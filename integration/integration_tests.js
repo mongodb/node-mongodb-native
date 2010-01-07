@@ -167,6 +167,63 @@ function test_automatic_reconnect() {
   automatic_connect_client.open();  
 }
 
+// Test the error reporting functionality
+function test_error_handling() {
+  var error_client = new Db('integration_tests2_', [{host: "127.0.0.1", port: 27017, auto_reconnect: true}], {});
+  error_client.addListener("connect", function() {
+    error_client.resetErrorHistory(function() {
+      error_client.error(function(r) {
+        test.assertEquals(true, r[0].documents[0].ok);                
+        test.assertEquals(0, r[0].documents[0].n);    
+                  
+        // Force error on server
+        error_client.executeDbCommand({forceerror: 1}, function(r) {
+          test.assertEquals(0, r[0].documents[0].ok);                
+          test.assertEquals("db assertion failure", r[0].documents[0].errmsg);    
+          // Check for previous errors
+          error_client.previousErrors(function(r) {
+            test.assertEquals(true, r[0].documents[0].ok);                
+            test.assertEquals(1, r[0].documents[0].nPrev);    
+            test.assertEquals("forced error", r[0].documents[0].err);
+            // Check for the last error
+            error_client.error(function(r) {
+              test.assertEquals("forced error", r[0].documents[0].err);    
+              // Force another error
+              var collection = error_client.collection('test_error_collection');
+              collection.findOne(new OrderedHash().add("name", "Fred"), function(records) {              
+                // Check that we have two previous errors
+                error_client.previousErrors(function(r) {
+                  test.assertEquals(true, r[0].documents[0].ok);                
+                  test.assertEquals(2, r[0].documents[0].nPrev);    
+                  test.assertEquals("forced error", r[0].documents[0].err);
+                
+                  error_client.resetErrorHistory(function() {
+                    error_client.previousErrors(function(r) {
+                      test.assertEquals(true, r[0].documents[0].ok);                
+                      test.assertEquals(-1, r[0].documents[0].nPrev);                        
+
+                      error_client.error(function(r) {
+                        test.assertEquals(true, r[0].documents[0].ok);                
+                        test.assertEquals(0, r[0].documents[0].n);                                              
+
+                        // Let's close the db 
+                        finished_tests.push({test_error_handling:'ok'}); 
+                        error_client.close();
+                      });
+                    })
+                  });
+                });
+              });            
+            })          
+          });
+        });
+      });
+    });
+  });
+  
+  error_client.open();
+}
+
 /*******************************************************************************************************
   Setup For Running Tests
 *******************************************************************************************************/
@@ -202,9 +259,9 @@ function ensure_tests_finished() {
 };
 
 // All the client tests
-var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation, test_automatic_reconnect];
+var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation, test_automatic_reconnect, test_error_handling];
 // var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation];
-// var client_tests = [test_automatic_reconnect];
+// var client_tests = [test_error_handling];
 var finished_tests = [];
 // Run all the tests
 function run_all_tests() {
