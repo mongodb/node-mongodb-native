@@ -134,6 +134,39 @@ function test_object_id_generation() {
   }, 100);    
 }
 
+// Test the auto connect functionality of the db
+function test_automatic_reconnect() {
+  var automatic_connect_client = new Db('integration_tests_', [{host: "127.0.0.1", port: 27017, auto_reconnect: true}], {});
+  automatic_connect_client.addListener("connect", function() {
+    // Listener for closing event
+    var closeListener = function(has_error) {
+      // Remove the listener for the close to avoid loop
+      automatic_connect_client.connections["127.0.0.127017"].connection.removeListener("close", this);
+      // Let's insert a document
+      var collection = automatic_connect_client.collection('test_object_id_generation.data2');
+      // Insert another test document and collect using ObjectId
+      collection.insert(new OrderedHash().add("name", "Patty").add("age", 34), function(ids) {
+        test.assertEquals(1, ids.length);    
+        test.assertEquals(1, ids[0].documents.length);  
+        test.assertTrue(ids[0].documents[0]['_id'].toHexString().length == 24);
+                    
+        collection.findOne(new OrderedHash().add("name", "Patty"), function(records) {
+          test.assertEquals(1, records.length);          
+          test.assertEquals(1, records[0].documents.length);    
+          test.assertEquals(ids[0].documents[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
+          // Let's close the db 
+          finished_tests.push({test_automatic_reconnect:'ok'});    
+          automatic_connect_client.close();
+        });      
+      });
+    };    
+    // Add listener to close event
+    automatic_connect_client.connections["127.0.0.127017"].connection.addListener("close", closeListener);
+    automatic_connect_client.connections["127.0.0.127017"].connection.close();
+  });
+  automatic_connect_client.open();  
+}
+
 /*******************************************************************************************************
   Setup For Running Tests
 *******************************************************************************************************/
@@ -169,8 +202,9 @@ function ensure_tests_finished() {
 };
 
 // All the client tests
-var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation];
-// var client_tests = [test_object_id_generation];
+var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation, test_automatic_reconnect];
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation];
+// var client_tests = [test_automatic_reconnect];
 var finished_tests = [];
 // Run all the tests
 function run_all_tests() {
