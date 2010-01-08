@@ -169,7 +169,7 @@ function test_automatic_reconnect() {
 
 // Test the error reporting functionality
 function test_error_handling() {
-  var error_client = new Db('integration_tests2_', [{host: "127.0.0.1", port: 27017, auto_reconnect: true}], {});
+  var error_client = new Db('integration_tests2_', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}], {});
   error_client.addListener("connect", function() {
     error_client.resetErrorHistory(function() {
       error_client.error(function(r) {
@@ -224,6 +224,16 @@ function test_error_handling() {
   error_client.open();
 }
 
+// Test the last status functionality of the driver
+function test_last_status() {
+  var last_status_client = new Db('integration_tests3_', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}], {});
+  last_status_client.addListener("connect", function() {
+    last_status_client.createCollection('test', function(r) {
+      test.assertEquals(true, r[0].documents[0].ok);                      
+    });
+  }
+}
+
 /*******************************************************************************************************
   Setup For Running Tests
 *******************************************************************************************************/
@@ -259,9 +269,8 @@ function ensure_tests_finished() {
 };
 
 // All the client tests
-var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation, test_automatic_reconnect, test_error_handling];
-// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation];
-// var client_tests = [test_error_handling];
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation, test_automatic_reconnect, test_error_handling];
+var client_tests = [test_last_status];
 var finished_tests = [];
 // Run all the tests
 function run_all_tests() {
