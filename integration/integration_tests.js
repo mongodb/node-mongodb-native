@@ -225,13 +225,50 @@ function test_error_handling() {
 }
 
 // Test the last status functionality of the driver
-function test_last_status() {
-  var last_status_client = new Db('integration_tests3_', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}], {});
-  last_status_client.addListener("connect", function() {
-    last_status_client.createCollection('test', function(r) {
-      test.assertEquals(true, r[0].documents[0].ok);                      
+function test_last_status() {  
+  client.createCollection('test_last_status', function(r) {
+    test.assertEquals(true, r[0].documents[0].ok);                            
+
+    // Get the collection
+    var collection = client.collection('test_last_status');
+  
+    // Remove all the elements of the collection
+    collection.remove(function() {
+      // Check update of a document
+      collection.insert(new OrderedHash().add("i", 1), function(ids) {
+        test.assertEquals(1, ids.length);    
+        test.assertEquals(1, ids[0].documents.length);  
+        test.assertTrue(ids[0].documents[0]['_id'].toHexString().length == 24);        
+        
+        // Update the record
+        collection.update(function(result) {
+          // Check for the last message from the server
+          client.lastStatus(function(status) {
+            test.assertEquals(true, status[0].documents[0].ok);                
+            test.assertEquals(true, status[0].documents[0].updatedExisting);                
+            // Check for failed update of document
+            collection.update(function(result) {
+              client.lastStatus(function(status) {
+                test.assertEquals(true, status[0].documents[0].ok);                
+                test.assertEquals(false, status[0].documents[0].updatedExisting);                
+              });
+            }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 500)));
+          });
+        }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 2)));
+      });
+      
+      // Check safe update of a document
+      collection.insert(new OrderedHash().add("x", 1), function(ids) {
+        collection.update(function(status) {
+          test.assertEquals(false, status.err);    
+          test.assertEquals(true, status.ok);    
+        }, new OrderedHash().add("x", 1), new OrderedHash().add("$set", new OrderedHash().add("x", 2)), {safe:true});
+      });
     });
-  }
+
+    // Let's close the db 
+    finished_tests.push({last_status_client:'ok'}); 
+  });
 }
 
 /*******************************************************************************************************

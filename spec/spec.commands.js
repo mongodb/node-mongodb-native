@@ -25,7 +25,7 @@ describe 'Mongo Commands'
       var selector = {name: 'peter pan'};
       var document = {name: 'peter pan junior'};
       // Create the command
-      var update_command = new UpdateCommand(full_collection_name, flags, selector, document);
+      var update_command = new UpdateCommand(full_collection_name, selector, document, flags);
       // assert the length of the binary
       update_command.toBinary().length.should.eql 90
     end
