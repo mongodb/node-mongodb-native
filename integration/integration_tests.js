@@ -251,25 +251,45 @@ function test_last_status() {
               client.lastStatus(function(status) {
                 test.assertEquals(true, status[0].documents[0].ok);                
                 test.assertEquals(false, status[0].documents[0].updatedExisting);                
+                
+                // Check safe update of a document
+                collection.insert(new OrderedHash().add("x", 1), function(ids) {
+                  collection.update(function(status) {
+                    test.assertEquals(false, status.err);    
+                    test.assertEquals(true, status.ok);    
+                    
+                    // Let's close the db 
+                    finished_tests.push({last_status_client:'ok'});                     
+                  }, new OrderedHash().add("x", 1), new OrderedHash().add("$set", new OrderedHash().add("x", 2)), {safe:true});
+                });                
               });
             }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 500)));
           });
         }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 2)));
       });
       
-      // Check safe update of a document
-      collection.insert(new OrderedHash().add("x", 1), function(ids) {
-        collection.update(function(status) {
-          test.assertEquals(false, status.err);    
-          test.assertEquals(true, status.ok);    
-        }, new OrderedHash().add("x", 1), new OrderedHash().add("$set", new OrderedHash().add("x", 2)), {safe:true});
-      });
     });
-
-    // Let's close the db 
-    finished_tests.push({last_status_client:'ok'}); 
   });
 }
+
+// Test clearing out of the collection
+function test_clear() {
+  client.createCollection('test_clear', function(r) {
+    var collection = client.collection('test_clear');
+    
+    collection.insert(new OrderedHash().add("i", 1), function(ids) {
+      collection.insert(new OrderedHash().add("i", 2), function(ids) {
+        collection.count(function(count) {
+          test.assertEquals(2, count);            
+          // Let's close the db 
+          finished_tests.push({test_clear:'ok'}); 
+        });
+      });
+    });    
+  });  
+}
+
+var client_tests = [test_clear];
 
 /*******************************************************************************************************
   Setup For Running Tests
@@ -307,7 +327,7 @@ function ensure_tests_finished() {
 
 // All the client tests
 // var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation, test_automatic_reconnect, test_error_handling];
-var client_tests = [test_last_status];
+// var client_tests = [test_clear];
 var finished_tests = [];
 // Run all the tests
 function run_all_tests() {

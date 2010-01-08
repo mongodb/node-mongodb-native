@@ -9,7 +9,7 @@ describe 'BSON'
     it 'Should Serialize and Deserialze String'
       var test_string = {hello: 'world'}
       var serialized_data = new BSON().serialize(test_string)
-      test_string.should.eql new BSON().deserialize(serialized_data).unordered_hash()      
+      test_string.should.eql new BSON().deserialize(serialized_data).unordered_hash()
     end
     
     it 'Should Correctly Serialize and Deserialize Integer'
@@ -17,6 +17,13 @@ describe 'BSON'
       var serialized_data = new BSON().serialize(test_number)
       test_number.doc.should.eql new BSON().deserialize(serialized_data).doc
     end    
+    
+    it 'Should Correctly Serialize and Deserialize null value'
+      var test_null = {doc:null}
+      var serialized_data = new BSON().serialize(test_null)
+      var object = new BSON().deserialize(serialized_data)
+      object.doc.should.be_null
+    end
     
     it 'Should Correctly Serialize and Deserialize Number'
       var test_number = {doc: 5.5}
