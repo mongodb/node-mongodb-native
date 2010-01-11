@@ -5,6 +5,7 @@ GLOBAL.DEBUG = true;
 sys = require("sys");
 test = require("mjsunit");
 require("mongodb/db");
+require("mongodb/bson/bson");
 
 /*******************************************************************************************************
   Integration Tests
@@ -45,8 +46,8 @@ function test_authentication() {
     // Insert a user document
     var user_doc = new OrderedHash().add('user', user_name).add('pwd', user_password);
     // Insert the user into the system users collections
-    user_collection.insert(user_doc, function(replies) {
-      test.assertTrue(replies[0].documents[0]['_id'].toHexString().length == 24);
+    user_collection.insert(user_doc, function(documents) {
+      test.assertTrue(documents[0]['_id'].toHexString().length == 24);
       // Ensure authentication works correctly
       client.authenticate(user_name, password, function(replies) {
         test.assertEquals(1, replies[0].documents[0].ok);
@@ -82,27 +83,23 @@ function test_object_id_generation() {
   // Insert test documents (creates collections and test fetch by query)
   collection.insert(new OrderedHash().add("name", "Fred").add("age", 42), function(ids) {
     test.assertEquals(1, ids.length);    
-    test.assertEquals(1, ids[0].documents.length);  
-    test.assertTrue(ids[0].documents[0]['_id'].toHexString().length == 24);
+    test.assertTrue(ids[0]['_id'].toHexString().length == 24);
     // Locate the first document inserted
     collection.findOne(new OrderedHash().add("name", "Fred"), function(records) {
-      test.assertEquals(1, records.length);          
       test.assertEquals(1, records[0].documents.length);    
-      test.assertEquals(ids[0].documents[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
+      test.assertEquals(ids[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
       number_of_tests_done++;
     });      
   });
 
-  // Insert another test document and collect using ObjectId
+  // // Insert another test document and collect using ObjectId
   collection.insert(new OrderedHash().add("name", "Pat").add("age", 21), function(ids) {
-    test.assertEquals(1, ids.length);    
-    test.assertEquals(1, ids[0].documents.length);  
-    test.assertTrue(ids[0].documents[0]['_id'].toHexString().length == 24);
+    test.assertEquals(1, ids.length);  
+    test.assertTrue(ids[0]['_id'].toHexString().length == 24);
     // Locate the first document inserted
-    collection.findOne(ids[0].documents[0]['_id'], function(records) {
-      test.assertEquals(1, records.length);          
+    collection.findOne(ids[0]['_id'], function(records) {
       test.assertEquals(1, records[0].documents.length);    
-      test.assertEquals(ids[0].documents[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
+      test.assertEquals(ids[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
       number_of_tests_done++;
     });      
   });
@@ -112,15 +109,13 @@ function test_object_id_generation() {
   
   // Insert a manually created document with generated oid
   collection.insert(new OrderedHash().add("_id", objectId.id).add("name", "Donald").add("age", 95), function(ids) {
-    test.assertEquals(1, ids.length);    
-    test.assertEquals(1, ids[0].documents.length);  
-    test.assertTrue(ids[0].documents[0]['_id'].toHexString().length == 24);
-    test.assertEquals(objectId.toHexString(), ids[0].documents[0]['_id'].toHexString());
+    test.assertEquals(1, ids.length);  
+    test.assertTrue(ids[0]['_id'].toHexString().length == 24);
+    test.assertEquals(objectId.toHexString(), ids[0]['_id'].toHexString());
     // Locate the first document inserted
-    collection.findOne(ids[0].documents[0]['_id'], function(records) {
-      test.assertEquals(1, records.length);          
+    collection.findOne(ids[0]['_id'], function(records) {
       test.assertEquals(1, records[0].documents.length);    
-      test.assertEquals(ids[0].documents[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
+      test.assertEquals(ids[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
       test.assertEquals(objectId.toHexString(), records[0].documents[0]['_id'].toHexString());
       number_of_tests_done++;
     });      
@@ -147,13 +142,12 @@ function test_automatic_reconnect() {
       // Insert another test document and collect using ObjectId
       collection.insert(new OrderedHash().add("name", "Patty").add("age", 34), function(ids) {
         test.assertEquals(1, ids.length);    
-        test.assertEquals(1, ids[0].documents.length);  
-        test.assertTrue(ids[0].documents[0]['_id'].toHexString().length == 24);
+        test.assertTrue(ids[0]['_id'].toHexString().length == 24);
                     
         collection.findOne(new OrderedHash().add("name", "Patty"), function(records) {
           test.assertEquals(1, records.length);          
           test.assertEquals(1, records[0].documents.length);    
-          test.assertEquals(ids[0].documents[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
+          test.assertEquals(ids[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
           // Let's close the db 
           finished_tests.push({test_automatic_reconnect:'ok'});    
           automatic_connect_client.close();
@@ -237,8 +231,7 @@ function test_last_status() {
       // Check update of a document
       collection.insert(new OrderedHash().add("i", 1), function(ids) {
         test.assertEquals(1, ids.length);    
-        test.assertEquals(1, ids[0].documents.length);  
-        test.assertTrue(ids[0].documents[0]['_id'].toHexString().length == 24);        
+        test.assertTrue(ids[0]['_id'].toHexString().length == 24);        
         
         // Update the record
         collection.update(function(result) {
@@ -294,21 +287,6 @@ function test_clear() {
   });  
 }
 
-// assert_kind_of ObjectID, @@coll.insert('a' => 2)
-// assert_kind_of ObjectID, @@coll.insert('b' => 3)
-// 
-// assert_equal 3, @@coll.count
-// docs = @@coll.find().to_a
-// assert_equal 3, docs.length
-// assert docs.detect { |row| row['a'] == 1 }
-// assert docs.detect { |row| row['a'] == 2 }
-// assert docs.detect { |row| row['b'] == 3 }
-// 
-// @@coll << {'b' => 4}
-// docs = @@coll.find().to_a
-// assert_equal 4, docs.length
-// assert docs.detect { |row| row['b'] == 4 }
-
 // Test insert of documents
 function test_insert() {
   client.createCollection('test_insert', function(r) {
@@ -339,7 +317,258 @@ function test_insert() {
   });
 }
 
-var client_tests = [test_insert];
+// Test multiple document insert
+function test_multiple_insert() {
+  client.createCollection('test_multiple_insert', function(r) {
+    var collection = client.collection('test_multiple_insert');
+    var docs = [new OrderedHash().add('a', 1), new OrderedHash().add('a', 2)];
+
+    collection.insert(docs, function(ids) {
+      ids.forEach(function(doc) {
+        test.assertTrue((doc['_id'] instanceof ObjectID));
+      });
+      
+      // Let's ensure we have both documents
+      collection.find(function(cursor) {
+        cursor.toArray(function(docs) {
+          test.assertEquals(2, docs.length);
+          var results = [];
+          // Check that we have all the results we want
+          docs.forEach(function(doc) {
+            if(doc['a'] == 1 || doc['a'] == 2) results.push(1);
+          });
+          test.assertEquals(2, results.length);
+          // Let's close the db 
+          finished_tests.push({test_multiple_insert:'ok'}); 
+        });
+      });
+    });
+  });  
+}
+
+// Test the count result on a collection that does not exist
+function test_count_on_nonexisting() {
+  var collection = client.collection('test_multiple_insert');
+  collection.count(function(count) {  
+    test.assertEquals(0, count);
+    // Let's close the db 
+    finished_tests.push({test_count_on_nonexisting:'ok'}); 
+  });
+}
+
+// Test a simple find
+function test_find_simple() {
+  client.createCollection('test_find_simple', function(r) {
+    var collection = client.collection('test_find_simple');
+    var doc1 = null;
+    var doc2 = null;
+    
+    // Insert some test documents
+    collection.insert([new OrderedHash().add('a', 2), new OrderedHash().add('b', 3)], function(docs) {doc1 = docs[0]; doc2 = docs[1]});
+    // Ensure correct insertion testing via the cursor and the count function
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(2, documents.length);
+      })            
+    });    
+    collection.count(function(count) {
+      test.assertEquals(2, count);      
+    });
+    // Fetch values by selection    
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(1, documents.length);
+        test.assertEquals(doc1['a'], documents[0]['a']);
+        // Let's close the db 
+        finished_tests.push({test_find_simple:'ok'}); 
+      });
+    }, {'a': doc1['a']});
+  });
+}
+
+// Test advanced find
+function test_find_advanced() {
+  client.createCollection('test_find_advanced', function(r) {
+    var collection = client.collection('test_find_advanced');
+    var doc1 = null, doc2 = null, doc3 = null;
+    
+    // Insert some test documents
+    collection.insert([new OrderedHash().add('a', 1), new OrderedHash().add('a', 2), new OrderedHash().add('b', 3)], function(docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]});
+    
+    // Locate by less than
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(2, documents.length);
+        // Check that the correct documents are returned
+        var results = [];
+        // Check that we have all the results we want
+        documents.forEach(function(doc) {
+          if(doc['a'] == 1 || doc['a'] == 2) results.push(1);
+        });
+        test.assertEquals(2, results.length);
+      });
+    }, {'a':{'$lt':10}});    
+    
+    // Locate by greater than
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(1, documents.length);
+        test.assertEquals(2, documents[0]['a']);
+      });
+    }, {'a':{'$gt':1}});    
+    
+    // Locate by less than or equal to
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(1, documents.length);
+        test.assertEquals(1, documents[0]['a']);
+      });
+    }, {'a':{'$lte':1}});    
+    
+    // Locate by greater than or equal to
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(2, documents.length);
+        // Check that the correct documents are returned
+        var results = [];
+        // Check that we have all the results we want
+        documents.forEach(function(doc) {
+          if(doc['a'] == 1 || doc['a'] == 2) results.push(1);
+        });
+        test.assertEquals(2, results.length);
+      });
+    }, {'a':{'$gte':1}});    
+    
+    // Locate by between
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(1, documents.length);
+        test.assertEquals(2, documents[0]['a']);
+      });
+    }, {'a':{'$gt':1, '$lt':3}});    
+    
+    // Locate in clause
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(2, documents.length);
+        // Check that the correct documents are returned
+        var results = [];
+        // Check that we have all the results we want
+        documents.forEach(function(doc) {
+          if(doc['a'] == 1 || doc['a'] == 2) results.push(1);
+        });
+        test.assertEquals(2, results.length);
+      });
+    }, {'a':{'$in':[1,2]}});  
+    
+    // Locate regexp clause
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(2, documents.length);
+        // Check that the correct documents are returned
+        var results = [];
+        // Check that we have all the results we want
+        documents.forEach(function(doc) {
+          if(doc['a'] == 1 || doc['a'] == 2) results.push(1);
+        });
+        test.assertEquals(2, results.length);
+        // Let's close the db 
+        finished_tests.push({test_find_advanced:'ok'});     
+      });
+    }, {'a':/[1|2]/});            
+  });
+}
+
+// Test sorting of results
+function test_find_sorting() {
+  client.createCollection('test_find_sorting', function(r) {
+    var collection = client.collection('test_find_sorting');
+    var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
+    
+    // Insert some test documents
+    collection.insert([new OrderedHash().add('a', 1).add('b', 2), 
+        new OrderedHash().add('a', 2).add('b', 1), 
+        new OrderedHash().add('a', 3).add('b', 2),
+        new OrderedHash().add('a', 4).add('b', 1)
+      ], function(docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
+    
+    // Test sorting (ascending)
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(4, documents.length);
+        test.assertEquals(1, documents[0]['a']);
+        test.assertEquals(2, documents[1]['a']);
+        test.assertEquals(3, documents[2]['a']);
+        test.assertEquals(4, documents[3]['a']);
+      });
+    }, {'a': {'$lt':10}}, {'sort': [['a', 1]]});
+    
+    // Test sorting (descending)
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(4, documents.length);
+        test.assertEquals(4, documents[0]['a']);
+        test.assertEquals(3, documents[1]['a']);
+        test.assertEquals(2, documents[2]['a']);
+        test.assertEquals(1, documents[3]['a']);
+      });
+    }, {'a': {'$lt':10}}, {'sort': [['a', -1]]});
+    
+    // Sorting using array of names, assumes ascending order
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(4, documents.length);
+        test.assertEquals(1, documents[0]['a']);
+        test.assertEquals(2, documents[1]['a']);
+        test.assertEquals(3, documents[2]['a']);
+        test.assertEquals(4, documents[3]['a']);
+      });
+    }, {'a': {'$lt':10}}, {'sort': ['a']});
+    
+    // Sorting using single name, assumes ascending order
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(4, documents.length);
+        test.assertEquals(1, documents[0]['a']);
+        test.assertEquals(2, documents[1]['a']);
+        test.assertEquals(3, documents[2]['a']);
+        test.assertEquals(4, documents[3]['a']);
+      });
+    }, {'a': {'$lt':10}}, {'sort': 'a'});
+
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(4, documents.length);
+        test.assertEquals(2, documents[0]['a']);
+        test.assertEquals(4, documents[1]['a']);
+        test.assertEquals(1, documents[2]['a']);
+        test.assertEquals(3, documents[3]['a']);
+      });
+    }, {'a': {'$lt':10}}, {'sort': ['b', 'a']});
+    
+    // Sorting using empty array, no order guarantee should not blow up
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(4, documents.length);
+        // Let's close the db 
+        finished_tests.push({test_find_sorting:'ok'});     
+      });
+    }, {'a': {'$lt':10}}, {'sort': []});
+
+    // Sorting using ordered hash
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        // Fail test if not an error
+        if(!(documents instanceof Error)) throw new TypeError("Should fail");
+      });
+    }, {'a': {'$lt':10}}, {'sort': new OrderedHash().add('a', -1)});      
+  });  
+}
+
+var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+          test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+          test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced, 
+          test_find_sorting];
 
 /*******************************************************************************************************
   Setup For Running Tests
