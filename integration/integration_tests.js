@@ -565,10 +565,66 @@ function test_find_sorting() {
   });  
 }
 
+// Test the limit function of the db
+function test_find_limits() {
+  client.createCollection('test_find_limits', function(r) {
+    var collection = client.collection('test_find_limits');
+    var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
+    
+    // Insert some test documents
+    collection.insert([new OrderedHash().add('a', 1), 
+        new OrderedHash().add('b', 2), 
+        new OrderedHash().add('c', 3),
+        new OrderedHash().add('d', 4)
+      ], function(docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
+      
+    // Test limits
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(1, documents.length);        
+        // Let's close the db 
+        finished_tests.push({test_find_limits:'ok'});     
+      });
+    }, {}, {'limit': 1});    
+
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(2, documents.length);        
+      });
+    }, {}, {'limit': 2});    
+
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(3, documents.length);        
+      });
+    }, {}, {'limit': 3});    
+
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(4, documents.length);        
+      });
+    }, {}, {'limit': 4});    
+
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(4, documents.length);        
+      });
+    }, {}, {});    
+
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(4, documents.length);        
+      });
+    }, {}, {'limit':99});    
+  });  
+}
+
+// var client_tests = [test_find_limits];
+
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
           test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
           test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced, 
-          test_find_sorting];
+          test_find_sorting, test_find_limits];
 
 /*******************************************************************************************************
   Setup For Running Tests
