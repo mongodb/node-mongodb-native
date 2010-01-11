@@ -582,8 +582,6 @@ function test_find_limits() {
     collection.find(function(cursor) {
       cursor.toArray(function(documents) {
         test.assertEquals(1, documents.length);        
-        // Let's close the db 
-        finished_tests.push({test_find_limits:'ok'});     
       });
     }, {}, {'limit': 1});    
 
@@ -614,6 +612,8 @@ function test_find_limits() {
     collection.find(function(cursor) {
       cursor.toArray(function(documents) {
         test.assertEquals(4, documents.length);        
+        // Let's close the db 
+        finished_tests.push({test_find_limits:'ok'});     
       });
     }, {}, {'limit':99});    
   });  
@@ -627,17 +627,19 @@ function test_find_one_no_records() {
     collection.find(function(cursor) {
       cursor.toArray(function(documents) {
         test.assertEquals(0, documents.length);        
+        // Let's close the db 
+        finished_tests.push({test_find_one_no_records:'ok'});     
       });
     }, {'a':1}, {});        
   });  
 }
 
-// var client_tests = [test_find_limits];
+// var client_tests = [test_find_one_no_records];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
           test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
           test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced, 
-          test_find_sorting, test_find_limits];
+          test_find_sorting, test_find_limits, test_find_one_no_records];
 
 /*******************************************************************************************************
   Setup For Running Tests
