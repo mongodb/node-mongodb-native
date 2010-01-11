@@ -266,8 +266,7 @@ function test_last_status() {
             }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 500)));
           });
         }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 2)));
-      });
-      
+      });      
     });
   });
 }
@@ -280,16 +279,67 @@ function test_clear() {
     collection.insert(new OrderedHash().add("i", 1), function(ids) {
       collection.insert(new OrderedHash().add("i", 2), function(ids) {
         collection.count(function(count) {
-          test.assertEquals(2, count);            
-          // Let's close the db 
-          finished_tests.push({test_clear:'ok'}); 
+          test.assertEquals(2, count);    
+          // Clear the collection
+          collection.remove(function() {
+            collection.count(function(count) {
+              test.assertEquals(0, count);    
+              // Let's close the db 
+              finished_tests.push({test_clear:'ok'}); 
+            });
+          });        
         });
       });
     });    
   });  
 }
 
-var client_tests = [test_clear];
+// assert_kind_of ObjectID, @@coll.insert('a' => 2)
+// assert_kind_of ObjectID, @@coll.insert('b' => 3)
+// 
+// assert_equal 3, @@coll.count
+// docs = @@coll.find().to_a
+// assert_equal 3, docs.length
+// assert docs.detect { |row| row['a'] == 1 }
+// assert docs.detect { |row| row['a'] == 2 }
+// assert docs.detect { |row| row['b'] == 3 }
+// 
+// @@coll << {'b' => 4}
+// docs = @@coll.find().to_a
+// assert_equal 4, docs.length
+// assert docs.detect { |row| row['b'] == 4 }
+
+// Test insert of documents
+function test_insert() {
+  client.createCollection('test_insert', function(r) {
+    var collection = client.collection('test_insert');
+    
+    for(var i = 1; i < 1000; i++) {
+      collection.insert(new OrderedHash().add('c', i), function(r) {});
+    }
+    
+    collection.insert(new OrderedHash().add('a', 2), function(r) {
+      collection.insert(new OrderedHash().add('a', 3), function(r) {
+        collection.count(function(count) {
+          test.assertEquals(1001, count);
+          
+          // Locate all the entries using find
+          collection.find(function(cursor) {
+            cursor.toArray(function(results) {
+              test.assertEquals(1001, results.length);
+              test.assertTrue(results[0] != null);
+
+              // Let's close the db 
+              finished_tests.push({test_insert:'ok'}); 
+            });
+          }, new OrderedHash());          
+        });        
+      });
+    });
+  });
+}
+
+var client_tests = [test_insert];
 
 /*******************************************************************************************************
   Setup For Running Tests
