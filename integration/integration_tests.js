@@ -619,6 +619,19 @@ function test_find_limits() {
   });  
 }
 
+// Find no records
+function test_find_one_no_records() {
+  client.createCollection('test_find_one_no_records', function(r) {
+    var collection = client.collection('test_find_one_no_records');
+
+    collection.find(function(cursor) {
+      cursor.toArray(function(documents) {
+        test.assertEquals(0, documents.length);        
+      });
+    }, {'a':1}, {});        
+  });  
+}
+
 // var client_tests = [test_find_limits];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
