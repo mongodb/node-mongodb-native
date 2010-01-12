@@ -13,23 +13,27 @@ require("mongodb/bson/bson");
 
 // Test the creation of a collection on the mongo db
 function test_collection_methods() {
-  client.createCollection('integration_test_collection', function(replies) {
+  client.createCollection(function(replies) {
     // Verify that all the result are correct coming back (should contain the value ok)
     test.assertEquals(1, replies[0].documents[0].ok);
     // Let's check that the collection was created correctly
-    client.collection_names(null, function(replies) {
-      test.assertEquals("integration_tests_.integration_test_collection", replies[0].documents[0].name);
+    client.collectionNames(function(documents) {
+      var found = false;
+      documents.forEach(function(document) {
+        if(document.name == "integration_tests_.integration_test_collection") found = true;
+      });      
+      test.assertTrue(true, found);
       // Rename the collection and check that it's gone
       client.renameCollection("integration_test_collection", "integration_test_collection2", function(replies) {
         test.assertEquals(1, replies[0].documents[0].ok);
         // Drop the collection and check that it's gone
-        client.dropCollection("integration_test_collection2", function(replies) {
-          test.assertEquals(1, replies[0].documents[0].ok);          
+        client.dropCollection(function(replies) {
+          test.assertEquals(true, replies.ok);          
           finished_tests.push({test_collection_methods:'ok'});
-        })
+        }, "integration_test_collection2")
       });
     });
-  })
+  }, 'integration_test_collection')
 }
 
 // Test the authentication method for the user
@@ -58,21 +62,25 @@ function test_authentication() {
 }
 
 // Test the access to collections
-function test_collections() {
+function test_collections() {  
   // Create two collections
-  var spiderman_collection = client.collection('test.spiderman');
-  var mario_collection = client.collection('test.mario');
-  // Insert test documents (creates collections)
-  spiderman_collection.insert(new OrderedHash().add("foo", 5));
-  mario_collection.insert(new OrderedHash().add("bar", 0));
-  // Assert collections
-  client.collections(function(collections) {
-    test.assertTrue(collections.length >= 2);
-    test.assertTrue(locate_collection_by_name("test.spiderman", collections) != null);
-    test.assertTrue(locate_collection_by_name("test.mario", collections) != null);
-    test.assertTrue(locate_collection_by_name("does_not_exist", collections) == null);
-    finished_tests.push({test_collections:'ok'});
-  });
+  client.createCollection(function(r) {
+    client.createCollection(function(r) {
+      var spiderman_collection = client.collection('test.spiderman');
+      var mario_collection = client.collection('test.mario');
+      // Insert test documents (creates collections)
+      spiderman_collection.insert(new OrderedHash().add("foo", 5));
+      mario_collection.insert(new OrderedHash().add("bar", 0));
+      // Assert collections
+      client.collections(function(collections) {
+        test.assertTrue(collections.length >= 2);
+        test.assertTrue(locate_collection_by_name("test.spiderman", collections) != null);
+        test.assertTrue(locate_collection_by_name("test.mario", collections) != null);
+        test.assertTrue(locate_collection_by_name("does_not_exist", collections) == null);
+        finished_tests.push({test_collections:'ok'});
+      });
+    }, 'test.mario');
+  }, 'test.spiderman');  
 }
 
 // Test the generation of the object ids
@@ -220,7 +228,7 @@ function test_error_handling() {
 
 // Test the last status functionality of the driver
 function test_last_status() {  
-  client.createCollection('test_last_status', function(r) {
+  client.createCollection(function(r) {
     test.assertEquals(true, r[0].documents[0].ok);                            
 
     // Get the collection
@@ -261,12 +269,12 @@ function test_last_status() {
         }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 2)));
       });      
     });
-  });
+  }, 'test_last_status');
 }
 
 // Test clearing out of the collection
 function test_clear() {
-  client.createCollection('test_clear', function(r) {
+  client.createCollection(function(r) {
     var collection = client.collection('test_clear');
     
     collection.insert(new OrderedHash().add("i", 1), function(ids) {
@@ -284,12 +292,12 @@ function test_clear() {
         });
       });
     });    
-  });  
+  }, 'test_clear');  
 }
 
 // Test insert of documents
 function test_insert() {
-  client.createCollection('test_insert', function(r) {
+  client.createCollection(function(r) {
     var collection = client.collection('test_insert');
     
     for(var i = 1; i < 1000; i++) {
@@ -314,12 +322,12 @@ function test_insert() {
         });        
       });
     });
-  });
+  }, 'test_insert');
 }
 
 // Test multiple document insert
 function test_multiple_insert() {
-  client.createCollection('test_multiple_insert', function(r) {
+  client.createCollection(function(r) {
     var collection = client.collection('test_multiple_insert');
     var docs = [new OrderedHash().add('a', 1), new OrderedHash().add('a', 2)];
 
@@ -343,7 +351,7 @@ function test_multiple_insert() {
         });
       });
     });
-  });  
+  }, 'test_multiple_insert');  
 }
 
 // Test the count result on a collection that does not exist
@@ -358,7 +366,7 @@ function test_count_on_nonexisting() {
 
 // Test a simple find
 function test_find_simple() {
-  client.createCollection('test_find_simple', function(r) {
+  client.createCollection(function(r) {
     var collection = client.collection('test_find_simple');
     var doc1 = null;
     var doc2 = null;
@@ -383,12 +391,12 @@ function test_find_simple() {
         finished_tests.push({test_find_simple:'ok'}); 
       });
     }, {'a': doc1['a']});
-  });
+  }, 'test_find_simple');
 }
 
 // Test advanced find
 function test_find_advanced() {
-  client.createCollection('test_find_advanced', function(r) {
+  client.createCollection(function(r) {
     var collection = client.collection('test_find_advanced');
     var doc1 = null, doc2 = null, doc3 = null;
     
@@ -476,12 +484,12 @@ function test_find_advanced() {
         finished_tests.push({test_find_advanced:'ok'});     
       });
     }, {'a':/[1|2]/});            
-  });
+  }, 'test_find_advanced');
 }
 
 // Test sorting of results
 function test_find_sorting() {
-  client.createCollection('test_find_sorting', function(r) {
+  client.createCollection(function(r) {
     var collection = client.collection('test_find_sorting');
     var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
     
@@ -562,12 +570,12 @@ function test_find_sorting() {
         if(!(documents instanceof Error)) throw new TypeError("Should fail");
       });
     }, {'a': {'$lt':10}}, {'sort': new OrderedHash().add('a', -1)});      
-  });  
+  }, 'test_find_sorting');  
 }
 
 // Test the limit function of the db
 function test_find_limits() {
-  client.createCollection('test_find_limits', function(r) {
+  client.createCollection(function(r) {
     var collection = client.collection('test_find_limits');
     var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
     
@@ -616,12 +624,12 @@ function test_find_limits() {
         finished_tests.push({test_find_limits:'ok'});     
       });
     }, {}, {'limit':99});    
-  });  
+  }, 'test_find_limits');  
 }
 
 // Find no records
 function test_find_one_no_records() {
-  client.createCollection('test_find_one_no_records', function(r) {
+  client.createCollection(function(r) {
     var collection = client.collection('test_find_one_no_records');
 
     collection.find(function(cursor) {
@@ -631,25 +639,67 @@ function test_find_one_no_records() {
         finished_tests.push({test_find_one_no_records:'ok'});     
       });
     }, {'a':1}, {});        
-  });  
+  }, 'test_find_one_no_records');  
 }
 
 // Test dropping of collections
 function test_drop_collection() {
-  db.dropCollection('test_drop_collection', function(r) {
-    sys.puts("------------- drop collection");
-    // Let's close the db 
-    finished_tests.push({test_drop_collection:'ok'});     
-  });
+  client.createCollection(function(r) {
+    client.dropCollection(function(r) {
+      test.assertFalse(r.ok);
+      test.assertTrue(r.err);
+      test.assertEquals("ns not found", r.errmsg);
+      var found = false;
+      // Ensure we don't have the collection in the set of names
+      client.collectionNames(function(replies) {
+        replies.forEach(function(document) {
+          if(document.name == "test_drop_collection") {
+            found = true;
+            break;
+          }
+        });        
+        // Let's close the db 
+        finished_tests.push({test_drop_collection:'ok'});     
+        // If we have an instance of the index throw and error
+        if(found) throw new Error("should not fail");
+      });
+    }, 'test_drop_collection');
+  }, 'test_drop_collection2');
 }
 
-// var client_tests = [test_drop_collection];
-// var client_tests = [test_find_sorting];
+// Test dropping using the collection drop command
+function test_other_drop() {
+  client.createCollection(function(r) {
+    var collection = client.collection('test_other_drop');    
+    
+    collection.drop(function(reply) {
+      // Ensure we don't have the collection in the set of names
+      client.collectionNames(function(replies) {
+        var found = false;
+        replies.forEach(function(document) {
+          if(document.name == "test_other_drop") {
+            found = true;
+            break;
+          }
+        });        
+        // Let's close the db 
+        finished_tests.push({test_drop_collection:'ok'});     
+        // If we have an instance of the index throw and error
+        if(found) throw new Error("should not fail");
+      });      
+    });
+  }, 'test_other_drop');
+}
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-          test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-          test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced, 
-          test_find_sorting, test_find_limits, test_find_one_no_records];
+  test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+  test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+  test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop];
+
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+//           test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+//           test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced, 
+//           test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop];
 
 /*******************************************************************************************************
   Setup For Running Tests
@@ -685,13 +735,11 @@ function ensure_tests_finished() {
   }, 100);
 };
 
-// All the client tests
-// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation, test_automatic_reconnect, test_error_handling];
-// var client_tests = [test_clear];
+// All the finished client tests
 var finished_tests = [];
 // Run all the tests
 function run_all_tests() {
-  sys.puts("= Executing tests =====================================================");
+  client_tests = client_tests.sort(randOrd);
   // Run all the tests
   client_tests.forEach(function (t) {    
     var function_name = t.name;
@@ -703,6 +751,10 @@ function run_all_tests() {
       finished_tests.push({function_name:error});
     }
   });
+}
+
+function randOrd() {
+  return (Math.round(Math.random()) - 0.5); 
 }
 
 /**
