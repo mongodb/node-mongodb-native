@@ -20,20 +20,20 @@ function test_collection_methods() {
     client.collectionNames(function(documents) {
       var found = false;
       documents.forEach(function(document) {
-        if(document.name == "integration_tests_.integration_test_collection") found = true;
+        if(document.name == "integration_tests_.test_collection_methods") found = true;
       });      
       test.assertTrue(true, found);
       // Rename the collection and check that it's gone
-      client.renameCollection("integration_test_collection", "integration_test_collection2", function(replies) {
+      client.renameCollection("test_collection_methods", "test_collection_methods2", function(replies) {
         test.assertEquals(1, replies[0].documents[0].ok);
         // Drop the collection and check that it's gone
         client.dropCollection(function(replies) {
           test.assertEquals(true, replies.ok);          
           finished_tests.push({test_collection_methods:'ok'});
-        }, "integration_test_collection2")
+        }, "test_collection_methods2")
       });
     });
-  }, 'integration_test_collection')
+  }, 'test_collection_methods')
 }
 
 // Test the authentication method for the user
@@ -73,7 +73,6 @@ function test_collections() {
       mario_collection.insert(new OrderedHash().add("bar", 0));
       // Assert collections
       client.collections(function(collections) {
-        test.assertTrue(collections.length >= 2);
         test.assertTrue(locate_collection_by_name("test.spiderman", collections) != null);
         test.assertTrue(locate_collection_by_name("test.mario", collections) != null);
         test.assertTrue(locate_collection_by_name("does_not_exist", collections) == null);
@@ -691,15 +690,62 @@ function test_other_drop() {
   }, 'test_other_drop');
 }
 
-var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-  test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-  test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-  test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop];
+function test_collection_names() {
+  client.createCollection(function(r) {
+    client.collectionNames(function(documents) {
+      var found = false;
+      var found2 = false;
+      documents.forEach(function(document) {
+        if(document.name == 'integration_tests_.test_collection_names') found = true;
+      });
+      test.assertTrue(found);
+      // Insert a document in an non-existing collection should create the collection
+      var collection = client.collection('test_collection_names2');
+      collection.insert({a:1})
+      client.collectionNames(function(documents) {
+        documents.forEach(function(document) {
+          if(document.name == 'integration_tests_.test_collection_names2') found = true;
+          if(document.name == 'integration_tests_.test_collection_names') found2 = true;
+        });        
 
-// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-//           test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-//           test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced, 
-//           test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop];
+        test.assertTrue(found);      
+        test.assertTrue(found2);      
+      });
+      // Let's close the db 
+      finished_tests.push({test_collection_names:'ok'});     
+    });    
+  }, 'test_collection_names');
+}
+
+function test_collections_info() {
+  client.createCollection(function(r) {
+    client.collectionsInfo(function(cursor) {
+      test.assertTrue((cursor instanceof Cursor));
+      // Fetch all the collection info
+      cursor.toArray(function(documents) {
+        test.assertTrue(documents.length > 1);
+        
+        var found = false;
+        documents.forEach(function(document) {
+          if(document.name == 'integration_tests_.test_collections_info') found = true;
+        });
+        test.assertTrue(found);
+      });    
+      // Let's close the db 
+      finished_tests.push({test_collections_info:'ok'});         
+    });
+  }, 'test_collections_info');
+}
+
+
+// var client_tests = [test_collection_methods, test_object_id_generation, test_collections];
+// var client_tests = [test_collections, test_collection_methods];
+
+var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, 
+      test_collection_names, test_collections_info];
 
 /*******************************************************************************************************
   Setup For Running Tests
@@ -739,7 +785,7 @@ function ensure_tests_finished() {
 var finished_tests = [];
 // Run all the tests
 function run_all_tests() {
-  client_tests = client_tests.sort(randOrd);
+  // client_tests = client_tests.sort(randOrd);
   // Run all the tests
   client_tests.forEach(function (t) {    
     var function_name = t.name;
@@ -761,8 +807,9 @@ function randOrd() {
   Helper Utilities for the testing
 **/
 function locate_collection_by_name(collectionName, collections) {
-  for(var index in collections) {
-    var collection = collections[index];
-    if(collection.collectionName == collectionName) return collection;
-  }
+  var foundObject = null;
+  collections.forEach(function(collection) {
+    if(collection.collectionName == collectionName) foundObject = collection;
+  });
+  return foundObject;
 }
