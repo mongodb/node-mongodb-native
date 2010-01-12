@@ -590,25 +590,25 @@ function test_find_limits() {
         test.assertEquals(2, documents.length);        
       });
     }, {}, {'limit': 2});    
-
+    
     collection.find(function(cursor) {
       cursor.toArray(function(documents) {
         test.assertEquals(3, documents.length);        
       });
     }, {}, {'limit': 3});    
-
+    
     collection.find(function(cursor) {
       cursor.toArray(function(documents) {
         test.assertEquals(4, documents.length);        
       });
     }, {}, {'limit': 4});    
-
+    
     collection.find(function(cursor) {
       cursor.toArray(function(documents) {
         test.assertEquals(4, documents.length);        
       });
     }, {}, {});    
-
+    
     collection.find(function(cursor) {
       cursor.toArray(function(documents) {
         test.assertEquals(4, documents.length);        
@@ -634,7 +634,17 @@ function test_find_one_no_records() {
   });  
 }
 
-// var client_tests = [test_find_one_no_records];
+// Test dropping of collections
+function test_drop_collection() {
+  db.dropCollection('test_drop_collection', function(r) {
+    sys.puts("------------- drop collection");
+    // Let's close the db 
+    finished_tests.push({test_drop_collection:'ok'});     
+  });
+}
+
+// var client_tests = [test_drop_collection];
+// var client_tests = [test_find_sorting];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
           test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
