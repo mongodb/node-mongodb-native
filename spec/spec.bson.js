@@ -6,6 +6,20 @@ describe 'BSON'
   end
   
   describe 'BSON'
+    it 'Should Correctly Deserialize object'
+      var bytes = [95,0,0,0,2,110,115,0,42,0,0,0,105,110,116,101,103,114,97,116,105,111,110,95,116,101,115,116,115,95,46,116,101,115,116,95,105,110,100,101,120,95,105,110,102,111,114,109,97,116,105,111,110,0,8,117,110,105,113,117,101,0,0,3,107,101,121,0,12,0,0,0,16,97,0,1,0,0,0,0,2,110,97,109,101,0,4,0,0,0,97,95,49,0,0];
+      var serialized_data = '';
+      var parser = new BinaryParser();
+      // Convert to chars
+      for(var i = 0; i < bytes.length; i++) {
+        serialized_data = serialized_data + parser.fromByte(bytes[i]);
+      }
+      var object = new BSON().deserialize(serialized_data);
+      object.name.should.eql "a_1"
+      object.unique.should.eql false
+      object.key.a.should.eql 1
+    end
+  
     it 'Should Serialize and Deserialze String'
       var test_string = {hello: 'world'}
       var serialized_data = new BSON().serialize(test_string)

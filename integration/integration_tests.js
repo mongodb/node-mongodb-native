@@ -760,8 +760,16 @@ function test_index_information() {
       // Create an index on the collection
       client.createIndex(function(indexName) {
         test.assertEquals("a_1", indexName);
-        // Let's close the db 
-        finished_tests.push({test_index_information:'ok'});                 
+        // Let's fetch the index information
+        client.indexInformation(function(collectionInfo) {
+          test.assertTrue(collectionInfo['_id_'] != null);
+          test.assertEquals('_id', collectionInfo['_id_'][0]);
+          test.assertTrue((collectionInfo['_id_'][1] instanceof ObjectID));
+          test.assertTrue(collectionInfo['a_1'] != null);
+          test.assertEquals(["a", 1], collectionInfo['a_1']);
+          // Let's close the db 
+          finished_tests.push({test_index_information:'ok'});                 
+        }, collection.collectionName);
       }, collection.collectionName, 'a');      
     })
   }, 'test_index_information');
