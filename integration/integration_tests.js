@@ -737,15 +737,29 @@ function test_collections_info() {
   }, 'test_collections_info');
 }
 
+function test_collection_options() {
+  client.createCollection(function(collection) {    
+    test.assertTrue(collection instanceof Collection);
+    // Let's fetch the collection options
+    collection.options(function(options) {
+      test.assertEquals(true, options.capped);
+      test.assertEquals(1024, options.size);
+      test.assertEquals("test_collection_options", options.create);
+      // Let's close the db 
+      finished_tests.push({test_collection_options:'ok'});         
+    });
+  }, 'test_collection_options', {'capped':true, 'size':1024});
+}
+
 
 // var client_tests = [test_collection_methods, test_object_id_generation, test_collections];
-// var client_tests = [test_collections, test_collection_methods];
+var client_tests = [test_collection_options];
 
-var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, 
-      test_collection_names, test_collections_info];
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, 
+//       test_collection_names, test_collections_info, test_collection_options];
 
 /*******************************************************************************************************
   Setup For Running Tests
