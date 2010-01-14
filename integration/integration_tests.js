@@ -174,40 +174,40 @@ function test_error_handling() {
   var error_client = new Db('integration_tests2_', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}], {});
   error_client.addListener("connect", function() {
     error_client.resetErrorHistory(function() {
-      error_client.error(function(r) {
-        test.assertEquals(true, r[0].documents[0].ok);                
-        test.assertEquals(0, r[0].documents[0].n);    
+      error_client.error(function(documents) {
+        test.assertEquals(true, documents[0].ok);                
+        test.assertEquals(0, documents[0].n);    
                   
         // Force error on server
         error_client.executeDbCommand({forceerror: 1}, function(r) {
           test.assertEquals(0, r[0].documents[0].ok);                
           test.assertEquals("db assertion failure", r[0].documents[0].errmsg);    
-          // Check for previous errors
-          error_client.previousErrors(function(r) {
-            test.assertEquals(true, r[0].documents[0].ok);                
-            test.assertEquals(1, r[0].documents[0].nPrev);    
-            test.assertEquals("forced error", r[0].documents[0].err);
+          // // Check for previous errors
+          error_client.previousErrors(function(documents) {
+            test.assertEquals(true, documents[0].ok);                
+            test.assertEquals(1, documents[0].nPrev);    
+            test.assertEquals("forced error", documents[0].err);
             // Check for the last error
-            error_client.error(function(r) {
-              test.assertEquals("forced error", r[0].documents[0].err);    
+            error_client.error(function(documents) {
+              test.assertEquals("forced error", documents[0].err);    
               // Force another error
               var collection = error_client.collection('test_error_collection');
               collection.findOne(new OrderedHash().add("name", "Fred"), function(records) {              
                 // Check that we have two previous errors
-                error_client.previousErrors(function(r) {
-                  test.assertEquals(true, r[0].documents[0].ok);                
-                  test.assertEquals(2, r[0].documents[0].nPrev);    
-                  test.assertEquals("forced error", r[0].documents[0].err);
+                error_client.previousErrors(function(documents) {
+                  test.assertEquals(true, documents[0].ok);                
+                  test.assertEquals(2, documents[0].nPrev);    
+                  test.assertEquals("forced error", documents[0].err);
                 
                   error_client.resetErrorHistory(function() {
-                    error_client.previousErrors(function(r) {
-                      test.assertEquals(true, r[0].documents[0].ok);                
-                      test.assertEquals(-1, r[0].documents[0].nPrev);                        
-
-                      error_client.error(function(r) {
-                        test.assertEquals(true, r[0].documents[0].ok);                
-                        test.assertEquals(0, r[0].documents[0].n);                                              
-
+                    error_client.previousErrors(function(documents) {
+                      test.assertEquals(true, documents[0].ok);                
+                      test.assertEquals(-1, documents[0].nPrev);                        
+          
+                      error_client.error(function(documents) {
+                        test.assertEquals(true, documents[0].ok);                
+                        test.assertEquals(0, documents[0].n);                                              
+          
                         // Let's close the db 
                         finished_tests.push({test_error_handling:'ok'}); 
                         error_client.close();
@@ -763,27 +763,145 @@ function test_index_information() {
         // Let's fetch the index information
         client.indexInformation(function(collectionInfo) {
           test.assertTrue(collectionInfo['_id_'] != null);
-          test.assertEquals('_id', collectionInfo['_id_'][0]);
-          test.assertTrue((collectionInfo['_id_'][1] instanceof ObjectID));
+          test.assertEquals('_id', collectionInfo['_id_'][0][0]);
+          test.assertTrue((collectionInfo['_id_'][0][1] instanceof ObjectID));
           test.assertTrue(collectionInfo['a_1'] != null);
-          test.assertEquals(["a", 1], collectionInfo['a_1']);
-          // Let's close the db 
-          finished_tests.push({test_index_information:'ok'});                 
+          test.assertEquals([["a", 1]], collectionInfo['a_1']);
+          
+          client.indexInformation(function(collectionInfo2) {
+            var count1 = 0, count2 = 0;
+            // Get count of indexes
+            for(var i in collectionInfo) { count1 += 1;}
+            for(var i in collectionInfo2) { count2 += 1;}
+            
+            // Tests
+            test.assertTrue(count2 >= count1);
+            test.assertTrue(collectionInfo2['_id_'] != null);
+            test.assertEquals('_id', collectionInfo2['_id_'][0][0]);
+            test.assertTrue((collectionInfo2['_id_'][0][1] instanceof ObjectID));
+            test.assertTrue(collectionInfo2['a_1'] != null);
+            test.assertEquals([["a", 1]], collectionInfo2['a_1']);            
+            test.assertTrue((collectionInfo[indexName] != null));
+            test.assertEquals([["a", 1]], collectionInfo[indexName]);            
+          
+            // Let's close the db 
+            finished_tests.push({test_index_information:'ok'});                 
+          });          
         }, collection.collectionName);
       }, collection.collectionName, 'a');      
     })
   }, 'test_index_information');
 }
 
+function test_multiple_index_cols() {
+  client.createCollection(function(collection) {    
+    collection.insert({a:1}, function(ids) {
+      // Create an index on the collection
+      client.createIndex(function(indexName) {
+        test.assertEquals("a_-1_b_1_c_-1", indexName);
+        // Let's fetch the index information
+        client.indexInformation(function(collectionInfo) {
+          var count1 = 0;
+          // Get count of indexes
+          for(var i in collectionInfo) { count1 += 1;}          
+          
+          // Test
+          test.assertEquals(2, count1);
+          test.assertTrue(collectionInfo[indexName] != null);
+          test.assertEquals([['a', -1], ['b', 1], ['c', -1]], collectionInfo[indexName]);
+          
+          // Let's close the db 
+          finished_tests.push({test_multiple_index_cols:'ok'});                 
+        }, collection.collectionName);        
+      }, collection.collectionName, [['a', -1], ['b', 1], ['c', -1]]);
+    });
+  }, 'test_multiple_index_cols');
+}
+
+function test_unique_index() {
+  // Create a non-unique index and test inserts
+  client.createCollection(function(collection) {    
+    client.createIndex(function(indexName) {
+      // Insert some docs
+      collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(ids) {
+        // Assert that we have no erros
+        client.error(function(errors) {
+          test.assertEquals(1, errors.length);
+          test.assertEquals(null, errors[0].err);
+          // Let's close the db 
+          finished_tests.push({test_unique_index:'ok'});                 
+        });
+      });
+    }, collection.collectionName, 'hello');        
+  }, 'test_unique_index');
+  
+  // Create a unique index and test that insert fails
+  client.createCollection(function(collection) {    
+    client.createIndex(function(indexName) {
+      // Insert some docs
+      collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(ids) {
+        // Assert that we have erros
+        client.error(function(errors) {
+          test.assertEquals(1, errors.length);
+          test.assertTrue(errors[0].err != null);
+        });
+      });
+    }, collection.collectionName, 'hello', true);        
+  }, 'test_unique_index2');  
+}
+
+function test_index_on_subfield() {
+  // Create a non-unique index and test inserts
+  client.createCollection(function(collection) {  
+    collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], function(ids) {
+      // Assert that we have no erros
+      client.error(function(errors) {
+        test.assertEquals(1, errors.length);
+        test.assertTrue(errors[0].err == null);
+      });      
+    });  
+  }, 'test_index_on_subfield');
+  
+  // Create a unique subfield index and test that insert fails
+  client.createCollection(function(collection) {  
+    client.createIndex(function(indexName) {
+      collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], function(ids) {
+        // Assert that we have erros
+        client.error(function(errors) {
+          test.assertEquals(1, errors.length);
+          test.assertTrue(errors[0].err != null);
+          // Let's close the db 
+          finished_tests.push({test_index_on_subfield:'ok'});                 
+        });
+      });  
+    }, collection.collectionName, 'hello.a', true);
+  }, 'test_index_on_subfield2');  
+}
+
+function test_array() {
+  // Create a non-unique index and test inserts
+  client.createCollection(function(collection) {  
+    collection.insert({'b':[1, 2, 3]}, function(ids) {
+      collection.find(function(cursor) {
+        cursor.toArray(function(documents) {
+          test.assertEquals([1, 2, 3], documents[0]['b']);
+          // Let's close the db 
+          finished_tests.push({test_array:'ok'});                 
+        });
+      }, {});
+    });
+  }, 'test_array');
+}
 
 // var client_tests = [test_collection_methods, test_object_id_generation, test_collections];
 var client_tests = [test_index_information];
 
-// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, 
-//       test_collection_names, test_collections_info, test_collection_options, test_index_information];
+var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, 
+      test_collection_names, test_collections_info, test_collection_options, test_index_information, 
+      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array];
 
 /*******************************************************************************************************
   Setup For Running Tests
