@@ -116,7 +116,7 @@ function test_object_id_generation() {
   var objectId = new ObjectID(null);
   
   // Insert a manually created document with generated oid
-  collection.insert(new OrderedHash().add("_id", objectId.id).add("name", "Donald").add("age", 95), function(ids) {
+  collection.insert(new OrderedHash().add("_id", objectId).add("name", "Donald").add("age", 95), function(ids) {
     test.assertEquals(1, ids.length);  
     test.assertTrue(ids[0]['_id'].toHexString().length == 24);
     test.assertEquals(objectId.toHexString(), ids[0]['_id'].toHexString());
@@ -893,15 +893,56 @@ function test_array() {
   }, 'test_array');
 }
 
+function test_regex() {
+  var regexp = /foobar/i;
+  
+  client.createCollection(function(collection) {  
+    collection.insert({'b':regexp}, function(ids) {
+      collection.find(function(cursor) {
+        cursor.toArray(function(items) {
+          test.assertEquals(("" + regexp), ("" + items[0]['b']));
+          // Let's close the db 
+          finished_tests.push({test_regex:'ok'});                 
+        });
+      }, {}, {'fields': ['b']});
+    });
+  }, 'test_regex');
+}
+
+// Use some other id than the standard for inserts
+function test_non_oid_id() {
+  client.createCollection(function(collection) {  
+    var date = new Date();
+    date.setUTCDate(12);
+    date.setUTCFullYear(2009);
+    date.setUTCMonth(11 - 1);
+    date.setUTCHours(12);
+    date.setUTCMinutes(0);
+    date.setUTCSeconds(30);
+    
+    collection.insert({'_id':date}, function(ids) {      
+      collection.find(function(cursor) {
+        cursor.toArray(function(items) {
+          test.assertEquals(("" + date), ("" + items[0]['_id']));
+          
+          // Let's close the db 
+          finished_tests.push({test_non_oid_id:'ok'});                 
+        });
+      }, {'_id':date});      
+    });    
+  }, 'test_non_oid_id');
+}
+
 // var client_tests = [test_collection_methods, test_object_id_generation, test_collections];
-var client_tests = [test_index_information];
+var client_tests = [test_object_id_generation];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, 
       test_collection_names, test_collections_info, test_collection_options, test_index_information, 
-      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array];
+      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+      test_non_oid_id];
 
 /*******************************************************************************************************
   Setup For Running Tests
