@@ -19,7 +19,7 @@ describe 'BSON'
       object.unique.should.eql false
       object.key.a.should.eql 1
     end
-  
+      
     it 'Should Serialize and Deserialze String'
       var test_string = {hello: 'world'}
       var serialized_data = new BSON().serialize(test_string)
@@ -185,6 +185,14 @@ describe 'BSON'
       var deserialized_data = new BSON().deserialize(serialized_data)
       deserialized_data.doc.sub_type.should.eql BSON.BSON_BINARY_SUBTYPE_USER_DEFINED
       doc.doc.value().should.eql deserialized_data.doc.value()
+    end
+    
+    it 'Should Correclty Serialize and Deserialize a Code object' 
+      var doc = {'doc': new Code('this.a > i', new OrderedHash().add('i', 1))};
+      var serialized_data = new BSON().serialize(doc)
+      var deserialized_data = new BSON().deserialize(serialized_data)
+      deserialized_data.doc.code.should.eql(doc.doc.code);
+      deserialized_data.doc.scope.i.should.eql(doc.doc.scope.i);
     end
   end
 end

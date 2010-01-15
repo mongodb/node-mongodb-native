@@ -970,8 +970,113 @@ function test_strict_access_collection() {
   error_client.open();
 }
 
+function test_strict_create_collection() {
+  var error_client = new Db('integration_tests_', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}], {strict:true});
+  test.assertEquals(true, error_client.strict);
+  error_client.addListener("connect", function() {
+    error_client.createCollection(function(collection) {
+      test.assertTrue(collection instanceof Collection);
+
+      // Creating an existing collection should fail
+      error_client.createCollection(function(collection) {
+        test.assertEquals(false, collection.ok);
+        test.assertEquals(true, collection.err);
+        test.assertEquals("Collection test_strict_create_collection already exists. Currently in strict mode.", collection.errmsg);
+        
+        // Switch out of strict mode and try to re-create collection
+        error_client.strict = false;
+        error_client.createCollection(function(collection) {
+          test.assertTrue(collection instanceof Collection);
+
+          // Let's close the db 
+          finished_tests.push({test_strict_create_collection:'ok'});                 
+          error_client.close();
+        }, 'test_strict_create_collection');                
+      }, 'test_strict_create_collection');
+    }, 'test_strict_create_collection');
+  });
+  error_client.open();  
+}
+
+function test_to_a() {
+  client.createCollection(function(collection) {
+    test.assertTrue(collection instanceof Collection);
+    collection.insert({'a':1}, function(ids) {
+      collection.find(function(cursor) {
+        cursor.toArray(function(items) {
+          // Should fail if called again (cursor should be closed)
+          cursor.toArray(function(items) {
+            test.assertEquals(false, items.ok);
+            test.assertEquals(true, items.err);
+            test.assertEquals("Cursor is closed", items.errmsg);
+
+            // Each should also return an error due to the cursor being closed
+            cursor.each(function(items) {
+              test.assertEquals(false, items.ok);
+              test.assertEquals(true, items.err);
+              test.assertEquals("Cursor is closed", items.errmsg);              
+
+              // Let's close the db 
+              finished_tests.push({test_to_a:'ok'});                 
+            });
+          });
+        });
+      }, {});      
+    });    
+  }, 'test_to_a');
+}
+
+function test_to_a_after_each() {
+  client.createCollection(function(collection) {
+    test.assertTrue(collection instanceof Collection);
+    collection.insert({'a':1}, function(ids) {
+      collection.find(function(cursor) {
+        cursor.each(function(item) {
+          if(item == null) {
+            cursor.toArray(function(items) {
+              test.assertEquals(false, items.ok);
+              test.assertEquals(true, items.err);
+              test.assertEquals("Cursor is closed", items.errmsg);                            
+
+              // Let's close the db 
+              finished_tests.push({test_to_a_after_each:'ok'});                 
+            });
+          };
+        });
+      });
+    });
+  }, 'test_to_a_after_each');
+}
+
+function test_where() {
+  client.createCollection(function(collection) {
+    test.assertTrue(collection instanceof Collection);
+    collection.insert([{'a':1}, {'a':2}, {'a':3}], function(ids) {
+      collection.count(function(count) {
+        test.assertEquals(3, count);
+        
+        // Let's test usage of the $where statement
+        collection.find(function(cursor) {
+          cursor.count(function(count) {
+            test.assertEquals(1, count);
+          });          
+        }, {'$where':new Code('this.a > 2')});
+        
+        collection.find(function(cursor) {
+          cursor.count(function(count) {
+            test.assertEquals(2, count);
+
+            // Let's close the db 
+            finished_tests.push({test_where:'ok'});                 
+          });
+        }, {'$where':new Code('this.a > i', new OrderedHash().add('i', 1))});
+      });
+    });    
+  }, 'test_where');
+}
+
 // var client_tests = [test_collection_methods, test_object_id_generation, test_collections];
-var client_tests = [test_strict_access_collection];
+var client_tests = [test_where];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -979,7 +1084,8 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, 
       test_collection_names, test_collections_info, test_collection_options, test_index_information, 
       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
-      test_non_oid_id, test_strict_access_collection];
+      test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+      test_to_a_after_each, test_where];
 
 /*******************************************************************************************************
   Setup For Running Tests
