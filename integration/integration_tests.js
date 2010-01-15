@@ -1118,8 +1118,69 @@ function test_eval() {
   }, "5 ++ 5;");
 }
 
+function test_hint() {
+  client.createCollection(function(collection) {
+    collection.insert({'a':1}, function(ids) {
+      client.createIndex(function(indexName) {
+        collection.find(function(cursor) {
+          cursor.toArray(function(items) {
+            test.assertEquals(1, items.length);
+          });
+        }, {'a':1}, {'hint':'a'});        
+
+        collection.find(function(cursor) {
+          cursor.toArray(function(items) {
+            test.assertEquals(1, items.length);
+          });
+        }, {'a':1}, {'hint':['a']});        
+
+        collection.find(function(cursor) {
+          cursor.toArray(function(items) {
+            test.assertEquals(1, items.length);
+          });
+        }, {'a':1}, {'hint':{'a':1}});      
+        
+        // Modify hints
+        collection.setHint('a');
+        test.assertEquals(1, collection.hint['a']);
+        collection.find(function(cursor) {
+          cursor.toArray(function(items) {
+            test.assertEquals(1, items.length);
+          });
+        }, {'a':1});   
+        
+        collection.setHint(['a']);
+        test.assertEquals(1, collection.hint['a']);
+        collection.find(function(cursor) {
+          cursor.toArray(function(items) {
+            test.assertEquals(1, items.length);
+          });
+        }, {'a':1});   
+             
+        collection.setHint({'a':1});
+        test.assertEquals(1, collection.hint['a']);
+        collection.find(function(cursor) {
+          cursor.toArray(function(items) {
+            test.assertEquals(1, items.length);
+          });
+        }, {'a':1});           
+
+        collection.setHint(null);
+        test.assertTrue(collection.hint == null);
+        collection.find(function(cursor) {
+          cursor.toArray(function(items) {
+            test.assertEquals(1, items.length);
+            // Let's close the db 
+            finished_tests.push({test_hint:'ok'});                             
+          });
+        }, {'a':1});           
+      }, collection.collectionName, "a");
+    });
+  }, 'test_hint');
+}
+
 // var client_tests = [test_collection_methods, test_object_id_generation, test_collections];
-var client_tests = [test_eval];
+var client_tests = [test_hint];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1128,7 +1189,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_collection_names, test_collections_info, test_collection_options, test_index_information, 
       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-      test_to_a_after_each, test_where, test_eval];
+      test_to_a_after_each, test_where, test_eval, test_hint];
 
 /*******************************************************************************************************
   Setup For Running Tests
