@@ -98,11 +98,10 @@ function test_object_id_generation() {
       test.assertEquals(1, ids.length);    
       test.assertTrue(ids[0]['_id'].toHexString().length == 24);
       // Locate the first document inserted
-      collection.findOne(new OrderedHash().add("name", "Fred"), function(records) {
-        test.assertEquals(1, records[0].documents.length);    
-        test.assertEquals(ids[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
+      collection.findOne(function(document) {
+        test.assertEquals(ids[0]['_id'].toHexString(), document['_id'].toHexString());
         number_of_tests_done++;
-      });      
+      }, new OrderedHash().add("name", "Fred"));      
     });
 
     // // Insert another test document and collect using ObjectId
@@ -110,11 +109,10 @@ function test_object_id_generation() {
       test.assertEquals(1, ids.length);  
       test.assertTrue(ids[0]['_id'].toHexString().length == 24);
       // Locate the first document inserted
-      collection.findOne(ids[0]['_id'], function(records) {
-        test.assertEquals(1, records[0].documents.length);    
-        test.assertEquals(ids[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
+      collection.findOne(function(document) {
+        test.assertEquals(ids[0]['_id'].toHexString(), document['_id'].toHexString());
         number_of_tests_done++;
-      });      
+      }, ids[0]['_id']);      
     });
 
     // Manually created id
@@ -126,12 +124,11 @@ function test_object_id_generation() {
       test.assertTrue(ids[0]['_id'].toHexString().length == 24);
       test.assertEquals(objectId.toHexString(), ids[0]['_id'].toHexString());
       // Locate the first document inserted
-      collection.findOne(ids[0]['_id'], function(records) {
-        test.assertEquals(1, records[0].documents.length);    
-        test.assertEquals(ids[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
-        test.assertEquals(objectId.toHexString(), records[0].documents[0]['_id'].toHexString());
+      collection.findOne(function(document) {
+        test.assertEquals(ids[0]['_id'].toHexString(), document['_id'].toHexString());
+        test.assertEquals(objectId.toHexString(), document['_id'].toHexString());
         number_of_tests_done++;
-      });      
+      }, ids[0]['_id']);      
     });    
   }, 'test_object_id_generation.data');
     
@@ -158,14 +155,12 @@ function test_automatic_reconnect() {
           test.assertEquals(1, ids.length);    
           test.assertTrue(ids[0]['_id'].toHexString().length == 24);
 
-          collection.findOne(new OrderedHash().add("name", "Patty"), function(records) {
-            test.assertEquals(1, records.length);          
-            test.assertEquals(1, records[0].documents.length);    
-            test.assertEquals(ids[0]['_id'].toHexString(), records[0].documents[0]['_id'].toHexString());
+          collection.findOne(function(document) {
+            test.assertEquals(ids[0]['_id'].toHexString(), document['_id'].toHexString());
             // Let's close the db 
             finished_tests.push({test_automatic_reconnect:'ok'});    
             automatic_connect_client.close();
-          });      
+          }, new OrderedHash().add("name", "Patty"));      
         });        
       }, 'test_object_id_generation.data2');
     };    
@@ -199,7 +194,7 @@ function test_error_handling() {
               test.assertEquals("forced error", documents[0].err);    
               // Force another error
               error_client.collection(function(collection) {
-                collection.findOne(new OrderedHash().add("name", "Fred"), function(records) {              
+                collection.findOne(function(document) {              
                   // Check that we have two previous errors
                   error_client.previousErrors(function(documents) {
                     test.assertEquals(true, documents[0].ok);                
@@ -222,7 +217,7 @@ function test_error_handling() {
                       })
                     });
                   });
-                });                            
+                }, new OrderedHash().add("name", "Fred"));                            
               }, 'test_error_collection');
             })          
           });
@@ -1075,8 +1070,56 @@ function test_where() {
   }, 'test_where');
 }
 
+function test_eval() {
+  client.eval(function(result) {
+    test.assertEquals(3, result);
+  }, 'function (x) {return x;}', [3]);
+  
+  client.eval(function(result) {
+    test.assertEquals(null, result)        
+    // Locate the entry
+    client.collection(function(collection) {
+      collection.findOne(function(item) {
+        test.assertEquals(5, item.y);
+      });
+    }, 'test_eval');    
+  }, 'function (x) {db.test_eval.save({y:x});}', [5]);  
+  
+  client.eval(function(result) {
+    test.assertEquals(5, result);    
+  }, 'function (x, y) {return x + y;}', [2, 3]);
+  
+  client.eval(function(result) {
+    test.assertEquals(5, result);    
+  }, 'function () {return 5;}');
+  
+  client.eval(function(result) {
+    test.assertEquals(5, result);        
+  }, '2 + 3;');
+  
+  client.eval(function(result) {
+    test.assertEquals(5, result);            
+  }, new Code("2 + 3;"));
+  
+  client.eval(function(result) {
+    test.assertEquals(2, result);            
+  }, new Code("return i;", {'i':2}));
+  
+  client.eval(function(result) {
+    test.assertEquals(5, result);            
+  }, new Code("i + 3;", {'i':2}));
+  
+  client.eval(function(result) {
+    test.assertEquals(false, result.ok);
+    test.assertEquals(true, result.err);
+    test.assertTrue(result.errmsg != null);
+    // Let's close the db 
+    finished_tests.push({test_eval:'ok'});                             
+  }, "5 ++ 5;");
+}
+
 // var client_tests = [test_collection_methods, test_object_id_generation, test_collections];
-var client_tests = [test_where];
+var client_tests = [test_eval];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1085,7 +1128,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_collection_names, test_collections_info, test_collection_options, test_index_information, 
       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-      test_to_a_after_each, test_where];
+      test_to_a_after_each, test_where, test_eval];
 
 /*******************************************************************************************************
   Setup For Running Tests
