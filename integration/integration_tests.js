@@ -1180,18 +1180,71 @@ function test_hint() {
 
 function test_group() {
   client.createCollection(function(collection) {
-    collection.group(function(result) {
-      sys.puts("---------------------------------- result received");
-      sys.puts(sys.inspect(result));
-      // Let's close the db 
-      finished_tests.push({test_group:'ok'});                             
+    collection.group(function(results) {
+      test.assertEquals([], results);
     }, [], {}, {"count":0}, "function (obj, prev) { prev.count++; }");
+    
+    collection.group(function(results) {
+      test.assertEquals([], results);
+      
+      // Trigger some inserts
+      collection.insert([{'a':2}, {'b':5}, {'a':1}], function(ids) {
+        collection.group(function(results) {
+          test.assertEquals(3, results[0].get('count'));
+        }, [], {}, {"count":0}, "function (obj, prev) { prev.count++; }");        
+
+        collection.group(function(results) {
+          test.assertEquals(3, results[0].get('count'));
+        }, [], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true);        
+
+        collection.group(function(results) {
+          test.assertEquals(1, results[0].get('count'));
+        }, [], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }");        
+
+        collection.group(function(results) {
+          test.assertEquals(1, results[0].get('count'));
+
+          // Insert some more test data
+          collection.insert([{'a':2}, {'b':3}], function(ids) {
+            collection.group(function(results) {
+              test.assertEquals(2, results[0].get('a'));
+              test.assertEquals(2, results[0].get('count'));
+              test.assertEquals(null, results[1].get('a'));
+              test.assertEquals(2, results[1].get('count'));
+              test.assertEquals(1, results[2].get('a'));
+              test.assertEquals(1, results[2].get('count'));
+            }, ['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }");                                
+
+            collection.group(function(results) {
+              test.assertEquals(2, results[0].get('a'));
+              test.assertEquals(2, results[0].get('count'));
+              test.assertEquals(null, results[1].get('a'));
+              test.assertEquals(2, results[1].get('count'));
+              test.assertEquals(1, results[2].get('a'));
+              test.assertEquals(1, results[2].get('count'));
+            }, ['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true);                                
+            
+            collection.group(function(results) {
+              test.assertEquals(false, results.ok);
+              test.assertEquals(true, results.err);
+              test.assertTrue(results.errmsg != null);
+            }, [], {}, {}, "5 ++ 5");
+
+            collection.group(function(results) {
+              test.assertEquals(false, results.ok);
+              test.assertEquals(true, results.err);
+              test.assertTrue(results.errmsg != null);
+              // Let's close the db 
+              finished_tests.push({test_group:'ok'});                                   
+            }, [], {}, {}, "5 ++ 5", true);
+          });          
+        }, [], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", true);        
+      });      
+    }, [], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true);
   }, 'test_group');
 }
 
-// var client_tests = [test_collection_methods, test_object_id_generation, test_collections];
-// var client_tests = [test_group];
-// var client_tests = [test_collection_methods];
+var client_tests = [test_group];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1200,7 +1253,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_collection_names, test_collections_info, test_collection_options, test_index_information, 
       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-      test_to_a_after_each, test_where, test_eval, test_hint];
+      test_to_a_after_each, test_where, test_eval, test_hint, test_group];
 
 /*******************************************************************************************************
   Setup For Running Tests
