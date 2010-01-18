@@ -1244,7 +1244,52 @@ function test_group() {
   }, 'test_group');
 }
 
-var client_tests = [test_group];
+function test_deref() {
+  client.createCollection(function(collection) {
+    collection.insert({'a':1}, function(ids) {
+      collection.remove(function(result) {
+        collection.count(function(count) {
+          test.assertEquals(0, count);          
+          
+          // Execute deref a db reference
+          client.dereference(function(result) {
+            collection.insert({'x':'hello'}, function(ids) {
+              collection.findOne(function(document) {
+                test.assertEquals('hello', document.get('x'));
+                
+                client.dereference(function(result) {
+                  test.assertEquals('hello', document.get('x'));
+                }, new DBRef("test_deref", document.get('_id')));
+              });
+            });            
+          }, new DBRef("test_deref", new ObjectID()));
+          
+          client.dereference(function(result) {
+            var obj = {'_id':4};
+            
+            collection.insert(obj, function(ids) {
+              client.dereference(function(document) {
+                test.assertEquals(obj['_id'], document.get('_id'));
+                
+                collection.remove(function(result) {
+                  collection.insert({'x':'hello'}, function(ids) {
+                    client.dereference(function(result) {
+                      test.assertEquals(null, result);
+                      // Let's close the db 
+                      finished_tests.push({test_deref:'ok'});                                   
+                    }, new DBRef("test_deref", null));
+                  });
+                });
+              }, new DBRef("test_deref", 4));
+            });
+          }, new DBRef("test_deref", 4));          
+        })
+      })          
+    })    
+  }, 'test_deref');
+}
+
+var client_tests = [test_deref];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1253,7 +1298,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_collection_names, test_collections_info, test_collection_options, test_index_information, 
       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-      test_to_a_after_each, test_where, test_eval, test_hint, test_group];
+      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref];
 
 /*******************************************************************************************************
   Setup For Running Tests
