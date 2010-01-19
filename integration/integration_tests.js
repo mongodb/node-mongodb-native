@@ -258,13 +258,19 @@ function test_last_status() {
 
                   // Check safe update of a document
                   collection.insert(new OrderedHash().add("x", 1), function(ids) {
-                    collection.update(function(status) {
-                      test.assertEquals(false, status.err);    
-                      test.assertEquals(true, status.ok);    
+                    collection.update(function(document) {
+                      test.assertTrue(document instanceof OrderedHash);
+                      test.assertTrue(document.get('$set') instanceof OrderedHash);
+                    }, new OrderedHash().add("x", 1), new OrderedHash().add("$set", new OrderedHash().add("x", 2)), {'safe':true});
+
+                    collection.update(function(document) {
+                      test.assertEquals(false, document.ok);    
+                      test.assertEquals(true, document.err);    
+                      test.assertEquals("Failed to update document", document.errmsg);
 
                       // Let's close the db 
                       finished_tests.push({last_status_client:'ok'});                     
-                    }, new OrderedHash().add("x", 1), new OrderedHash().add("$set", new OrderedHash().add("x", 2)), {safe:true});
+                    }, new OrderedHash().add("y", 1), new OrderedHash().add("$set", new OrderedHash().add("y", 2)), {'safe':true});
                   });                
                 });
               }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 500)));
@@ -1289,7 +1295,52 @@ function test_deref() {
   }, 'test_deref');
 }
 
-var client_tests = [test_deref];
+function test_save() {
+  client.createCollection(function(collection) {
+    var doc = {'hello':'world'};
+    collection.save(function(docs) {
+      test.assertTrue(docs[0].get('_id') instanceof ObjectID);
+      collection.count(function(count) {
+        test.assertEquals(1, count);
+        doc = docs[0];
+        
+        collection.save(function(doc) {
+          collection.count(function(count) {
+            test.assertEquals(1, count);                        
+          });
+          
+          collection.findOne(function(doc) {
+            test.assertEquals('world', doc.get('hello'));
+            
+            // Modify doc and save
+            doc = doc.add('hello', 'mike');
+            // sys.puts("length:" + doc.length());
+            collection.save(function(doc) {
+              collection.count(function(count) {
+                test.assertEquals(1, count);                        
+              });
+              
+              collection.findOne(function(doc) {
+                test.assertEquals('mike', doc.get('hello'));
+                
+                // Save another document
+                collection.save(function(doc) {
+                  collection.count(function(count) {
+                    test.assertEquals(2, count);                        
+                    // Let's close the db 
+                    finished_tests.push({test_save:'ok'});                                   
+                  });                  
+                }, new OrderedHash().add('hello', 'world'));                
+              });              
+            }, doc);            
+          });
+        }, doc);        
+      });
+    }, doc);
+  }, 'test_save');
+}
+
+var client_tests = [test_last_status];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1298,7 +1349,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_collection_names, test_collections_info, test_collection_options, test_index_information, 
       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref];
+      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save];
 
 /*******************************************************************************************************
   Setup For Running Tests
