@@ -1340,7 +1340,82 @@ function test_save() {
   }, 'test_save');
 }
 
-var client_tests = [test_last_status];
+function test_save_long() {
+  client.createCollection(function(collection) {
+    collection.insert({'x':Long.fromNumber(9223372036854775807)});
+    collection.findOne(function(doc) {
+      test.assertTrue(Long.fromNumber(9223372036854775807).equals(doc.get('x')));
+      // Let's close the db 
+      finished_tests.push({test_save_long:'ok'});                                   
+    });
+  }, 'test_save_long');
+}
+
+function test_find_by_oid() {
+  client.createCollection(function(collection) {
+    collection.save(function(docs) {
+      test.assertTrue(docs[0].get('_id') instanceof ObjectID);
+      
+      collection.findOne(function(doc) {
+        test.assertEquals('mike', doc.get('hello'));
+        
+        var id = doc.get('_id').toString();
+        collection.findOne(function(doc) {
+          test.assertEquals('mike', doc.get('hello'));          
+          // Let's close the db 
+          finished_tests.push({test_find_by_oid:'ok'});                                   
+        }, {'_id':new ObjectID(id)});        
+      }, {'_id':docs[0].get('_id')});      
+    }, {'hello':'mike'});    
+  }, 'test_find_by_oid');
+}
+
+function test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection() {
+  client.createCollection(function(collection) {
+    var a = {'_id':'1', 'hello':'world'};
+    collection.save(function(docs) {
+      collection.count(function(count) {
+        test.assertEquals(1, count);
+        
+        collection.findOne(function(doc) {
+          test.assertEquals('world', doc.get('hello'));
+          
+          doc.add('hello', 'mike');
+          collection.save(function(doc) {
+            collection.count(function(count) {
+              test.assertEquals(1, count);
+            });
+            
+            collection.findOne(function(doc) {
+              test.assertEquals('mike', doc.get('hello'));
+              // Let's close the db 
+              finished_tests.push({test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection:'ok'});                                   
+            });
+          }, doc);          
+        });        
+      });
+    }, a);
+    
+  }, 'test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection');
+}
+
+function test_invalid_key_names() {
+  client.createCollection(function(collection) {
+    // Legal inserts
+    collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}]);
+    // Illegal insert for key
+    collection.insert({'$hello':'world'}, function(doc) {
+      test.assertEquals(true, doc.err);
+      test.assertEquals(false, doc.ok);
+      test.assertEquals("Error: key $hello must not start with '$'", doc.errmsg);      
+      // Let's close the db 
+      finished_tests.push({test_invalid_key_names:'ok'});                                   
+    });
+    
+  }, 'test_invalid_key_names');
+}
+
+var client_tests = [test_invalid_key_names];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1349,7 +1424,9 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_collection_names, test_collections_info, test_collection_options, test_index_information, 
       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save];
+      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+      test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+      test_invalid_key_names];
 
 /*******************************************************************************************************
   Setup For Running Tests
