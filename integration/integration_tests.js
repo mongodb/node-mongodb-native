@@ -1591,7 +1591,63 @@ function test_explain() {
   }, 'test_explain');
 }
 
-var client_tests = [test_explain];
+function test_count() {
+  client.createCollection(function(collection) {
+    collection.find(function(cursor) {
+      cursor.count(function(count) {
+        test.assertEquals(0, count);
+        
+        for(var i = 0; i < 10; i++) {
+          collection.insert({'x':i});
+        }
+        
+        collection.find(function(cursor) {
+          cursor.count(function(count) {
+            test.assertEquals(10, count);
+            test.assertTrue(count.constructor == Number);
+          });
+        });
+        
+        collection.find(function(cursor) {
+          cursor.count(function(count) {
+            test.assertEquals(10, count);            
+          });
+        }, {}, {'limit':5});
+
+        collection.find(function(cursor) {
+          cursor.count(function(count) {
+            test.assertEquals(10, count);            
+          });
+        }, {}, {'skip':5});
+        
+        collection.find(function(cursor) {
+          cursor.count(function(count) {
+            test.assertEquals(10, count);
+            
+            cursor.each(function(item) {
+              if(item == null) {
+                cursor.count(function(count2) {
+                  test.assertEquals(10, count2);                  
+                  test.assertEquals(count, count2);                  
+                  // Let's close the db 
+                  finished_tests.push({test_count:'ok'});                                   
+                });
+              }
+            });
+          });
+        });
+        
+        client.collection(function(collection) {
+          collection.count(function(count) {
+            test.assertEquals(0, count);          
+          });
+        }, 'acollectionthatdoesn')
+      });
+    });
+  }, 'test_count');
+}
+
+var client_tests = [test_count];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1602,7 +1658,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain];
+      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count];
 
 /*******************************************************************************************************
   Setup For Running Tests
