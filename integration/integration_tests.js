@@ -1574,7 +1574,24 @@ function test_rename_collection() {
   }, 'test_rename_collection');
 }
 
-var client_tests = [test_rename_collection];
+function test_explain() {
+  client.createCollection(function(collection) {
+    collection.insert({'a':1});
+    collection.find(function(cursor) {
+      cursor.explain(function(explaination) {
+        test.assertTrue(explaination.get('cursor') != null);
+        test.assertTrue(explaination.get('n').constructor == Number);
+        test.assertTrue(explaination.get('millis').constructor == Number);
+        test.assertTrue(explaination.get('nscanned').constructor == Number);
+        
+        // Let's close the db 
+        finished_tests.push({test_explain:'ok'});                                   
+      });
+    }, {'a':1});
+  }, 'test_explain');
+}
+
+var client_tests = [test_explain];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1585,7 +1602,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-      test_invalid_key_names, test_collection_names, test_rename_collection];
+      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain];
 
 /*******************************************************************************************************
   Setup For Running Tests
