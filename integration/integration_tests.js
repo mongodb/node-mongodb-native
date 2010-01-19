@@ -1647,7 +1647,106 @@ function test_count() {
   }, 'test_count');
 }
 
-var client_tests = [test_count];
+function test_sort() {
+  client.createCollection(function(collection) {
+    for(var i = 0; i < 5; i++) {
+      collection.insert({'a':i});
+    }
+    
+    collection.find(function(cursor) {      
+      cursor.sort(function(cursor) {
+        test.assertTrue(cursor instanceof Cursor);
+        test.assertEquals(['a', 1], cursor.sortValue);
+      }, ['a', 1]);      
+    });
+    
+    collection.find(function(cursor) {
+      cursor.sort(function(cursor) {
+        cursor.nextObject(function(doc) {
+          test.assertEquals(0, doc.get('a'));
+        });
+      }, 'a', 1);      
+    });
+    
+    collection.find(function(cursor) {
+      cursor.sort(function(cursor) {
+        cursor.nextObject(function(doc) {
+          test.assertEquals(4, doc.get('a'));
+        });
+      }, 'a', -1);      
+    });
+    
+    collection.find(function(cursor) {
+      cursor.sort(function(cursor) {
+        cursor.nextObject(function(doc) {
+          test.assertEquals(0, doc.get('a'));
+        });
+      }, 'a', "asc");      
+    });
+    
+    collection.find(function(cursor) {
+      cursor.sort(function(cursor) {
+        test.assertTrue(cursor instanceof Cursor);
+        test.assertEquals([['a', -1], ['b', 1]], cursor.sortValue);
+      }, [['a', -1], ['b', 1]]);      
+    });
+    
+    collection.find(function(cursor) {
+      cursor.sort(function(cursor) {
+        cursor.sort(function(cursor) {
+          cursor.nextObject(function(doc) {
+            test.assertEquals(4, doc.get('a'));
+          });          
+        }, 'a', -1)
+      }, 'a', 1);      
+    });
+    
+    collection.find(function(cursor) {
+      cursor.sort(function(cursor) {
+        cursor.sort(function(cursor) {
+          cursor.nextObject(function(doc) {
+            test.assertEquals(0, doc.get('a'));
+          });          
+        }, 'a', 1)
+      }, 'a', -1);      
+    });    
+
+    collection.find(function(cursor) {
+      cursor.nextObject(function(doc) {
+        cursor.sort(function(cursor) {
+          test.assertEquals(true, cursor.err);
+          test.assertEquals(false, cursor.ok);
+          test.assertEquals("Cursor is closed", cursor.errmsg);          
+          
+          // Let's close the db 
+          finished_tests.push({test_sort:'ok'});                                   
+        }, ['a']); 
+      });          
+    }); 
+    
+    collection.find(function(cursor) {
+      cursor.sort(function(cursor) {
+        cursor.nextObject(function(doc) {
+          test.assertEquals(true, doc.err);
+          test.assertEquals(false, doc.ok);
+          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", doc.errmsg);
+        });
+      }, 'a', 25);      
+    });
+
+    collection.find(function(cursor) {
+      cursor.sort(function(cursor) {
+        cursor.nextObject(function(doc) {
+          test.assertEquals(true, doc.err);
+          test.assertEquals(false, doc.ok);
+          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", doc.errmsg);
+        });
+      }, 25);      
+    });           
+  }, 'test_sort');
+}
+
+// var client_tests = [test_sort];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1658,7 +1757,8 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count];
+      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+      test_sort];
 
 /*******************************************************************************************************
   Setup For Running Tests
