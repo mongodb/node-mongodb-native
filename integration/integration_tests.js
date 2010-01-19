@@ -1407,15 +1407,174 @@ function test_invalid_key_names() {
     collection.insert({'$hello':'world'}, function(doc) {
       test.assertEquals(true, doc.err);
       test.assertEquals(false, doc.ok);
-      test.assertEquals("Error: key $hello must not start with '$'", doc.errmsg);      
-      // Let's close the db 
-      finished_tests.push({test_invalid_key_names:'ok'});                                   
+      test.assertEquals("Error: key $hello must not start with '$'", doc.errmsg);            
     });
     
+    collection.insert({'hello':{'$hello':'world'}}, function(doc) {
+      test.assertEquals(true, doc.err);
+      test.assertEquals(false, doc.ok);
+      test.assertEquals("Error: key $hello must not start with '$'", doc.errmsg);              
+    });
+    
+    collection.insert({'he$llo':'world'}, function(docs) {
+      test.assertTrue(docs[0] instanceof OrderedHash);
+    })
+
+    collection.insert({'hello':{'hell$o':'world'}}, function(docs) {
+      test.assertTrue(docs[0] instanceof OrderedHash);
+    })
+
+    collection.insert({'.hello':'world'}, function(doc) {
+      test.assertEquals(true, doc.err);
+      test.assertEquals(false, doc.ok);
+      test.assertEquals("Error: key .hello must not contain '.'", doc.errmsg);            
+    });
+
+    collection.insert({'hello':{'.hello':'world'}}, function(doc) {
+      test.assertEquals(true, doc.err);
+      test.assertEquals(false, doc.ok);
+      test.assertEquals("Error: key .hello must not contain '.'", doc.errmsg);            
+    });
+
+    collection.insert({'hello.':'world'}, function(doc) {
+      test.assertEquals(true, doc.err);
+      test.assertEquals(false, doc.ok);
+      test.assertEquals("Error: key hello. must not contain '.'", doc.errmsg);            
+    });
+
+    collection.insert({'hello':{'hello.':'world'}}, function(doc) {
+      test.assertEquals(true, doc.err);
+      test.assertEquals(false, doc.ok);
+      test.assertEquals("Error: key hello. must not contain '.'", doc.errmsg);            
+      // Let's close the db 
+      finished_tests.push({test_invalid_key_names:'ok'});                                   
+    });    
   }, 'test_invalid_key_names');
 }
 
-var client_tests = [test_invalid_key_names];
+function test_collection_names() {
+  client.collection(function(collection) {
+    test.assertEquals(true, collection.err);
+    test.assertEquals(false, collection.ok);
+    test.assertEquals("Error: collection name must be a String", collection.errmsg);            
+  }, 5);
+  
+  client.collection(function(collection) {
+    test.assertEquals(true, collection.err);
+    test.assertEquals(false, collection.ok);
+    test.assertEquals("Error: collection names cannot be empty", collection.errmsg);            
+  }, "");  
+
+  client.collection(function(collection) {
+    test.assertEquals(true, collection.err);
+    test.assertEquals(false, collection.ok);
+    test.assertEquals("Error: collection names must not contain '$'", collection.errmsg);            
+  }, "te$t");  
+
+  client.collection(function(collection) {
+    test.assertEquals(true, collection.err);
+    test.assertEquals(false, collection.ok);
+    test.assertEquals("Error: collection names must not start or end with '.'", collection.errmsg);            
+  }, ".test");  
+
+  client.collection(function(collection) {
+    test.assertEquals(true, collection.err);
+    test.assertEquals(false, collection.ok);
+    test.assertEquals("Error: collection names must not start or end with '.'", collection.errmsg);            
+  }, "test.");  
+
+  client.collection(function(collection) {
+    test.assertEquals(true, collection.err);
+    test.assertEquals(false, collection.ok);
+    test.assertEquals("Error: collection names cannot be empty", collection.errmsg);            
+    
+    // Let's close the db 
+    finished_tests.push({test_collection_names:'ok'});                                   
+  }, "test..t");  
+}
+
+function test_rename_collection() {
+  client.createCollection(function(collection) {
+    client.createCollection(function(collection) {
+
+      client.collection(function(collection1) {
+        client.collection(function(collection2) {
+          // Assert rename
+          collection1.rename(function(collection) {
+            test.assertEquals(true, collection.err);
+            test.assertEquals(false, collection.ok);
+            test.assertEquals("Error: collection name must be a String", collection.errmsg);            
+          }, 5);
+
+          collection1.rename(function(collection) {
+            test.assertEquals(true, collection.err);
+            test.assertEquals(false, collection.ok);
+            test.assertEquals("Error: collection names cannot be empty", collection.errmsg);            
+          }, "");
+
+          collection1.rename(function(collection) {
+            test.assertEquals(true, collection.err);
+            test.assertEquals(false, collection.ok);
+            test.assertEquals("Error: collection names must not contain '$'", collection.errmsg);            
+          }, "te$t");
+
+          collection1.rename(function(collection) {
+            test.assertEquals(true, collection.err);
+            test.assertEquals(false, collection.ok);
+            test.assertEquals("Error: collection names must not start or end with '.'", collection.errmsg);            
+          }, ".test");
+
+          collection1.rename(function(collection) {
+            test.assertEquals(true, collection.err);
+            test.assertEquals(false, collection.ok);
+            test.assertEquals("Error: collection names must not start or end with '.'", collection.errmsg);            
+          }, "test.");
+
+          collection1.rename(function(collection) {
+            test.assertEquals(true, collection.err);
+            test.assertEquals(false, collection.ok);
+            test.assertEquals("Error: collection names cannot be empty", collection.errmsg);            
+          }, "tes..t");
+          
+          collection1.count(function(count) {
+            test.assertEquals(0, count);
+
+            collection1.insert([{'x':1}, {'x':2}], function(docs) {
+              collection1.count(function(count) {
+                test.assertEquals(2, count);                
+                
+                collection1.rename(function(collection) {
+                  test.assertEquals(true, collection.err);
+                  test.assertEquals(false, collection.ok);
+                  test.assertEquals("db assertion failure", collection.errmsg);            
+                  
+                  collection1.rename(function(collection) {
+                    test.assertEquals("test_rename_collection3", collection.collectionName);
+                    
+                    // Check count
+                    collection.count(function(count) {
+                      test.assertEquals(2, count);                                      
+                      // Let's close the db 
+                      finished_tests.push({test_rename_collection:'ok'});                                   
+                    });                    
+                  }, 'test_rename_collection3');                  
+                }, 'test_rename_collection2');                
+              });
+            })            
+          })
+
+          collection2.count(function(count) {
+            test.assertEquals(0, count);
+          })
+
+        }, 'test_rename_collection2');        
+      }, 'test_rename_collection');
+      
+    }, 'test_rename_collection2');    
+  }, 'test_rename_collection');
+}
+
+var client_tests = [test_rename_collection];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1426,7 +1585,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-      test_invalid_key_names];
+      test_invalid_key_names, test_collection_names, test_rename_collection];
 
 /*******************************************************************************************************
   Setup For Running Tests
