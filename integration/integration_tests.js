@@ -79,9 +79,19 @@ function test_collections() {
 
       // Assert collections
       client.collections(function(collections) {
-        test.assertTrue(locate_collection_by_name("test.spiderman", collections) != null);
-        test.assertTrue(locate_collection_by_name("test.mario", collections) != null);
-        test.assertTrue(locate_collection_by_name("does_not_exist", collections) == null);
+        var found_spiderman = false;
+        var found_mario = false;
+        var found_does_not_exist = false;
+        
+        collections.forEach(function(collection) {
+          if(collection.collectionName == "test.spiderman") found_spiderman = true;
+          if(collection.collectionName == "test.mario") found_mario = true;
+          if(collection.collectionName == "does_not_exist") found_does_not_exist = true;
+        });
+        
+        test.assertTrue(found_spiderman);
+        test.assertTrue(found_mario);
+        test.assertTrue(!found_does_not_exist);
         finished_tests.push({test_collections:'ok'});
       });
     }, 'test.mario');
@@ -1746,7 +1756,240 @@ function test_sort() {
   }, 'test_sort');
 }
 
-// var client_tests = [test_sort];
+function test_cursor_limit() {
+  client.createCollection(function(collection) {
+    for(var i = 0; i < 10; i++) {
+      collection.save(function(document) {        
+      }, {'x':1});
+    }
+    
+    collection.find(function(cursor) {
+      cursor.count(function(count) {
+        test.assertEquals(10, count);
+      });
+    });
+    
+    collection.find(function(cursor) {
+      cursor.limit(function(cursor) {
+        cursor.toArray(function(items) {
+          test.assertEquals(5, items.length);
+          // Let's close the db 
+          finished_tests.push({test_cursor_limit:'ok'});                                   
+        });
+      }, 5);
+    });
+  }, 'test_cursor_limit');
+}
+
+function test_limit_exceptions() {
+  client.createCollection(function(collection) {
+    collection.insert({'a':1}, function(docs) {});
+    collection.find(function(cursor) {
+      cursor.limit(function(cursor) {
+        test.assertEquals(false, cursor.ok);
+        test.assertEquals(true, cursor.err);
+        test.assertEquals("limit requires an integer", cursor.errmsg);
+      }, 'not-an-integer');
+    });
+    
+    collection.find(function(cursor) {
+      cursor.nextObject(function(doc) {
+        cursor.limit(function(cursor) {
+          test.assertEquals(false, cursor.ok);
+          test.assertEquals(true, cursor.err);
+          test.assertEquals("Cursor is closed", cursor.errmsg);
+          // Let's close the db 
+          finished_tests.push({test_limit_exceptions:'ok'});                                   
+        }, 1);
+      });
+    });       
+
+    collection.find(function(cursor) {
+      cursor.close(function(cursor) {        
+        cursor.limit(function(cursor) {
+          test.assertEquals(false, cursor.ok);
+          test.assertEquals(true, cursor.err);
+          test.assertEquals("Cursor is closed", cursor.errmsg);
+        }, 1);
+      });
+    });
+  }, 'test_limit_exceptions');
+}
+
+function test_skip() {
+  client.createCollection(function(collection) {
+    for(var i = 0; i < 10; i++) {
+      collection.insert({'x':1});
+    }
+    
+    collection.find(function(cursor) {
+      cursor.count(function(count) {
+        test.assertEquals(10, count);
+      });
+    });
+    
+    collection.find(function(cursor) {
+      cursor.toArray(function(items) {
+        test.assertEquals(10, items.length);
+
+        collection.find(function(cursor) {
+          cursor.skip(function(cursor) {
+            cursor.toArray(function(items2) {
+              test.assertEquals(8, items2.length);          
+              
+              // Check that we have the same elements
+              var numberEqual = 0;
+              var sliced = items.slice(2, 10);
+              
+              for(var i = 0; i < sliced.length; i++) {
+                if(sliced[i].get('x') == items2[i].get('x')) numberEqual = numberEqual + 1;
+              }
+              test.assertEquals(8, numberEqual);          
+              
+              // Let's close the db 
+              finished_tests.push({test_skip:'ok'});                                   
+            });
+          }, 2);
+        });
+      });
+    });    
+  }, 'test_skip');
+}
+
+function test_skip_exceptions() {
+  client.createCollection(function(collection) {
+    collection.insert({'a':1}, function(docs) {});
+    collection.find(function(cursor) {
+      cursor.skip(function(cursor) {
+        test.assertEquals(false, cursor.ok);
+        test.assertEquals(true, cursor.err);
+        test.assertEquals("skip requires an integer", cursor.errmsg);
+      }, 'not-an-integer');
+    });
+    
+    collection.find(function(cursor) {
+      cursor.nextObject(function(doc) {
+        cursor.skip(function(cursor) {
+          test.assertEquals(false, cursor.ok);
+          test.assertEquals(true, cursor.err);
+          test.assertEquals("Cursor is closed", cursor.errmsg);
+          // Let's close the db 
+          finished_tests.push({test_skip_exceptions:'ok'});                                   
+        }, 1);
+      });
+    });       
+
+    collection.find(function(cursor) {
+      cursor.close(function(cursor) {        
+        cursor.skip(function(cursor) {
+          test.assertEquals(false, cursor.ok);
+          test.assertEquals(true, cursor.err);
+          test.assertEquals("Cursor is closed", cursor.errmsg);
+        }, 1);
+      });
+    });
+  }, 'test_skip_exceptions');  
+}
+
+function test_limit_skip_chaining() {
+  client.createCollection(function(collection) {
+    for(var i = 0; i < 10; i++) {
+      collection.insert({'x':1});
+    }
+
+    collection.find(function(cursor) {
+      cursor.toArray(function(items) {
+        test.assertEquals(10, items.length);
+        
+        collection.find(function(cursor) {
+          cursor.limit(function(cursor) {
+            cursor.skip(function(cursor) {
+              cursor.toArray(function(items2) {
+                test.assertEquals(5, items2.length);                
+                
+                // Check that we have the same elements
+                var numberEqual = 0;
+                var sliced = items.slice(3, 8);
+
+                for(var i = 0; i < sliced.length; i++) {
+                  if(sliced[i].get('x') == items2[i].get('x')) numberEqual = numberEqual + 1;
+                }
+                test.assertEquals(5, numberEqual);          
+                
+                // Let's close the db 
+                finished_tests.push({test_limit_skip_chaining:'ok'});                                   
+              });
+            }, 3);
+          }, 5);
+        });        
+      });
+    });
+    
+  }, 'test_limit_skip_chaining');
+}
+
+function test_close_no_query_sent() {
+  client.createCollection(function(collection) {
+    collection.find(function(cursor) {
+      cursor.close(function(cursor) {
+        test.assertEquals(true, cursor.isClosed());
+        // Let's close the db 
+        finished_tests.push({test_close_no_query_sent:'ok'});                                   
+      });
+    });
+  }, 'test_close_no_query_sent');
+}
+
+function test_refill_via_get_more() {
+  client.createCollection(function(collection) {
+    for(var i = 0; i < 1000; i++) {
+      collection.save(function(doc) {}, {'a': i});
+    }
+
+    collection.count(function(count) {
+      test.assertEquals(1000, count);
+    });      
+    
+    var total = 0;
+    collection.find(function(cursor) {
+      cursor.each(function(item) {
+        if(item != null) {
+          total = total + item.get('a');
+        } else {
+          test.assertEquals(499500, total); 
+          
+          collection.count(function(count) {
+            test.assertEquals(1000, count);
+          });                  
+
+          collection.count(function(count) {
+            test.assertEquals(1000, count);
+            
+            var total2 = 0;
+            collection.find(function(cursor) {
+              cursor.each(function(item) {
+                if(item != null) {
+                  total2 = total2 + item.get('a');
+                } else {
+                  test.assertEquals(499500, total2); 
+                  collection.count(function(count) {
+                    test.assertEquals(1000, count);
+                    test.assertEquals(total, total2);
+                    // Let's close the db 
+                    finished_tests.push({test_refill_via_get_more:'ok'});                                   
+                  });                  
+                }
+              });
+            });
+          });
+        }
+      });
+    });  
+
+  }, 'test_refill_via_get_more');
+}
+
+// var client_tests = [test_collections, test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -1758,7 +2001,8 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
-      test_sort];
+      test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more];
 
 /*******************************************************************************************************
   Setup For Running Tests
