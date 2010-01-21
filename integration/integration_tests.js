@@ -11,6 +11,10 @@ require("mongodb/bson/bson");
   Integration Tests
 *******************************************************************************************************/
 
+//#####################################
+// Needs to be fixed (problem with count vs number of records left)
+//#####################################
+
 // Test the creation of a collection on the mongo db
 function test_collection_methods() {
   client.createCollection(function(collection) {
@@ -30,7 +34,7 @@ function test_collection_methods() {
         // Drop the collection and check that it's gone
         client.dropCollection(function(replies) {
           test.assertEquals(true, replies.ok);          
-          finished_tests.push({test_collection_methods:'ok'});
+          finished_test({test_collection_methods:'ok'});
         }, "test_collection_methods2")
       });
     });
@@ -56,7 +60,7 @@ function test_authentication() {
         // Ensure authentication works correctly
         client.authenticate(user_name, password, function(replies) {
           test.assertEquals(1, replies[0].documents[0].get('ok'));
-          finished_tests.push({test_authentication:'ok'});
+          finished_test({test_authentication:'ok'});
         });
       });      
     }, 'system.users');
@@ -92,7 +96,7 @@ function test_collections() {
         test.assertTrue(found_spiderman);
         test.assertTrue(found_mario);
         test.assertTrue(!found_does_not_exist);
-        finished_tests.push({test_collections:'ok'});
+        finished_test({test_collections:'ok'});
       });
     }, 'test.mario');
   }, 'test.spiderman');  
@@ -145,7 +149,7 @@ function test_object_id_generation() {
   var intervalId = setInterval(function() {
     if(number_of_tests_done == 3) {
       clearInterval(intervalId);
-      finished_tests.push({test_object_id_generation:'ok'});
+      finished_test({test_object_id_generation:'ok'});
     }
   }, 100);    
 }
@@ -168,7 +172,7 @@ function test_automatic_reconnect() {
           collection.findOne(function(document) {
             test.assertEquals(ids[0].get('_id').toHexString(), document.get('_id').toHexString());
             // Let's close the db 
-            finished_tests.push({test_automatic_reconnect:'ok'});    
+            finished_test({test_automatic_reconnect:'ok'});    
             automatic_connect_client.close();
           }, new OrderedHash().add("name", "Patty"));      
         });        
@@ -221,7 +225,7 @@ function test_error_handling() {
                           test.assertEquals(0, documents[0].get('n'));                                              
 
                           // Let's close the db 
-                          finished_tests.push({test_error_handling:'ok'}); 
+                          finished_test({test_error_handling:'ok'}); 
                           error_client.close();
                         });
                       })
@@ -279,7 +283,7 @@ function test_last_status() {
                       test.assertEquals("Failed to update document", document.errmsg);
 
                       // Let's close the db 
-                      finished_tests.push({last_status_client:'ok'});                     
+                      finished_test({test_last_status:'ok'});                     
                     }, new OrderedHash().add("y", 1), new OrderedHash().add("$set", new OrderedHash().add("y", 2)), {'safe':true});
                   });                
                 });
@@ -305,7 +309,7 @@ function test_clear() {
               collection.count(function(count) {
                 test.assertEquals(0, count);    
                 // Let's close the db 
-                finished_tests.push({test_clear:'ok'}); 
+                finished_test({test_clear:'ok'}); 
               });
             });        
           });
@@ -334,7 +338,7 @@ function test_insert() {
                 test.assertTrue(results[0] != null);
 
                 // Let's close the db 
-                finished_tests.push({test_insert:'ok'}); 
+                finished_test({test_insert:'ok'}); 
               });
             }, new OrderedHash());          
           });        
@@ -366,7 +370,7 @@ function test_multiple_insert() {
             });
             test.assertEquals(2, results.length);
             // Let's close the db 
-            finished_tests.push({test_multiple_insert:'ok'}); 
+            finished_test({test_multiple_insert:'ok'}); 
           });
         });
       });      
@@ -380,7 +384,7 @@ function test_count_on_nonexisting() {
     collection.count(function(count) {  
       test.assertEquals(0, count);
       // Let's close the db 
-      finished_tests.push({test_count_on_nonexisting:'ok'}); 
+      finished_test({test_count_on_nonexisting:'ok'}); 
     });    
   }, 'test_multiple_insert');
 }
@@ -409,7 +413,7 @@ function test_find_simple() {
           test.assertEquals(1, documents.length);
           test.assertEquals(doc1.get('a'), documents[0].get('a'));
           // Let's close the db 
-          finished_tests.push({test_find_simple:'ok'}); 
+          finished_test({test_find_simple:'ok'}); 
         });
       }, {'a': doc1.get('a')});      
     }, 'test_find_simple');
@@ -503,7 +507,7 @@ function test_find_advanced() {
           });
           test.assertEquals(2, results.length);
           // Let's close the db 
-          finished_tests.push({test_find_advanced:'ok'});     
+          finished_test({test_find_advanced:'ok'});     
         });
       }, {'a':/[1|2]/});                  
     }, 'test_find_advanced');
@@ -515,14 +519,14 @@ function test_find_sorting() {
   client.createCollection(function(r) {
     client.collection(function(collection) {
       var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
-
+      
       // Insert some test documents
       collection.insert([new OrderedHash().add('a', 1).add('b', 2), 
           new OrderedHash().add('a', 2).add('b', 1), 
           new OrderedHash().add('a', 3).add('b', 2),
           new OrderedHash().add('a', 4).add('b', 1)
         ], function(docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
-
+      
       // Test sorting (ascending)
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
@@ -533,7 +537,7 @@ function test_find_sorting() {
           test.assertEquals(4, documents[3].get('a'));
         });
       }, {'a': {'$lt':10}}, {'sort': [['a', 1]]});
-
+      
       // Test sorting (descending)
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
@@ -544,7 +548,7 @@ function test_find_sorting() {
           test.assertEquals(1, documents[3].get('a'));
         });
       }, {'a': {'$lt':10}}, {'sort': [['a', -1]]});
-
+      
       // Sorting using array of names, assumes ascending order
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
@@ -555,7 +559,7 @@ function test_find_sorting() {
           test.assertEquals(4, documents[3].get('a'));
         });
       }, {'a': {'$lt':10}}, {'sort': ['a']});
-
+      
       // Sorting using single name, assumes ascending order
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
@@ -566,7 +570,7 @@ function test_find_sorting() {
           test.assertEquals(4, documents[3].get('a'));
         });
       }, {'a': {'$lt':10}}, {'sort': 'a'});
-
+      
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
           test.assertEquals(4, documents.length);
@@ -576,21 +580,23 @@ function test_find_sorting() {
           test.assertEquals(3, documents[3].get('a'));
         });
       }, {'a': {'$lt':10}}, {'sort': ['b', 'a']});
-
+      
       // Sorting using empty array, no order guarantee should not blow up
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
           test.assertEquals(4, documents.length);
           // Let's close the db 
-          finished_tests.push({test_find_sorting:'ok'});     
+          finished_test({test_find_sorting:'ok'});     
         });
       }, {'a': {'$lt':10}}, {'sort': []});
-
+      
       // Sorting using ordered hash
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
           // Fail test if not an error
-          if(!(documents instanceof Error)) throw new TypeError("Should fail");
+          test.assertEquals(true, documents.err);
+          test.assertEquals(false, documents.ok);
+          test.assertEquals("Error: Invalid sort argument was supplied", documents.errmsg);
         });
       }, {'a': {'$lt':10}}, {'sort': new OrderedHash().add('a', -1)});            
     }, 'test_find_sorting');
@@ -617,7 +623,7 @@ function test_find_limits() {
         });
       }, {}, {'limit': 1});    
 
-      collection.find(function(cursor) {
+      collection.find(function(cursor) {        
         cursor.toArray(function(documents) {
           test.assertEquals(2, documents.length);        
         });
@@ -628,24 +634,24 @@ function test_find_limits() {
           test.assertEquals(3, documents.length);        
         });
       }, {}, {'limit': 3});    
-
+      
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
           test.assertEquals(4, documents.length);        
         });
       }, {}, {'limit': 4});    
-
+      
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
           test.assertEquals(4, documents.length);        
         });
       }, {}, {});    
-
+      
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
           test.assertEquals(4, documents.length);        
           // Let's close the db 
-          finished_tests.push({test_find_limits:'ok'});     
+          finished_test({test_find_limits:'ok'});     
         });
       }, {}, {'limit':99});          
     }, 'test_find_limits');
@@ -660,7 +666,7 @@ function test_find_one_no_records() {
         cursor.toArray(function(documents) {
           test.assertEquals(0, documents.length);        
           // Let's close the db 
-          finished_tests.push({test_find_one_no_records:'ok'});     
+          finished_test({test_find_one_no_records:'ok'});     
         });
       }, {'a':1}, {});              
     }, 'test_find_one_no_records');
@@ -684,7 +690,7 @@ function test_drop_collection() {
           }
         });        
         // Let's close the db 
-        finished_tests.push({test_drop_collection:'ok'});     
+        finished_test({test_drop_collection:'ok'});     
         // If we have an instance of the index throw and error
         if(found) throw new Error("should not fail");
       });
@@ -707,7 +713,7 @@ function test_other_drop() {
             }
           });        
           // Let's close the db 
-          finished_tests.push({test_drop_collection:'ok'});     
+          finished_test({test_other_drop:'ok'});     
           // If we have an instance of the index throw and error
           if(found) throw new Error("should not fail");
         });      
@@ -738,7 +744,7 @@ function test_collection_names() {
           test.assertTrue(found2);      
         });
         // Let's close the db 
-        finished_tests.push({test_collection_names:'ok'});             
+        finished_test({test_collection_names:'ok'});             
       }, 'test_collection_names2');
     });    
   }, 'test_collection_names');
@@ -759,7 +765,7 @@ function test_collections_info() {
         test.assertTrue(found);
       });    
       // Let's close the db 
-      finished_tests.push({test_collections_info:'ok'});         
+      finished_test({test_collections_info:'ok'});         
     });
   }, 'test_collections_info');
 }
@@ -774,7 +780,7 @@ function test_collection_options() {
       test.assertEquals(1024, options.get('size'));
       test.assertEquals("test_collection_options", options.get('create'));
       // Let's close the db 
-      finished_tests.push({test_collection_options:'ok'});         
+      finished_test({test_collection_options:'ok'});         
     });
   }, 'test_collection_options', {'capped':true, 'size':1024});
 }
@@ -810,7 +816,7 @@ function test_index_information() {
             test.assertEquals([["a", 1]], collectionInfo[indexName]);            
           
             // Let's close the db 
-            finished_tests.push({test_index_information:'ok'});                 
+            finished_test({test_index_information:'ok'});                 
           });          
         }, collection.collectionName);
       }, collection.collectionName, 'a');      
@@ -836,7 +842,7 @@ function test_multiple_index_cols() {
           test.assertEquals([['a', -1], ['b', 1], ['c', -1]], collectionInfo[indexName]);
           
           // Let's close the db 
-          finished_tests.push({test_multiple_index_cols:'ok'});                 
+          finished_test({test_multiple_index_cols:'ok'});                 
         }, collection.collectionName);        
       }, collection.collectionName, [['a', -1], ['b', 1], ['c', -1]]);
     });
@@ -854,7 +860,7 @@ function test_unique_index() {
           test.assertEquals(1, errors.length);
           test.assertEquals(null, errors[0].get('err'));
           // Let's close the db 
-          finished_tests.push({test_unique_index:'ok'});                 
+          finished_test({test_unique_index:'ok'});                 
         });
       });
     }, collection.collectionName, 'hello');        
@@ -896,7 +902,7 @@ function test_index_on_subfield() {
           test.assertEquals(1, errors.length);
           test.assertTrue(errors[0].get('err') != null);
           // Let's close the db 
-          finished_tests.push({test_index_on_subfield:'ok'});                 
+          finished_test({test_index_on_subfield:'ok'});                 
         });
       });  
     }, collection.collectionName, 'hello.a', true);
@@ -911,7 +917,7 @@ function test_array() {
         cursor.toArray(function(documents) {
           test.assertEquals([1, 2, 3], documents[0].get('b'));
           // Let's close the db 
-          finished_tests.push({test_array:'ok'});                 
+          finished_test({test_array:'ok'});                 
         });
       }, {});
     });
@@ -927,7 +933,7 @@ function test_regex() {
         cursor.toArray(function(items) {
           test.assertEquals(("" + regexp), ("" + items[0].get('b')));
           // Let's close the db 
-          finished_tests.push({test_regex:'ok'});                 
+          finished_test({test_regex:'ok'});                 
         });
       }, {}, {'fields': ['b']});
     });
@@ -951,7 +957,7 @@ function test_non_oid_id() {
           test.assertEquals(("" + date), ("" + items[0].get('_id')));
           
           // Let's close the db 
-          finished_tests.push({test_non_oid_id:'ok'});                 
+          finished_test({test_non_oid_id:'ok'});                 
         });
       }, {'_id':date});      
     });    
@@ -972,7 +978,7 @@ function test_strict_access_collection() {
       error_client.collection(function(collection) {
         test.assertTrue(collection instanceof Collection);
         // Let's close the db 
-        finished_tests.push({test_strict_access_collection:'ok'});                 
+        finished_test({test_strict_access_collection:'ok'});                 
         error_client.close();
       }, 'test_strict_access_collection');
     }, 'test_strict_access_collection');
@@ -999,7 +1005,7 @@ function test_strict_create_collection() {
           test.assertTrue(collection instanceof Collection);
 
           // Let's close the db 
-          finished_tests.push({test_strict_create_collection:'ok'});                 
+          finished_test({test_strict_create_collection:'ok'});                 
           error_client.close();
         }, 'test_strict_create_collection');                
       }, 'test_strict_create_collection');
@@ -1013,7 +1019,7 @@ function test_to_a() {
     test.assertTrue(collection instanceof Collection);
     collection.insert({'a':1}, function(ids) {
       collection.find(function(cursor) {
-        cursor.toArray(function(items) {
+        cursor.toArray(function(items) {          
           // Should fail if called again (cursor should be closed)
           cursor.toArray(function(items) {
             test.assertEquals(false, items.ok);
@@ -1027,7 +1033,7 @@ function test_to_a() {
               test.assertEquals("Cursor is closed", items.errmsg);              
 
               // Let's close the db 
-              finished_tests.push({test_to_a:'ok'});                 
+              finished_test({test_to_a:'ok'});                 
             });
           });
         });
@@ -1049,7 +1055,7 @@ function test_to_a_after_each() {
               test.assertEquals("Cursor is closed", items.errmsg);                            
 
               // Let's close the db 
-              finished_tests.push({test_to_a_after_each:'ok'});                 
+              finished_test({test_to_a_after_each:'ok'});                 
             });
           };
         });
@@ -1077,7 +1083,7 @@ function test_where() {
             test.assertEquals(2, count);
 
             // Let's close the db 
-            finished_tests.push({test_where:'ok'});                 
+            finished_test({test_where:'ok'});                 
           });
         }, {'$where':new Code('this.a > i', new OrderedHash().add('i', 1))});
       });
@@ -1129,7 +1135,7 @@ function test_eval() {
     test.assertEquals(true, result.err);
     test.assertTrue(result.errmsg != null);
     // Let's close the db 
-    finished_tests.push({test_eval:'ok'});                             
+    finished_test({test_eval:'ok'});                             
   }, "5 ++ 5;");
 }
 
@@ -1186,7 +1192,7 @@ function test_hint() {
           cursor.toArray(function(items) {
             test.assertEquals(1, items.length);
             // Let's close the db 
-            finished_tests.push({test_hint:'ok'});                             
+            finished_test({test_hint:'ok'});                             
           });
         }, {'a':1});           
       }, collection.collectionName, "a");
@@ -1251,7 +1257,7 @@ function test_group() {
               test.assertEquals(true, results.err);
               test.assertTrue(results.errmsg != null);
               // Let's close the db 
-              finished_tests.push({test_group:'ok'});                                   
+              finished_test({test_group:'ok'});                                   
             }, [], {}, {}, "5 ++ 5", true);
           });          
         }, [], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", true);        
@@ -1292,7 +1298,7 @@ function test_deref() {
                     client.dereference(function(result) {
                       test.assertEquals(null, result);
                       // Let's close the db 
-                      finished_tests.push({test_deref:'ok'});                                   
+                      finished_test({test_deref:'ok'});                                   
                     }, new DBRef("test_deref", null));
                   });
                 });
@@ -1338,7 +1344,7 @@ function test_save() {
                   collection.count(function(count) {
                     test.assertEquals(2, count);                        
                     // Let's close the db 
-                    finished_tests.push({test_save:'ok'});                                   
+                    finished_test({test_save:'ok'});                                   
                   });                  
                 }, new OrderedHash().add('hello', 'world'));                
               });              
@@ -1356,7 +1362,7 @@ function test_save_long() {
     collection.findOne(function(doc) {
       test.assertTrue(Long.fromNumber(9223372036854775807).equals(doc.get('x')));
       // Let's close the db 
-      finished_tests.push({test_save_long:'ok'});                                   
+      finished_test({test_save_long:'ok'});                                   
     });
   }, 'test_save_long');
 }
@@ -1373,7 +1379,7 @@ function test_find_by_oid() {
         collection.findOne(function(doc) {
           test.assertEquals('mike', doc.get('hello'));          
           // Let's close the db 
-          finished_tests.push({test_find_by_oid:'ok'});                                   
+          finished_test({test_find_by_oid:'ok'});                                   
         }, {'_id':new ObjectID(id)});        
       }, {'_id':docs[0].get('_id')});      
     }, {'hello':'mike'});    
@@ -1399,7 +1405,7 @@ function test_save_with_object_that_has_id_but_does_not_actually_exist_in_collec
             collection.findOne(function(doc) {
               test.assertEquals('mike', doc.get('hello'));
               // Let's close the db 
-              finished_tests.push({test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection:'ok'});                                   
+              finished_test({test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection:'ok'});                                   
             });
           }, doc);          
         });        
@@ -1457,12 +1463,12 @@ function test_invalid_key_names() {
       test.assertEquals(false, doc.ok);
       test.assertEquals("Error: key hello. must not contain '.'", doc.errmsg);            
       // Let's close the db 
-      finished_tests.push({test_invalid_key_names:'ok'});                                   
+      finished_test({test_invalid_key_names:'ok'});                                   
     });    
   }, 'test_invalid_key_names');
 }
 
-function test_collection_names() {
+function test_collection_names2() {
   client.collection(function(collection) {
     test.assertEquals(true, collection.err);
     test.assertEquals(false, collection.ok);
@@ -1499,7 +1505,7 @@ function test_collection_names() {
     test.assertEquals("Error: collection names cannot be empty", collection.errmsg);            
     
     // Let's close the db 
-    finished_tests.push({test_collection_names:'ok'});                                   
+    finished_test({test_collection_names2:'ok'});                                   
   }, "test..t");  
 }
 
@@ -1565,7 +1571,7 @@ function test_rename_collection() {
                     collection.count(function(count) {
                       test.assertEquals(2, count);                                      
                       // Let's close the db 
-                      finished_tests.push({test_rename_collection:'ok'});                                   
+                      finished_test({test_rename_collection:'ok'});                                   
                     });                    
                   }, 'test_rename_collection3');                  
                 }, 'test_rename_collection2');                
@@ -1595,7 +1601,7 @@ function test_explain() {
         test.assertTrue(explaination.get('nscanned').constructor == Number);
         
         // Let's close the db 
-        finished_tests.push({test_explain:'ok'});                                   
+        finished_test({test_explain:'ok'});                                   
       });
     }, {'a':1});
   }, 'test_explain');
@@ -1640,7 +1646,7 @@ function test_count() {
                   test.assertEquals(10, count2);                  
                   test.assertEquals(count, count2);                  
                   // Let's close the db 
-                  finished_tests.push({test_count:'ok'});                                   
+                  finished_test({test_count:'ok'});                                   
                 });
               }
             });
@@ -1729,7 +1735,7 @@ function test_sort() {
           test.assertEquals("Cursor is closed", cursor.errmsg);          
           
           // Let's close the db 
-          finished_tests.push({test_sort:'ok'});                                   
+          finished_test({test_sort:'ok'});                                   
         }, ['a']); 
       });          
     }); 
@@ -1774,7 +1780,7 @@ function test_cursor_limit() {
         cursor.toArray(function(items) {
           test.assertEquals(5, items.length);
           // Let's close the db 
-          finished_tests.push({test_cursor_limit:'ok'});                                   
+          finished_test({test_cursor_limit:'ok'});                                   
         });
       }, 5);
     });
@@ -1799,7 +1805,7 @@ function test_limit_exceptions() {
           test.assertEquals(true, cursor.err);
           test.assertEquals("Cursor is closed", cursor.errmsg);
           // Let's close the db 
-          finished_tests.push({test_limit_exceptions:'ok'});                                   
+          finished_test({test_limit_exceptions:'ok'});                                   
         }, 1);
       });
     });       
@@ -1847,7 +1853,7 @@ function test_skip() {
               test.assertEquals(8, numberEqual);          
               
               // Let's close the db 
-              finished_tests.push({test_skip:'ok'});                                   
+              finished_test({test_skip:'ok'});                                   
             });
           }, 2);
         });
@@ -1874,7 +1880,7 @@ function test_skip_exceptions() {
           test.assertEquals(true, cursor.err);
           test.assertEquals("Cursor is closed", cursor.errmsg);
           // Let's close the db 
-          finished_tests.push({test_skip_exceptions:'ok'});                                   
+          finished_test({test_skip_exceptions:'ok'});                                   
         }, 1);
       });
     });       
@@ -1917,7 +1923,7 @@ function test_limit_skip_chaining() {
                 test.assertEquals(5, numberEqual);          
                 
                 // Let's close the db 
-                finished_tests.push({test_limit_skip_chaining:'ok'});                                   
+                finished_test({test_limit_skip_chaining:'ok'});                                   
               });
             }, 3);
           }, 5);
@@ -1934,7 +1940,7 @@ function test_close_no_query_sent() {
       cursor.close(function(cursor) {
         test.assertEquals(true, cursor.isClosed());
         // Let's close the db 
-        finished_tests.push({test_close_no_query_sent:'ok'});                                   
+        finished_test({test_close_no_query_sent:'ok'});                                   
       });
     });
   }, 'test_close_no_query_sent');
@@ -1976,7 +1982,7 @@ function test_refill_via_get_more() {
                     test.assertEquals(1000, count);
                     test.assertEquals(total, total2);
                     // Let's close the db 
-                    finished_tests.push({test_refill_via_get_more:'ok'});                                   
+                    finished_test({test_refill_via_get_more:'ok'});                                   
                   });                  
                 }
               });
@@ -1985,24 +1991,188 @@ function test_refill_via_get_more() {
         }
       });
     });  
-
   }, 'test_refill_via_get_more');
 }
 
-// var client_tests = [test_collections, test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more];
+function test_refill_via_get_more_alt_coll() {
+  client.createCollection(function(collection) {
+    for(var i = 0; i < 1000; i++) {
+      collection.save(function(doc) {}, {'a': i});
+    }
+
+    collection.count(function(count) {
+      test.assertEquals(1000, count);
+    });      
+    
+    var total = 0;
+    collection.find(function(cursor) {
+      cursor.each(function(item) {
+        if(item != null) {
+          total = total + item.get('a');
+        } else {
+          test.assertEquals(499500, total); 
+          
+          collection.count(function(count) {
+            test.assertEquals(1000, count);
+          });                  
+
+          collection.count(function(count) {
+            test.assertEquals(1000, count);
+            
+            var total2 = 0;
+            collection.find(function(cursor) {
+              cursor.each(function(item) {
+                if(item != null) {
+                  total2 = total2 + item.get('a');
+                } else {
+                  test.assertEquals(499500, total2); 
+                  collection.count(function(count) {
+                    test.assertEquals(1000, count);
+                    test.assertEquals(total, total2);
+                    // Let's close the db 
+                    finished_test({test_refill_via_get_more_alt_coll:'ok'});                                   
+                  });                  
+                }
+              });
+            });
+          });
+        }
+      });
+    });  
+  }, 'test_refill_via_get_more_alt_coll');
+}
+
+function test_close_after_query_sent() {
+  client.createCollection(function(collection) {
+    collection.insert({'a':1});
+    collection.find(function(cursor) {
+      cursor.nextObject(function(item) {
+        cursor.close(function(cursor) {
+          test.assertEquals(true, cursor.isClosed());
+          // Let's close the db 
+          finished_test({test_close_after_query_sent:'ok'});                                   
+        })
+      });
+    }, {'a':1});
+  }, 'test_close_after_query_sent');
+}
+
+function test_kill_cursors() {
+  var test_kill_cursors_client = new Db('integration_tests4_', [{host: "127.0.0.1", port: 27017, auto_reconnect: true}], {});
+  test_kill_cursors_client.addListener("connect", function() {
+    var number_of_tests_done = 0;
+    
+    test_kill_cursors_client.dropCollection(function(collection) {      
+      test_kill_cursors_client.createCollection(function(collection) {
+        test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+          var clientCursors = cursorInfo.get('clientCursors_size');
+          var byLocation = cursorInfo.get('byLocation_size');
+      
+          for(var i = 0; i < 1000; i++) {
+            collection.save(function(doc) {}, {'i': i});
+          }
+      
+          test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+            test.assertEquals(clientCursors, cursorInfo.get('clientCursors_size'));
+            test.assertEquals(byLocation, cursorInfo.get('byLocation_size'));
+        
+            for(var i = 0; i < 10; i++) {
+              collection.findOne(function(item) {});
+            }
+        
+            test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+              test.assertEquals(clientCursors, cursorInfo.get('clientCursors_size'));
+              test.assertEquals(byLocation, cursorInfo.get('byLocation_size'));
+
+              for(var i = 0; i < 10; i++) {
+                collection.find(function(cursor) {
+                  cursor.nextObject(function(item) {
+                    cursor.close(function(cursor) {});
+
+                    if(i == 10) {
+                      test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+                        test.assertEquals(clientCursors, cursorInfo.get('clientCursors_size'));
+                        test.assertEquals(byLocation, cursorInfo.get('byLocation_size'));
+
+                        collection.find(function(cursor) {
+                          cursor.nextObject(function(item) {
+                            test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+                              test.assertEquals(clientCursors, cursorInfo.get('clientCursors_size'));                  
+                              test.assertEquals(byLocation, cursorInfo.get('byLocation_size'));
+                            
+                              cursor.close(function(cursor) {
+                                test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+                                  test.assertEquals(clientCursors, cursorInfo.get('clientCursors_size'));
+                                  test.assertEquals(byLocation, cursorInfo.get('byLocation_size'));
+
+                                  collection.find(function(cursor) {
+                                    cursor.nextObject(function(item) {                                      
+                                      test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+                                        test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+                                          test.assertEquals(clientCursors, cursorInfo.get('clientCursors_size'));
+                                          test.assertEquals(byLocation, cursorInfo.get('byLocation_size'));
+                                          number_of_tests_done = 1;
+                                        });
+                                      });
+                                    });
+                                  }, {}, {'limit':10});                                
+                                });
+                              });                  
+                            });
+                          });
+                        });
+                      });
+                    }
+                  });
+                });
+              }
+            });        
+          });      
+        });
+      }, 'test_kill_cursors');
+    }, 'test_kill_cursors');
+    
+    var intervalId = setInterval(function() {
+      if(number_of_tests_done == 1) {
+        clearInterval(intervalId);
+        finished_test({test_kill_cursors:'ok'});
+        test_kill_cursors_client.close();
+      }
+    }, 100);        
+  });
+  test_kill_cursors_client.open();  
+}
+
+var client_tests = [test_kill_cursors];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, 
-      test_collection_names, test_collections_info, test_collection_options, test_index_information, 
+      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+      test_collection_names, test_collections_info, test_collection_options, test_index_information,
       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
-      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more];
+      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+      test_close_after_query_sent, test_kill_cursors];
+
+
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, 
+//       test_collection_names, test_collections_info, test_collection_options, test_index_information, 
+//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+//       test_close_after_query_sent];//, test_kill_cursors];
 
 /*******************************************************************************************************
   Setup For Running Tests
@@ -2012,7 +2182,7 @@ var client = new Db('integration_tests_', [{host: "127.0.0.1", port: 27017}], {}
 client.addListener("connect", function() {
   // Do cleanup of the db
   client.dropDatabase(function() {
-    // Run all the tests
+    // Run  all the tests
     run_all_tests();  
     // Start the timer that checks that all the tests have finished or failed
     ensure_tests_finished();  
@@ -2024,15 +2194,18 @@ function ensure_tests_finished() {
   var intervalId = setInterval(function() {
     if(finished_tests.length >= client_tests.length) {
       // Print out the result
-      sys.puts("= Results =========================================================");
+      sys.puts("= Final Checks =========================================================");
       // Stop interval timer and close db connection
       clearInterval(intervalId);
-      client.close();
-      // Print all the statuses
-      finished_tests.forEach(function(t) {
-        for(var i in t) {
-          sys.puts(i + " = " + sys.inspect(t[i]));
-        }
+      // client.close();
+      
+      // Ensure we don't have any more cursors hanging about
+      client.cursorInfo(function(cursorInfo) {
+        sys.puts(sys.inspect(cursorInfo));
+        // test.assertEquals(clientCursors, cursorInfo.get('clientCursors_size'));
+        // test.assertEquals(byLocation, cursorInfo.get('byLocation_size'));
+        
+        client.close();
       });
     }
   }, 100);
@@ -2046,14 +2219,21 @@ function run_all_tests() {
   // Run all the tests
   client_tests.forEach(function (t) {    
     var function_name = t.name;
-    sys.puts("executing test: [" + function_name + "]"); 
+    // sys.puts("executing test: [" + function_name + "]"); 
     try {
       t();      
     } catch(error) {
       sys.puts(sys.inspect(error));
-      finished_tests.push({function_name:error});
+      finished_test({function_name:error});
     }
   });
+}
+
+function finished_test(test_object) {
+  for(var name in test_object) {
+    sys.puts("= executing test: " + name + " [" + test_object[name] + "]");
+  }  
+  finished_tests.push(test_object);
 }
 
 function randOrd() {
