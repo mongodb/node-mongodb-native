@@ -6,6 +6,7 @@ sys = require("sys");
 test = require("mjsunit");
 require("mongodb/db");
 require("mongodb/bson/bson");
+require("mongodb/gridfs/gridstore");
 
 /*******************************************************************************************************
   Integration Tests
@@ -2156,21 +2157,50 @@ function test_count_with_fields() {
   }, 'test_count_with_fields');
 }
 
-var client_tests = [test_count_with_fields];
+// Gridstore tests
+function test_gs_exist() {
+  var gridStore = new GridStore(client, "foobar", "w");
+  gridStore.open(function(gridStore) {    
+    sys.puts("------------ gridstore:open");
+    gridStore.write(function(gridStore) {
+      // Close the gridstore (save the document)
+      sys.puts("------------ gridstore:write");
+      gridStore.close(function(result) {
+        sys.puts("------------ gridstore:close");
+        finished_test({test_gs_exist:'ok'});        
+      });
+      
+      // GridStore.exist(function(result) {
+      //   test.assertEquals(true, result);
+      // }, client, 'foobar');
+      //     
+      // GridStore.exist(function(result) {
+      //   test.assertEquals(false, result);
+      // }, client, 'does_not_exist');
+      //     
+      // GridStore.exist(function(result) {
+      //   test.assertEquals(false, result);
+      //   finished_test({test_gs_exist:'ok'});
+      // }, client, 'another_root');      
+    }, "hello world!");
+  });
+}
 
-var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
-      test_collection_names, test_collections_info, test_collection_options, test_index_information,
-      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
-      test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
-      test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
-      test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
-      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
-      test_close_after_query_sent, test_kill_cursors, test_count_with_fields];
+var client_tests = [test_gs_exist];
+
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
+//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+//       test_close_after_query_sent, test_kill_cursors, test_count_with_fields, test_gs_exist];
 
 /*******************************************************************************************************
   Setup For Running Tests
