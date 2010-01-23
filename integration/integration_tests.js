@@ -2161,32 +2161,86 @@ function test_count_with_fields() {
 function test_gs_exist() {
   var gridStore = new GridStore(client, "foobar", "w");
   gridStore.open(function(gridStore) {    
-    sys.puts("------------ gridstore:open");
     gridStore.write(function(gridStore) {
-      // Close the gridstore (save the document)
-      sys.puts("------------ gridstore:write");
       gridStore.close(function(result) {
-        sys.puts("------------ gridstore:close");
-        finished_test({test_gs_exist:'ok'});        
+        GridStore.exist(function(result) {
+          test.assertEquals(true, result);
+        }, client, 'foobar');
+
+        GridStore.exist(function(result) {
+          test.assertEquals(false, result);
+        }, client, 'does_not_exist');
+
+        GridStore.exist(function(result) {
+          test.assertEquals(false, result);
+          finished_test({test_gs_exist:'ok'});        
+        }, client, 'foobar', 'another_root');
       });
-      
-      // GridStore.exist(function(result) {
-      //   test.assertEquals(true, result);
-      // }, client, 'foobar');
-      //     
-      // GridStore.exist(function(result) {
-      //   test.assertEquals(false, result);
-      // }, client, 'does_not_exist');
-      //     
-      // GridStore.exist(function(result) {
-      //   test.assertEquals(false, result);
-      //   finished_test({test_gs_exist:'ok'});
-      // }, client, 'another_root');      
     }, "hello world!");
   });
 }
 
-var client_tests = [test_gs_exist];
+function test_gs_list() {
+  var gridStore = new GridStore(client, "foobar2", "w");
+  gridStore.open(function(gridStore) {    
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+        GridStore.list(function(items) {
+          var found = false;
+          items.forEach(function(filename) {
+            if(filename == 'foobar2') found = true;
+          });
+          
+          test.assertTrue(items.length >= 1);
+          test.assertTrue(found);
+        }, client);
+
+        GridStore.list(function(items) {
+          var found = false;
+          items.forEach(function(filename) {
+            if(filename == 'foobar2') found = true;
+          });
+          
+          test.assertTrue(items.length >= 1);
+          test.assertTrue(found);
+        }, client, 'fs');
+
+        GridStore.list(function(items) {
+          var found = false;
+          items.forEach(function(filename) {
+            if(filename == 'foobar2') found = true;
+          });
+          
+          test.assertTrue(items.length >= 0);
+          test.assertTrue(!found);
+          
+          var gridStore2 = new GridStore(client, "foobar3", "w");
+          gridStore2.open(function(gridStore) {    
+            gridStore2.write(function(gridStore) {
+              gridStore.close(function(result) {                
+                GridStore.list(function(items) {
+                  var found = false;
+                  var found2 = false;
+                  items.forEach(function(filename) {
+                    if(filename == 'foobar2') found = true;
+                    if(filename == 'foobar3') found2 = true;
+                  });
+
+                  test.assertTrue(items.length >= 2);
+                  test.assertTrue(found);
+                  test.assertTrue(found2);
+                  finished_test({test_gs_list:'ok'});        
+                }, client);
+              });
+            }, 'my file');
+          });          
+        }, client, 'my_fs');
+      });
+    }, "hello world!");
+  });  
+}
+
+var client_tests = [test_gs_list];
 
 // var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
 //       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -2200,7 +2254,21 @@ var client_tests = [test_gs_exist];
 //       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
 //       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
 //       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
-//       test_close_after_query_sent, test_kill_cursors, test_count_with_fields, test_gs_exist];
+//       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list];
+
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
+//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+//       test_close_after_query_sent, test_kill_cursors, test_count_with_fields, test_gs_exist, test_gs_list];
 
 /*******************************************************************************************************
   Setup For Running Tests
