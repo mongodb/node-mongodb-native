@@ -2344,13 +2344,95 @@ function test_gs_read_with_offset() {
           finished_test({test_gs_read_with_offset:'ok'});        
         }, client, 'test_gs_read_with_offset', null, 7);                            
       });
-    }, "hello world!");
+    }, "hello, world!");
   });            
 }
 
-var client_tests = [test_gs_read_length];
-// var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write, test_gs_small_file, test_gs_overwrite,
-//                    test_gs_read_length, test_gs_read_with_offset];
+function test_gs_seek() {
+  var gridStore = new GridStore(client, "test_gs_seek", "w");
+  gridStore.open(function(gridStore) {    
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {        
+        var gridStore2 = new GridStore(client, "test_gs_seek", "r");
+        gridStore2.open(function(gridStore) {    
+          gridStore.seek(function(gridStore) {
+            gridStore.getc(function(chr) {
+              test.assertEquals('h', chr);
+            });
+          }, 0);
+        });
+        
+        var gridStore3 = new GridStore(client, "test_gs_seek", "r");
+        gridStore3.open(function(gridStore) {    
+          gridStore.seek(function(gridStore) {
+            gridStore.getc(function(chr) {
+              test.assertEquals('w', chr);
+            });
+          }, 7);
+        });
+        
+        var gridStore4 = new GridStore(client, "test_gs_seek", "r");
+        gridStore4.open(function(gridStore) {    
+          gridStore.seek(function(gridStore) {
+            gridStore.getc(function(chr) {
+              test.assertEquals('o', chr);
+            });
+          }, 4);
+        });
+
+        var gridStore5 = new GridStore(client, "test_gs_seek", "r");
+        gridStore5.open(function(gridStore) {    
+          gridStore.seek(function(gridStore) {
+            gridStore.getc(function(chr) {
+              test.assertEquals('!', chr);
+            });
+          }, -1, GridStore.IO_SEEK_END);
+        });
+
+        var gridStore6 = new GridStore(client, "test_gs_seek", "r");
+        gridStore6.open(function(gridStore) {    
+          gridStore.seek(function(gridStore) {
+            gridStore.getc(function(chr) {
+              test.assertEquals('w', chr);
+            });
+          }, -6, GridStore.IO_SEEK_END);
+        });
+
+        var gridStore7 = new GridStore(client, "test_gs_seek", "r");
+        gridStore7.open(function(gridStore) {    
+          gridStore.seek(function(gridStore) {
+            gridStore.getc(function(chr) {
+              test.assertEquals('w', chr);
+              
+              gridStore.seek(function(gridStore) {
+                gridStore.getc(function(chr) {
+                  test.assertEquals('w', chr);
+
+                  gridStore.seek(function(gridStore) {
+                    gridStore.getc(function(chr) {
+                      test.assertEquals('o', chr);
+
+                      gridStore.seek(function(gridStore) {
+                        gridStore.getc(function(chr) {
+                          test.assertEquals('o', chr);
+                          finished_test({test_gs_seek:'ok'});        
+                        });
+                      }, 3, GridStore.IO_SEEK_CUR);        
+                    });
+                  }, -4, GridStore.IO_SEEK_CUR);        
+                });
+              }, -1, GridStore.IO_SEEK_CUR);        
+            });
+          }, 7, GridStore.IO_SEEK_CUR);
+        });
+      });
+    }, "hello, world!");
+  });              
+}
+
+var client_tests = [test_gs_seek];
+var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write, test_gs_small_file, test_gs_overwrite,
+                   test_gs_read_length, test_gs_read_with_offset, test_gs_seek];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -2365,7 +2447,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
-      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset];
+      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek];
 
 // var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
 //       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
