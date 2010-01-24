@@ -2430,9 +2430,46 @@ function test_gs_seek() {
   });              
 }
 
-var client_tests = [test_gs_seek];
-var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write, test_gs_small_file, test_gs_overwrite,
-                   test_gs_read_length, test_gs_read_with_offset, test_gs_seek];
+function test_gs_multi_chunk() {
+  var fs_client = new Db('integration_tests_10', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  fs_client.addListener("connect", function() {
+    fs_client.dropDatabase(function(done) {
+      var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
+      gridStore.open(function(gridStore) {    
+        gridStore.chunkSize = 512;
+        var file1 = ''; var file2 = ''; var file3 = '';
+        for(var i = 0; i < gridStore.chunkSize; i++) { file1 = file1 + 'x'; }
+        for(var i = 0; i < gridStore.chunkSize; i++) { file2 = file2 + 'y'; }
+        for(var i = 0; i < gridStore.chunkSize; i++) { file3 = file3 + 'z'; }
+
+        gridStore.write(function(gridStore) {
+          gridStore.write(function(gridStore) {
+            gridStore.write(function(gridStore) {
+              gridStore.close(function(result) {
+                fs_client.collection(function(collection) {
+                  collection.count(function(count) {
+                    test.assertEquals(3, count);
+
+                    GridStore.read(function(data) {
+                      test.assertEquals(512*3, data.length);
+                      finished_test({test_gs_multi_chunk:'ok'});                    
+                      fs_client.close();
+                    }, fs_client, 'test_gs_multi_chunk');              
+                  })
+                }, 'fs.chunks');            
+              });
+            }, file3);
+          }, file2);
+        }, file1);
+      });                        
+    });
+  });    
+  fs_client.open();
+}
+
+var client_tests = [test_gs_multi_chunk];
+// var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write, test_gs_small_file, test_gs_overwrite,
+//                    test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -2447,7 +2484,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
-      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek];
+      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk];
 
 // var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
 //       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
