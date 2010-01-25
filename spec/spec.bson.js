@@ -12,7 +12,7 @@ describe 'BSON'
       var parser = new BinaryParser();
       // Convert to chars
       for(var i = 0; i < bytes.length; i++) {
-        serialized_data = serialized_data + parser.fromByte(bytes[i]);
+        serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
       }
       var object = new BSON().deserialize(serialized_data);
       object.get('name').should.eql "a_1"
