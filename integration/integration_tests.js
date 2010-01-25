@@ -2485,10 +2485,183 @@ function test_gs_puts_and_readlines() {
   });            
 }
 
-var client_tests = [test_gs_puts_and_readlines];
+function test_gs_unlink() {
+  var fs_client = new Db('integration_tests_11', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  fs_client.addListener("connect", function() {
+    fs_client.dropDatabase(function(done) {
+      var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
+      gridStore.open(function(gridStore) {    
+        gridStore.write(function(gridStore) {
+          gridStore.close(function(result) {
+            fs_client.collection(function(collection) {
+              collection.count(function(count) {
+                test.assertEquals(1, count);
+              })
+            }, 'fs.files');
+
+            fs_client.collection(function(collection) {
+              collection.count(function(count) {
+                test.assertEquals(1, count);
+                
+                // Unlink the file
+                GridStore.unlink(function(gridStore) {
+                  fs_client.collection(function(collection) {
+                    collection.count(function(count) {
+                      test.assertEquals(0, count);
+                    })
+                  }, 'fs.files');
+
+                  fs_client.collection(function(collection) {
+                    collection.count(function(count) {
+                      test.assertEquals(0, count);
+
+                      finished_test({test_gs_unlink:'ok'});       
+                      fs_client.close();
+                    })
+                  }, 'fs.chunks');
+                }, fs_client, 'test_gs_unlink');                
+              })
+            }, 'fs.chunks');
+          });
+        }, "hello, world!");
+      });              
+    });
+  });    
+  fs_client.open();
+}
+
+function test_gs_append() {
+  var fs_client = new Db('integration_tests_12', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  fs_client.addListener("connect", function() {
+    fs_client.dropDatabase(function(done) {
+      var gridStore = new GridStore(fs_client, "test_gs_append", "w");
+      gridStore.open(function(gridStore) {    
+        gridStore.write(function(gridStore) {
+          gridStore.close(function(result) {
+            
+            var gridStore2 = new GridStore(fs_client, "test_gs_append", "w+");
+            gridStore2.open(function(gridStore) {
+              gridStore.write(function(gridStore) {
+                gridStore.close(function(result) {
+                  
+                  fs_client.collection(function(collection) {
+                    collection.count(function(count) {
+                      test.assertEquals(1, count);
+                      
+                      GridStore.read(function(data) {
+                        test.assertEquals("hello, world! how are you?", data);
+                        
+                        finished_test({test_gs_append:'ok'});       
+                        fs_client.close();
+                      }, fs_client, 'test_gs_append');
+                    });
+                  }, 'fs.chunks');
+                });
+              }, " how are you?");
+            });
+          });
+        }, "hello, world!");
+      });              
+    });
+  });
+  fs_client.open();  
+}
+
+function test_gs_rewind_and_truncate_on_write() {
+  var gridStore = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
+  gridStore.open(function(gridStore) {    
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+        var gridStore2 = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
+        gridStore2.open(function(gridStore) {
+          gridStore.write(function(gridStore) {
+            gridStore.rewind(function(gridStore) {
+              gridStore.write(function(gridStore) {
+                gridStore.close(function(result) {
+                  GridStore.read(function(data) {
+                    test.assertEquals("abc", data);
+        
+                    finished_test({test_gs_rewind_and_truncate_on_write:'ok'});       
+                  }, client, 'test_gs_rewind_and_truncate_on_write');                                  
+                });
+              }, 'abc');
+            });
+          }, 'some text is inserted here');
+        });                
+      });
+    }, "hello, world!");
+  });                
+}
+
+function test_gs_tell() {
+  var gridStore = new GridStore(client, "test_gs_tell", "w");
+  gridStore.open(function(gridStore) {    
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+        var gridStore2 = new GridStore(client, "test_gs_tell", "r");
+        gridStore2.open(function(gridStore) {
+          gridStore.read(function(data) {
+            test.assertEquals("hello", data);
+            
+            gridStore.tell(function(position) {
+              test.assertEquals(5, position);              
+              finished_test({test_gs_tell:'ok'});       
+            })            
+          }, 5);
+        });
+      });
+    }, "hello, world!");
+  });                  
+}
+
+function test_gs_save_empty_file() {
+  var fs_client = new Db('integration_tests_13', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  fs_client.addListener("connect", function() {
+    fs_client.dropDatabase(function(done) {
+      var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");
+      gridStore.open(function(gridStore) {    
+        gridStore.write(function(gridStore) {
+          gridStore.close(function(result) {
+            fs_client.collection(function(collection) {
+              collection.count(function(count) {
+                test.assertEquals(1, count);
+              });
+            }, 'fs.files');
+            
+            fs_client.collection(function(collection) {
+              collection.count(function(count) {
+                test.assertEquals(0, count);
+
+                finished_test({test_gs_save_empty_file:'ok'});       
+                fs_client.close();
+              });
+            }, 'fs.chunks');            
+          });
+        }, "");
+      });              
+    });
+  });
+  fs_client.open();    
+}
+
+function test_gs_empty_file_eof() {
+  var gridStore = new GridStore(client, 'test_gs_empty_file_eof', "w");
+  gridStore.open(function(gridStore) {
+    gridStore.close(function(gridStore) {      
+      var gridStore2 = new GridStore(client, 'test_gs_empty_file_eof', "r");
+      gridStore2.open(function(gridStore) {
+        test.assertEquals(true, gridStore.eof());
+        finished_test({test_gs_empty_file_eof:'ok'});       
+      })
+    });
+  });
+}
+
+var client_tests = [test_gs_empty_file_eof];
 // var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write, test_gs_small_file, test_gs_overwrite,
 //                    test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk,
-//                    test_gs_puts_and_readlines];
+//                    test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write, 
+//                    test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof];
 
 // var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
 //       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -2504,7 +2677,8 @@ var client_tests = [test_gs_puts_and_readlines];
 //       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
 //       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
 //       test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
-//       test_gs_puts_and_readlines];
+//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof];
 
 // var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
 //       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
