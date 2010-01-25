@@ -4,7 +4,6 @@ process.mixin(GLOBAL, require("sys"))
 
 sys = require("sys")
 require("jspec")
-require("mongodb/mongo")
 require("mongodb/bson/bson")
 require("mongodb/bson/collections")
 require("mongodb/bson/binary_parser")
@@ -45,7 +44,6 @@ if (process.ARGV[2])
 else
   JSpec
     .exec('spec/spec.bson.js')
-    // .exec('spec/spec.mongo.js')
     .exec('spec/spec.commands.js')
 JSpec.run({ formatter: JSpec.formatters.Terminal, failuresOnly: true })
 JSpec.report()
