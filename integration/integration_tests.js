@@ -2866,14 +2866,123 @@ function test_gs_metadata() {
   });    
 }
 
-var client_tests = [test_gs_metadata];
-var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write, test_gs_small_file, test_gs_overwrite,
-                   test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk,
-                   test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write, 
-                   test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
-                   test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size,
-                   test_gs_chunk_size_in_option, test_gs_md5, test_gs_upload_date, test_gs_content_type,
-                   test_gs_content_type_option, test_gs_unknown_mode, test_gs_metadata];
+function test_admin_default_profiling_level() {
+  var fs_client = new Db('admin_test_1', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  fs_client.addListener("connect", function() {
+    fs_client.dropDatabase(function(done) {
+      fs_client.collection(function(collection) {
+        collection.insert({'a':1}, function(doc) {
+          fs_client.admin(function(adminDb) {
+            adminDb.profilingLevel(function(level) {
+              test.assertEquals("off", level);
+              finished_test({test_admin_default_profiling_level:'ok'});       
+              fs_client.close();
+            });
+          });          
+        });
+      }, 'test');
+    });
+  });
+  fs_client.open();    
+}
+
+function test_admin_change_profiling_level() {
+  var fs_client = new Db('admin_test_2', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  fs_client.addListener("connect", function() {
+    fs_client.dropDatabase(function(done) {
+      fs_client.collection(function(collection) {
+        collection.insert({'a':1}, function(doc) {
+          fs_client.admin(function(adminDb) {
+            adminDb.setProfilingLevel(function(level) {              
+              adminDb.profilingLevel(function(level) {
+                test.assertEquals('slow_only', level);
+
+                adminDb.setProfilingLevel(function(level) {              
+                  adminDb.profilingLevel(function(level) {
+                    test.assertEquals('off', level);
+
+                    adminDb.setProfilingLevel(function(level) {              
+                      adminDb.profilingLevel(function(level) {
+                        test.assertEquals('all', level);
+
+                        adminDb.setProfilingLevel(function(level) {              
+                          test.assertEquals(true, level.err);
+                          test.assertEquals(false, level.ok);
+                          test.assertEquals("Error: illegal profiling level value medium", level.errmsg);
+
+                          finished_test({test_admin_default_profiling_level:'ok'});       
+                          fs_client.close();                          
+                        }, 'medium');
+                      })
+                    }, 'all');
+                  })
+                }, 'off');
+              })
+            }, 'slow_only');
+          });          
+        });
+      }, 'test');
+    });
+  });
+  fs_client.open();      
+}
+
+function test_admin_profiling_info() {
+  var fs_client = new Db('admin_test_3', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  fs_client.addListener("connect", function() {
+    fs_client.dropDatabase(function(done) {
+      fs_client.collection(function(collection) {
+        collection.insert({'a':1}, function(doc) {
+          fs_client.admin(function(adminDb) {
+            adminDb.setProfilingLevel(function(level) {
+              collection.find(function(cursor) {
+                cursor.toArray(function(items) {                  
+                  adminDb.setProfilingLevel(function(level) {
+                    adminDb.profilingInfo(function(infos) {
+                      test.assertTrue(infos.constructor == Array);
+                      test.assertTrue(infos.length >= 1);
+                      test.assertTrue(infos[0].get('ts').constructor == Date);
+                      test.assertTrue(infos[0].get('info').constructor == String);
+                      test.assertTrue(infos[0].get('millis').constructor == Number);
+                    
+                      finished_test({test_admin_profiling_info:'ok'});       
+                      fs_client.close();                          
+                    });                  
+                  }, 'off');
+                });
+              });              
+            }, 'all');
+          });          
+        });
+      }, 'test');
+    });
+  });
+  fs_client.open();        
+}
+
+function test_admin_validate_collection() {
+  var fs_client = new Db('admin_test_4', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  fs_client.addListener("connect", function() {
+    fs_client.dropDatabase(function(done) {
+      fs_client.collection(function(collection) {
+        collection.insert({'a':1}, function(doc) {
+          fs_client.admin(function(adminDb) {
+            adminDb.validatCollection(function(doc) {
+              test.assertTrue(doc.get('result') != null);
+              test.assertTrue(doc.get('result').match(/firstExtent/) != null);
+              
+              finished_test({test_admin_validate_collection:'ok'});       
+              fs_client.close();                          
+            }, 'test');            
+          });          
+        });
+      }, 'test');
+    });
+  });
+  fs_client.open();          
+}
+
+var client_tests = [test_admin_validate_collection];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -2893,21 +3002,8 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
-      test_gs_metadata];
-
-// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
-//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
-//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
-//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
-//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
-//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
-//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
-//       test_close_after_query_sent, test_kill_cursors, test_count_with_fields, test_gs_exist, test_gs_list];
+      test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
+      test_admin_profiling_info, test_admin_validate_collection];
 
 /*******************************************************************************************************
   Setup For Running Tests
