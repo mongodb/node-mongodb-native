@@ -2657,28 +2657,243 @@ function test_gs_empty_file_eof() {
   });
 }
 
-var client_tests = [test_gs_empty_file_eof];
-// var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write, test_gs_small_file, test_gs_overwrite,
-//                    test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk,
-//                    test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write, 
-//                    test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof];
+function test_gs_cannot_change_chunk_size_on_read() {
+  var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
+  gridStore.open(function(gridStore) {    
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+        
+        var gridStore2 = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
+        gridStore2.open(function(gridStore) {
+          gridStore.chunkSize = 42; 
+          test.assertEquals(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+          finished_test({test_gs_cannot_change_chunk_size_on_read:'ok'});       
+        });        
+      });
+    }, "hello, world!");
+  });            
+}
 
-// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
-//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
-//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
-//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
-//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
-//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
-//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
-//       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
-//       test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
-//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
-//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof];
+function test_gs_cannot_change_chunk_size_after_data_written() {
+  var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
+  gridStore.open(function(gridStore) {    
+    gridStore.write(function(gridStore) {
+      gridStore.chunkSize = 42; 
+      test.assertEquals(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+      finished_test({test_gs_cannot_change_chunk_size_after_data_written:'ok'});       
+    }, "hello, world!");
+  });              
+}
+
+function test_change_chunk_size() {
+  var gridStore = new GridStore(client, "test_change_chunk_size", "w");
+  gridStore.open(function(gridStore) {   
+    gridStore.chunkSize = 42
+     
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+        var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
+        gridStore2.open(function(gridStore) {
+          test.assertEquals(42, gridStore.chunkSize);
+          finished_test({test_change_chunk_size:'ok'});       
+        });
+      });
+    }, 'foo');
+  });
+}
+
+function test_gs_chunk_size_in_option() {
+  var gridStore = new GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
+  gridStore.open(function(gridStore) {   
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+        var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
+        gridStore2.open(function(gridStore) {
+          test.assertEquals(42, gridStore.chunkSize);
+          finished_test({test_gs_chunk_size_in_option:'ok'});       
+        });
+      });
+    }, 'foo');
+  });
+}
+
+function test_gs_md5() {
+  var gridStore = new GridStore(client, "new-file", "w");
+  gridStore.open(function(gridStore) {   
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+        var gridStore2 = new GridStore(client, "new-file", "r");
+        gridStore2.open(function(gridStore) {
+          test.assertEquals("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
+          gridStore.md5 = "can't do this";
+          test.assertEquals("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
+          
+          var gridStore2 = new GridStore(client, "new-file", "w");
+          gridStore2.open(function(gridStore) {
+            gridStore.close(function(result) {
+              var gridStore3 = new GridStore(client, "new-file", "r");
+              gridStore3.open(function(gridStore) {
+                test.assertEquals("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
+
+                finished_test({test_gs_chunk_size_in_option:'ok'});       
+              });
+            })
+          })
+        });
+      });
+    }, 'hello world\n');
+  });  
+}
+
+function test_gs_upload_date() {
+  var now = new Date();
+  var originalFileUploadDate = null;
+
+  var gridStore = new GridStore(client, "test_gs_upload_date", "w");
+  gridStore.open(function(gridStore) {   
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+
+        var gridStore2 = new GridStore(client, "test_gs_upload_date", "r");
+        gridStore2.open(function(gridStore) {
+          test.assertTrue(gridStore.uploadDate != null);
+          test.assertTrue((gridStore.uploadDate.getTime() - now.getTime()) > 0);
+          originalFileUploadDate = gridStore.uploadDate;
+          
+          gridStore2.close(function(result) {
+            var gridStore3 = new GridStore(client, "test_gs_upload_date", "w");
+            gridStore3.open(function(gridStore) {
+              gridStore3.write(function(gridStore) {
+                gridStore3.close(function(result) {
+                  var fileUploadDate = null;
+                  
+                  var gridStore4 = new GridStore(client, "test_gs_upload_date", "r");
+                  gridStore4.open(function(gridStore) {
+                    test.assertEquals(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
+                    finished_test({test_gs_upload_date:'ok'});       
+                  });                  
+                });
+              }, 'new data');
+            });            
+          });          
+        });
+      });
+    }, 'hello world\n');
+  });  
+}
+
+function test_gs_content_type() {
+  var ct = null;
+
+  var gridStore = new GridStore(client, "test_gs_content_type", "w");
+  gridStore.open(function(gridStore) {   
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+
+        var gridStore2 = new GridStore(client, "test_gs_content_type", "r");
+        gridStore2.open(function(gridStore) {
+          ct = gridStore.contentType;
+          test.assertEquals(GridStore.DEFAULT_CONTENT_TYPE, ct);
+          
+          var gridStore3 = new GridStore(client, "test_gs_content_type", "w+");
+          gridStore3.open(function(gridStore) {
+            gridStore.contentType = "text/html";
+            gridStore.close(function(result) {              
+              var gridStore4 = new GridStore(client, "test_gs_content_type", "r");
+              gridStore4.open(function(gridStore) {
+                test.assertEquals("text/html", gridStore.contentType);
+                finished_test({test_gs_content_type:'ok'});       
+              });                            
+            })
+          });          
+        });
+      });
+    }, 'hello world\n');
+  });  
+}
+
+function test_gs_content_type_option() {
+  var gridStore = new GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
+  gridStore.open(function(gridStore) {   
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+        
+        var gridStore2 = new GridStore(client, "test_gs_content_type_option", "r");
+        gridStore2.open(function(gridStore) {
+          test.assertEquals('image/jpg', gridStore.contentType);
+          finished_test({test_gs_content_type_option:'ok'});       
+        });        
+      });
+    }, 'hello world\n');
+  });  
+}
+
+function test_gs_unknown_mode() {
+  var gridStore = new GridStore(client, "test_gs_unknown_mode", "x");
+  gridStore.open(function(gridStore) {
+    test.assertEquals(true, gridStore.err);
+    test.assertEquals(false, gridStore.ok);
+    test.assertEquals("Illegal mode x", gridStore.errmsg);
+    finished_test({test_gs_unknown_mode:'ok'});       
+  });  
+}
+
+function test_gs_metadata() {
+  var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
+  gridStore.open(function(gridStore) {   
+    gridStore.write(function(gridStore) {
+      gridStore.close(function(result) {
+
+        var gridStore2 = new GridStore(client, "test_gs_metadata", "r");
+        gridStore2.open(function(gridStore) {
+          test.assertEquals(null, gridStore.metadata);
+
+          var gridStore3 = new GridStore(client, "test_gs_metadata", "w+");
+          gridStore3.open(function(gridStore) {
+            gridStore.metadata = {'a':1};
+            gridStore.close(function(result) {
+
+              var gridStore4 = new GridStore(client, "test_gs_metadata", "r");
+              gridStore4.open(function(gridStore) {
+                test.assertEquals(1, gridStore.metadata.get('a'));
+                finished_test({test_gs_metadata:'ok'});       
+              });                
+            });
+          });                
+        });                
+      });
+    }, 'hello world\n');
+  });    
+}
+
+var client_tests = [test_gs_metadata];
+var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write, test_gs_small_file, test_gs_overwrite,
+                   test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk,
+                   test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write, 
+                   test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+                   test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size,
+                   test_gs_chunk_size_in_option, test_gs_md5, test_gs_upload_date, test_gs_content_type,
+                   test_gs_content_type_option, test_gs_unknown_mode, test_gs_metadata];
+
+var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+      test_collection_names, test_collections_info, test_collection_options, test_index_information,
+      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+      test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+      test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+      test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+      test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
+      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
+      test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+      test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+      test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
+      test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
+      test_gs_metadata];
 
 // var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
 //       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
