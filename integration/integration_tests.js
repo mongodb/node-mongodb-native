@@ -157,12 +157,12 @@ function test_object_id_generation() {
 
 // Test the auto connect functionality of the db
 function test_automatic_reconnect() {
-  var automatic_connect_client = new Db('integration_tests_', [{host: "127.0.0.1", port: 27017, auto_reconnect: true}], {});
+  var automatic_connect_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
   automatic_connect_client.addListener("connect", function() {
     // Listener for closing event
     var closeListener = function(has_error) {
       // Remove the listener for the close to avoid loop
-      automatic_connect_client.connections["127.0.0.127017"].connection.removeListener("close", this);
+      automatic_connect_client.server.connection.removeListener("close", this);
       // Let's insert a document
       automatic_connect_client.collection(function(collection) {
         // Insert another test document and collect using ObjectId
@@ -180,15 +180,15 @@ function test_automatic_reconnect() {
       }, 'test_object_id_generation.data2');
     };    
     // Add listener to close event
-    automatic_connect_client.connections["127.0.0.127017"].connection.addListener("close", closeListener);
-    automatic_connect_client.connections["127.0.0.127017"].connection.close();
+    automatic_connect_client.server.connection.addListener("close", closeListener);
+    automatic_connect_client.server.connection.close();
   });
   automatic_connect_client.open();  
 }
 
 // Test the error reporting functionality
 function test_error_handling() {
-  var error_client = new Db('integration_tests2_', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}], {});
+  var error_client = new Db('integration_tests2_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {});
   error_client.addListener("connect", function() {
     error_client.resetErrorHistory(function() {
       error_client.error(function(documents) {
@@ -966,7 +966,7 @@ function test_non_oid_id() {
 }
 
 function test_strict_access_collection() {
-  var error_client = new Db('integration_tests_', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}], {strict:true});
+  var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
   test.assertEquals(true, error_client.strict);
   error_client.addListener("connect", function() {
     error_client.collection(function(collection) {
@@ -988,7 +988,7 @@ function test_strict_access_collection() {
 }
 
 function test_strict_create_collection() {
-  var error_client = new Db('integration_tests_', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}], {strict:true});
+  var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
   test.assertEquals(true, error_client.strict);
   error_client.addListener("connect", function() {
     error_client.createCollection(function(collection) {
@@ -2059,7 +2059,7 @@ function test_close_after_query_sent() {
 }
 
 function test_kill_cursors() {
-  var test_kill_cursors_client = new Db('integration_tests4_', [{host: "127.0.0.1", port: 27017, auto_reconnect: true}], {});
+  var test_kill_cursors_client = new Db('integration_tests4_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
   test_kill_cursors_client.addListener("connect", function() {
     var number_of_tests_done = 0;
     
@@ -2431,7 +2431,7 @@ function test_gs_seek() {
 }
 
 function test_gs_multi_chunk() {
-  var fs_client = new Db('integration_tests_10', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  var fs_client = new Db('integration_tests_10', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.addListener("connect", function() {
     fs_client.dropDatabase(function(done) {
       var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
@@ -2486,7 +2486,7 @@ function test_gs_puts_and_readlines() {
 }
 
 function test_gs_unlink() {
-  var fs_client = new Db('integration_tests_11', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  var fs_client = new Db('integration_tests_11', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.addListener("connect", function() {
     fs_client.dropDatabase(function(done) {
       var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
@@ -2531,7 +2531,7 @@ function test_gs_unlink() {
 }
 
 function test_gs_append() {
-  var fs_client = new Db('integration_tests_12', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  var fs_client = new Db('integration_tests_12', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.addListener("connect", function() {
     fs_client.dropDatabase(function(done) {
       var gridStore = new GridStore(fs_client, "test_gs_append", "w");
@@ -2615,7 +2615,7 @@ function test_gs_tell() {
 }
 
 function test_gs_save_empty_file() {
-  var fs_client = new Db('integration_tests_13', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  var fs_client = new Db('integration_tests_13', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.addListener("connect", function() {
     fs_client.dropDatabase(function(done) {
       var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");
@@ -2867,7 +2867,7 @@ function test_gs_metadata() {
 }
 
 function test_admin_default_profiling_level() {
-  var fs_client = new Db('admin_test_1', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  var fs_client = new Db('admin_test_1', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.addListener("connect", function() {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
@@ -2887,7 +2887,7 @@ function test_admin_default_profiling_level() {
 }
 
 function test_admin_change_profiling_level() {
-  var fs_client = new Db('admin_test_2', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  var fs_client = new Db('admin_test_2', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.addListener("connect", function() {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
@@ -2928,7 +2928,7 @@ function test_admin_change_profiling_level() {
 }
 
 function test_admin_profiling_info() {
-  var fs_client = new Db('admin_test_3', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  var fs_client = new Db('admin_test_3', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.addListener("connect", function() {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
@@ -2961,7 +2961,7 @@ function test_admin_profiling_info() {
 }
 
 function test_admin_validate_collection() {
-  var fs_client = new Db('admin_test_4', [{host: "127.0.0.1", port: 27017, auto_reconnect: false}]);
+  var fs_client = new Db('admin_test_4', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.addListener("connect", function() {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
@@ -2982,34 +2982,62 @@ function test_admin_validate_collection() {
   fs_client.open();          
 }
 
-var client_tests = [test_admin_validate_collection];
+function test_pair() {
+  // var automatic_connect_client = new Db('integration_tests_', [{host: "127.0.0.1", port: 27017, auto_reconnect: true}], {});
+  
+  // var connection = 
+  finished_test({test_pair:'ok'});       
+}
 
-var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
-      test_collection_names, test_collections_info, test_collection_options, test_index_information,
-      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
-      test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
-      test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
-      test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
-      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
-      test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
-      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
-      test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
-      test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
-      test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
-      test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
-      test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
-      test_admin_profiling_info, test_admin_validate_collection];
+var client_tests = [test_pair];
+
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
+//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+//       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
+//       test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
+//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+//       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
+//       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
+//       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
+//       test_admin_profiling_info, test_admin_validate_collection, test_pair];
+
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
+//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+//       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
+//       test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
+//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+//       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
+//       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
+//       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
+//       test_admin_profiling_info, test_admin_validate_collection, test_pair];
 
 /*******************************************************************************************************
   Setup For Running Tests
 *******************************************************************************************************/
 // Set up the client connection
-var client = new Db('integration_tests_', [{host: "127.0.0.1", port: 27017}], {});
+var client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {}), {});
 client.addListener("connect", function() {
   // Do cleanup of the db
   client.dropDatabase(function() {
