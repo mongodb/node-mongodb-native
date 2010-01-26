@@ -162,7 +162,7 @@ function test_automatic_reconnect() {
     // Listener for closing event
     var closeListener = function(has_error) {
       // Remove the listener for the close to avoid loop
-      automatic_connect_client.server.connection.removeListener("close", this);
+      automatic_connect_client.masterConnection.removeListener("close", this);
       // Let's insert a document
       automatic_connect_client.collection(function(collection) {
         // Insert another test document and collect using ObjectId
@@ -180,8 +180,8 @@ function test_automatic_reconnect() {
       }, 'test_object_id_generation.data2');
     };    
     // Add listener to close event
-    automatic_connect_client.server.connection.addListener("close", closeListener);
-    automatic_connect_client.server.connection.close();
+    automatic_connect_client.masterConnection.addListener("close", closeListener);
+    automatic_connect_client.masterConnection.connection.close();
   });
   automatic_connect_client.open();  
 }
@@ -2983,34 +2983,45 @@ function test_admin_validate_collection() {
 }
 
 function test_pair() {
-  // var automatic_connect_client = new Db('integration_tests_', [{host: "127.0.0.1", port: 27017, auto_reconnect: true}], {});
-  
-  // var connection = 
+  // var p_client = new Db('integration_tests_', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27017, {})), {});
+  // p_client.addListener("connect", function() {
+  //   test.assertTrue(p_client.masterConnection != null);
+  //   test.assertEquals(2, p_client.connections.length);
+  // 
+  //   sys.puts(p_client.serverObject.leftServer.master);
+  //   sys.puts(p_client.serverObject.rightServer.master);
+  // 
+  //   test.assertTrue(p_client.serverObject.leftServer.master);
+  //   test.assertTrue(p_client.serverObject.rightServer.master);
+  //   finished_test({test_pair:'ok'});       
+  //   p_client.close();
+  // });
+  // p_client.open();    
   finished_test({test_pair:'ok'});       
 }
 
-var client_tests = [test_pair];
+var client_tests = [test_collection_methods];
 
-// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
-//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
-//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
-//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
-//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
-//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
-//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
-//       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
-//       test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
-//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
-//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
-//       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
-//       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
-//       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
-//       test_admin_profiling_info, test_admin_validate_collection, test_pair];
+var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+      test_collection_names, test_collections_info, test_collection_options, test_index_information,
+      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+      test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+      test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+      test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+      test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
+      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
+      test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+      test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+      test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
+      test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
+      test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
+      test_admin_profiling_info, test_admin_validate_collection, test_pair];
 
 // var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
 //       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
