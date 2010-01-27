@@ -162,7 +162,7 @@ function test_automatic_reconnect() {
     // Listener for closing event
     var closeListener = function(has_error) {
       // Remove the listener for the close to avoid loop
-      automatic_connect_client.masterConnection.removeListener("close", this);
+      automatic_connect_client.serverConfig.masterConnection.removeListener("close", this);
       // Let's insert a document
       automatic_connect_client.collection(function(collection) {
         // Insert another test document and collect using ObjectId
@@ -180,8 +180,8 @@ function test_automatic_reconnect() {
       }, 'test_object_id_generation.data2');
     };    
     // Add listener to close event
-    automatic_connect_client.masterConnection.addListener("close", closeListener);
-    automatic_connect_client.masterConnection.connection.close();
+    automatic_connect_client.serverConfig.masterConnection.addListener("close", closeListener);
+    automatic_connect_client.serverConfig.masterConnection.connection.close();
   });
   automatic_connect_client.open();  
 }
@@ -2983,29 +2983,55 @@ function test_admin_validate_collection() {
 }
 
 function test_pair() {
-  var p_client = new Db('integration_tests_', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
+  var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
   p_client.addListener("connect", function() {
-    test.assertTrue(p_client.masterConnection != null);
-    test.assertEquals(2, p_client.connections.length);
+    p_client.dropDatabase(function(done) {    
+      test.assertTrue(p_client.masterConnection != null);
+      test.assertEquals(2, p_client.connections.length);
   
-    test.assertTrue(p_client.serverObject.leftServer.master);
-    test.assertFalse(p_client.serverObject.rightServer.master);
-    finished_test({test_pair:'ok'});       
-    p_client.close();
+      test.assertTrue(p_client.serverConfig.leftServer.master);
+      test.assertFalse(p_client.serverConfig.rightServer.master);
+    
+      p_client.createCollection(function(collection) {
+        collection.insert({'a':1}, function(doc) {
+          collection.find(function(cursor) {
+            cursor.toArray(function(items) {
+              test.assertEquals(1, items.length);
+
+              finished_test({test_pair:'ok'});       
+              p_client.close();
+            });
+          }, {});
+        });
+      }, 'test_collection');
+    });
   });
   p_client.open();    
 }
 
 function test_cluster() {
-  var p_client = new Db('integration_tests_', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
+  var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
   p_client.addListener("connect", function() {
-    test.assertTrue(p_client.masterConnection != null);
-    test.assertEquals(2, p_client.connections.length);
-    test.assertEquals(true, p_client.serverObject.servers[0].master);
-    test.assertEquals(false, p_client.serverObject.servers[1].master);
+    p_client.dropDatabase(function(done) {    
+      test.assertTrue(p_client.masterConnection != null);
+      test.assertEquals(2, p_client.connections.length);
+  
+      test.assertEquals(true, p_client.serverConfig.servers[0].master);
+      test.assertEquals(false, p_client.serverConfig.servers[1].master);
+    
+      p_client.createCollection(function(collection) {
+        collection.insert({'a':1}, function(doc) {
+          collection.find(function(cursor) {
+            cursor.toArray(function(items) {
+              test.assertEquals(1, items.length);
 
-    finished_test({test_cluster:'ok'});       
-    p_client.close();
+              finished_test({test_cluster:'ok'});       
+              p_client.close();
+            });
+          }, {});
+        });
+      }, 'test_collection');
+    });
   });
   p_client.open();    
 }
@@ -3039,10 +3065,10 @@ function test_custom_primary_key_generator() {
   p_client.open();      
 }
 
-var client_tests = [test_custom_primary_key_generator];
+// var client_tests = [test_custom_primary_key_generator];
 
 // Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_pair, test_cluster];
+var client_tests = [test_pair, test_cluster];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
