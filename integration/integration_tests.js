@@ -169,7 +169,7 @@ function test_automatic_reconnect() {
         collection.insert(new OrderedHash().add("name", "Patty").add("age", 34), function(ids) {
           test.assertEquals(1, ids.length);    
           test.assertTrue(ids[0].get('_id').toHexString().length == 24);
-
+                  
           collection.findOne(function(document) {
             test.assertEquals(ids[0].get('_id').toHexString(), document.get('_id').toHexString());
             // Let's close the db 
@@ -1148,8 +1148,8 @@ function test_hint() {
           cursor.toArray(function(items) {
             test.assertEquals(1, items.length);
           });
-        }, {'a':1}, {'hint':'a'});        
-        
+        }, {'a':1}, {'hint':'a'});     
+           
         collection.find(function(cursor) {
           cursor.toArray(function(items) {
             test.assertEquals(1, items.length);
@@ -1163,7 +1163,7 @@ function test_hint() {
         }, {'a':1}, {'hint':{'a':1}});      
         
         // Modify hints
-        collection.setHint('a');
+        collection.hint = 'a';
         test.assertEquals(1, collection.hint.get('a'));
         collection.find(function(cursor) {
           cursor.toArray(function(items) {
@@ -1171,7 +1171,7 @@ function test_hint() {
           });
         }, {'a':1});   
                 
-        collection.setHint(['a']);
+        collection.hint = ['a'];
         test.assertEquals(1, collection.hint.get('a'));
         collection.find(function(cursor) {
           cursor.toArray(function(items) {
@@ -1179,7 +1179,7 @@ function test_hint() {
           });
         }, {'a':1});   
              
-        collection.setHint({'a':1});
+        collection.hint = {'a':1};
         test.assertEquals(1, collection.hint.get('a'));
         collection.find(function(cursor) {
           cursor.toArray(function(items) {
@@ -1187,7 +1187,7 @@ function test_hint() {
           });
         }, {'a':1});           
         
-        collection.setHint(null);
+        collection.hint = null;
         test.assertTrue(collection.hint == null);
         collection.find(function(cursor) {
           cursor.toArray(function(items) {
@@ -1331,7 +1331,6 @@ function test_save() {
             
             // Modify doc and save
             doc = doc.add('hello', 'mike');
-            // sys.puts("length:" + doc.length());
             collection.save(function(doc) {
               collection.count(function(count) {
                 test.assertEquals(1, count);                        
@@ -3065,10 +3064,10 @@ function test_custom_primary_key_generator() {
   p_client.open();      
 }
 
-// var client_tests = [test_custom_primary_key_generator];
+var client_tests = [test_hint];
 
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_pair, test_cluster];
+// var client_tests = [test_pair, test_cluster];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
@@ -3133,7 +3132,6 @@ function run_all_tests() {
   // Run all the tests
   client_tests.forEach(function (t) {    
     var function_name = t.name;
-    // sys.puts("executing test: [" + function_name + "]"); 
     try {
       t();      
     } catch(error) {

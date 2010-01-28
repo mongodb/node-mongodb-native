@@ -93,8 +93,8 @@ describe 'Mongo Commands'
       mongo_reply.startingFrom.should.eql 100
       mongo_reply.numberReturned.should.eql 2
       mongo_reply.documents.length.should.eql 2
-      mongo_reply.documents[0].unordered_hash().should.eql {name:'peter pan'}
-      mongo_reply.documents[1].unordered_hash().should.eql {name:'captain hook'}
+      mongo_reply.documents[0].unorderedHash().should.eql {name:'peter pan'}
+      mongo_reply.documents[1].unorderedHash().should.eql {name:'captain hook'}
     end
   end
 end

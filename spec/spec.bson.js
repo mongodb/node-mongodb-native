@@ -23,7 +23,7 @@ describe 'BSON'
     it 'Should Serialize and Deserialze String'
       var test_string = {hello: 'world'}
       var serialized_data = new BSON().serialize(test_string)
-      test_string.should.eql new BSON().deserialize(serialized_data).unordered_hash()
+      test_string.should.eql new BSON().deserialize(serialized_data).unorderedHash()
     end
     
     it 'Should Correctly Serialize and Deserialize Integer'
@@ -42,7 +42,7 @@ describe 'BSON'
     it 'Should Correctly Serialize and Deserialize Number'
       var test_number = {doc: 5.5}
       var serialized_data = new BSON().serialize(test_number)
-      test_number.should.eql new BSON().deserialize(serialized_data).unordered_hash()
+      test_number.should.eql new BSON().deserialize(serialized_data).unorderedHash()
     end
     
     it 'Should Correctly Serialize and Deserialize Integer'
@@ -80,7 +80,7 @@ describe 'BSON'
     it 'Should Correctly Serialize and Deserialize A Boolean'
       var doc = {doc: true}
       var serialized_data = new BSON().serialize(doc)
-      doc.should.eql new BSON().deserialize(serialized_data).unordered_hash()
+      doc.should.eql new BSON().deserialize(serialized_data).unorderedHash()
     end
     
     it 'Should Correctly Serialize and Deserialize a Date'
@@ -94,19 +94,19 @@ describe 'BSON'
       date.setUTCSeconds(30)
       var doc = {doc: date}
       var serialized_data = new BSON().serialize(doc)
-      doc.should.eql new BSON().deserialize(serialized_data).unordered_hash()
+      doc.should.eql new BSON().deserialize(serialized_data).unorderedHash()
     end    
         
     it 'Should Correctly Serialize and Deserialize Oid'
       var doc = {doc: new ObjectID()}
       var serialized_data = new BSON().serialize(doc)
-      doc.should.eql new BSON().deserialize(serialized_data).unordered_hash()
+      doc.should.eql new BSON().deserialize(serialized_data).unorderedHash()
     end    
         
     it 'Should Correctly encode Empty Hash'
       var test_code = {}
       var serialized_data = new BSON().serialize(test_code)
-      test_code.should.eql new BSON().deserialize(serialized_data).unordered_hash()
+      test_code.should.eql new BSON().deserialize(serialized_data).unorderedHash()
     end        
     
     it 'Should Correctly Serialize and Deserialize Ordered Hash'
@@ -120,7 +120,7 @@ describe 'BSON'
       // Serialize the regular expression
       var doc = {doc: /foobar/mi}
       var serialized_data = new BSON().serialize(doc)
-      var doc2 = new BSON().deserialize(serialized_data).unordered_hash()
+      var doc2 = new BSON().deserialize(serialized_data).unorderedHash()
       doc.should.eql doc2         
       doc.doc.toString().should.eql doc2.doc.toString()
     end
@@ -151,17 +151,17 @@ describe 'BSON'
     it 'Should Correctly Serialize and Deserialize Long Integer'
       var test_int = {doc: Long.fromNumber(9223372036854775807)}
       var serialized_data = new BSON().serialize(test_int)
-      var deserialized_data = new BSON().deserialize(serialized_data).unordered_hash()
+      var deserialized_data = new BSON().deserialize(serialized_data).unorderedHash()
       test_int.should.eql deserialized_data
       
       test_int = {doc: Long.fromNumber(-9223372036854775)}
       serialized_data = new BSON().serialize(test_int)
-      deserialized_data = new BSON().deserialize(serialized_data).unordered_hash()
+      deserialized_data = new BSON().deserialize(serialized_data).unorderedHash()
       test_int.doc.should.eql deserialized_data.doc
       
       test_int = {doc: Long.fromNumber(-9223372036854775809)}
       serialized_data = new BSON().serialize(test_int)
-      deserialized_data = new BSON().deserialize(serialized_data).unordered_hash()
+      deserialized_data = new BSON().deserialize(serialized_data).unorderedHash()
       test_int.doc.should.eql deserialized_data.doc      
     end
     
