@@ -1021,15 +1021,14 @@ function test_to_a() {
             test.assertEquals(false, items.ok);
             test.assertEquals(true, items.err);
             test.assertEquals("Cursor is closed", items.errmsg);
-
-            // Each should also return an error due to the cursor being closed
-            cursor.each(function(items) {
-              test.assertEquals(false, items.ok);
-              test.assertEquals(true, items.err);
-              test.assertEquals("Cursor is closed", items.errmsg);              
-
-              // Let's close the db 
-              finished_test({test_to_a:'ok'});                 
+            
+            // Each should allow us to iterate over the entries due to cache
+            cursor.each(function(item) {
+              if(item != null) {
+                test.assertEquals(1, item.get('a'));                
+                // Let's close the db 
+                finished_test({test_to_a:'ok'});                 
+              }
             });
           });
         });
@@ -2466,7 +2465,6 @@ function test_gs_puts_and_readlines() {
       gridStore.puts(function(gridStore) {
         gridStore.puts(function(gridStore) {          
           gridStore.close(function(result) {
-            sys.debug("================================ closed");
             GridStore.readlines(function(lines) {
               test.assertEquals(["line one\n", "line two\n", "line three\n"], lines);
               finished_test({test_gs_puts_and_readlines:'ok'});                    
@@ -3048,7 +3046,7 @@ function test_custom_primary_key_generator() {
   });      
 }
 
-var client_tests = [test_gs_puts_and_readlines];
+var client_tests = [test_to_a];
 
 // Not run since it requires a master-slave setup to test correctly
 // var client_tests = [test_pair, test_cluster];

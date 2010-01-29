@@ -12,7 +12,7 @@ require("mongodb/gridfs/gridstore");
 var host = process.ENV['MONGO_NODE_DRIVER_HOST'] != null ? process.ENV['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.ENV['MONGO_NODE_DRIVER_PORT'] != null ? process.ENV['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
-sys.debug(">> Connecting to " + host + ":" + port);
+sys.puts(">> Connecting to " + host + ":" + port);
 var db1 = new Db('node-mongo-examples', new Server(host, port, {}), {});
 db1.open(function(db) {
   // Write a new file
@@ -59,16 +59,16 @@ db2.open(function(db) {
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
         GridStore.exist(function(result) {
-          sys.debug("File 'foobar2' exists: " + result);
+          sys.puts("File 'foobar2' exists: " + result);
         }, db, 'foobar2');
         
         GridStore.exist(function(result) {
-          sys.debug("File 'does-not-exist' exists: " + result);
+          sys.puts("File 'does-not-exist' exists: " + result);
         }, db, 'does-not-exist');
         
         // Read with offset(uses seek)
         GridStore.read(function(data) {
-          sys.debug(data);
+          sys.puts(data);
         }, db, 'foobar2', 6, 7);
 
         // Rewind/seek/tell
@@ -78,7 +78,7 @@ db2.open(function(db) {
           gridStore.rewind(function(){});
           gridStore.write(function(){}, 'xyzzz');
           gridStore.tell(function(tell) {
-            sys.debug("tell: " + tell);       // Should be 5
+            sys.puts("tell: " + tell);       // Should be 5
           });
           gridStore.seek(function(gridStore){}, 4);
           gridStore.write(function(){}, 'y');
@@ -88,7 +88,7 @@ db2.open(function(db) {
             // Unlink file (delete)
             GridStore.unlink(function(gridStore) {
               GridStore.exist(function(result) {
-                sys.debug("File 'foobar2' exists: " + result);
+                sys.puts("File 'foobar2' exists: " + result);
                 db.close();
               }, db, 'foobar2');            
             }, db, 'foobar2');
@@ -108,10 +108,10 @@ db3.open(function(db) {
     gridStore.close(function() {
       gridStore = new GridStore(db, 'foobar3', "r");
       gridStore.open(function(gridStore) {
-        sys.debug("contentType: " + gridStore.contentType);
-        sys.debug("uploadDate: " + gridStore.uploadDate);
-        sys.debug("chunkSize: " + gridStore.chunkSize);
-        sys.debug("metadata: " + gridStore.metadata);          
+        sys.puts("contentType: " + gridStore.contentType);
+        sys.puts("uploadDate: " + gridStore.uploadDate);
+        sys.puts("chunkSize: " + gridStore.chunkSize);
+        sys.puts("metadata: " + gridStore.metadata);          
       });
       
       // Add some metadata
@@ -123,10 +123,10 @@ db3.open(function(db) {
           // Print the metadata
           gridStore = new GridStore(db, 'foobar3', "r");
           gridStore.open(function(gridStore) {
-            sys.debug("contentType: " + gridStore.contentType);
-            sys.debug("uploadDate: " + gridStore.uploadDate);
-            sys.debug("chunkSize: " + gridStore.chunkSize);
-            sys.debug("metadata: " + gridStore.metadata);          
+            sys.puts("contentType: " + gridStore.contentType);
+            sys.puts("uploadDate: " + gridStore.uploadDate);
+            sys.puts("chunkSize: " + gridStore.chunkSize);
+            sys.puts("metadata: " + gridStore.metadata);          
             db.close();
           });            
         });
@@ -149,7 +149,7 @@ db3.open(function(db) {
 
 function dump(db, filename, callback) {
   GridStore.read(function(data) {
-    sys.debug(data);
+    sys.puts(data);
     if(callback != null) callback();
   }, db, filename); 
 }
