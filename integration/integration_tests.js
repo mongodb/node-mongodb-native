@@ -3048,14 +3048,6 @@ function test_custom_primary_key_generator() {
   });      
 }
 
-var client_tests = [test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
-test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
-test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
-test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
-test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
-test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator];
-
-// var client_tests = [test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write];
 var client_tests = [test_gs_puts_and_readlines];
 
 // Not run since it requires a master-slave setup to test correctly
