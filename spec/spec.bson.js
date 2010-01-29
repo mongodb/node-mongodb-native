@@ -19,6 +19,31 @@ describe 'BSON'
       object.get('unique').should.eql false
       object.get('key').get('a').should.eql 1
     end
+        
+    it 'Should Correctly Deserialize object with all types'
+      var bytes = [26,1,0,0,7,95,105,100,0,161,190,98,75,118,169,3,0,0,3,0,0,4,97,114,114,97,121,0,26,0,0,0,16,48,0,1,0,0,0,16,49,0,2,0,0,0,16,50,0,3,0,0,0,0,2,115,116,114,105,110,103,0,6,0,0,0,104,101,108,108,111,0,3,104,97,115,104,0,19,0,0,0,16,97,0,1,0,0,0,16,98,0,2,0,0,0,0,9,100,97,116,101,0,161,190,98,75,0,0,0,0,7,111,105,100,0,161,190,98,75,90,217,18,0,0,1,0,0,5,98,105,110,97,114,121,0,7,0,0,0,2,3,0,0,0,49,50,51,16,105,110,116,0,42,0,0,0,1,102,108,111,97,116,0,223,224,11,147,169,170,64,64,11,114,101,103,101,120,112,0,102,111,111,98,97,114,0,105,0,8,98,111,111,108,101,97,110,0,1,15,119,104,101,114,101,0,25,0,0,0,12,0,0,0,116,104,105,115,46,120,32,61,61,32,51,0,5,0,0,0,0,3,100,98,114,101,102,0,37,0,0,0,2,36,114,101,102,0,5,0,0,0,116,101,115,116,0,7,36,105,100,0,161,190,98,75,2,180,1,0,0,2,0,0,0,10,110,117,108,108,0,0]
+      var serialized_data = ''
+      var parser = new BinaryParser()
+      // Convert to chars
+      for(var i = 0; i < bytes.length; i++) {
+        serialized_data = serialized_data + BinaryParser.fromByte(bytes[i])
+      }
+      var object = new BSON().deserialize(serialized_data)
+      object.get('string').should.eql "hello"
+      object.get('array').should.eql [1,2,3]
+      object.get('hash').get('a').should.eql 1
+      object.get('hash').get('b').should.eql 2
+      object.get('date').should.not.be_null
+      object.get('oid').should.not.be_null()
+      object.get('binary').should.not.be_null()
+      object.get('int').should.eql 42
+      object.get('float').should.eql 33.3333
+      object.get('regexp').should.not.be_null()
+      object.get('boolean').should.eql true
+      object.get('where').should.not.be_null()
+      object.get('dbref').should.not.be_null()
+      object.get('null').should.be_null()
+    end
       
     it 'Should Serialize and Deserialze String'
       var test_string = {hello: 'world'}
