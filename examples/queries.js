@@ -14,7 +14,7 @@ var port = process.ENV['MONGO_NODE_DRIVER_PORT'] != null ? process.ENV['MONGO_NO
 
 sys.puts("Connecting to " + host + ":" + port);
 var db = new Db('node-mongo-examples', new Server(host, port, {}), {});
-db.addListener("connect", function(db) {
+db.open(function(db) {
   db.dropDatabase(function() {
     // Fetch the collection test
     db.collection(function(collection) {
@@ -127,7 +127,6 @@ db.addListener("connect", function(db) {
     }, 'test');    
   });
 });
-db.open();
 
 
 

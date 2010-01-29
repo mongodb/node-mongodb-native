@@ -158,7 +158,7 @@ function test_object_id_generation() {
 // Test the auto connect functionality of the db
 function test_automatic_reconnect() {
   var automatic_connect_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-  automatic_connect_client.addListener("connect", function() {
+  automatic_connect_client.open(function(automatic_connect_client) {
     // Listener for closing event
     var closeListener = function(has_error) {
       // Remove the listener for the close to avoid loop
@@ -182,14 +182,13 @@ function test_automatic_reconnect() {
     // Add listener to close event
     automatic_connect_client.serverConfig.masterConnection.addListener("close", closeListener);
     automatic_connect_client.serverConfig.masterConnection.connection.close();
-  });
-  automatic_connect_client.open();  
+  });  
 }
 
 // Test the error reporting functionality
 function test_error_handling() {
-  var error_client = new Db('integration_tests2_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {});
-  error_client.addListener("connect", function() {
+  var error_client = new Db('integration_tests2_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {});  
+  error_client.open(function(error_client) {
     error_client.resetErrorHistory(function() {
       error_client.error(function(documents) {
         test.assertEquals(true, documents[0].get('ok'));                
@@ -240,8 +239,6 @@ function test_error_handling() {
       });
     });
   });
-  
-  error_client.open();
 }
 
 // Test the last status functionality of the driver
@@ -968,7 +965,7 @@ function test_non_oid_id() {
 function test_strict_access_collection() {
   var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
   test.assertEquals(true, error_client.strict);
-  error_client.addListener("connect", function() {
+  error_client.open(function(error_client) {
     error_client.collection(function(collection) {
       test.assertEquals(false, collection.ok);
       test.assertEquals(true, collection.err);
@@ -983,14 +980,13 @@ function test_strict_access_collection() {
         error_client.close();
       }, 'test_strict_access_collection');
     }, 'test_strict_access_collection');
-  });    
-  error_client.open();
+  });
 }
 
 function test_strict_create_collection() {
   var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
   test.assertEquals(true, error_client.strict);
-  error_client.addListener("connect", function() {
+  error_client.open(function(error_client) {
     error_client.createCollection(function(collection) {
       test.assertTrue(collection instanceof Collection);
 
@@ -1011,8 +1007,7 @@ function test_strict_create_collection() {
         }, 'test_strict_create_collection');                
       }, 'test_strict_create_collection');
     }, 'test_strict_create_collection');
-  });
-  error_client.open();  
+  });  
 }
 
 function test_to_a() {
@@ -2059,7 +2054,7 @@ function test_close_after_query_sent() {
 
 function test_kill_cursors() {
   var test_kill_cursors_client = new Db('integration_tests4_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-  test_kill_cursors_client.addListener("connect", function() {
+  test_kill_cursors_client.open(function(test_kill_cursors_client) {
     var number_of_tests_done = 0;
     
     test_kill_cursors_client.dropCollection(function(collection) {      
@@ -2139,8 +2134,7 @@ function test_kill_cursors() {
         test_kill_cursors_client.close();
       }
     }, 100);        
-  });
-  test_kill_cursors_client.open();  
+  });  
 }
 
 function test_count_with_fields() {
@@ -2431,7 +2425,7 @@ function test_gs_seek() {
 
 function test_gs_multi_chunk() {
   var fs_client = new Db('integration_tests_10', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.addListener("connect", function() {
+  fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
       gridStore.open(function(gridStore) {    
@@ -2462,8 +2456,7 @@ function test_gs_multi_chunk() {
         }, file1);
       });                        
     });
-  });    
-  fs_client.open();
+  });
 }
 
 function test_gs_puts_and_readlines() {
@@ -2486,7 +2479,7 @@ function test_gs_puts_and_readlines() {
 
 function test_gs_unlink() {
   var fs_client = new Db('integration_tests_11', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.addListener("connect", function() {
+  fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
       gridStore.open(function(gridStore) {    
@@ -2525,13 +2518,12 @@ function test_gs_unlink() {
         }, "hello, world!");
       });              
     });
-  });    
-  fs_client.open();
+  });
 }
 
 function test_gs_append() {
   var fs_client = new Db('integration_tests_12', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.addListener("connect", function() {
+  fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       var gridStore = new GridStore(fs_client, "test_gs_append", "w");
       gridStore.open(function(gridStore) {    
@@ -2562,8 +2554,7 @@ function test_gs_append() {
         }, "hello, world!");
       });              
     });
-  });
-  fs_client.open();  
+  });  
 }
 
 function test_gs_rewind_and_truncate_on_write() {
@@ -2615,7 +2606,7 @@ function test_gs_tell() {
 
 function test_gs_save_empty_file() {
   var fs_client = new Db('integration_tests_13', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.addListener("connect", function() {
+  fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");
       gridStore.open(function(gridStore) {    
@@ -2639,8 +2630,7 @@ function test_gs_save_empty_file() {
         }, "");
       });              
     });
-  });
-  fs_client.open();    
+  });    
 }
 
 function test_gs_empty_file_eof() {
@@ -2867,7 +2857,7 @@ function test_gs_metadata() {
 
 function test_admin_default_profiling_level() {
   var fs_client = new Db('admin_test_1', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.addListener("connect", function() {
+  fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
         collection.insert({'a':1}, function(doc) {
@@ -2881,13 +2871,12 @@ function test_admin_default_profiling_level() {
         });
       }, 'test');
     });
-  });
-  fs_client.open();    
+  });    
 }
 
 function test_admin_change_profiling_level() {
   var fs_client = new Db('admin_test_2', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.addListener("connect", function() {
+  fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
         collection.insert({'a':1}, function(doc) {
@@ -2922,13 +2911,12 @@ function test_admin_change_profiling_level() {
         });
       }, 'test');
     });
-  });
-  fs_client.open();      
+  });      
 }
 
 function test_admin_profiling_info() {
   var fs_client = new Db('admin_test_3', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.addListener("connect", function() {
+  fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
         collection.insert({'a':1}, function(doc) {
@@ -2955,13 +2943,12 @@ function test_admin_profiling_info() {
         });
       }, 'test');
     });
-  });
-  fs_client.open();        
+  });        
 }
 
 function test_admin_validate_collection() {
   var fs_client = new Db('admin_test_4', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.addListener("connect", function() {
+  fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
         collection.insert({'a':1}, function(doc) {
@@ -2977,13 +2964,12 @@ function test_admin_validate_collection() {
         });
       }, 'test');
     });
-  });
-  fs_client.open();          
+  });          
 }
 
 function test_pair() {
   var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
-  p_client.addListener("connect", function() {
+  p_client.open(function(p_client) {
     p_client.dropDatabase(function(done) {    
       test.assertTrue(p_client.masterConnection != null);
       test.assertEquals(2, p_client.connections.length);
@@ -3004,13 +2990,12 @@ function test_pair() {
         });
       }, 'test_collection');
     });
-  });
-  p_client.open();    
+  });    
 }
 
 function test_cluster() {
   var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
-  p_client.addListener("connect", function() {
+  p_client.open(function(p_client) {
     p_client.dropDatabase(function(done) {    
       test.assertTrue(p_client.masterConnection != null);
       test.assertEquals(2, p_client.connections.length);
@@ -3031,8 +3016,7 @@ function test_cluster() {
         });
       }, 'test_collection');
     });
-  });
-  p_client.open();    
+  });    
 }
 
 function test_custom_primary_key_generator() {    
@@ -3045,7 +3029,7 @@ function test_custom_primary_key_generator() {
 
   var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
   // var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {});
-  p_client.addListener("connect", function() {
+  p_client.open(function(p_client) {
     p_client.dropDatabase(function(done) {    
       p_client.createCollection(function(collection) {
         collection.insert({'a':1}, function(doc) {
@@ -3060,11 +3044,10 @@ function test_custom_primary_key_generator() {
         });
       }, 'test_custom_key');
     });
-  });
-  p_client.open();      
+  });      
 }
 
-var client_tests = [test_hint];
+var client_tests = [test_automatic_reconnect];
 
 // Not run since it requires a master-slave setup to test correctly
 // var client_tests = [test_pair, test_cluster];
@@ -3095,7 +3078,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
 *******************************************************************************************************/
 // Set up the client connection
 var client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {}), {});
-client.addListener("connect", function() {
+client.open(function(client) {
   // Do cleanup of the db
   client.dropDatabase(function() {
     // Run  all the tests
@@ -3104,7 +3087,6 @@ client.addListener("connect", function() {
     ensure_tests_finished();  
   });
 });
-client.open();
 
 function ensure_tests_finished() {
   var intervalId = setInterval(function() {
