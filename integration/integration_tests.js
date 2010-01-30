@@ -33,8 +33,8 @@ function test_collection_methods() {
       client.renameCollection("test_collection_methods", "test_collection_methods2", function(replies) {
         test.assertEquals(1, replies[0].documents[0].get('ok'));
         // Drop the collection and check that it's gone
-        client.dropCollection(function(replies) {
-          test.assertEquals(true, replies.ok);          
+        client.dropCollection(function(result) {
+          test.assertEquals(true, result);          
           finished_test({test_collection_methods:'ok'});
         }, "test_collection_methods2")
       });
@@ -276,9 +276,8 @@ function test_last_status() {
                     }, new OrderedHash().add("x", 1), new OrderedHash().add("$set", new OrderedHash().add("x", 2)), {'safe':true});
 
                     collection.update(function(document) {
-                      test.assertEquals(false, document.ok);    
-                      test.assertEquals(true, document.err);    
-                      test.assertEquals("Failed to update document", document.errmsg);
+                      test.assertTrue(document instanceof Error);
+                      test.assertEquals("Failed to update document", document.message);
 
                       // Let's close the db 
                       finished_test({test_last_status:'ok'});                     
@@ -592,9 +591,8 @@ function test_find_sorting() {
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
           // Fail test if not an error
-          test.assertEquals(true, documents.err);
-          test.assertEquals(false, documents.ok);
-          test.assertEquals("Error: Invalid sort argument was supplied", documents.errmsg);
+          test.assertTrue(documents instanceof Error);
+          test.assertEquals("Error: Invalid sort argument was supplied", documents.message);
         });
       }, {'a': {'$lt':10}}, {'sort': new OrderedHash().add('a', -1)});            
     }, 'test_find_sorting');
@@ -675,9 +673,8 @@ function test_find_one_no_records() {
 function test_drop_collection() {
   client.createCollection(function(r) {
     client.dropCollection(function(r) {
-      test.assertFalse(r.ok);
-      test.assertTrue(r.err);
-      test.assertEquals("ns not found", r.errmsg);
+      test.assertTrue(r instanceof Error);
+      test.assertEquals("ns not found", r.message);
       var found = false;
       // Ensure we don't have the collection in the set of names
       client.collectionNames(function(replies) {
@@ -967,10 +964,9 @@ function test_strict_access_collection() {
   test.assertEquals(true, error_client.strict);
   error_client.open(function(error_client) {
     error_client.collection(function(collection) {
-      test.assertEquals(false, collection.ok);
-      test.assertEquals(true, collection.err);
-      test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", collection.errmsg);      
-    }, 'does-not-exist');
+      test.assertTrue(collection instanceof Error);
+      test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", collection.message);      
+    }, 'does-not-exist');      
     
     error_client.createCollection(function(collection) {  
       error_client.collection(function(collection) {
@@ -992,9 +988,8 @@ function test_strict_create_collection() {
 
       // Creating an existing collection should fail
       error_client.createCollection(function(collection) {
-        test.assertEquals(false, collection.ok);
-        test.assertEquals(true, collection.err);
-        test.assertEquals("Collection test_strict_create_collection already exists. Currently in strict mode.", collection.errmsg);
+        test.assertTrue(collection instanceof Error);
+        test.assertEquals("Collection test_strict_create_collection already exists. Currently in strict mode.", collection.message);
         
         // Switch out of strict mode and try to re-create collection
         error_client.strict = false;
@@ -1018,9 +1013,8 @@ function test_to_a() {
         cursor.toArray(function(items) {          
           // Should fail if called again (cursor should be closed)
           cursor.toArray(function(items) {
-            test.assertEquals(false, items.ok);
-            test.assertEquals(true, items.err);
-            test.assertEquals("Cursor is closed", items.errmsg);
+            test.assertTrue(items instanceof Error);
+            test.assertEquals("Cursor is closed", items.message);
             
             // Each should allow us to iterate over the entries due to cache
             cursor.each(function(item) {
@@ -1045,9 +1039,8 @@ function test_to_a_after_each() {
         cursor.each(function(item) {
           if(item == null) {
             cursor.toArray(function(items) {
-              test.assertEquals(false, items.ok);
-              test.assertEquals(true, items.err);
-              test.assertEquals("Cursor is closed", items.errmsg);                            
+              test.assertTrue(items instanceof Error);
+              test.assertEquals("Cursor is closed", items.message);                            
 
               // Let's close the db 
               finished_test({test_to_a_after_each:'ok'});                 
@@ -1126,9 +1119,8 @@ function test_eval() {
   }, new Code("i + 3;", {'i':2}));
   
   client.eval(function(result) {
-    test.assertEquals(false, result.ok);
-    test.assertEquals(true, result.err);
-    test.assertTrue(result.errmsg != null);
+    test.assertTrue(result instanceof Error);
+    test.assertTrue(result.message != null);
     // Let's close the db 
     finished_test({test_eval:'ok'});                             
   }, "5 ++ 5;");
@@ -1242,15 +1234,13 @@ function test_group() {
             }, ['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true);                                
             
             collection.group(function(results) {
-              test.assertEquals(false, results.ok);
-              test.assertEquals(true, results.err);
-              test.assertTrue(results.errmsg != null);
+              test.assertTrue(results instanceof Error);
+              test.assertTrue(results.message != null);
             }, [], {}, {}, "5 ++ 5");
 
             collection.group(function(results) {
-              test.assertEquals(false, results.ok);
-              test.assertEquals(true, results.err);
-              test.assertTrue(results.errmsg != null);
+              test.assertTrue(results instanceof Error);
+              test.assertTrue(results.message != null);
               // Let's close the db 
               finished_test({test_group:'ok'});                                   
             }, [], {}, {}, "5 ++ 5", true);
@@ -1415,15 +1405,13 @@ function test_invalid_key_names() {
     collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}]);
     // Illegal insert for key
     collection.insert({'$hello':'world'}, function(doc) {
-      test.assertEquals(true, doc.err);
-      test.assertEquals(false, doc.ok);
-      test.assertEquals("Error: key $hello must not start with '$'", doc.errmsg);            
+      test.assertTrue(doc instanceof Error);
+      test.assertEquals("Error: key $hello must not start with '$'", doc.message);            
     });
     
     collection.insert({'hello':{'$hello':'world'}}, function(doc) {
-      test.assertEquals(true, doc.err);
-      test.assertEquals(false, doc.ok);
-      test.assertEquals("Error: key $hello must not start with '$'", doc.errmsg);              
+      test.assertTrue(doc instanceof Error);
+      test.assertEquals("Error: key $hello must not start with '$'", doc.message);              
     });
     
     collection.insert({'he$llo':'world'}, function(docs) {
@@ -1435,27 +1423,23 @@ function test_invalid_key_names() {
     })
 
     collection.insert({'.hello':'world'}, function(doc) {
-      test.assertEquals(true, doc.err);
-      test.assertEquals(false, doc.ok);
-      test.assertEquals("Error: key .hello must not contain '.'", doc.errmsg);            
+      test.assertTrue(doc instanceof Error);
+      test.assertEquals("Error: key .hello must not contain '.'", doc.message);            
     });
 
     collection.insert({'hello':{'.hello':'world'}}, function(doc) {
-      test.assertEquals(true, doc.err);
-      test.assertEquals(false, doc.ok);
-      test.assertEquals("Error: key .hello must not contain '.'", doc.errmsg);            
+      test.assertTrue(doc instanceof Error);
+      test.assertEquals("Error: key .hello must not contain '.'", doc.message);            
     });
 
     collection.insert({'hello.':'world'}, function(doc) {
-      test.assertEquals(true, doc.err);
-      test.assertEquals(false, doc.ok);
-      test.assertEquals("Error: key hello. must not contain '.'", doc.errmsg);            
+      test.assertTrue(doc instanceof Error);
+      test.assertEquals("Error: key hello. must not contain '.'", doc.message);            
     });
 
     collection.insert({'hello':{'hello.':'world'}}, function(doc) {
-      test.assertEquals(true, doc.err);
-      test.assertEquals(false, doc.ok);
-      test.assertEquals("Error: key hello. must not contain '.'", doc.errmsg);            
+      test.assertTrue(doc instanceof Error);
+      test.assertEquals("Error: key hello. must not contain '.'", doc.message);            
       // Let's close the db 
       finished_test({test_invalid_key_names:'ok'});                                   
     });    
@@ -1511,39 +1495,32 @@ function test_rename_collection() {
         client.collection(function(collection2) {
           // Assert rename
           collection1.rename(function(collection) {
-            test.assertEquals(true, collection.err);
-            test.assertEquals(false, collection.ok);
-            test.assertEquals("Error: collection name must be a String", collection.errmsg);            
+            test.assertTrue(collection instanceof Error);
+            test.assertEquals("Error: collection name must be a String", collection.message);            
           }, 5);
 
           collection1.rename(function(collection) {
-            test.assertEquals(true, collection.err);
-            test.assertEquals(false, collection.ok);
-            test.assertEquals("Error: collection names cannot be empty", collection.errmsg);            
+            test.assertTrue(collection instanceof Error);
+            test.assertEquals("Error: collection names cannot be empty", collection.message);            
           }, "");
 
           collection1.rename(function(collection) {
-            test.assertEquals(true, collection.err);
-            test.assertEquals(false, collection.ok);
-            test.assertEquals("Error: collection names must not contain '$'", collection.errmsg);            
+            test.assertTrue(collection instanceof Error);
+            test.assertEquals("Error: collection names must not contain '$'", collection.message);            
           }, "te$t");
 
           collection1.rename(function(collection) {
-            test.assertEquals(true, collection.err);
-            test.assertEquals(false, collection.ok);
-            test.assertEquals("Error: collection names must not start or end with '.'", collection.errmsg);            
+            test.assertTrue(collection instanceof Error);
+            test.assertEquals("Error: collection names must not start or end with '.'", collection.message);            
           }, ".test");
 
           collection1.rename(function(collection) {
-            test.assertEquals(true, collection.err);
-            test.assertEquals(false, collection.ok);
-            test.assertEquals("Error: collection names must not start or end with '.'", collection.errmsg);            
+            test.assertTrue(collection instanceof Error);
+            test.assertEquals("Error: collection names must not start or end with '.'", collection.message);            
           }, "test.");
 
           collection1.rename(function(collection) {
-            test.assertEquals(true, collection.err);
-            test.assertEquals(false, collection.ok);
-            test.assertEquals("Error: collection names cannot be empty", collection.errmsg);            
+            test.assertEquals("Error: collection names cannot be empty", collection.message);            
           }, "tes..t");
           
           collection1.count(function(count) {
@@ -1554,9 +1531,8 @@ function test_rename_collection() {
                 test.assertEquals(2, count);                
                 
                 collection1.rename(function(collection) {
-                  test.assertEquals(true, collection.err);
-                  test.assertEquals(false, collection.ok);
-                  test.assertEquals("db assertion failure", collection.errmsg);            
+                  test.assertTrue(collection instanceof Error);
+                  test.assertEquals("db assertion failure", collection.message);            
                   
                   collection1.rename(function(collection) {
                     test.assertEquals("test_rename_collection3", collection.collectionName);
@@ -1724,9 +1700,8 @@ function test_sort() {
     collection.find(function(cursor) {
       cursor.nextObject(function(doc) {
         cursor.sort(function(cursor) {
-          test.assertEquals(true, cursor.err);
-          test.assertEquals(false, cursor.ok);
-          test.assertEquals("Cursor is closed", cursor.errmsg);          
+          test.assertTrue(cursor instanceof Error);
+          test.assertEquals("Cursor is closed", cursor.message);          
           
           // Let's close the db 
           finished_test({test_sort:'ok'});                                   
@@ -1737,9 +1712,8 @@ function test_sort() {
     collection.find(function(cursor) {
       cursor.sort(function(cursor) {
         cursor.nextObject(function(doc) {
-          test.assertEquals(true, doc.err);
-          test.assertEquals(false, doc.ok);
-          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", doc.errmsg);
+          test.assertTrue(doc instanceof Error);
+          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", doc.message);
         });
       }, 'a', 25);      
     });
@@ -1747,9 +1721,8 @@ function test_sort() {
     collection.find(function(cursor) {
       cursor.sort(function(cursor) {
         cursor.nextObject(function(doc) {
-          test.assertEquals(true, doc.err);
-          test.assertEquals(false, doc.ok);
-          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", doc.errmsg);
+          test.assertTrue(doc instanceof Error);
+          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", doc.message);
         });
       }, 25);      
     });           
@@ -1786,18 +1759,16 @@ function test_limit_exceptions() {
     collection.insert({'a':1}, function(docs) {});
     collection.find(function(cursor) {
       cursor.limit(function(cursor) {
-        test.assertEquals(false, cursor.ok);
-        test.assertEquals(true, cursor.err);
-        test.assertEquals("limit requires an integer", cursor.errmsg);
+        test.assertTrue(cursor instanceof Error);
+        test.assertEquals("limit requires an integer", cursor.message);
       }, 'not-an-integer');
     });
     
     collection.find(function(cursor) {
       cursor.nextObject(function(doc) {
         cursor.limit(function(cursor) {
-          test.assertEquals(false, cursor.ok);
-          test.assertEquals(true, cursor.err);
-          test.assertEquals("Cursor is closed", cursor.errmsg);
+          test.assertTrue(cursor instanceof Error);
+          test.assertEquals("Cursor is closed", cursor.message);
           // Let's close the db 
           finished_test({test_limit_exceptions:'ok'});                                   
         }, 1);
@@ -1807,9 +1778,8 @@ function test_limit_exceptions() {
     collection.find(function(cursor) {
       cursor.close(function(cursor) {        
         cursor.limit(function(cursor) {
-          test.assertEquals(false, cursor.ok);
-          test.assertEquals(true, cursor.err);
-          test.assertEquals("Cursor is closed", cursor.errmsg);
+          test.assertTrue(cursor instanceof Error);
+          test.assertEquals("Cursor is closed", cursor.message);
         }, 1);
       });
     });
@@ -1861,18 +1831,16 @@ function test_skip_exceptions() {
     collection.insert({'a':1}, function(docs) {});
     collection.find(function(cursor) {
       cursor.skip(function(cursor) {
-        test.assertEquals(false, cursor.ok);
-        test.assertEquals(true, cursor.err);
-        test.assertEquals("skip requires an integer", cursor.errmsg);
+        test.assertTrue(cursor instanceof Error);
+        test.assertEquals("skip requires an integer", cursor.message);
       }, 'not-an-integer');
     });
     
     collection.find(function(cursor) {
       cursor.nextObject(function(doc) {
         cursor.skip(function(cursor) {
-          test.assertEquals(false, cursor.ok);
-          test.assertEquals(true, cursor.err);
-          test.assertEquals("Cursor is closed", cursor.errmsg);
+          test.assertTrue(cursor instanceof Error);
+          test.assertEquals("Cursor is closed", cursor.message);
           // Let's close the db 
           finished_test({test_skip_exceptions:'ok'});                                   
         }, 1);
@@ -1882,9 +1850,8 @@ function test_skip_exceptions() {
     collection.find(function(cursor) {
       cursor.close(function(cursor) {        
         cursor.skip(function(cursor) {
-          test.assertEquals(false, cursor.ok);
-          test.assertEquals(true, cursor.err);
-          test.assertEquals("Cursor is closed", cursor.errmsg);
+          test.assertTrue(cursor instanceof Error);
+          test.assertEquals("Cursor is closed", cursor.message);
         }, 1);
       });
     });
@@ -2819,9 +2786,8 @@ function test_gs_content_type_option() {
 function test_gs_unknown_mode() {
   var gridStore = new GridStore(client, "test_gs_unknown_mode", "x");
   gridStore.open(function(gridStore) {
-    test.assertEquals(true, gridStore.err);
-    test.assertEquals(false, gridStore.ok);
-    test.assertEquals("Illegal mode x", gridStore.errmsg);
+    test.assertTrue(gridStore instanceof Error);
+    test.assertEquals("Illegal mode x", gridStore.message);
     finished_test({test_gs_unknown_mode:'ok'});       
   });  
 }
@@ -2893,9 +2859,8 @@ function test_admin_change_profiling_level() {
                         test.assertEquals('all', level);
 
                         adminDb.setProfilingLevel(function(level) {              
-                          test.assertEquals(true, level.err);
-                          test.assertEquals(false, level.ok);
-                          test.assertEquals("Error: illegal profiling level value medium", level.errmsg);
+                          test.assertTrue(level instanceof Error);
+                          test.assertEquals("Error: illegal profiling level value medium", level.message);
 
                           finished_test({test_admin_default_profiling_level:'ok'});       
                           fs_client.close();                          
@@ -3046,7 +3011,7 @@ function test_custom_primary_key_generator() {
   });      
 }
 
-var client_tests = [test_to_a];
+var client_tests = [test_strict_access_collection];
 
 // Not run since it requires a master-slave setup to test correctly
 // var client_tests = [test_pair, test_cluster];
