@@ -2992,7 +2992,6 @@ function test_custom_primary_key_generator() {
   }
 
   var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
-  // var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {});
   p_client.open(function(p_client) {
     p_client.dropDatabase(function(done) {    
       p_client.createCollection(function(collection) {

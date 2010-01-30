@@ -1,0 +1,4 @@
+0.1 2010-01-30
+* Initial release support of driver using native node.js interface
+* Supports gridfs specification
+* Supports admin functionality
