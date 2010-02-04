@@ -4,9 +4,13 @@ GLOBAL.DEBUG = true;
 
 sys = require("sys");
 test = require("mjsunit");
-process.mixin(require("mongodb/db"));
-process.mixin(require("mongodb/admin"));
-process.mixin(require("mongodb/gridfs/gridstore"));
+var mongo = require('mongodb/db');
+process.mixin(mongo, require('mongodb/connection'));
+process.mixin(mongo, require('mongodb/bson/bson'));
+process.mixin(mongo, require('mongodb/admin'));
+process.mixin(mongo, require('mongodb/gridfs/gridstore'));
+process.mixin(mongo, require('mongodb/collection'));
+process.mixin(mongo, require('mongodb/bson/collections'));
 
 /*******************************************************************************************************
   Integration Tests
@@ -15,7 +19,7 @@ process.mixin(require("mongodb/gridfs/gridstore"));
 function test_collection_methods() {
   client.createCollection(function(collection) {
     // Verify that all the result are correct coming back (should contain the value ok)
-    test.assertTrue(collection instanceof Collection);
+    test.assertTrue(collection instanceof mongo.Collection);
     test.assertEquals('test_collection_methods', collection.collectionName);
     // Let's check that the collection was created correctly
     client.collectionNames(function(documents) {
@@ -49,7 +53,7 @@ function test_authentication() {
     // Fetch a user collection
     client.collection(function(user_collection) {
       // Insert a user document
-      var user_doc = new OrderedHash().add('user', user_name).add('pwd', user_password);
+      var user_doc = new mongo.OrderedHash().add('user', user_name).add('pwd', user_password);
       // Insert the user into the system users collections
       user_collection.insert(user_doc, function(documents) {
         test.assertTrue(documents[0].get('_id').toHexString().length == 24);
@@ -104,18 +108,18 @@ function test_object_id_generation() {
 
   client.collection(function(collection) {
     // Insert test documents (creates collections and test fetch by query)
-    collection.insert(new OrderedHash().add("name", "Fred").add("age", 42), function(ids) {
+    collection.insert(new mongo.OrderedHash().add("name", "Fred").add("age", 42), function(ids) {
       test.assertEquals(1, ids.length);    
       test.assertTrue(ids[0].get('_id').toHexString().length == 24);
       // Locate the first document inserted
       collection.findOne(function(document) {
         test.assertEquals(ids[0].get('_id').toHexString(), document.get('_id').toHexString());
         number_of_tests_done++;
-      }, new OrderedHash().add("name", "Fred"));      
+      }, new mongo.OrderedHash().add("name", "Fred"));      
     });
 
     // Insert another test document and collect using ObjectId
-    collection.insert(new OrderedHash().add("name", "Pat").add("age", 21), function(ids) {
+    collection.insert(new mongo.OrderedHash().add("name", "Pat").add("age", 21), function(ids) {
       test.assertEquals(1, ids.length);  
       test.assertTrue(ids[0].get('_id').toHexString().length == 24);
       // Locate the first document inserted
@@ -126,10 +130,10 @@ function test_object_id_generation() {
     });
     
     // Manually created id
-    var objectId = new ObjectID(null);
+    var objectId = new mongo.ObjectID(null);
     
     // Insert a manually created document with generated oid
-    collection.insert(new OrderedHash().add("_id", objectId).add("name", "Donald").add("age", 95), function(ids) {
+    collection.insert(new mongo.OrderedHash().add("_id", objectId).add("name", "Donald").add("age", 95), function(ids) {
       test.assertEquals(1, ids.length);  
       test.assertTrue(ids[0].get('_id').toHexString().length == 24);
       test.assertEquals(objectId.toHexString(), ids[0].get('_id').toHexString());
@@ -152,7 +156,7 @@ function test_object_id_generation() {
 
 // Test the auto connect functionality of the db
 function test_automatic_reconnect() {
-  var automatic_connect_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+  var automatic_connect_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
   automatic_connect_client.open(function(automatic_connect_client) {
     // Listener for closing event
     var closeListener = function(has_error) {
@@ -161,7 +165,7 @@ function test_automatic_reconnect() {
       // Let's insert a document
       automatic_connect_client.collection(function(collection) {
         // Insert another test document and collect using ObjectId
-        collection.insert(new OrderedHash().add("name", "Patty").add("age", 34), function(ids) {
+        collection.insert(new mongo.OrderedHash().add("name", "Patty").add("age", 34), function(ids) {
           test.assertEquals(1, ids.length);    
           test.assertTrue(ids[0].get('_id').toHexString().length == 24);
                   
@@ -170,7 +174,7 @@ function test_automatic_reconnect() {
             // Let's close the db 
             finished_test({test_automatic_reconnect:'ok'});    
             automatic_connect_client.close();
-          }, new OrderedHash().add("name", "Patty"));      
+          }, new mongo.OrderedHash().add("name", "Patty"));      
         });        
       }, 'test_object_id_generation.data2');
     };    
@@ -182,7 +186,7 @@ function test_automatic_reconnect() {
 
 // Test the error reporting functionality
 function test_error_handling() {
-  var error_client = new Db('integration_tests2_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {});  
+  var error_client = new mongo.Db('integration_tests2_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {});  
   error_client.open(function(error_client) {
     error_client.resetErrorHistory(function() {
       error_client.error(function(documents) {
@@ -226,7 +230,7 @@ function test_error_handling() {
                       })
                     });
                   });
-                }, new OrderedHash().add("name", "Fred"));                            
+                }, new mongo.OrderedHash().add("name", "Fred"));                            
               }, 'test_error_collection');
             })          
           });
@@ -239,7 +243,7 @@ function test_error_handling() {
 // Test the last status functionality of the driver
 function test_last_status() {  
   client.createCollection(function(collection) {
-    test.assertTrue(collection instanceof Collection);
+    test.assertTrue(collection instanceof mongo.Collection);
     test.assertEquals('test_last_status', collection.collectionName);
 
     // Get the collection
@@ -247,7 +251,7 @@ function test_last_status() {
       // Remove all the elements of the collection
       collection.remove(function() {
         // Check update of a document
-        collection.insert(new OrderedHash().add("i", 1), function(ids) {
+        collection.insert(new mongo.OrderedHash().add("i", 1), function(ids) {
           test.assertEquals(1, ids.length);    
           test.assertTrue(ids[0].get('_id').toHexString().length == 24);        
 
@@ -264,11 +268,11 @@ function test_last_status() {
                   test.assertEquals(false, status[0].documents[0].get('updatedExisting'));                
             
                   // Check safe update of a document
-                  collection.insert(new OrderedHash().add("x", 1), function(ids) {
+                  collection.insert(new mongo.OrderedHash().add("x", 1), function(ids) {
                     collection.update(function(document) {
-                      test.assertTrue(document instanceof OrderedHash);
-                      test.assertTrue(document.get('$set') instanceof OrderedHash);
-                    }, new OrderedHash().add("x", 1), new OrderedHash().add("$set", new OrderedHash().add("x", 2)), {'safe':true});
+                      test.assertTrue(document instanceof mongo.OrderedHash);
+                      test.assertTrue(document.get('$set') instanceof mongo.OrderedHash);
+                    }, new mongo.OrderedHash().add("x", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("x", 2)), {'safe':true});
             
                     collection.update(function(document) {
                       test.assertTrue(document instanceof Error);
@@ -276,12 +280,12 @@ function test_last_status() {
             
                       // Let's close the db 
                       finished_test({test_last_status:'ok'});                     
-                    }, new OrderedHash().add("y", 1), new OrderedHash().add("$set", new OrderedHash().add("y", 2)), {'safe':true});
+                    }, new mongo.OrderedHash().add("y", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("y", 2)), {'safe':true});
                   });                
                 });
-              }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 500)));
+              }, new mongo.OrderedHash().add("i", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("i", 500)));
             });
-          }, new OrderedHash().add("i", 1), new OrderedHash().add("$set", new OrderedHash().add("i", 2)));
+          }, new mongo.OrderedHash().add("i", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("i", 2)));
         });      
       });      
     }, 'test_last_status');  
@@ -292,8 +296,8 @@ function test_last_status() {
 function test_clear() {
   client.createCollection(function(r) {
     client.collection(function(collection) {
-      collection.insert(new OrderedHash().add("i", 1), function(ids) {
-        collection.insert(new OrderedHash().add("i", 2), function(ids) {
+      collection.insert(new mongo.OrderedHash().add("i", 1), function(ids) {
+        collection.insert(new mongo.OrderedHash().add("i", 2), function(ids) {
           collection.count(function(count) {
             test.assertEquals(2, count);    
             // Clear the collection
@@ -316,11 +320,11 @@ function test_insert() {
   client.createCollection(function(r) {
     client.collection(function(collection) {
       for(var i = 1; i < 1000; i++) {
-        collection.insert(new OrderedHash().add('c', i), function(r) {});
+        collection.insert(new mongo.OrderedHash().add('c', i), function(r) {});
       }
 
-      collection.insert(new OrderedHash().add('a', 2), function(r) {
-        collection.insert(new OrderedHash().add('a', 3), function(r) {
+      collection.insert(new mongo.OrderedHash().add('a', 2), function(r) {
+        collection.insert(new mongo.OrderedHash().add('a', 3), function(r) {
           collection.count(function(count) {
             test.assertEquals(1001, count);
             // Locate all the entries using find
@@ -332,7 +336,7 @@ function test_insert() {
                 // Let's close the db 
                 finished_test({test_insert:'ok'}); 
               });
-            }, new OrderedHash());          
+            }, new mongo.OrderedHash());          
           });        
         });
       });      
@@ -344,11 +348,11 @@ function test_insert() {
 function test_multiple_insert() {
   client.createCollection(function(r) {
     var collection = client.collection(function(collection) {
-      var docs = [new OrderedHash().add('a', 1), new OrderedHash().add('a', 2)];
+      var docs = [new mongo.OrderedHash().add('a', 1), new mongo.OrderedHash().add('a', 2)];
 
       collection.insert(docs, function(ids) {
         ids.forEach(function(doc) {
-          test.assertTrue(((doc.get('_id')) instanceof ObjectID));
+          test.assertTrue(((doc.get('_id')) instanceof mongo.ObjectID));
         });
 
         // Let's ensure we have both documents
@@ -389,7 +393,7 @@ function test_find_simple() {
       var doc2 = null;
 
       // Insert some test documents
-      collection.insert([new OrderedHash().add('a', 2), new OrderedHash().add('b', 3)], function(docs) {doc1 = docs[0]; doc2 = docs[1]});
+      collection.insert([new mongo.OrderedHash().add('a', 2), new mongo.OrderedHash().add('b', 3)], function(docs) {doc1 = docs[0]; doc2 = docs[1]});
       // Ensure correct insertion testing via the cursor and the count function
       collection.find(function(cursor) {
         cursor.toArray(function(documents) {
@@ -419,7 +423,7 @@ function test_find_advanced() {
       var doc1 = null, doc2 = null, doc3 = null;
 
       // Insert some test documents
-      collection.insert([new OrderedHash().add('a', 1), new OrderedHash().add('a', 2), new OrderedHash().add('b', 3)], function(docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]});
+      collection.insert([new mongo.OrderedHash().add('a', 1), new mongo.OrderedHash().add('a', 2), new mongo.OrderedHash().add('b', 3)], function(docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]});
 
       // Locate by less than
       collection.find(function(cursor) {
@@ -513,10 +517,10 @@ function test_find_sorting() {
       var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
       
       // Insert some test documents
-      collection.insert([new OrderedHash().add('a', 1).add('b', 2), 
-          new OrderedHash().add('a', 2).add('b', 1), 
-          new OrderedHash().add('a', 3).add('b', 2),
-          new OrderedHash().add('a', 4).add('b', 1)
+      collection.insert([new mongo.OrderedHash().add('a', 1).add('b', 2), 
+          new mongo.OrderedHash().add('a', 2).add('b', 1), 
+          new mongo.OrderedHash().add('a', 3).add('b', 2),
+          new mongo.OrderedHash().add('a', 4).add('b', 1)
         ], function(docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
       
       // Test sorting (ascending)
@@ -589,7 +593,7 @@ function test_find_sorting() {
           test.assertTrue(documents instanceof Error);
           test.assertEquals("Error: Invalid sort argument was supplied", documents.message);
         });
-      }, {'a': {'$lt':10}}, {'sort': new OrderedHash().add('a', -1)});            
+      }, {'a': {'$lt':10}}, {'sort': new mongo.OrderedHash().add('a', -1)});            
     }, 'test_find_sorting');
   }, 'test_find_sorting');  
 }
@@ -601,10 +605,10 @@ function test_find_limits() {
       var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
 
       // Insert some test documents
-      collection.insert([new OrderedHash().add('a', 1), 
-          new OrderedHash().add('b', 2), 
-          new OrderedHash().add('c', 3),
-          new OrderedHash().add('d', 4)
+      collection.insert([new mongo.OrderedHash().add('a', 1), 
+          new mongo.OrderedHash().add('b', 2), 
+          new mongo.OrderedHash().add('c', 3),
+          new mongo.OrderedHash().add('d', 4)
         ], function(docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
 
       // Test limits
@@ -743,7 +747,7 @@ function test_collection_names() {
 function test_collections_info() {
   client.createCollection(function(r) {
     client.collectionsInfo(function(cursor) {
-      test.assertTrue((cursor instanceof Cursor));
+      test.assertTrue((cursor instanceof mongo.Cursor));
       // Fetch all the collection info
       cursor.toArray(function(documents) {
         test.assertTrue(documents.length > 1);
@@ -762,7 +766,7 @@ function test_collections_info() {
 
 function test_collection_options() {
   client.createCollection(function(collection) {    
-    test.assertTrue(collection instanceof Collection);
+    test.assertTrue(collection instanceof mongo.Collection);
     test.assertEquals('test_collection_options', collection.collectionName);
     // Let's fetch the collection options
     collection.options(function(options) {
@@ -785,7 +789,7 @@ function test_index_information() {
         client.indexInformation(function(collectionInfo) {
           test.assertTrue(collectionInfo['_id_'] != null);
           test.assertEquals('_id', collectionInfo['_id_'][0][0]);
-          test.assertTrue((collectionInfo['_id_'][0][1] instanceof ObjectID));
+          test.assertTrue((collectionInfo['_id_'][0][1] instanceof mongo.ObjectID));
           test.assertTrue(collectionInfo['a_1'] != null);
           test.assertEquals([["a", 1]], collectionInfo['a_1']);
           
@@ -799,7 +803,7 @@ function test_index_information() {
             test.assertTrue(count2 >= count1);
             test.assertTrue(collectionInfo2['_id_'] != null);
             test.assertEquals('_id', collectionInfo2['_id_'][0][0]);
-            test.assertTrue((collectionInfo2['_id_'][0][1] instanceof ObjectID));
+            test.assertTrue((collectionInfo2['_id_'][0][1] instanceof mongo.ObjectID));
             test.assertTrue(collectionInfo2['a_1'] != null);
             test.assertEquals([["a", 1]], collectionInfo2['a_1']);            
             test.assertTrue((collectionInfo[indexName] != null));
@@ -955,7 +959,7 @@ function test_non_oid_id() {
 }
 
 function test_strict_access_collection() {
-  var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
+  var error_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
   test.assertEquals(true, error_client.strict);
   error_client.open(function(error_client) {
     error_client.collection(function(collection) {
@@ -965,7 +969,7 @@ function test_strict_access_collection() {
     
     error_client.createCollection(function(collection) {  
       error_client.collection(function(collection) {
-        test.assertTrue(collection instanceof Collection);
+        test.assertTrue(collection instanceof mongo.Collection);
         // Let's close the db 
         finished_test({test_strict_access_collection:'ok'});                 
         error_client.close();
@@ -975,11 +979,11 @@ function test_strict_access_collection() {
 }
 
 function test_strict_create_collection() {
-  var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
+  var error_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
   test.assertEquals(true, error_client.strict);
   error_client.open(function(error_client) {
     error_client.createCollection(function(collection) {
-      test.assertTrue(collection instanceof Collection);
+      test.assertTrue(collection instanceof mongo.Collection);
 
       // Creating an existing collection should fail
       error_client.createCollection(function(collection) {
@@ -989,7 +993,7 @@ function test_strict_create_collection() {
         // Switch out of strict mode and try to re-create collection
         error_client.strict = false;
         error_client.createCollection(function(collection) {
-          test.assertTrue(collection instanceof Collection);
+          test.assertTrue(collection instanceof mongo.Collection);
 
           // Let's close the db 
           finished_test({test_strict_create_collection:'ok'});                 
@@ -1002,7 +1006,7 @@ function test_strict_create_collection() {
 
 function test_to_a() {
   client.createCollection(function(collection) {
-    test.assertTrue(collection instanceof Collection);
+    test.assertTrue(collection instanceof mongo.Collection);
     collection.insert({'a':1}, function(ids) {
       collection.find(function(cursor) {
         cursor.toArray(function(items) {          
@@ -1028,7 +1032,7 @@ function test_to_a() {
 
 function test_to_a_after_each() {
   client.createCollection(function(collection) {
-    test.assertTrue(collection instanceof Collection);
+    test.assertTrue(collection instanceof mongo.Collection);
     collection.insert({'a':1}, function(ids) {
       collection.find(function(cursor) {
         cursor.each(function(item) {
@@ -1049,7 +1053,7 @@ function test_to_a_after_each() {
 
 function test_where() {
   client.createCollection(function(collection) {
-    test.assertTrue(collection instanceof Collection);
+    test.assertTrue(collection instanceof mongo.Collection);
     collection.insert([{'a':1}, {'a':2}, {'a':3}], function(ids) {
       collection.count(function(count) {
         test.assertEquals(3, count);
@@ -1059,7 +1063,7 @@ function test_where() {
           cursor.count(function(count) {
             test.assertEquals(1, count);
           });          
-        }, {'$where':new Code('this.a > 2')});
+        }, {'$where':new mongo.Code('this.a > 2')});
         
         collection.find(function(cursor) {
           cursor.count(function(count) {
@@ -1068,7 +1072,7 @@ function test_where() {
             // Let's close the db 
             finished_test({test_where:'ok'});                 
           });
-        }, {'$where':new Code('this.a > i', new OrderedHash().add('i', 1))});
+        }, {'$where':new mongo.Code('this.a > i', new mongo.OrderedHash().add('i', 1))});
       });
     });    
   }, 'test_where');
@@ -1103,15 +1107,15 @@ function test_eval() {
   
   client.eval(function(result) {
     test.assertEquals(5, result);            
-  }, new Code("2 + 3;"));
+  }, new mongo.Code("2 + 3;"));
   
   client.eval(function(result) {
     test.assertEquals(2, result);            
-  }, new Code("return i;", {'i':2}));
+  }, new mongo.Code("return i;", {'i':2}));
   
   client.eval(function(result) {
     test.assertEquals(5, result);            
-  }, new Code("i + 3;", {'i':2}));
+  }, new mongo.Code("i + 3;", {'i':2}));
   
   client.eval(function(result) {
     test.assertTrue(result instanceof Error);
@@ -1261,10 +1265,10 @@ function test_deref() {
                 
                 client.dereference(function(result) {
                   test.assertEquals('hello', document.get('x'));
-                }, new DBRef("test_deref", document.get('_id')));
+                }, new mongo.DBRef("test_deref", document.get('_id')));
               });
             });            
-          }, new DBRef("test_deref", new ObjectID()));
+          }, new mongo.DBRef("test_deref", new mongo.ObjectID()));
           
           client.dereference(function(result) {
             var obj = {'_id':4};
@@ -1279,12 +1283,12 @@ function test_deref() {
                       test.assertEquals(null, result);
                       // Let's close the db 
                       finished_test({test_deref:'ok'});                                   
-                    }, new DBRef("test_deref", null));
+                    }, new mongo.DBRef("test_deref", null));
                   });
                 });
-              }, new DBRef("test_deref", 4));
+              }, new mongo.DBRef("test_deref", 4));
             });
-          }, new DBRef("test_deref", 4));          
+          }, new mongo.DBRef("test_deref", 4));          
         })
       })          
     })    
@@ -1295,7 +1299,7 @@ function test_save() {
   client.createCollection(function(collection) {
     var doc = {'hello':'world'};
     collection.save(function(docs) {
-      test.assertTrue(docs[0].get('_id') instanceof ObjectID);
+      test.assertTrue(docs[0].get('_id') instanceof mongo.ObjectID);
       collection.count(function(count) {
         test.assertEquals(1, count);
         doc = docs[0];
@@ -1325,7 +1329,7 @@ function test_save() {
                     // Let's close the db 
                     finished_test({test_save:'ok'});                                   
                   });                  
-                }, new OrderedHash().add('hello', 'world'));                
+                }, new mongo.OrderedHash().add('hello', 'world'));                
               });              
             }, doc);            
           });
@@ -1337,9 +1341,9 @@ function test_save() {
 
 function test_save_long() {
   client.createCollection(function(collection) {
-    collection.insert({'x':Long.fromNumber(9223372036854775807)});
+    collection.insert({'x':mongo.Long.fromNumber(9223372036854775807)});
     collection.findOne(function(doc) {
-      test.assertTrue(Long.fromNumber(9223372036854775807).equals(doc.get('x')));
+      test.assertTrue(mongo.Long.fromNumber(9223372036854775807).equals(doc.get('x')));
       // Let's close the db 
       finished_test({test_save_long:'ok'});                                   
     });
@@ -1349,7 +1353,7 @@ function test_save_long() {
 function test_find_by_oid() {
   client.createCollection(function(collection) {
     collection.save(function(docs) {
-      test.assertTrue(docs[0].get('_id') instanceof ObjectID);
+      test.assertTrue(docs[0].get('_id') instanceof mongo.ObjectID);
       
       collection.findOne(function(doc) {
         test.assertEquals('mike', doc.get('hello'));
@@ -1359,7 +1363,7 @@ function test_find_by_oid() {
           test.assertEquals('mike', doc.get('hello'));          
           // Let's close the db 
           finished_test({test_find_by_oid:'ok'});                                   
-        }, {'_id':new ObjectID(id)});        
+        }, {'_id':new mongo.ObjectID(id)});        
       }, {'_id':docs[0].get('_id')});      
     }, {'hello':'mike'});    
   }, 'test_find_by_oid');
@@ -1410,11 +1414,11 @@ function test_invalid_key_names() {
     });
     
     collection.insert({'he$llo':'world'}, function(docs) {
-      test.assertTrue(docs[0] instanceof OrderedHash);
+      test.assertTrue(docs[0] instanceof mongo.OrderedHash);
     })
 
     collection.insert({'hello':{'hell$o':'world'}}, function(docs) {
-      test.assertTrue(docs[0] instanceof OrderedHash);
+      test.assertTrue(docs[0] instanceof mongo.OrderedHash);
     })
 
     collection.insert({'.hello':'world'}, function(doc) {
@@ -1443,39 +1447,27 @@ function test_invalid_key_names() {
 
 function test_collection_names2() {
   client.collection(function(collection) {
-    test.assertEquals(true, collection.err);
-    test.assertEquals(false, collection.ok);
-    test.assertEquals("Error: collection name must be a String", collection.errmsg);            
+    test.assertEquals("Error: collection name must be a String", collection.message);            
   }, 5);
   
   client.collection(function(collection) {
-    test.assertEquals(true, collection.err);
-    test.assertEquals(false, collection.ok);
-    test.assertEquals("Error: collection names cannot be empty", collection.errmsg);            
+    test.assertEquals("Error: collection names cannot be empty", collection.message);            
   }, "");  
-
+  
   client.collection(function(collection) {
-    test.assertEquals(true, collection.err);
-    test.assertEquals(false, collection.ok);
-    test.assertEquals("Error: collection names must not contain '$'", collection.errmsg);            
+    test.assertEquals("Error: collection names must not contain '$'", collection.message);            
   }, "te$t");  
-
+  
   client.collection(function(collection) {
-    test.assertEquals(true, collection.err);
-    test.assertEquals(false, collection.ok);
-    test.assertEquals("Error: collection names must not start or end with '.'", collection.errmsg);            
+    test.assertEquals("Error: collection names must not start or end with '.'", collection.message);            
   }, ".test");  
-
+  
   client.collection(function(collection) {
-    test.assertEquals(true, collection.err);
-    test.assertEquals(false, collection.ok);
-    test.assertEquals("Error: collection names must not start or end with '.'", collection.errmsg);            
+    test.assertEquals("Error: collection names must not start or end with '.'", collection.message);            
   }, "test.");  
-
+  
   client.collection(function(collection) {
-    test.assertEquals(true, collection.err);
-    test.assertEquals(false, collection.ok);
-    test.assertEquals("Error: collection names cannot be empty", collection.errmsg);            
+    test.assertEquals("Error: collection names cannot be empty", collection.message);            
     
     // Let's close the db 
     finished_test({test_collection_names2:'ok'});                                   
@@ -1636,7 +1628,7 @@ function test_sort() {
     
     collection.find(function(cursor) {      
       cursor.sort(function(cursor) {
-        test.assertTrue(cursor instanceof Cursor);
+        test.assertTrue(cursor instanceof mongo.Cursor);
         test.assertEquals(['a', 1], cursor.sortValue);
       }, ['a', 1]);      
     });
@@ -1667,7 +1659,7 @@ function test_sort() {
     
     collection.find(function(cursor) {
       cursor.sort(function(cursor) {
-        test.assertTrue(cursor instanceof Cursor);
+        test.assertTrue(cursor instanceof mongo.Cursor);
         test.assertEquals([['a', -1], ['b', 1]], cursor.sortValue);
       }, [['a', -1], ['b', 1]]);      
     });
@@ -2014,7 +2006,7 @@ function test_close_after_query_sent() {
 }
 
 function test_kill_cursors() {
-  var test_kill_cursors_client = new Db('integration_tests4_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+  var test_kill_cursors_client = new mongo.Db('integration_tests4_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
   test_kill_cursors_client.open(function(test_kill_cursors_client) {
     var number_of_tests_done = 0;
     
@@ -2110,6 +2102,8 @@ function test_count_with_fields() {
     }, {'x':1});
   }, 'test_count_with_fields');
 }
+
+var client_tests = [test_gs_exist];
 
 // Gridstore tests
 function test_gs_exist() {
@@ -3006,34 +3000,34 @@ function test_custom_primary_key_generator() {
 }
 
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_last_status];
+// var client_tests = [test_authentication];
 
-var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
-      test_collection_names, test_collections_info, test_collection_options, test_index_information,
-      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
-      test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
-      test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
-      test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
-      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
-      test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
-      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
-      test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
-      test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
-      test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
-      test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
-      test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
-      test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator];
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
+//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+//       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
+//       test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
+//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+//       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
+//       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
+//       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
+//       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator];
 
 /*******************************************************************************************************
   Setup For Running Tests
 *******************************************************************************************************/
 // Set up the client connection
-var client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {}), {});
+var client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {}), {});
 client.open(function(client) {
   // Do cleanup of the db
   client.dropDatabase(function() {
