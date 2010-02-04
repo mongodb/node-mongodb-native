@@ -1,6 +1,5 @@
 require.paths.unshift("./spec/lib", "./lib");
 process.mixin(GLOBAL, require("sys"))
-// process.mixin(GLOBAL, require("goog/base"))
 
 sys = require("sys")
 require("jspec")
@@ -45,6 +44,6 @@ else
   JSpec
     .exec('spec/spec.bson.js')
     .exec('spec/spec.commands.js')
-JSpec.run({ formatter: JSpec.formatters.Terminal, failuresOnly: true })
+JSpec.run({ reporter: JSpec.reporters.Terminal, failuresOnly: true })
 JSpec.report()
 

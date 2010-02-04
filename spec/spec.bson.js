@@ -119,7 +119,7 @@ describe 'BSON'
       date.setUTCSeconds(30)
       var doc = {doc: date}
       var serialized_data = new BSON().serialize(doc)
-      doc.should.eql new BSON().deserialize(serialized_data).unorderedHash()
+      doc.date.should.eql new BSON().deserialize(serialized_data).unorderedHash().date      
     end    
         
     it 'Should Correctly Serialize and Deserialize Oid'
