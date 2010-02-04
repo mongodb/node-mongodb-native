@@ -5,15 +5,15 @@ GLOBAL.DEBUG = true;
 sys = require("sys");
 test = require("mjsunit");
 
-require("mongodb/db");
-require("mongodb/bson/bson");
-require("mongodb/gridfs/gridstore");
+var mongo = require('mongodb/db');
+process.mixin(mongo, require('mongodb/connection'));
+process.mixin(mongo, require('mongodb/bson/bson'));
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : mongo.Connection.DEFAULT_PORT;
 
 sys.puts("Connecting to " + host + ":" + port);
-var db = new Db('node-mongo-examples', new Server(host, port, {}), {});
+var db = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), {});
 db.open(function(db) {
   db.dropDatabase(function() {
     // Fetch the collection test
