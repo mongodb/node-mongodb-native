@@ -4,18 +4,13 @@ GLOBAL.DEBUG = true;
 
 sys = require("sys");
 test = require("mjsunit");
-require("mongodb/db");
-require("mongodb/bson/bson");
-require("mongodb/gridfs/gridstore");
+process.mixin(require("mongodb/db"));
+process.mixin(require("mongodb/admin"));
+process.mixin(require("mongodb/gridfs/gridstore"));
 
 /*******************************************************************************************************
   Integration Tests
 *******************************************************************************************************/
-
-//#####################################
-// Needs to be fixed (problem with count vs number of records left)
-//#####################################
-
 // Test the creation of a collection on the mongo db
 function test_collection_methods() {
   client.createCollection(function(collection) {
@@ -267,18 +262,18 @@ function test_last_status() {
                 client.lastStatus(function(status) {
                   test.assertEquals(true, status[0].documents[0].get('ok'));                
                   test.assertEquals(false, status[0].documents[0].get('updatedExisting'));                
-
+            
                   // Check safe update of a document
                   collection.insert(new OrderedHash().add("x", 1), function(ids) {
                     collection.update(function(document) {
                       test.assertTrue(document instanceof OrderedHash);
                       test.assertTrue(document.get('$set') instanceof OrderedHash);
                     }, new OrderedHash().add("x", 1), new OrderedHash().add("$set", new OrderedHash().add("x", 2)), {'safe':true});
-
+            
                     collection.update(function(document) {
                       test.assertTrue(document instanceof Error);
                       test.assertEquals("Failed to update document", document.message);
-
+            
                       // Let's close the db 
                       finished_test({test_last_status:'ok'});                     
                     }, new OrderedHash().add("y", 1), new OrderedHash().add("$set", new OrderedHash().add("y", 2)), {'safe':true});
@@ -3010,10 +3005,8 @@ function test_custom_primary_key_generator() {
   });      
 }
 
-var client_tests = [test_strict_access_collection];
-
 // Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_pair, test_cluster];
+var client_tests = [test_last_status];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,

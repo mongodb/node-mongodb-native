@@ -3,7 +3,6 @@
 //
 describe 'Mongo Commands'
   before_each
-    bson = new BSON();
   end
   
   describe 'Insert Command'
@@ -81,8 +80,8 @@ describe 'Mongo Commands'
   
   describe 'Reply Response'
     it 'Should Correctly Generate and parse a Reply Object'
-      var reply_message = BinaryParser.fromInt(0) + bson.encodeLong(Long.fromNumber(1222)) + BinaryParser.fromInt(100) + BinaryParser.fromInt(2);
-      reply_message = reply_message + bson.serialize({name:'peter pan'}) + bson.serialize({name:'captain hook'});
+      var reply_message = BinaryParser.fromInt(0) + BSON.encodeLong(Long.fromNumber(1222)) + BinaryParser.fromInt(100) + BinaryParser.fromInt(2);
+      reply_message = reply_message + BSON.serialize({name:'peter pan'}) + BSON.serialize({name:'captain hook'});
       var message = BinaryParser.fromInt(reply_message.length + 4*4) + BinaryParser.fromInt(2) + BinaryParser.fromInt(1) + BinaryParser.fromInt(BaseCommand.OP_QUERY) + reply_message;
       // Parse the message into a proper reply object
       var mongo_reply = new MongoReply(message);
