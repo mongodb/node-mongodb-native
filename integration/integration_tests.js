@@ -9,6 +9,7 @@ process.mixin(mongo, require('mongodb/connection'));
 process.mixin(mongo, require('mongodb/bson/bson'));
 process.mixin(mongo, require('mongodb/admin'));
 process.mixin(mongo, require('mongodb/gridfs/gridstore'));
+process.mixin(mongo, require('mongodb/gridfs/chunk'));
 process.mixin(mongo, require('mongodb/collection'));
 process.mixin(mongo, require('mongodb/bson/collections'));
 
@@ -74,11 +75,11 @@ function test_collections() {
     client.createCollection(function(r) {
       // Insert test documents (creates collections)
       client.collection(function(spiderman_collection) {
-        spiderman_collection.insert(new OrderedHash().add("foo", 5));        
+        spiderman_collection.insert(new mongo.OrderedHash().add("foo", 5));        
       }, 'test.spiderman');
       
       client.collection(function(mario_collection) {
-        mario_collection.insert(new OrderedHash().add("bar", 0));        
+        mario_collection.insert(new mongo.OrderedHash().add("bar", 0));        
       }, 'test.mario');
 
       // Assert collections
@@ -2103,23 +2104,21 @@ function test_count_with_fields() {
   }, 'test_count_with_fields');
 }
 
-var client_tests = [test_gs_exist];
-
 // Gridstore tests
 function test_gs_exist() {
-  var gridStore = new GridStore(client, "foobar", "w");
+  var gridStore = new mongo.GridStore(client, "foobar", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
-        GridStore.exist(function(result) {
+        mongo.GridStore.exist(function(result) {
           test.assertEquals(true, result);
         }, client, 'foobar');
 
-        GridStore.exist(function(result) {
+        mongo.GridStore.exist(function(result) {
           test.assertEquals(false, result);
         }, client, 'does_not_exist');
 
-        GridStore.exist(function(result) {
+        mongo.GridStore.exist(function(result) {
           test.assertEquals(false, result);
           finished_test({test_gs_exist:'ok'});        
         }, client, 'foobar', 'another_root');
@@ -2129,11 +2128,11 @@ function test_gs_exist() {
 }
 
 function test_gs_list() {
-  var gridStore = new GridStore(client, "foobar2", "w");
+  var gridStore = new mongo.GridStore(client, "foobar2", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
-        GridStore.list(function(items) {
+        mongo.GridStore.list(function(items) {
           var found = false;
           items.forEach(function(filename) {
             if(filename == 'foobar2') found = true;
@@ -2143,7 +2142,7 @@ function test_gs_list() {
           test.assertTrue(found);
         }, client);
 
-        GridStore.list(function(items) {
+        mongo.GridStore.list(function(items) {
           var found = false;
           items.forEach(function(filename) {
             if(filename == 'foobar2') found = true;
@@ -2153,7 +2152,7 @@ function test_gs_list() {
           test.assertTrue(found);
         }, client, 'fs');
 
-        GridStore.list(function(items) {
+        mongo.GridStore.list(function(items) {
           var found = false;
           items.forEach(function(filename) {
             if(filename == 'foobar2') found = true;
@@ -2162,11 +2161,11 @@ function test_gs_list() {
           test.assertTrue(items.length >= 0);
           test.assertTrue(!found);
           
-          var gridStore2 = new GridStore(client, "foobar3", "w");
+          var gridStore2 = new mongo.GridStore(client, "foobar3", "w");
           gridStore2.open(function(gridStore) {    
             gridStore2.write(function(gridStore) {
               gridStore.close(function(result) {                
-                GridStore.list(function(items) {
+                mongo.GridStore.list(function(items) {
                   var found = false;
                   var found2 = false;
                   items.forEach(function(filename) {
@@ -2189,7 +2188,7 @@ function test_gs_list() {
 }
 
 function test_gs_small_write() {
-  var gridStore = new GridStore(client, "test_gs_small_write", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_small_write", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
@@ -2198,7 +2197,7 @@ function test_gs_small_write() {
             cursor.toArray(function(items) {
               test.assertEquals(1, items.length);
               var item = items[0];
-              test.assertTrue(item.get('_id') instanceof ObjectID);
+              test.assertTrue(item.get('_id') instanceof mongo.ObjectID);
               
               client.collection(function(collection) {
                 collection.find(function(cursor) {
@@ -2217,7 +2216,7 @@ function test_gs_small_write() {
 }
 
 function test_gs_small_file() {
-  var gridStore = new GridStore(client, "test_gs_small_file", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_small_file", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
@@ -2227,7 +2226,7 @@ function test_gs_small_file() {
               test.assertEquals(1, items.length);
               
               // Read test of the file
-              GridStore.read(function(data) {
+              mongo.GridStore.read(function(data) {
                 test.assertEquals('hello world!', data);
                 finished_test({test_gs_small_file:'ok'});        
               }, client, 'test_gs_small_file');              
@@ -2240,17 +2239,17 @@ function test_gs_small_file() {
 }
 
 function test_gs_overwrite() {
-  var gridStore = new GridStore(client, "test_gs_overwrite", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_overwrite", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
-        var gridStore2 = new GridStore(client, "test_gs_overwrite", "w");
+        var gridStore2 = new mongo.GridStore(client, "test_gs_overwrite", "w");
         gridStore2.open(function(gridStore) {    
           gridStore2.write(function(gridStore) {
             gridStore2.close(function(result) {
               
               // Assert that we have overwriten the data
-              GridStore.read(function(data) {
+              mongo.GridStore.read(function(data) {
                 test.assertEquals('overwrite', data);
                 finished_test({test_gs_overwrite:'ok'});        
               }, client, 'test_gs_overwrite');                            
@@ -2263,12 +2262,12 @@ function test_gs_overwrite() {
 }
 
 function test_gs_read_length() {
-  var gridStore = new GridStore(client, "test_gs_read_length", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_read_length", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
         // Assert that we have overwriten the data
-        GridStore.read(function(data) {
+        mongo.GridStore.read(function(data) {
           test.assertEquals('hello', data);
           finished_test({test_gs_read_length:'ok'});        
         }, client, 'test_gs_read_length', 5);                            
@@ -2278,16 +2277,16 @@ function test_gs_read_length() {
 }
 
 function test_gs_read_with_offset() {
-  var gridStore = new GridStore(client, "test_gs_read_with_offset", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_read_with_offset", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
         // Assert that we have overwriten the data
-        GridStore.read(function(data) {
+        mongo.GridStore.read(function(data) {
           test.assertEquals('world', data);
         }, client, 'test_gs_read_with_offset', 5, 7);                            
 
-        GridStore.read(function(data) {
+        mongo.GridStore.read(function(data) {
           test.assertEquals('world!', data);
           finished_test({test_gs_read_with_offset:'ok'});        
         }, client, 'test_gs_read_with_offset', null, 7);                            
@@ -2297,11 +2296,11 @@ function test_gs_read_with_offset() {
 }
 
 function test_gs_seek() {
-  var gridStore = new GridStore(client, "test_gs_seek", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_seek", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {        
-        var gridStore2 = new GridStore(client, "test_gs_seek", "r");
+        var gridStore2 = new mongo.GridStore(client, "test_gs_seek", "r");
         gridStore2.open(function(gridStore) {    
           gridStore.seek(function(gridStore) {
             gridStore.getc(function(chr) {
@@ -2310,7 +2309,7 @@ function test_gs_seek() {
           }, 0);
         });
         
-        var gridStore3 = new GridStore(client, "test_gs_seek", "r");
+        var gridStore3 = new mongo.GridStore(client, "test_gs_seek", "r");
         gridStore3.open(function(gridStore) {    
           gridStore.seek(function(gridStore) {
             gridStore.getc(function(chr) {
@@ -2319,7 +2318,7 @@ function test_gs_seek() {
           }, 7);
         });
         
-        var gridStore4 = new GridStore(client, "test_gs_seek", "r");
+        var gridStore4 = new mongo.GridStore(client, "test_gs_seek", "r");
         gridStore4.open(function(gridStore) {    
           gridStore.seek(function(gridStore) {
             gridStore.getc(function(chr) {
@@ -2328,25 +2327,25 @@ function test_gs_seek() {
           }, 4);
         });
 
-        var gridStore5 = new GridStore(client, "test_gs_seek", "r");
+        var gridStore5 = new mongo.GridStore(client, "test_gs_seek", "r");
         gridStore5.open(function(gridStore) {    
           gridStore.seek(function(gridStore) {
             gridStore.getc(function(chr) {
               test.assertEquals('!', chr);
             });
-          }, -1, GridStore.IO_SEEK_END);
+          }, -1, mongo.GridStore.IO_SEEK_END);
         });
 
-        var gridStore6 = new GridStore(client, "test_gs_seek", "r");
+        var gridStore6 = new mongo.GridStore(client, "test_gs_seek", "r");
         gridStore6.open(function(gridStore) {    
           gridStore.seek(function(gridStore) {
             gridStore.getc(function(chr) {
               test.assertEquals('w', chr);
             });
-          }, -6, GridStore.IO_SEEK_END);
+          }, -6, mongo.GridStore.IO_SEEK_END);
         });
 
-        var gridStore7 = new GridStore(client, "test_gs_seek", "r");
+        var gridStore7 = new mongo.GridStore(client, "test_gs_seek", "r");
         gridStore7.open(function(gridStore) {    
           gridStore.seek(function(gridStore) {
             gridStore.getc(function(chr) {
@@ -2365,13 +2364,13 @@ function test_gs_seek() {
                           test.assertEquals('o', chr);
                           finished_test({test_gs_seek:'ok'});        
                         });
-                      }, 3, GridStore.IO_SEEK_CUR);        
+                      }, 3, mongo.GridStore.IO_SEEK_CUR);        
                     });
-                  }, -4, GridStore.IO_SEEK_CUR);        
+                  }, -4, mongo.GridStore.IO_SEEK_CUR);        
                 });
-              }, -1, GridStore.IO_SEEK_CUR);        
+              }, -1, mongo.GridStore.IO_SEEK_CUR);        
             });
-          }, 7, GridStore.IO_SEEK_CUR);
+          }, 7, mongo.GridStore.IO_SEEK_CUR);
         });
       });
     }, "hello, world!");
@@ -2379,10 +2378,10 @@ function test_gs_seek() {
 }
 
 function test_gs_multi_chunk() {
-  var fs_client = new Db('integration_tests_10', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  var fs_client = new mongo.Db('integration_tests_10', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
-      var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
+      var gridStore = new mongo.GridStore(fs_client, "test_gs_multi_chunk", "w");
       gridStore.open(function(gridStore) {    
         gridStore.chunkSize = 512;
         var file1 = ''; var file2 = ''; var file3 = '';
@@ -2398,7 +2397,7 @@ function test_gs_multi_chunk() {
                   collection.count(function(count) {
                     test.assertEquals(3, count);
 
-                    GridStore.read(function(data) {
+                    mongo.GridStore.read(function(data) {
                       test.assertEquals(512*3, data.length);
                       finished_test({test_gs_multi_chunk:'ok'});                    
                       fs_client.close();
@@ -2415,13 +2414,13 @@ function test_gs_multi_chunk() {
 }
 
 function test_gs_puts_and_readlines() {
-  var gridStore = new GridStore(client, "test_gs_puts_and_readlines", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_puts_and_readlines", "w");
   gridStore.open(function(gridStore) {    
     gridStore.puts(function(gridStore) {
       gridStore.puts(function(gridStore) {
         gridStore.puts(function(gridStore) {          
           gridStore.close(function(result) {
-            GridStore.readlines(function(lines) {
+            mongo.GridStore.readlines(function(lines) {
               test.assertEquals(["line one\n", "line two\n", "line three\n"], lines);
               finished_test({test_gs_puts_and_readlines:'ok'});                    
             }, client, 'test_gs_puts_and_readlines');
@@ -2433,10 +2432,10 @@ function test_gs_puts_and_readlines() {
 }
 
 function test_gs_unlink() {
-  var fs_client = new Db('integration_tests_11', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  var fs_client = new mongo.Db('integration_tests_11', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
-      var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
+      var gridStore = new mongo.GridStore(fs_client, "test_gs_unlink", "w");
       gridStore.open(function(gridStore) {    
         gridStore.write(function(gridStore) {
           gridStore.close(function(result) {
@@ -2451,7 +2450,7 @@ function test_gs_unlink() {
                 test.assertEquals(1, count);
                 
                 // Unlink the file
-                GridStore.unlink(function(gridStore) {
+                mongo.GridStore.unlink(function(gridStore) {
                   fs_client.collection(function(collection) {
                     collection.count(function(count) {
                       test.assertEquals(0, count);
@@ -2477,15 +2476,15 @@ function test_gs_unlink() {
 }
 
 function test_gs_append() {
-  var fs_client = new Db('integration_tests_12', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  var fs_client = new mongo.Db('integration_tests_12', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
-      var gridStore = new GridStore(fs_client, "test_gs_append", "w");
+      var gridStore = new mongo.GridStore(fs_client, "test_gs_append", "w");
       gridStore.open(function(gridStore) {    
         gridStore.write(function(gridStore) {
           gridStore.close(function(result) {
             
-            var gridStore2 = new GridStore(fs_client, "test_gs_append", "w+");
+            var gridStore2 = new mongo.GridStore(fs_client, "test_gs_append", "w+");
             gridStore2.open(function(gridStore) {
               gridStore.write(function(gridStore) {
                 gridStore.close(function(result) {
@@ -2494,7 +2493,7 @@ function test_gs_append() {
                     collection.count(function(count) {
                       test.assertEquals(1, count);
                       
-                      GridStore.read(function(data) {
+                      mongo.GridStore.read(function(data) {
                         test.assertEquals("hello, world! how are you?", data);
                         
                         finished_test({test_gs_append:'ok'});       
@@ -2513,17 +2512,17 @@ function test_gs_append() {
 }
 
 function test_gs_rewind_and_truncate_on_write() {
-  var gridStore = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
-        var gridStore2 = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
+        var gridStore2 = new mongo.GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
         gridStore2.open(function(gridStore) {
           gridStore.write(function(gridStore) {
             gridStore.rewind(function(gridStore) {
               gridStore.write(function(gridStore) {
                 gridStore.close(function(result) {
-                  GridStore.read(function(data) {
+                  mongo.GridStore.read(function(data) {
                     test.assertEquals("abc", data);
         
                     finished_test({test_gs_rewind_and_truncate_on_write:'ok'});       
@@ -2539,11 +2538,11 @@ function test_gs_rewind_and_truncate_on_write() {
 }
 
 function test_gs_tell() {
-  var gridStore = new GridStore(client, "test_gs_tell", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_tell", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
-        var gridStore2 = new GridStore(client, "test_gs_tell", "r");
+        var gridStore2 = new mongo.GridStore(client, "test_gs_tell", "r");
         gridStore2.open(function(gridStore) {
           gridStore.read(function(data) {
             test.assertEquals("hello", data);
@@ -2560,10 +2559,10 @@ function test_gs_tell() {
 }
 
 function test_gs_save_empty_file() {
-  var fs_client = new Db('integration_tests_13', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  var fs_client = new mongo.Db('integration_tests_13', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
-      var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");
+      var gridStore = new mongo.GridStore(fs_client, "test_gs_save_empty_file", "w");
       gridStore.open(function(gridStore) {    
         gridStore.write(function(gridStore) {
           gridStore.close(function(result) {
@@ -2589,10 +2588,10 @@ function test_gs_save_empty_file() {
 }
 
 function test_gs_empty_file_eof() {
-  var gridStore = new GridStore(client, 'test_gs_empty_file_eof', "w");
+  var gridStore = new mongo.GridStore(client, 'test_gs_empty_file_eof', "w");
   gridStore.open(function(gridStore) {
     gridStore.close(function(gridStore) {      
-      var gridStore2 = new GridStore(client, 'test_gs_empty_file_eof', "r");
+      var gridStore2 = new mongo.GridStore(client, 'test_gs_empty_file_eof', "r");
       gridStore2.open(function(gridStore) {
         test.assertEquals(true, gridStore.eof());
         finished_test({test_gs_empty_file_eof:'ok'});       
@@ -2602,15 +2601,15 @@ function test_gs_empty_file_eof() {
 }
 
 function test_gs_cannot_change_chunk_size_on_read() {
-  var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
         
-        var gridStore2 = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
+        var gridStore2 = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
         gridStore2.open(function(gridStore) {
           gridStore.chunkSize = 42; 
-          test.assertEquals(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+          test.assertEquals(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
           finished_test({test_gs_cannot_change_chunk_size_on_read:'ok'});       
         });        
       });
@@ -2619,24 +2618,24 @@ function test_gs_cannot_change_chunk_size_on_read() {
 }
 
 function test_gs_cannot_change_chunk_size_after_data_written() {
-  var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
   gridStore.open(function(gridStore) {    
     gridStore.write(function(gridStore) {
       gridStore.chunkSize = 42; 
-      test.assertEquals(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+      test.assertEquals(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
       finished_test({test_gs_cannot_change_chunk_size_after_data_written:'ok'});       
     }, "hello, world!");
   });              
 }
 
 function test_change_chunk_size() {
-  var gridStore = new GridStore(client, "test_change_chunk_size", "w");
+  var gridStore = new mongo.GridStore(client, "test_change_chunk_size", "w");
   gridStore.open(function(gridStore) {   
     gridStore.chunkSize = 42
      
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
-        var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
+        var gridStore2 = new mongo.GridStore(client, "test_change_chunk_size", "r");
         gridStore2.open(function(gridStore) {
           test.assertEquals(42, gridStore.chunkSize);
           finished_test({test_change_chunk_size:'ok'});       
@@ -2647,11 +2646,11 @@ function test_change_chunk_size() {
 }
 
 function test_gs_chunk_size_in_option() {
-  var gridStore = new GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
+  var gridStore = new mongo.GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
   gridStore.open(function(gridStore) {   
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
-        var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
+        var gridStore2 = new mongo.GridStore(client, "test_change_chunk_size", "r");
         gridStore2.open(function(gridStore) {
           test.assertEquals(42, gridStore.chunkSize);
           finished_test({test_gs_chunk_size_in_option:'ok'});       
@@ -2662,20 +2661,20 @@ function test_gs_chunk_size_in_option() {
 }
 
 function test_gs_md5() {
-  var gridStore = new GridStore(client, "new-file", "w");
+  var gridStore = new mongo.GridStore(client, "new-file", "w");
   gridStore.open(function(gridStore) {   
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
-        var gridStore2 = new GridStore(client, "new-file", "r");
+        var gridStore2 = new mongo.GridStore(client, "new-file", "r");
         gridStore2.open(function(gridStore) {
           test.assertEquals("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
           gridStore.md5 = "can't do this";
           test.assertEquals("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
           
-          var gridStore2 = new GridStore(client, "new-file", "w");
+          var gridStore2 = new mongo.GridStore(client, "new-file", "w");
           gridStore2.open(function(gridStore) {
             gridStore.close(function(result) {
-              var gridStore3 = new GridStore(client, "new-file", "r");
+              var gridStore3 = new mongo.GridStore(client, "new-file", "r");
               gridStore3.open(function(gridStore) {
                 test.assertEquals("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
 
@@ -2693,25 +2692,25 @@ function test_gs_upload_date() {
   var now = new Date();
   var originalFileUploadDate = null;
 
-  var gridStore = new GridStore(client, "test_gs_upload_date", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_upload_date", "w");
   gridStore.open(function(gridStore) {   
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
 
-        var gridStore2 = new GridStore(client, "test_gs_upload_date", "r");
+        var gridStore2 = new mongo.GridStore(client, "test_gs_upload_date", "r");
         gridStore2.open(function(gridStore) {
           test.assertTrue(gridStore.uploadDate != null);
           // test.assertTrue((gridStore.uploadDate.getTime() - now.getTime()) > 0);
           originalFileUploadDate = gridStore.uploadDate;
           
           gridStore2.close(function(result) {
-            var gridStore3 = new GridStore(client, "test_gs_upload_date", "w");
+            var gridStore3 = new mongo.GridStore(client, "test_gs_upload_date", "w");
             gridStore3.open(function(gridStore) {
               gridStore3.write(function(gridStore) {
                 gridStore3.close(function(result) {
                   var fileUploadDate = null;
                   
-                  var gridStore4 = new GridStore(client, "test_gs_upload_date", "r");
+                  var gridStore4 = new mongo.GridStore(client, "test_gs_upload_date", "r");
                   gridStore4.open(function(gridStore) {
                     test.assertEquals(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
                     finished_test({test_gs_upload_date:'ok'});       
@@ -2729,21 +2728,21 @@ function test_gs_upload_date() {
 function test_gs_content_type() {
   var ct = null;
 
-  var gridStore = new GridStore(client, "test_gs_content_type", "w");
+  var gridStore = new mongo.GridStore(client, "test_gs_content_type", "w");
   gridStore.open(function(gridStore) {   
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
 
-        var gridStore2 = new GridStore(client, "test_gs_content_type", "r");
+        var gridStore2 = new mongo.GridStore(client, "test_gs_content_type", "r");
         gridStore2.open(function(gridStore) {
           ct = gridStore.contentType;
-          test.assertEquals(GridStore.DEFAULT_CONTENT_TYPE, ct);
+          test.assertEquals(mongo.GridStore.DEFAULT_CONTENT_TYPE, ct);
           
-          var gridStore3 = new GridStore(client, "test_gs_content_type", "w+");
+          var gridStore3 = new mongo.GridStore(client, "test_gs_content_type", "w+");
           gridStore3.open(function(gridStore) {
             gridStore.contentType = "text/html";
             gridStore.close(function(result) {              
-              var gridStore4 = new GridStore(client, "test_gs_content_type", "r");
+              var gridStore4 = new mongo.GridStore(client, "test_gs_content_type", "r");
               gridStore4.open(function(gridStore) {
                 test.assertEquals("text/html", gridStore.contentType);
                 finished_test({test_gs_content_type:'ok'});       
@@ -2757,12 +2756,12 @@ function test_gs_content_type() {
 }
 
 function test_gs_content_type_option() {
-  var gridStore = new GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
+  var gridStore = new mongo.GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
   gridStore.open(function(gridStore) {   
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
         
-        var gridStore2 = new GridStore(client, "test_gs_content_type_option", "r");
+        var gridStore2 = new mongo.GridStore(client, "test_gs_content_type_option", "r");
         gridStore2.open(function(gridStore) {
           test.assertEquals('image/jpg', gridStore.contentType);
           finished_test({test_gs_content_type_option:'ok'});       
@@ -2773,7 +2772,7 @@ function test_gs_content_type_option() {
 }
 
 function test_gs_unknown_mode() {
-  var gridStore = new GridStore(client, "test_gs_unknown_mode", "x");
+  var gridStore = new mongo.GridStore(client, "test_gs_unknown_mode", "x");
   gridStore.open(function(gridStore) {
     test.assertTrue(gridStore instanceof Error);
     test.assertEquals("Illegal mode x", gridStore.message);
@@ -2782,21 +2781,21 @@ function test_gs_unknown_mode() {
 }
 
 function test_gs_metadata() {
-  var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
+  var gridStore = new mongo.GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
   gridStore.open(function(gridStore) {   
     gridStore.write(function(gridStore) {
       gridStore.close(function(result) {
 
-        var gridStore2 = new GridStore(client, "test_gs_metadata", "r");
+        var gridStore2 = new mongo.GridStore(client, "test_gs_metadata", "r");
         gridStore2.open(function(gridStore) {
           test.assertEquals(null, gridStore.metadata);
 
-          var gridStore3 = new GridStore(client, "test_gs_metadata", "w+");
+          var gridStore3 = new mongo.GridStore(client, "test_gs_metadata", "w+");
           gridStore3.open(function(gridStore) {
             gridStore.metadata = {'a':1};
             gridStore.close(function(result) {
 
-              var gridStore4 = new GridStore(client, "test_gs_metadata", "r");
+              var gridStore4 = new mongo.GridStore(client, "test_gs_metadata", "r");
               gridStore4.open(function(gridStore) {
                 test.assertEquals(1, gridStore.metadata.get('a'));
                 finished_test({test_gs_metadata:'ok'});       
@@ -2810,7 +2809,7 @@ function test_gs_metadata() {
 }
 
 function test_admin_default_profiling_level() {
-  var fs_client = new Db('admin_test_1', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  var fs_client = new mongo.Db('admin_test_1', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
@@ -2829,7 +2828,7 @@ function test_admin_default_profiling_level() {
 }
 
 function test_admin_change_profiling_level() {
-  var fs_client = new Db('admin_test_2', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  var fs_client = new mongo.Db('admin_test_2', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
@@ -2868,7 +2867,7 @@ function test_admin_change_profiling_level() {
 }
 
 function test_admin_profiling_info() {
-  var fs_client = new Db('admin_test_3', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  var fs_client = new mongo.Db('admin_test_3', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
@@ -2900,7 +2899,7 @@ function test_admin_profiling_info() {
 }
 
 function test_admin_validate_collection() {
-  var fs_client = new Db('admin_test_4', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  var fs_client = new mongo.Db('admin_test_4', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
     fs_client.dropDatabase(function(done) {
       fs_client.collection(function(collection) {
@@ -2921,12 +2920,12 @@ function test_admin_validate_collection() {
 }
 
 function test_pair() {
-  var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
-  p_client.open(function(p_client) {
+  var p_client = new mongo.Db('integration_tests_21', new mongo.ServerPair(new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})), {});
+  p_client.open(function(p_client) {    
     p_client.dropDatabase(function(done) {    
       test.assertTrue(p_client.masterConnection != null);
       test.assertEquals(2, p_client.connections.length);
-  
+      
       test.assertTrue(p_client.serverConfig.leftServer.master);
       test.assertFalse(p_client.serverConfig.rightServer.master);
     
@@ -2935,7 +2934,7 @@ function test_pair() {
           collection.find(function(cursor) {
             cursor.toArray(function(items) {
               test.assertEquals(1, items.length);
-
+    
               finished_test({test_pair:'ok'});       
               p_client.close();
             });
@@ -2947,7 +2946,7 @@ function test_pair() {
 }
 
 function test_cluster() {
-  var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
+  var p_client = new mongo.Db('integration_tests_22', new mongo.ServerCluster([new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})]), {});
   p_client.open(function(p_client) {
     p_client.dropDatabase(function(done) {    
       test.assertTrue(p_client.masterConnection != null);
@@ -2977,10 +2976,10 @@ function test_custom_primary_key_generator() {
   CustomPKFactory = function() {}
   CustomPKFactory.prototype = new Object();
   CustomPKFactory.createPk = function() {  
-    return new ObjectID("aaaaaaaaaaaa");
+    return new mongo.ObjectID("aaaaaaaaaaaa");
   }
 
-  var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
+  var p_client = new mongo.Db('integration_tests_20', new mongo.Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
   p_client.open(function(p_client) {
     p_client.dropDatabase(function(done) {    
       p_client.createCollection(function(collection) {
@@ -2992,7 +2991,7 @@ function test_custom_primary_key_generator() {
               finished_test({test_custom_primary_key_generator:'ok'});       
               p_client.close();
             });
-          }, {'_id':new ObjectID("aaaaaaaaaaaa")});
+          }, {'_id':new mongo.ObjectID("aaaaaaaaaaaa")});
         });
       }, 'test_custom_key');
     });
@@ -3000,28 +2999,28 @@ function test_custom_primary_key_generator() {
 }
 
 // Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_authentication];
+var client_tests = [test_authentication];
 
-// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-//       test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-//       test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
-//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
-//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
-//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
-//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
-//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
-//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
-//       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
-//       test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
-//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
-//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
-//       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
-//       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
-//       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
-//       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator];
+var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
+      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+      test_collection_names, test_collections_info, test_collection_options, test_index_information,
+      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+      test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+      test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+      test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+      test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
+      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
+      test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+      test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+      test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
+      test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
+      test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
+      test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator];
 
 /*******************************************************************************************************
   Setup For Running Tests
