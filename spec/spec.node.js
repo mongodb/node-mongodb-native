@@ -19,8 +19,8 @@ require("mongodb/responses/mongo_reply")
 require("mongodb/db")
 require("mongodb/connection")
 
-require("goog/math/integer")
-require("goog/math/long")
+require("mongodb/goog/math/integer")
+require("mongodb/goog/math/long")
 
 var posix = require('posix')
 
