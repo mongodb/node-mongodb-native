@@ -54,6 +54,7 @@ describe 'Mongo Commands'
   
   describe 'Kill Cursors Command'
     it 'Should Correctly Generate a Kill Cursors Command'
+      Array.prototype.toXml = function() {}    
       var cursorIds = [Long.fromNumber(1), Long.fromNumber(10000222)];
       // Create the command
       var kill_cursor_command = new KillCursorCommand(cursorIds);

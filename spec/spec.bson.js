@@ -99,7 +99,16 @@ describe 'BSON'
     it 'Should Correctly Serialize and Deserialize Array'
       var doc = {doc: [1, 2, 'a', 'b']}
       var serialized_data = BSON.serialize(doc)
-      doc.doc.should.eql [1, 2, 'a', 'b']
+      var deserialized = BSON.deserialize(serialized_data);
+      doc.doc.should.eql deserialized.get('doc')
+    end   
+    
+    it 'Should Correctly Serialize and Deserialize Array with added on functions'
+      Array.prototype.toXml = function() {}    
+      var doc = {doc: [1, 2, 'a', 'b']}
+      var serialized_data = BSON.serialize(doc)
+      var deserialized = BSON.deserialize(serialized_data);
+      doc.doc.should.eql deserialized.get('doc')
     end   
     
     it 'Should Correctly Serialize and Deserialize A Boolean'
