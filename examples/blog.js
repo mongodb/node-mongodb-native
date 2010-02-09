@@ -29,8 +29,8 @@ db.open(function(db) {
         collection.insert([{'name':'William Shakespeare', 'email':'william@shakespeare.com', 'age':587},
           {'name':'Jorge Luis Borges', 'email':'jorge@borges.com', 'age':123}], function(docs) {
             docs.forEach(function(doc) {
-              sys.puts(sys.inspect(doc.unorderedHash()));
-              authors[doc.get('name')] = doc;
+              sys.puts(sys.inspect(doc));
+              authors[doc.name] = doc;
             });
         });
 
@@ -40,7 +40,7 @@ db.open(function(db) {
         collection.find(function(cursor) {
           cursor.each(function(author) {
             if(author != null) {
-              sys.puts("[" + author.get('name') + "]:[" + author.get('email') + "]:[" + author.get('age') + "]");
+              sys.puts("[" + author.name + "]:[" + author.email + "]:[" + author.age + "]");
             } else {
               sys.puts("===================================================================================");        
               sys.puts(">> Adding users");        
@@ -51,8 +51,8 @@ db.open(function(db) {
                 userCollection.insert([{'login':'jdoe', 'name':'John Doe', 'email':'john@doe.com'}, 
                   {'login':'lsmith', 'name':'Lucy Smith', 'email':'lucy@smith.com'}], function(docs) {
                     docs.forEach(function(doc) {
-                      sys.puts(sys.inspect(doc.unorderedHash()));
-                      users[doc.get('login')] = doc;
+                      sys.puts(sys.inspect(doc));
+                      users[doc.login] = doc;
                     });              
                 });
 
@@ -62,7 +62,7 @@ db.open(function(db) {
                 userCollection.find(function(cursor) {
                   cursor.each(function(user) {
                     if(user != null) {
-                      sys.puts("[" + user.get('login') + "]:[" + user.get('name') + "]:[" + user.get('email') + "]");
+                      sys.puts("[" + user.login + "]:[" + user.name + "]:[" + user.email + "]");
                     } else {
                       sys.puts("===================================================================================");        
                       sys.puts(">> Adding articles");        
@@ -71,15 +71,15 @@ db.open(function(db) {
                         articlesCollection.insert([
                           { 'title':'Caminando por Buenos Aires', 
                             'body':'Las callecitas de Buenos Aires tienen ese no se que...', 
-                            'author_id':authors['Jorge Luis Borges'].get('_id')},
+                            'author_id':authors['Jorge Luis Borges']._id},
                           { 'title':'I must have seen thy face before', 
                             'body':'Thine eyes call me in a new way', 
-                            'author_id':authors['William Shakespeare'].get('_id'), 
-                            'comments':[{'user_id':users['jdoe'].get('_id'), 'body':"great article!"}]
+                            'author_id':authors['William Shakespeare']._id, 
+                            'comments':[{'user_id':users['jdoe']._id, 'body':"great article!"}]
                           }
                         ], function(docs) {
                           docs.forEach(function(doc) {
-                            sys.puts(sys.inspect(doc.unorderedHash()));
+                            sys.puts(sys.inspect(doc));
                           });              
                         })
                         
@@ -89,7 +89,7 @@ db.open(function(db) {
                         articlesCollection.find(function(cursor) {
                           cursor.each(function(article) {
                             if(article != null) {
-                              sys.puts("[" + article.get('title') + "]:[" + article.get('body') + "]:[" + article.get('author_id').toHexString() + "]");
+                              sys.puts("[" + article.title + "]:[" + article.body + "]:[" + article.author_id.toHexString() + "]");
                               sys.puts(">> Closing connection");
                               db.close();
                             }

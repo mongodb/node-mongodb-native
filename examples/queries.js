@@ -34,7 +34,7 @@ db.open(function(db) {
             // that provides a 12 byte value
             sys.puts("Printing docs from Cursor Each")
             cursor.each(function(doc) {
-              if(doc != null) sys.puts("Doc from Each " + sys.inspect(doc.unorderedHash()));
+              if(doc != null) sys.puts("Doc from Each " + sys.inspect(doc));
             })                    
           });
           // Cursor has an to array method that reads in all the records to memory
@@ -42,7 +42,7 @@ db.open(function(db) {
             cursor.toArray(function(docs) {
               sys.puts("Printing docs from Array")
               docs.forEach(function(doc) {
-                sys.puts("Doc from Array " + sys.inspect(doc.unorderedHash()));
+                sys.puts("Doc from Array " + sys.inspect(doc));
               });
             });
           });
@@ -95,7 +95,7 @@ db.open(function(db) {
           collection.find(function(cursor) {
             cursor.explain(function(doc) {
               sys.puts("-------------------------- Explanation");
-              sys.puts(sys.inspect(doc.unorderedHash()));
+              sys.puts(sys.inspect(doc));
             })
           }, {'a':/[1|2]/});   
 
@@ -110,14 +110,14 @@ db.open(function(db) {
             collection.find(function(cursor) {
               cursor.explain(function(doc) {
                 sys.puts("-------------------------- Explanation");
-                sys.puts(sys.inspect(doc.unorderedHash()));
+                sys.puts(sys.inspect(doc));
               })
             }, {'a':/[1|2]/});             
 
             collection.find(function(cursor) {
               cursor.explain(function(doc) {
                 sys.puts("-------------------------- Explanation");
-                sys.puts(sys.inspect(doc.unorderedHash()));
+                sys.puts(sys.inspect(doc));
                 db.close();
               })
             }, {'a':/[1|2]/}, {'hint':'a'});             

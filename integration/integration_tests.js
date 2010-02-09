@@ -1303,7 +1303,7 @@ function test_save() {
   client.createCollection(function(collection) {
     var doc = {'hello':'world'};
     collection.save(function(docs) {
-      test.assertTrue(docs[0].get('_id') instanceof mongo.ObjectID);
+      test.assertTrue(docs[0]._id instanceof mongo.ObjectID);
       collection.count(function(count) {
         test.assertEquals(1, count);
         doc = docs[0];
@@ -1357,7 +1357,7 @@ function test_save_long() {
 function test_find_by_oid() {
   client.createCollection(function(collection) {
     collection.save(function(docs) {
-      test.assertTrue(docs[0].get('_id') instanceof mongo.ObjectID);
+      test.assertTrue(docs[0]._id instanceof mongo.ObjectID);
       
       collection.findOne(function(doc) {
         test.assertEquals('mike', doc.hello);
@@ -1368,7 +1368,7 @@ function test_find_by_oid() {
           // Let's close the db 
           finished_test({test_find_by_oid:'ok'});                                   
         }, {'_id':new mongo.ObjectID(id)});        
-      }, {'_id':docs[0].get('_id')});      
+      }, {'_id':docs[0]._id});      
     }, {'hello':'mike'});    
   }, 'test_find_by_oid');
 }
@@ -1418,10 +1418,10 @@ function test_invalid_key_names() {
     });
     
     collection.insert({'he$llo':'world'}, function(docs) {
-      test.assertTrue(docs[0] instanceof mongo.OrderedHash);
+      test.assertTrue(docs[0].constructor == Object);
     })
 
-    collection.insert({'hello':{'hell$o':'world'}}, function(docs) {
+    collection.insert(new mongo.OrderedHash().add('hello', new mongo.OrderedHash().add('hell$o', 'world')), function(docs) {
       test.assertTrue(docs[0] instanceof mongo.OrderedHash);
     })
 

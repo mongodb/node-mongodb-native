@@ -28,7 +28,7 @@ db.open(function(db) {
       // Show collection names in the database
       db.collectionNames(function(names) {
         names.forEach(function(name) {
-          sys.puts(sys.inspect(name.unorderedHash()));          
+          sys.puts(sys.inspect(name));          
         });
       });
       
@@ -36,7 +36,7 @@ db.open(function(db) {
       db.collectionsInfo(function(cursor) {
         cursor.toArray(function(items) {
           items.forEach(function(item) {
-            sys.puts(sys.inspect(item.unorderedHash()));          
+            sys.puts(sys.inspect(item));          
           });        
         });
       })  

@@ -28,7 +28,7 @@ db.open(function(db) {
 
           collection.find(function(cursor) {
             cursor.each(function(item) {
-              if(item != null) sys.puts(sys.inspect(item.unorderedHash()));
+              if(item != null) sys.puts(sys.inspect(item));
               // Null signifies end of iterator
               if(item == null) {                
                 // Destory the collection

@@ -31,7 +31,7 @@ db.open(function(db) {
       // Find returns a Cursor, which is Enumerable. You can iterate:
       collection.find(function(cursor) {
         cursor.each(function(item) {
-          if(item != null) sys.puts(sys.inspect(item.unorderedHash()));
+          if(item != null) sys.puts(sys.inspect(item));
         });
       });
       
@@ -47,7 +47,7 @@ db.open(function(db) {
       collection.find(function(cursor) {
         cursor.toArray(function(items) {          
           cursor.each(function(item) {
-            if(item != null) sys.puts(sys.inspect(item.unorderedHash()));            
+            if(item != null) sys.puts(sys.inspect(item));            
           });
         });
       });  
@@ -55,7 +55,7 @@ db.open(function(db) {
       // You can get the next object    
       collection.find(function(cursor) {
         cursor.nextObject(function(item) {
-          if(item != null) sys.puts(sys.inspect(item.unorderedHash()));                      
+          if(item != null) sys.puts(sys.inspect(item));                      
         });
       });
       
