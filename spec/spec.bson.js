@@ -15,9 +15,9 @@ describe 'BSON'
         serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
       }
       var object = BSON.deserialize(serialized_data);
-      object.get('name').should.eql "a_1"
-      object.get('unique').should.eql false
-      object.get('key').get('a').should.eql 1
+      object.name.should.eql "a_1"
+      object.unique.should.eql false
+      object.key.a.should.eql 1
     end
         
     it 'Should Correctly Deserialize object with all types'
@@ -29,78 +29,78 @@ describe 'BSON'
         serialized_data = serialized_data + BinaryParser.fromByte(bytes[i])
       }
       var object = BSON.deserialize(serialized_data)
-      object.get('string').should.eql "hello"
-      object.get('array').should.eql [1,2,3]
-      object.get('hash').get('a').should.eql 1
-      object.get('hash').get('b').should.eql 2
-      object.get('date').should.not.be_null
-      object.get('oid').should.not.be_null()
-      object.get('binary').should.not.be_null()
-      object.get('int').should.eql 42
-      object.get('float').should.eql 33.3333
-      object.get('regexp').should.not.be_null()
-      object.get('boolean').should.eql true
-      object.get('where').should.not.be_null()
-      object.get('dbref').should.not.be_null()
-      object.get('null').should.be_null()
+      object.string.should.eql "hello"
+      object.array.should.eql [1,2,3]
+      object.hash.a.should.eql 1
+      object.hash.b.should.eql 2
+      object.date.should.not.be_null
+      object.oid.should.not.be_null()
+      object.binary.should.not.be_null()
+      object.int.should.eql 42
+      object.float.should.eql 33.3333
+      object.regexp.should.not.be_null()
+      object.boolean.should.eql true
+      object.where.should.not.be_null()
+      object.dbref.should.not.be_null()
+      object['null'].should.be_null()
     end
     
     it 'Should Serialize and Deserialze String'
       var test_string = {hello: 'world'}
       var serialized_data = BSON.serialize(test_string)
-      test_string.should.eql BSON.deserialize(serialized_data).unorderedHash()
+      test_string.should.eql BSON.deserialize(serialized_data)
     end
     
     it 'Should Correctly Serialize and Deserialize Integer'
       var test_number = {doc: 5}
       var serialized_data = BSON.serialize(test_number)
-      test_number.doc.should.eql BSON.deserialize(serialized_data).get('doc')
+      test_number.doc.should.eql BSON.deserialize(serialized_data).doc
     end    
     
     it 'Should Correctly Serialize and Deserialize null value'
       var test_null = {doc:null}
       var serialized_data = BSON.serialize(test_null)
       var object = BSON.deserialize(serialized_data)
-      object.get('doc').should.be_null
+      object.doc.should.be_null
     end
     
     it 'Should Correctly Serialize and Deserialize Number'
       var test_number = {doc: 5.5}
       var serialized_data = BSON.serialize(test_number)
-      test_number.should.eql BSON.deserialize(serialized_data).unorderedHash()
+      test_number.should.eql BSON.deserialize(serialized_data)
     end
     
     it 'Should Correctly Serialize and Deserialize Integer'
       var test_int = {doc: 42}
       var serialized_data = BSON.serialize(test_int)
-      test_int.doc.should.eql BSON.deserialize(serialized_data).get('doc')
+      test_int.doc.should.eql BSON.deserialize(serialized_data).doc
     
       test_int = {doc: -5600}
       serialized_data = BSON.serialize(test_int)
-      test_int.doc.should.eql BSON.deserialize(serialized_data).get('doc')
+      test_int.doc.should.eql BSON.deserialize(serialized_data).doc
     
       test_int = {doc: 2147483647}
       serialized_data = BSON.serialize(test_int)
-      test_int.doc.should.eql BSON.deserialize(serialized_data).get('doc')
+      test_int.doc.should.eql BSON.deserialize(serialized_data).doc
           
       test_int = {doc: -2147483648}
       serialized_data = BSON.serialize(test_int)
-      test_int.doc.should.eql BSON.deserialize(serialized_data).get('doc')
+      test_int.doc.should.eql BSON.deserialize(serialized_data).doc
     end
     
     it 'Should Correctly Serialize and Deserialize Object'
       var doc = {doc: {age: 42, name: 'Spongebob', shoe_size: 9.5}}
       var serialized_data = BSON.serialize(doc)
-      doc.doc.age.should.eql BSON.deserialize(serialized_data).get('doc').get('age')
-      doc.doc.name.should.eql BSON.deserialize(serialized_data).get('doc').get('name')
-      doc.doc.shoe_size.should.eql BSON.deserialize(serialized_data).get('doc').get('shoe_size')
+      doc.doc.age.should.eql BSON.deserialize(serialized_data).doc.age
+      doc.doc.name.should.eql BSON.deserialize(serialized_data).doc.name
+      doc.doc.shoe_size.should.eql BSON.deserialize(serialized_data).doc.shoe_size
     end
     
     it 'Should Correctly Serialize and Deserialize Array'
       var doc = {doc: [1, 2, 'a', 'b']}
       var serialized_data = BSON.serialize(doc)
       var deserialized = BSON.deserialize(serialized_data);
-      doc.doc.should.eql deserialized.get('doc')
+      doc.doc.should.eql deserialized.doc
     end   
     
     it 'Should Correctly Serialize and Deserialize Array with added on functions'
@@ -108,13 +108,13 @@ describe 'BSON'
       var doc = {doc: [1, 2, 'a', 'b']}
       var serialized_data = BSON.serialize(doc)
       var deserialized = BSON.deserialize(serialized_data);
-      doc.doc.should.eql deserialized.get('doc')
+      doc.doc.should.eql deserialized.doc
     end   
     
     it 'Should Correctly Serialize and Deserialize A Boolean'
       var doc = {doc: true}
       var serialized_data = BSON.serialize(doc)
-      doc.should.eql BSON.deserialize(serialized_data).unorderedHash()
+      doc.should.eql BSON.deserialize(serialized_data)
     end
     
     it 'Should Correctly Serialize and Deserialize a Date'
@@ -128,33 +128,35 @@ describe 'BSON'
       date.setUTCSeconds(30)
       var doc = {doc: date}
       var serialized_data = BSON.serialize(doc)
-      doc.date.should.eql BSON.deserialize(serialized_data).unorderedHash().date      
+      doc.date.should.eql BSON.deserialize(serialized_data).date      
     end    
         
     it 'Should Correctly Serialize and Deserialize Oid'
       var doc = {doc: new ObjectID()}
       var serialized_data = BSON.serialize(doc)
-      doc.should.eql BSON.deserialize(serialized_data).unorderedHash()
+      doc.should.eql BSON.deserialize(serialized_data)
     end    
         
     it 'Should Correctly encode Empty Hash'
       var test_code = {}
       var serialized_data = BSON.serialize(test_code)
-      test_code.should.eql BSON.deserialize(serialized_data).unorderedHash()
+      test_code.should.eql BSON.deserialize(serialized_data)
     end        
     
     it 'Should Correctly Serialize and Deserialize Ordered Hash'
       var doc = {doc: new OrderedHash().add('b', 1).add('a', 2).add('c', 3).add('d', 4)};
       var serialized_data = BSON.serialize(doc)
-      var decoded_hash = BSON.deserialize(serialized_data).get('doc')
-      decoded_hash.keys().should.eql ['b', 'a', 'c', 'd']
+      var decoded_hash = BSON.deserialize(serialized_data).doc
+      var keys = [];
+      for(name in decoded_hash) keys.push(name);
+      keys.should.eql ['b', 'a', 'c', 'd']      
     end
     
     it 'Should Correctly Serialize and Deserialize Regular Expression'
       // Serialize the regular expression
       var doc = {doc: /foobar/mi}
       var serialized_data = BSON.serialize(doc)
-      var doc2 = BSON.deserialize(serialized_data).unorderedHash()
+      var doc2 = BSON.deserialize(serialized_data)
       doc.should.eql doc2         
       doc.doc.toString().should.eql doc2.doc.toString()
     end
@@ -168,7 +170,7 @@ describe 'BSON'
       var doc = {doc: bin}
       var serialized_data = BSON.serialize(doc)
       var deserialized_data = BSON.deserialize(serialized_data)
-      doc.doc.value().should.eql deserialized_data.get('doc').value()
+      doc.doc.value().should.eql deserialized_data.doc.value()
     end
     
     it "Should Correctly Serialize and Deserialize DBRef"
@@ -177,25 +179,25 @@ describe 'BSON'
       doc['dbref'] = new DBRef('namespace', oid, null)      
       var serialized_data = BSON.serialize(doc)
       var doc2 = BSON.deserialize(serialized_data)
-      doc2.get('dbref').should.be_an_instance_of DBRef
-      doc2.get('dbref').namespace.should.eql 'namespace'
-      doc2.get('dbref').oid.should.eql oid
+      doc2.dbref.should.be_an_instance_of DBRef
+      doc2.dbref.namespace.should.eql 'namespace'
+      doc2.dbref.oid.should.eql oid
     end
     
     it 'Should Correctly Serialize and Deserialize Long Integer'
       var test_int = {doc: Long.fromNumber(9223372036854775807)}
       var serialized_data = BSON.serialize(test_int)
-      var deserialized_data = BSON.deserialize(serialized_data).unorderedHash()
+      var deserialized_data = BSON.deserialize(serialized_data)
       test_int.should.eql deserialized_data
       
       test_int = {doc: Long.fromNumber(-9223372036854775)}
       serialized_data = BSON.serialize(test_int)
-      deserialized_data = BSON.deserialize(serialized_data).unorderedHash()
+      deserialized_data = BSON.deserialize(serialized_data)
       test_int.doc.should.eql deserialized_data.doc
       
       test_int = {doc: Long.fromNumber(-9223372036854775809)}
       serialized_data = BSON.serialize(test_int)
-      deserialized_data = BSON.deserialize(serialized_data).unorderedHash()
+      deserialized_data = BSON.deserialize(serialized_data)
       test_int.doc.should.eql deserialized_data.doc      
     end
     
@@ -203,8 +205,13 @@ describe 'BSON'
       var hash = {doc: new OrderedHash().add('not_id', 1).add('_id', 2)}
       var serialized_data = BSON.serialize(hash)
       var deserialized_data = BSON.deserialize(serialized_data)
+      var keys = [];
+
+      for(name in deserialized_data.doc) {
+        keys.push(name);
+      }
       
-      deserialized_data.get('doc').keys()[0].should.eql '_id'      
+      keys.should.eql ['_id', 'not_id']
     end
     
     it 'Should Correctly Serialize and Deserialize a User defined Binary object'
@@ -217,16 +224,16 @@ describe 'BSON'
       var doc = {doc: bin}
       var serialized_data = BSON.serialize(doc)
       var deserialized_data = BSON.deserialize(serialized_data)
-      deserialized_data.get('doc').sub_type.should.eql BSON.BSON_BINARY_SUBTYPE_USER_DEFINED
-      doc.doc.value().should.eql deserialized_data.get('doc').value()
+      deserialized_data.doc.sub_type.should.eql BSON.BSON_BINARY_SUBTYPE_USER_DEFINED
+      doc.doc.value().should.eql deserialized_data.doc.value()
     end
     
     it 'Should Correclty Serialize and Deserialize a Code object' 
       var doc = {'doc': new Code('this.a > i', new OrderedHash().add('i', 1))};
       var serialized_data = BSON.serialize(doc)
       var deserialized_data = BSON.deserialize(serialized_data)
-      deserialized_data.get('doc').code.should.eql(doc.doc.code);
-      deserialized_data.get('doc').scope.get('i').should.eql(doc.doc.scope.get('i'));
+      deserialized_data.doc.code.should.eql(doc.doc.code);
+      deserialized_data.doc.scope.i.should.eql(doc.doc.scope.get('i'));
     end
   end
 end
