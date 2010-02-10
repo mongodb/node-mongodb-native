@@ -12,6 +12,8 @@ process.mixin(mongo, require('mongodb/gridfs/gridstore'));
 process.mixin(mongo, require('mongodb/gridfs/chunk'));
 process.mixin(mongo, require('mongodb/collection'));
 process.mixin(mongo, require('mongodb/bson/collections'));
+process.mixin(mongo, require('mongodb/goog/math/long'));
+process.mixin(mongo, require('mongodb/goog/math/integer'));
 
 /*******************************************************************************************************
   Integration Tests
@@ -20,7 +22,7 @@ process.mixin(mongo, require('mongodb/bson/collections'));
 function test_collection_methods() {
   client.createCollection(function(collection) {
     // Verify that all the result are correct coming back (should contain the value ok)
-    test.assertTrue(collection instanceof mongo.Collection);
+    test.assertTrue(collection.className == "Collection");
     test.assertEquals('test_collection_methods', collection.collectionName);
     // Let's check that the collection was created correctly
     client.collectionNames(function(documents) {
@@ -56,7 +58,7 @@ function test_authentication() {
       // Insert a user document
       var user_doc = new mongo.OrderedHash().add('user', user_name).add('pwd', user_password);
       // Insert the user into the system users collections
-      user_collection.insert(user_doc, function(documents) {
+      user_collection.insert(user_doc, function(documents) {        
         test.assertTrue(documents[0].get('_id').toHexString().length == 24);
         // Ensure authentication works correctly
         client.authenticate(user_name, password, function(replies) {
@@ -118,7 +120,7 @@ function test_object_id_generation() {
         number_of_tests_done++;
       }, new mongo.OrderedHash().add("name", "Fred"));      
     });
-
+    
     // Insert another test document and collect using ObjectId
     collection.insert(new mongo.OrderedHash().add("name", "Pat").add("age", 21), function(ids) {
       test.assertEquals(1, ids.length);  
@@ -244,7 +246,7 @@ function test_error_handling() {
 // Test the last status functionality of the driver
 function test_last_status() {  
   client.createCollection(function(collection) {
-    test.assertTrue(collection instanceof mongo.Collection);
+    test.assertTrue(collection.className == "Collection");
     test.assertEquals('test_last_status', collection.collectionName);
 
     // Get the collection
@@ -271,8 +273,8 @@ function test_last_status() {
                   // Check safe update of a document
                   collection.insert(new mongo.OrderedHash().add("x", 1), function(ids) {
                     collection.update(function(document) {
-                      test.assertTrue(document instanceof mongo.OrderedHash);
-                      test.assertTrue(document.get('$set') instanceof mongo.OrderedHash);
+                      test.assertTrue(document.className == "OrderedHash");
+                      test.assertTrue(document.get('$set').className == "OrderedHash");
                     }, new mongo.OrderedHash().add("x", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("x", 2)), {'safe':true});
                               
                     collection.update(function(document) {
@@ -353,7 +355,7 @@ function test_multiple_insert() {
 
       collection.insert(docs, function(ids) {
         ids.forEach(function(doc) {
-          test.assertTrue(((doc.get('_id')) instanceof mongo.ObjectID));
+          test.assertTrue(((doc.get('_id')).className == "ObjectID"));
         });
 
         // Let's ensure we have both documents
@@ -748,7 +750,7 @@ function test_collection_names() {
 function test_collections_info() {
   client.createCollection(function(r) {
     client.collectionsInfo(function(cursor) {
-      test.assertTrue((cursor instanceof mongo.Cursor));
+      test.assertTrue((cursor.className == "Cursor"));
       // Fetch all the collection info
       cursor.toArray(function(documents) {
         test.assertTrue(documents.length > 1);
@@ -767,7 +769,7 @@ function test_collections_info() {
 
 function test_collection_options() {
   client.createCollection(function(collection) {    
-    test.assertTrue(collection instanceof mongo.Collection);
+    test.assertTrue(collection.className == "Collection");
     test.assertEquals('test_collection_options', collection.collectionName);
     // Let's fetch the collection options
     collection.options(function(options) {
@@ -788,12 +790,9 @@ function test_index_information() {
         test.assertEquals("a_1", indexName);
         // Let's fetch the index information
         client.indexInformation(function(collectionInfo) {
-          // sys.puts("=============================================================");
-          // sys.puts(sys.inspect(collectionInfo));
-          
           test.assertTrue(collectionInfo['_id_'] != null);
           test.assertEquals('_id', collectionInfo['_id_'][0][0]);
-          test.assertTrue((collectionInfo['_id_'][0][1] instanceof mongo.ObjectID));
+          test.assertTrue((collectionInfo['_id_'][0][1].className == "ObjectID"));
           test.assertTrue(collectionInfo['a_1'] != null);
           test.assertEquals([["a", 1]], collectionInfo['a_1']);
           
@@ -807,7 +806,7 @@ function test_index_information() {
             test.assertTrue(count2 >= count1);
             test.assertTrue(collectionInfo2['_id_'] != null);
             test.assertEquals('_id', collectionInfo2['_id_'][0][0]);
-            test.assertTrue((collectionInfo2['_id_'][0][1] instanceof mongo.ObjectID));
+            test.assertTrue((collectionInfo2['_id_'][0][1].className == "ObjectID"));
             test.assertTrue(collectionInfo2['a_1'] != null);
             test.assertEquals([["a", 1]], collectionInfo2['a_1']);            
             test.assertTrue((collectionInfo[indexName] != null));
@@ -973,7 +972,7 @@ function test_strict_access_collection() {
     
     error_client.createCollection(function(collection) {  
       error_client.collection(function(collection) {
-        test.assertTrue(collection instanceof mongo.Collection);
+        test.assertTrue(collection.className == "Collection");
         // Let's close the db 
         finished_test({test_strict_access_collection:'ok'});                 
         error_client.close();
@@ -987,7 +986,7 @@ function test_strict_create_collection() {
   test.assertEquals(true, error_client.strict);
   error_client.open(function(error_client) {
     error_client.createCollection(function(collection) {
-      test.assertTrue(collection instanceof mongo.Collection);
+      test.assertTrue(collection.className == "Collection");
 
       // Creating an existing collection should fail
       error_client.createCollection(function(collection) {
@@ -997,7 +996,7 @@ function test_strict_create_collection() {
         // Switch out of strict mode and try to re-create collection
         error_client.strict = false;
         error_client.createCollection(function(collection) {
-          test.assertTrue(collection instanceof mongo.Collection);
+          test.assertTrue(collection.className == "Collection");
 
           // Let's close the db 
           finished_test({test_strict_create_collection:'ok'});                 
@@ -1010,7 +1009,7 @@ function test_strict_create_collection() {
 
 function test_to_a() {
   client.createCollection(function(collection) {
-    test.assertTrue(collection instanceof mongo.Collection);
+    test.assertTrue(collection.className == "Collection");
     collection.insert({'a':1}, function(ids) {
       collection.find(function(cursor) {
         cursor.toArray(function(items) {          
@@ -1036,7 +1035,7 @@ function test_to_a() {
 
 function test_to_a_after_each() {
   client.createCollection(function(collection) {
-    test.assertTrue(collection instanceof mongo.Collection);
+    test.assertTrue(collection.className == "Collection");
     collection.insert({'a':1}, function(ids) {
       collection.find(function(cursor) {
         cursor.each(function(item) {
@@ -1057,7 +1056,7 @@ function test_to_a_after_each() {
 
 function test_where() {
   client.createCollection(function(collection) {
-    test.assertTrue(collection instanceof mongo.Collection);
+    test.assertTrue(collection.className == "Collection");
     collection.insert([{'a':1}, {'a':2}, {'a':3}], function(ids) {
       collection.count(function(count) {
         test.assertEquals(3, count);
@@ -1303,7 +1302,7 @@ function test_save() {
   client.createCollection(function(collection) {
     var doc = {'hello':'world'};
     collection.save(function(docs) {
-      test.assertTrue(docs[0]._id instanceof mongo.ObjectID);
+      test.assertTrue(docs[0]._id.className == "ObjectID");
       collection.count(function(count) {
         test.assertEquals(1, count);
         doc = docs[0];
@@ -1357,7 +1356,7 @@ function test_save_long() {
 function test_find_by_oid() {
   client.createCollection(function(collection) {
     collection.save(function(docs) {
-      test.assertTrue(docs[0]._id instanceof mongo.ObjectID);
+      test.assertTrue(docs[0]._id.className == "ObjectID");
       
       collection.findOne(function(doc) {
         test.assertEquals('mike', doc.hello);
@@ -1422,7 +1421,7 @@ function test_invalid_key_names() {
     })
 
     collection.insert(new mongo.OrderedHash().add('hello', new mongo.OrderedHash().add('hell$o', 'world')), function(docs) {
-      test.assertTrue(docs[0] instanceof mongo.OrderedHash);
+      test.assertTrue(docs[0].className == "OrderedHash");
     })
 
     collection.insert({'.hello':'world'}, function(doc) {
@@ -1632,7 +1631,7 @@ function test_sort() {
     
     collection.find(function(cursor) {      
       cursor.sort(function(cursor) {
-        test.assertTrue(cursor instanceof mongo.Cursor);
+        test.assertTrue(cursor.className == "Cursor");
         test.assertEquals(['a', 1], cursor.sortValue);
       }, ['a', 1]);      
     });
@@ -1663,7 +1662,7 @@ function test_sort() {
     
     collection.find(function(cursor) {
       cursor.sort(function(cursor) {
-        test.assertTrue(cursor instanceof mongo.Cursor);
+        test.assertTrue(cursor.className == "Cursor");
         test.assertEquals([['a', -1], ['b', 1]], cursor.sortValue);
       }, [['a', -1], ['b', 1]]);      
     });
@@ -2199,7 +2198,7 @@ function test_gs_small_write() {
             cursor.toArray(function(items) {
               test.assertEquals(1, items.length);
               var item = items[0];
-              test.assertTrue(item._id instanceof mongo.ObjectID);
+              test.assertTrue(item._id.className == "ObjectID");
               
               client.collection(function(collection) {
                 collection.find(function(cursor) {
