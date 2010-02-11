@@ -157,6 +157,15 @@ function test_object_id_generation() {
   }, 100);    
 }
 
+function test_object_id_toAndFromhexString() {
+    var objectId = new mongo.ObjectID(null);
+    var originalHex= objectId.toHexString();
+    
+    var newObjectId= new mongo.ObjectID.createFromHexString(originalHex)
+    newHex= newObjectId.toHexString();    
+    test.assertEquals(originalHex, newHex);
+}
+
 // Test the auto connect functionality of the db
 function test_automatic_reconnect() {
   var automatic_connect_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
@@ -3003,8 +3012,8 @@ function test_custom_primary_key_generator() {
 // var client_tests = [test_authentication];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-      test_automatic_reconnect, test_error_handling, test_last_status, test_clear, test_insert,
-      test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+      test_object_id_toAndFromhexString, test_automatic_reconnect, test_error_handling, test_last_status, test_clear,
+      test_insert, test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
       test_collection_names, test_collections_info, test_collection_options, test_index_information,
       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
