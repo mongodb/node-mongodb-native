@@ -1615,14 +1615,14 @@
   // --- Node.js support
   
   if (typeof GLOBAL === 'object' && typeof exports === 'object') {
-    var posix = require('posix')
+    var posix = require('fs')
     quit = process.exit
     print = require('sys').puts
 
     readFile = function(path) {
       var result
       posix
-        .cat(path, "utf8")
+        .readFile(path, "utf8")
         .addCallback(function(contents){ result = contents })
         .addErrback(function(){ throw new Error("failed to read file `" + path + "'") })
         .wait()
