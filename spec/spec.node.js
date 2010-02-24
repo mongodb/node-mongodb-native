@@ -28,14 +28,7 @@ quit = process.exit
 print = puts
 
 readFile = function(path) {
-  var promise = posix.readFile(path, "utf8")
-  var result = ''
-  promise.addErrback(function(){ throw "failed to read file `" + path + "'" })
-  promise.addCallback(function(contents){
-    result = contents
-  })
-  promise.wait()
-  return result
+  return posix.readFileSync(path);
 }
 
 if (process.ARGV[2])
