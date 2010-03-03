@@ -18,37 +18,37 @@ var db1 = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), 
 db1.open(function(db) {
   // Write a new file
   var gridStore = new mongo.GridStore(db, "foobar", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
         // Read the file and dump the contents
         dump(db, 'foobar');
   
         // Append more data
         gridStore = new mongo.GridStore(db, 'foobar', "w+");
-        gridStore.open(function(gridStore) {
-          gridStore.write(function(gridStore) {
-            gridStore.puts(function(gridStore) {
-              gridStore.close(function(result) {
+        gridStore.open(function(err, gridStore) {
+          gridStore.write('\n', function(err, gridStore) {
+            gridStore.puts('line two', function(err, gridStore) {
+              gridStore.close(function(err, result) {
                 dump(db, 'foobar');          
   
                 // Overwrite
                 gridStore = new mongo.GridStore(db, 'foobar', "w");
-                gridStore.open(function(gridStore) {
-                  gridStore.write(function(gridStore) {
-                    gridStore.close(function(result) {
+                gridStore.open(function(err, gridStore) {
+                  gridStore.write('hello, sailor!', function(err, gridStore) {
+                    gridStore.close(function(err, result) {
                       dump(db, 'foobar', function() {
                         db.close();                        
                       });
                     });
-                  }, 'hello, sailor!');
+                  });
                 });
               });
-            }, 'line two');
-          }, '\n');
+            });
+          });
         });
       });
-    }, "hello world!");
+    });
   });
 });
 
@@ -56,47 +56,47 @@ var db2 = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), 
 db2.open(function(db) {
   // File existence tests
   var gridStore = new mongo.GridStore(db, "foobar2", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
-        mongo.GridStore.exist(function(result) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write( 'hello sailor', function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        mongo.GridStore.exist(db, 'foobar2', function(err, result) {
           sys.puts("File 'foobar2' exists: " + result);
-        }, db, 'foobar2');
+        });
         
-        mongo.GridStore.exist(function(result) {
+        mongo.GridStore.exist(db, 'does-not-exist', function(err, result) {
           sys.puts("File 'does-not-exist' exists: " + result);
-        }, db, 'does-not-exist');
+        });
         
         // Read with offset(uses seek)
-        mongo.GridStore.read(function(data) {
+        mongo.GridStore.read(db, 'foobar2', 6, 7, function(err, data) {
           sys.puts(data);
-        }, db, 'foobar2', 6, 7);
+        });
 
         // Rewind/seek/tell
         var gridStore2 = new mongo.GridStore(db, 'foobar2', 'w');
-        gridStore2.open(function(gridStore) {
-          gridStore.write(function(){}, 'hello, world!');
+        gridStore2.open(function(err, gridStore) {
+          gridStore.write('hello, world!', function(err, gridStore){});
           gridStore.rewind(function(){});
-          gridStore.write(function(){}, 'xyzzz');
+          gridStore.write('xyzzz', function(err, gridStore){});
           gridStore.tell(function(tell) {
             sys.puts("tell: " + tell);       // Should be 5
           });
-          gridStore.seek(function(gridStore){}, 4);
-          gridStore.write(function(){}, 'y');
+          gridStore.seek(4, function(err, gridStore){});
+          gridStore.write('y', function(){});
           gridStore.close(function() {
             dump(db, 'foobar2');
 
             // Unlink file (delete)
-            mongo.GridStore.unlink(function(gridStore) {
-              mongo.GridStore.exist(function(result) {
+            mongo.GridStore.unlink(db, 'foobar2', function(err, gridStore) {
+              mongo.GridStore.exist(db, 'foobar2', function(err, result) {
                 sys.puts("File 'foobar2' exists: " + result);
                 db.close();
-              }, db, 'foobar2');            
-            }, db, 'foobar2');
+              });
+            });
           });
         });
       });
-    }, 'hello sailor');
+    });
   });
 });
 
@@ -104,11 +104,11 @@ var db3 = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), 
 db3.open(function(db) {
   // Metadata
   var gridStore = new mongo.GridStore(db, "foobar3", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(){}, 'hello, world!');
-    gridStore.close(function() {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write('hello, world!', function(err, gridStore){});
+    gridStore.close(function(err, gridStore) {
       gridStore = new mongo.GridStore(db, 'foobar3', "r");
-      gridStore.open(function(gridStore) {
+      gridStore.open(function(err, gridStore) {
         sys.puts("contentType: " + gridStore.contentType);
         sys.puts("uploadDate: " + gridStore.uploadDate);
         sys.puts("chunkSize: " + gridStore.chunkSize);
@@ -117,13 +117,13 @@ db3.open(function(db) {
       
       // Add some metadata
       gridStore = new mongo.GridStore(db, 'foobar3', "w+");
-      gridStore.open(function(gridStore) {
+      gridStore.open(function(err, gridStore) {
         gridStore.contentType = 'text/xml';
         gridStore.metadata = {'a':1};
-        gridStore.close(function() {
+        gridStore.close(function(err, gridStore) {
           // Print the metadata
           gridStore = new mongo.GridStore(db, 'foobar3', "r");
-          gridStore.open(function(gridStore) {
+          gridStore.open(function(err, gridStore) {
             sys.puts("contentType: " + gridStore.contentType);
             sys.puts("uploadDate: " + gridStore.uploadDate);
             sys.puts("chunkSize: " + gridStore.chunkSize);
@@ -141,16 +141,16 @@ db3.open(function(db) {
   // my_files.files and my_files.chunks      
   var gridStore = new mongo.GridStore(db, "foobar3", "w", {'content_type':'text/plain', 
     'metadata':{'a':1}, 'chunk_size': 1024*4, 'root':'my_files'});
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(){}, 'hello, world!');
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write('hello, world!', function(err, gridStore){});
     gridStore.close(function() {
     });
   });
 });
 
 function dump(db, filename, callback) {
-  mongo.GridStore.read(function(data) {
+  mongo.GridStore.read(db, filename, function(err, data) {
     sys.puts(data);
     if(callback != null) callback();
-  }, db, filename); 
+  }); 
 }

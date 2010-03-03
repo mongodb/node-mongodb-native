@@ -15,47 +15,47 @@ var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NO
 sys.puts("Connecting to " + host + ":" + port);
 var db = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), {});
 db.open(function(db) {
-  db.dropDatabase(function(){
-    db.dropCollection(function() {
-      db.createCollection(function(collection) {
+  db.dropDatabase(function(err, result){
+    db.dropCollection('test', function(err, result) {
+      db.createCollection('test', function(err, collection) {
 
         // Erase all records in collection
-        collection.remove(function(collection) {
-          db.admin(function(admin) {
+        collection.remove(function(err, collection) {
+          db.admin(function(err, admin) {
 
             // Profiling level set/get
-            admin.profilingLevel(function(profilingLevel) {
+            admin.profilingLevel(function(err, profilingLevel) {
               sys.puts("Profiling level: " + profilingLevel);
             });
 
             // Start profiling everything
-            admin.setProfilingLevel(function(level) {
+            admin.setProfilingLevel('all', function(err, level) {
               sys.puts("Profiling level: " + level);            
 
               // Read records, creating a profiling event
-              collection.find(function(cursor) {
-                cursor.toArray(function(items) {
+              collection.find(function(err, cursor) {
+                cursor.toArray(function(err, items) {
 
                   // Stop profiling
-                  admin.setProfilingLevel(function(level) {
+                  admin.setProfilingLevel('off', function(err, level) {
                     // Print all profiling info
-                    admin.profilingInfo(function(info) {
+                    admin.profilingInfo(function(err, info) {
                       sys.puts(sys.inspect(info));
 
                       // Validate returns a hash if all is well or return an error has if there is a
                       // problem.
-                      admin.validatCollection(function(result) {
+                      admin.validatCollection(collection.collectionName, function(err, result) {
                         sys.puts(result.result);
                         db.close();
-                      }, collection.collectionName);
+                      });
                     });
-                  }, 'off');
+                  });
                 });
               });            
-            }, 'all');
+            });
           });
         });
-      }, 'test');    
-    }, 'test');    
+      });    
+    });    
   });
 });

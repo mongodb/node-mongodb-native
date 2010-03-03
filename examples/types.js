@@ -15,9 +15,9 @@ var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NO
 sys.puts("Connecting to " + host + ":" + port);
 var db = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), {});
 db.open(function(db) {
-  db.collection(function(collection) {    
+  db.collection('test', function(err, collection) {    
     // Remove all existing documents in collection
-    collection.remove(function(collection) {      
+    collection.remove(function(err, collection) {      
       // Insert record with all the available types of values
       collection.insert({'array':[1,2,3], 
         'string':'hello', 
@@ -31,16 +31,16 @@ db.open(function(db) {
         'boolean':true,
         'where':new mongo.Code('this.x == 3'),
         'dbref':new mongo.DBRef(collection.collectionName, new mongo.ObjectID()),
-        'null':null}, function(doc) {
+        'null':null}, function(err, doc) {
           
           // Locate the first document
-          collection.findOne(function(document) {
+          collection.findOne(function(err, document) {
             sys.puts(sys.inspect(document));
-            collection.remove(function(collection) {
+            collection.remove(function(err, collection) {
               db.close();
             });
           })
         });
     });
-  }, 'test');
+  });
 });

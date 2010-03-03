@@ -17,12 +17,12 @@ sys.puts(">> Connecting to " + host + ":" + port);
 var db = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), {});
 db.open(function(db) {
   sys.puts(">> Dropping collection test");
-  db.dropCollection(function(result) {
+  db.dropCollection('test', function(err, result) {
     sys.puts("dropped: " + sys.inspect(result));
-  }, 'test');
+  });
   
   sys.puts(">> Creating collection test");
-  db.collection(function(collection) {
+  db.collection('test', function(err, collection) {
     sys.puts("created: " + sys.inspect(collection));    
 
     var objectCount = 100;
@@ -39,27 +39,26 @@ db.open(function(db) {
     sys.puts("inserted");
     
     sys.puts(">> Creating index")
-    collection.createIndex(function(indexName) {
+    collection.createIndex([['all'], ['_id', 1], ['number', 1], ['rndm', 1], ['msg', 1]], function(err, indexName) {
       sys.puts("created index: " + indexName);      
       
       sys.puts(">> Gathering index information");
             
-      collection.indexInformation(function(doc) {
+      collection.indexInformation(function(err, doc) {
         sys.puts("indexInformation: " + sys.inspect(doc));                    
         
         sys.puts(">> Dropping index");
-        collection.dropIndex('all_1__id_1_number_1_rndm_1_msg_1', function(result) {
+        collection.dropIndex('all_1__id_1_number_1_rndm_1_msg_1', function(err, result) {
           sys.puts("dropped: " + sys.inspect(result));          
 
           sys.puts(">> Gathering index information");
-          collection.indexInformation(function(doc) {
+          collection.indexInformation(function(err, doc) {
             sys.puts("indexInformation: " + sys.inspect(doc));              
             sys.puts(">> Closing connection");
             db.close();
           });      
         });
-      });
-      
-    }, [['all'], ['_id', 1], ['number', 1], ['rndm', 1], ['msg', 1]]);
-  }, 'test');
+      });      
+    });
+  });
 });
