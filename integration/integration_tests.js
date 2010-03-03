@@ -1092,14 +1092,6 @@ function test_where() {
   });
 }
 
-var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation, test_object_id_to_and_from_hex_string, test_automatic_reconnect,
-                      test_error_handling, test_last_status, test_clear, test_insert, test_multiple_insert, test_count_on_nonexisting, test_find_simple, 
-                      test_find_advanced, test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop, test_collection_names,
-                      test_collections_info, test_collection_options, test_index_information, test_multiple_index_cols, test_unique_index, test_index_on_subfield,
-                      test_array, test_regex, test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a, test_to_a_after_each,
-                      test_where, test_eval];
-// var client_tests = [test_eval];
-
 function test_eval() {
   client.eval('function (x) {return x;}', [3], function(err, result) {
     test.assertEquals(3, result);
@@ -1148,432 +1140,428 @@ function test_eval() {
 }
 
 function test_hint() {
-  client.createCollection(function(collection) {
-    collection.insert({'a':1}, function(ids) {
-      client.createIndex(function(indexName) {
-        collection.find(function(cursor) {
-          cursor.toArray(function(items) {
+  client.createCollection('test_hint', function(err, collection) {
+    collection.insert({'a':1}, function(err, ids) {
+      client.createIndex(collection.collectionName, "a", function(err, indexName) {
+        collection.find({'a':1}, {'hint':'a'}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
             test.assertEquals(1, items.length);
           });
-        }, {'a':1}, {'hint':'a'});     
+        });     
            
-        collection.find(function(cursor) {
-          cursor.toArray(function(items) {
+        collection.find({'a':1}, {'hint':['a']}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
             test.assertEquals(1, items.length);
           });
-        }, {'a':1}, {'hint':['a']});        
+        });        
         
-        collection.find(function(cursor) {
-          cursor.toArray(function(items) {
+        collection.find({'a':1}, {'hint':{'a':1}}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
             test.assertEquals(1, items.length);
           });
-        }, {'a':1}, {'hint':{'a':1}});      
+        });      
         
         // Modify hints
         collection.hint = 'a';
         test.assertEquals(1, collection.hint.get('a'));
-        collection.find(function(cursor) {
-          cursor.toArray(function(items) {
+        collection.find({'a':1}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
             test.assertEquals(1, items.length);
           });
-        }, {'a':1});   
+        });   
                 
         collection.hint = ['a'];
         test.assertEquals(1, collection.hint.get('a'));
-        collection.find(function(cursor) {
-          cursor.toArray(function(items) {
+        collection.find({'a':1}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
             test.assertEquals(1, items.length);
           });
-        }, {'a':1});   
+        });   
              
         collection.hint = {'a':1};
         test.assertEquals(1, collection.hint.get('a'));
-        collection.find(function(cursor) {
-          cursor.toArray(function(items) {
+        collection.find({'a':1}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
             test.assertEquals(1, items.length);
           });
-        }, {'a':1});           
+        });           
         
         collection.hint = null;
         test.assertTrue(collection.hint == null);
-        collection.find(function(cursor) {
-          cursor.toArray(function(items) {
+        collection.find({'a':1}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
             test.assertEquals(1, items.length);
             // Let's close the db 
             finished_test({test_hint:'ok'});                             
           });
-        }, {'a':1});           
-      }, collection.collectionName, "a");
+        });           
+      });
     });
-  }, 'test_hint');
+  });
 }
 
 function test_group() {
-  client.createCollection(function(collection) {
-    collection.group(function(results) {
+  client.createCollection('test_group', function(err, collection) {
+    collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
       test.assertEquals([], results);
-    }, [], {}, {"count":0}, "function (obj, prev) { prev.count++; }");
+    });
     
-    collection.group(function(results) {
+    collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
       test.assertEquals([], results);
       
       // Trigger some inserts
-      collection.insert([{'a':2}, {'b':5}, {'a':1}], function(ids) {
-        collection.group(function(results) {
+      collection.insert([{'a':2}, {'b':5}, {'a':1}], function(err, ids) {
+        collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
           test.assertEquals(3, results[0].count);
-        }, [], {}, {"count":0}, "function (obj, prev) { prev.count++; }");        
+        });        
         
-        collection.group(function(results) {
+        collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
           test.assertEquals(3, results[0].count);
-        }, [], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true);        
+        });        
         
-        collection.group(function(results) {
+        collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
           test.assertEquals(1, results[0].count);
-        }, [], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }");        
+        });
         
-        collection.group(function(results) {
+        collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
           test.assertEquals(1, results[0].count);
         
           // Insert some more test data
-          collection.insert([{'a':2}, {'b':3}], function(ids) {
-            collection.group(function(results) {
+          collection.insert([{'a':2}, {'b':3}], function(err, ids) {
+            collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
               test.assertEquals(2, results[0].a);
               test.assertEquals(2, results[0].count);
               test.assertEquals(null, results[1].a);
               test.assertEquals(2, results[1].count);
               test.assertEquals(1, results[2].a);
               test.assertEquals(1, results[2].count);
-            }, ['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }");                                
+            });
         
-            collection.group(function(results) {
+            collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
               test.assertEquals(2, results[0].a);
               test.assertEquals(2, results[0].count);
               test.assertEquals(null, results[1].a);
               test.assertEquals(2, results[1].count);
               test.assertEquals(1, results[2].a);
               test.assertEquals(1, results[2].count);
-            }, ['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true);                                
+            });
             
-            collection.group(function(results) {
-              test.assertTrue(results instanceof Error);
-              test.assertTrue(results.message != null);
-            }, [], {}, {}, "5 ++ 5");
-        
-            collection.group(function(results) {
-              test.assertTrue(results instanceof Error);
-              test.assertTrue(results.message != null);
+            collection.group([], {}, {}, "5 ++ 5", function(err, results) {
+              test.assertTrue(err instanceof Error);
+              test.assertTrue(err.message != null);
+            });
+                    
+            collection.group([], {}, {}, "5 ++ 5", true, function(err, results) {
+              test.assertTrue(err instanceof Error);
+              test.assertTrue(err.message != null);
               // Let's close the db 
               finished_test({test_group:'ok'});                                   
-            }, [], {}, {}, "5 ++ 5", true);
+            });
           });          
-        }, [], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", true);        
+        });        
       });      
-    }, [], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true);
-  }, 'test_group');
+    });
+  });
 }
 
 function test_deref() {
-  client.createCollection(function(collection) {
-    collection.insert({'a':1}, function(ids) {
-      collection.remove(function(result) {
-        collection.count(function(count) {
+  client.createCollection('test_deref', function(err, collection) {
+    collection.insert({'a':1}, function(err, ids) {
+      collection.remove(function(err, result) {
+        collection.count(function(err, count) {
           test.assertEquals(0, count);          
           
           // Execute deref a db reference
-          client.dereference(function(result) {
-            collection.insert({'x':'hello'}, function(ids) {
-              collection.findOne(function(document) {
+          client.dereference(new mongo.DBRef("test_deref", new mongo.ObjectID()), function(err, result) {
+            collection.insert({'x':'hello'}, function(err, ids) {
+              collection.findOne(function(err, document) {
                 test.assertEquals('hello', document.x);
                 
-                client.dereference(function(result) {
+                client.dereference(new mongo.DBRef("test_deref", document._id), function(err, result) {
                   test.assertEquals('hello', document.x);
-                }, new mongo.DBRef("test_deref", document._id));
+                });
               });
             });            
-          }, new mongo.DBRef("test_deref", new mongo.ObjectID()));
+          });
           
-          client.dereference(function(result) {
+          client.dereference(new mongo.DBRef("test_deref", 4), function(err, result) {
             var obj = {'_id':4};
             
-            collection.insert(obj, function(ids) {
-              client.dereference(function(document) {
+            collection.insert(obj, function(err, ids) {
+              client.dereference(new mongo.DBRef("test_deref", 4), function(err, document) {
                 test.assertEquals(obj['_id'], document._id);
                 
-                collection.remove(function(result) {
-                  collection.insert({'x':'hello'}, function(ids) {
-                    client.dereference(function(result) {
+                collection.remove(function(err, result) {
+                  collection.insert({'x':'hello'}, function(err, ids) {
+                    client.dereference(new mongo.DBRef("test_deref", null), function(err, result) {
                       test.assertEquals(null, result);
                       // Let's close the db 
                       finished_test({test_deref:'ok'});                                   
-                    }, new mongo.DBRef("test_deref", null));
+                    });
                   });
                 });
-              }, new mongo.DBRef("test_deref", 4));
+              });
             });
-          }, new mongo.DBRef("test_deref", 4));          
+          });          
         })
       })          
     })    
-  }, 'test_deref');
+  });
 }
 
 function test_save() {
-  client.createCollection(function(collection) {
+  client.createCollection('test_save', function(err, collection) {
     var doc = {'hello':'world'};
-    collection.save(function(docs) {
+    collection.save(doc, function(err, docs) {
       test.assertTrue(docs[0]._id.className == "ObjectID");
-      collection.count(function(count) {
+      collection.count(function(err, count) {
         test.assertEquals(1, count);
         doc = docs[0];
         
-        collection.save(function(doc) {
-          collection.count(function(count) {
+        collection.save(doc, function(err, doc) {
+          collection.count(function(err, count) {
             test.assertEquals(1, count);                        
           });
           
-          collection.findOne(function(doc) {
+          collection.findOne(function(err, doc) {
             test.assertEquals('world', doc.hello);
             
             // Modify doc and save
             doc.hello = 'mike';
-            collection.save(function(doc) {
-              collection.count(function(count) {
+            collection.save(doc, function(err, doc) {
+              collection.count(function(err, count) {
                 test.assertEquals(1, count);                        
               });
               
-              collection.findOne(function(doc) {
+              collection.findOne(function(err, doc) {
                 test.assertEquals('mike', doc.hello);
                 
                 // Save another document
-                collection.save(function(doc) {
-                  collection.count(function(count) {
+                collection.save(new mongo.OrderedHash().add('hello', 'world'), function(err, doc) {
+                  collection.count(function(err, count) {
                     test.assertEquals(2, count);                        
                     // Let's close the db 
                     finished_test({test_save:'ok'});                                   
                   });                  
-                }, new mongo.OrderedHash().add('hello', 'world'));                
+                });
               });              
-            }, doc);            
+            });            
           });
-        }, doc);        
+        });        
       });
-    }, doc);
-  }, 'test_save');
+    });
+  });
 }
 
 function test_save_long() {
-  client.createCollection(function(collection) {
+  client.createCollection('test_save_long', function(err, collection) {
     collection.insert({'x':mongo.Long.fromNumber(9223372036854775807)});
-    collection.findOne(function(doc) {
+    collection.findOne(function(err, doc) {
       test.assertTrue(mongo.Long.fromNumber(9223372036854775807).equals(doc.x));
       // Let's close the db 
       finished_test({test_save_long:'ok'});                                   
     });
-  }, 'test_save_long');
+  });
 }
 
 function test_find_by_oid() {
-  client.createCollection(function(collection) {
-    collection.save(function(docs) {
+  client.createCollection('test_find_by_oid', function(err, collection) {
+    collection.save({'hello':'mike'}, function(err, docs) {
       test.assertTrue(docs[0]._id.className == "ObjectID");
       
-      collection.findOne(function(doc) {
+      collection.findOne({'_id':docs[0]._id}, function(err, doc) {
         test.assertEquals('mike', doc.hello);
         
         var id = doc._id.toString();
-        collection.findOne(function(doc) {
+        collection.findOne({'_id':new mongo.ObjectID(id)}, function(err, doc) {
           test.assertEquals('mike', doc.hello);          
           // Let's close the db 
           finished_test({test_find_by_oid:'ok'});                                   
-        }, {'_id':new mongo.ObjectID(id)});        
-      }, {'_id':docs[0]._id});      
-    }, {'hello':'mike'});    
-  }, 'test_find_by_oid');
+        });        
+      });      
+    });    
+  });
 }
 
 function test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection() {
-  client.createCollection(function(collection) {
+  client.createCollection('test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection', function(err, collection) {
     var a = {'_id':'1', 'hello':'world'};
-    collection.save(function(docs) {
-      collection.count(function(count) {
+    collection.save(a, function(err, docs) {
+      collection.count(function(err, count) {
         test.assertEquals(1, count);
         
-        collection.findOne(function(doc) {
+        collection.findOne(function(err, doc) {
           test.assertEquals('world', doc.hello);
           
           doc.hello = 'mike';
-          collection.save(function(doc) {
-            collection.count(function(count) {
+          collection.save(doc, function(err, doc) {
+            collection.count(function(err, count) {
               test.assertEquals(1, count);
             });
             
-            collection.findOne(function(doc) {
+            collection.findOne(function(err, doc) {
               test.assertEquals('mike', doc.hello);
               // Let's close the db 
               finished_test({test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection:'ok'});                                   
             });
-          }, doc);          
+          });          
         });        
       });
-    }, a);
-    
-  }, 'test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection');
+    });    
+  });
 }
 
 function test_invalid_key_names() {
-  client.createCollection(function(collection) {
+  client.createCollection('test_invalid_key_names', function(err, collection) {
     // Legal inserts
     collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}]);
     // Illegal insert for key
-    collection.insert({'$hello':'world'}, function(doc) {
-      test.assertTrue(doc instanceof Error);
-      test.assertEquals("Error: key $hello must not start with '$'", doc.message);            
+    collection.insert({'$hello':'world'}, function(err, doc) {
+      test.assertTrue(err instanceof Error);
+      test.assertEquals("Error: key $hello must not start with '$'", err.message);            
     });
     
-    collection.insert({'hello':{'$hello':'world'}}, function(doc) {
-      test.assertTrue(doc instanceof Error);
-      test.assertEquals("Error: key $hello must not start with '$'", doc.message);              
+    collection.insert({'hello':{'$hello':'world'}}, function(err, doc) {
+      test.assertTrue(err instanceof Error);
+      test.assertEquals("Error: key $hello must not start with '$'", err.message);              
     });
     
-    collection.insert({'he$llo':'world'}, function(docs) {
+    collection.insert({'he$llo':'world'}, function(err, docs) {
       test.assertTrue(docs[0].constructor == Object);
     })
 
-    collection.insert(new mongo.OrderedHash().add('hello', new mongo.OrderedHash().add('hell$o', 'world')), function(docs) {
+    collection.insert(new mongo.OrderedHash().add('hello', new mongo.OrderedHash().add('hell$o', 'world')), function(err, docs) {
       test.assertTrue(docs[0].className == "OrderedHash");
     })
 
-    collection.insert({'.hello':'world'}, function(doc) {
-      test.assertTrue(doc instanceof Error);
-      test.assertEquals("Error: key .hello must not contain '.'", doc.message);            
+    collection.insert({'.hello':'world'}, function(err, doc) {
+      test.assertTrue(err instanceof Error);
+      test.assertEquals("Error: key .hello must not contain '.'", err.message);            
     });
 
-    collection.insert({'hello':{'.hello':'world'}}, function(doc) {
-      test.assertTrue(doc instanceof Error);
-      test.assertEquals("Error: key .hello must not contain '.'", doc.message);            
+    collection.insert({'hello':{'.hello':'world'}}, function(err, doc) {
+      test.assertTrue(err instanceof Error);
+      test.assertEquals("Error: key .hello must not contain '.'", err.message);            
     });
 
-    collection.insert({'hello.':'world'}, function(doc) {
-      test.assertTrue(doc instanceof Error);
-      test.assertEquals("Error: key hello. must not contain '.'", doc.message);            
+    collection.insert({'hello.':'world'}, function(err, doc) {
+      test.assertTrue(err instanceof Error);
+      test.assertEquals("Error: key hello. must not contain '.'", err.message);            
     });
 
-    collection.insert({'hello':{'hello.':'world'}}, function(doc) {
-      test.assertTrue(doc instanceof Error);
-      test.assertEquals("Error: key hello. must not contain '.'", doc.message);            
+    collection.insert({'hello':{'hello.':'world'}}, function(err, doc) {
+      test.assertTrue(err instanceof Error);
+      test.assertEquals("Error: key hello. must not contain '.'", err.message);            
       // Let's close the db 
       finished_test({test_invalid_key_names:'ok'});                                   
     });    
-  }, 'test_invalid_key_names');
+  });
 }
 
 function test_collection_names2() {
-  client.collection(function(collection) {
-    test.assertEquals("Error: collection name must be a String", collection.message);            
-  }, 5);
+  client.collection(5, function(err, collection) {
+    test.assertEquals("Error: collection name must be a String", err.message);            
+  });
   
-  client.collection(function(collection) {
-    test.assertEquals("Error: collection names cannot be empty", collection.message);            
-  }, "");  
+  client.collection("", function(err, collection) {
+    test.assertEquals("Error: collection names cannot be empty", err.message);            
+  });  
   
-  client.collection(function(collection) {
-    test.assertEquals("Error: collection names must not contain '$'", collection.message);            
-  }, "te$t");  
+  client.collection("te$t", function(err, collection) {
+    test.assertEquals("Error: collection names must not contain '$'", err.message);            
+  });  
   
-  client.collection(function(collection) {
-    test.assertEquals("Error: collection names must not start or end with '.'", collection.message);            
-  }, ".test");  
+  client.collection(".test", function(err, collection) {
+    test.assertEquals("Error: collection names must not start or end with '.'", err.message);            
+  });  
   
-  client.collection(function(collection) {
-    test.assertEquals("Error: collection names must not start or end with '.'", collection.message);            
-  }, "test.");  
+  client.collection("test.", function(err, collection) {
+    test.assertEquals("Error: collection names must not start or end with '.'", err.message);            
+  });  
   
-  client.collection(function(collection) {
-    test.assertEquals("Error: collection names cannot be empty", collection.message);            
+  client.collection("test..t", function(err, collection) {
+    test.assertEquals("Error: collection names cannot be empty", err.message);            
     
     // Let's close the db 
     finished_test({test_collection_names2:'ok'});                                   
-  }, "test..t");  
+  });  
 }
 
 function test_rename_collection() {
-  client.createCollection(function(collection) {
-    client.createCollection(function(collection) {
-
-      client.collection(function(collection1) {
-        client.collection(function(collection2) {
+  client.createCollection('test_rename_collection', function(err, collection) {
+    client.createCollection('test_rename_collection2', function(err, collection) {
+      client.collection('test_rename_collection', function(err, collection1) {
+        client.collection('test_rename_collection2', function(err, collection2) {
           // Assert rename
-          collection1.rename(function(collection) {
-            test.assertTrue(collection instanceof Error);
-            test.assertEquals("Error: collection name must be a String", collection.message);            
-          }, 5);
+          collection1.rename(5, function(err, collection) {
+            test.assertTrue(err instanceof Error);
+            test.assertEquals("Error: collection name must be a String", err.message);
+          });
 
-          collection1.rename(function(collection) {
-            test.assertTrue(collection instanceof Error);
-            test.assertEquals("Error: collection names cannot be empty", collection.message);            
-          }, "");
-
-          collection1.rename(function(collection) {
-            test.assertTrue(collection instanceof Error);
-            test.assertEquals("Error: collection names must not contain '$'", collection.message);            
-          }, "te$t");
-
-          collection1.rename(function(collection) {
-            test.assertTrue(collection instanceof Error);
-            test.assertEquals("Error: collection names must not start or end with '.'", collection.message);            
-          }, ".test");
-
-          collection1.rename(function(collection) {
-            test.assertTrue(collection instanceof Error);
-            test.assertEquals("Error: collection names must not start or end with '.'", collection.message);            
-          }, "test.");
-
-          collection1.rename(function(collection) {
-            test.assertEquals("Error: collection names cannot be empty", collection.message);            
-          }, "tes..t");
+          collection1.rename("", function(err, collection) {
+            test.assertTrue(err instanceof Error);
+            test.assertEquals("Error: collection names cannot be empty", err.message);
+          });
           
-          collection1.count(function(count) {
+          collection1.rename("te$t", function(err, collection) {
+            test.assertTrue(err instanceof Error);
+            test.assertEquals("Error: collection names must not contain '$'", err.message);
+          });
+          
+          collection1.rename(".test", function(err, collection) {
+            test.assertTrue(err instanceof Error);
+            test.assertEquals("Error: collection names must not start or end with '.'", err.message);
+          });
+          
+          collection1.rename("test.", function(err, collection) {
+            test.assertTrue(err instanceof Error);
+            test.assertEquals("Error: collection names must not start or end with '.'", err.message);
+          });
+          
+          collection1.rename("tes..t", function(err, collection) {
+            test.assertEquals("Error: collection names cannot be empty", err.message);            
+          });
+          
+          collection1.count(function(err, count) {
             test.assertEquals(0, count);
-
-            collection1.insert([{'x':1}, {'x':2}], function(docs) {
-              collection1.count(function(count) {
+          
+            collection1.insert([{'x':1}, {'x':2}], function(err, docs) {
+              collection1.count(function(err, count) {
                 test.assertEquals(2, count);                
                 
-                collection1.rename(function(collection) {
-                  test.assertTrue(collection instanceof Error);
-                  test.assertTrue(collection.message.length > 0);            
+                collection1.rename('test_rename_collection2', function(err, collection) {
+                  test.assertTrue(err instanceof Error);
+                  test.assertTrue(err.message.length > 0);            
                   
-                  collection1.rename(function(collection) {
+                  collection1.rename('test_rename_collection3', function(err, collection) {
                     test.assertEquals("test_rename_collection3", collection.collectionName);
                     
                     // Check count
-                    collection.count(function(count) {
+                    collection.count(function(err, count) {
                       test.assertEquals(2, count);                                      
                       // Let's close the db 
                       finished_test({test_rename_collection:'ok'});                                   
                     });                    
-                  }, 'test_rename_collection3');                  
-                }, 'test_rename_collection2');                
+                  });
+                });
               });
             })            
           })
-
-          collection2.count(function(count) {
+          
+          collection2.count(function(err, count) {
             test.assertEquals(0, count);
           })
-
-        }, 'test_rename_collection2');        
-      }, 'test_rename_collection');
-      
-    }, 'test_rename_collection2');    
-  }, 'test_rename_collection');
+        });
+      });      
+    });    
+  });
 }
 
 function test_explain() {
-  client.createCollection(function(collection) {
+  client.createCollection('test_explain', function(err, collection) {
     collection.insert({'a':1});
-    collection.find(function(cursor) {
-      cursor.explain(function(explaination) {
+    collection.find({'a':1}, function(err, cursor) {
+      cursor.explain(function(err, explaination) {
         test.assertTrue(explaination.cursor != null);
         test.assertTrue(explaination.n.constructor == Number);
         test.assertTrue(explaination.millis.constructor == Number);
@@ -1582,46 +1570,46 @@ function test_explain() {
         // Let's close the db 
         finished_test({test_explain:'ok'});                                   
       });
-    }, {'a':1});
-  }, 'test_explain');
+    });
+  });
 }
 
 function test_count() {
-  client.createCollection(function(collection) {
-    collection.find(function(cursor) {
-      cursor.count(function(count) {
+  client.createCollection('test_count', function(err, collection) {
+    collection.find(function(err, cursor) {
+      cursor.count(function(err, count) {
         test.assertEquals(0, count);
         
         for(var i = 0; i < 10; i++) {
           collection.insert({'x':i});
         }
         
-        collection.find(function(cursor) {
-          cursor.count(function(count) {
+        collection.find(function(err, cursor) {
+          cursor.count(function(err, count) {
             test.assertEquals(10, count);
             test.assertTrue(count.constructor == Number);
           });
         });
         
-        collection.find(function(cursor) {
-          cursor.count(function(count) {
+        collection.find({}, {'limit':5}, function(err, cursor) {
+          cursor.count(function(err, count) {
             test.assertEquals(10, count);            
           });
-        }, {}, {'limit':5});
-
-        collection.find(function(cursor) {
-          cursor.count(function(count) {
-            test.assertEquals(10, count);            
-          });
-        }, {}, {'skip':5});
+        });
         
-        collection.find(function(cursor) {
-          cursor.count(function(count) {
+        collection.find({}, {'skip':5}, function(err, cursor) {
+          cursor.count(function(err, count) {
+            test.assertEquals(10, count);            
+          });
+        });
+        
+        collection.find(function(err, cursor) {
+          cursor.count(function(err, count) {
             test.assertEquals(10, count);
             
-            cursor.each(function(item) {
+            cursor.each(function(err, item) {
               if(item == null) {
-                cursor.count(function(count2) {
+                cursor.count(function(err, count2) {
                   test.assertEquals(10, count2);                  
                   test.assertEquals(count, count2);                  
                   // Let's close the db 
@@ -1632,188 +1620,185 @@ function test_count() {
           });
         });
         
-        client.collection(function(collection) {
-          collection.count(function(count) {
+        client.collection('acollectionthatdoesn', function(err, collection) {
+          collection.count(function(err, count) {
             test.assertEquals(0, count);          
           });
-        }, 'acollectionthatdoesn')
+        })
       });
     });
-  }, 'test_count');
+  });
 }
 
 function test_sort() {
-  client.createCollection(function(collection) {
+  client.createCollection('test_sort', function(err, collection) {
     for(var i = 0; i < 5; i++) {
       collection.insert({'a':i});
     }
     
-    collection.find(function(cursor) {      
-      cursor.sort(function(cursor) {
+    collection.find(function(err, cursor) {      
+      cursor.sort(['a', 1], function(err, cursor) {
         test.assertTrue(cursor.className == "Cursor");
         test.assertEquals(['a', 1], cursor.sortValue);
-      }, ['a', 1]);      
+      });      
     });
     
-    collection.find(function(cursor) {
-      cursor.sort(function(cursor) {
-        cursor.nextObject(function(doc) {
+    collection.find(function(err, cursor) {
+      cursor.sort('a', 1, function(err, cursor) {
+        cursor.nextObject(function(err, doc) {
           test.assertEquals(0, doc.a);
         });
-      }, 'a', 1);      
+      });
     });
     
-    collection.find(function(cursor) {
-      cursor.sort(function(cursor) {
-        cursor.nextObject(function(doc) {
+    collection.find(function(err, cursor) {
+      cursor.sort('a', -1, function(err, cursor) {
+        cursor.nextObject(function(err, doc) {
           test.assertEquals(4, doc.a);
         });
-      }, 'a', -1);      
+      });
     });
     
-    collection.find(function(cursor) {
-      cursor.sort(function(cursor) {
-        cursor.nextObject(function(doc) {
+    collection.find(function(err, cursor) {
+      cursor.sort('a', "asc", function(err, cursor) {
+        cursor.nextObject(function(err, doc) {
           test.assertEquals(0, doc.a);
         });
-      }, 'a', "asc");      
+      });
     });
     
-    collection.find(function(cursor) {
-      cursor.sort(function(cursor) {
+    collection.find(function(err, cursor) {
+      cursor.sort([['a', -1], ['b', 1]], function(err, cursor) {
         test.assertTrue(cursor.className == "Cursor");
         test.assertEquals([['a', -1], ['b', 1]], cursor.sortValue);
-      }, [['a', -1], ['b', 1]]);      
+      });
     });
     
-    collection.find(function(cursor) {
-      cursor.sort(function(cursor) {
-        cursor.sort(function(cursor) {
-          cursor.nextObject(function(doc) {
+    collection.find(function(err, cursor) {
+      cursor.sort('a', 1, function(err, cursor) {
+        cursor.sort('a', -1, function(err, cursor) {
+          cursor.nextObject(function(err, doc) {
             test.assertEquals(4, doc.a);
           });          
-        }, 'a', -1)
-      }, 'a', 1);      
+        })
+      });      
     });
     
-    collection.find(function(cursor) {
-      cursor.sort(function(cursor) {
-        cursor.sort(function(cursor) {
-          cursor.nextObject(function(doc) {
+    collection.find(function(err, cursor) {
+      cursor.sort('a', -1, function(err, cursor) {
+        cursor.sort('a', 1, function(err, cursor) {
+          cursor.nextObject(function(err, doc) {
             test.assertEquals(0, doc.a);
           });          
-        }, 'a', 1)
-      }, 'a', -1);      
+        })
+      });      
     });    
-
-    collection.find(function(cursor) {
-      cursor.nextObject(function(doc) {
-        cursor.sort(function(cursor) {
-          test.assertTrue(cursor instanceof Error);
-          test.assertEquals("Cursor is closed", cursor.message);          
+    
+    collection.find(function(err, cursor) {
+      cursor.nextObject(function(err, doc) {
+        cursor.sort(['a'], function(err, cursor) {
+          test.assertTrue(err instanceof Error);
+          test.assertEquals("Cursor is closed", err.message);          
           
           // Let's close the db 
           finished_test({test_sort:'ok'});                                   
-        }, ['a']); 
+        }); 
       });          
     }); 
     
-    collection.find(function(cursor) {
-      cursor.sort(function(cursor) {
-        cursor.nextObject(function(doc) {
-          test.assertTrue(doc instanceof Error);
-          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", doc.message);
+    collection.find(function(err, cursor) {
+      cursor.sort('a', 25, function(err, cursor) {
+        cursor.nextObject(function(err, doc) {
+          test.assertTrue(err instanceof Error);
+          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
         });
-      }, 'a', 25);      
+      });
     });
-
-    collection.find(function(cursor) {
-      cursor.sort(function(cursor) {
-        cursor.nextObject(function(doc) {
-          test.assertTrue(doc instanceof Error);
-          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", doc.message);
+    
+    collection.find(function(err, cursor) {
+      cursor.sort(25, function(err, cursor) {
+        cursor.nextObject(function(err, doc) {
+          test.assertTrue(err instanceof Error);
+          test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
         });
-      }, 25);      
+      });
     });           
-  }, 'test_sort');
+  });
 }
 
 function test_cursor_limit() {
-  client.createCollection(function(collection) {
+  client.createCollection('test_cursor_limit', function(err, collection) {
     for(var i = 0; i < 10; i++) {
-      collection.save(function(document) {        
-      }, {'x':1});
+      collection.save({'x':1}, function(err, document) {});
     }
     
-    collection.find(function(cursor) {
-      cursor.count(function(count) {
+    collection.find(function(err, cursor) {
+      cursor.count(function(err, count) {
         test.assertEquals(10, count);
       });
     });
     
-    collection.find(function(cursor) {
-      cursor.limit(function(cursor) {
-        cursor.toArray(function(items) {
+    collection.find(function(err, cursor) {
+      cursor.limit(5, function(err, cursor) {
+        cursor.toArray(function(err, items) {
           test.assertEquals(5, items.length);
           // Let's close the db 
           finished_test({test_cursor_limit:'ok'});                                   
         });
-      }, 5);
+      });
     });
-  }, 'test_cursor_limit');
+  });
 }
 
 function test_limit_exceptions() {
-  client.createCollection(function(collection) {
-    collection.insert({'a':1}, function(docs) {});
-    collection.find(function(cursor) {
-      cursor.limit(function(cursor) {
-        test.assertTrue(cursor instanceof Error);
-        test.assertEquals("limit requires an integer", cursor.message);
-      }, 'not-an-integer');
+  client.createCollection('test_limit_exceptions', function(err, collection) {
+    collection.insert({'a':1}, function(err, docs) {});
+    collection.find(function(err, cursor) {
+      cursor.limit('not-an-integer', function(err, cursor) {
+        test.assertTrue(err instanceof Error);
+        test.assertEquals("limit requires an integer", err.message);
+      });
     });
     
-    collection.find(function(cursor) {
-      cursor.nextObject(function(doc) {
-        cursor.limit(function(cursor) {
-          test.assertTrue(cursor instanceof Error);
-          test.assertEquals("Cursor is closed", cursor.message);
+    collection.find(function(err, cursor) {
+      cursor.nextObject(function(err, doc) {
+        cursor.limit(1, function(err, cursor) {
+          test.assertTrue(err instanceof Error);
+          test.assertEquals("Cursor is closed", err.message);
           // Let's close the db 
           finished_test({test_limit_exceptions:'ok'});                                   
-        }, 1);
+        });
       });
     });       
 
-    collection.find(function(cursor) {
-      cursor.close(function(cursor) {        
-        cursor.limit(function(cursor) {
-          test.assertTrue(cursor instanceof Error);
-          test.assertEquals("Cursor is closed", cursor.message);
-        }, 1);
+    collection.find(function(err, cursor) {
+      cursor.close(function(err, cursor) {        
+        cursor.limit(1, function(err, cursor) {
+          test.assertTrue(err instanceof Error);
+          test.assertEquals("Cursor is closed", err.message);
+        });
       });
     });
-  }, 'test_limit_exceptions');
+  });
 }
 
 function test_skip() {
-  client.createCollection(function(collection) {
-    for(var i = 0; i < 10; i++) {
-      collection.insert({'x':1});
-    }
+  client.createCollection('test_skip', function(err, collection) {
+    for(var i = 0; i < 10; i++) { collection.insert({'x':1}); }
     
-    collection.find(function(cursor) {
-      cursor.count(function(count) {
+    collection.find(function(err, cursor) {
+      cursor.count(function(err, count) {
         test.assertEquals(10, count);
       });
     });
     
-    collection.find(function(cursor) {
-      cursor.toArray(function(items) {
+    collection.find(function(err, cursor) {
+      cursor.toArray(function(err, items) {
         test.assertEquals(10, items.length);
 
-        collection.find(function(cursor) {
-          cursor.skip(function(cursor) {
-            cursor.toArray(function(items2) {
+        collection.find(function(err, cursor) {
+          cursor.skip(2, function(err, cursor) {
+            cursor.toArray(function(err, items2) {
               test.assertEquals(8, items2.length);          
               
               // Check that we have the same elements
@@ -1828,59 +1813,57 @@ function test_skip() {
               // Let's close the db 
               finished_test({test_skip:'ok'});                                   
             });
-          }, 2);
+          });
         });
       });
     });    
-  }, 'test_skip');
+  });
 }
 
 function test_skip_exceptions() {
-  client.createCollection(function(collection) {
-    collection.insert({'a':1}, function(docs) {});
-    collection.find(function(cursor) {
-      cursor.skip(function(cursor) {
-        test.assertTrue(cursor instanceof Error);
-        test.assertEquals("skip requires an integer", cursor.message);
-      }, 'not-an-integer');
+  client.createCollection('test_skip_exceptions', function(err, collection) {
+    collection.insert({'a':1}, function(err, docs) {});
+    collection.find(function(err, cursor) {
+      cursor.skip('not-an-integer', function(err, cursor) {
+        test.assertTrue(err instanceof Error);
+        test.assertEquals("skip requires an integer", err.message);
+      });
     });
     
-    collection.find(function(cursor) {
-      cursor.nextObject(function(doc) {
-        cursor.skip(function(cursor) {
-          test.assertTrue(cursor instanceof Error);
-          test.assertEquals("Cursor is closed", cursor.message);
+    collection.find(function(err, cursor) {
+      cursor.nextObject(function(err, doc) {
+        cursor.skip(1, function(err, cursor) {
+          test.assertTrue(err instanceof Error);
+          test.assertEquals("Cursor is closed", err.message);
           // Let's close the db 
           finished_test({test_skip_exceptions:'ok'});                                   
-        }, 1);
+        });
       });
     });       
 
-    collection.find(function(cursor) {
-      cursor.close(function(cursor) {        
-        cursor.skip(function(cursor) {
-          test.assertTrue(cursor instanceof Error);
-          test.assertEquals("Cursor is closed", cursor.message);
-        }, 1);
+    collection.find(function(err, cursor) {
+      cursor.close(function(err, cursor) {        
+        cursor.skip(1, function(err, cursor) {
+          test.assertTrue(err instanceof Error);
+          test.assertEquals("Cursor is closed", err.message);
+        });
       });
     });
-  }, 'test_skip_exceptions');  
+  });  
 }
 
 function test_limit_skip_chaining() {
-  client.createCollection(function(collection) {
-    for(var i = 0; i < 10; i++) {
-      collection.insert({'x':1});
-    }
+  client.createCollection('test_limit_skip_chaining', function(err, collection) {
+    for(var i = 0; i < 10; i++) { collection.insert({'x':1}); }
 
-    collection.find(function(cursor) {
-      cursor.toArray(function(items) {
+    collection.find(function(err, cursor) {
+      cursor.toArray(function(err, items) {
         test.assertEquals(10, items.length);
         
-        collection.find(function(cursor) {
-          cursor.limit(function(cursor) {
-            cursor.skip(function(cursor) {
-              cursor.toArray(function(items2) {
+        collection.find(function(err, cursor) {
+          cursor.limit(5, function(err, cursor) {
+            cursor.skip(3, function(err, cursor) {
+              cursor.toArray(function(err, items2) {
                 test.assertEquals(5, items2.length);                
                 
                 // Check that we have the same elements
@@ -1895,59 +1878,57 @@ function test_limit_skip_chaining() {
                 // Let's close the db 
                 finished_test({test_limit_skip_chaining:'ok'});                                   
               });
-            }, 3);
-          }, 5);
+            });
+          });
         });        
       });
     });    
-  }, 'test_limit_skip_chaining');
+  });
 }
 
 function test_close_no_query_sent() {
-  client.createCollection(function(collection) {
-    collection.find(function(cursor) {
-      cursor.close(function(cursor) {
+  client.createCollection('test_close_no_query_sent', function(err, collection) {
+    collection.find(function(err, cursor) {
+      cursor.close(function(err, cursor) {
         test.assertEquals(true, cursor.isClosed());
         // Let's close the db 
         finished_test({test_close_no_query_sent:'ok'});                                   
       });
     });
-  }, 'test_close_no_query_sent');
+  });
 }
 
 function test_refill_via_get_more() {
-  client.createCollection(function(collection) {
-    for(var i = 0; i < 1000; i++) {
-      collection.save(function(doc) {}, {'a': i});
-    }
+  client.createCollection('test_refill_via_get_more', function(err, collection) {
+    for(var i = 0; i < 1000; i++) { collection.save({'a': i}, function(err, doc) {}); }
 
-    collection.count(function(count) {
+    collection.count(function(err, count) {
       test.assertEquals(1000, count);
     });      
     
     var total = 0;
-    collection.find(function(cursor) {
-      cursor.each(function(item) {
+    collection.find(function(err, cursor) {
+      cursor.each(function(err, item) {
         if(item != null) {
           total = total + item.a;
         } else {
           test.assertEquals(499500, total); 
           
-          collection.count(function(count) {
+          collection.count(function(err, count) {
             test.assertEquals(1000, count);
           });                  
 
-          collection.count(function(count) {
+          collection.count(function(err, count) {
             test.assertEquals(1000, count);
             
             var total2 = 0;
-            collection.find(function(cursor) {
-              cursor.each(function(item) {
+            collection.find(function(err, cursor) {
+              cursor.each(function(err, item) {
                 if(item != null) {
                   total2 = total2 + item.a;
                 } else {
                   test.assertEquals(499500, total2); 
-                  collection.count(function(count) {
+                  collection.count(function(err, count) {
                     test.assertEquals(1000, count);
                     test.assertEquals(total, total2);
                     // Let's close the db 
@@ -1960,42 +1941,42 @@ function test_refill_via_get_more() {
         }
       });
     });  
-  }, 'test_refill_via_get_more');
+  });
 }
 
 function test_refill_via_get_more_alt_coll() {
-  client.createCollection(function(collection) {
+  client.createCollection('test_refill_via_get_more_alt_coll', function(err, collection) {
     for(var i = 0; i < 1000; i++) {
-      collection.save(function(doc) {}, {'a': i});
+      collection.save({'a': i}, function(err, doc) {});
     }
 
-    collection.count(function(count) {
+    collection.count(function(err, count) {
       test.assertEquals(1000, count);
     });      
     
     var total = 0;
-    collection.find(function(cursor) {
-      cursor.each(function(item) {
+    collection.find(function(err, cursor) {
+      cursor.each(function(err, item) {
         if(item != null) {
           total = total + item.a;
         } else {
           test.assertEquals(499500, total); 
           
-          collection.count(function(count) {
+          collection.count(function(err, count) {
             test.assertEquals(1000, count);
           });                  
 
-          collection.count(function(count) {
+          collection.count(function(err, count) {
             test.assertEquals(1000, count);
             
             var total2 = 0;
-            collection.find(function(cursor) {
-              cursor.each(function(item) {
+            collection.find(function(err, cursor) {
+              cursor.each(function(err, item) {
                 if(item != null) {
                   total2 = total2 + item.a;
                 } else {
                   test.assertEquals(499500, total2); 
-                  collection.count(function(count) {
+                  collection.count(function(err, count) {
                     test.assertEquals(1000, count);
                     test.assertEquals(total, total2);
                     // Let's close the db 
@@ -2008,22 +1989,22 @@ function test_refill_via_get_more_alt_coll() {
         }
       });
     });  
-  }, 'test_refill_via_get_more_alt_coll');
+  });
 }
 
 function test_close_after_query_sent() {
-  client.createCollection(function(collection) {
+  client.createCollection('test_close_after_query_sent', function(err, collection) {
     collection.insert({'a':1});
-    collection.find(function(cursor) {
-      cursor.nextObject(function(item) {
-        cursor.close(function(cursor) {
+    collection.find({'a':1}, function(err, cursor) {
+      cursor.nextObject(function(err, item) {
+        cursor.close(function(err, cursor) {
           test.assertEquals(true, cursor.isClosed());
           // Let's close the db 
           finished_test({test_close_after_query_sent:'ok'});                                   
         })
       });
-    }, {'a':1});
-  }, 'test_close_after_query_sent');
+    });
+  });
 }
 
 function test_kill_cursors() {
@@ -2031,60 +2012,60 @@ function test_kill_cursors() {
   test_kill_cursors_client.open(function(test_kill_cursors_client) {
     var number_of_tests_done = 0;
     
-    test_kill_cursors_client.dropCollection(function(collection) {      
-      test_kill_cursors_client.createCollection(function(collection) {
-        test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+    test_kill_cursors_client.dropCollection('test_kill_cursors', function(err, collection) {      
+      test_kill_cursors_client.createCollection('test_kill_cursors', function(err, collection) {
+        test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
           var clientCursors = cursorInfo.clientCursors_size;
           var byLocation = cursorInfo.byLocation_size;
       
           for(var i = 0; i < 1000; i++) {
-            collection.save(function(doc) {}, {'i': i});
+            collection.save({'i': i}, function(err, doc) {});
           }
       
-          test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+          test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
             test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
             test.assertEquals(byLocation, cursorInfo.byLocation_size);
         
             for(var i = 0; i < 10; i++) {
-              collection.findOne(function(item) {});
+              collection.findOne(function(err, item) {});
             }
         
-            test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+            test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
               test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
               test.assertEquals(byLocation, cursorInfo.byLocation_size);
 
               for(var i = 0; i < 10; i++) {
-                collection.find(function(cursor) {
-                  cursor.nextObject(function(item) {
-                    cursor.close(function(cursor) {});
+                collection.find(function(err, cursor) {
+                  cursor.nextObject(function(err, item) {
+                    cursor.close(function(err, cursor) {});
 
                     if(i == 10) {
-                      test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+                      test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
                         test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
                         test.assertEquals(byLocation, cursorInfo.byLocation_size);
 
-                        collection.find(function(cursor) {
-                          cursor.nextObject(function(item) {
-                            test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+                        collection.find(function(err, cursor) {
+                          cursor.nextObject(function(err, item) {
+                            test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
                               test.assertEquals(clientCursors, cursorInfo.clientCursors_size);                  
                               test.assertEquals(byLocation, cursorInfo.byLocation_size);
                             
-                              cursor.close(function(cursor) {
-                                test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+                              cursor.close(function(err, cursor) {
+                                test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
                                   test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
                                   test.assertEquals(byLocation, cursorInfo.byLocation_size);
 
-                                  collection.find(function(cursor) {
-                                    cursor.nextObject(function(item) {                                      
-                                      test_kill_cursors_client.cursorInfo(function(cursorInfo) {
-                                        test_kill_cursors_client.cursorInfo(function(cursorInfo) {
+                                  collection.find({}, {'limit':10}, function(err, cursor) {
+                                    cursor.nextObject(function(err, item) {                                      
+                                      test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+                                        test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
                                           test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
                                           test.assertEquals(byLocation, cursorInfo.byLocation_size);
                                           number_of_tests_done = 1;
                                         });
                                       });
                                     });
-                                  }, {}, {'limit':10});                                
+                                  });
                                 });
                               });                  
                             });
@@ -2098,8 +2079,8 @@ function test_kill_cursors() {
             });        
           });      
         });
-      }, 'test_kill_cursors');
-    }, 'test_kill_cursors');
+      });
+    });
     
     var intervalId = setInterval(function() {
       if(number_of_tests_done == 1) {
@@ -2112,47 +2093,47 @@ function test_kill_cursors() {
 }
 
 function test_count_with_fields() {
-  client.createCollection(function(collection) {
-    collection.save(function(doc) {
-      collection.find(function(cursor) {
-        cursor.count(function(count) {
+  client.createCollection('test_count_with_fields', function(err, collection) {
+    collection.save({'x':1}, function(err, doc) {
+      collection.find({}, {'fields':['a']}, function(err, cursor) {
+        cursor.count(function(err, count) {
           test.assertEquals(1, count);
           finished_test({test_count_with_fields:'ok'});
         });
-      }, {}, {'fields':['a']});
-    }, {'x':1});
-  }, 'test_count_with_fields');
+      });
+    });
+  });
 }
 
 // Gridstore tests
 function test_gs_exist() {
   var gridStore = new mongo.GridStore(client, "foobar", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
-        mongo.GridStore.exist(function(result) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        mongo.GridStore.exist(client, 'foobar', function(err, result) {
           test.assertEquals(true, result);
-        }, client, 'foobar');
-
-        mongo.GridStore.exist(function(result) {
+        });
+          
+        mongo.GridStore.exist(client, 'does_not_exist', function(err, result) {
           test.assertEquals(false, result);
-        }, client, 'does_not_exist');
-
-        mongo.GridStore.exist(function(result) {
+        });
+          
+        mongo.GridStore.exist(client, 'foobar', 'another_root', function(err, result) {
           test.assertEquals(false, result);
           finished_test({test_gs_exist:'ok'});        
-        }, client, 'foobar', 'another_root');
+        });
       });
-    }, "hello world!");
+    });
   });
 }
 
 function test_gs_list() {
   var gridStore = new mongo.GridStore(client, "foobar2", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
-        mongo.GridStore.list(function(items) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        mongo.GridStore.list(client, function(err, items) {
           var found = false;
           items.forEach(function(filename) {
             if(filename == 'foobar2') found = true;
@@ -2160,9 +2141,9 @@ function test_gs_list() {
           
           test.assertTrue(items.length >= 1);
           test.assertTrue(found);
-        }, client);
+        });
 
-        mongo.GridStore.list(function(items) {
+        mongo.GridStore.list(client, 'fs', function(err, items) {
           var found = false;
           items.forEach(function(filename) {
             if(filename == 'foobar2') found = true;
@@ -2170,9 +2151,9 @@ function test_gs_list() {
           
           test.assertTrue(items.length >= 1);
           test.assertTrue(found);
-        }, client, 'fs');
-
-        mongo.GridStore.list(function(items) {
+        });
+        
+        mongo.GridStore.list(client, 'my_fs', function(err, items) {
           var found = false;
           items.forEach(function(filename) {
             if(filename == 'foobar2') found = true;
@@ -2182,252 +2163,252 @@ function test_gs_list() {
           test.assertTrue(!found);
           
           var gridStore2 = new mongo.GridStore(client, "foobar3", "w");
-          gridStore2.open(function(gridStore) {    
-            gridStore2.write(function(gridStore) {
-              gridStore.close(function(result) {                
-                mongo.GridStore.list(function(items) {
+          gridStore2.open(function(err, gridStore) {    
+            gridStore2.write('my file', function(err, gridStore) {
+              gridStore.close(function(err, result) {                
+                mongo.GridStore.list(client, function(err, items) {
                   var found = false;
                   var found2 = false;
                   items.forEach(function(filename) {
                     if(filename == 'foobar2') found = true;
                     if(filename == 'foobar3') found2 = true;
                   });
-
+        
                   test.assertTrue(items.length >= 2);
                   test.assertTrue(found);
                   test.assertTrue(found2);
                   finished_test({test_gs_list:'ok'});        
-                }, client);
+                });
               });
-            }, 'my file');
+            });
           });          
-        }, client, 'my_fs');
+        });
       });
-    }, "hello world!");
+    });
   });  
 }
 
 function test_gs_small_write() {
   var gridStore = new mongo.GridStore(client, "test_gs_small_write", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
-        client.collection(function(collection) {
-          collection.find(function(cursor) {
-            cursor.toArray(function(items) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        client.collection('fs.files', function(err, collection) {
+          collection.find({'filename':'test_gs_small_write'}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
               test.assertEquals(1, items.length);
               var item = items[0];
               test.assertTrue(item._id.className == "ObjectID");
               
-              client.collection(function(collection) {
-                collection.find(function(cursor) {
-                  cursor.toArray(function(items) {
+              client.collection('fs.chunks', function(err, collection) {
+                collection.find({'files_id':item._id}, function(err, cursor) {
+                  cursor.toArray(function(err, items) {
                     test.assertEquals(1, items.length);                  
                     finished_test({test_gs_small_write:'ok'});        
                   })
-                }, {'files_id':item._id});              
-              }, 'fs.chunks');
+                });              
+              });
             });
-          }, {'filename':'test_gs_small_write'});
-        }, 'fs.files');        
+          });
+        });        
       });
-    }, "hello world!");
+    });
   });  
 }
 
 function test_gs_small_file() {
   var gridStore = new mongo.GridStore(client, "test_gs_small_file", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
-        client.collection(function(collection) {
-          collection.find(function(cursor) {
-            cursor.toArray(function(items) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        client.collection('fs.files', function(err, collection) {
+          collection.find({'filename':'test_gs_small_file'}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
               test.assertEquals(1, items.length);
               
               // Read test of the file
-              mongo.GridStore.read(function(data) {
+              mongo.GridStore.read(client, 'test_gs_small_file', function(err, data) {
                 test.assertEquals('hello world!', data);
                 finished_test({test_gs_small_file:'ok'});        
-              }, client, 'test_gs_small_file');              
+              });              
             });
-          }, {'filename':'test_gs_small_file'});
-        }, 'fs.files');        
+          });
+        });        
       });
-    }, "hello world!");
+    });
   });      
 }
 
 function test_gs_overwrite() {
   var gridStore = new mongo.GridStore(client, "test_gs_overwrite", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
         var gridStore2 = new mongo.GridStore(client, "test_gs_overwrite", "w");
-        gridStore2.open(function(gridStore) {    
-          gridStore2.write(function(gridStore) {
-            gridStore2.close(function(result) {
+        gridStore2.open(function(err, gridStore) {    
+          gridStore2.write("overwrite", function(err, gridStore) {
+            gridStore2.close(function(err, result) {
               
               // Assert that we have overwriten the data
-              mongo.GridStore.read(function(data) {
+              mongo.GridStore.read(client, 'test_gs_overwrite', function(err, data) {
                 test.assertEquals('overwrite', data);
                 finished_test({test_gs_overwrite:'ok'});        
-              }, client, 'test_gs_overwrite');                            
+              });                            
             });
-          }, "overwrite");
+          });
         });                
       });
-    }, "hello world!");
+    });
   });        
 }
 
 function test_gs_read_length() {
   var gridStore = new mongo.GridStore(client, "test_gs_read_length", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
         // Assert that we have overwriten the data
-        mongo.GridStore.read(function(data) {
+        mongo.GridStore.read(client, 'test_gs_read_length', 5, function(err, data) {
           test.assertEquals('hello', data);
           finished_test({test_gs_read_length:'ok'});        
-        }, client, 'test_gs_read_length', 5);                            
+        });                            
       });
-    }, "hello world!");
+    });
   });          
 }
 
 function test_gs_read_with_offset() {
   var gridStore = new mongo.GridStore(client, "test_gs_read_with_offset", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello, world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
         // Assert that we have overwriten the data
-        mongo.GridStore.read(function(data) {
+        mongo.GridStore.read(client, 'test_gs_read_with_offset', 5, 7, function(err, data) {
           test.assertEquals('world', data);
-        }, client, 'test_gs_read_with_offset', 5, 7);                            
+        });
 
-        mongo.GridStore.read(function(data) {
+        mongo.GridStore.read(client, 'test_gs_read_with_offset', null, 7, function(err, data) {
           test.assertEquals('world!', data);
           finished_test({test_gs_read_with_offset:'ok'});        
-        }, client, 'test_gs_read_with_offset', null, 7);                            
+        });
       });
-    }, "hello, world!");
+    });
   });            
 }
 
 function test_gs_seek() {
   var gridStore = new mongo.GridStore(client, "test_gs_seek", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello, world!", function(err, gridStore) {
       gridStore.close(function(result) {        
         var gridStore2 = new mongo.GridStore(client, "test_gs_seek", "r");
-        gridStore2.open(function(gridStore) {    
-          gridStore.seek(function(gridStore) {
-            gridStore.getc(function(chr) {
+        gridStore2.open(function(err, gridStore) {    
+          gridStore.seek(0, function(err, gridStore) {
+            gridStore.getc(function(err, chr) {
               test.assertEquals('h', chr);
             });
-          }, 0);
+          });
         });
         
         var gridStore3 = new mongo.GridStore(client, "test_gs_seek", "r");
-        gridStore3.open(function(gridStore) {    
-          gridStore.seek(function(gridStore) {
-            gridStore.getc(function(chr) {
+        gridStore3.open(function(err, gridStore) {    
+          gridStore.seek(7, function(err, gridStore) {
+            gridStore.getc(function(err, chr) {
               test.assertEquals('w', chr);
             });
-          }, 7);
+          });
         });
         
         var gridStore4 = new mongo.GridStore(client, "test_gs_seek", "r");
-        gridStore4.open(function(gridStore) {    
-          gridStore.seek(function(gridStore) {
-            gridStore.getc(function(chr) {
+        gridStore4.open(function(err, gridStore) {    
+          gridStore.seek(4, function(err, gridStore) {
+            gridStore.getc(function(err, chr) {
               test.assertEquals('o', chr);
             });
-          }, 4);
+          });
         });
-
+      
         var gridStore5 = new mongo.GridStore(client, "test_gs_seek", "r");
-        gridStore5.open(function(gridStore) {    
-          gridStore.seek(function(gridStore) {
-            gridStore.getc(function(chr) {
+        gridStore5.open(function(err, gridStore) {    
+          gridStore.seek(-1, mongo.GridStore.IO_SEEK_END, function(err, gridStore) {
+            gridStore.getc(function(err, chr) {
               test.assertEquals('!', chr);
             });
-          }, -1, mongo.GridStore.IO_SEEK_END);
+          });
         });
-
+      
         var gridStore6 = new mongo.GridStore(client, "test_gs_seek", "r");
-        gridStore6.open(function(gridStore) {    
-          gridStore.seek(function(gridStore) {
-            gridStore.getc(function(chr) {
+        gridStore6.open(function(err, gridStore) {    
+          gridStore.seek(-6, mongo.GridStore.IO_SEEK_END, function(err, gridStore) {
+            gridStore.getc(function(err, chr) {
               test.assertEquals('w', chr);
             });
-          }, -6, mongo.GridStore.IO_SEEK_END);
+          });
         });
-
+      
         var gridStore7 = new mongo.GridStore(client, "test_gs_seek", "r");
-        gridStore7.open(function(gridStore) {    
-          gridStore.seek(function(gridStore) {
-            gridStore.getc(function(chr) {
+        gridStore7.open(function(err, gridStore) {    
+          gridStore.seek(7, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
+            gridStore.getc(function(err, chr) {
               test.assertEquals('w', chr);
               
-              gridStore.seek(function(gridStore) {
-                gridStore.getc(function(chr) {
+              gridStore.seek(-1, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                gridStore.getc(function(err, chr) {
                   test.assertEquals('w', chr);
-
-                  gridStore.seek(function(gridStore) {
-                    gridStore.getc(function(chr) {
+      
+                  gridStore.seek(-4, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                    gridStore.getc(function(err, chr) {
                       test.assertEquals('o', chr);
-
-                      gridStore.seek(function(gridStore) {
-                        gridStore.getc(function(chr) {
+      
+                      gridStore.seek(3, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                        gridStore.getc(function(err, chr) {
                           test.assertEquals('o', chr);
                           finished_test({test_gs_seek:'ok'});        
                         });
-                      }, 3, mongo.GridStore.IO_SEEK_CUR);        
+                      });
                     });
-                  }, -4, mongo.GridStore.IO_SEEK_CUR);        
+                  });        
                 });
-              }, -1, mongo.GridStore.IO_SEEK_CUR);        
+              });        
             });
-          }, 7, mongo.GridStore.IO_SEEK_CUR);
+          });
         });
       });
-    }, "hello, world!");
+    });
   });              
 }
 
 function test_gs_multi_chunk() {
   var fs_client = new mongo.Db('integration_tests_10', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
-    fs_client.dropDatabase(function(done) {
+    fs_client.dropDatabase(function(err, done) {
       var gridStore = new mongo.GridStore(fs_client, "test_gs_multi_chunk", "w");
-      gridStore.open(function(gridStore) {    
+      gridStore.open(function(err, gridStore) {    
         gridStore.chunkSize = 512;
         var file1 = ''; var file2 = ''; var file3 = '';
         for(var i = 0; i < gridStore.chunkSize; i++) { file1 = file1 + 'x'; }
         for(var i = 0; i < gridStore.chunkSize; i++) { file2 = file2 + 'y'; }
         for(var i = 0; i < gridStore.chunkSize; i++) { file3 = file3 + 'z'; }
 
-        gridStore.write(function(gridStore) {
-          gridStore.write(function(gridStore) {
-            gridStore.write(function(gridStore) {
-              gridStore.close(function(result) {
-                fs_client.collection(function(collection) {
-                  collection.count(function(count) {
+        gridStore.write(file1, function(err, gridStore) {
+          gridStore.write(file2, function(err, gridStore) {
+            gridStore.write(file3, function(err, gridStore) {
+              gridStore.close(function(err, result) {
+                fs_client.collection('fs.chunks', function(err, collection) {
+                  collection.count(function(err, count) {
                     test.assertEquals(3, count);
 
-                    mongo.GridStore.read(function(data) {
+                    mongo.GridStore.read(fs_client, 'test_gs_multi_chunk', function(err, data) {
                       test.assertEquals(512*3, data.length);
                       finished_test({test_gs_multi_chunk:'ok'});                    
                       fs_client.close();
-                    }, fs_client, 'test_gs_multi_chunk');              
+                    });              
                   })
-                }, 'fs.chunks');            
+                });
               });
-            }, file3);
-          }, file2);
-        }, file1);
+            });
+          });
+        });
       });                        
     });
   });
@@ -2435,61 +2416,61 @@ function test_gs_multi_chunk() {
 
 function test_gs_puts_and_readlines() {
   var gridStore = new mongo.GridStore(client, "test_gs_puts_and_readlines", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.puts(function(gridStore) {
-      gridStore.puts(function(gridStore) {
-        gridStore.puts(function(gridStore) {          
-          gridStore.close(function(result) {
-            mongo.GridStore.readlines(function(lines) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.puts("line one", function(err, gridStore) {
+      gridStore.puts("line two\n", function(err, gridStore) {
+        gridStore.puts("line three", function(err, gridStore) {          
+          gridStore.close(function(err, result) {
+            mongo.GridStore.readlines(client, 'test_gs_puts_and_readlines', function(err, lines) {
               test.assertEquals(["line one\n", "line two\n", "line three\n"], lines);
               finished_test({test_gs_puts_and_readlines:'ok'});                    
-            }, client, 'test_gs_puts_and_readlines');
+            });
           });
-        }, "line three");
-      }, "line two\n");
-    }, "line one");
+        });
+      });
+    });
   });            
 }
 
 function test_gs_unlink() {
   var fs_client = new mongo.Db('integration_tests_11', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
-    fs_client.dropDatabase(function(done) {
+    fs_client.dropDatabase(function(err, done) {
       var gridStore = new mongo.GridStore(fs_client, "test_gs_unlink", "w");
-      gridStore.open(function(gridStore) {    
-        gridStore.write(function(gridStore) {
-          gridStore.close(function(result) {
-            fs_client.collection(function(collection) {
-              collection.count(function(count) {
+      gridStore.open(function(err, gridStore) {    
+        gridStore.write("hello, world!", function(err, gridStore) {
+          gridStore.close(function(err, result) {
+            fs_client.collection('fs.files', function(err, collection) {
+              collection.count(function(err, count) {
                 test.assertEquals(1, count);
               })
-            }, 'fs.files');
+            });
 
-            fs_client.collection(function(collection) {
-              collection.count(function(count) {
+            fs_client.collection('fs.chunks', function(err, collection) {
+              collection.count(function(err, count) {
                 test.assertEquals(1, count);
                 
                 // Unlink the file
-                mongo.GridStore.unlink(function(gridStore) {
-                  fs_client.collection(function(collection) {
-                    collection.count(function(count) {
+                mongo.GridStore.unlink(fs_client, 'test_gs_unlink', function(err, gridStore) {
+                  fs_client.collection('fs.files', function(err, collection) {
+                    collection.count(function(err, count) {
                       test.assertEquals(0, count);
                     })
-                  }, 'fs.files');
+                  });
 
-                  fs_client.collection(function(collection) {
-                    collection.count(function(count) {
+                  fs_client.collection('fs.chunks', function(err, collection) {
+                    collection.count(function(err, count) {
                       test.assertEquals(0, count);
 
                       finished_test({test_gs_unlink:'ok'});       
                       fs_client.close();
                     })
-                  }, 'fs.chunks');
-                }, fs_client, 'test_gs_unlink');                
+                  });
+                });
               })
-            }, 'fs.chunks');
+            });
           });
-        }, "hello, world!");
+        });
       });              
     });
   });
@@ -2498,34 +2479,34 @@ function test_gs_unlink() {
 function test_gs_append() {
   var fs_client = new mongo.Db('integration_tests_12', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
-    fs_client.dropDatabase(function(done) {
+    fs_client.dropDatabase(function(err, done) {
       var gridStore = new mongo.GridStore(fs_client, "test_gs_append", "w");
-      gridStore.open(function(gridStore) {    
-        gridStore.write(function(gridStore) {
-          gridStore.close(function(result) {
+      gridStore.open(function(err, gridStore) {    
+        gridStore.write("hello, world!", function(err, gridStore) {
+          gridStore.close(function(err, result) {
             
             var gridStore2 = new mongo.GridStore(fs_client, "test_gs_append", "w+");
-            gridStore2.open(function(gridStore) {
-              gridStore.write(function(gridStore) {
-                gridStore.close(function(result) {
+            gridStore2.open(function(err, gridStore) {
+              gridStore.write(" how are you?", function(err, gridStore) {
+                gridStore.close(function(err, result) {
                   
-                  fs_client.collection(function(collection) {
-                    collection.count(function(count) {
+                  fs_client.collection('fs.chunks', function(err, collection) {
+                    collection.count(function(err, count) {
                       test.assertEquals(1, count);
                       
-                      mongo.GridStore.read(function(data) {
+                      mongo.GridStore.read(fs_client, 'test_gs_append', function(err, data) {
                         test.assertEquals("hello, world! how are you?", data);
                         
                         finished_test({test_gs_append:'ok'});       
                         fs_client.close();
-                      }, fs_client, 'test_gs_append');
+                      });
                     });
-                  }, 'fs.chunks');
+                  });
                 });
-              }, " how are you?");
+              });
             });
           });
-        }, "hello, world!");
+        });
       });              
     });
   });  
@@ -2533,75 +2514,75 @@ function test_gs_append() {
 
 function test_gs_rewind_and_truncate_on_write() {
   var gridStore = new mongo.GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello, world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
         var gridStore2 = new mongo.GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
-        gridStore2.open(function(gridStore) {
-          gridStore.write(function(gridStore) {
-            gridStore.rewind(function(gridStore) {
-              gridStore.write(function(gridStore) {
-                gridStore.close(function(result) {
-                  mongo.GridStore.read(function(data) {
+        gridStore2.open(function(err, gridStore) {
+          gridStore.write('some text is inserted here', function(err, gridStore) {
+            gridStore.rewind(function(err, gridStore) {
+              gridStore.write('abc', function(err, gridStore) {
+                gridStore.close(function(err, result) {
+                  mongo.GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
                     test.assertEquals("abc", data);
         
                     finished_test({test_gs_rewind_and_truncate_on_write:'ok'});       
-                  }, client, 'test_gs_rewind_and_truncate_on_write');                                  
+                  });
                 });
-              }, 'abc');
+              });
             });
-          }, 'some text is inserted here');
+          });
         });                
       });
-    }, "hello, world!");
+    });
   });                
 }
 
 function test_gs_tell() {
   var gridStore = new mongo.GridStore(client, "test_gs_tell", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello, world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
         var gridStore2 = new mongo.GridStore(client, "test_gs_tell", "r");
-        gridStore2.open(function(gridStore) {
-          gridStore.read(function(data) {
+        gridStore2.open(function(err, gridStore) {
+          gridStore.read(5, function(err, data) {
             test.assertEquals("hello", data);
             
-            gridStore.tell(function(position) {
+            gridStore.tell(function(err, position) {
               test.assertEquals(5, position);              
               finished_test({test_gs_tell:'ok'});       
             })            
-          }, 5);
+          });
         });
       });
-    }, "hello, world!");
+    });
   });                  
 }
 
 function test_gs_save_empty_file() {
   var fs_client = new mongo.Db('integration_tests_13', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
-    fs_client.dropDatabase(function(done) {
+    fs_client.dropDatabase(function(err, done) {
       var gridStore = new mongo.GridStore(fs_client, "test_gs_save_empty_file", "w");
-      gridStore.open(function(gridStore) {    
-        gridStore.write(function(gridStore) {
-          gridStore.close(function(result) {
-            fs_client.collection(function(collection) {
-              collection.count(function(count) {
+      gridStore.open(function(err, gridStore) {    
+        gridStore.write("", function(err, gridStore) {
+          gridStore.close(function(err, result) {
+            fs_client.collection('fs.files', function(err, collection) {
+              collection.count(function(err, count) {
                 test.assertEquals(1, count);
               });
-            }, 'fs.files');
+            });
             
-            fs_client.collection(function(collection) {
-              collection.count(function(count) {
+            fs_client.collection('fs.chunks', function(err, collection) {
+              collection.count(function(err, count) {
                 test.assertEquals(0, count);
 
                 finished_test({test_gs_save_empty_file:'ok'});       
                 fs_client.close();
               });
-            }, 'fs.chunks');            
+            });            
           });
-        }, "");
+        });
       });              
     });
   });    
@@ -2609,10 +2590,10 @@ function test_gs_save_empty_file() {
 
 function test_gs_empty_file_eof() {
   var gridStore = new mongo.GridStore(client, 'test_gs_empty_file_eof', "w");
-  gridStore.open(function(gridStore) {
-    gridStore.close(function(gridStore) {      
+  gridStore.open(function(err, gridStore) {
+    gridStore.close(function(err, gridStore) {      
       var gridStore2 = new mongo.GridStore(client, 'test_gs_empty_file_eof', "r");
-      gridStore2.open(function(gridStore) {
+      gridStore2.open(function(err, gridStore) {
         test.assertEquals(true, gridStore.eof());
         finished_test({test_gs_empty_file_eof:'ok'});       
       })
@@ -2622,80 +2603,80 @@ function test_gs_empty_file_eof() {
 
 function test_gs_cannot_change_chunk_size_on_read() {
   var gridStore = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello, world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
         
         var gridStore2 = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
-        gridStore2.open(function(gridStore) {
+        gridStore2.open(function(err, gridStore) {
           gridStore.chunkSize = 42; 
           test.assertEquals(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
           finished_test({test_gs_cannot_change_chunk_size_on_read:'ok'});       
         });        
       });
-    }, "hello, world!");
+    });
   });            
 }
 
 function test_gs_cannot_change_chunk_size_after_data_written() {
   var gridStore = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
-  gridStore.open(function(gridStore) {    
-    gridStore.write(function(gridStore) {
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write("hello, world!", function(err, gridStore) {
       gridStore.chunkSize = 42; 
       test.assertEquals(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
       finished_test({test_gs_cannot_change_chunk_size_after_data_written:'ok'});       
-    }, "hello, world!");
+    });
   });              
 }
 
 function test_change_chunk_size() {
   var gridStore = new mongo.GridStore(client, "test_change_chunk_size", "w");
-  gridStore.open(function(gridStore) {   
+  gridStore.open(function(err, gridStore) {   
     gridStore.chunkSize = 42
      
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+    gridStore.write('foo', function(err, gridStore) {
+      gridStore.close(function(err, result) {
         var gridStore2 = new mongo.GridStore(client, "test_change_chunk_size", "r");
-        gridStore2.open(function(gridStore) {
+        gridStore2.open(function(err, gridStore) {
           test.assertEquals(42, gridStore.chunkSize);
           finished_test({test_change_chunk_size:'ok'});       
         });
       });
-    }, 'foo');
+    });
   });
 }
 
 function test_gs_chunk_size_in_option() {
   var gridStore = new mongo.GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
-  gridStore.open(function(gridStore) {   
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {   
+    gridStore.write('foo', function(err, gridStore) {
+      gridStore.close(function(err, result) {
         var gridStore2 = new mongo.GridStore(client, "test_change_chunk_size", "r");
-        gridStore2.open(function(gridStore) {
+        gridStore2.open(function(err, gridStore) {
           test.assertEquals(42, gridStore.chunkSize);
           finished_test({test_gs_chunk_size_in_option:'ok'});       
         });
       });
-    }, 'foo');
+    });
   });
 }
 
 function test_gs_md5() {
   var gridStore = new mongo.GridStore(client, "new-file", "w");
-  gridStore.open(function(gridStore) {   
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {   
+    gridStore.write('hello world\n', function(err, gridStore) {
+      gridStore.close(function(err, result) {
         var gridStore2 = new mongo.GridStore(client, "new-file", "r");
-        gridStore2.open(function(gridStore) {
+        gridStore2.open(function(err, gridStore) {
           test.assertEquals("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
           gridStore.md5 = "can't do this";
           test.assertEquals("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
           
           var gridStore2 = new mongo.GridStore(client, "new-file", "w");
-          gridStore2.open(function(gridStore) {
-            gridStore.close(function(result) {
+          gridStore2.open(function(err, gridStore) {
+            gridStore.close(function(err, result) {
               var gridStore3 = new mongo.GridStore(client, "new-file", "r");
-              gridStore3.open(function(gridStore) {
+              gridStore3.open(function(err, gridStore) {
                 test.assertEquals("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
 
                 finished_test({test_gs_chunk_size_in_option:'ok'});       
@@ -2704,7 +2685,7 @@ function test_gs_md5() {
           })
         });
       });
-    }, 'hello world\n');
+    });
   });  
 }
 
@@ -2713,35 +2694,34 @@ function test_gs_upload_date() {
   var originalFileUploadDate = null;
 
   var gridStore = new mongo.GridStore(client, "test_gs_upload_date", "w");
-  gridStore.open(function(gridStore) {   
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {   
+    gridStore.write('hello world\n', function(err, gridStore) {
+      gridStore.close(function(err, result) {
 
         var gridStore2 = new mongo.GridStore(client, "test_gs_upload_date", "r");
-        gridStore2.open(function(gridStore) {
+        gridStore2.open(function(err, gridStore) {
           test.assertTrue(gridStore.uploadDate != null);
-          // test.assertTrue((gridStore.uploadDate.getTime() - now.getTime()) > 0);
           originalFileUploadDate = gridStore.uploadDate;
           
-          gridStore2.close(function(result) {
+          gridStore2.close(function(err, result) {
             var gridStore3 = new mongo.GridStore(client, "test_gs_upload_date", "w");
-            gridStore3.open(function(gridStore) {
-              gridStore3.write(function(gridStore) {
-                gridStore3.close(function(result) {
+            gridStore3.open(function(err, gridStore) {
+              gridStore3.write('new data', function(err, gridStore) {
+                gridStore3.close(function(err, result) {
                   var fileUploadDate = null;
                   
                   var gridStore4 = new mongo.GridStore(client, "test_gs_upload_date", "r");
-                  gridStore4.open(function(gridStore) {
+                  gridStore4.open(function(err, gridStore) {
                     test.assertEquals(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
                     finished_test({test_gs_upload_date:'ok'});       
                   });                  
                 });
-              }, 'new data');
+              });
             });            
           });          
         });
       });
-    }, 'hello world\n');
+    });
   });  
 }
 
@@ -2749,21 +2729,21 @@ function test_gs_content_type() {
   var ct = null;
 
   var gridStore = new mongo.GridStore(client, "test_gs_content_type", "w");
-  gridStore.open(function(gridStore) {   
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {   
+    gridStore.write('hello world\n', function(err, gridStore) {
+      gridStore.close(function(err, result) {
 
         var gridStore2 = new mongo.GridStore(client, "test_gs_content_type", "r");
-        gridStore2.open(function(gridStore) {
+        gridStore2.open(function(err, gridStore) {
           ct = gridStore.contentType;
           test.assertEquals(mongo.GridStore.DEFAULT_CONTENT_TYPE, ct);
           
           var gridStore3 = new mongo.GridStore(client, "test_gs_content_type", "w+");
-          gridStore3.open(function(gridStore) {
+          gridStore3.open(function(err, gridStore) {
             gridStore.contentType = "text/html";
-            gridStore.close(function(result) {              
+            gridStore.close(function(err, result) {              
               var gridStore4 = new mongo.GridStore(client, "test_gs_content_type", "r");
-              gridStore4.open(function(gridStore) {
+              gridStore4.open(function(err, gridStore) {
                 test.assertEquals("text/html", gridStore.contentType);
                 finished_test({test_gs_content_type:'ok'});       
               });                            
@@ -2771,52 +2751,52 @@ function test_gs_content_type() {
           });          
         });
       });
-    }, 'hello world\n');
+    });
   });  
 }
 
 function test_gs_content_type_option() {
   var gridStore = new mongo.GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
-  gridStore.open(function(gridStore) {   
-    gridStore.write(function(gridStore) {
+  gridStore.open(function(err, gridStore) {   
+    gridStore.write('hello world\n', function(err, gridStore) {
       gridStore.close(function(result) {
         
         var gridStore2 = new mongo.GridStore(client, "test_gs_content_type_option", "r");
-        gridStore2.open(function(gridStore) {
+        gridStore2.open(function(err, gridStore) {
           test.assertEquals('image/jpg', gridStore.contentType);
           finished_test({test_gs_content_type_option:'ok'});       
         });        
       });
-    }, 'hello world\n');
+    });
   });  
 }
 
 function test_gs_unknown_mode() {
   var gridStore = new mongo.GridStore(client, "test_gs_unknown_mode", "x");
-  gridStore.open(function(gridStore) {
-    test.assertTrue(gridStore instanceof Error);
-    test.assertEquals("Illegal mode x", gridStore.message);
+  gridStore.open(function(err, gridStore) {
+    test.assertTrue(err instanceof Error);
+    test.assertEquals("Illegal mode x", err.message);
     finished_test({test_gs_unknown_mode:'ok'});       
   });  
 }
 
 function test_gs_metadata() {
   var gridStore = new mongo.GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
-  gridStore.open(function(gridStore) {   
-    gridStore.write(function(gridStore) {
-      gridStore.close(function(result) {
+  gridStore.open(function(err, gridStore) {   
+    gridStore.write('hello world\n', function(err, gridStore) {
+      gridStore.close(function(err, result) {
 
         var gridStore2 = new mongo.GridStore(client, "test_gs_metadata", "r");
-        gridStore2.open(function(gridStore) {
+        gridStore2.open(function(err, gridStore) {
           test.assertEquals(null, gridStore.metadata);
 
           var gridStore3 = new mongo.GridStore(client, "test_gs_metadata", "w+");
-          gridStore3.open(function(gridStore) {
+          gridStore3.open(function(err, gridStore) {
             gridStore.metadata = {'a':1};
-            gridStore.close(function(result) {
+            gridStore.close(function(err, result) {
 
               var gridStore4 = new mongo.GridStore(client, "test_gs_metadata", "r");
-              gridStore4.open(function(gridStore) {
+              gridStore4.open(function(err, gridStore) {
                 test.assertEquals(1, gridStore.metadata.a);
                 finished_test({test_gs_metadata:'ok'});       
               });                
@@ -2824,25 +2804,25 @@ function test_gs_metadata() {
           });                
         });                
       });
-    }, 'hello world\n');
+    });
   });    
 }
 
 function test_admin_default_profiling_level() {
   var fs_client = new mongo.Db('admin_test_1', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
-    fs_client.dropDatabase(function(done) {
-      fs_client.collection(function(collection) {
-        collection.insert({'a':1}, function(doc) {
-          fs_client.admin(function(adminDb) {
-            adminDb.profilingLevel(function(level) {
+    fs_client.dropDatabase(function(err, done) {
+      fs_client.collection('test', function(err, collection) {
+        collection.insert({'a':1}, function(err, doc) {
+          fs_client.admin(function(err, adminDb) {
+            adminDb.profilingLevel(function(err, level) {
               test.assertEquals("off", level);
               finished_test({test_admin_default_profiling_level:'ok'});       
               fs_client.close();
             });
           });          
         });
-      }, 'test');
+      });
     });
   });    
 }
@@ -2850,38 +2830,38 @@ function test_admin_default_profiling_level() {
 function test_admin_change_profiling_level() {
   var fs_client = new mongo.Db('admin_test_2', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
-    fs_client.dropDatabase(function(done) {
-      fs_client.collection(function(collection) {
-        collection.insert({'a':1}, function(doc) {
-          fs_client.admin(function(adminDb) {
-            adminDb.setProfilingLevel(function(level) {              
-              adminDb.profilingLevel(function(level) {
+    fs_client.dropDatabase(function(err, done) {
+      fs_client.collection('test', function(err, collection) {
+        collection.insert({'a':1}, function(err, doc) {
+          fs_client.admin(function(err, adminDb) {
+            adminDb.setProfilingLevel('slow_only', function(err, level) {              
+              adminDb.profilingLevel(function(err, level) {
                 test.assertEquals('slow_only', level);
 
-                adminDb.setProfilingLevel(function(level) {              
-                  adminDb.profilingLevel(function(level) {
+                adminDb.setProfilingLevel('off', function(err, level) {              
+                  adminDb.profilingLevel(function(err, level) {
                     test.assertEquals('off', level);
-
-                    adminDb.setProfilingLevel(function(level) {              
-                      adminDb.profilingLevel(function(level) {
+              
+                    adminDb.setProfilingLevel('all', function(err, level) {              
+                      adminDb.profilingLevel(function(err, level) {
                         test.assertEquals('all', level);
-
-                        adminDb.setProfilingLevel(function(level) {              
-                          test.assertTrue(level instanceof Error);
-                          test.assertEquals("Error: illegal profiling level value medium", level.message);
-
+                                  
+                        adminDb.setProfilingLevel('medium', function(err, level) {              
+                          test.assertTrue(err instanceof Error);
+                          test.assertEquals("Error: illegal profiling level value medium", err.message);
+                                  
                           finished_test({test_admin_default_profiling_level:'ok'});       
                           fs_client.close();                          
-                        }, 'medium');
+                        });
                       })
-                    }, 'all');
+                    });
                   })
-                }, 'off');
+                });
               })
-            }, 'slow_only');
+            });
           });          
         });
-      }, 'test');
+      });
     });
   });      
 }
@@ -2889,15 +2869,15 @@ function test_admin_change_profiling_level() {
 function test_admin_profiling_info() {
   var fs_client = new mongo.Db('admin_test_3', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
-    fs_client.dropDatabase(function(done) {
-      fs_client.collection(function(collection) {
+    fs_client.dropDatabase(function(err, done) {
+      fs_client.collection('test', function(err, collection) {
         collection.insert({'a':1}, function(doc) {
-          fs_client.admin(function(adminDb) {
-            adminDb.setProfilingLevel(function(level) {
-              collection.find(function(cursor) {
-                cursor.toArray(function(items) {                  
-                  adminDb.setProfilingLevel(function(level) {
-                    adminDb.profilingInfo(function(infos) {
+          fs_client.admin(function(err, adminDb) {
+            adminDb.setProfilingLevel('all', function(err, level) {
+              collection.find(function(err, cursor) {
+                cursor.toArray(function(err, items) {                  
+                  adminDb.setProfilingLevel('off', function(err, level) {
+                    adminDb.profilingInfo(function(err, infos) {
                       test.assertTrue(infos.constructor == Array);
                       test.assertTrue(infos.length >= 1);
                       test.assertTrue(infos[0].ts.constructor == Date);
@@ -2907,13 +2887,13 @@ function test_admin_profiling_info() {
                       finished_test({test_admin_profiling_info:'ok'});       
                       fs_client.close();                          
                     });                  
-                  }, 'off');
+                  });
                 });
               });              
-            }, 'all');
+            });
           });          
         });
-      }, 'test');
+      });
     });
   });        
 }
@@ -2921,20 +2901,20 @@ function test_admin_profiling_info() {
 function test_admin_validate_collection() {
   var fs_client = new mongo.Db('admin_test_4', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(fs_client) {
-    fs_client.dropDatabase(function(done) {
-      fs_client.collection(function(collection) {
-        collection.insert({'a':1}, function(doc) {
-          fs_client.admin(function(adminDb) {
-            adminDb.validatCollection(function(doc) {
+    fs_client.dropDatabase(function(err, done) {
+      fs_client.collection('test', function(err, collection) {
+        collection.insert({'a':1}, function(err, doc) {
+          fs_client.admin(function(err, adminDb) {
+            adminDb.validatCollection('test', function(err, doc) {
               test.assertTrue(doc.result != null);
               test.assertTrue(doc.result.match(/firstExtent/) != null);
               
               finished_test({test_admin_validate_collection:'ok'});       
               fs_client.close();                          
-            }, 'test');            
+            });
           });          
         });
-      }, 'test');
+      });
     });
   });          
 }
@@ -2942,25 +2922,25 @@ function test_admin_validate_collection() {
 function test_pair() {
   var p_client = new mongo.Db('integration_tests_21', new mongo.ServerPair(new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})), {});
   p_client.open(function(p_client) {    
-    p_client.dropDatabase(function(done) {    
+    p_client.dropDatabase(function(err, done) {    
       test.assertTrue(p_client.masterConnection != null);
       test.assertEquals(2, p_client.connections.length);
       
       test.assertTrue(p_client.serverConfig.leftServer.master);
       test.assertFalse(p_client.serverConfig.rightServer.master);
     
-      p_client.createCollection(function(collection) {
-        collection.insert({'a':1}, function(doc) {
-          collection.find(function(cursor) {
-            cursor.toArray(function(items) {
+      p_client.createCollection('test_collection', function(err, collection) {
+        collection.insert({'a':1}, function(err, doc) {
+          collection.find(function(err, cursor) {
+            cursor.toArray(function(err, items) {
               test.assertEquals(1, items.length);
     
               finished_test({test_pair:'ok'});       
               p_client.close();
             });
-          }, {});
+          });
         });
-      }, 'test_collection');
+      });
     });
   });    
 }
@@ -2968,25 +2948,25 @@ function test_pair() {
 function test_cluster() {
   var p_client = new mongo.Db('integration_tests_22', new mongo.ServerCluster([new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})]), {});
   p_client.open(function(p_client) {
-    p_client.dropDatabase(function(done) {    
+    p_client.dropDatabase(function(err, done) {    
       test.assertTrue(p_client.masterConnection != null);
       test.assertEquals(2, p_client.connections.length);
   
       test.assertEquals(true, p_client.serverConfig.servers[0].master);
       test.assertEquals(false, p_client.serverConfig.servers[1].master);
     
-      p_client.createCollection(function(collection) {
-        collection.insert({'a':1}, function(doc) {
-          collection.find(function(cursor) {
-            cursor.toArray(function(items) {
+      p_client.createCollection('test_collection', function(err, collection) {
+        collection.insert({'a':1}, function(err, doc) {
+          collection.find(function(err, cursor) {
+            cursor.toArray(function(err, items) {
               test.assertEquals(1, items.length);
 
               finished_test({test_cluster:'ok'});       
               p_client.close();
             });
-          }, {});
+          });
         });
-      }, 'test_collection');
+      });
     });
   });    
 }
@@ -3001,19 +2981,19 @@ function test_custom_primary_key_generator() {
 
   var p_client = new mongo.Db('integration_tests_20', new mongo.Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
   p_client.open(function(p_client) {
-    p_client.dropDatabase(function(done) {    
-      p_client.createCollection(function(collection) {
-        collection.insert({'a':1}, function(doc) {
-          collection.find(function(cursor) {
-            cursor.toArray(function(items) {
+    p_client.dropDatabase(function(err, done) {    
+      p_client.createCollection('test_custom_key', function(err, collection) {
+        collection.insert({'a':1}, function(err, doc) {
+          collection.find({'_id':new mongo.ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
               test.assertEquals(1, items.length);
 
               finished_test({test_custom_primary_key_generator:'ok'});       
               p_client.close();
             });
-          }, {'_id':new mongo.ObjectID("aaaaaaaaaaaa")});
+          });
         });
-      }, 'test_custom_key');
+      });
     });
   });      
 }
@@ -3021,27 +3001,27 @@ function test_custom_primary_key_generator() {
 // Not run since it requires a master-slave setup to test correctly
 // var client_tests = [test_object_id_generation];
 
-// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-//       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_error_handling, test_last_status, test_clear,
-//       test_insert, test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
-//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
-//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
-//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
-//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
-//       test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
-//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
-//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
-//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
-//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
-//       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
-//       test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
-//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
-//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
-//       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
-//       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
-//       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
-//       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator];
-
+var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+      test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_error_handling, test_last_status, test_clear,
+      test_insert, test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+      test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+      test_collection_names, test_collections_info, test_collection_options, test_index_information,
+      test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+      test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+      test_to_a_after_each, test_where, test_eval, test_hint, test_group, test_deref, test_save,
+      test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+      test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+      test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+      test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+      test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
+      test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
+      test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+      test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+      test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
+      test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
+      test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
+      test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator];
+      
 /*******************************************************************************************************
   Setup For Running Tests
 *******************************************************************************************************/
@@ -3067,7 +3047,7 @@ function ensure_tests_finished() {
       // client.close();
       
       // Ensure we don't have any more cursors hanging about
-      client.cursorInfo(function(cursorInfo) {
+      client.cursorInfo(function(err, cursorInfo) {
         sys.puts(sys.inspect(cursorInfo));
         client.close();
       });
