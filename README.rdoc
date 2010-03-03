@@ -6,31 +6,31 @@ A simple example of inserting a document.
 
   var client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}));
   client.open(function(p_client) {
-	client.createCollection(function(r) {
-	  client.collection(function(collection) {
-	    for(var i = 1; i < 1000; i++) {
-	      collection.insert(new OrderedHash().add('c', i), function(r) {});
-	    }
+  	client.createCollection('test_insert', function(err, collection) {
+  	  client.collection('test_insert', function(err, collection) {
+  	    for(var i = 1; i < 1000; i++) {
+  	      collection.insert({c:1}, function(err, docs) {});
+  	    }
 
-	    collection.insert(new OrderedHash().add('a', 2), function(r) {
-	      collection.insert(new OrderedHash().add('a', 3), function(r) {
-	        collection.count(function(count) {
-	          test.assertEquals(1001, count);
-	          // Locate all the entries using find
-	          collection.find(function(cursor) {
-	            cursor.toArray(function(results) {
-	              test.assertEquals(1001, results.length);
-	              test.assertTrue(results[0] != null);
+  	    collection.insert({a:2}, function(err, docs) {
+  	      collection.insert({a:3}, function(err, docs) {
+  	        collection.count(function(err, count) {
+  	          test.assertEquals(1001, count);
+  	          // Locate all the entries using find
+  	          collection.find(function(err, cursor) {
+  	            cursor.toArray(function(err, results) {
+  	              test.assertEquals(1001, results.length);
+  	              test.assertTrue(results[0] != null);
 
-	              // Let's close the db 
-	              finished_test({test_insert:'ok'}); 
-	            });
-	          }, new OrderedHash());          
-	        });        
-	      });
-	    });      
-	  }, 'test_insert');    
-	}, 'test_insert');
+  	              // Let's close the db 
+  	              client.close();
+  	            });
+  	          });          
+  	        });        
+  	      });
+  	    });      
+  	  });    
+  	});
   });
 
 === GitHub information
@@ -55,7 +55,7 @@ For examples look in the examples/ directory. You can execute the examples using
 
 The GridStore class allows for storage of binary files in mongoDB using the mongoDB defined files and chunks collection definition.
 
-See the gridfs.js file under examples/ for how to use it or view the ingration tests marked with test_gs_...
+See the gridfs.js file under examples/ for how to use it or view the integration tests marked with test_gs_...
 
 = Notes
 
@@ -78,19 +78,18 @@ Simple example below
 
 	var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
 	p_client.open(function(p_client) {
-	  p_client.dropDatabase(function(done) {    
-	    p_client.createCollection(function(collection) {
-	      collection.insert({'a':1}, function(doc) {
-	        collection.find(function(cursor) {
-	          cursor.toArray(function(items) {
+	  p_client.dropDatabase(function(err, done) {    
+	    p_client.createCollection('test_custom_key', function(err, collection) {
+	      collection.insert({'a':1}, function(err, docs) {
+	        collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
+	          cursor.toArray(function(err, items) {
 	            test.assertEquals(1, items.length);
-
-	            finished_test({test_custom_primary_key_generator:'ok'});       
+      	      // Let's close the db 
 	            p_client.close();
 	          });
-	        }, {'_id':new ObjectID("aaaaaaaaaaaa")});
+	        });
 	      });
-	    }, 'test_custom_key');
+	    });
 	  });
 	});      
 
@@ -103,19 +102,18 @@ attempt to create a collection that already exists. Strict is provided for conve
 	var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
 	test.assertEquals(true, error_client.strict);
 	error_client.open(function(error_client) {
-	  error_client.collection(function(collection) {
-	    test.assertTrue(collection instanceof Error);
-	    test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", collection.message);      
-	  }, 'does-not-exist');      
+	  error_client.collection('does-not-exist', function(err, collection) {
+	    test.assertTrue(err instanceof Error);
+	    test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", err.message);      
+	  });      
   
-	  error_client.createCollection(function(collection) {  
-	    error_client.collection(function(collection) {
+	  error_client.createCollection('test_strict_access_collection', function(err, collection) {  
+	    error_client.collection('test_strict_access_collection', function(err, collection) {
 	      test.assertTrue(collection instanceof Collection);
 	      // Let's close the db 
-	      finished_test({test_strict_access_collection:'ok'});                 
 	      error_client.close();
-	    }, 'test_strict_access_collection');
-	  }, 'test_strict_access_collection');
+	    });
+	  });
 	});
 
 == Cursors
