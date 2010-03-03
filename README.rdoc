@@ -1,3 +1,6 @@
+= Community
+Check out the google group http://groups.google.com/group/node-mongodb-native for questions/answers from users of the driver.
+
 = Introduction
 
 This is a node.js driver for MongoDB. It's a port (or close to a port) of the libary for ruby at http://github.com/mongodb/mongo-ruby-driver/.
@@ -84,7 +87,8 @@ Simple example below
 	        collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
 	          cursor.toArray(function(err, items) {
 	            test.assertEquals(1, items.length);
-      	      // Let's close the db 
+              
+              // Let's close the db 
 	            p_client.close();
 	          });
 	        });
