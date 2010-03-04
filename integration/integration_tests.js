@@ -198,6 +198,41 @@ function test_automatic_reconnect() {
   });  
 }
 
+// Test that error conditions are handled correctly
+function test_connection_errors() {
+  // Test error handling for single server connection
+  var serverConfig = new mongo.Server("127.0.0.1", 21017, {auto_reconnect: true});
+  var error_client = new mongo.Db('integration_tests_', serverConfig, {});
+
+  error_client.addListener("close", function(connection) {
+    test.assertTrue(typeof connection == typeof serverConfig);
+    test.assertEquals("127.0.0.1", connection.host);
+    test.assertEquals(21017, connection.port);
+    test.assertEquals(true, connection.autoReconnect);
+  });
+  error_client.open(function(error_client) {});    
+  
+  // Test error handling for server pair (works for cluster aswell)
+  var serverConfig = new mongo.Server("127.0.0.1", 21017, {});
+  var normalServer = new mongo.Server("127.0.0.1", 27017);
+  var serverPairConfig = new mongo.ServerPair(normalServer, serverConfig);
+  var error_client_pair = new mongo.Db('integration_tests_21', serverPairConfig, {});  
+
+  var closeListener = function(connection) {
+    test.assertTrue(typeof connection == typeof serverConfig);
+    test.assertEquals("127.0.0.1", connection.host);
+    test.assertEquals(21017, connection.port);
+    test.assertEquals(false, connection.autoReconnect);
+      // Let's close the db 
+    finished_test({test_connection_errors:'ok'});
+    error_client_pair.removeListener("close", closeListener);
+    normalServer.close(); 
+  };
+
+  error_client_pair.addListener("close", closeListener);
+  error_client_pair.open(function(error_client_pair) {});
+}
+
 // Test the error reporting functionality
 function test_error_handling() {
   var error_client = new mongo.Db('integration_tests2_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {});  
@@ -3002,7 +3037,7 @@ function test_custom_primary_key_generator() {
 // var client_tests = [test_object_id_generation];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
-      test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_error_handling, test_last_status, test_clear,
+      test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
       test_insert, test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
       test_collection_names, test_collections_info, test_collection_options, test_index_information,
