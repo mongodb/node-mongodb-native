@@ -3033,8 +3033,109 @@ function test_custom_primary_key_generator() {
   });      
 }
 
+// Mapreduce tests
+function test_map_reduce() {
+  client.createCollection('test_map_reduce', function(err, collection) {
+    collection.insert([{'user_id':1}, {'user_id':2}]);
+    
+    // String functions
+    var map = "function() { emit(this.user_id, 1); }";
+    var reduce = "function(k,vals) { return 1; }";
+    
+    collection.mapReduce(map, reduce, function(err, collection) {
+      collection.findOne({'_id':1}, function(err, result) {
+        test.assertEquals(1, result.value);
+      });
+      collection.findOne({'_id':2}, function(err, result) {
+        test.assertEquals(1, result.value);
+        finished_test({test_map_reduce:'ok'});       
+      });
+    });    
+  });
+}
+
+function test_map_reduce_with_functions_as_arguments() {
+  client.createCollection('test_map_reduce_with_functions_as_arguments', function(err, collection) {
+    collection.insert([{'user_id':1}, {'user_id':2}]);
+    
+    // String functions
+    var map = function() { emit(this.user_id, 1); };
+    var reduce = function(k,vals) { return 1; };
+    
+    collection.mapReduce(map, reduce, function(err, collection) {
+      collection.findOne({'_id':1}, function(err, result) {
+        test.assertEquals(1, result.value);
+      });
+      collection.findOne({'_id':2}, function(err, result) {
+        test.assertEquals(1, result.value);
+        finished_test({test_map_reduce_with_functions_as_arguments:'ok'});       
+      });
+    });    
+  });  
+}
+
+function test_map_reduce_with_code_objects() {
+  client.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
+    collection.insert([{'user_id':1}, {'user_id':2}]);
+    
+    // String functions
+    var map = new mongo.Code("function() { emit(this.user_id, 1); }");
+    var reduce = new mongo.Code("function(k,vals) { return 1; }");
+    
+    collection.mapReduce(map, reduce, function(err, collection) {
+      collection.findOne({'_id':1}, function(err, result) {
+        test.assertEquals(1, result.value);
+      });
+      collection.findOne({'_id':2}, function(err, result) {
+        test.assertEquals(1, result.value);
+        finished_test({test_map_reduce_with_code_objects:'ok'});       
+      });
+    });    
+  });    
+}
+
+function test_map_reduce_with_options() {
+  client.createCollection('test_map_reduce_with_options', function(err, collection) {
+    collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}]);
+    
+    // String functions
+    var map = new mongo.Code("function() { emit(this.user_id, 1); }");
+    var reduce = new mongo.Code("function(k,vals) { return 1; }");
+    
+    collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
+      collection.count(function(err, count) {
+        test.assertEquals(2, count);
+        
+        collection.findOne({'_id':2}, function(err, result) {
+          test.assertEquals(1, result.value);
+        });
+        collection.findOne({'_id':3}, function(err, result) {
+          test.assertEquals(1, result.value);
+          finished_test({test_map_reduce_with_options:'ok'});       
+        });
+      });
+    });    
+  });    
+}
+
+function test_map_reduce_error() {
+  client.createCollection('test_map_reduce_error', function(err, collection) {
+    collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}]);
+    
+    // String functions
+    var map = new mongo.Code("function() { emit(this.user_id, 1); }");
+    var reduce = new mongo.Code("function(k,vals) { throw 'error'; }");
+    
+    collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
+      test.assertTrue(err != null);
+      finished_test({test_map_reduce_error:'ok'});       
+    });    
+  });      
+}
+
+
 // Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_object_id_generation];
+var client_tests = [test_map_reduce_error];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3055,7 +3156,9 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
-      test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator];
+      test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator,
+      test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
+      test_map_reduce_with_options, test_map_reduce_error];
       
 /*******************************************************************************************************
   Setup For Running Tests
