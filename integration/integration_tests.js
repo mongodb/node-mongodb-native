@@ -3176,8 +3176,26 @@ function test_add_and_remove_user() {
   });
 }
 
+function test_distinct_queries() {
+  client.createCollection('test_distinct_queries', function(err, collection) {    
+    collection.insert([{'a':0, 'b':{'c':'a'}},
+      {'a':1, 'b':{'c':'b'}},
+      {'a':1, 'b':{'c':'c'}},
+      {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], function(err, ids) {
+        collection.distinct('a', function(err, docs) {
+          test.assertEquals([0, 1, 2, 3], docs.sort());
+        });
+
+        collection.distinct('b.c', function(err, docs) {
+          test.assertEquals(['a', 'b', 'c'], docs.sort());
+          finished_test({test_distinct_queries:'ok'});
+        });
+    })
+  });    
+}
+
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_authentication, test_add_and_remove_user];
+var client_tests = [test_distinct_queries];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3200,7 +3218,8 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator,
       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
-      test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user];
+      test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
+      test_distinct_queries];
       
 /*******************************************************************************************************
   Setup For Running Tests
