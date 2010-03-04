@@ -49,25 +49,18 @@ function test_collection_methods() {
 function test_authentication() {
   var user_name = 'spongebob';
   var password = 'password';
-  var user_password = MD5.hex_md5(user_name + ":mongo:" + password);
   
   client.authenticate('admin', 'admin', function(replies) {
     test.assertEquals(0, replies[0].documents[0].ok);
     test.assertEquals("auth fails", replies[0].documents[0].errmsg);
-    // Fetch a user collection
-    client.collection('system.users', function(err, user_collection) {
-      // Insert a user document
-      var user_doc = new mongo.OrderedHash().add('user', user_name).add('pwd', user_password);
-      // Insert the user into the system users collections
-      user_collection.insert(user_doc, function(err, documents) {        
-        test.assertTrue(documents[0].get('_id').toHexString().length == 24);
-        // Ensure authentication works correctly
-        client.authenticate(user_name, password, function(replies) {
-          test.assertEquals(1, replies[0].documents[0].ok);
-          finished_test({test_authentication:'ok'});
-        });
+    
+    // Add a user
+    client.addUser(user_name, password, function(err, result) {
+      client.authenticate(user_name, password, function(replies) {
+        test.assertEquals(1, replies[0].documents[0].ok);
+        finished_test({test_authentication:'ok'});
       });      
-    });
+    });    
   });
 }
 
@@ -3133,9 +3126,29 @@ function test_map_reduce_error() {
   });      
 }
 
+function test_drop_indexes() {
+  client.createCollection('test_drop_indexes', function(err, collection) {    
+    collection.insert({a:1}, function(err, ids) {
+      // Create an index on the collection
+      client.createIndex(collection.collectionName, 'a', function(err, indexName) {
+        test.assertEquals("a_1", indexName);
+
+        // Drop all the indexes
+        collection.dropIndexes(function(err, result) {
+          test.assertEquals(true, result);          
+          
+          collection.indexInformation(function(err, result) {
+            test.assertTrue(result['a_1'] == null);
+            finished_test({test_drop_indexes:'ok'});       
+          })
+        })
+      });      
+    })
+  });  
+}
 
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_map_reduce_error];
+var client_tests = [test_authentication];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3158,7 +3171,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator,
       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
-      test_map_reduce_with_options, test_map_reduce_error];
+      test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes];
       
 /*******************************************************************************************************
   Setup For Running Tests
@@ -3181,9 +3194,7 @@ function ensure_tests_finished() {
       // Print out the result
       sys.puts("= Final Checks =========================================================");
       // Stop interval timer and close db connection
-      clearInterval(intervalId);
-      // client.close();
-      
+      clearInterval(intervalId);      
       // Ensure we don't have any more cursors hanging about
       client.cursorInfo(function(err, cursorInfo) {
         sys.puts(sys.inspect(cursorInfo));
