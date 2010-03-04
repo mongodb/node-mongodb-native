@@ -50,14 +50,14 @@ function test_authentication() {
   var user_name = 'spongebob';
   var password = 'password';
   
-  client.authenticate('admin', 'admin', function(replies) {
-    test.assertEquals(0, replies[0].documents[0].ok);
-    test.assertEquals("auth fails", replies[0].documents[0].errmsg);
+  client.authenticate('admin', 'admin', function(err, replies) {
+    test.assertTrue(err instanceof Error);
+    test.assertTrue(!replies);
     
     // Add a user
     client.addUser(user_name, password, function(err, result) {
-      client.authenticate(user_name, password, function(replies) {
-        test.assertEquals(1, replies[0].documents[0].ok);
+      client.authenticate(user_name, password, function(err, replies) {
+        test.assertTrue(replies);
         finished_test({test_authentication:'ok'});
       });      
     });    
@@ -3147,8 +3147,37 @@ function test_drop_indexes() {
   });  
 }
 
+function test_add_and_remove_user() {
+  var user_name = 'spongebob2';
+  var password = 'password';
+
+  var p_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+  p_client.open(function(automatic_connect_client) {
+    p_client.authenticate('admin', 'admin', function(err, replies) {
+      test.assertTrue(err instanceof Error);
+
+      // Add a user
+      p_client.addUser(user_name, password, function(err, result) {
+        p_client.authenticate(user_name, password, function(err, replies) {
+          test.assertTrue(replies);
+          
+          // Remove the user and try to authenticate again
+          p_client.removeUser(user_name, function(err, result) {
+            p_client.authenticate(user_name, password, function(err, replies) {
+              test.assertTrue(err instanceof Error);
+          
+              finished_test({test_add_and_remove_user:'ok'});
+              p_client.close();
+            });          
+          });        
+        });      
+      });    
+    });
+  });
+}
+
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_authentication];
+var client_tests = [test_authentication, test_add_and_remove_user];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3171,7 +3200,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator,
       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
-      test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes];
+      test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user];
       
 /*******************************************************************************************************
   Setup For Running Tests
