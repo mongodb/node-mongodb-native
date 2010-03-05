@@ -1,14 +1,9 @@
-require.paths.unshift("../lib");
-
 GLOBAL.DEBUG = true;
 
 sys = require("sys");
 test = require("mjsunit");
 
-var mongo = require('mongodb/db');
-process.mixin(mongo, require('mongodb/connection'));
-process.mixin(mongo, require('mongodb/bson/bson'));
-process.mixin(mongo, require('mongodb/goog/math/integer'));
+var mongo = require('../lib/mongodb');
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : mongo.Connection.DEFAULT_PORT;
@@ -30,7 +25,7 @@ db.open(function(db) {
     var messages = ["hola", "hello", "aloha", "ciao"];
     sys.puts(">> Generate test data");
     for(var i = 0; i < objectCount; i++) {
-      objects.push({'number':i, 'rndm':((5*Math.random()) + 1), 'msg':messages[mongo.Integer.fromNumber((4*Math.random())).toInt()]})
+      objects.push({'number':i, 'rndm':((5*Math.random()) + 1), 'msg':messages[Integer.fromNumber((4*Math.random())).toInt()]})
     }
     sys.puts("generated");
 

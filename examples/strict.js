@@ -1,12 +1,9 @@
-require.paths.unshift("../lib");
-
 GLOBAL.DEBUG = true;
 
 sys = require("sys");
 test = require("mjsunit");
 
-var mongo = require('mongodb/db');
-process.mixin(mongo, require('mongodb/connection'));
+var mongo = require('../lib/mongodb');
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : mongo.Connection.DEFAULT_PORT;
