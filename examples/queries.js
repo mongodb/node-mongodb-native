@@ -127,7 +127,3 @@ db.open(function(db) {
     });    
   });
 });
-
-
-
-
