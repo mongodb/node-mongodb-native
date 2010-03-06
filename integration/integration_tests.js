@@ -1,19 +1,8 @@
-require.paths.unshift("./lib");
-
 GLOBAL.DEBUG = true;
 
 sys = require("sys");
 test = require("mjsunit");
-var mongo = require('mongodb/db');
-process.mixin(mongo, require('mongodb/connection'));
-process.mixin(mongo, require('mongodb/bson/bson'));
-process.mixin(mongo, require('mongodb/admin'));
-process.mixin(mongo, require('mongodb/gridfs/gridstore'));
-process.mixin(mongo, require('mongodb/gridfs/chunk'));
-process.mixin(mongo, require('mongodb/collection'));
-process.mixin(mongo, require('mongodb/bson/collections'));
-process.mixin(mongo, require('mongodb/goog/math/long'));
-process.mixin(mongo, require('mongodb/goog/math/integer'));
+var mongo = require('../lib/mongodb');
 
 /*******************************************************************************************************
   Integration Tests
