@@ -1812,7 +1812,7 @@ function test_limit_exceptions() {
 
 function test_skip() {
   client.createCollection('test_skip', function(err, collection) {
-    for(var i = 0; i < 10; i++) { collection.insert({'x':1}); }
+    for(var i = 0; i < 10; i++) { collection.insert({'x':i}); }
     
     collection.find(function(err, cursor) {
       cursor.count(function(err, count) {
@@ -3194,8 +3194,64 @@ function test_distinct_queries() {
   });    
 }
 
+function test_all_serialization_types() {
+  client.createCollection('test_all_serialization_types', function(err, collection) {    
+    var date = new Date();
+    var oid = new mongo.ObjectID();
+    var string = 'binstring'
+    var bin = new mongo.Binary()
+    for(var index = 0; index < string.length; index++) {
+      bin.put(string.charAt(index))
+    }
+    
+    var motherOfAllDocuments = {
+      'string': 'hello',
+      'array': [1,2,3],
+      'hash': {'a':1, 'b':2},
+      'date': date,
+      'oid': oid,
+      'binary': bin,
+      'int': 42,
+      'float': 33.3333,
+      'regexp': /regexp/,
+      'boolean': true, 
+      'long': date.getTime(),
+      'where': new mongo.Code('this.a > i', new mongo.OrderedHash().add('i', 1)),
+      'dbref': new mongo.DBRef('namespace', oid, null)
+    }
+    
+    collection.insert(motherOfAllDocuments, function(err, docs) {
+      collection.findOne(function(err, doc) {
+        // Assert correct deserialization of the values
+        test.assertEquals(motherOfAllDocuments.string, doc.string);
+        test.assertEquals(motherOfAllDocuments.array, doc.array);
+        test.assertEquals(motherOfAllDocuments.hash.a, doc.hash.a);
+        test.assertEquals(motherOfAllDocuments.hash.b, doc.hash.b);
+        test.assertEquals(date.getTime(), doc.long);
+        test.assertEquals(date.toString(), doc.date.toString());
+        test.assertEquals(date.getTime(), doc.date.getTime());
+        test.assertEquals(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+        test.assertEquals(motherOfAllDocuments.binary.value, doc.binary.value);
+
+        test.assertEquals(motherOfAllDocuments.int, doc.int);
+        test.assertEquals(motherOfAllDocuments.long, doc.long);
+        test.assertEquals(motherOfAllDocuments.float, doc.float);
+        test.assertEquals(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+        test.assertEquals(motherOfAllDocuments.boolean, doc.boolean);
+        test.assertEquals(motherOfAllDocuments.where.code, doc.where.code);
+        test.assertEquals(motherOfAllDocuments.where.scope.get('i'), doc.where.scope.i);
+        test.assertEquals(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+        test.assertEquals(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+        
+        // sys.puts(sys.inspect(doc));
+        finished_test({test_all_serialization_types:'ok'});      
+      })      
+    });    
+  });    
+}
+
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_distinct_queries];
+var client_tests = [test_skip];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3219,7 +3275,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator,
       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
-      test_distinct_queries];
+      test_distinct_queries, test_all_serialization_types];
       
 /*******************************************************************************************************
   Setup For Running Tests
