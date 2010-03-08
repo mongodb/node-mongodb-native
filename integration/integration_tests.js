@@ -1330,10 +1330,10 @@ function test_save() {
   client.createCollection('test_save', function(err, collection) {
     var doc = {'hello':'world'};
     collection.save(doc, function(err, docs) {
-      test.assertTrue(docs[0]._id.className == "ObjectID");
+      test.assertTrue(docs._id.className == "ObjectID");
       collection.count(function(err, count) {
         test.assertEquals(1, count);
-        doc = docs[0];
+        doc = docs;
         
         collection.save(doc, function(err, doc) {
           collection.count(function(err, count) {
@@ -1384,9 +1384,9 @@ function test_save_long() {
 function test_find_by_oid() {
   client.createCollection('test_find_by_oid', function(err, collection) {
     collection.save({'hello':'mike'}, function(err, docs) {
-      test.assertTrue(docs[0]._id.className == "ObjectID");
+      test.assertTrue(docs._id.className == "ObjectID");
       
-      collection.findOne({'_id':docs[0]._id}, function(err, doc) {
+      collection.findOne({'_id':docs._id}, function(err, doc) {
         test.assertEquals('mike', doc.hello);
         
         var id = doc._id.toString();
