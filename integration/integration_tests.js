@@ -3239,8 +3239,24 @@ function test_all_serialization_types() {
   });    
 }
 
+function test_should_correctly_retrieve_one_record() {
+  var p_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+  p_client.open(function(p_client) {
+    client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {    
+      collection.insert({'a':0});
+
+      p_client.collection('test_should_correctly_retrieve_one_record', function(err, usercollection) {
+        usercollection.findOne({'a': 0}, function(err, result) {          
+          finished_test({test_should_correctly_retrieve_one_record:'ok'});      
+          p_client.close();
+        });
+      });
+    });
+  });
+}
+
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_skip];
+var client_tests = [test_should_correctly_retrieve_one_record];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3264,7 +3280,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator,
       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
-      test_distinct_queries, test_all_serialization_types];
+      test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record];
       
 /*******************************************************************************************************
   Setup For Running Tests
