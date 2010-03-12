@@ -1435,12 +1435,12 @@ function test_invalid_key_names() {
     // Illegal insert for key
     collection.insert({'$hello':'world'}, function(err, doc) {
       test.assertTrue(err instanceof Error);
-      test.assertEquals("Error: key $hello must not start with '$'", err.message);            
+      test.assertEquals("key $hello must not start with '$'", err.message);            
     });
     
     collection.insert({'hello':{'$hello':'world'}}, function(err, doc) {
       test.assertTrue(err instanceof Error);
-      test.assertEquals("Error: key $hello must not start with '$'", err.message);              
+      test.assertEquals("key $hello must not start with '$'", err.message);              
     });
     
     collection.insert({'he$llo':'world'}, function(err, docs) {
@@ -1453,22 +1453,22 @@ function test_invalid_key_names() {
 
     collection.insert({'.hello':'world'}, function(err, doc) {
       test.assertTrue(err instanceof Error);
-      test.assertEquals("Error: key .hello must not contain '.'", err.message);            
+      test.assertEquals("key .hello must not contain '.'", err.message);            
     });
 
     collection.insert({'hello':{'.hello':'world'}}, function(err, doc) {
       test.assertTrue(err instanceof Error);
-      test.assertEquals("Error: key .hello must not contain '.'", err.message);            
+      test.assertEquals("key .hello must not contain '.'", err.message);            
     });
 
     collection.insert({'hello.':'world'}, function(err, doc) {
       test.assertTrue(err instanceof Error);
-      test.assertEquals("Error: key hello. must not contain '.'", err.message);            
+      test.assertEquals("key hello. must not contain '.'", err.message);            
     });
 
     collection.insert({'hello':{'hello.':'world'}}, function(err, doc) {
       test.assertTrue(err instanceof Error);
-      test.assertEquals("Error: key hello. must not contain '.'", err.message);            
+      test.assertEquals("key hello. must not contain '.'", err.message);            
       // Let's close the db 
       finished_test({test_invalid_key_names:'ok'});                                   
     });    
@@ -1507,36 +1507,36 @@ function test_collection_names2() {
 function test_rename_collection() {
   client.createCollection('test_rename_collection', function(err, collection) {
     client.createCollection('test_rename_collection2', function(err, collection) {
-      client.collection('test_rename_collection', function(err, collection1) {
+      client.collection('test_rename_collection', function(err, collection1) {        
         client.collection('test_rename_collection2', function(err, collection2) {
           // Assert rename
           collection1.rename(5, function(err, collection) {
             test.assertTrue(err instanceof Error);
-            test.assertEquals("Error: collection name must be a String", err.message);
+            test.assertEquals("collection name must be a String", err.message);
           });
 
           collection1.rename("", function(err, collection) {
             test.assertTrue(err instanceof Error);
-            test.assertEquals("Error: collection names cannot be empty", err.message);
+            test.assertEquals("collection names cannot be empty", err.message);
           });
           
           collection1.rename("te$t", function(err, collection) {
             test.assertTrue(err instanceof Error);
-            test.assertEquals("Error: collection names must not contain '$'", err.message);
+            test.assertEquals("collection names must not contain '$'", err.message);
           });
           
           collection1.rename(".test", function(err, collection) {
             test.assertTrue(err instanceof Error);
-            test.assertEquals("Error: collection names must not start or end with '.'", err.message);
+            test.assertEquals("collection names must not start or end with '.'", err.message);
           });
           
           collection1.rename("test.", function(err, collection) {
             test.assertTrue(err instanceof Error);
-            test.assertEquals("Error: collection names must not start or end with '.'", err.message);
+            test.assertEquals("collection names must not start or end with '.'", err.message);
           });
           
           collection1.rename("tes..t", function(err, collection) {
-            test.assertEquals("Error: collection names cannot be empty", err.message);            
+            test.assertEquals("collection names cannot be empty", err.message);            
           });
           
           collection1.count(function(err, count) {
