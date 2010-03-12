@@ -3255,8 +3255,62 @@ function test_should_correctly_retrieve_one_record() {
   });
 }
 
+function test_should_correctly_save_unicode_containing_document() {
+  var doc = {statuses_count: 1687
+  , created_at: 'Mon Oct 22 14:55:08 +0000 2007'
+  , description: 'NodeJS hacker, Cofounder of Debuggable, CakePHP core alumnus'
+  , favourites_count: 6
+  , profile_sidebar_fill_color: 'EADEAA'
+  , screen_name: 'felixge'
+  , status: 
+     { created_at: 'Fri Mar 12 08:59:44 +0000 2010'
+     , in_reply_to_screen_name: null
+     , truncated: false
+     , in_reply_to_user_id: null
+     , source: '<a href="http://www.atebits.com/" rel="nofollow">Tweetie</a>'
+     , favorited: false
+     , in_reply_to_status_id: null
+     , id: 10364119169
+     , text: '#berlin #snow = #fail : ('
+     }
+  , contributors_enabled: false
+  , following: null
+  , geo_enabled: false
+  , time_zone: 'Eastern Time (US & Canada)'
+  , profile_sidebar_border_color: 'D9B17E'
+  , url: 'http://debuggable.com'
+  , verified: false
+  , location: 'Berlin'
+  , profile_text_color: '333333'
+  , notifications: null
+  , profile_background_image_url: 'http://s.twimg.com/a/1268354287/images/themes/theme8/bg.gif'
+  , protected: false
+  , profile_link_color: '9D582E'
+  , followers_count: 840
+  , name: 'Felix Geisend\u00f6rfer'
+  , profile_background_tile: false
+  , id: 9599342
+  , lang: 'en'
+  , utc_offset: -18000
+  , friends_count: 450
+  , profile_background_color: '8B542B'
+  , profile_image_url: 'http://a3.twimg.com/profile_images/107142257/passbild-square_normal.jpg'
+  };
+  
+  client.createCollection('test_should_correctly_save_unicode_containing_document', function(err, collection) {    
+    doc['_id'] = 'felixge';
+    
+    collection.save(doc, function(err, doc) {
+      collection.findOne(function(err, doc) {
+        test.assertEquals('felixge', doc._id);        
+        finished_test({test_should_correctly_save_unicode_containing_document:'ok'});      
+      });
+    });
+  });
+}
+
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_should_correctly_retrieve_one_record];
+var client_tests = [test_should_correctly_save_unicode_containing_document];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3280,7 +3334,8 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator,
       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
-      test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record];
+      test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
+      test_should_correctly_save_unicode_containing_document];
       
 /*******************************************************************************************************
   Setup For Running Tests
