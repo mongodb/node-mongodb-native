@@ -157,16 +157,16 @@ function test_automatic_reconnect() {
     // Listener for closing event
     var closeListener = function(has_error) {
       // Remove the listener for the close to avoid loop
-      automatic_connect_client.serverConfig.masterConnection.removeListener("close", this);
+      automatic_connect_client.serverConfig.masterConnection.removeListener("close", closeListener);
       // Let's insert a document
       automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
         // Insert another test document and collect using ObjectId
-        collection.insert(new mongo.OrderedHash().add("name", "Patty").add("age", 34), function(err, ids) {
+        collection.insert({"name":"Patty", "age":34}, function(err, ids) {
           test.assertEquals(1, ids.length);    
-          test.assertTrue(ids[0].get('_id').toHexString().length == 24);
+          test.assertTrue(ids[0]._id.toHexString().length == 24);
                   
-          collection.findOne(new mongo.OrderedHash().add("name", "Patty"), function(err, document) {
-            test.assertEquals(ids[0].get('_id').toHexString(), document._id.toHexString());
+          collection.findOne({"name":"Patty"}, function(err, document) {
+            test.assertEquals(ids[0]._id.toHexString(), document._id.toHexString());
             // Let's close the db 
             finished_test({test_automatic_reconnect:'ok'});    
             automatic_connect_client.close();
@@ -3310,7 +3310,7 @@ function test_should_correctly_save_unicode_containing_document() {
 }
 
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_should_correctly_save_unicode_containing_document];
+// var client_tests = [test_should_correctly_save_unicode_containing_document];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
