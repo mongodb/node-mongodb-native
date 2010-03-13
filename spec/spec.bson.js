@@ -233,5 +233,16 @@ describe 'BSON'
       deserialized_data.doc.code.should.eql(doc.doc.code);
       deserialized_data.doc.scope.i.should.eql(doc.doc.scope.get('i'));
     end
+    
+    it 'Should Correctly serialize and deserialize and embedded array'
+      var doc = {'a':0,
+        'b':['tmp1', 'tmp2', 'tmp3', 'tmp4', 'tmp5', 'tmp6', 'tmp7', 'tmp8', 'tmp9', 'tmp10', 'tmp11', 'tmp12', 'tmp13', 'tmp14', 'tmp15', 'tmp16']
+      };
+
+      var serialized_data = mongo.BSON.serialize(doc)
+      var deserialized_data = mongo.BSON.deserialize(serialized_data)
+      deserialized_data.a.should.eql doc.a
+      deserialized_data.b.should.eql doc.b      
+    end
   end
 end

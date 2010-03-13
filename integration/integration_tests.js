@@ -3309,8 +3309,24 @@ function test_should_correctly_save_unicode_containing_document() {
   });
 }
 
+function test_should_deserialize_large_integrated_array() {
+  client.createCollection('test_should_deserialize_large_integrated_array', function(err, collection) {    
+    var doc = {'a':0,
+      'b':['tmp1', 'tmp2', 'tmp3', 'tmp4', 'tmp5', 'tmp6', 'tmp7', 'tmp8', 'tmp9', 'tmp10', 'tmp11', 'tmp12', 'tmp13', 'tmp14', 'tmp15', 'tmp16']
+    };
+    // Insert the collection
+    collection.insert(doc);
+    // Fetch and check the collection
+    collection.findOne({'a': 0}, function(err, result) {         
+      test.assertEquals(doc.a, result.a);
+      test.assertEquals(doc.b, result.b);
+      finished_test({test_should_deserialize_large_integrated_array:'ok'});      
+    });
+  });
+}
+
 // Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_should_correctly_save_unicode_containing_document];
+var client_tests = [test_should_deserialize_large_integrated_array];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3335,7 +3351,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
       test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
-      test_should_correctly_save_unicode_containing_document];
+      test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array];
       
 /*******************************************************************************************************
   Setup For Running Tests
