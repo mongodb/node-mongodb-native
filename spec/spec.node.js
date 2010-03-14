@@ -1,7 +1,8 @@
 require.paths.unshift("./spec/lib");
-process.mixin(GLOBAL, require("sys"))
+var sys = require('sys');
+for (var key in sys)
+	GLOBAL[key] = sys[key];
 
-sys = require("sys")
 mongo = require("../lib/mongodb")
 
 require("jspec")
