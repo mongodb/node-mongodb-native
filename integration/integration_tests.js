@@ -3329,6 +3329,18 @@ function test_should_deserialize_large_integrated_array() {
   });
 }
 
+function test_find_one_error_handling() {
+  client.createCollection('test_find_one_error_handling', function(err, collection) {    
+    // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
+    // is the error handling of the findOne Method     
+    collection.findOne({"_id":ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {
+      test.assertEquals(undefined, result)
+      test.asserNotEqual(undefined, err)
+    });
+  });
+  
+}
+
 // Not run since it requires a master-slave setup to test correctly
 // var client_tests = [test_gs_small_write];
 
@@ -3355,7 +3367,8 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
       test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
-      test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array];
+      test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array,
+      test_find_one_error_handling];
  
 // var client_tests = [
 //       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
