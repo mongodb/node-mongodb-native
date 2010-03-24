@@ -6,7 +6,8 @@ var mongo = require('../lib/mongodb'),
   ObjectID = require('../lib/mongodb/bson/bson').ObjectID,
   Cursor = require('../lib/mongodb/cursor').Cursor,
   OrderedHash = require('../lib/mongodb/bson/collections').OrderedHash,
-  Collection = require('../lib/mongodb/collection').Collection;
+  Collection = require('../lib/mongodb/collection').Collection,
+  BinaryParser = require('../lib/mongodb/bson/binary_parser').BinaryParser;
 
 /*******************************************************************************************************
   Integration Tests
@@ -25,8 +26,8 @@ function test_collection_methods() {
       });      
       test.assertTrue(true, found);
       // Rename the collection and check that it's gone
-      client.renameCollection("test_collection_methods", "test_collection_methods2", function(err, replies) {
-        test.assertEquals(1, replies[0].documents[0].ok);
+      client.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
+        test.assertEquals(1, reply.documents[0].ok);
         // Drop the collection and check that it's gone
         client.dropCollection("test_collection_methods2", function(err, result) {
           test.assertEquals(true, result);          
@@ -156,7 +157,7 @@ function test_object_id_to_and_from_hex_string() {
 // Test the auto connect functionality of the db
 function test_automatic_reconnect() {
   var automatic_connect_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-  automatic_connect_client.open(function(automatic_connect_client) {
+  automatic_connect_client.open(function(err, automatic_connect_client) {
     // Listener for closing event
     var closeListener = function(has_error) {
       // Remove the listener for the close to avoid loop
@@ -195,14 +196,14 @@ function test_connection_errors() {
     test.assertEquals(21017, connection.port);
     test.assertEquals(true, connection.autoReconnect);
   });
-  error_client.open(function(error_client) {});    
+  error_client.open(function(err, error_client) {});    
   
   // Test error handling for server pair (works for cluster aswell)
   var serverConfig = new mongo.Server("127.0.0.1", 21017, {});
   var normalServer = new mongo.Server("127.0.0.1", 27017);
   var serverPairConfig = new mongo.ServerPair(normalServer, serverConfig);
   var error_client_pair = new mongo.Db('integration_tests_21', serverPairConfig, {});  
-
+  
   var closeListener = function(connection) {
     test.assertTrue(typeof connection == typeof serverConfig);
     test.assertEquals("127.0.0.1", connection.host);
@@ -213,47 +214,47 @@ function test_connection_errors() {
     error_client_pair.removeListener("close", closeListener);
     normalServer.close(); 
   };
-
+  
   error_client_pair.addListener("close", closeListener);
-  error_client_pair.open(function(error_client_pair) {});
+  error_client_pair.open(function(err, error_client_pair) {});
 }
 
 // Test the error reporting functionality
 function test_error_handling() {
   var error_client = new mongo.Db('integration_tests2_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {});  
-  error_client.open(function(error_client) {
+  error_client.open(function(err, error_client) {
     error_client.resetErrorHistory(function() {
-      error_client.error(function(documents) {
+      error_client.error(function(err, documents) {
         test.assertEquals(true, documents[0].ok);                
         test.assertEquals(0, documents[0].n);    
                   
         // Force error on server
-        error_client.executeDbCommand({forceerror: 1}, function(r) {
-          test.assertEquals(0, r[0].documents[0].ok);                
-          test.assertTrue(r[0].documents[0].errmsg.length > 0);    
+        error_client.executeDbCommand({forceerror: 1}, function(err, r) {
+          test.assertEquals(0, r.documents[0].ok);                
+          test.assertTrue(r.documents[0].errmsg.length > 0);    
           // // Check for previous errors
-          error_client.previousErrors(function(documents) {
+          error_client.previousErrors(function(err, documents) {
             test.assertEquals(true, documents[0].ok);                
             test.assertEquals(1, documents[0].nPrev);    
             test.assertEquals("forced error", documents[0].err);
             // Check for the last error
-            error_client.error(function(documents) {
+            error_client.error(function(err, documents) {
               test.assertEquals("forced error", documents[0].err);    
               // Force another error
               error_client.collection('test_error_collection', function(err, collection) {
                 collection.findOne(new mongo.OrderedHash().add("name", "Fred"), function(err, document) {              
                   // Check that we have two previous errors
-                  error_client.previousErrors(function(documents) {
+                  error_client.previousErrors(function(err, documents) {
                     test.assertEquals(true, documents[0].ok);                
                     test.assertEquals(2, documents[0].nPrev);    
                     test.assertEquals("forced error", documents[0].err);
 
                     error_client.resetErrorHistory(function() {
-                      error_client.previousErrors(function(documents) {
+                      error_client.previousErrors(function(err, documents) {
                         test.assertEquals(true, documents[0].ok);                
                         test.assertEquals(-1, documents[0].nPrev);                        
 
-                        error_client.error(function(documents) {
+                        error_client.error(function(err, documents) {
                           test.assertEquals(true, documents[0].ok);                
                           test.assertEquals(0, documents[0].n);
 
@@ -292,23 +293,23 @@ function test_last_status() {
           // Update the record
           collection.update(new mongo.OrderedHash().add("i", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("i", 2)), function(err, result) {
             // Check for the last message from the server
-            client.lastStatus(function(status) {
-              test.assertEquals(true, status[0].documents[0].ok);                
-              test.assertEquals(true, status[0].documents[0].updatedExisting);                
+            client.lastStatus(function(err, status) {
+              test.assertEquals(true, status.documents[0].ok);                
+              test.assertEquals(true, status.documents[0].updatedExisting);                
               // Check for failed update of document
               collection.update(new mongo.OrderedHash().add("i", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("i", 500)), function(err, result) {
-                client.lastStatus(function(status) {
-                  test.assertEquals(true, status[0].documents[0].ok);                
-                  test.assertEquals(false, status[0].documents[0].updatedExisting);                
+                client.lastStatus(function(err, status) {
+                  test.assertEquals(true, status.documents[0].ok);                
+                  test.assertEquals(false, status.documents[0].updatedExisting);                
             
                   // Check safe update of a document
-                  collection.insert(new mongo.OrderedHash().add("x", 1), function(ids) {
+                  collection.insert(new mongo.OrderedHash().add("x", 1), function(err, ids) {
                     collection.update(new mongo.OrderedHash().add("x", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("x", 2)), {'safe':true}, function(err, document) {
                       test.assertTrue(document instanceof OrderedHash);
                       test.assertTrue(document.get('$set') instanceof OrderedHash);
                     });
                               
-                    collection.update(new mongo.OrderedHash().add("y", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("y", 2)), {'safe':true}, function(err, document) {                      
+                    collection.update(new mongo.OrderedHash().add("y", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("y", 2)), {'safe':true}, function(err, document) {
                       test.assertTrue(err instanceof Error);
                       test.assertEquals("Failed to update document", err.message);
                               
@@ -328,7 +329,7 @@ function test_last_status() {
 
 // Test clearing out of the collection
 function test_clear() {
-  client.createCollection('test_clear', function(r) {
+  client.createCollection('test_clear', function(err, r) {
     client.collection('test_clear', function(err, collection) {
       collection.insert(new mongo.OrderedHash().add("i", 1), function(err, ids) {
         collection.insert(new mongo.OrderedHash().add("i", 2), function(err, ids) {
@@ -526,22 +527,6 @@ function test_find_advanced() {
           finished_test({test_find_advanced:'ok'});     
         });
       });  
-
-      // Locate regexp clause
-      // collection.find({'a':/[1|2]/}, function(err, cursor) {
-      //   cursor.toArray(function(err, documents) {
-      //     test.assertEquals(2, documents.length);
-      //     // Check that the correct documents are returned
-      //     var results = [];
-      //     // Check that we have all the results we want
-      //     documents.forEach(function(doc) {
-      //       if(doc.a == 1 || doc.a == 2) results.push(1);
-      //     });
-      //     test.assertEquals(2, results.length);
-      //     // Let's close the db 
-      //     finished_test({test_find_advanced:'ok'});     
-      //   });
-      // });
     });
   });
 }
@@ -883,13 +868,11 @@ function test_unique_index() {
   client.createCollection('test_unique_index', function(err, collection) {    
     client.createIndex(collection.collectionName, 'hello', function(err, indexName) {
       // Insert some docs
-      collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(ids) {
+      collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(err, ids) {
         // Assert that we have no erros
-        client.error(function(errors) {
+        client.error(function(err, errors) {
           test.assertEquals(1, errors.length);
           test.assertEquals(null, errors[0].err);
-          // Let's close the db 
-          finished_test({test_unique_index:'ok'});                 
         });
       });
     });        
@@ -899,11 +882,13 @@ function test_unique_index() {
   client.createCollection('test_unique_index2', function(err, collection) {    
     client.createIndex(collection.collectionName, 'hello', true, function(err, indexName) {
       // Insert some docs
-      collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(ids) {
+      collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(err, ids) {
         // Assert that we have erros
-        client.error(function(errors) {
+        client.error(function(err, errors) {
           test.assertEquals(1, errors.length);
           test.assertTrue(errors[0].err != null);
+          // Let's close the db 
+          finished_test({test_unique_index:'ok'});                 
         });
       });
     });        
@@ -915,7 +900,7 @@ function test_index_on_subfield() {
   client.createCollection('test_index_on_subfield', function(err, collection) {  
     collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], function(err, ids) {
       // Assert that we have no erros
-      client.error(function(errors) {
+      client.error(function(err, errors) {
         test.assertEquals(1, errors.length);
         test.assertTrue(errors[0].err == null);
       });      
@@ -927,7 +912,7 @@ function test_index_on_subfield() {
     client.createIndex(collection.collectionName, 'hello.a', true, function(err, indexName) {
       collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], function(err, ids) {
         // Assert that we have erros
-        client.error(function(errors) {
+        client.error(function(err, errors) {
           test.assertEquals(1, errors.length);
           test.assertTrue(errors[0].err != null);
           // Let's close the db 
@@ -996,7 +981,7 @@ function test_non_oid_id() {
 function test_strict_access_collection() {
   var error_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
   test.assertEquals(true, error_client.strict);
-  error_client.open(function(error_client) {
+  error_client.open(function(err, error_client) {
     error_client.collection('does-not-exist', function(err, collection) {
       test.assertTrue(err instanceof Error);
       test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", err.message);      
@@ -1016,7 +1001,7 @@ function test_strict_access_collection() {
 function test_strict_create_collection() {
   var error_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
   test.assertEquals(true, error_client.strict);
-  error_client.open(function(error_client) {
+  error_client.open(function(err, error_client) {
     error_client.createCollection('test_strict_create_collection', function(err, collection) {
       test.assertTrue(collection instanceof Collection);
 
@@ -1481,27 +1466,27 @@ function test_invalid_key_names() {
 
 function test_collection_names2() {
   client.collection(5, function(err, collection) {
-    test.assertEquals("Error: collection name must be a String", err.message);            
+    test.assertEquals("collection name must be a String", err.message);            
   });
   
   client.collection("", function(err, collection) {
-    test.assertEquals("Error: collection names cannot be empty", err.message);            
+    test.assertEquals("collection names cannot be empty", err.message);            
   });  
   
   client.collection("te$t", function(err, collection) {
-    test.assertEquals("Error: collection names must not contain '$'", err.message);            
+    test.assertEquals("collection names must not contain '$'", err.message);            
   });  
   
   client.collection(".test", function(err, collection) {
-    test.assertEquals("Error: collection names must not start or end with '.'", err.message);            
+    test.assertEquals("collection names must not start or end with '.'", err.message);            
   });  
   
   client.collection("test.", function(err, collection) {
-    test.assertEquals("Error: collection names must not start or end with '.'", err.message);            
+    test.assertEquals("collection names must not start or end with '.'", err.message);            
   });  
   
   client.collection("test..t", function(err, collection) {
-    test.assertEquals("Error: collection names cannot be empty", err.message);            
+    test.assertEquals("collection names cannot be empty", err.message);            
     
     // Let's close the db 
     finished_test({test_collection_names2:'ok'});                                   
@@ -1577,6 +1562,8 @@ function test_rename_collection() {
     });    
   });
 }
+
+var client_tests = [test_explain];
 
 function test_explain() {
   client.createCollection('test_explain', function(err, collection) {
@@ -2030,7 +2017,7 @@ function test_close_after_query_sent() {
 
 function test_kill_cursors() {
   var test_kill_cursors_client = new mongo.Db('integration_tests4_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-  test_kill_cursors_client.open(function(test_kill_cursors_client) {
+  test_kill_cursors_client.open(function(err, test_kill_cursors_client) {
     var number_of_tests_done = 0;
     
     test_kill_cursors_client.dropCollection('test_kill_cursors', function(err, collection) {      
@@ -2401,7 +2388,7 @@ function test_gs_seek() {
 
 function test_gs_multi_chunk() {
   var fs_client = new mongo.Db('integration_tests_10', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.open(function(fs_client) {
+  fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       var gridStore = new mongo.GridStore(fs_client, "test_gs_multi_chunk", "w");
       gridStore.open(function(err, gridStore) {    
@@ -2455,7 +2442,7 @@ function test_gs_puts_and_readlines() {
 
 function test_gs_unlink() {
   var fs_client = new mongo.Db('integration_tests_11', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.open(function(fs_client) {
+  fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       var gridStore = new mongo.GridStore(fs_client, "test_gs_unlink", "w");
       gridStore.open(function(err, gridStore) {    
@@ -2499,7 +2486,7 @@ function test_gs_unlink() {
 
 function test_gs_append() {
   var fs_client = new mongo.Db('integration_tests_12', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.open(function(fs_client) {
+  fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       var gridStore = new mongo.GridStore(fs_client, "test_gs_append", "w");
       gridStore.open(function(err, gridStore) {    
@@ -2582,7 +2569,7 @@ function test_gs_tell() {
 
 function test_gs_save_empty_file() {
   var fs_client = new mongo.Db('integration_tests_13', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.open(function(fs_client) {
+  fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       var gridStore = new mongo.GridStore(fs_client, "test_gs_save_empty_file", "w");
       gridStore.open(function(err, gridStore) {    
@@ -2831,7 +2818,7 @@ function test_gs_metadata() {
 
 function test_admin_default_profiling_level() {
   var fs_client = new mongo.Db('admin_test_1', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.open(function(fs_client) {
+  fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       fs_client.collection('test', function(err, collection) {
         collection.insert({'a':1}, function(err, doc) {
@@ -2850,7 +2837,7 @@ function test_admin_default_profiling_level() {
 
 function test_admin_change_profiling_level() {
   var fs_client = new mongo.Db('admin_test_2', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.open(function(fs_client) {
+  fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       fs_client.collection('test', function(err, collection) {
         collection.insert({'a':1}, function(err, doc) {
@@ -2871,7 +2858,7 @@ function test_admin_change_profiling_level() {
                           test.assertTrue(err instanceof Error);
                           test.assertEquals("Error: illegal profiling level value medium", err.message);
                                   
-                          finished_test({test_admin_default_profiling_level:'ok'});       
+                          finished_test({test_admin_change_profiling_level:'ok'});       
                           fs_client.close();                          
                         });
                       })
@@ -2889,7 +2876,7 @@ function test_admin_change_profiling_level() {
 
 function test_admin_profiling_info() {
   var fs_client = new mongo.Db('admin_test_3', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.open(function(fs_client) {
+  fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       fs_client.collection('test', function(err, collection) {
         collection.insert({'a':1}, function(doc) {
@@ -2921,7 +2908,7 @@ function test_admin_profiling_info() {
 
 function test_admin_validate_collection() {
   var fs_client = new mongo.Db('admin_test_4', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  fs_client.open(function(fs_client) {
+  fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       fs_client.collection('test', function(err, collection) {
         collection.insert({'a':1}, function(err, doc) {
@@ -2942,7 +2929,7 @@ function test_admin_validate_collection() {
 
 function test_pair() {
   var p_client = new mongo.Db('integration_tests_21', new mongo.ServerPair(new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})), {});
-  p_client.open(function(p_client) {    
+  p_client.open(function(err, p_client) {    
     p_client.dropDatabase(function(err, done) {    
       test.assertTrue(p_client.masterConnection != null);
       test.assertEquals(2, p_client.connections.length);
@@ -2968,7 +2955,7 @@ function test_pair() {
 
 function test_cluster() {
   var p_client = new mongo.Db('integration_tests_22', new mongo.ServerCluster([new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})]), {});
-  p_client.open(function(p_client) {
+  p_client.open(function(err, p_client) {
     p_client.dropDatabase(function(err, done) {    
       test.assertTrue(p_client.masterConnection != null);
       test.assertEquals(2, p_client.connections.length);
@@ -3001,7 +2988,7 @@ function test_custom_primary_key_generator() {
   }
 
   var p_client = new mongo.Db('integration_tests_20', new mongo.Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
-  p_client.open(function(p_client) {
+  p_client.open(function(err, p_client) {
     p_client.dropDatabase(function(err, done) {    
       p_client.createCollection('test_custom_key', function(err, collection) {
         collection.insert({'a':1}, function(err, doc) {
@@ -3032,6 +3019,7 @@ function test_map_reduce() {
       collection.findOne({'_id':1}, function(err, result) {
         test.assertEquals(1, result.value);
       });
+
       collection.findOne({'_id':2}, function(err, result) {
         test.assertEquals(1, result.value);
         finished_test({test_map_reduce:'ok'});       
@@ -3145,7 +3133,7 @@ function test_add_and_remove_user() {
   var password = 'password';
 
   var p_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-  p_client.open(function(automatic_connect_client) {
+  p_client.open(function(err, automatic_connect_client) {
     p_client.authenticate('admin', 'admin', function(err, replies) {
       test.assertTrue(err instanceof Error);
 
@@ -3245,7 +3233,7 @@ function test_all_serialization_types() {
 
 function test_should_correctly_retrieve_one_record() {
   var p_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-  p_client.open(function(p_client) {
+  p_client.open(function(err, p_client) {
     client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {    
       collection.insert({'a':0});
 
@@ -3333,16 +3321,40 @@ function test_find_one_error_handling() {
   client.createCollection('test_find_one_error_handling', function(err, collection) {    
     // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
     // is the error handling of the findOne Method     
-    collection.findOne({"_id":ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {
-      test.assertEquals(undefined, result)
-      test.asserNotEqual(undefined, err)
-    });
-  });
-  
+    try {
+      collection.findOne({"_id":ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {});      
+    } catch (err) {
+      finished_test({test_find_one_error_handling:'ok'});      
+    }
+  });  
+}
+
+function test_force_binary_error() {
+  client.createCollection('test_find_one_error_handling', function(err, collection) {    
+    // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
+    // is the error handling of the findOne Method     
+    var result= "";
+    var hexString = "5e9bd59248305adf18ebc15703a1";
+    for(var index=0 ; index < hexString.length; index+=2) {
+        var string= hexString.substr(index, 2);
+        var number= parseInt(string, 16);
+        result+= BinaryParser.fromByte(number);
+    }
+    
+    // Generate a illegal ID
+    var id = ObjectID.createFromHexString('5e9bd59248305adf18ebc157');
+    id.id = result;
+    // Execute with error
+    collection.findOne({"_id": id}, function(err, result) {
+      // test.assertEquals(undefined, result)
+      test.assertTrue(err != null)
+      finished_test({test_force_binary_error:'ok'});      
+    });      
+  });  
 }
 
 // Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_gs_small_write];
+// var client_tests = [test_collection_methods];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3369,25 +3381,13 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
       test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array,
       test_find_one_error_handling];
- 
-// var client_tests = [
-//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
-//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
-//       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
-//       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
-//       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
-//       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator,
-//       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
-//       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
-//       test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
-//       test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array];
-   
+    
 /*******************************************************************************************************
   Setup For Running Tests
 *******************************************************************************************************/
 // Set up the client connection
 var client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {}), {});
-client.open(function(client) {
+client.open(function(err, client) {
   // Do cleanup of the db
   client.dropDatabase(function() {
     // Run  all the tests

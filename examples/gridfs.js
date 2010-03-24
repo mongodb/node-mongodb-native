@@ -10,7 +10,7 @@ var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NO
 
 sys.puts(">> Connecting to " + host + ":" + port);
 var db1 = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), {});
-db1.open(function(db) {
+db1.open(function(err, db) {
   // Write a new file
   var gridStore = new mongo.GridStore(db, "foobar", "w");
   gridStore.open(function(err, gridStore) {    
@@ -48,7 +48,7 @@ db1.open(function(db) {
 });
 
 var db2 = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), {});
-db2.open(function(db) {
+db2.open(function(err, db) {
   // File existence tests
   var gridStore = new mongo.GridStore(db, "foobar2", "w");
   gridStore.open(function(err, gridStore) {    
@@ -96,7 +96,7 @@ db2.open(function(db) {
 });
 
 var db3 = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), {});
-db3.open(function(db) {
+db3.open(function(err, db) {
   // Metadata
   var gridStore = new mongo.GridStore(db, "foobar3", "w");
   gridStore.open(function(err, gridStore) {    

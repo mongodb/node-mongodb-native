@@ -12,7 +12,7 @@ var LINE_SIZE = 120;
 
 sys.puts("Connecting to " + host + ":" + port);
 var db = new mongo.Db('node-mongo-blog', new mongo.Server(host, port, {}), {});
-db.open(function(db) {
+db.open(function(err, db) {
   db.dropDatabase(function(err, result) {
     sys.puts("===================================================================================");
     sys.puts(">> Adding Authors");

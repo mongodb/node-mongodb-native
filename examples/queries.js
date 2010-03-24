@@ -10,7 +10,7 @@ var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NO
 
 sys.puts("Connecting to " + host + ":" + port);
 var db = new mongo.Db('node-mongo-examples', new mongo.Server(host, port, {}), {});
-db.open(function(db) {
+db.open(function(err, db) {
   db.dropDatabase(function() {
     // Fetch the collection test
     db.collection('test', function(err, collection) {
