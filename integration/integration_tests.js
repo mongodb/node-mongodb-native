@@ -180,7 +180,7 @@ function test_automatic_reconnect() {
     };    
     // Add listener to close event
     automatic_connect_client.serverConfig.masterConnection.addListener("close", closeListener);
-    automatic_connect_client.serverConfig.masterConnection.connection.close();
+    automatic_connect_client.serverConfig.masterConnection.connection.end();
   });  
 }
 
@@ -808,7 +808,6 @@ function test_index_information() {
         test.assertEquals("a_1", indexName);
         // Let's fetch the index information
         client.indexInformation(collection.collectionName, function(err, collectionInfo) {
-          sys.puts(sys.inspect(collectionInfo));
           test.assertTrue(collectionInfo['_id_'] != null);
           test.assertEquals('_id', collectionInfo['_id_'][0][0]);
           test.assertTrue(collectionInfo['a_1'] != null);
@@ -3354,7 +3353,7 @@ function test_force_binary_error() {
 }
 
 // Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_collection_methods];
+// var client_tests = [test_automatic_reconnect];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
