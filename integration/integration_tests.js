@@ -2439,6 +2439,52 @@ function test_gs_puts_and_readlines() {
   });            
 }
 
+function test_gs_weird_name_unlink() {
+  //9476700.937375426_1271170118964-clipped.png
+  var fs_client = new mongo.Db('awesome_f0eabd4b52e30b223c010000', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  fs_client.open(function(err, fs_client) {
+    fs_client.dropDatabase(function(err, done) {
+      var gridStore = new mongo.GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
+      gridStore.open(function(err, gridStore) {    
+        gridStore.write("hello, world!", function(err, gridStore) {
+          gridStore.close(function(err, result) {
+            fs_client.collection('articles.files', function(err, collection) {
+              collection.count(function(err, count) {
+                test.assertEquals(1, count);
+              })
+            });
+
+            fs_client.collection('articles.chunks', function(err, collection) {
+              collection.count(function(err, count) {
+                test.assertEquals(1, count);
+                
+                // Unlink the file
+                mongo.GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
+                  fs_client.collection('articles.files', function(err, collection) {
+                    collection.count(function(err, count) {
+                      test.assertEquals(0, count);
+                    })
+                  });
+
+                  fs_client.collection('articles.chunks', function(err, collection) {
+                    collection.count(function(err, count) {
+                      test.assertEquals(0, count);
+
+                      finished_test({test_gs_unlink:'ok'});       
+                      fs_client.close();
+                    })
+                  });
+                });
+              })
+            });
+          });
+        });
+      });              
+    });
+  });
+
+}
+
 function test_gs_unlink() {
   var fs_client = new mongo.Db('integration_tests_11', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
   fs_client.open(function(err, fs_client) {
@@ -3353,7 +3399,7 @@ function test_force_binary_error() {
 }
 
 // Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_automatic_reconnect];
+// var client_tests = [test_gs_weird_name_unlink];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3379,7 +3425,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
       test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
       test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array,
-      test_find_one_error_handling];
+      test_find_one_error_handling, test_gs_weird_name_unlink];
     
 /*******************************************************************************************************
   Setup For Running Tests
