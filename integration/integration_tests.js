@@ -7,7 +7,8 @@ var mongo = require('../lib/mongodb'),
   Cursor = require('../lib/mongodb/cursor').Cursor,
   OrderedHash = require('../lib/mongodb/bson/collections').OrderedHash,
   Collection = require('../lib/mongodb/collection').Collection,
-  BinaryParser = require('../lib/mongodb/bson/binary_parser').BinaryParser;
+  BinaryParser = require('../lib/mongodb/bson/binary_parser').BinaryParser,
+  fs = require('fs');
 
 /*******************************************************************************************************
   Integration Tests
@@ -3258,7 +3259,7 @@ function test_all_serialization_types() {
         test.assertEquals(date.getTime(), doc.date.getTime());
         test.assertEquals(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
         test.assertEquals(motherOfAllDocuments.binary.value, doc.binary.value);
-
+        
         test.assertEquals(motherOfAllDocuments.int, doc.int);
         test.assertEquals(motherOfAllDocuments.long, doc.long);
         test.assertEquals(motherOfAllDocuments.float, doc.float);
@@ -3398,8 +3399,42 @@ function test_force_binary_error() {
   });  
 }
 
+function test_gs_weird_bug() {
+  var gridStore = new mongo.GridStore(client, "test_gs_weird_bug", "w");
+  var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
+  
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write(data, function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        // Assert that we have overwriten the data
+        mongo.GridStore.read(client, 'test_gs_weird_bug', function(err, fileData) {
+          test.assertEquals(data.length, fileData.length);
+          finished_test({test_gs_weird_bug:'ok'});        
+        });
+      });
+    });
+  });            
+}
+
+function test_gs_working_field_read() {
+  var gridStore = new mongo.GridStore(client, "test_gs_working_field_read", "w");
+  var data = fs.readFileSync("./integration/test_gs_working_field_read.pdf", 'binary');
+  
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write(data, function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        // Assert that we have overwriten the data
+        mongo.GridStore.read(client, 'test_gs_working_field_read', function(err, fileData) {
+          test.assertEquals(data.length, fileData.length);
+          finished_test({test_gs_weird_bug:'ok'});        
+        });
+      });
+    });
+  });            
+}
+
 // Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_gs_weird_name_unlink];
+var client_tests = [test_all_serialization_types];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3425,7 +3460,7 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
       test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
       test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array,
-      test_find_one_error_handling, test_gs_weird_name_unlink];
+      test_find_one_error_handling, test_gs_weird_name_unlink, test_gs_weird_bug, test_gs_working_field_read];
     
 /*******************************************************************************************************
   Setup For Running Tests
