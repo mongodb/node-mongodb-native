@@ -191,6 +191,7 @@ function test_connection_errors() {
   var serverConfig = new mongo.Server("127.0.0.1", 21017, {auto_reconnect: true});
   var error_client = new mongo.Db('integration_tests_', serverConfig, {});
 
+  error_client.addListener("error", function(err) {});
   error_client.addListener("close", function(connection) {
     test.assertTrue(typeof connection == typeof serverConfig);
     test.assertEquals("127.0.0.1", connection.host);
@@ -198,24 +199,25 @@ function test_connection_errors() {
     test.assertEquals(true, connection.autoReconnect);
   });
   error_client.open(function(err, error_client) {});    
-  
+
   // Test error handling for server pair (works for cluster aswell)
   var serverConfig = new mongo.Server("127.0.0.1", 21017, {});
   var normalServer = new mongo.Server("127.0.0.1", 27017);
   var serverPairConfig = new mongo.ServerPair(normalServer, serverConfig);
-  var error_client_pair = new mongo.Db('integration_tests_21', serverPairConfig, {});  
+  var error_client_pair = new mongo.Db('integration_tests_21', serverPairConfig, {});
   
   var closeListener = function(connection) {
     test.assertTrue(typeof connection == typeof serverConfig);
     test.assertEquals("127.0.0.1", connection.host);
     test.assertEquals(21017, connection.port);
     test.assertEquals(false, connection.autoReconnect);
-      // Let's close the db 
+      // Let's close the db
     finished_test({test_connection_errors:'ok'});
     error_client_pair.removeListener("close", closeListener);
-    normalServer.close(); 
+    normalServer.close();
   };
   
+  error_client_pair.addListener("error", function(err) {});
   error_client_pair.addListener("close", closeListener);
   error_client_pair.open(function(err, error_client_pair) {});
 }
@@ -3434,7 +3436,7 @@ function test_gs_working_field_read() {
 }
 
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_all_serialization_types];
+var client_tests = [test_connection_errors];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
@@ -3461,6 +3463,9 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
       test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array,
       test_find_one_error_handling, test_gs_weird_name_unlink, test_gs_weird_bug, test_gs_working_field_read];
+
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+// test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear];
     
 /*******************************************************************************************************
   Setup For Running Tests
