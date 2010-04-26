@@ -537,7 +537,6 @@ function test_find_sorting() {
   client.createCollection('test_find_sorting', function(err, r) {
     client.collection('test_find_sorting', function(err, collection) {
       var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
-      
       // Insert some test documents
       collection.insert([new mongo.OrderedHash().add('a', 1).add('b', 2), 
           new mongo.OrderedHash().add('a', 2).add('b', 1), 
@@ -3433,6 +3432,43 @@ function test_gs_working_field_read() {
   });            
 }
 
+// Test field select with options
+function test_field_select_with_options() {
+  client.createCollection('test_field_select_with_options', function(err, r) {
+    var collection = client.collection('test_field_select_with_options', function(err, collection) {
+      var docCount = 25, docs = [];
+
+      // Insert some test documents
+      while(docCount--) docs.push(new mongo.OrderedHash().add('a',docCount).add('b',docCount));
+      collection.insert(docs, function(err,retDocs){ docs = retDocs; });
+          
+      collection.find({},{ 'a' : 1},{ limit : 3, sort : [['a',-1]] },function(err,cursor){
+        cursor.toArray(function(err,documents){
+          test.assertEquals(3,documents.length);
+          documents.forEach(function(doc,idx){
+            test.assertEquals(undefined,doc.b); // making sure field select works
+            test.assertEquals((24-idx),doc.a); // checking limit sort object with field select
+          });
+        });
+      });
+      
+      collection.find({},{},10,3,function(err,cursor){
+        cursor.toArray(function(err,documents){
+          test.assertEquals(3,documents.length);
+          documents.forEach(function(doc,idx){
+            test.assertEquals(doc.a,doc.b); // making sure empty field select returns properly
+            test.assertEquals((14-idx),doc.a); // checking skip and limit in args
+          });
+          finished_test({test_field_select_with_options:'ok'}); 
+        });
+      });
+      
+    });
+  });
+}
+
+
+
 // Not run since it requires a master-slave setup to test correctly
 var client_tests = [test_all_serialization_types];
 
@@ -3460,7 +3496,8 @@ var client_tests = [test_collection_methods, test_authentication, test_collectio
       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
       test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
       test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array,
-      test_find_one_error_handling, test_gs_weird_name_unlink, test_gs_weird_bug, test_gs_working_field_read];
+      test_find_one_error_handling, test_gs_weird_name_unlink, test_gs_weird_bug, test_gs_working_field_read,
+      test_field_select_with_options];
     
 /*******************************************************************************************************
   Setup For Running Tests
