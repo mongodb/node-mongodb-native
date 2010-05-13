@@ -2103,12 +2103,19 @@ function test_kill_cursors() {
 
 function test_count_with_fields() {
   client.createCollection('test_count_with_fields', function(err, collection) {
-    collection.save({'x':1}, function(err, doc) {
+    collection.save({'x':1, 'a':2}, function(err, doc) {
       collection.find({}, {'fields':['a']}, function(err, cursor) {
-        cursor.count(function(err, count) {
-          test.assertEquals(1, count);
-          finished_test({test_count_with_fields:'ok'});
+        cursor.toArray(function(err, items) {
+          test.assertEquals(1, items.length);
+          test.assertEquals(2, items[0].a);
+          test.assertEquals(null, items[0].x);
         });
+      });
+      
+      collection.findOne({}, {'fields':['a']}, function(err, item) {
+        test.assertEquals(2, item.a);
+        test.assertEquals(null, item.x);
+        finished_test({test_count_with_fields:'ok'});
       });
     });
   });
@@ -3244,7 +3251,7 @@ function test_all_serialization_types() {
       'boolean': true, 
       'long': date.getTime(),
       'where': new mongo.Code('this.a > i', new mongo.OrderedHash().add('i', 1)),
-      'dbref': new mongo.DBRef('namespace', oid, null)
+      'dbref': new mongo.DBRef('namespace', oid, 'integration_tests_')
     }
     
     collection.insert(motherOfAllDocuments, function(err, docs) {
@@ -3269,8 +3276,7 @@ function test_all_serialization_types() {
         test.assertEquals(motherOfAllDocuments.where.scope.get('i'), doc.where.scope.i);
         test.assertEquals(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
         test.assertEquals(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-        
-        // sys.puts(sys.inspect(doc));
+        test.assertEquals(motherOfAllDocuments.dbref.db, doc.dbref.db);        
         finished_test({test_all_serialization_types:'ok'});      
       })      
     });    
@@ -3462,8 +3468,7 @@ function test_field_select_with_options() {
           });
           finished_test({test_field_select_with_options:'ok'}); 
         });
-      });
-      
+      });      
     });
   });
 }
@@ -3471,7 +3476,7 @@ function test_field_select_with_options() {
 
 
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_connection_errors];
+var client_tests = [test_count_with_fields];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
