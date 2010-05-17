@@ -22,6 +22,7 @@ else
   JSpec
     .exec('spec/spec.bson.js')
     .exec('spec/spec.commands.js')
+    .exec('spec/spec.objectid.js')
 JSpec.run({ reporter: JSpec.reporters.Terminal, failuresOnly: true })
 JSpec.report()
 
