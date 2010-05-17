@@ -8,6 +8,7 @@ var mongo = require('../lib/mongodb'),
   OrderedHash = require('../lib/mongodb/bson/collections').OrderedHash,
   Collection = require('../lib/mongodb/collection').Collection,
   BinaryParser = require('../lib/mongodb/bson/binary_parser').BinaryParser,
+  Buffer = require('buffer').Buffer,
   fs = require('fs');
 
 /*******************************************************************************************************
@@ -2556,8 +2557,7 @@ function test_gs_append() {
                       test.assertEquals(1, count);
                       
                       mongo.GridStore.read(fs_client, 'test_gs_append', function(err, data) {
-                        test.assertEquals("hello, world! how are you?", data);
-                        
+                        test.assertEquals("hello, world! how are you?", data);                        
                         finished_test({test_gs_append:'ok'});       
                         fs_client.close();
                       });
@@ -2586,7 +2586,6 @@ function test_gs_rewind_and_truncate_on_write() {
                 gridStore.close(function(err, result) {
                   mongo.GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
                     test.assertEquals("abc", data);
-        
                     finished_test({test_gs_rewind_and_truncate_on_write:'ok'});       
                   });
                 });
@@ -3408,7 +3407,7 @@ function test_force_binary_error() {
 function test_gs_weird_bug() {
   var gridStore = new mongo.GridStore(client, "test_gs_weird_bug", "w");
   var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
-  
+    
   gridStore.open(function(err, gridStore) {    
     gridStore.write(data, function(err, gridStore) {
       gridStore.close(function(err, result) {
@@ -3432,7 +3431,7 @@ function test_gs_working_field_read() {
         // Assert that we have overwriten the data
         mongo.GridStore.read(client, 'test_gs_working_field_read', function(err, fileData) {
           test.assertEquals(data.length, fileData.length);
-          finished_test({test_gs_weird_bug:'ok'});        
+          finished_test({test_gs_working_field_read:'ok'});        
         });
       });
     });
@@ -3476,7 +3475,19 @@ function test_field_select_with_options() {
 
 
 // Not run since it requires a master-slave setup to test correctly
-var client_tests = [test_count_with_fields];
+// var client_tests = [test_gs_rewind_and_truncate_on_write];
+
+// var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write,
+//         test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk,
+//         test_gs_puts_and_readlines, test_gs_unlink, test_gs_append];
+
+// var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write,
+//         test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
+//         test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+//         test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+//         test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
+//         test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
+//         test_gs_metadata];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,

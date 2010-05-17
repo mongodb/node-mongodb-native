@@ -9,6 +9,7 @@ require("jspec")
 
 var posix = require('fs')
 
+fs = require('fs')
 quit = process.exit
 print = puts
 
@@ -21,7 +22,7 @@ if (process.ARGV[2])
 else
   JSpec
     .exec('spec/spec.bson.js')
-    .exec('spec/spec.commands.js')
+    // .exec('spec/spec.commands.js')
 JSpec.run({ reporter: JSpec.reporters.Terminal, failuresOnly: true })
 JSpec.report()
 
