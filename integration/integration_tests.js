@@ -3472,22 +3472,34 @@ function test_field_select_with_options() {
   });
 }
 
+var client_tests = [test_eval];
 
-
-// Not run since it requires a master-slave setup to test correctly
-// var client_tests = [test_gs_rewind_and_truncate_on_write];
-
-// var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write,
-//         test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk,
-//         test_gs_puts_and_readlines, test_gs_unlink, test_gs_append];
-
-// var client_tests = [test_gs_exist, test_gs_list, test_gs_small_write,
-//         test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
-//         test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
-//         test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
-//         test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
-//         test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
-//         test_gs_metadata];
+// var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
+//       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
+//       test_insert, test_multiple_insert, test_count_on_nonexisting, test_find_simple, test_find_advanced,
+//       test_find_sorting, test_find_limits, test_find_one_no_records, test_drop_collection, test_other_drop,
+//       test_collection_names, test_collections_info, test_collection_options, test_index_information,
+//       test_multiple_index_cols, test_unique_index, test_index_on_subfield, test_array, test_regex,
+//       test_non_oid_id, test_strict_access_collection, test_strict_create_collection, test_to_a,
+//       test_to_a_after_each, test_where, test_hint, test_group, test_deref, test_save,
+//       test_save_long, test_find_by_oid, test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection,
+//       test_invalid_key_names, test_collection_names, test_rename_collection, test_explain, test_count,
+//       test_sort, test_cursor_limit, test_limit_exceptions, test_skip, test_skip_exceptions,
+//       test_limit_skip_chaining, test_close_no_query_sent, test_refill_via_get_more, test_refill_via_get_more_alt_coll,
+//       test_close_after_query_sent, test_count_with_fields, test_gs_exist, test_gs_list, test_gs_small_write,
+//       test_gs_small_file, test_gs_read_length, test_gs_read_with_offset, test_gs_seek, test_gs_multi_chunk, 
+//       test_gs_puts_and_readlines, test_gs_unlink, test_gs_append, test_gs_rewind_and_truncate_on_write,
+//       test_gs_tell, test_gs_save_empty_file, test_gs_empty_file_eof, test_gs_cannot_change_chunk_size_on_read,
+//       test_gs_cannot_change_chunk_size_after_data_written, test_change_chunk_size, test_gs_chunk_size_in_option,
+//       test_gs_md5, test_gs_upload_date, test_gs_content_type, test_gs_content_type_option, test_gs_unknown_mode,
+//       test_gs_metadata, test_admin_default_profiling_level, test_admin_change_profiling_level,
+//       test_admin_profiling_info, test_admin_validate_collection, test_custom_primary_key_generator,
+//       test_map_reduce, test_map_reduce_with_functions_as_arguments, test_map_reduce_with_code_objects,
+//       test_map_reduce_with_options, test_map_reduce_error, test_drop_indexes, test_add_and_remove_user,
+//       test_distinct_queries, test_all_serialization_types, test_should_correctly_retrieve_one_record,
+//       test_should_correctly_save_unicode_containing_document, test_should_deserialize_large_integrated_array,
+//       test_find_one_error_handling, test_gs_weird_name_unlink, test_gs_weird_bug, test_gs_working_field_read,
+//       test_field_select_with_options];
 
 var client_tests = [test_collection_methods, test_authentication, test_collections, test_object_id_generation,
       test_object_id_to_and_from_hex_string, test_automatic_reconnect, test_connection_errors, test_error_handling, test_last_status, test_clear,
