@@ -8,9 +8,6 @@ test:
 test_all: test integrate_test
 	
 integrate_test:
-	@$(NODE) integration/integration_tests.js
-	
-integrate:
-	@$(NODE) integration/integration_tests2.js $(name)
+	@$(NODE) integration/integration_tests.js $(name)
 	
 .PHONY: test
