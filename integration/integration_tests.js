@@ -20,8 +20,8 @@ var all_tests = {
   test_unicode_characters : function() {
     client.createCollection('unicode_test_collection', function(err, collection) {
       var test_strings = ["ouooueauiOUOOUEAUI", "öüóőúéáűíÖÜÓŐÚÉÁŰÍ"];
-      collection.insert({'id': 0, text: test_strings[0]}, function(err, ids) {
-        collection.insert({'id': 1, text: test_strings[1]}, function(err, ids) {
+      collection.insert({id: 0, text: test_strings[0]}, function(err, ids) {
+        collection.insert({id: 1, text: test_strings[1]}, function(err, ids) {
           collection.find(function(err, cursor) {
             cursor.each(function(err, item) {
               if(item !== null) {
