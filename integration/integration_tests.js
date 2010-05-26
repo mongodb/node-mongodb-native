@@ -15,6 +15,28 @@ var mongo = require('../lib/mongodb'),
   Integration Tests
 *******************************************************************************************************/
 var all_tests = {
+
+  // Test unicode characters
+  test_unicode_characters : function() {
+    client.createCollection('unicode_test_collection', function(err, collection) {
+      var test_strings = ["ouooueauiOUOOUEAUI", "öüóőúéáűíÖÜÓŐÚÉÁŰÍ"];
+      collection.insert({'id': 0, text: test_strings[0]}, function(err, ids) {
+        collection.insert({'id': 1, text: test_strings[1]}, function(err, ids) {
+          collection.find(function(err, cursor) {
+            cursor.each(function(err, item) {
+              if(item !== null) {
+                test.assertEquals(test_strings[item.id], item.text);      
+              }
+            });
+            collection.drop(function(err, reply) {
+              finished_test({test_unicode_characters:'ok'});
+            });
+          });
+        });
+      });
+    });
+  },
+
   // Test the creation of a collection on the mongo db
   test_collection_methods : function() {
     client.createCollection('test_collection_methods', function(err, collection) {
@@ -3470,7 +3492,7 @@ var all_tests = {
       });
     });
   },
-
+/*
   // Test findAndModify a document
   test_find_and_modify_a_document : function() {
     client.createCollection('test_find_and_modify_a_document', function(err, collection) {
@@ -3502,7 +3524,7 @@ var all_tests = {
         })
       });    
     });  
-  }
+  }*/
 
 };
 /*******************************************************************************************************
