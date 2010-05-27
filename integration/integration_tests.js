@@ -25,12 +25,11 @@ var all_tests = {
           collection.find(function(err, cursor) {
             cursor.each(function(err, item) {
               if(item !== null) {
-                test.assertEquals(test_strings[item.id], item.text);      
+                test.assertEquals(test_strings[item.id], item.text);
               }
             });
-            collection.drop(function(err, reply) {
-              finished_test({test_unicode_characters:'ok'});
-            });
+
+            finished_test({test_unicode_characters:'ok'});
           });
         });
       });
