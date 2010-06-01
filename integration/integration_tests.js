@@ -1486,7 +1486,7 @@ var all_tests = {
       });    
     });
   },
-/*
+
   test_collection_names2 : function() {
     client.collection(5, function(err, collection) {
       test.assertEquals("collection name must be a String", err.message);            
@@ -1515,7 +1515,7 @@ var all_tests = {
       finished_test({test_collection_names2:'ok'});                                   
     });  
   },
-*/
+
   test_rename_collection : function() {
     client.createCollection('test_rename_collection', function(err, collection) {
       client.createCollection('test_rename_collection2', function(err, collection) {
@@ -2035,92 +2035,92 @@ var all_tests = {
       });
     });
   },
-/*
-  test_kill_cursors : function() {
-    var test_kill_cursors_client = new mongo.Db('integration_tests4_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-    test_kill_cursors_client.open(function(err, test_kill_cursors_client) {
-      var number_of_tests_done = 0;
 
-      test_kill_cursors_client.dropCollection('test_kill_cursors', function(err, collection) {      
-        test_kill_cursors_client.createCollection('test_kill_cursors', function(err, collection) {
-          test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-            var clientCursors = cursorInfo.clientCursors_size;
-            var byLocation = cursorInfo.byLocation_size;
+  // test_kill_cursors : function() {
+  //   var test_kill_cursors_client = new mongo.Db('integration_tests4_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+  //   test_kill_cursors_client.open(function(err, test_kill_cursors_client) {
+  //     var number_of_tests_done = 0;
+  // 
+  //     test_kill_cursors_client.dropCollection('test_kill_cursors', function(err, collection) {      
+  //       test_kill_cursors_client.createCollection('test_kill_cursors', function(err, collection) {
+  //         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  //           var clientCursors = cursorInfo.clientCursors_size;
+  //           var byLocation = cursorInfo.byLocation_size;
+  // 
+  //           for(var i = 0; i < 1000; i++) {
+  //             collection.save({'i': i}, function(err, doc) {});
+  //           }
+  // 
+  //           test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  //             test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
+  //             test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  // 
+  //             for(var i = 0; i < 10; i++) {
+  //               collection.findOne(function(err, item) {});
+  //             }
+  // 
+  //             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  //               test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
+  //               test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  // 
+  //               for(var i = 0; i < 10; i++) {
+  //                 collection.find(function(err, cursor) {
+  //                   cursor.nextObject(function(err, item) {
+  //                     cursor.close(function(err, cursor) {});
+  // 
+  //                     if(i == 10) {
+  //                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  //                         test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
+  //                         test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  // 
+  //                         collection.find(function(err, cursor) {
+  //                           cursor.nextObject(function(err, item) {
+  //                             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  //                               test.assertEquals(clientCursors, cursorInfo.clientCursors_size);                  
+  //                               test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  // 
+  //                               cursor.close(function(err, cursor) {
+  //                                 test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  //                                   test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
+  //                                   test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  // 
+  //                                   collection.find({}, {'limit':10}, function(err, cursor) {
+  //                                     cursor.nextObject(function(err, item) {                                      
+  //                                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  //                                         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  //                                           test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
+  //                                           test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  //                                           number_of_tests_done = 1;
+  //                                         });
+  //                                       });
+  //                                     });
+  //                                   });
+  //                                 });
+  //                               });                  
+  //                             });
+  //                           });
+  //                         });
+  //                       });
+  //                     }
+  //                   });
+  //                 });
+  //               }
+  //             });        
+  //           });      
+  //         });
+  //       });
+  //     });
+  // 
+  //     var intervalId = setInterval(function() {
+  //       if(number_of_tests_done == 1) {
+  //         clearInterval(intervalId);
+  //         finished_test({test_kill_cursors:'ok'});
+  //         test_kill_cursors_client.close();
+  //       }
+  //     }, 100);        
+  //   });  
+  // },
 
-            for(var i = 0; i < 1000; i++) {
-              collection.save({'i': i}, function(err, doc) {});
-            }
-
-            test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-              test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-              test.assertEquals(byLocation, cursorInfo.byLocation_size);
-
-              for(var i = 0; i < 10; i++) {
-                collection.findOne(function(err, item) {});
-              }
-
-              test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-                test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-                test.assertEquals(byLocation, cursorInfo.byLocation_size);
-
-                for(var i = 0; i < 10; i++) {
-                  collection.find(function(err, cursor) {
-                    cursor.nextObject(function(err, item) {
-                      cursor.close(function(err, cursor) {});
-
-                      if(i == 10) {
-                        test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-                          test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-                          test.assertEquals(byLocation, cursorInfo.byLocation_size);
-
-                          collection.find(function(err, cursor) {
-                            cursor.nextObject(function(err, item) {
-                              test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-                                test.assertEquals(clientCursors, cursorInfo.clientCursors_size);                  
-                                test.assertEquals(byLocation, cursorInfo.byLocation_size);
-
-                                cursor.close(function(err, cursor) {
-                                  test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-                                    test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-                                    test.assertEquals(byLocation, cursorInfo.byLocation_size);
-
-                                    collection.find({}, {'limit':10}, function(err, cursor) {
-                                      cursor.nextObject(function(err, item) {                                      
-                                        test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-                                          test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-                                            test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-                                            test.assertEquals(byLocation, cursorInfo.byLocation_size);
-                                            number_of_tests_done = 1;
-                                          });
-                                        });
-                                      });
-                                    });
-                                  });
-                                });                  
-                              });
-                            });
-                          });
-                        });
-                      }
-                    });
-                  });
-                }
-              });        
-            });      
-          });
-        });
-      });
-
-      var intervalId = setInterval(function() {
-        if(number_of_tests_done == 1) {
-          clearInterval(intervalId);
-          finished_test({test_kill_cursors:'ok'});
-          test_kill_cursors_client.close();
-        }
-      }, 100);        
-    });  
-  },
-*/
   test_count_with_fields : function() {
     client.createCollection('test_count_with_fields', function(err, collection) {
       collection.save({'x':1, 'a':2}, function(err, doc) {
@@ -2274,7 +2274,7 @@ var all_tests = {
       });
     });      
   },
-/*
+
   test_gs_overwrite : function() {
     var gridStore = new mongo.GridStore(client, "test_gs_overwrite", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2297,7 +2297,7 @@ var all_tests = {
       });
     });        
   },
-*/
+
   test_gs_read_length : function() {
     var gridStore = new mongo.GridStore(client, "test_gs_read_length", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2997,60 +2997,6 @@ var all_tests = {
       });
     });          
   },
-/*
-  test_pair : function() {
-    var p_client = new mongo.Db('integration_tests_21', new mongo.ServerPair(new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})), {});
-    p_client.open(function(err, p_client) {    
-      p_client.dropDatabase(function(err, done) {    
-        test.assertTrue(p_client.masterConnection != null);
-        test.assertEquals(2, p_client.connections.length);
-
-        test.assertTrue(p_client.serverConfig.leftServer.master);
-        test.assertFalse(p_client.serverConfig.rightServer.master);
-
-        p_client.createCollection('test_collection', function(err, collection) {
-          collection.insert({'a':1}, function(err, doc) {
-            collection.find(function(err, cursor) {
-              cursor.toArray(function(err, items) {
-                test.assertEquals(1, items.length);
-
-                finished_test({test_pair:'ok'});       
-                p_client.close();
-              });
-            });
-          });
-        });
-      });
-    });    
-  },
-*/
-/*
-  test_cluster : function() {
-    var p_client = new mongo.Db('integration_tests_22', new mongo.ServerCluster([new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})]), {});
-    p_client.open(function(err, p_client) {
-      p_client.dropDatabase(function(err, done) {    
-        test.assertTrue(p_client.masterConnection != null);
-        test.assertEquals(2, p_client.connections.length);
-
-        test.assertEquals(true, p_client.serverConfig.servers[0].master);
-        test.assertEquals(false, p_client.serverConfig.servers[1].master);
-
-        p_client.createCollection('test_collection', function(err, collection) {
-          collection.insert({'a':1}, function(err, doc) {
-            collection.find(function(err, cursor) {
-              cursor.toArray(function(err, items) {
-                test.assertEquals(1, items.length);
-
-                finished_test({test_cluster:'ok'});       
-                p_client.close();
-              });
-            });
-          });
-        });
-      });
-    });    
-  },
-*/
   test_custom_primary_key_generator : function() {    
     // Custom factory (need to provide a 12 byte array);
     CustomPKFactory = function() {}
@@ -3399,9 +3345,9 @@ var all_tests = {
       }
     });  
   },
-/*
+
   test_force_binary_error : function() {
-    client.createCollection('test_find_one_error_handling', function(err, collection) {    
+    client.createCollection('test_force_binary_error', function(err, collection) {    
       // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
       // is the error handling of the findOne Method     
       var result= "";
@@ -3415,6 +3361,7 @@ var all_tests = {
       // Generate a illegal ID
       var id = ObjectID.createFromHexString('5e9bd59248305adf18ebc157');
       id.id = result;
+      
       // Execute with error
       collection.findOne({"_id": id}, function(err, result) {
         // test.assertEquals(undefined, result)
@@ -3423,7 +3370,7 @@ var all_tests = {
       });      
     });  
   },
-*/
+
   test_gs_weird_bug : function() {
     var gridStore = new mongo.GridStore(client, "test_gs_weird_bug", "w");
     var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
@@ -3491,7 +3438,7 @@ var all_tests = {
       });
     });
   },
-/*
+
   // Test findAndModify a document
   test_find_and_modify_a_document : function() {
     client.createCollection('test_find_and_modify_a_document', function(err, collection) {
@@ -3523,13 +3470,77 @@ var all_tests = {
         })
       });    
     });  
-  }*/
+  }
 
+  /*
+    test_pair : function() {
+      var p_client = new mongo.Db('integration_tests_21', new mongo.ServerPair(new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})), {});
+      p_client.open(function(err, p_client) {    
+        p_client.dropDatabase(function(err, done) {    
+          test.assertTrue(p_client.masterConnection != null);
+          test.assertEquals(2, p_client.connections.length);
+
+          test.assertTrue(p_client.serverConfig.leftServer.master);
+          test.assertFalse(p_client.serverConfig.rightServer.master);
+
+          p_client.createCollection('test_collection', function(err, collection) {
+            collection.insert({'a':1}, function(err, doc) {
+              collection.find(function(err, cursor) {
+                cursor.toArray(function(err, items) {
+                  test.assertEquals(1, items.length);
+
+                  finished_test({test_pair:'ok'});       
+                  p_client.close();
+                });
+              });
+            });
+          });
+        });
+      });    
+    },
+
+    test_cluster : function() {
+      var p_client = new mongo.Db('integration_tests_22', new mongo.ServerCluster([new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})]), {});
+      p_client.open(function(err, p_client) {
+        p_client.dropDatabase(function(err, done) {    
+          test.assertTrue(p_client.masterConnection != null);
+          test.assertEquals(2, p_client.connections.length);
+
+          test.assertEquals(true, p_client.serverConfig.servers[0].master);
+          test.assertEquals(false, p_client.serverConfig.servers[1].master);
+
+          p_client.createCollection('test_collection', function(err, collection) {
+            collection.insert({'a':1}, function(err, doc) {
+              collection.find(function(err, cursor) {
+                cursor.toArray(function(err, items) {
+                  test.assertEquals(1, items.length);
+
+                  finished_test({test_cluster:'ok'});       
+                  p_client.close();
+                });
+              });
+            });
+          });
+        });
+      });    
+    },
+
+    test_slave_connection :function() {
+      var p_client = new mongo.Db('integration_tests_23', new mongo.Server("127.0.0.1", 27018, {}));
+      p_client.open(function(err, p_client) {
+        test.assertEquals(null, err);
+        finished_test({test_slave_connection:'ok'});
+        p_client.close();
+      });          
+    }
+  */  
 };
+
+
+
 /*******************************************************************************************************
   Setup For Running Tests
 *******************************************************************************************************/
-
 var client_tests = {};
 
 if(process.argv[2]){
@@ -3575,8 +3586,6 @@ function ensure_tests_finished() {
 
 // All the finished client tests
 var finished_tests = [];
-
-
 
 // Run all the tests
 function run_tests() {
