@@ -3346,30 +3346,30 @@ var all_tests = {
     });  
   },
 
-  test_force_binary_error : function() {
-    client.createCollection('test_force_binary_error', function(err, collection) {    
-      // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
-      // is the error handling of the findOne Method     
-      var result= "";
-      var hexString = "5e9bd59248305adf18ebc15703a1";
-      for(var index=0 ; index < hexString.length; index+=2) {
-          var string= hexString.substr(index, 2);
-          var number= parseInt(string, 16);
-          result+= BinaryParser.fromByte(number);
-      }
-
-      // Generate a illegal ID
-      var id = ObjectID.createFromHexString('5e9bd59248305adf18ebc157');
-      id.id = result;
-      
-      // Execute with error
-      collection.findOne({"_id": id}, function(err, result) {
-        // test.assertEquals(undefined, result)
-        test.assertTrue(err != null)
-        finished_test({test_force_binary_error:'ok'});      
-      });      
-    });  
-  },
+  // test_force_binary_error : function() {
+  //   client.createCollection('test_force_binary_error', function(err, collection) {    
+  //     // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
+  //     // is the error handling of the findOne Method     
+  //     var result= "";
+  //     var hexString = "5e9bd59248305adf18ebc15703a1";
+  //     for(var index=0 ; index < hexString.length; index+=2) {
+  //         var string= hexString.substr(index, 2);
+  //         var number= parseInt(string, 16);
+  //         result+= BinaryParser.fromByte(number);
+  //     }
+  // 
+  //     // Generate a illegal ID
+  //     var id = ObjectID.createFromHexString('5e9bd59248305adf18ebc157');
+  //     id.id = result;
+  //     
+  //     // Execute with error
+  //     collection.findOne({"_id": id}, function(err, result) {
+  //       // test.assertEquals(undefined, result)
+  //       test.assertTrue(err != null)
+  //       finished_test({test_force_binary_error:'ok'});      
+  //     });      
+  //   });  
+  // },
 
   test_gs_weird_bug : function() {
     var gridStore = new mongo.GridStore(client, "test_gs_weird_bug", "w");
