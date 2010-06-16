@@ -3458,7 +3458,7 @@ var all_tests = {
         })
       });    
     });  
-  }
+  },
 
   /*
     test_pair : function() {
@@ -3522,6 +3522,35 @@ var all_tests = {
       });          
     }
   */  
+  
+  test_ensure_index : function() {
+    client.createCollection('test_ensure_index', function(err, collection) {    
+      // Create an index on the collection
+      client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
+        test.assertEquals("a_1", indexName);
+        // Let's fetch the index information
+        client.indexInformation(collection.collectionName, function(err, collectionInfo) {
+          test.assertTrue(collectionInfo['_id_'] != null);
+          test.assertEquals('_id', collectionInfo['_id_'][0][0]);
+          test.assertTrue(collectionInfo['a_1'] != null);
+          test.assertEquals([["a", 1]], collectionInfo['a_1']);
+
+          client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
+            test.assertEquals("a_1", indexName);
+            // Let's fetch the index information
+            client.indexInformation(collection.collectionName, function(err, collectionInfo) {
+              test.assertTrue(collectionInfo['_id_'] != null);
+              test.assertEquals('_id', collectionInfo['_id_'][0][0]);
+              test.assertTrue(collectionInfo['a_1'] != null);
+              test.assertEquals([["a", 1]], collectionInfo['a_1']);
+              // Let's close the db 
+              finished_test({test_ensure_index:'ok'});                 
+            });
+          });      
+        });
+      });      
+    })
+}  
 };
 
 
