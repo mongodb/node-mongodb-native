@@ -3334,6 +3334,18 @@ var all_tests = {
     });
   },
 
+  test_find_one_error_handling : function() {
+    client.createCollection('test_find_one_error_handling', function(err, collection) {    
+      // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
+      // is the error handling of the findOne Method     
+      try {
+        collection.findOne({"_id":ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {});      
+      } catch (err) {
+        finished_test({test_find_one_error_handling:'ok'});      
+      }
+    });  
+  },
+
   // test_force_binary_error : function() {
   //   client.createCollection('test_force_binary_error', function(err, collection) {    
   //     // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
@@ -3620,6 +3632,7 @@ function run_tests() {
     }
   });
 }
+
 
 function finished_test(test_object) {
   for(var name in test_object) {
