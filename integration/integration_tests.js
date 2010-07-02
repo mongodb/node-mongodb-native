@@ -9,7 +9,8 @@ var mongo = require('../lib/mongodb'),
   Collection = require('../lib/mongodb/collection').Collection,
   BinaryParser = require('../lib/mongodb/bson/binary_parser').BinaryParser,
   Buffer = require('buffer').Buffer,
-  fs = require('fs');
+  fs = require('fs'),
+  Script = process.binding('evals').Script;
 
 /*******************************************************************************************************
   Integration Tests
@@ -3562,7 +3563,53 @@ var all_tests = {
         });
       });      
     })
-}  
+  },
+  
+  test_insert_and_update_with_new_script_context: function() {
+    new mongo.Db('test-db', new mongo.Server('localhost', 27017, {auto_reconnect: true}, {})).open(function(err, db) {
+      //convience curried handler for functions of type 'a -> (err, result)
+      function getResult(callback){
+        return function(error, result) {
+          test.assertTrue(error == null);
+          callback(result);
+        }
+      };
+
+      db.collection('users', getResult(function(user_collection){
+        user_collection.remove(function(err, result) {
+          //first, create a user object   
+          var newUser = { name : 'Test Account', settings : {} };
+          user_collection.insert([newUser],  getResult(function(users){
+              var user = users[0];
+
+              var scriptCode = "settings.block = []; settings.block.push('test');";
+              var context = { settings : { thisOneWorks : "somestring" } };
+
+              Script.runInNewContext(scriptCode, context, "testScript");
+
+              //now create update command and issue it
+              var updateCommand = { $set : context };
+
+              user_collection.update({_id : user._id}, updateCommand, null, 
+                getResult(function(updateCommand) {
+                  // Fetch the object and check that the changes are persisted
+                  user_collection.findOne({_id : user._id}, function(err, doc) {
+                    test.assertTrue(err == null);
+                    test.assertEquals("Test Account", doc.name);
+                    test.assertEquals("somestring", doc.settings.thisOneWorks);
+                    test.assertEquals("test", doc.settings.block[0]);
+
+                    // Let's close the db 
+                    finished_test({test_insert_and_update_with_new_script_context:'ok'});
+                    db.close();
+                  });
+                })
+              );        
+          }));          
+        });
+      }));      
+    });
+  }
 };
 
 
