@@ -1,4 +1,4 @@
-{ "name" : "mongodb-native"
+{ "name" : "mongodb"
   , "description" : "A node.js driver for MongoDB"
   , "version" : "0.7.8"
   , "author" : "Christian Amor Kvalheim <christkv@gmail.com>"
