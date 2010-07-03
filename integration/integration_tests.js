@@ -1,7 +1,7 @@
 GLOBAL.DEBUG = true;
 
 sys = require("sys");
-test = require("mjsunit");
+test = require("assert");
 var mongo = require('../lib/mongodb'),
   ObjectID = require('../lib/mongodb/bson/bson').ObjectID,
   Cursor = require('../lib/mongodb/cursor').Cursor,
@@ -26,7 +26,7 @@ var all_tests = {
           collection.find(function(err, cursor) {
             cursor.each(function(err, item) {
               if(item !== null) {
-                test.assertEquals(test_strings[item.id], item.text);
+                test.equal(test_strings[item.id], item.text);
               }
             });
 
@@ -41,20 +41,20 @@ var all_tests = {
   test_collection_methods : function() {
     client.createCollection('test_collection_methods', function(err, collection) {
       // Verify that all the result are correct coming back (should contain the value ok)
-      test.assertEquals('test_collection_methods', collection.collectionName);
+      test.equal('test_collection_methods', collection.collectionName);
       // Let's check that the collection was created correctly
       client.collectionNames(function(err, documents) {
         var found = false;
         documents.forEach(function(document) {
           if(document.name == "integration_tests_.test_collection_methods") found = true;
         });      
-        test.assertTrue(true, found);
+        test.ok(true, found);
         // Rename the collection and check that it's gone
         client.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
-          test.assertEquals(1, reply.documents[0].ok);
+          test.equal(1, reply.documents[0].ok);
           // Drop the collection and check that it's gone
           client.dropCollection("test_collection_methods2", function(err, result) {
-            test.assertEquals(true, result);          
+            test.equal(true, result);          
             finished_test({test_collection_methods:'ok'});
           })
         });
@@ -68,13 +68,13 @@ var all_tests = {
     var password = 'password';
 
     client.authenticate('admin', 'admin', function(err, replies) {
-      test.assertTrue(err instanceof Error);
-      test.assertTrue(!replies);
+      test.ok(err instanceof Error);
+      test.ok(!replies);
 
       // Add a user
       client.addUser(user_name, password, function(err, result) {
         client.authenticate(user_name, password, function(err, replies) {
-          test.assertTrue(replies);
+          test.ok(replies);
           finished_test({test_authentication:'ok'});
         });      
       });    
@@ -107,9 +107,9 @@ var all_tests = {
             if(collection.collectionName == "does_not_exist") found_does_not_exist = true;
           });
 
-          test.assertTrue(found_spiderman);
-          test.assertTrue(found_mario);
-          test.assertTrue(!found_does_not_exist);
+          test.ok(found_spiderman);
+          test.ok(found_mario);
+          test.ok(!found_does_not_exist);
           finished_test({test_collections:'ok'});
         });
       });
@@ -123,22 +123,22 @@ var all_tests = {
     client.collection('test_object_id_generation.data', function(err, collection) {
       // Insert test documents (creates collections and test fetch by query)
       collection.insert(new mongo.OrderedHash().add("name", "Fred").add("age", 42), function(err, ids) {
-        test.assertEquals(1, ids.length);    
-        test.assertTrue(ids[0].get('_id').toHexString().length == 24);
+        test.equal(1, ids.length);    
+        test.ok(ids[0].get('_id').toHexString().length == 24);
         // Locate the first document inserted
         collection.findOne(new mongo.OrderedHash().add("name", "Fred"), function(err, document) {
-          test.assertEquals(ids[0].get('_id').toHexString(), document._id.toHexString());
+          test.equal(ids[0].get('_id').toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });      
       });
 
       // Insert another test document and collect using ObjectId
       collection.insert(new mongo.OrderedHash().add("name", "Pat").add("age", 21), function(err, ids) {
-        test.assertEquals(1, ids.length);  
-        test.assertTrue(ids[0].get('_id').toHexString().length == 24);
+        test.equal(1, ids.length);  
+        test.ok(ids[0].get('_id').toHexString().length == 24);
         // Locate the first document inserted
         collection.findOne(ids[0].get('_id'), function(err, document) {
-          test.assertEquals(ids[0].get('_id').toHexString(), document._id.toHexString());
+          test.equal(ids[0].get('_id').toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });      
       });
@@ -148,13 +148,13 @@ var all_tests = {
 
       // Insert a manually created document with generated oid
       collection.insert(new mongo.OrderedHash().add("_id", objectId).add("name", "Donald").add("age", 95), function(err, ids) {
-        test.assertEquals(1, ids.length);  
-        test.assertTrue(ids[0].get('_id').toHexString().length == 24);
-        test.assertEquals(objectId.toHexString(), ids[0].get('_id').toHexString());
+        test.equal(1, ids.length);  
+        test.ok(ids[0].get('_id').toHexString().length == 24);
+        test.equal(objectId.toHexString(), ids[0].get('_id').toHexString());
         // Locate the first document inserted
         collection.findOne(ids[0].get('_id'), function(err, document) {
-          test.assertEquals(ids[0].get('_id').toHexString(), document._id.toHexString());
-          test.assertEquals(objectId.toHexString(), document._id.toHexString());
+          test.equal(ids[0].get('_id').toHexString(), document._id.toHexString());
+          test.equal(objectId.toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });      
       });    
@@ -174,7 +174,7 @@ var all_tests = {
 
       var newObjectId= new mongo.ObjectID.createFromHexString(originalHex)
       newHex= newObjectId.toHexString();    
-      test.assertEquals(originalHex, newHex);
+      test.equal(originalHex, newHex);
       finished_test({test_object_id_to_and_from_hex_string:'ok'});
   },
 
@@ -190,11 +190,11 @@ var all_tests = {
         automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
           // Insert another test document and collect using ObjectId
           collection.insert({"name":"Patty", "age":34}, function(err, ids) {
-            test.assertEquals(1, ids.length);    
-            test.assertTrue(ids[0]._id.toHexString().length == 24);
+            test.equal(1, ids.length);    
+            test.ok(ids[0]._id.toHexString().length == 24);
 
             collection.findOne({"name":"Patty"}, function(err, document) {
-              test.assertEquals(ids[0]._id.toHexString(), document._id.toHexString());
+              test.equal(ids[0]._id.toHexString(), document._id.toHexString());
               // Let's close the db 
               finished_test({test_automatic_reconnect:'ok'});    
               automatic_connect_client.close();
@@ -216,10 +216,10 @@ var all_tests = {
 
     error_client.addListener("error", function(err) {});
     error_client.addListener("close", function(connection) {
-      test.assertTrue(typeof connection == typeof serverConfig);
-      test.assertEquals("127.0.0.1", connection.host);
-      test.assertEquals(21017, connection.port);
-      test.assertEquals(true, connection.autoReconnect);
+      test.ok(typeof connection == typeof serverConfig);
+      test.equal("127.0.0.1", connection.host);
+      test.equal(21017, connection.port);
+      test.equal(true, connection.autoReconnect);
     });
     error_client.open(function(err, error_client) {});    
 
@@ -230,10 +230,10 @@ var all_tests = {
     var error_client_pair = new mongo.Db('integration_tests_21', serverPairConfig, {});
 
     var closeListener = function(connection) {
-      test.assertTrue(typeof connection == typeof serverConfig);
-      test.assertEquals("127.0.0.1", connection.host);
-      test.assertEquals(21017, connection.port);
-      test.assertEquals(false, connection.autoReconnect);
+      test.ok(typeof connection == typeof serverConfig);
+      test.equal("127.0.0.1", connection.host);
+      test.equal(21017, connection.port);
+      test.equal(false, connection.autoReconnect);
         // Let's close the db
       finished_test({test_connection_errors:'ok'});
       error_client_pair.removeListener("close", closeListener);
@@ -251,38 +251,38 @@ var all_tests = {
     error_client.open(function(err, error_client) {
       error_client.resetErrorHistory(function() {
         error_client.error(function(err, documents) {
-          test.assertEquals(true, documents[0].ok);                
-          test.assertEquals(0, documents[0].n);    
+          test.equal(true, documents[0].ok);                
+          test.equal(0, documents[0].n);    
 
           // Force error on server
           error_client.executeDbCommand({forceerror: 1}, function(err, r) {
-            test.assertEquals(0, r.documents[0].ok);                
-            test.assertTrue(r.documents[0].errmsg.length > 0);    
+            test.equal(0, r.documents[0].ok);                
+            test.ok(r.documents[0].errmsg.length > 0);    
             // // Check for previous errors
             error_client.previousErrors(function(err, documents) {
-              test.assertEquals(true, documents[0].ok);                
-              test.assertEquals(1, documents[0].nPrev);    
-              test.assertEquals("forced error", documents[0].err);
+              test.equal(true, documents[0].ok);                
+              test.equal(1, documents[0].nPrev);    
+              test.equal("forced error", documents[0].err);
               // Check for the last error
               error_client.error(function(err, documents) {
-                test.assertEquals("forced error", documents[0].err);    
+                test.equal("forced error", documents[0].err);    
                 // Force another error
                 error_client.collection('test_error_collection', function(err, collection) {
                   collection.findOne(new mongo.OrderedHash().add("name", "Fred"), function(err, document) {              
                     // Check that we have two previous errors
                     error_client.previousErrors(function(err, documents) {
-                      test.assertEquals(true, documents[0].ok);                
-                      test.assertEquals(2, documents[0].nPrev);    
-                      test.assertEquals("forced error", documents[0].err);
+                      test.equal(true, documents[0].ok);                
+                      test.equal(2, documents[0].nPrev);    
+                      test.equal("forced error", documents[0].err);
 
                       error_client.resetErrorHistory(function() {
                         error_client.previousErrors(function(err, documents) {
-                          test.assertEquals(true, documents[0].ok);                
-                          test.assertEquals(-1, documents[0].nPrev);                        
+                          test.equal(true, documents[0].ok);                
+                          test.equal(-1, documents[0].nPrev);                        
 
                           error_client.error(function(err, documents) {
-                            test.assertEquals(true, documents[0].ok);                
-                            test.assertEquals(0, documents[0].n);
+                            test.equal(true, documents[0].ok);                
+                            test.equal(0, documents[0].n);
 
                             // Let's close the db 
                             finished_test({test_error_handling:'ok'}); 
@@ -304,8 +304,8 @@ var all_tests = {
   // Test the last status functionality of the driver
   test_last_status : function() {  
     client.createCollection('test_last_status', function(err, collection) {
-      test.assertTrue(collection instanceof Collection);
-      test.assertEquals('test_last_status', collection.collectionName);
+      test.ok(collection instanceof Collection);
+      test.equal('test_last_status', collection.collectionName);
 
       // Get the collection
       client.collection('test_last_status', function(err, collection) {
@@ -313,31 +313,31 @@ var all_tests = {
         collection.remove(function(err, collection) {
           // Check update of a document
           collection.insert(new mongo.OrderedHash().add("i", 1), function(err, ids) {
-            test.assertEquals(1, ids.length);    
-            test.assertTrue(ids[0].get('_id').toHexString().length == 24);        
+            test.equal(1, ids.length);    
+            test.ok(ids[0].get('_id').toHexString().length == 24);        
 
             // Update the record
             collection.update(new mongo.OrderedHash().add("i", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("i", 2)), function(err, result) {
               // Check for the last message from the server
               client.lastStatus(function(err, status) {
-                test.assertEquals(true, status.documents[0].ok);                
-                test.assertEquals(true, status.documents[0].updatedExisting);                
+                test.equal(true, status.documents[0].ok);                
+                test.equal(true, status.documents[0].updatedExisting);                
                 // Check for failed update of document
                 collection.update(new mongo.OrderedHash().add("i", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("i", 500)), function(err, result) {
                   client.lastStatus(function(err, status) {
-                    test.assertEquals(true, status.documents[0].ok);                
-                    test.assertEquals(false, status.documents[0].updatedExisting);                
+                    test.equal(true, status.documents[0].ok);                
+                    test.equal(false, status.documents[0].updatedExisting);                
 
                     // Check safe update of a document
                     collection.insert(new mongo.OrderedHash().add("x", 1), function(err, ids) {
                       collection.update(new mongo.OrderedHash().add("x", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("x", 2)), {'safe':true}, function(err, document) {
-                        test.assertTrue(document instanceof OrderedHash);
-                        test.assertTrue(document.get('$set') instanceof OrderedHash);
+                        test.ok(document instanceof OrderedHash);
+                        test.ok(document.get('$set') instanceof OrderedHash);
                       });
 
                       collection.update(new mongo.OrderedHash().add("y", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("y", 2)), {'safe':true}, function(err, document) {
-                        test.assertTrue(err instanceof Error);
-                        test.assertEquals("Failed to update document", err.message);
+                        test.ok(err instanceof Error);
+                        test.equal("Failed to update document", err.message);
 
                         // Let's close the db 
                         finished_test({test_last_status:'ok'});                     
@@ -360,11 +360,11 @@ var all_tests = {
         collection.insert(new mongo.OrderedHash().add("i", 1), function(err, ids) {
           collection.insert(new mongo.OrderedHash().add("i", 2), function(err, ids) {
             collection.count(function(err, count) {
-              test.assertEquals(2, count);    
+              test.equal(2, count);    
               // Clear the collection
               collection.remove(function(err, collection) {
                 collection.count(function(err, count) {
-                  test.assertEquals(0, count);    
+                  test.equal(0, count);    
                   // Let's close the db 
                   finished_test({test_clear:'ok'}); 
                 });
@@ -387,12 +387,12 @@ var all_tests = {
         collection.insert(new mongo.OrderedHash().add('a', 2), function(err, r) {
           collection.insert(new mongo.OrderedHash().add('a', 3), function(err, r) {
             collection.count(function(err, count) {
-              test.assertEquals(1001, count);
+              test.equal(1001, count);
               // Locate all the entries using find
               collection.find(function(err, cursor) {
                 cursor.toArray(function(err, results) {
-                  test.assertEquals(1001, results.length);
-                  test.assertTrue(results[0] != null);
+                  test.equal(1001, results.length);
+                  test.ok(results[0] != null);
 
                   // Let's close the db 
                   finished_test({test_insert:'ok'}); 
@@ -413,19 +413,19 @@ var all_tests = {
 
         collection.insert(docs, function(err, ids) {
           ids.forEach(function(doc) {
-            test.assertTrue(((doc.get('_id')) instanceof ObjectID));
+            test.ok(((doc.get('_id')) instanceof ObjectID));
           });
 
           // Let's ensure we have both documents
           collection.find(function(err, cursor) {
             cursor.toArray(function(err, docs) {
-              test.assertEquals(2, docs.length);
+              test.equal(2, docs.length);
               var results = [];
               // Check that we have all the results we want
               docs.forEach(function(doc) {
                 if(doc.a == 1 || doc.a == 2) results.push(1);
               });
-              test.assertEquals(2, results.length);
+              test.equal(2, results.length);
               // Let's close the db 
               finished_test({test_multiple_insert:'ok'}); 
             });
@@ -439,7 +439,7 @@ var all_tests = {
   test_count_on_nonexisting : function() {
     client.collection('test_multiple_insert', function(err, collection) {
       collection.count(function(err, count) {  
-        test.assertEquals(0, count);
+        test.equal(0, count);
         // Let's close the db 
         finished_test({test_count_on_nonexisting:'ok'}); 
       });    
@@ -458,17 +458,17 @@ var all_tests = {
         // Ensure correct insertion testing via the cursor and the count function
         collection.find(function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(2, documents.length);
+            test.equal(2, documents.length);
           })            
         });    
         collection.count(function(err, count) {
-          test.assertEquals(2, count);      
+          test.equal(2, count);      
         });
         // Fetch values by selection    
         collection.find({'a': doc1.a}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(1, documents.length);
-            test.assertEquals(doc1.a, documents[0].a);
+            test.equal(1, documents.length);
+            test.equal(doc1.a, documents[0].a);
             // Let's close the db 
             finished_test({test_find_simple:'ok'}); 
           });
@@ -489,66 +489,66 @@ var all_tests = {
         // Locate by less than
         collection.find({'a':{'$lt':10}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(2, documents.length);
+            test.equal(2, documents.length);
             // Check that the correct documents are returned
             var results = [];
             // Check that we have all the results we want
             documents.forEach(function(doc) {
               if(doc.a == 1 || doc.a == 2) results.push(1);
             });
-            test.assertEquals(2, results.length);
+            test.equal(2, results.length);
           });
         });    
 
         // Locate by greater than
         collection.find({'a':{'$gt':1}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(1, documents.length);
-            test.assertEquals(2, documents[0].a);
+            test.equal(1, documents.length);
+            test.equal(2, documents[0].a);
           });
         });    
 
         // Locate by less than or equal to
         collection.find({'a':{'$lte':1}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(1, documents.length);
-            test.assertEquals(1, documents[0].a);
+            test.equal(1, documents.length);
+            test.equal(1, documents[0].a);
           });
         });    
 
         // Locate by greater than or equal to
         collection.find({'a':{'$gte':1}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(2, documents.length);
+            test.equal(2, documents.length);
             // Check that the correct documents are returned
             var results = [];
             // Check that we have all the results we want
             documents.forEach(function(doc) {
               if(doc.a == 1 || doc.a == 2) results.push(1);
             });
-            test.assertEquals(2, results.length);
+            test.equal(2, results.length);
           });
         });    
 
         // Locate by between
         collection.find({'a':{'$gt':1, '$lt':3}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(1, documents.length);
-            test.assertEquals(2, documents[0].a);
+            test.equal(1, documents.length);
+            test.equal(2, documents[0].a);
           });
         });    
 
         // Locate in clause
         collection.find({'a':{'$in':[1,2]}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(2, documents.length);
+            test.equal(2, documents.length);
             // Check that the correct documents are returned
             var results = [];
             // Check that we have all the results we want
             documents.forEach(function(doc) {
               if(doc.a == 1 || doc.a == 2) results.push(1);
             });
-            test.assertEquals(2, results.length);
+            test.equal(2, results.length);
             // Let's close the db 
             finished_test({test_find_advanced:'ok'});     
           });
@@ -572,61 +572,61 @@ var all_tests = {
         // Test sorting (ascending)
         collection.find({'a': {'$lt':10}}, {'sort': [['a', 1]]}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(4, documents.length);
-            test.assertEquals(1, documents[0].a);
-            test.assertEquals(2, documents[1].a);
-            test.assertEquals(3, documents[2].a);
-            test.assertEquals(4, documents[3].a);
+            test.equal(4, documents.length);
+            test.equal(1, documents[0].a);
+            test.equal(2, documents[1].a);
+            test.equal(3, documents[2].a);
+            test.equal(4, documents[3].a);
           });
         });
 
         // Test sorting (descending)
         collection.find({'a': {'$lt':10}}, {'sort': [['a', -1]]}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(4, documents.length);
-            test.assertEquals(4, documents[0].a);
-            test.assertEquals(3, documents[1].a);
-            test.assertEquals(2, documents[2].a);
-            test.assertEquals(1, documents[3].a);
+            test.equal(4, documents.length);
+            test.equal(4, documents[0].a);
+            test.equal(3, documents[1].a);
+            test.equal(2, documents[2].a);
+            test.equal(1, documents[3].a);
           });
         });
 
         // Sorting using array of names, assumes ascending order
         collection.find({'a': {'$lt':10}}, {'sort': ['a']}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(4, documents.length);
-            test.assertEquals(1, documents[0].a);
-            test.assertEquals(2, documents[1].a);
-            test.assertEquals(3, documents[2].a);
-            test.assertEquals(4, documents[3].a);
+            test.equal(4, documents.length);
+            test.equal(1, documents[0].a);
+            test.equal(2, documents[1].a);
+            test.equal(3, documents[2].a);
+            test.equal(4, documents[3].a);
           });
         });
 
         // Sorting using single name, assumes ascending order
         collection.find({'a': {'$lt':10}}, {'sort': 'a'}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(4, documents.length);
-            test.assertEquals(1, documents[0].a);
-            test.assertEquals(2, documents[1].a);
-            test.assertEquals(3, documents[2].a);
-            test.assertEquals(4, documents[3].a);
+            test.equal(4, documents.length);
+            test.equal(1, documents[0].a);
+            test.equal(2, documents[1].a);
+            test.equal(3, documents[2].a);
+            test.equal(4, documents[3].a);
           });
         });
 
         collection.find({'a': {'$lt':10}}, {'sort': ['b', 'a']}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(4, documents.length);
-            test.assertEquals(2, documents[0].a);
-            test.assertEquals(4, documents[1].a);
-            test.assertEquals(1, documents[2].a);
-            test.assertEquals(3, documents[3].a);
+            test.equal(4, documents.length);
+            test.equal(2, documents[0].a);
+            test.equal(4, documents[1].a);
+            test.equal(1, documents[2].a);
+            test.equal(3, documents[3].a);
           });
         });
 
         // Sorting using empty array, no order guarantee should not blow up
         collection.find({'a': {'$lt':10}}, {'sort': []}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(4, documents.length);
+            test.equal(4, documents.length);
             // Let's close the db 
             finished_test({test_find_sorting:'ok'});     
           });
@@ -636,8 +636,8 @@ var all_tests = {
         collection.find({'a': {'$lt':10}}, {'sort': new mongo.OrderedHash().add('a', -1)}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             // Fail test if not an error
-            test.assertTrue(err instanceof Error);
-            test.assertEquals("Error: Invalid sort argument was supplied", err.message);
+            test.ok(err instanceof Error);
+            test.equal("Error: Invalid sort argument was supplied", err.message);
           });
         });            
       });
@@ -660,37 +660,37 @@ var all_tests = {
         // Test limits
         collection.find({}, {'limit': 1}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(1, documents.length);        
+            test.equal(1, documents.length);        
           });
         });    
 
         collection.find({}, {'limit': 2}, function(err, cursor) {        
           cursor.toArray(function(err, documents) {
-            test.assertEquals(2, documents.length);        
+            test.equal(2, documents.length);        
           });
         });    
 
         collection.find({}, {'limit': 3}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(3, documents.length);        
+            test.equal(3, documents.length);        
           });
         });    
 
         collection.find({}, {'limit': 4}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(4, documents.length);        
+            test.equal(4, documents.length);        
           });
         });    
 
         collection.find({}, {}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(4, documents.length);        
+            test.equal(4, documents.length);        
           });
         });    
 
         collection.find({}, {'limit':99}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(4, documents.length);        
+            test.equal(4, documents.length);        
             // Let's close the db 
             finished_test({test_find_limits:'ok'});     
           });
@@ -705,7 +705,7 @@ var all_tests = {
       client.collection('test_find_one_no_records', function(err, collection) {
         collection.find({'a':1}, {}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals(0, documents.length);        
+            test.equal(0, documents.length);        
             // Let's close the db 
             finished_test({test_find_one_no_records:'ok'});     
           });
@@ -718,8 +718,8 @@ var all_tests = {
   test_drop_collection : function() {
     client.createCollection('test_drop_collection2', function(err, r) {
       client.dropCollection('test_drop_collection', function(err, r) {
-        test.assertTrue(err instanceof Error);
-        test.assertEquals("ns not found", err.message);
+        test.ok(err instanceof Error);
+        test.equal("ns not found", err.message);
         var found = false;
         // Ensure we don't have the collection in the set of names
         client.collectionNames(function(err, replies) {
@@ -770,7 +770,7 @@ var all_tests = {
         documents.forEach(function(document) {
           if(document.name == 'integration_tests_.test_collection_names') found = true;
         });
-        test.assertTrue(found);
+        test.ok(found);
         // Insert a document in an non-existing collection should create the collection
         client.collection('test_collection_names2', function(err, collection) {
           collection.insert({a:1})
@@ -780,8 +780,8 @@ var all_tests = {
               if(document.name == 'integration_tests_.test_collection_names') found2 = true;
             });        
 
-            test.assertTrue(found);      
-            test.assertTrue(found2);      
+            test.ok(found);      
+            test.ok(found2);      
           });
           // Let's close the db 
           finished_test({test_collection_names:'ok'});             
@@ -793,16 +793,16 @@ var all_tests = {
   test_collections_info : function() {
     client.createCollection('test_collections_info', function(err, r) {
       client.collectionsInfo(function(err, cursor) {
-        test.assertTrue((cursor instanceof Cursor));
+        test.ok((cursor instanceof Cursor));
         // Fetch all the collection info
         cursor.toArray(function(err, documents) {
-          test.assertTrue(documents.length > 1);
+          test.ok(documents.length > 1);
 
           var found = false;
           documents.forEach(function(document) {
             if(document.name == 'integration_tests_.test_collections_info') found = true;
           });
-          test.assertTrue(found);
+          test.ok(found);
         });    
         // Let's close the db 
         finished_test({test_collections_info:'ok'});         
@@ -812,13 +812,13 @@ var all_tests = {
 
   test_collection_options : function() {
     client.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {    
-      test.assertTrue(collection instanceof Collection);
-      test.assertEquals('test_collection_options', collection.collectionName);
+      test.ok(collection instanceof Collection);
+      test.equal('test_collection_options', collection.collectionName);
       // Let's fetch the collection options
       collection.options(function(err, options) {
-        test.assertEquals(true, options.capped);
-        test.assertEquals(1024, options.size);
-        test.assertEquals("test_collection_options", options.create);
+        test.equal(true, options.capped);
+        test.equal(1024, options.size);
+        test.equal("test_collection_options", options.create);
         // Let's close the db 
         finished_test({test_collection_options:'ok'});         
       });
@@ -830,13 +830,13 @@ var all_tests = {
       collection.insert({a:1}, function(err, ids) {
         // Create an index on the collection
         client.createIndex(collection.collectionName, 'a', function(err, indexName) {
-          test.assertEquals("a_1", indexName);
+          test.equal("a_1", indexName);
           // Let's fetch the index information
           client.indexInformation(collection.collectionName, function(err, collectionInfo) {
-            test.assertTrue(collectionInfo['_id_'] != null);
-            test.assertEquals('_id', collectionInfo['_id_'][0][0]);
-            test.assertTrue(collectionInfo['a_1'] != null);
-            test.assertEquals([["a", 1]], collectionInfo['a_1']);
+            test.ok(collectionInfo['_id_'] != null);
+            test.equal('_id', collectionInfo['_id_'][0][0]);
+            test.ok(collectionInfo['a_1'] != null);
+            test.deepEqual([["a", 1]], collectionInfo['a_1']);
 
             client.indexInformation(function(err, collectionInfo2) {
               var count1 = 0, count2 = 0;
@@ -845,13 +845,13 @@ var all_tests = {
               for(var i in collectionInfo2) { count2 += 1;}
 
               // Tests
-              test.assertTrue(count2 >= count1);
-              test.assertTrue(collectionInfo2['_id_'] != null);
-              test.assertEquals('_id', collectionInfo2['_id_'][0][0]);
-              test.assertTrue(collectionInfo2['a_1'] != null);
-              test.assertEquals([["a", 1]], collectionInfo2['a_1']);            
-              test.assertTrue((collectionInfo[indexName] != null));
-              test.assertEquals([["a", 1]], collectionInfo[indexName]);            
+              test.ok(count2 >= count1);
+              test.ok(collectionInfo2['_id_'] != null);
+              test.equal('_id', collectionInfo2['_id_'][0][0]);
+              test.ok(collectionInfo2['a_1'] != null);
+              test.deepEqual([["a", 1]], collectionInfo2['a_1']);            
+              test.ok((collectionInfo[indexName] != null));
+              test.deepEqual([["a", 1]], collectionInfo[indexName]);            
 
               // Let's close the db 
               finished_test({test_index_information:'ok'});                 
@@ -867,7 +867,7 @@ var all_tests = {
       collection.insert({a:1}, function(err, ids) {
         // Create an index on the collection
         client.createIndex(collection.collectionName, [['a', -1], ['b', 1], ['c', -1]], function(err, indexName) {
-          test.assertEquals("a_-1_b_1_c_-1", indexName);
+          test.equal("a_-1_b_1_c_-1", indexName);
           // Let's fetch the index information
           client.indexInformation(collection.collectionName, function(err, collectionInfo) {
             var count1 = 0;
@@ -875,9 +875,9 @@ var all_tests = {
             for(var i in collectionInfo) { count1 += 1;}          
 
             // Test
-            test.assertEquals(2, count1);
-            test.assertTrue(collectionInfo[indexName] != null);
-            test.assertEquals([['a', -1], ['b', 1], ['c', -1]], collectionInfo[indexName]);
+            test.equal(2, count1);
+            test.ok(collectionInfo[indexName] != null);
+            test.deepEqual([['a', -1], ['b', 1], ['c', -1]], collectionInfo[indexName]);
 
             // Let's close the db 
             finished_test({test_multiple_index_cols:'ok'});                 
@@ -895,8 +895,8 @@ var all_tests = {
         collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(err, ids) {
           // Assert that we have no erros
           client.error(function(err, errors) {
-            test.assertEquals(1, errors.length);
-            test.assertEquals(null, errors[0].err);
+            test.equal(1, errors.length);
+            test.equal(null, errors[0].err);
           });
         });
       });        
@@ -909,8 +909,8 @@ var all_tests = {
         collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(err, ids) {
           // Assert that we have erros
           client.error(function(err, errors) {
-            test.assertEquals(1, errors.length);
-            test.assertTrue(errors[0].err != null);
+            test.equal(1, errors.length);
+            test.ok(errors[0].err != null);
             // Let's close the db 
             finished_test({test_unique_index:'ok'});                 
           });
@@ -925,8 +925,8 @@ var all_tests = {
       collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], function(err, ids) {
         // Assert that we have no erros
         client.error(function(err, errors) {
-          test.assertEquals(1, errors.length);
-          test.assertTrue(errors[0].err == null);
+          test.equal(1, errors.length);
+          test.ok(errors[0].err == null);
         });      
       });  
     });
@@ -937,8 +937,8 @@ var all_tests = {
         collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], function(err, ids) {
           // Assert that we have erros
           client.error(function(err, errors) {
-            test.assertEquals(1, errors.length);
-            test.assertTrue(errors[0].err != null);
+            test.equal(1, errors.length);
+            test.ok(errors[0].err != null);
             // Let's close the db 
             finished_test({test_index_on_subfield:'ok'});                 
           });
@@ -953,7 +953,7 @@ var all_tests = {
       collection.insert({'b':[1, 2, 3]}, function(err, ids) {
         collection.find(function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.assertEquals([1, 2, 3], documents[0].b);
+            test.deepEqual([1, 2, 3], documents[0].b);
             // Let's close the db 
             finished_test({test_array:'ok'});                 
           });
@@ -969,7 +969,7 @@ var all_tests = {
       collection.insert({'b':regexp}, function(err, ids) {
         collection.find({}, {'fields': ['b']}, function(err, cursor) {
           cursor.toArray(function(err, items) {
-            test.assertEquals(("" + regexp), ("" + items[0].b));
+            test.equal(("" + regexp), ("" + items[0].b));
             // Let's close the db 
             finished_test({test_regex:'ok'});                 
           });
@@ -992,7 +992,7 @@ var all_tests = {
       collection.insert({'_id':date}, function(err, ids) {      
         collection.find({'_id':date}, function(err, cursor) {
           cursor.toArray(function(err, items) {
-            test.assertEquals(("" + date), ("" + items[0]._id));
+            test.equal(("" + date), ("" + items[0]._id));
 
             // Let's close the db 
             finished_test({test_non_oid_id:'ok'});                 
@@ -1004,16 +1004,16 @@ var all_tests = {
 
   test_strict_access_collection : function() {
     var error_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
-    test.assertEquals(true, error_client.strict);
+    test.equal(true, error_client.strict);
     error_client.open(function(err, error_client) {
       error_client.collection('does-not-exist', function(err, collection) {
-        test.assertTrue(err instanceof Error);
-        test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", err.message);      
+        test.ok(err instanceof Error);
+        test.equal("Collection does-not-exist does not exist. Currently in strict mode.", err.message);      
       });      
 
       error_client.createCollection('test_strict_access_collection', function(err, collection) {  
         error_client.collection('test_strict_access_collection', function(err, collection) {
-          test.assertTrue(collection instanceof Collection);
+          test.ok(collection instanceof Collection);
           // Let's close the db 
           finished_test({test_strict_access_collection:'ok'});                 
           error_client.close();
@@ -1024,20 +1024,20 @@ var all_tests = {
 
   test_strict_create_collection : function() {
     var error_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
-    test.assertEquals(true, error_client.strict);
+    test.equal(true, error_client.strict);
     error_client.open(function(err, error_client) {
       error_client.createCollection('test_strict_create_collection', function(err, collection) {
-        test.assertTrue(collection instanceof Collection);
+        test.ok(collection instanceof Collection);
 
         // Creating an existing collection should fail
         error_client.createCollection('test_strict_create_collection', function(err, collection) {
-          test.assertTrue(err instanceof Error);
-          test.assertEquals("Collection test_strict_create_collection already exists. Currently in strict mode.", err.message);
+          test.ok(err instanceof Error);
+          test.equal("Collection test_strict_create_collection already exists. Currently in strict mode.", err.message);
 
           // Switch out of strict mode and try to re-create collection
           error_client.strict = false;
           error_client.createCollection('test_strict_create_collection', function(err, collection) {
-            test.assertTrue(collection instanceof Collection);
+            test.ok(collection instanceof Collection);
 
             // Let's close the db 
             finished_test({test_strict_create_collection:'ok'});                 
@@ -1050,19 +1050,19 @@ var all_tests = {
 
   test_to_a : function() {
     client.createCollection('test_to_a', function(err, collection) {
-      test.assertTrue(collection instanceof Collection);
+      test.ok(collection instanceof Collection);
       collection.insert({'a':1}, function(err, ids) {
         collection.find({}, function(err, cursor) {
           cursor.toArray(function(err, items) {          
             // Should fail if called again (cursor should be closed)
             cursor.toArray(function(err, items) {
-              test.assertTrue(err instanceof Error);
-              test.assertEquals("Cursor is closed", err.message);
+              test.ok(err instanceof Error);
+              test.equal("Cursor is closed", err.message);
 
               // Each should allow us to iterate over the entries due to cache
               cursor.each(function(err, item) {
                 if(item != null) {
-                  test.assertEquals(1, item.a);                
+                  test.equal(1, item.a);                
                   // Let's close the db 
                   finished_test({test_to_a:'ok'});                 
                 }
@@ -1076,14 +1076,14 @@ var all_tests = {
 
   test_to_a_after_each : function() {
     client.createCollection('test_to_a_after_each', function(err, collection) {
-      test.assertTrue(collection instanceof Collection);
+      test.ok(collection instanceof Collection);
       collection.insert({'a':1}, function(err, ids) {
         collection.find(function(err, cursor) {
           cursor.each(function(err, item) {
             if(item == null) {
               cursor.toArray(function(err, items) {
-                test.assertTrue(err instanceof Error);
-                test.assertEquals("Cursor is closed", err.message);                            
+                test.ok(err instanceof Error);
+                test.equal("Cursor is closed", err.message);                            
 
                 // Let's close the db 
                 finished_test({test_to_a_after_each:'ok'});                 
@@ -1097,21 +1097,21 @@ var all_tests = {
 
   test_where : function() {
     client.createCollection('test_where', function(err, collection) {
-      test.assertTrue(collection instanceof Collection);
+      test.ok(collection instanceof Collection);
       collection.insert([{'a':1}, {'a':2}, {'a':3}], function(err, ids) {
         collection.count(function(err, count) {
-          test.assertEquals(3, count);
+          test.equal(3, count);
 
           // Let's test usage of the $where statement
           collection.find({'$where':new mongo.Code('this.a > 2')}, function(err, cursor) {
             cursor.count(function(err, count) {
-              test.assertEquals(1, count);
+              test.equal(1, count);
             });          
           });
 
           collection.find({'$where':new mongo.Code('this.a > i', new mongo.OrderedHash().add('i', 1))}, function(err, cursor) {
             cursor.count(function(err, count) {
-              test.assertEquals(2, count);
+              test.equal(2, count);
 
               // Let's close the db 
               finished_test({test_where:'ok'});                 
@@ -1124,46 +1124,46 @@ var all_tests = {
 
   test_eval : function() {
     client.eval('function (x) {return x;}', [3], function(err, result) {
-      test.assertEquals(3, result);
+      test.equal(3, result);
     });
 
     client.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
-      test.assertEquals(null, result)        
+      test.equal(null, result)        
       // Locate the entry
       client.collection('test_eval', function(err, collection) {
         collection.findOne(function(err, item) {
-          test.assertEquals(5, item.y);
+          test.equal(5, item.y);
         });
       });    
     });  
 
     client.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
-      test.assertEquals(5, result);    
+      test.equal(5, result);    
     });
 
     client.eval('function () {return 5;}', function(err, result) {
-      test.assertEquals(5, result);    
+      test.equal(5, result);    
     });
 
     client.eval('2 + 3;', function(err, result) {
-      test.assertEquals(5, result);        
+      test.equal(5, result);        
     });
 
     client.eval(new mongo.Code("2 + 3;"), function(err, result) {
-      test.assertEquals(5, result);            
+      test.equal(5, result);            
     });
 
     client.eval(new mongo.Code("return i;", {'i':2}), function(err, result) {
-      test.assertEquals(2, result);            
+      test.equal(2, result);            
     });
 
     client.eval(new mongo.Code("i + 3;", {'i':2}), function(err, result) {
-      test.assertEquals(5, result);            
+      test.equal(5, result);            
     });
 
     client.eval("5 ++ 5;", function(err, result) {
-      test.assertTrue(err instanceof Error);
-      test.assertTrue(err.message != null);
+      test.ok(err instanceof Error);
+      test.ok(err.message != null);
       // Let's close the db 
       finished_test({test_eval:'ok'});                             
     });
@@ -1175,52 +1175,52 @@ var all_tests = {
         client.createIndex(collection.collectionName, "a", function(err, indexName) {
           collection.find({'a':1}, {'hint':'a'}, function(err, cursor) {
             cursor.toArray(function(err, items) {
-              test.assertEquals(1, items.length);
+              test.equal(1, items.length);
             });
           });     
 
           collection.find({'a':1}, {'hint':['a']}, function(err, cursor) {
             cursor.toArray(function(err, items) {
-              test.assertEquals(1, items.length);
+              test.equal(1, items.length);
             });
           });        
 
           collection.find({'a':1}, {'hint':{'a':1}}, function(err, cursor) {
             cursor.toArray(function(err, items) {
-              test.assertEquals(1, items.length);
+              test.equal(1, items.length);
             });
           });      
 
           // Modify hints
           collection.hint = 'a';
-          test.assertEquals(1, collection.hint.get('a'));
+          test.equal(1, collection.hint.get('a'));
           collection.find({'a':1}, function(err, cursor) {
             cursor.toArray(function(err, items) {
-              test.assertEquals(1, items.length);
+              test.equal(1, items.length);
             });
           });   
 
           collection.hint = ['a'];
-          test.assertEquals(1, collection.hint.get('a'));
+          test.equal(1, collection.hint.get('a'));
           collection.find({'a':1}, function(err, cursor) {
             cursor.toArray(function(err, items) {
-              test.assertEquals(1, items.length);
+              test.equal(1, items.length);
             });
           });   
 
           collection.hint = {'a':1};
-          test.assertEquals(1, collection.hint.get('a'));
+          test.equal(1, collection.hint.get('a'));
           collection.find({'a':1}, function(err, cursor) {
             cursor.toArray(function(err, items) {
-              test.assertEquals(1, items.length);
+              test.equal(1, items.length);
             });
           });           
 
           collection.hint = null;
-          test.assertTrue(collection.hint == null);
+          test.ok(collection.hint == null);
           collection.find({'a':1}, function(err, cursor) {
             cursor.toArray(function(err, items) {
-              test.assertEquals(1, items.length);
+              test.equal(1, items.length);
               // Let's close the db 
               finished_test({test_hint:'ok'});                             
             });
@@ -1233,57 +1233,57 @@ var all_tests = {
   test_group : function() {
     client.createCollection('test_group', function(err, collection) {
       collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
-        test.assertEquals([], results);
+        test.deepEqual([], results);
       });
 
       collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
-        test.assertEquals([], results);
+        test.deepEqual([], results);
 
         // Trigger some inserts
         collection.insert([{'a':2}, {'b':5}, {'a':1}], function(err, ids) {
           collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
-            test.assertEquals(3, results[0].count);
+            test.equal(3, results[0].count);
           });        
 
           collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
-            test.assertEquals(3, results[0].count);
+            test.equal(3, results[0].count);
           });        
 
           collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
-            test.assertEquals(1, results[0].count);
+            test.equal(1, results[0].count);
           });
 
           collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
-            test.assertEquals(1, results[0].count);
+            test.equal(1, results[0].count);
 
             // Insert some more test data
             collection.insert([{'a':2}, {'b':3}], function(err, ids) {
               collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
-                test.assertEquals(2, results[0].a);
-                test.assertEquals(2, results[0].count);
-                test.assertEquals(null, results[1].a);
-                test.assertEquals(2, results[1].count);
-                test.assertEquals(1, results[2].a);
-                test.assertEquals(1, results[2].count);
+                test.equal(2, results[0].a);
+                test.equal(2, results[0].count);
+                test.equal(null, results[1].a);
+                test.equal(2, results[1].count);
+                test.equal(1, results[2].a);
+                test.equal(1, results[2].count);
               });
 
               collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
-                test.assertEquals(2, results[0].a);
-                test.assertEquals(2, results[0].count);
-                test.assertEquals(null, results[1].a);
-                test.assertEquals(2, results[1].count);
-                test.assertEquals(1, results[2].a);
-                test.assertEquals(1, results[2].count);
+                test.equal(2, results[0].a);
+                test.equal(2, results[0].count);
+                test.equal(null, results[1].a);
+                test.equal(2, results[1].count);
+                test.equal(1, results[2].a);
+                test.equal(1, results[2].count);
               });
 
               collection.group([], {}, {}, "5 ++ 5", function(err, results) {
-                test.assertTrue(err instanceof Error);
-                test.assertTrue(err.message != null);
+                test.ok(err instanceof Error);
+                test.ok(err.message != null);
               });
 
               collection.group([], {}, {}, "5 ++ 5", true, function(err, results) {
-                test.assertTrue(err instanceof Error);
-                test.assertTrue(err.message != null);
+                test.ok(err instanceof Error);
+                test.ok(err.message != null);
                 // Let's close the db 
                 finished_test({test_group:'ok'});                                   
               });
@@ -1299,16 +1299,16 @@ var all_tests = {
       collection.insert({'a':1}, function(err, ids) {
         collection.remove(function(err, result) {
           collection.count(function(err, count) {
-            test.assertEquals(0, count);          
+            test.equal(0, count);          
 
             // Execute deref a db reference
             client.dereference(new mongo.DBRef("test_deref", new mongo.ObjectID()), function(err, result) {
               collection.insert({'x':'hello'}, function(err, ids) {
                 collection.findOne(function(err, document) {
-                  test.assertEquals('hello', document.x);
+                  test.equal('hello', document.x);
 
                   client.dereference(new mongo.DBRef("test_deref", document._id), function(err, result) {
-                    test.assertEquals('hello', document.x);
+                    test.equal('hello', document.x);
                   });
                 });
               });            
@@ -1319,12 +1319,12 @@ var all_tests = {
 
               collection.insert(obj, function(err, ids) {
                 client.dereference(new mongo.DBRef("test_deref", 4), function(err, document) {
-                  test.assertEquals(obj['_id'], document._id);
+                  test.equal(obj['_id'], document._id);
 
                   collection.remove(function(err, result) {
                     collection.insert({'x':'hello'}, function(err, ids) {
                       client.dereference(new mongo.DBRef("test_deref", null), function(err, result) {
-                        test.assertEquals(null, result);
+                        test.equal(null, result);
                         // Let's close the db 
                         finished_test({test_deref:'ok'});                                   
                       });
@@ -1343,33 +1343,33 @@ var all_tests = {
     client.createCollection('test_save', function(err, collection) {
       var doc = {'hello':'world'};
       collection.save(doc, function(err, docs) {
-        test.assertTrue(docs._id instanceof ObjectID);
+        test.ok(docs._id instanceof ObjectID);
         collection.count(function(err, count) {
-          test.assertEquals(1, count);
+          test.equal(1, count);
           doc = docs;
 
           collection.save(doc, function(err, doc) {
             collection.count(function(err, count) {
-              test.assertEquals(1, count);                        
+              test.equal(1, count);                        
             });
 
             collection.findOne(function(err, doc) {
-              test.assertEquals('world', doc.hello);
+              test.equal('world', doc.hello);
 
               // Modify doc and save
               doc.hello = 'mike';
               collection.save(doc, function(err, doc) {
                 collection.count(function(err, count) {
-                  test.assertEquals(1, count);                        
+                  test.equal(1, count);                        
                 });
 
                 collection.findOne(function(err, doc) {
-                  test.assertEquals('mike', doc.hello);
+                  test.equal('mike', doc.hello);
 
                   // Save another document
                   collection.save(new mongo.OrderedHash().add('hello', 'world'), function(err, doc) {
                     collection.count(function(err, count) {
-                      test.assertEquals(2, count);                        
+                      test.equal(2, count);                        
                       // Let's close the db 
                       finished_test({test_save:'ok'});                                   
                     });                  
@@ -1387,7 +1387,7 @@ var all_tests = {
     client.createCollection('test_save_long', function(err, collection) {
       collection.insert({'x':mongo.Long.fromNumber(9223372036854775807)});
       collection.findOne(function(err, doc) {
-        test.assertTrue(mongo.Long.fromNumber(9223372036854775807).equals(doc.x));
+        test.ok(mongo.Long.fromNumber(9223372036854775807).equals(doc.x));
         // Let's close the db 
         finished_test({test_save_long:'ok'});                                   
       });
@@ -1397,14 +1397,14 @@ var all_tests = {
   test_find_by_oid : function() {
     client.createCollection('test_find_by_oid', function(err, collection) {
       collection.save({'hello':'mike'}, function(err, docs) {
-        test.assertTrue(docs._id instanceof ObjectID);
+        test.ok(docs._id instanceof ObjectID);
 
         collection.findOne({'_id':docs._id}, function(err, doc) {
-          test.assertEquals('mike', doc.hello);
+          test.equal('mike', doc.hello);
 
           var id = doc._id.toString();
           collection.findOne({'_id':new mongo.ObjectID(id)}, function(err, doc) {
-            test.assertEquals('mike', doc.hello);          
+            test.equal('mike', doc.hello);          
             // Let's close the db 
             finished_test({test_find_by_oid:'ok'});                                   
           });        
@@ -1418,19 +1418,19 @@ var all_tests = {
       var a = {'_id':'1', 'hello':'world'};
       collection.save(a, function(err, docs) {
         collection.count(function(err, count) {
-          test.assertEquals(1, count);
+          test.equal(1, count);
 
           collection.findOne(function(err, doc) {
-            test.assertEquals('world', doc.hello);
+            test.equal('world', doc.hello);
 
             doc.hello = 'mike';
             collection.save(doc, function(err, doc) {
               collection.count(function(err, count) {
-                test.assertEquals(1, count);
+                test.equal(1, count);
               });
 
               collection.findOne(function(err, doc) {
-                test.assertEquals('mike', doc.hello);
+                test.equal('mike', doc.hello);
                 // Let's close the db 
                 finished_test({test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection:'ok'});                                   
               });
@@ -1447,41 +1447,41 @@ var all_tests = {
       collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}]);
       // Illegal insert for key
       collection.insert({'$hello':'world'}, function(err, doc) {
-        test.assertTrue(err instanceof Error);
-        test.assertEquals("key $hello must not start with '$'", err.message);            
+        test.ok(err instanceof Error);
+        test.equal("key $hello must not start with '$'", err.message);            
       });
 
       collection.insert({'hello':{'$hello':'world'}}, function(err, doc) {
-        test.assertTrue(err instanceof Error);
-        test.assertEquals("key $hello must not start with '$'", err.message);              
+        test.ok(err instanceof Error);
+        test.equal("key $hello must not start with '$'", err.message);              
       });
 
       collection.insert({'he$llo':'world'}, function(err, docs) {
-        test.assertTrue(docs[0].constructor == Object);
+        test.ok(docs[0].constructor == Object);
       })
 
       collection.insert(new mongo.OrderedHash().add('hello', new mongo.OrderedHash().add('hell$o', 'world')), function(err, docs) {
-        test.assertTrue(docs[0] instanceof OrderedHash);
+        test.ok(docs[0] instanceof OrderedHash);
       })
 
       collection.insert({'.hello':'world'}, function(err, doc) {
-        test.assertTrue(err instanceof Error);
-        test.assertEquals("key .hello must not contain '.'", err.message);            
+        test.ok(err instanceof Error);
+        test.equal("key .hello must not contain '.'", err.message);            
       });
 
       collection.insert({'hello':{'.hello':'world'}}, function(err, doc) {
-        test.assertTrue(err instanceof Error);
-        test.assertEquals("key .hello must not contain '.'", err.message);            
+        test.ok(err instanceof Error);
+        test.equal("key .hello must not contain '.'", err.message);            
       });
 
       collection.insert({'hello.':'world'}, function(err, doc) {
-        test.assertTrue(err instanceof Error);
-        test.assertEquals("key hello. must not contain '.'", err.message);            
+        test.ok(err instanceof Error);
+        test.equal("key hello. must not contain '.'", err.message);            
       });
 
       collection.insert({'hello':{'hello.':'world'}}, function(err, doc) {
-        test.assertTrue(err instanceof Error);
-        test.assertEquals("key hello. must not contain '.'", err.message);            
+        test.ok(err instanceof Error);
+        test.equal("key hello. must not contain '.'", err.message);            
         // Let's close the db 
         finished_test({test_invalid_key_names:'ok'});                                   
       });    
@@ -1490,27 +1490,27 @@ var all_tests = {
 
   test_collection_names2 : function() {
     client.collection(5, function(err, collection) {
-      test.assertEquals("collection name must be a String", err.message);            
+      test.equal("collection name must be a String", err.message);            
     });
 
     client.collection("", function(err, collection) {
-      test.assertEquals("collection names cannot be empty", err.message);            
+      test.equal("collection names cannot be empty", err.message);            
     });  
 
     client.collection("te$t", function(err, collection) {
-      test.assertEquals("collection names must not contain '$'", err.message);            
+      test.equal("collection names must not contain '$'", err.message);            
     });  
 
     client.collection(".test", function(err, collection) {
-      test.assertEquals("collection names must not start or end with '.'", err.message);            
+      test.equal("collection names must not start or end with '.'", err.message);            
     });  
 
     client.collection("test.", function(err, collection) {
-      test.assertEquals("collection names must not start or end with '.'", err.message);            
+      test.equal("collection names must not start or end with '.'", err.message);            
     });  
 
     client.collection("test..t", function(err, collection) {
-      test.assertEquals("collection names cannot be empty", err.message);            
+      test.equal("collection names cannot be empty", err.message);            
 
       // Let's close the db 
       finished_test({test_collection_names2:'ok'});                                   
@@ -1524,51 +1524,51 @@ var all_tests = {
           client.collection('test_rename_collection2', function(err, collection2) {
             // Assert rename
             collection1.rename(5, function(err, collection) {
-              test.assertTrue(err instanceof Error);
-              test.assertEquals("collection name must be a String", err.message);
+              test.ok(err instanceof Error);
+              test.equal("collection name must be a String", err.message);
             });
 
             collection1.rename("", function(err, collection) {
-              test.assertTrue(err instanceof Error);
-              test.assertEquals("collection names cannot be empty", err.message);
+              test.ok(err instanceof Error);
+              test.equal("collection names cannot be empty", err.message);
             });
 
             collection1.rename("te$t", function(err, collection) {
-              test.assertTrue(err instanceof Error);
-              test.assertEquals("collection names must not contain '$'", err.message);
+              test.ok(err instanceof Error);
+              test.equal("collection names must not contain '$'", err.message);
             });
 
             collection1.rename(".test", function(err, collection) {
-              test.assertTrue(err instanceof Error);
-              test.assertEquals("collection names must not start or end with '.'", err.message);
+              test.ok(err instanceof Error);
+              test.equal("collection names must not start or end with '.'", err.message);
             });
 
             collection1.rename("test.", function(err, collection) {
-              test.assertTrue(err instanceof Error);
-              test.assertEquals("collection names must not start or end with '.'", err.message);
+              test.ok(err instanceof Error);
+              test.equal("collection names must not start or end with '.'", err.message);
             });
 
             collection1.rename("tes..t", function(err, collection) {
-              test.assertEquals("collection names cannot be empty", err.message);            
+              test.equal("collection names cannot be empty", err.message);            
             });
 
             collection1.count(function(err, count) {
-              test.assertEquals(0, count);
+              test.equal(0, count);
 
               collection1.insert([{'x':1}, {'x':2}], function(err, docs) {
                 collection1.count(function(err, count) {
-                  test.assertEquals(2, count);                
+                  test.equal(2, count);                
 
                   collection1.rename('test_rename_collection2', function(err, collection) {
-                    test.assertTrue(err instanceof Error);
-                    test.assertTrue(err.message.length > 0);            
+                    test.ok(err instanceof Error);
+                    test.ok(err.message.length > 0);            
 
                     collection1.rename('test_rename_collection3', function(err, collection) {
-                      test.assertEquals("test_rename_collection3", collection.collectionName);
+                      test.equal("test_rename_collection3", collection.collectionName);
 
                       // Check count
                       collection.count(function(err, count) {
-                        test.assertEquals(2, count);                                      
+                        test.equal(2, count);                                      
                         // Let's close the db 
                         finished_test({test_rename_collection:'ok'});                                   
                       });                    
@@ -1579,7 +1579,7 @@ var all_tests = {
             })
 
             collection2.count(function(err, count) {
-              test.assertEquals(0, count);
+              test.equal(0, count);
             })
           });
         });      
@@ -1592,10 +1592,10 @@ var all_tests = {
       collection.insert({'a':1});
       collection.find({'a':1}, function(err, cursor) {
         cursor.explain(function(err, explaination) {
-          test.assertTrue(explaination.cursor != null);
-          test.assertTrue(explaination.n.constructor == Number);
-          test.assertTrue(explaination.millis.constructor == Number);
-          test.assertTrue(explaination.nscanned.constructor == Number);
+          test.ok(explaination.cursor != null);
+          test.ok(explaination.n.constructor == Number);
+          test.ok(explaination.millis.constructor == Number);
+          test.ok(explaination.nscanned.constructor == Number);
 
           // Let's close the db 
           finished_test({test_explain:'ok'});                                   
@@ -1608,7 +1608,7 @@ var all_tests = {
     client.createCollection('test_count', function(err, collection) {
       collection.find(function(err, cursor) {
         cursor.count(function(err, count) {
-          test.assertEquals(0, count);
+          test.equal(0, count);
 
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i});
@@ -1616,32 +1616,32 @@ var all_tests = {
 
           collection.find(function(err, cursor) {
             cursor.count(function(err, count) {
-              test.assertEquals(10, count);
-              test.assertTrue(count.constructor == Number);
+              test.equal(10, count);
+              test.ok(count.constructor == Number);
             });
           });
 
           collection.find({}, {'limit':5}, function(err, cursor) {
             cursor.count(function(err, count) {
-              test.assertEquals(10, count);            
+              test.equal(10, count);            
             });
           });
 
           collection.find({}, {'skip':5}, function(err, cursor) {
             cursor.count(function(err, count) {
-              test.assertEquals(10, count);            
+              test.equal(10, count);            
             });
           });
 
           collection.find(function(err, cursor) {
             cursor.count(function(err, count) {
-              test.assertEquals(10, count);
+              test.equal(10, count);
 
               cursor.each(function(err, item) {
                 if(item == null) {
                   cursor.count(function(err, count2) {
-                    test.assertEquals(10, count2);                  
-                    test.assertEquals(count, count2);                  
+                    test.equal(10, count2);                  
+                    test.equal(count, count2);                  
                     // Let's close the db 
                     finished_test({test_count:'ok'});                                   
                   });
@@ -1652,7 +1652,7 @@ var all_tests = {
 
           client.collection('acollectionthatdoesn', function(err, collection) {
             collection.count(function(err, count) {
-              test.assertEquals(0, count);          
+              test.equal(0, count);          
             });
           })
         });
@@ -1668,15 +1668,15 @@ var all_tests = {
 
       collection.find(function(err, cursor) {      
         cursor.sort(['a', 1], function(err, cursor) {
-          test.assertTrue(cursor instanceof Cursor);
-          test.assertEquals(['a', 1], cursor.sortValue);
+          test.ok(cursor instanceof Cursor);
+          test.deepEqual(['a', 1], cursor.sortValue);
         });      
       });
 
       collection.find(function(err, cursor) {
         cursor.sort('a', 1, function(err, cursor) {
           cursor.nextObject(function(err, doc) {
-            test.assertEquals(0, doc.a);
+            test.equal(0, doc.a);
           });
         });
       });
@@ -1684,7 +1684,7 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.sort('a', -1, function(err, cursor) {
           cursor.nextObject(function(err, doc) {
-            test.assertEquals(4, doc.a);
+            test.equal(4, doc.a);
           });
         });
       });
@@ -1692,15 +1692,15 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.sort('a', "asc", function(err, cursor) {
           cursor.nextObject(function(err, doc) {
-            test.assertEquals(0, doc.a);
+            test.equal(0, doc.a);
           });
         });
       });
 
       collection.find(function(err, cursor) {
         cursor.sort([['a', -1], ['b', 1]], function(err, cursor) {
-          test.assertTrue(cursor instanceof Cursor);
-          test.assertEquals([['a', -1], ['b', 1]], cursor.sortValue);
+          test.ok(cursor instanceof Cursor);
+          test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);
         });
       });
 
@@ -1708,7 +1708,7 @@ var all_tests = {
         cursor.sort('a', 1, function(err, cursor) {
           cursor.sort('a', -1, function(err, cursor) {
             cursor.nextObject(function(err, doc) {
-              test.assertEquals(4, doc.a);
+              test.equal(4, doc.a);
             });          
           })
         });      
@@ -1718,7 +1718,7 @@ var all_tests = {
         cursor.sort('a', -1, function(err, cursor) {
           cursor.sort('a', 1, function(err, cursor) {
             cursor.nextObject(function(err, doc) {
-              test.assertEquals(0, doc.a);
+              test.equal(0, doc.a);
             });          
           })
         });      
@@ -1727,8 +1727,8 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.nextObject(function(err, doc) {
           cursor.sort(['a'], function(err, cursor) {
-            test.assertTrue(err instanceof Error);
-            test.assertEquals("Cursor is closed", err.message);          
+            test.ok(err instanceof Error);
+            test.equal("Cursor is closed", err.message);          
 
             // Let's close the db 
             finished_test({test_sort:'ok'});                                   
@@ -1739,8 +1739,8 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.sort('a', 25, function(err, cursor) {
           cursor.nextObject(function(err, doc) {
-            test.assertTrue(err instanceof Error);
-            test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+            test.ok(err instanceof Error);
+            test.equal("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
           });
         });
       });
@@ -1748,8 +1748,8 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.sort(25, function(err, cursor) {
           cursor.nextObject(function(err, doc) {
-            test.assertTrue(err instanceof Error);
-            test.assertEquals("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+            test.ok(err instanceof Error);
+            test.equal("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
           });
         });
       });           
@@ -1764,14 +1764,14 @@ var all_tests = {
 
       collection.find(function(err, cursor) {
         cursor.count(function(err, count) {
-          test.assertEquals(10, count);
+          test.equal(10, count);
         });
       });
 
       collection.find(function(err, cursor) {
         cursor.limit(5, function(err, cursor) {
           cursor.toArray(function(err, items) {
-            test.assertEquals(5, items.length);
+            test.equal(5, items.length);
             // Let's close the db 
             finished_test({test_cursor_limit:'ok'});                                   
           });
@@ -1785,16 +1785,16 @@ var all_tests = {
       collection.insert({'a':1}, function(err, docs) {});
       collection.find(function(err, cursor) {
         cursor.limit('not-an-integer', function(err, cursor) {
-          test.assertTrue(err instanceof Error);
-          test.assertEquals("limit requires an integer", err.message);
+          test.ok(err instanceof Error);
+          test.equal("limit requires an integer", err.message);
         });
       });
 
       collection.find(function(err, cursor) {
         cursor.nextObject(function(err, doc) {
           cursor.limit(1, function(err, cursor) {
-            test.assertTrue(err instanceof Error);
-            test.assertEquals("Cursor is closed", err.message);
+            test.ok(err instanceof Error);
+            test.equal("Cursor is closed", err.message);
             // Let's close the db 
             finished_test({test_limit_exceptions:'ok'});                                   
           });
@@ -1804,8 +1804,8 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.close(function(err, cursor) {        
           cursor.limit(1, function(err, cursor) {
-            test.assertTrue(err instanceof Error);
-            test.assertEquals("Cursor is closed", err.message);
+            test.ok(err instanceof Error);
+            test.equal("Cursor is closed", err.message);
           });
         });
       });
@@ -1818,18 +1818,18 @@ var all_tests = {
 
       collection.find(function(err, cursor) {
         cursor.count(function(err, count) {
-          test.assertEquals(10, count);
+          test.equal(10, count);
         });
       });
 
       collection.find(function(err, cursor) {
         cursor.toArray(function(err, items) {
-          test.assertEquals(10, items.length);
+          test.equal(10, items.length);
 
           collection.find(function(err, cursor) {
             cursor.skip(2, function(err, cursor) {
               cursor.toArray(function(err, items2) {
-                test.assertEquals(8, items2.length);          
+                test.equal(8, items2.length);          
 
                 // Check that we have the same elements
                 var numberEqual = 0;
@@ -1838,7 +1838,7 @@ var all_tests = {
                 for(var i = 0; i < sliced.length; i++) {
                   if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
                 }
-                test.assertEquals(8, numberEqual);          
+                test.equal(8, numberEqual);          
 
                 // Let's close the db 
                 finished_test({test_skip:'ok'});                                   
@@ -1855,16 +1855,16 @@ var all_tests = {
       collection.insert({'a':1}, function(err, docs) {});
       collection.find(function(err, cursor) {
         cursor.skip('not-an-integer', function(err, cursor) {
-          test.assertTrue(err instanceof Error);
-          test.assertEquals("skip requires an integer", err.message);
+          test.ok(err instanceof Error);
+          test.equal("skip requires an integer", err.message);
         });
       });
 
       collection.find(function(err, cursor) {
         cursor.nextObject(function(err, doc) {
           cursor.skip(1, function(err, cursor) {
-            test.assertTrue(err instanceof Error);
-            test.assertEquals("Cursor is closed", err.message);
+            test.ok(err instanceof Error);
+            test.equal("Cursor is closed", err.message);
             // Let's close the db 
             finished_test({test_skip_exceptions:'ok'});                                   
           });
@@ -1874,8 +1874,8 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.close(function(err, cursor) {        
           cursor.skip(1, function(err, cursor) {
-            test.assertTrue(err instanceof Error);
-            test.assertEquals("Cursor is closed", err.message);
+            test.ok(err instanceof Error);
+            test.equal("Cursor is closed", err.message);
           });
         });
       });
@@ -1888,13 +1888,13 @@ var all_tests = {
 
       collection.find(function(err, cursor) {
         cursor.toArray(function(err, items) {
-          test.assertEquals(10, items.length);
+          test.equal(10, items.length);
 
           collection.find(function(err, cursor) {
             cursor.limit(5, function(err, cursor) {
               cursor.skip(3, function(err, cursor) {
                 cursor.toArray(function(err, items2) {
-                  test.assertEquals(5, items2.length);                
+                  test.equal(5, items2.length);                
 
                   // Check that we have the same elements
                   var numberEqual = 0;
@@ -1903,7 +1903,7 @@ var all_tests = {
                   for(var i = 0; i < sliced.length; i++) {
                     if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
                   }
-                  test.assertEquals(5, numberEqual);          
+                  test.equal(5, numberEqual);          
 
                   // Let's close the db 
                   finished_test({test_limit_skip_chaining:'ok'});                                   
@@ -1920,7 +1920,7 @@ var all_tests = {
     client.createCollection('test_close_no_query_sent', function(err, collection) {
       collection.find(function(err, cursor) {
         cursor.close(function(err, cursor) {
-          test.assertEquals(true, cursor.isClosed());
+          test.equal(true, cursor.isClosed());
           // Let's close the db 
           finished_test({test_close_no_query_sent:'ok'});                                   
         });
@@ -1933,7 +1933,7 @@ var all_tests = {
       for(var i = 0; i < 1000; i++) { collection.save({'a': i}, function(err, doc) {}); }
 
       collection.count(function(err, count) {
-        test.assertEquals(1000, count);
+        test.equal(1000, count);
       });      
 
       var total = 0;
@@ -1942,14 +1942,14 @@ var all_tests = {
           if(item != null) {
             total = total + item.a;
           } else {
-            test.assertEquals(499500, total); 
+            test.equal(499500, total); 
 
             collection.count(function(err, count) {
-              test.assertEquals(1000, count);
+              test.equal(1000, count);
             });                  
 
             collection.count(function(err, count) {
-              test.assertEquals(1000, count);
+              test.equal(1000, count);
 
               var total2 = 0;
               collection.find(function(err, cursor) {
@@ -1957,10 +1957,10 @@ var all_tests = {
                   if(item != null) {
                     total2 = total2 + item.a;
                   } else {
-                    test.assertEquals(499500, total2); 
+                    test.equal(499500, total2); 
                     collection.count(function(err, count) {
-                      test.assertEquals(1000, count);
-                      test.assertEquals(total, total2);
+                      test.equal(1000, count);
+                      test.equal(total, total2);
                       // Let's close the db 
                       finished_test({test_refill_via_get_more:'ok'});                                   
                     });                  
@@ -1981,7 +1981,7 @@ var all_tests = {
       }
 
       collection.count(function(err, count) {
-        test.assertEquals(1000, count);
+        test.equal(1000, count);
       });      
 
       var total = 0;
@@ -1990,14 +1990,14 @@ var all_tests = {
           if(item != null) {
             total = total + item.a;
           } else {
-            test.assertEquals(499500, total); 
+            test.equal(499500, total); 
 
             collection.count(function(err, count) {
-              test.assertEquals(1000, count);
+              test.equal(1000, count);
             });                  
 
             collection.count(function(err, count) {
-              test.assertEquals(1000, count);
+              test.equal(1000, count);
 
               var total2 = 0;
               collection.find(function(err, cursor) {
@@ -2005,10 +2005,10 @@ var all_tests = {
                   if(item != null) {
                     total2 = total2 + item.a;
                   } else {
-                    test.assertEquals(499500, total2); 
+                    test.equal(499500, total2); 
                     collection.count(function(err, count) {
-                      test.assertEquals(1000, count);
-                      test.assertEquals(total, total2);
+                      test.equal(1000, count);
+                      test.equal(total, total2);
                       // Let's close the db 
                       finished_test({test_refill_via_get_more_alt_coll:'ok'});                                   
                     });                  
@@ -2028,7 +2028,7 @@ var all_tests = {
       collection.find({'a':1}, function(err, cursor) {
         cursor.nextObject(function(err, item) {
           cursor.close(function(err, cursor) {
-            test.assertEquals(true, cursor.isClosed());
+            test.equal(true, cursor.isClosed());
             // Let's close the db 
             finished_test({test_close_after_query_sent:'ok'});                                   
           })
@@ -2053,16 +2053,16 @@ var all_tests = {
   //           }
   // 
   //           test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //             test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-  //             test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  //             test.equal(clientCursors, cursorInfo.clientCursors_size);
+  //             test.equal(byLocation, cursorInfo.byLocation_size);
   // 
   //             for(var i = 0; i < 10; i++) {
   //               collection.findOne(function(err, item) {});
   //             }
   // 
   //             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //               test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-  //               test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  //               test.equal(clientCursors, cursorInfo.clientCursors_size);
+  //               test.equal(byLocation, cursorInfo.byLocation_size);
   // 
   //               for(var i = 0; i < 10; i++) {
   //                 collection.find(function(err, cursor) {
@@ -2071,26 +2071,26 @@ var all_tests = {
   // 
   //                     if(i == 10) {
   //                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                         test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-  //                         test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  //                         test.equal(clientCursors, cursorInfo.clientCursors_size);
+  //                         test.equal(byLocation, cursorInfo.byLocation_size);
   // 
   //                         collection.find(function(err, cursor) {
   //                           cursor.nextObject(function(err, item) {
   //                             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                               test.assertEquals(clientCursors, cursorInfo.clientCursors_size);                  
-  //                               test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  //                               test.equal(clientCursors, cursorInfo.clientCursors_size);                  
+  //                               test.equal(byLocation, cursorInfo.byLocation_size);
   // 
   //                               cursor.close(function(err, cursor) {
   //                                 test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                                   test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-  //                                   test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  //                                   test.equal(clientCursors, cursorInfo.clientCursors_size);
+  //                                   test.equal(byLocation, cursorInfo.byLocation_size);
   // 
   //                                   collection.find({}, {'limit':10}, function(err, cursor) {
   //                                     cursor.nextObject(function(err, item) {                                      
   //                                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
   //                                         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                                           test.assertEquals(clientCursors, cursorInfo.clientCursors_size);
-  //                                           test.assertEquals(byLocation, cursorInfo.byLocation_size);
+  //                                           test.equal(clientCursors, cursorInfo.clientCursors_size);
+  //                                           test.equal(byLocation, cursorInfo.byLocation_size);
   //                                           number_of_tests_done = 1;
   //                                         });
   //                                       });
@@ -2127,15 +2127,15 @@ var all_tests = {
       collection.save({'x':1, 'a':2}, function(err, doc) {
         collection.find({}, {'fields':['a']}, function(err, cursor) {
           cursor.toArray(function(err, items) {
-            test.assertEquals(1, items.length);
-            test.assertEquals(2, items[0].a);
-            test.assertEquals(null, items[0].x);
+            test.equal(1, items.length);
+            test.equal(2, items[0].a);
+            test.equal(null, items[0].x);
           });
         });
 
         collection.findOne({}, {'fields':['a']}, function(err, item) {
-          test.assertEquals(2, item.a);
-          test.assertEquals(null, item.x);
+          test.equal(2, item.a);
+          test.equal(null, item.x);
           finished_test({test_count_with_fields:'ok'});
         });
       });
@@ -2149,15 +2149,15 @@ var all_tests = {
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           mongo.GridStore.exist(client, 'foobar', function(err, result) {
-            test.assertEquals(true, result);
+            test.equal(true, result);
           });
 
           mongo.GridStore.exist(client, 'does_not_exist', function(err, result) {
-            test.assertEquals(false, result);
+            test.equal(false, result);
           });
 
           mongo.GridStore.exist(client, 'foobar', 'another_root', function(err, result) {
-            test.assertEquals(false, result);
+            test.equal(false, result);
             finished_test({test_gs_exist:'ok'});        
           });
         });
@@ -2176,8 +2176,8 @@ var all_tests = {
               if(filename == 'foobar2') found = true;
             });
 
-            test.assertTrue(items.length >= 1);
-            test.assertTrue(found);
+            test.ok(items.length >= 1);
+            test.ok(found);
           });
 
           mongo.GridStore.list(client, 'fs', function(err, items) {
@@ -2186,8 +2186,8 @@ var all_tests = {
               if(filename == 'foobar2') found = true;
             });
 
-            test.assertTrue(items.length >= 1);
-            test.assertTrue(found);
+            test.ok(items.length >= 1);
+            test.ok(found);
           });
 
           mongo.GridStore.list(client, 'my_fs', function(err, items) {
@@ -2196,8 +2196,8 @@ var all_tests = {
               if(filename == 'foobar2') found = true;
             });
 
-            test.assertTrue(items.length >= 0);
-            test.assertTrue(!found);
+            test.ok(items.length >= 0);
+            test.ok(!found);
 
             var gridStore2 = new mongo.GridStore(client, "foobar3", "w");
             gridStore2.open(function(err, gridStore) {    
@@ -2211,9 +2211,9 @@ var all_tests = {
                       if(filename == 'foobar3') found2 = true;
                     });
 
-                    test.assertTrue(items.length >= 2);
-                    test.assertTrue(found);
-                    test.assertTrue(found2);
+                    test.ok(items.length >= 2);
+                    test.ok(found);
+                    test.ok(found2);
                     finished_test({test_gs_list:'ok'});        
                   });
                 });
@@ -2233,14 +2233,14 @@ var all_tests = {
           client.collection('fs.files', function(err, collection) {
             collection.find({'filename':'test_gs_small_write'}, function(err, cursor) {
               cursor.toArray(function(err, items) {
-                test.assertEquals(1, items.length);
+                test.equal(1, items.length);
                 var item = items[0];
-                test.assertTrue(item._id instanceof ObjectID);
+                test.ok(item._id instanceof ObjectID);
 
                 client.collection('fs.chunks', function(err, collection) {
                   collection.find({'files_id':item._id}, function(err, cursor) {
                     cursor.toArray(function(err, items) {
-                      test.assertEquals(1, items.length);                  
+                      test.equal(1, items.length);                  
                       finished_test({test_gs_small_write:'ok'});        
                     })
                   });              
@@ -2261,11 +2261,11 @@ var all_tests = {
           client.collection('fs.files', function(err, collection) {
             collection.find({'filename':'test_gs_small_file'}, function(err, cursor) {
               cursor.toArray(function(err, items) {
-                test.assertEquals(1, items.length);
+                test.equal(1, items.length);
 
                 // Read test of the file
                 mongo.GridStore.read(client, 'test_gs_small_file', function(err, data) {
-                  test.assertEquals('hello world!', data);
+                  test.equal('hello world!', data);
                   finished_test({test_gs_small_file:'ok'});        
                 });              
               });
@@ -2288,7 +2288,7 @@ var all_tests = {
 
                 // Assert that we have overwriten the data
                 mongo.GridStore.read(client, 'test_gs_overwrite', function(err, data) {
-                  test.assertEquals('overwrite', data);
+                  test.equal('overwrite', data);
                   finished_test({test_gs_overwrite:'ok'});        
                 });                            
               });
@@ -2306,7 +2306,7 @@ var all_tests = {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
           mongo.GridStore.read(client, 'test_gs_read_length', 5, function(err, data) {
-            test.assertEquals('hello', data);
+            test.equal('hello', data);
             finished_test({test_gs_read_length:'ok'});        
           });                            
         });
@@ -2321,11 +2321,11 @@ var all_tests = {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
           mongo.GridStore.read(client, 'test_gs_read_with_offset', 5, 7, function(err, data) {
-            test.assertEquals('world', data);
+            test.equal('world', data);
           });
 
           mongo.GridStore.read(client, 'test_gs_read_with_offset', null, 7, function(err, data) {
-            test.assertEquals('world!', data);
+            test.equal('world!', data);
             finished_test({test_gs_read_with_offset:'ok'});        
           });
         });
@@ -2342,7 +2342,7 @@ var all_tests = {
           gridStore2.open(function(err, gridStore) {    
             gridStore.seek(0, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
-                test.assertEquals('h', chr);
+                test.equal('h', chr);
               });
             });
           });
@@ -2351,7 +2351,7 @@ var all_tests = {
           gridStore3.open(function(err, gridStore) {    
             gridStore.seek(7, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
-                test.assertEquals('w', chr);
+                test.equal('w', chr);
               });
             });
           });
@@ -2360,7 +2360,7 @@ var all_tests = {
           gridStore4.open(function(err, gridStore) {    
             gridStore.seek(4, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
-                test.assertEquals('o', chr);
+                test.equal('o', chr);
               });
             });
           });
@@ -2369,7 +2369,7 @@ var all_tests = {
           gridStore5.open(function(err, gridStore) {    
             gridStore.seek(-1, mongo.GridStore.IO_SEEK_END, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
-                test.assertEquals('!', chr);
+                test.equal('!', chr);
               });
             });
           });
@@ -2378,7 +2378,7 @@ var all_tests = {
           gridStore6.open(function(err, gridStore) {    
             gridStore.seek(-6, mongo.GridStore.IO_SEEK_END, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
-                test.assertEquals('w', chr);
+                test.equal('w', chr);
               });
             });
           });
@@ -2387,19 +2387,19 @@ var all_tests = {
           gridStore7.open(function(err, gridStore) {    
             gridStore.seek(7, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
-                test.assertEquals('w', chr);
+                test.equal('w', chr);
 
                 gridStore.seek(-1, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
                   gridStore.getc(function(err, chr) {
-                    test.assertEquals('w', chr);
+                    test.equal('w', chr);
 
                     gridStore.seek(-4, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
                       gridStore.getc(function(err, chr) {
-                        test.assertEquals('o', chr);
+                        test.equal('o', chr);
 
                         gridStore.seek(3, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
                           gridStore.getc(function(err, chr) {
-                            test.assertEquals('o', chr);
+                            test.equal('o', chr);
                             finished_test({test_gs_seek:'ok'});        
                           });
                         });
@@ -2433,10 +2433,10 @@ var all_tests = {
                 gridStore.close(function(err, result) {
                   fs_client.collection('fs.chunks', function(err, collection) {
                     collection.count(function(err, count) {
-                      test.assertEquals(3, count);
+                      test.equal(3, count);
 
                       mongo.GridStore.read(fs_client, 'test_gs_multi_chunk', function(err, data) {
-                        test.assertEquals(512*3, data.length);
+                        test.equal(512*3, data.length);
                         finished_test({test_gs_multi_chunk:'ok'});                    
                         fs_client.close();
                       });              
@@ -2459,7 +2459,7 @@ var all_tests = {
           gridStore.puts("line three", function(err, gridStore) {          
             gridStore.close(function(err, result) {
               mongo.GridStore.readlines(client, 'test_gs_puts_and_readlines', function(err, lines) {
-                test.assertEquals(["line one\n", "line two\n", "line three\n"], lines);
+                test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
                 finished_test({test_gs_puts_and_readlines:'ok'});                    
               });
             });
@@ -2479,25 +2479,25 @@ var all_tests = {
             gridStore.close(function(err, result) {
               fs_client.collection('articles.files', function(err, collection) {
                 collection.count(function(err, count) {
-                  test.assertEquals(1, count);
+                  test.equal(1, count);
                 })
               });
 
               fs_client.collection('articles.chunks', function(err, collection) {
                 collection.count(function(err, count) {
-                  test.assertEquals(1, count);
+                  test.equal(1, count);
 
                   // Unlink the file
                   mongo.GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
                     fs_client.collection('articles.files', function(err, collection) {
                       collection.count(function(err, count) {
-                        test.assertEquals(0, count);
+                        test.equal(0, count);
                       })
                     });
 
                     fs_client.collection('articles.chunks', function(err, collection) {
                       collection.count(function(err, count) {
-                        test.assertEquals(0, count);
+                        test.equal(0, count);
 
                         finished_test({test_gs_unlink:'ok'});       
                         fs_client.close();
@@ -2524,25 +2524,25 @@ var all_tests = {
             gridStore.close(function(err, result) {
               fs_client.collection('fs.files', function(err, collection) {
                 collection.count(function(err, count) {
-                  test.assertEquals(1, count);
+                  test.equal(1, count);
                 })
               });
 
               fs_client.collection('fs.chunks', function(err, collection) {
                 collection.count(function(err, count) {
-                  test.assertEquals(1, count);
+                  test.equal(1, count);
 
                   // Unlink the file
                   mongo.GridStore.unlink(fs_client, 'test_gs_unlink', function(err, gridStore) {
                     fs_client.collection('fs.files', function(err, collection) {
                       collection.count(function(err, count) {
-                        test.assertEquals(0, count);
+                        test.equal(0, count);
                       })
                     });
 
                     fs_client.collection('fs.chunks', function(err, collection) {
                       collection.count(function(err, count) {
-                        test.assertEquals(0, count);
+                        test.equal(0, count);
 
                         finished_test({test_gs_unlink:'ok'});       
                         fs_client.close();
@@ -2574,10 +2574,10 @@ var all_tests = {
 
                     fs_client.collection('fs.chunks', function(err, collection) {
                       collection.count(function(err, count) {
-                        test.assertEquals(1, count);
+                        test.equal(1, count);
 
                         mongo.GridStore.read(fs_client, 'test_gs_append', function(err, data) {
-                          test.assertEquals("hello, world! how are you?", data);                        
+                          test.equal("hello, world! how are you?", data);                        
                           finished_test({test_gs_append:'ok'});       
                           fs_client.close();
                         });
@@ -2605,7 +2605,7 @@ var all_tests = {
                 gridStore.write('abc', function(err, gridStore) {
                   gridStore.close(function(err, result) {
                     mongo.GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
-                      test.assertEquals("abc", data);
+                      test.equal("abc", data);
                       finished_test({test_gs_rewind_and_truncate_on_write:'ok'});       
                     });
                   });
@@ -2626,10 +2626,10 @@ var all_tests = {
           var gridStore2 = new mongo.GridStore(client, "test_gs_tell", "r");
           gridStore2.open(function(err, gridStore) {
             gridStore.read(5, function(err, data) {
-              test.assertEquals("hello", data);
+              test.equal("hello", data);
 
               gridStore.tell(function(err, position) {
-                test.assertEquals(5, position);              
+                test.equal(5, position);              
                 finished_test({test_gs_tell:'ok'});       
               })            
             });
@@ -2649,13 +2649,13 @@ var all_tests = {
             gridStore.close(function(err, result) {
               fs_client.collection('fs.files', function(err, collection) {
                 collection.count(function(err, count) {
-                  test.assertEquals(1, count);
+                  test.equal(1, count);
                 });
               });
 
               fs_client.collection('fs.chunks', function(err, collection) {
                 collection.count(function(err, count) {
-                  test.assertEquals(0, count);
+                  test.equal(0, count);
 
                   finished_test({test_gs_save_empty_file:'ok'});       
                   fs_client.close();
@@ -2674,7 +2674,7 @@ var all_tests = {
       gridStore.close(function(err, gridStore) {      
         var gridStore2 = new mongo.GridStore(client, 'test_gs_empty_file_eof', "r");
         gridStore2.open(function(err, gridStore) {
-          test.assertEquals(true, gridStore.eof());
+          test.equal(true, gridStore.eof());
           finished_test({test_gs_empty_file_eof:'ok'});       
         })
       });
@@ -2690,7 +2690,7 @@ var all_tests = {
           var gridStore2 = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
           gridStore2.open(function(err, gridStore) {
             gridStore.chunkSize = 42; 
-            test.assertEquals(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+            test.equal(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
             finished_test({test_gs_cannot_change_chunk_size_on_read:'ok'});       
           });        
         });
@@ -2703,7 +2703,7 @@ var all_tests = {
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.chunkSize = 42; 
-        test.assertEquals(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+        test.equal(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
         finished_test({test_gs_cannot_change_chunk_size_after_data_written:'ok'});       
       });
     });              
@@ -2718,7 +2718,7 @@ var all_tests = {
         gridStore.close(function(err, result) {
           var gridStore2 = new mongo.GridStore(client, "test_change_chunk_size", "r");
           gridStore2.open(function(err, gridStore) {
-            test.assertEquals(42, gridStore.chunkSize);
+            test.equal(42, gridStore.chunkSize);
             finished_test({test_change_chunk_size:'ok'});       
           });
         });
@@ -2733,7 +2733,7 @@ var all_tests = {
         gridStore.close(function(err, result) {
           var gridStore2 = new mongo.GridStore(client, "test_change_chunk_size", "r");
           gridStore2.open(function(err, gridStore) {
-            test.assertEquals(42, gridStore.chunkSize);
+            test.equal(42, gridStore.chunkSize);
             finished_test({test_gs_chunk_size_in_option:'ok'});       
           });
         });
@@ -2748,16 +2748,16 @@ var all_tests = {
         gridStore.close(function(err, result) {
           var gridStore2 = new mongo.GridStore(client, "new-file", "r");
           gridStore2.open(function(err, gridStore) {
-            test.assertEquals("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
+            test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
             gridStore.md5 = "can't do this";
-            test.assertEquals("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
+            test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
 
             var gridStore2 = new mongo.GridStore(client, "new-file", "w");
             gridStore2.open(function(err, gridStore) {
               gridStore.close(function(err, result) {
                 var gridStore3 = new mongo.GridStore(client, "new-file", "r");
                 gridStore3.open(function(err, gridStore) {
-                  test.assertEquals("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
+                  test.equal("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
 
                   finished_test({test_gs_chunk_size_in_option:'ok'});       
                 });
@@ -2780,7 +2780,7 @@ var all_tests = {
 
           var gridStore2 = new mongo.GridStore(client, "test_gs_upload_date", "r");
           gridStore2.open(function(err, gridStore) {
-            test.assertTrue(gridStore.uploadDate != null);
+            test.ok(gridStore.uploadDate != null);
             originalFileUploadDate = gridStore.uploadDate;
 
             gridStore2.close(function(err, result) {
@@ -2792,7 +2792,7 @@ var all_tests = {
 
                     var gridStore4 = new mongo.GridStore(client, "test_gs_upload_date", "r");
                     gridStore4.open(function(err, gridStore) {
-                      test.assertEquals(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
+                      test.equal(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
                       finished_test({test_gs_upload_date:'ok'});       
                     });                  
                   });
@@ -2816,7 +2816,7 @@ var all_tests = {
           var gridStore2 = new mongo.GridStore(client, "test_gs_content_type", "r");
           gridStore2.open(function(err, gridStore) {
             ct = gridStore.contentType;
-            test.assertEquals(mongo.GridStore.DEFAULT_CONTENT_TYPE, ct);
+            test.equal(mongo.GridStore.DEFAULT_CONTENT_TYPE, ct);
 
             var gridStore3 = new mongo.GridStore(client, "test_gs_content_type", "w+");
             gridStore3.open(function(err, gridStore) {
@@ -2824,7 +2824,7 @@ var all_tests = {
               gridStore.close(function(err, result) {              
                 var gridStore4 = new mongo.GridStore(client, "test_gs_content_type", "r");
                 gridStore4.open(function(err, gridStore) {
-                  test.assertEquals("text/html", gridStore.contentType);
+                  test.equal("text/html", gridStore.contentType);
                   finished_test({test_gs_content_type:'ok'});       
                 });                            
               })
@@ -2843,7 +2843,7 @@ var all_tests = {
 
           var gridStore2 = new mongo.GridStore(client, "test_gs_content_type_option", "r");
           gridStore2.open(function(err, gridStore) {
-            test.assertEquals('image/jpg', gridStore.contentType);
+            test.equal('image/jpg', gridStore.contentType);
             finished_test({test_gs_content_type_option:'ok'});       
           });        
         });
@@ -2854,8 +2854,8 @@ var all_tests = {
   test_gs_unknown_mode : function() {
     var gridStore = new mongo.GridStore(client, "test_gs_unknown_mode", "x");
     gridStore.open(function(err, gridStore) {
-      test.assertTrue(err instanceof Error);
-      test.assertEquals("Illegal mode x", err.message);
+      test.ok(err instanceof Error);
+      test.equal("Illegal mode x", err.message);
       finished_test({test_gs_unknown_mode:'ok'});       
     });  
   },
@@ -2868,7 +2868,7 @@ var all_tests = {
 
           var gridStore2 = new mongo.GridStore(client, "test_gs_metadata", "r");
           gridStore2.open(function(err, gridStore) {
-            test.assertEquals(null, gridStore.metadata);
+            test.equal(null, gridStore.metadata);
 
             var gridStore3 = new mongo.GridStore(client, "test_gs_metadata", "w+");
             gridStore3.open(function(err, gridStore) {
@@ -2877,7 +2877,7 @@ var all_tests = {
 
                 var gridStore4 = new mongo.GridStore(client, "test_gs_metadata", "r");
                 gridStore4.open(function(err, gridStore) {
-                  test.assertEquals(1, gridStore.metadata.a);
+                  test.equal(1, gridStore.metadata.a);
                   finished_test({test_gs_metadata:'ok'});       
                 });                
               });
@@ -2896,7 +2896,7 @@ var all_tests = {
           collection.insert({'a':1}, function(err, doc) {
             fs_client.admin(function(err, adminDb) {
               adminDb.profilingLevel(function(err, level) {
-                test.assertEquals("off", level);
+                test.equal("off", level);
                 finished_test({test_admin_default_profiling_level:'ok'});       
                 fs_client.close();
               });
@@ -2916,19 +2916,19 @@ var all_tests = {
             fs_client.admin(function(err, adminDb) {
               adminDb.setProfilingLevel('slow_only', function(err, level) {              
                 adminDb.profilingLevel(function(err, level) {
-                  test.assertEquals('slow_only', level);
+                  test.equal('slow_only', level);
 
                   adminDb.setProfilingLevel('off', function(err, level) {              
                     adminDb.profilingLevel(function(err, level) {
-                      test.assertEquals('off', level);
+                      test.equal('off', level);
 
                       adminDb.setProfilingLevel('all', function(err, level) {              
                         adminDb.profilingLevel(function(err, level) {
-                          test.assertEquals('all', level);
+                          test.equal('all', level);
 
                           adminDb.setProfilingLevel('medium', function(err, level) {              
-                            test.assertTrue(err instanceof Error);
-                            test.assertEquals("Error: illegal profiling level value medium", err.message);
+                            test.ok(err instanceof Error);
+                            test.equal("Error: illegal profiling level value medium", err.message);
 
                             finished_test({test_admin_change_profiling_level:'ok'});       
                             fs_client.close();                          
@@ -2958,11 +2958,11 @@ var all_tests = {
                   cursor.toArray(function(err, items) {                  
                     adminDb.setProfilingLevel('off', function(err, level) {
                       adminDb.profilingInfo(function(err, infos) {
-                        test.assertTrue(infos.constructor == Array);
-                        test.assertTrue(infos.length >= 1);
-                        test.assertTrue(infos[0].ts.constructor == Date);
-                        test.assertTrue(infos[0].info.constructor == String);
-                        test.assertTrue(infos[0].millis.constructor == Number);
+                        test.ok(infos.constructor == Array);
+                        test.ok(infos.length >= 1);
+                        test.ok(infos[0].ts.constructor == Date);
+                        test.ok(infos[0].info.constructor == String);
+                        test.ok(infos[0].millis.constructor == Number);
 
                         finished_test({test_admin_profiling_info:'ok'});       
                         fs_client.close();                          
@@ -2986,8 +2986,8 @@ var all_tests = {
           collection.insert({'a':1}, function(err, doc) {
             fs_client.admin(function(err, adminDb) {
               adminDb.validatCollection('test', function(err, doc) {
-                test.assertTrue(doc.result != null);
-                test.assertTrue(doc.result.match(/firstExtent/) != null);
+                test.ok(doc.result != null);
+                test.ok(doc.result.match(/firstExtent/) != null);
 
                 finished_test({test_admin_validate_collection:'ok'});       
                 fs_client.close();                          
@@ -3013,7 +3013,7 @@ var all_tests = {
           collection.insert({'a':1}, function(err, doc) {
             collection.find({'_id':new mongo.ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
               cursor.toArray(function(err, items) {
-                test.assertEquals(1, items.length);
+                test.equal(1, items.length);
 
                 finished_test({test_custom_primary_key_generator:'ok'});       
                 p_client.close();
@@ -3036,11 +3036,11 @@ var all_tests = {
 
       collection.mapReduce(map, reduce, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
-          test.assertEquals(1, result.value);
+          test.equal(1, result.value);
         });
 
         collection.findOne({'_id':2}, function(err, result) {
-          test.assertEquals(1, result.value);
+          test.equal(1, result.value);
           finished_test({test_map_reduce:'ok'});       
         });
       });    
@@ -3057,10 +3057,10 @@ var all_tests = {
 
       collection.mapReduce(map, reduce, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
-          test.assertEquals(1, result.value);
+          test.equal(1, result.value);
         });
         collection.findOne({'_id':2}, function(err, result) {
-          test.assertEquals(1, result.value);
+          test.equal(1, result.value);
           finished_test({test_map_reduce_with_functions_as_arguments:'ok'});       
         });
       });    
@@ -3077,10 +3077,10 @@ var all_tests = {
 
       collection.mapReduce(map, reduce, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
-          test.assertEquals(1, result.value);
+          test.equal(1, result.value);
         });
         collection.findOne({'_id':2}, function(err, result) {
-          test.assertEquals(1, result.value);
+          test.equal(1, result.value);
           finished_test({test_map_reduce_with_code_objects:'ok'});       
         });
       });    
@@ -3097,13 +3097,13 @@ var all_tests = {
 
       collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
         collection.count(function(err, count) {
-          test.assertEquals(2, count);
+          test.equal(2, count);
 
           collection.findOne({'_id':2}, function(err, result) {
-            test.assertEquals(1, result.value);
+            test.equal(1, result.value);
           });
           collection.findOne({'_id':3}, function(err, result) {
-            test.assertEquals(1, result.value);
+            test.equal(1, result.value);
             finished_test({test_map_reduce_with_options:'ok'});       
           });
         });
@@ -3120,7 +3120,7 @@ var all_tests = {
       var reduce = new mongo.Code("function(k,vals) { throw 'error'; }");
 
       collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
-        test.assertTrue(err != null);
+        test.ok(err != null);
         finished_test({test_map_reduce_error:'ok'});       
       });    
     });      
@@ -3131,14 +3131,14 @@ var all_tests = {
       collection.insert({a:1}, function(err, ids) {
         // Create an index on the collection
         client.createIndex(collection.collectionName, 'a', function(err, indexName) {
-          test.assertEquals("a_1", indexName);
+          test.equal("a_1", indexName);
 
           // Drop all the indexes
           collection.dropIndexes(function(err, result) {
-            test.assertEquals(true, result);          
+            test.equal(true, result);          
 
             collection.indexInformation(function(err, result) {
-              test.assertTrue(result['a_1'] == null);
+              test.ok(result['a_1'] == null);
               finished_test({test_drop_indexes:'ok'});       
             })
           })
@@ -3154,17 +3154,17 @@ var all_tests = {
     var p_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
     p_client.open(function(err, automatic_connect_client) {
       p_client.authenticate('admin', 'admin', function(err, replies) {
-        test.assertTrue(err instanceof Error);
+        test.ok(err instanceof Error);
 
         // Add a user
         p_client.addUser(user_name, password, function(err, result) {
           p_client.authenticate(user_name, password, function(err, replies) {
-            test.assertTrue(replies);
+            test.ok(replies);
 
             // Remove the user and try to authenticate again
             p_client.removeUser(user_name, function(err, result) {
               p_client.authenticate(user_name, password, function(err, replies) {
-                test.assertTrue(err instanceof Error);
+                test.ok(err instanceof Error);
 
                 finished_test({test_add_and_remove_user:'ok'});
                 p_client.close();
@@ -3183,11 +3183,11 @@ var all_tests = {
         {'a':1, 'b':{'c':'c'}},
         {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], function(err, ids) {
           collection.distinct('a', function(err, docs) {
-            test.assertEquals([0, 1, 2, 3], docs.sort());
+            test.deepEqual([0, 1, 2, 3], docs.sort());
           });
 
           collection.distinct('b.c', function(err, docs) {
-            test.assertEquals(['a', 'b', 'c'], docs.sort());
+            test.deepEqual(['a', 'b', 'c'], docs.sort());
             finished_test({test_distinct_queries:'ok'});
           });
       })
@@ -3223,26 +3223,26 @@ var all_tests = {
       collection.insert(motherOfAllDocuments, function(err, docs) {
         collection.findOne(function(err, doc) {
           // Assert correct deserialization of the values
-          test.assertEquals(motherOfAllDocuments.string, doc.string);
-          test.assertEquals(motherOfAllDocuments.array, doc.array);
-          test.assertEquals(motherOfAllDocuments.hash.a, doc.hash.a);
-          test.assertEquals(motherOfAllDocuments.hash.b, doc.hash.b);
-          test.assertEquals(date.getTime(), doc.long);
-          test.assertEquals(date.toString(), doc.date.toString());
-          test.assertEquals(date.getTime(), doc.date.getTime());
-          test.assertEquals(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-          test.assertEquals(motherOfAllDocuments.binary.value, doc.binary.value);
+          test.equal(motherOfAllDocuments.string, doc.string);
+          test.deepEqual(motherOfAllDocuments.array, doc.array);
+          test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+          test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+          test.equal(date.getTime(), doc.long);
+          test.equal(date.toString(), doc.date.toString());
+          test.equal(date.getTime(), doc.date.getTime());
+          test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+          test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
 
-          test.assertEquals(motherOfAllDocuments.int, doc.int);
-          test.assertEquals(motherOfAllDocuments.long, doc.long);
-          test.assertEquals(motherOfAllDocuments.float, doc.float);
-          test.assertEquals(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
-          test.assertEquals(motherOfAllDocuments.boolean, doc.boolean);
-          test.assertEquals(motherOfAllDocuments.where.code, doc.where.code);
-          test.assertEquals(motherOfAllDocuments.where.scope.get('i'), doc.where.scope.i);
-          test.assertEquals(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
-          test.assertEquals(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-          test.assertEquals(motherOfAllDocuments.dbref.db, doc.dbref.db);        
+          test.equal(motherOfAllDocuments.int, doc.int);
+          test.equal(motherOfAllDocuments.long, doc.long);
+          test.equal(motherOfAllDocuments.float, doc.float);
+          test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+          test.equal(motherOfAllDocuments.boolean, doc.boolean);
+          test.equal(motherOfAllDocuments.where.code, doc.where.code);
+          test.equal(motherOfAllDocuments.where.scope.get('i'), doc.where.scope.i);
+          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
           finished_test({test_all_serialization_types:'ok'});      
         })      
       });    
@@ -3312,7 +3312,7 @@ var all_tests = {
 
       collection.save(doc, function(err, doc) {
         collection.findOne(function(err, doc) {
-          test.assertEquals('felixge', doc._id);        
+          test.equal('felixge', doc._id);        
           finished_test({test_should_correctly_save_unicode_containing_document:'ok'});      
         });
       });
@@ -3328,8 +3328,8 @@ var all_tests = {
       collection.insert(doc);
       // Fetch and check the collection
       collection.findOne({'a': 0}, function(err, result) {         
-        test.assertEquals(doc.a, result.a);
-        test.assertEquals(doc.b, result.b);
+        test.deepEqual(doc.a, result.a);
+        test.deepEqual(doc.b, result.b);
         finished_test({test_should_deserialize_large_integrated_array:'ok'});      
       });
     });
@@ -3365,8 +3365,8 @@ var all_tests = {
   //     
   //     // Execute with error
   //     collection.findOne({"_id": id}, function(err, result) {
-  //       // test.assertEquals(undefined, result)
-  //       test.assertTrue(err != null)
+  //       // test.equal(undefined, result)
+  //       test.ok(err != null)
   //       finished_test({test_force_binary_error:'ok'});      
   //     });      
   //   });  
@@ -3381,7 +3381,7 @@ var all_tests = {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
           mongo.GridStore.read(client, 'test_gs_weird_bug', function(err, fileData) {
-            test.assertEquals(data.length, fileData.length);
+            test.equal(data.length, fileData.length);
             finished_test({test_gs_weird_bug:'ok'});        
           });
         });
@@ -3398,7 +3398,7 @@ var all_tests = {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
           mongo.GridStore.read(client, 'test_gs_working_field_read', function(err, fileData) {
-            test.assertEquals(data.length, fileData.length);
+            test.equal(data.length, fileData.length);
             finished_test({test_gs_working_field_read:'ok'});        
           });
         });
@@ -3418,20 +3418,20 @@ var all_tests = {
 
         collection.find({},{ 'a' : 1},{ limit : 3, sort : [['a',-1]] },function(err,cursor){
           cursor.toArray(function(err,documents){
-            test.assertEquals(3,documents.length);
+            test.equal(3,documents.length);
             documents.forEach(function(doc,idx){
-              test.assertEquals(undefined,doc.b); // making sure field select works
-              test.assertEquals((24-idx),doc.a); // checking limit sort object with field select
+              test.equal(undefined,doc.b); // making sure field select works
+              test.equal((24-idx),doc.a); // checking limit sort object with field select
             });
           });
         });
 
         collection.find({},{},10,3,function(err,cursor){
           cursor.toArray(function(err,documents){
-            test.assertEquals(3,documents.length);
+            test.equal(3,documents.length);
             documents.forEach(function(doc,idx){
-              test.assertEquals(doc.a,doc.b); // making sure empty field select returns properly
-              test.assertEquals((14-idx),doc.a); // checking skip and limit in args
+              test.equal(doc.a,doc.b); // making sure empty field select returns properly
+              test.equal((14-idx),doc.a); // checking skip and limit in args
             });
             finished_test({test_field_select_with_options:'ok'}); 
           });
@@ -3447,8 +3447,8 @@ var all_tests = {
       collection.insert({'a':1, 'b':2}, function(err, doc) {
         // Let's modify the document in place
         collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, true, function(err, updated_doc) {
-          test.assertEquals(1, updated_doc.a);
-          test.assertEquals(3, updated_doc.b);        
+          test.equal(1, updated_doc.a);
+          test.equal(3, updated_doc.b);        
         })
       });
 
@@ -3456,8 +3456,8 @@ var all_tests = {
       collection.insert({'a':2, 'b':2}, function(err, doc) {
         // Let's modify the document in place
         collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, function(err, updated_doc) {
-          test.assertEquals(2, updated_doc.a);
-          test.assertEquals(2, updated_doc.b);        
+          test.equal(2, updated_doc.a);
+          test.equal(2, updated_doc.b);        
         })
       });
 
@@ -3465,8 +3465,8 @@ var all_tests = {
       collection.insert({'a':3, 'b':2}, function(err, doc) {
         // Let's modify the document in place
         collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, true, true, function(err, updated_doc) {
-          test.assertEquals(3, updated_doc.a);
-          test.assertEquals(2, updated_doc.b);        
+          test.equal(3, updated_doc.a);
+          test.equal(2, updated_doc.b);        
           finished_test({test_find_and_modify_a_document:'ok'}); 
         })
       });    
@@ -3478,17 +3478,17 @@ var all_tests = {
       var p_client = new mongo.Db('integration_tests_21', new mongo.ServerPair(new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})), {});
       p_client.open(function(err, p_client) {    
         p_client.dropDatabase(function(err, done) {    
-          test.assertTrue(p_client.masterConnection != null);
-          test.assertEquals(2, p_client.connections.length);
+          test.ok(p_client.masterConnection != null);
+          test.equal(2, p_client.connections.length);
 
-          test.assertTrue(p_client.serverConfig.leftServer.master);
+          test.ok(p_client.serverConfig.leftServer.master);
           test.assertFalse(p_client.serverConfig.rightServer.master);
 
           p_client.createCollection('test_collection', function(err, collection) {
             collection.insert({'a':1}, function(err, doc) {
               collection.find(function(err, cursor) {
                 cursor.toArray(function(err, items) {
-                  test.assertEquals(1, items.length);
+                  test.equal(1, items.length);
 
                   finished_test({test_pair:'ok'});       
                   p_client.close();
@@ -3504,17 +3504,17 @@ var all_tests = {
       var p_client = new mongo.Db('integration_tests_22', new mongo.ServerCluster([new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})]), {});
       p_client.open(function(err, p_client) {
         p_client.dropDatabase(function(err, done) {    
-          test.assertTrue(p_client.masterConnection != null);
-          test.assertEquals(2, p_client.connections.length);
+          test.ok(p_client.masterConnection != null);
+          test.equal(2, p_client.connections.length);
 
-          test.assertEquals(true, p_client.serverConfig.servers[0].master);
-          test.assertEquals(false, p_client.serverConfig.servers[1].master);
+          test.equal(true, p_client.serverConfig.servers[0].master);
+          test.equal(false, p_client.serverConfig.servers[1].master);
 
           p_client.createCollection('test_collection', function(err, collection) {
             collection.insert({'a':1}, function(err, doc) {
               collection.find(function(err, cursor) {
                 cursor.toArray(function(err, items) {
-                  test.assertEquals(1, items.length);
+                  test.equal(1, items.length);
 
                   finished_test({test_cluster:'ok'});       
                   p_client.close();
@@ -3529,7 +3529,7 @@ var all_tests = {
     test_slave_connection :function() {
       var p_client = new mongo.Db('integration_tests_23', new mongo.Server("127.0.0.1", 27018, {}));
       p_client.open(function(err, p_client) {
-        test.assertEquals(null, err);
+        test.equal(null, err);
         finished_test({test_slave_connection:'ok'});
         p_client.close();
       });          
@@ -3540,22 +3540,22 @@ var all_tests = {
     client.createCollection('test_ensure_index', function(err, collection) {    
       // Create an index on the collection
       client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
-        test.assertEquals("a_1", indexName);
+        test.equal("a_1", indexName);
         // Let's fetch the index information
         client.indexInformation(collection.collectionName, function(err, collectionInfo) {
-          test.assertTrue(collectionInfo['_id_'] != null);
-          test.assertEquals('_id', collectionInfo['_id_'][0][0]);
-          test.assertTrue(collectionInfo['a_1'] != null);
-          test.assertEquals([["a", 1]], collectionInfo['a_1']);
+          test.ok(collectionInfo['_id_'] != null);
+          test.equal('_id', collectionInfo['_id_'][0][0]);
+          test.ok(collectionInfo['a_1'] != null);
+          test.deepEqual([["a", 1]], collectionInfo['a_1']);
 
           client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
-            test.assertEquals("a_1", indexName);
+            test.equal("a_1", indexName);
             // Let's fetch the index information
             client.indexInformation(collection.collectionName, function(err, collectionInfo) {
-              test.assertTrue(collectionInfo['_id_'] != null);
-              test.assertEquals('_id', collectionInfo['_id_'][0][0]);
-              test.assertTrue(collectionInfo['a_1'] != null);
-              test.assertEquals([["a", 1]], collectionInfo['a_1']);
+              test.ok(collectionInfo['_id_'] != null);
+              test.equal('_id', collectionInfo['_id_'][0][0]);
+              test.ok(collectionInfo['a_1'] != null);
+              test.deepEqual([["a", 1]], collectionInfo['a_1']);
               // Let's close the db 
               finished_test({test_ensure_index:'ok'});                 
             });
@@ -3570,7 +3570,7 @@ var all_tests = {
       //convience curried handler for functions of type 'a -> (err, result)
       function getResult(callback){
         return function(error, result) {
-          test.assertTrue(error == null);
+          test.ok(error == null);
           callback(result);
         }
       };
@@ -3594,10 +3594,10 @@ var all_tests = {
                 getResult(function(updateCommand) {
                   // Fetch the object and check that the changes are persisted
                   user_collection.findOne({_id : user._id}, function(err, doc) {
-                    test.assertTrue(err == null);
-                    test.assertEquals("Test Account", doc.name);
-                    test.assertEquals("somestring", doc.settings.thisOneWorks);
-                    test.assertEquals("test", doc.settings.block[0]);
+                    test.ok(err == null);
+                    test.equal("Test Account", doc.name);
+                    test.equal("somestring", doc.settings.thisOneWorks);
+                    test.equal("test", doc.settings.block[0]);
 
                     // Let's close the db 
                     finished_test({test_insert_and_update_with_new_script_context:'ok'});
