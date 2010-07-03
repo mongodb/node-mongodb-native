@@ -25,7 +25,10 @@ db.open(function(err, db) {
 
           collection.find(function(err, cursor) {
             cursor.each(function(err, item) {
-              if(item != null) sys.puts(sys.inspect(item));
+              if(item != null) {
+                sys.puts(sys.inspect(item));
+                sys.puts("created at " + new Date(item._id.generationTime) + "\n")
+              }
               // Null signifies end of iterator
               if(item == null) {                
                 // Destory the collection

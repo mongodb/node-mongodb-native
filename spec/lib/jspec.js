@@ -112,7 +112,7 @@
               }
           })
         })
-  			if ('close' in main) main.close()
+  			if ('close' in main) main.end()
       },
 
       /**

@@ -171,6 +171,16 @@ describe 'BSON'
       doc.doc.value().should.eql deserialized_data.doc.value()
     end
     
+    it 'Should Correctly Serialize and Deserialize a big Binary object'
+      var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
+      var bin = new mongo.Binary()
+      bin.write(data)
+      var doc = {doc: bin}
+      var serialized_data = mongo.BSON.serialize(doc)
+      var deserialized_data = mongo.BSON.deserialize(serialized_data)
+      doc.doc.value().should.eql deserialized_data.doc.value()
+    end
+    
     it "Should Correctly Serialize and Deserialize DBRef"
       var oid = new mongo.ObjectID()
       var doc = {}
@@ -238,7 +248,7 @@ describe 'BSON'
       var doc = {'a':0,
         'b':['tmp1', 'tmp2', 'tmp3', 'tmp4', 'tmp5', 'tmp6', 'tmp7', 'tmp8', 'tmp9', 'tmp10', 'tmp11', 'tmp12', 'tmp13', 'tmp14', 'tmp15', 'tmp16']
       };
-
+    
       var serialized_data = mongo.BSON.serialize(doc)
       var deserialized_data = mongo.BSON.deserialize(serialized_data)
       deserialized_data.a.should.eql doc.a
