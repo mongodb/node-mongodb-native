@@ -3609,10 +3609,66 @@ var all_tests = {
         });
       }));      
     });
-  }
+  },
+  
+  test_all_serialization_types_new_context : function() {
+    client.createCollection('test_all_serialization_types_new_context', function(err, collection) {   
+      var date = new Date(); 
+      var scriptCode = 
+        "var string = 'binstring'\n" +
+        "var bin = new mongo.Binary()\n" +
+        "for(var index = 0; index < string.length; index++) {\n" +
+        "  bin.put(string.charAt(index))\n" + 
+        "}\n" +             
+        "motherOfAllDocuments['string'] = 'hello';" +
+        "motherOfAllDocuments['array'] = [1,2,3];" +
+        "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
+        "motherOfAllDocuments['date'] = date;" +
+        "motherOfAllDocuments['oid'] = new mongo.ObjectID();" +
+        "motherOfAllDocuments['binary'] = bin;" +
+        "motherOfAllDocuments['int'] = 42;" +
+        "motherOfAllDocuments['float'] = 33.3333;" +
+        "motherOfAllDocuments['regexp'] = /regexp/;" +
+        "motherOfAllDocuments['boolean'] = true;" +
+        "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
+        "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', new mongo.OrderedHash().add('i', 1));" +
+        "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
+      
+      var context = { motherOfAllDocuments : {}, mongo:mongo, date:date};
+      // Execute function in context
+      Script.runInNewContext(scriptCode, context, "testScript");
+      // sys.puts(sys.inspect(context.motherOfAllDocuments))
+      var motherOfAllDocuments = context.motherOfAllDocuments;
+
+      collection.insert(context.motherOfAllDocuments, function(err, docs) {
+         collection.findOne(function(err, doc) {
+           // Assert correct deserialization of the values
+           test.equal(motherOfAllDocuments.string, doc.string);
+           test.deepEqual(motherOfAllDocuments.array, doc.array);
+           test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+           test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+           test.equal(date.getTime(), doc.long);
+           test.equal(date.toString(), doc.date.toString());
+           test.equal(date.getTime(), doc.date.getTime());
+           test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+           test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
+                 
+           test.equal(motherOfAllDocuments.int, doc.int);
+           test.equal(motherOfAllDocuments.long, doc.long);
+           test.equal(motherOfAllDocuments.float, doc.float);
+           test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+           test.equal(motherOfAllDocuments.boolean, doc.boolean);
+           test.equal(motherOfAllDocuments.where.code, doc.where.code);
+           test.equal(motherOfAllDocuments.where.scope.get('i'), doc.where.scope.i);
+           test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+           test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+           test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
+           finished_test({test_all_serialization_types_new_context:'ok'});      
+         })      
+       });    
+    });    
+  },  
 };
-
-
 
 /*******************************************************************************************************
   Setup For Running Tests
