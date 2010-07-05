@@ -478,81 +478,98 @@ var all_tests = {
   },
 
   // Test advanced find
+  // Test advanced find
   test_find_advanced : function() {
     client.createCollection('test_find_advanced', function(err, r) {
       var collection = client.collection('test_find_advanced', function(err, collection) {
         var doc1 = null, doc2 = null, doc3 = null;
 
         // Insert some test documents
-        collection.insert([new mongo.OrderedHash().add('a', 1), new mongo.OrderedHash().add('a', 2), new mongo.OrderedHash().add('b', 3)], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]});
+        collection.insert([new mongo.OrderedHash().add('a', 1), new mongo.OrderedHash().add('a', 2), new mongo.OrderedHash().add('b', 3)], function(err, docs) {
+            var doc1 = docs[0], doc2 = docs[1], doc3 = docs[2];
+        
+            // Locate by less than
+            collection.find({'a':{'$lt':10}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(2, documents.length);
+                // Check that the correct documents are returned
+                var results = [];
+                // Check that we have all the results we want
+                documents.forEach(function(doc) {
+                  if(doc.a == 1 || doc.a == 2) results.push(1);
+                });
+                test.equal(2, results.length);
+              });
+            });    
 
-        // Locate by less than
-        collection.find({'a':{'$lt':10}}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(2, documents.length);
-            // Check that the correct documents are returned
-            var results = [];
-            // Check that we have all the results we want
-            documents.forEach(function(doc) {
-              if(doc.a == 1 || doc.a == 2) results.push(1);
+            // Locate by greater than
+            collection.find({'a':{'$gt':1}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(1, documents.length);
+                test.equal(2, documents[0].a);
+              });
+            });    
+
+            // Locate by less than or equal to
+            collection.find({'a':{'$lte':1}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(1, documents.length);
+                test.equal(1, documents[0].a);
+              });
+            });    
+
+            // Locate by greater than or equal to
+            collection.find({'a':{'$gte':1}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(2, documents.length);
+                // Check that the correct documents are returned
+                var results = [];
+                // Check that we have all the results we want
+                documents.forEach(function(doc) {
+                  if(doc.a == 1 || doc.a == 2) results.push(1);
+                });
+                test.equal(2, results.length);
+              });
+            });    
+
+            // Locate by between
+            collection.find({'a':{'$gt':1, '$lt':3}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(1, documents.length);
+                test.equal(2, documents[0].a);
+              });
+            });    
+
+            // Locate in clause
+            collection.find({'a':{'$in':[1,2]}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(2, documents.length);
+                // Check that the correct documents are returned
+                var results = [];
+                // Check that we have all the results we want
+                documents.forEach(function(doc) {
+                  if(doc.a == 1 || doc.a == 2) results.push(1);
+                });
+                test.equal(2, results.length);    
+              });
             });
-            test.equal(2, results.length);
-          });
-        });    
-
-        // Locate by greater than
-        collection.find({'a':{'$gt':1}}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(1, documents.length);
-            test.equal(2, documents[0].a);
-          });
-        });    
-
-        // Locate by less than or equal to
-        collection.find({'a':{'$lte':1}}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(1, documents.length);
-            test.equal(1, documents[0].a);
-          });
-        });    
-
-        // Locate by greater than or equal to
-        collection.find({'a':{'$gte':1}}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(2, documents.length);
-            // Check that the correct documents are returned
-            var results = [];
-            // Check that we have all the results we want
-            documents.forEach(function(doc) {
-              if(doc.a == 1 || doc.a == 2) results.push(1);
+            
+            // Locate in _id clause
+            collection.find({'_id':{'$in':[doc1.values._id, doc2.values._id]}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(2, documents.length);
+                // Check that the correct documents are returned
+                var results = [];
+                // Check that we have all the results we want
+                documents.forEach(function(doc) {
+                  if(doc.a == 1 || doc.a == 2) results.push(1);
+                });
+                test.equal(2, results.length);
+                // Let's close the db 
+                finished_test({test_find_advanced:'ok'});     
+              });
             });
-            test.equal(2, results.length);
-          });
-        });    
-
-        // Locate by between
-        collection.find({'a':{'$gt':1, '$lt':3}}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(1, documents.length);
-            test.equal(2, documents[0].a);
-          });
-        });    
-
-        // Locate in clause
-        collection.find({'a':{'$in':[1,2]}}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(2, documents.length);
-            // Check that the correct documents are returned
-            var results = [];
-            // Check that we have all the results we want
-            documents.forEach(function(doc) {
-              if(doc.a == 1 || doc.a == 2) results.push(1);
-            });
-            test.equal(2, results.length);
-            // Let's close the db 
-            finished_test({test_find_advanced:'ok'});     
-          });
-        });  
+        });
       });
     });
   },
