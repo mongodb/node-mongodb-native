@@ -1,6 +1,6 @@
 { "name" :            "mongodb"
 , "description" :     "A node.js driver for MongoDB"
-, "version" :         "0.7.8"
+, "version" :         "0.7.9"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  [ "Nathan White <nw@nwhite.net>",
                       "Adam Wiggins <adam@heroku.com>",
