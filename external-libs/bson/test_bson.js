@@ -10,19 +10,33 @@ var sys = require('sys'),
 var Long2 = require('./bson').Long;
 
 // Long data type tests
-// var l2 = Long2.fromNumber(9223372036854775807);
-// var l = Long.fromNumber(9223372036854775807);
-// var l = Long2.fromNumber(0);
 var l2_string = Long2.fromNumber(9223372036854775807).toString();
 var l_string = Long.fromNumber(9223372036854775807).toString();
-
 sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.length);
 sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
 sys.debug(l_string == l2_string);
-// assert.equal(l2.toString(), l.toString())
+assert.equal(l_string, l2_string);
 
-l2_string = Long2.fromNumber(9223372036854).toString();
-l_string = Long.fromNumber(9223372036854).toString();
+l2_string = Long2.fromNumber(9223372036800).toString();
+l_string = Long.fromNumber(9223372036800).toString();
+sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.length);
+sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
+sys.debug(l_string == l2_string);
+
+l2_string = Long2.fromNumber(2355).toString();
+l_string = Long.fromNumber(2355).toString();
+sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.length);
+sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
+sys.debug(l_string == l2_string);
+
+l2_string = Long2.fromNumber(-2355).toString();
+l_string = Long.fromNumber(-2355).toString();
+sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.length);
+sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
+sys.debug(l_string == l2_string);
+
+l2_string = Long2.fromNumber(-9223372036854775807).toString();
+l_string = Long.fromNumber(-9223372036854775807).toString();
 sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.length);
 sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
 sys.debug(l_string == l2_string);

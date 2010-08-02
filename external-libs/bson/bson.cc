@@ -422,6 +422,8 @@ Handle<Value> Long::ToString(const Arguments &args) {
   Long *radix_to_power = Long::fromInt(pow(radix, 6));
   Long *rem = l;
   char *result = (char *)malloc(1024 * sizeof(char) + 1);
+  // Ensure the allocated space is null terminated to ensure a proper CString
+  *(result) = '\0';
   
   while(true) {
     Long *rem_div = rem->div(radix_to_power);
@@ -435,28 +437,33 @@ Handle<Value> Long::ToString(const Arguments &args) {
     if(rem->isZero()) {
       // Join digits and result to create final result
       int total_length = strlen(digits) + strlen(result);      
-      char *new_result = (char *)malloc(total_length * sizeof(char));
-      strncpy(new_result, digits, strlen(digits));
-      strncat(new_result + strlen(digits), result, strlen(result) - 1);
+      char *new_result = (char *)malloc(total_length * sizeof(char) + 1);
+      *(new_result) = '\0';
+      // printf("C:: ================== result: %s:%d\n", result, (int)strlen(result));      
+      // printf("C:: ================== digits: %s:%d\n", digits, (int)strlen(digits));      
+      strncat(new_result, digits, strlen(digits));
+      strncat(new_result + strlen(digits), result, strlen(result));
       // Free the existing structure
       free(result);
+      // printf("C:: ================== new_result: %s:%d\n", new_result, (int)strlen(new_result));      
       return String::New(new_result);
     } else {
       // Allocate some new space for the number
       char *new_result = (char *)malloc(1024 * sizeof(char) + 1);
+      *(new_result) = '\0';
       int digits_length = (int)strlen(digits);
       int index = 0;
       // Pad with zeros
       while(digits_length < 6) {
-        strncpy(new_result + index, "0", 1);
+        strncat(new_result + index, "0", 1);
         digits_length = digits_length + 1;
         index = index + 1;
       }
 
-      // printf("C:: ================== new_result: %s:%d\n", new_result, index);      
-      strncpy(new_result + index, digits, strlen(digits));
+      // printf("C:: ================== result: %s:%d\n", result, (int)strlen(result));      
+      strncat(new_result + index, digits, strlen(digits));
       // printf("C:: ================== new_result: %s\n", new_result);
-      strncpy(new_result + strlen(digits) + index, result, strlen(result));
+      strncat(new_result + strlen(digits) + index, result, strlen(result));
       
       free(result);
       result = new_result;
