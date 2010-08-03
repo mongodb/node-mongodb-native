@@ -323,22 +323,33 @@ Handle<Value> Long::New(const Arguments &args) {
   HandleScope scope;
 
   // Ensure that we have an parameter
-  if(args.Length() != 2) return VException("One argument required - number.");
-  if(!args[0]->IsNumber()) return VException("Argument passed in must be a number.");  
-
-  // Unpack the variable
-  int32_t low_bits = args[0]->IntegerValue();
-  int32_t high_bits = args[1]->IntegerValue();
+  // if(args.Length() != 2) return VException("One argument required - number.");
+  // if(!args[0]->IsNumber()) return VException("Argument passed in must be a number.");
   
-  // printf("============ low_bits: %d\n", low_bits);
-  // printf("============ high_bits: %d\n", high_bits);
-  
-  // Create an instance of long
-  Long *l = new Long(low_bits, high_bits);
-  // Wrap it in the object wrap
-  l->Wrap(args.This());
-  // Return the context
-  return args.This();
+  if(args.Length() == 1 && args[0]->IsNumber()) {
+    // printf("============================================================== 1\n");
+    // Unpack the value
+    int64_t value = args[0]->IntegerValue();
+    // Create an instance of long
+    Long *l = Long::fromNumber(value);
+    // Wrap it in the object wrap
+    l->Wrap(args.This());
+    // Return the context
+    return args.This();
+  } else if(args.Length() == 2 && args[0]->IsNumber() && args[1]->IsNumber()) {
+    // printf("============================================================== 2\n");
+    // Unpack the value
+    int32_t low_bits = args[0]->Int32Value();
+    int32_t high_bits = args[1]->Int32Value();
+    // Create an instance of long
+    Long *l = new Long(low_bits, high_bits);
+    // Wrap it in the object wrap
+    l->Wrap(args.This());
+    // Return the context
+    return args.This();    
+  } else {
+    return VException("Argument passed in must be either a 64 bit number or two 32 bit numbers.");
+  }
 }
 
 void Long::Initialize(Handle<Object> target) {
@@ -433,10 +444,12 @@ char *Long::toString(int32_t opt_radix) {
       // // printf("C:: =================================== ToString:div_results: %s\n", div_result);
       // // Unpack the rem result and convert int to string
       char *int_buf = (char *)malloc(50 * sizeof(char) + 1);
+      *(int_buf) = '\0';
       uint32_t rem_int = rem->toInt();
       sprintf(int_buf, "%d", rem_int);
       // Final bufferr
       char *final_buffer = (char *)malloc(50 * sizeof(char) + 1);
+      *(final_buffer) = '\0';
       strncat(final_buffer, div_result, strlen(div_result));
       strncat(final_buffer + strlen(div_result), int_buf, strlen(div_result));
       // Release some memory
@@ -1026,8 +1039,8 @@ Handle<Value> Long::FromNumber(const Arguments &args) {
     return scope.Close(long_obj);        
   } else if(double_value < 0) {
     // printf("C:: ========================================================= 4\n");
-    Local<Value> argv[] = {Integer::New((value % BSON_INT32_) | 0), Integer::New((value / BSON_INT32_) | 0)};
-    Local<Object> long_obj = constructor_template->GetFunction()->NewInstance(2, argv);    
+    Local<Value> argv[] = {Number::New(double_value)};
+    Local<Object> long_obj = constructor_template->GetFunction()->NewInstance(1, argv);    
     return scope.Close(long_obj);    
   } else {
     // printf("C:: ========================================================= 5\n");
