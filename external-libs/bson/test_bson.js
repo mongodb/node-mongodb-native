@@ -41,6 +41,18 @@ sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.leng
 sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
 sys.debug(l_string == l2_string);
 
+l2_string = Long2.fromNumber(-1).toString();
+l_string = Long.fromNumber(-1).toString();
+sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.length);
+sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
+sys.debug(l_string == l2_string);
+
+l2_string = Long2.fromNumber(1).toString();
+l_string = Long.fromNumber(1).toString();
+sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.length);
+sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
+sys.debug(l_string == l2_string);
+
 
 // sys.puts(sys.inspect(require('./bson')))
 // var l = new Long2();
