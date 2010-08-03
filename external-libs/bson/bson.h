@@ -50,10 +50,13 @@ class Long : public ObjectWrap {
     bool isOdd();
     bool greaterThanOrEqual(Long *other);
     bool greaterThan(Long *other);
-    double toNumber();
+    int64_t toNumber();
     int32_t toInt();
     int64_t compare(Long *other);
     int64_t getLowBitsUnsigned();
+    char *toString(int32_t radix);
+    Long *shiftRight(int32_t number_bits);
+    Long *shiftLeft(int32_t number_bits);
 
     static Long *fromInt(int64_t value);
     static Long *fromBits(int32_t low_bits, int32_t high_bits);

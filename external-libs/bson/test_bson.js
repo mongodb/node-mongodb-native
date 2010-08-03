@@ -29,14 +29,14 @@ sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.leng
 sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
 sys.debug(l_string == l2_string);
 
-l2_string = Long2.fromNumber(-2355).toString();
-l_string = Long.fromNumber(-2355).toString();
+l_string = Long.fromNumber(-9223372036854775807).toString();
+l2_string = Long2.fromNumber(-9223372036854775807).toString();
 sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.length);
 sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
 sys.debug(l_string == l2_string);
 
-l2_string = Long2.fromNumber(-9223372036854775807).toString();
-l_string = Long.fromNumber(-9223372036854775807).toString();
+l2_string = Long2.fromNumber(-2355).toString();
+l_string = Long.fromNumber(-2355).toString();
 sys.debug("===================== Long JS: [" + l_string + "] = " + l_string.length);
 sys.debug("===================== Long C: [" + l2_string + "] = " + l2_string.length);
 sys.debug(l_string == l2_string);

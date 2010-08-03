@@ -391,50 +391,92 @@ int32_t Long::toInt() {
   return this->low_bits;
 }
 
-Handle<Value> Long::ToString(const Arguments &args) {
-  HandleScope scope;
-
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+char *Long::toString(int32_t opt_radix) {
+  // printf("C:: =================================== ToString\n");
+  // printf("C:: ------------------------------------------------- THIS: %lli\n", this->toNumber());
   // Set the radix
-  int32_t radix = 10;
+  int32_t radix = opt_radix;
   // Check if we have a zero value
-  if(l->isZero()) {
-    // printf("C:: ================================ ToString:isZero\n");
-    return String::New("0");
+  if(this->isZero()) {
+    // Allocate a string to return
+    char *result = (char *)malloc(1 * sizeof(char) + 1);
+    // Set the string to the character 0
+    *(result) = '0';
+    // Terminate the C String
+    *(result + 1) = '\0';
+    return result;
   }
   
+  // printf("C:: =================================== ToString1\n");
   // If the long is negative we need to perform som arithmetics
-  if(l->isNegative()) {
+  if(this->isNegative()) {
     // printf("C:: =================================== ToString:isNegative\n");
     // Min value object
     Long *minLong = new Long(0, 0x80000000 | 0);
     
-    if(l->equals(minLong)) {
-      // printf("C:: =================================== ToString:equals min Long\n");
+    if(this->equals(minLong)) {
+      // printf("C:: =================================== ToString:div_results: START0\n");
+      // We need to change the exports.Long value before it can be negated, so we remove
+      // the bottom-most digit in this base and then recurse to do the rest.
+      Long *radix_long = Long::fromNumber(radix);
+      // printf("C:: =================================== ToString:radix_long: START1 %lli\n", radix_long->toNumber());
+      // printf("C:: =================================== ToString:l: START1 %lli\n", this->toNumber());
+      Long *div = this->div(radix_long);
+      // printf("======================================= OWOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n");
+      // printf("C:: =================================== ToString:div: START2 %lli\n", div->toNumber());
+      // printf("C:: =================================== ToString:div_results: START3\n");
+      Long *rem = div->multiply(radix_long)->subtract(this);
+      // printf("C:: =================================== ToString:div: START3 %lli\n", rem->toNumber());
+      // Fetch div result      
+      // // printf("C:: =================================== ToString:div_results: START %f\n", div->toNumber());
+      char *div_result = div->toString(radix);
+      // // printf("C:: =================================== ToString:div_results: %s\n", div_result);
+      // // Unpack the rem result and convert int to string
+      char *int_buf = (char *)malloc(50 * sizeof(char) + 1);
+      uint32_t rem_int = rem->toInt();
+      sprintf(int_buf, "%d", rem_int);
+      // Final bufferr
+      char *final_buffer = (char *)malloc(50 * sizeof(char) + 1);
+      strncat(final_buffer, div_result, strlen(div_result));
+      strncat(final_buffer + strlen(div_result), int_buf, strlen(div_result));
+      // Release some memory
+      free(int_buf);
+      return final_buffer;
     } else {
-      // printf("C:: =================================== ToString:equals min Long\n");
+      // printf("C:: =================================== ToString:not equals min Long\n");
+      char *buf = (char *)malloc(50 * sizeof(char) + 1);
+      *(buf) = '\0';
+      char *result = this->negate()->toString(radix);      
+      strncat(buf, "-", 1);
+      strncat(buf + 1, result, strlen(result));
+      return buf;
     }  
   }
-
+  
+  // // printf("=============================================== TOSTRING::0\n");
+  // 
   // Do several (6) digits each time through the loop, so as to
   // minimize the calls to the very expensive emulated div.
   Long *radix_to_power = Long::fromInt(pow(radix, 6));
-  Long *rem = l;
+  Long *rem = this;
   char *result = (char *)malloc(1024 * sizeof(char) + 1);
   // Ensure the allocated space is null terminated to ensure a proper CString
   *(result) = '\0';
   
   while(true) {
+    // printf("C:: =================================== ToString2\n");
+    // printf("C:: ToString:: ============ rem: %f\n", rem->toNumber());
     Long *rem_div = rem->div(radix_to_power);
-    // printf("C:: ToString:: ============ rem_div: %f\n", rem_div->toNumber());
+    // printf("C:: =================================== ToString2-1\n");
     int32_t interval = rem->subtract(rem_div->multiply(radix_to_power))->toInt();
     // Convert interval into string
     char digits[50];    
     sprintf(digits, "%d", interval);
+    // printf("C:: =================================== ToString2-2\n");
     
     rem = rem_div;
     if(rem->isZero()) {
+      // printf("C:: =================================== ToString3\n");
       // Join digits and result to create final result
       int total_length = strlen(digits) + strlen(result);      
       char *new_result = (char *)malloc(total_length * sizeof(char) + 1);
@@ -446,8 +488,9 @@ Handle<Value> Long::ToString(const Arguments &args) {
       // Free the existing structure
       free(result);
       // printf("C:: ================== new_result: %s:%d\n", new_result, (int)strlen(new_result));      
-      return String::New(new_result);
+      return new_result;
     } else {
+      // printf("C:: =================================== ToString4\n");
       // Allocate some new space for the number
       char *new_result = (char *)malloc(1024 * sizeof(char) + 1);
       *(new_result) = '\0';
@@ -459,7 +502,7 @@ Handle<Value> Long::ToString(const Arguments &args) {
         digits_length = digits_length + 1;
         index = index + 1;
       }
-
+  
       // printf("C:: ================== result: %s:%d\n", result, (int)strlen(result));      
       strncat(new_result + index, digits, strlen(digits));
       // printf("C:: ================== new_result: %s\n", new_result);
@@ -472,103 +515,252 @@ Handle<Value> Long::ToString(const Arguments &args) {
     
     // printf("C:: ============== digits: %s:%d\n", digits, (int)strlen(digits));
     // printf("C:: ============== result: %s:%d\n", result, (int)strlen(result));
-    
-    
-    // break;
-  }
+  }  
+  // return "Hello";
+}
 
-  // printf("C:: ToString:: ============ radix_to_power: %d\n", radix_to_power);
-  // printf("C:: ToString:: ============ low_bits: %d\n", l->low_bits);
-  // printf("C:: ToString:: ============ high_bits: %d\n", l->high_bits);
-  
-  // Create a buffer to keep the long string
-  char strLong[1024];
-  sprintf(strLong, "%d", l->low_bits);
-  
-  // char buffer[sizeof(long) * 8 + 1];
-  // ltoa(this->value, buffer, 10);
-  // Return the string for the long
-  return String::New(strLong);
+Handle<Value> Long::ToString(const Arguments &args) {
+  HandleScope scope;
+
+  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
+  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's create the string from the Long number
+  char *result = l->toString(10);
+  // Package the result in a V8 String object and return
+  return String::New(result);
+}
+
+Long *Long::shiftRight(int32_t number_bits) {
+  number_bits &= 63;
+  if(number_bits == 0) {
+    return this;
+  } else {
+    int32_t high_bits = this->high_bits;
+    if(number_bits < 32) {
+      int32_t low_bits = this->low_bits;
+      return Long::fromBits((low_bits >> number_bits) | (high_bits << (32 - number_bits)), high_bits >> number_bits);
+    } else {
+      return Long::fromBits(high_bits >> (number_bits - 32), high_bits >= 0 ? 0 : -1);
+    }
+  }
+}
+
+Long *Long::shiftLeft(int32_t number_bits) {
+  number_bits &= 63;
+  if(number_bits == 0) {
+    return this;
+  } else {
+    int32_t low_bits = this->low_bits;
+    if(number_bits < 32) {
+      int32_t high_bits = this->high_bits;
+      return Long::fromBits(low_bits << number_bits, (high_bits << number_bits) | (low_bits >> (32 - number_bits)));
+    } else {
+      return Long::fromBits(0, low_bits << (number_bits - 32));
+    }
+  }  
 }
 
 Long *Long::div(Long *other) {
+  // printf("C:: =================================== div-0\n");
   // If we are about to do a divide by zero throw an exception
   if(other->isZero()) {
     throw "division by zero";
   } else if(this->isZero()) {
     return new Long(0, 0);
   }
-  
-  // If we have the minimum value for the current long or the div long
+    
   if(this->equals(MIN_VALUE)) {    
-    // if(other->equals(Long::fromInt(0)) || other->equals(Long::fromInt(-1))) {
-    //   return new Long()
-    // }
-    // 
+    // printf("C:: =================================== div-3\n");
+    if(other->equals(ONE) || other->equals(NEG_ONE)) {
+      // printf("C:: =================================== div-3-1\n");
+      return Long::fromBits(0, 0x80000000 | 0);
+    } else if(other->equals(MIN_VALUE)) {
+      // printf("C:: =================================== div-3-2\n");
+      return Long::fromNumber(1);
+    } else {
+      // printf("C:: =================================== div-3-3\n");
+      Long *half_this = this->shiftRight(1);
+      Long *approx = half_this->div(other)->shiftLeft(1);
+      if(approx->equals(ZERO)) {
+        return other->isNegative() ? Long::fromNumber(0) : Long::fromNumber(-1);
+      } else {
+        Long *rem = this->subtract(other->multiply(approx));
+        Long *result = approx->add(rem->div(other));
+        return result;
+      }
+    }    
   } else if(other->equals(MIN_VALUE)) {
+    // printf("C:: =================================== div-4\n");
     return new Long(0, 0);
   }
   
   // If the value is negative
   if(this->isNegative()) {
-    
+    // printf("C:: =================================== div-5\n");
+    if(other->isNegative()) {
+      // printf("C:: =================================== div-5-1\n");
+      return this->negate()->div(other->negate());
+    } else {
+      // printf("C:: =================================== div-5-2\n");
+      // printf("C:: =================================== this:%lli\n", this->toNumber());
+      // printf("C:: =================================== this->negate():%lli\n", this->negate()->toNumber());
+      // printf("C:: =================================== div-5-2\n");
+      // printf("C:: =================================== div-5-2\n");
+      return this->negate()->div(other)->negate();
+    }    
   } else if(other->isNegative()) {
-    
-  }
-  
-  // Repeat the following until the remainder is less than other:  find a
-  // floating-point that approximates remainder / other *from below*, add this
-  // into the result, and subtract it from the remainder.  It is critical that
-  // the approximate value is less than or equal to the real value so that the
-  // remainder never becomes negative.
-  Long *res = ZERO;
-  Long *rem = this;
-  
-  while(rem->greaterThanOrEqual(other)) {
-    // Approximate the result of division. This may be a little greater or
-    // smaller than the actual value.
-    int64_t approx = max(1, floor(rem->toNumber() / other->toNumber()));
-    // printf("C:: ======================================= rem->toNumber(): %f\n", rem->toNumber());
-    // printf("C:: ======================================= other->toNumber(): %f\n", other->toNumber());
-    // printf("C:: ======================================= approx: %lli\n", approx);
-    // printf("C:: ======================================= floor: %f\n", floor(rem->toNumber() / other->toNumber()));
-
-    // We will tweak the approximate result by changing it in the 48-th digit or
-    // the smallest non-fractional digit, whichever is larger.
-    int64_t log2 = ceil(log(approx) / LN2);
-    // printf("C:: ======================================= log2: %lli\n", log2);
-    int64_t delta = (log2 <= 48) ? 1 : pow(2, (log2 - 48));
-    // printf("C:: ======================================= delta: %lli\n", delta);
-    
-    // Decrease the approximation until it is smaller than the remainder.  Note
-    // that if it is too large, the product overflows and is negative.
-    Long *approxRes = Long::fromNumber(approx);
-    Long *approxRem = approxRes->multiply(other);
-
-    // printf("C:: ======================================= approxRes: %f\n", approxRes->toNumber());
-    // printf("C:: ======================================= approxRem: %f\n", approxRem->toNumber());
-
-    while(approxRem->isNegative() || approxRem->greaterThan(rem)) {
-      approx -= delta;
-      // printf("C:: ======================================= approx: %lli\n", approx);
-      approxRes = Long::fromNumber(approx);
-      approxRem = approxRes->multiply(other);
-    }
-    
-    // We know the answer can't be zero... and actually, zero would cause
-    // infinite recursion since we would make no progress.
-    if(approxRes->isZero()) {
-      approxRes = ONE;
-    }
-    
-    res = res->add(approxRes);
-    // printf("C:: ======================================= approx: %f\n", res->toNumber());
-    
-    
-    rem = rem->subtract(approxRem);
+    // printf("C:: =================================== div-6\n");
+    return this->div(other->negate())->negate();
   }  
-    
-  return res;
+  
+  
+  int64_t this_number = this->toNumber();
+  int64_t other_number = other->toNumber();
+  int64_t result = this_number / other_number;
+  // printf("=================================== this_number::%lli\n", this_number);
+  // printf("=================================== other_number::%lli\n", other_number);
+  // printf("C:: =================================== RESULT::[%lli/%lli] = [%lli]\n", this_number, other_number, result);
+  
+  // Split into the 32 bit valu
+  int32_t low32, high32;
+  high32 = (uint64_t)result >> 32;
+  low32 = (int32_t)result;
+  return Long::fromBits(low32, high32);
+  // return Long::fromInt(result);
+  
+  // printf("C:: =================================== div-1\n");
+  // printf("C:: =================================== result: [%lli/%lli] = [%lli]\n", this_number, other_number, result);
+  // Long *l = Long::fromNumber(result);
+  // printf("C:: =================================== div-2: %lli\n", l->toNumber());
+  // return l;
+  
+  //   printf("C:: =================================== div-1\n");
+  // 
+  // // If we have the minimum value for the current long or the div long
+  // if(this->equals(MIN_VALUE)) {    
+  //   printf("C:: =================================== div-2\n");
+  //   // printf("C:: =================================== div-3\n");
+  //   if(other->equals(ONE) || other->equals(NEG_ONE)) {
+  //     printf("C:: =================================== div-3\n");
+  //     return Long::fromBits(0, 0x80000000 | 0);
+  //   } else if(other->equals(MIN_VALUE)) {
+  //     printf("C:: =================================== div-4\n");
+  //     return Long::fromNumber(1);
+  //   } else {
+  //     printf("C:: =================================== div-5\n");
+  //     Long *half_this = this->shiftRight(1);
+  //     Long *approx = half_this->div(other)->shiftLeft(1);
+  //     if(approx->equals(ZERO)) {
+  //       return other->isNegative() ? Long::fromNumber(0) : Long::fromNumber(-1);
+  //     } else {
+  //       Long *rem = this->subtract(other->multiply(approx));
+  //       Long *result = approx->add(rem->div(other));
+  //       return result;
+  //     }
+  //   }    
+  // } else if(other->equals(MIN_VALUE)) {
+  //   printf("C:: =================================== div-6\n");
+  //   // printf("C:: =================================== div-4\n");
+  //   return new Long(0, 0);
+  // }
+  // 
+  // // If the value is negative
+  // if(this->isNegative()) {
+  //   printf("C:: =================================== div-7\n");
+  //   // printf("C:: ========================================= NEGATIVE 1\n");
+  //   if(other->isNegative()) {
+  //     // printf("C:: ========================================= NEGATIVE 1-1\n");
+  //     return this->negate()->div(other->negate());
+  //   } else {
+  //     // printf("C:: ========================================= NEGATIVE 1-2\n");
+  //     // printf("C:: ========================================= this: %lli\n", this->toNumber());
+  //     // printf("C:: ========================================= this->negate(): %lli\n", this->negate()->toNumber());
+  //     // printf("C:: ========================================= this->negate()->div(other): %lli\n", this->negate()->div(other)->toNumber());
+  //     // printf("C:: ========================================= this->negate()->div(other)->negate(): %lli\n", this->negate()->div(other)->negate()->toNumber());
+  //     return this->negate()->div(other)->negate();
+  //   }    
+  // } else if(other->isNegative()) {
+  //   printf("C:: =================================== div-8\n");
+  //   // printf("C:: ========================================= NEGATIVE 2\n");
+  //   return this->div(other->negate())->negate();
+  // }
+  // 
+  // // Repeat the following until the remainder is less than other:  find a
+  // // floating-point that approximates remainder / other *from below*, add this
+  // // into the result, and subtract it from the remainder.  It is critical that
+  // // the approximate value is less than or equal to the real value so that the
+  // // remainder never becomes negative.
+  // Long *res = ZERO;
+  // Long *rem = this;
+  // 
+  // while(rem->greaterThanOrEqual(other)) {
+  //   printf("----------------------------------------------------------------------------------\n");
+  //   printf("C:: =================================== div-9\n");
+  //   // Approximate the result of division. This may be a little greater or
+  //   // smaller than the actual value.
+  //   // printf("C:: =================================== rem->toNumber(): %lli\n", rem->toNumber());
+  //   // printf("C:: =================================== other->toNumber(): %lli\n", other->toNumber());
+  // 
+  //   int64_t a = rem->toNumber();
+  //   int64_t b = other->toNumber();
+  //   int64_t c = a / b;
+  //   printf("C:: =================================== rem->toNumber(): %lli\n", a);
+  //   printf("C:: =================================== other->toNumber(): %lli\n", b);
+  //   printf("C:: =================================== rem->toNumber() / other->toNumber(): %lli\n", c);
+  //   printf("C:: =================================== floor(c): %f\n", floor(c));
+  //   printf("C:: =================================== max(1, floor(c)): %f\n", max(1, floor(c)));
+  // 
+  //   int64_t approx = (int64_t)max(1, floor(a / b));
+  //   
+  //   // int64_t approx = max(1, floor(rem->toNumber() / other->toNumber()));
+  //   printf("C:: =================================== div-10\n");
+  //   printf("C:: ======================================= approx: %lli\n", approx);
+  //   // printf("C:: ======================================= rem->toNumber(): %f\n", rem->toNumber());
+  //   // printf("C:: ======================================= other->toNumber(): %f\n", other->toNumber());
+  //   // printf("C:: ======================================= approx: %lli\n", approx);
+  //   // printf("C:: ======================================= floor: %f\n", floor(rem->toNumber() / other->toNumber()));
+  // 
+  //   // We will tweak the approximate result by changing it in the 48-th digit or
+  //   // the smallest non-fractional digit, whichever is larger.
+  //   int64_t log2 = ceil(log(approx) / LN2);
+  //   printf("C:: ======================================= log2: %lli\n", log2);
+  //   int64_t delta = (log2 <= 48) ? 1 : pow(2, (log2 - 48));
+  //   // printf("C:: ======================================= delta: %lli\n", delta);
+  //   
+  //   // Decrease the approximation until it is smaller than the remainder.  Note
+  //   // that if it is too large, the product overflows and is negative.
+  //   Long *approxRes = Long::fromNumber(approx);
+  //   Long *approxRem = approxRes->multiply(other);
+  //   // printf("C:: =================================== div-9\n");
+  // 
+  //   printf("C:: ======================================= approxRes: %lli\n", approxRes->toNumber());
+  //   printf("C:: ======================================= approxRem: %lli\n", approxRem->toNumber());
+  //   printf("C:: ======================================= rem: %lli\n", rem->toNumber());
+  //   printf("C:: ======================================= approxRem->isNegative(): %s\n", approxRem->isNegative() ? "true" : "false");
+  //   printf("C:: ======================================= approxRem->greaterThan(rem): %s\n", approxRem->greaterThan(rem) ? "true" : "false");
+  // 
+  //   while(approxRem->isNegative() || approxRem->greaterThan(rem)) {
+  //     printf("C:: =================================== div-10\n");
+  //     approx -= delta;
+  //     // printf("C:: ======================================= approx: %lli\n", approx);
+  //     approxRes = Long::fromNumber(approx);
+  //     approxRem = approxRes->multiply(other);
+  //   }
+  //   
+  //   // We know the answer can't be zero... and actually, zero would cause
+  //   // infinite recursion since we would make no progress.
+  //   if(approxRes->isZero()) {
+  //     approxRes = ONE;
+  //   }
+  //   
+  //   res = res->add(approxRes);
+  //   printf("C:: ======================================= res: %lli\n", res->toNumber());
+  //   
+  //   
+  //   rem = rem->subtract(approxRem);
+  // }  
+  //   
+  // return res;
 }
 
 Long *Long::multiply(Long *other) {
@@ -576,74 +768,86 @@ Long *Long::multiply(Long *other) {
     return new Long(0, 0);    
   }
   
-  if(this->equals(MIN_VALUE)) {
-    return other->isOdd() ? MIN_VALUE : ZERO; 
-  } else if(other->equals(MIN_VALUE)) {
-    return this->isOdd() ? MIN_VALUE : ZERO;
-  }
+  int64_t this_number = this->toNumber();
+  int64_t other_number = other->toNumber();
+  int64_t result = this_number * other_number;
   
-  if(this->isNegative()) {
-    if(other->isNegative()) {
-      return this->negate()->multiply(other->negate());
-    } else {
-      return this->negate()->multiply(other)->negate();
-    }
-  } else if(other->isNegative()) {
-    return this->multiply(other->negate())->negate();
-  }
+  // Split into the 32 bit valu
+  int32_t low32, high32;
+  high32 = (uint64_t)result >> 32;
+  low32 = (int32_t)result;
+  return Long::fromBits(low32, high32);
   
-  // Divide each long into 4 chunks of 16 bits, and then add up 4x4 products.
-  // We can skip products that would overflow.
-  int32_t a48 = this->high_bits >> 16;
-  int32_t a32 = this->high_bits & 0xFFFF;
-  int32_t a16 = this->low_bits >> 16;
-  int32_t a00 = this->low_bits & 0xFFFF;
-
-  int32_t b48 = other->high_bits >> 16;
-  int32_t b32 = other->high_bits & 0xFFFF;
-  int32_t b16 = other->low_bits >> 16;
-  int32_t b00 = other->low_bits & 0xFFFF;
-
-  int32_t c48 = 0;
-  int32_t c32 = 0;
-  int32_t c16 = 0;
-  int32_t c00 = 0;
-
-  c00 += a00 * b00;
-  c16 += c00 >> 16;
-  c00 &= 0xFFFF;
-  c16 += a16 * b00;
-  c32 += c16 >> 16;
-  c16 &= 0xFFFF;
-  c16 += a00 * b16;
-  c32 += c16 >> 16;
-  c16 &= 0xFFFF;
-  c32 += a32 * b00;
-  c48 += c32 >> 16;
-  c32 &= 0xFFFF;
-  c32 += a16 * b16;
-  c48 += c32 >> 16;
-  c32 &= 0xFFFF;
-  c32 += a00 * b32;
-  c48 += c32 >> 16;
-  c32 &= 0xFFFF;
-  c48 += a48 * b00 + a32 * b16 + a16 * b32 + a00 * b48;
-  c48 &= 0xFFFF;
-  // Return the new number
-  return Long::fromBits((c16 << 16) | c00, (c48 << 16) | c32);
+  // return Long::fromInt(result);
+  
+  // if(this->equals(MIN_VALUE)) {
+  //   return other->isOdd() ? MIN_VALUE : ZERO; 
+  // } else if(other->equals(MIN_VALUE)) {
+  //   return this->isOdd() ? MIN_VALUE : ZERO;
+  // }
+  // 
+  // if(this->isNegative()) {
+  //   if(other->isNegative()) {
+  //     return this->negate()->multiply(other->negate());
+  //   } else {
+  //     return this->negate()->multiply(other)->negate();
+  //   }
+  // } else if(other->isNegative()) {
+  //   return this->multiply(other->negate())->negate();
+  // }
+  // 
+  // // Divide each long into 4 chunks of 16 bits, and then add up 4x4 products.
+  // // We can skip products that would overflow.
+  // int32_t a48 = this->high_bits >> 16;
+  // int32_t a32 = this->high_bits & 0xFFFF;
+  // int32_t a16 = this->low_bits >> 16;
+  // int32_t a00 = this->low_bits & 0xFFFF;
+  // 
+  // int32_t b48 = other->high_bits >> 16;
+  // int32_t b32 = other->high_bits & 0xFFFF;
+  // int32_t b16 = other->low_bits >> 16;
+  // int32_t b00 = other->low_bits & 0xFFFF;
+  // 
+  // int32_t c48 = 0;
+  // int32_t c32 = 0;
+  // int32_t c16 = 0;
+  // int32_t c00 = 0;
+  // 
+  // c00 += a00 * b00;
+  // c16 += c00 >> 16;
+  // c00 &= 0xFFFF;
+  // c16 += a16 * b00;
+  // c32 += c16 >> 16;
+  // c16 &= 0xFFFF;
+  // c16 += a00 * b16;
+  // c32 += c16 >> 16;
+  // c16 &= 0xFFFF;
+  // c32 += a32 * b00;
+  // c48 += c32 >> 16;
+  // c32 &= 0xFFFF;
+  // c32 += a16 * b16;
+  // c48 += c32 >> 16;
+  // c32 &= 0xFFFF;
+  // c32 += a00 * b32;
+  // c48 += c32 >> 16;
+  // c32 &= 0xFFFF;
+  // c48 += a48 * b00 + a32 * b16 + a16 * b32 + a00 * b48;
+  // c48 &= 0xFFFF;
+  // // Return the new number
+  // return Long::fromBits((c16 << 16) | c00, (c48 << 16) | c32);
 }
 
 bool Long::isOdd() {
   return (this->low_bits & 1) == 1;
 }
 
-double Long::toNumber() {
-  // printf("===============================================================================TONUMBER\n");
+int64_t Long::toNumber() {
+  // printf("C:: -------------------------------------------------------------------------- TONUMBER\n");
   // printf("C:: ======================================= low_bits: %d\n", this->low_bits);
   // printf("C:: ======================================= low_bits: %lli\n", this->getLowBitsUnsigned());
   // printf("C:: ======================================= high_bits: %d\n", this->high_bits);
-  // printf("C:: ======================================= BSON_INT32_: %lli\n", BSON_INT32_);    
-  return (double)(this->high_bits * BSON_INT32_ + this->getLowBitsUnsigned());
+  // printf("C:: -----------------------------------------------------------------------------------\n");
+  return (int64_t)(this->high_bits * BSON_INT32_ + this->getLowBitsUnsigned());
 }
 
 int64_t Long::getLowBitsUnsigned() {
@@ -651,12 +855,14 @@ int64_t Long::getLowBitsUnsigned() {
 }
 
 int64_t Long::compare(Long *other) {
+  // printf("C:: ============== COMPARE ================== %lli = %lli\n", this->toNumber(), other->toNumber());
+  
   if(this->equals(other)) {
     return 0;
   }
   
   bool this_neg = this->isNegative();
-  bool other_neg = this->isNegative();
+  bool other_neg = other->isNegative();
   if(this_neg && !other_neg) {
     return -1;
   }
@@ -673,10 +879,11 @@ int64_t Long::compare(Long *other) {
 }
 
 Long *Long::negate() {
-  if(this->equals((Long *)MIN_VALUE)) {
-    return Long::fromBits(0, 0x80000000 | 0);
+  if(this->equals(MIN_VALUE)) {
+    return MIN_VALUE;
   } else {
-    return this->not_()->add(Long::fromInt(1));
+    // return this->not_()->add(ONE);
+    return this->not_()->add(ONE);
   }
 }
 
@@ -685,39 +892,67 @@ Long *Long::not_() {
 }
 
 Long *Long::add(Long *other) {
-  int32_t a48 = this->high_bits >> 16;
-  int32_t a32 = this->high_bits & 0xFFFF;
-  int32_t a16 = this->low_bits >> 16;
-  int32_t a00 = this->low_bits & 0xFFFF;
+  int64_t this_number = this->toNumber();
+  int64_t other_number = other->toNumber();
+  int64_t result = this_number + other_number;
+  // printf("======================= LONG:ADD: %lli=%lli\n", result, Long::fromNumbe(result)->toNumber());
   
-  int32_t b48 = other->high_bits >> 16;
-  int32_t b32 = other->high_bits & 0xFFFF;
-  int32_t b16 = other->low_bits >> 16;
-  int32_t b00 = other->low_bits & 0xFFFF;
+  // Split into the 32 bit valu
+  int32_t low32, high32;
+  high32 = (uint64_t)result >> 32;
+  low32 = (int32_t)result;
+  return Long::fromBits(low32, high32);
   
-  int32_t c48 = 0;
-  int32_t c32 = 0;
-  int32_t c16 = 0;
-  int32_t c00 = 0;
-  
-  c00 += a00 + b00;
-  c16 += c00 >> 16;
-  c00 &= 0xFFFF;
-  c16 += a16 + b16;
-  c32 += c16 >> 16;
-  c16 &= 0xFFFF;  
-  c32 += a32 + b32;
-  c48 += c32 >> 16;
-  c32 &= 0xFFFF;
-  c48 += a48 + b48;
-  c48 &= 0xFFFF;
-  // Return the new value
-  return Long::fromBits((c16 << 16) | c00, (c48 << 16) | c32);
+  // return Long::fromInt(result);
+  // 
+  // int32_t a48 = this->high_bits >> 16;
+  // int32_t a32 = this->high_bits & 0xFFFF;
+  // int32_t a16 = this->low_bits >> 16;
+  // int32_t a00 = this->low_bits & 0xFFFF;
+  // 
+  // int32_t b48 = other->high_bits >> 16;
+  // int32_t b32 = other->high_bits & 0xFFFF;
+  // int32_t b16 = other->low_bits >> 16;
+  // int32_t b00 = other->low_bits & 0xFFFF;
+  // 
+  // int32_t c48 = 0;
+  // int32_t c32 = 0;
+  // int32_t c16 = 0;
+  // int32_t c00 = 0;
+  // 
+  // c00 += a00 + b00;
+  // c16 += c00 >> 16;
+  // c00 &= 0xFFFF;
+  // c16 += a16 + b16;
+  // c32 += c16 >> 16;
+  // c16 &= 0xFFFF;  
+  // c32 += a32 + b32;
+  // c48 += c32 >> 16;
+  // c32 &= 0xFFFF;
+  // c48 += a48 + b48;
+  // c48 &= 0xFFFF;
+  // 
+  // printf("====================================== [%lli] + [%lli]\n", this_number, other_number);
+  // printf("====================================== [%lli] = [%lli]\n", result, Long::fromBits((c16 << 16) | c00, (c48 << 16) | c32)->toNumber());
+  // 
+  // // Return the new value
+  // return Long::fromBits((c16 << 16) | c00, (c48 << 16) | c32);
 }
 
 Long *Long::subtract(Long *other) {
-  Long *negated = other->negate();
-  return this->add(negated);
+  int64_t this_number = this->toNumber();
+  int64_t other_number = other->toNumber();
+  int64_t result = this_number - other_number;
+  // return Long::fromInt(result);
+
+  // Split into the 32 bit valu
+  int32_t low32, high32;
+  high32 = (uint64_t)result >> 32;
+  low32 = (int32_t)result;
+  return Long::fromBits(low32, high32);
+  
+  // Long *negated = other->negate();
+  // return this->add(negated);
 }
 
 bool Long::greaterThan(Long *other) {
@@ -739,19 +974,14 @@ Long *Long::fromBits(int32_t low_bits, int32_t high_bits) {
 Long *Long::fromNumber(int64_t value) {
   // Ensure we have a valid ranged number
   if(std::isinf(value) || std::isnan(value)) {
-    // printf("C:: ========================================================= fromNumber:1\n");
     return Long::fromBits(0, 0);
   } else if(value <= BSON_INT64_MIN) {
-    // printf("C:: ========================================================= fromNumber:2\n");
     return Long::fromBits(0, 0x80000000 | 0);
   } else if(value >= BSON_INT64_MAX) {
-    // printf("C:: ========================================================= fromNumber:3\n");
     return Long::fromBits(0xFFFFFFFF | 0, 0x7FFFFFFF | 0);
   } else if(value < 0) {
-    // printf("C:: ========================================================= fromNumber:4\n");
     return Long::fromNumber(-value)->negate();
   } else {
-    // printf("C:: ========================================================= fromNumber:5\n");
     return Long::fromBits((value % BSON_INT32_) | 0, (value / BSON_INT32_) | 0);
   }  
 }
