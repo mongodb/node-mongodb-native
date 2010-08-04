@@ -53,7 +53,7 @@ Handle<Value> Long::New(const Arguments &args) {
   // Ensure that we have an parameter
   if(args.Length() == 1 && args[0]->IsNumber()) {
     // Unpack the value
-    int64_t value = args[0]->IntegerValue();
+    double value = args[0]->NumberValue();
     // Create an instance of long
     Long *l = Long::fromNumber(value);
     // Wrap it in the object wrap
@@ -75,6 +75,9 @@ Handle<Value> Long::New(const Arguments &args) {
   }
 }
 
+static Persistent<String> low_bits_symbol;
+static Persistent<String> high_bits_symbol;
+
 void Long::Initialize(Handle<Object> target) {
   // Grab the scope of the call from Node
   HandleScope scope;
@@ -84,15 +87,111 @@ void Long::Initialize(Handle<Object> target) {
   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
   constructor_template->SetClassName(String::NewSymbol("Long"));
   
+  // Propertry symbols
+  low_bits_symbol = NODE_PSYMBOL("low_");
+  high_bits_symbol = NODE_PSYMBOL("high_");  
+  
   // Instance methods
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "isZero", IsZero);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "getLowBits", GetLowBits);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "getHighBits", GetHighBits);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
+
+  // Getters for correct serialization of the object  
+  constructor_template->InstanceTemplate()->SetAccessor(low_bits_symbol, LowGetter, LowSetter);
+  constructor_template->InstanceTemplate()->SetAccessor(high_bits_symbol, HighGetter, HighSetter);
   
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "fromNumber", FromNumber);
   
   // Add class to scope
   target->Set(String::NewSymbol("Long"), constructor_template->GetFunction());
+}
+
+Handle<Value> Long::LowGetter(Local<String> property, const AccessorInfo& info) {
+  HandleScope scope;
+  
+  // Unpack object reference
+  Local<Object> self = info.Holder();
+  // Fetch external reference (reference to Long object)
+  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+  // Get pointer to the object
+  void *ptr = wrap->Value();
+  // Extract value doing a cast of the pointer to Long and accessing low_bits
+  int32_t low_bits = static_cast<Long *>(ptr)->low_bits;
+  Local<Integer> integer = Integer::New(low_bits);
+  return scope.Close(integer);
+}
+
+void Long::LowSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
+  // Unpack object reference
+  Local<Object> self = info.Holder();
+  // Fetch external reference (reference to Long object)
+  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+  // Get pointer to the object
+  void *ptr = wrap->Value();
+  // Set the low bits
+  static_cast<Long *>(ptr)->low_bits = value->Int32Value();
+}
+
+Handle<Value> Long::HighGetter(Local<String> property, const AccessorInfo& info) {
+  HandleScope scope;
+  
+  // Unpack object reference
+  Local<Object> self = info.Holder();
+  // Fetch external reference (reference to Long object)
+  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+  // Get pointer to the object
+  void *ptr = wrap->Value();
+  // Extract value doing a cast of the pointer to Long and accessing low_bits
+  int32_t high_bits = static_cast<Long *>(ptr)->high_bits;
+  Local<Integer> integer = Integer::New(high_bits);
+  return scope.Close(integer);
+}
+
+void Long::HighSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
+  // Unpack object reference
+  Local<Object> self = info.Holder();
+  // Fetch external reference (reference to Long object)
+  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+  // Get pointer to the object
+  void *ptr = wrap->Value();
+  // Set the low bits
+  static_cast<Long *>(ptr)->high_bits = value->Int32Value();  
+}
+
+Handle<Value> Long::Inspect(const Arguments &args) {
+  HandleScope scope;
+  
+  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
+  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's create the string from the Long number
+  char *result = l->toString(10);
+  // Package the result in a V8 String object and return
+  return String::New(result);
+}
+
+Handle<Value> Long::GetLowBits(const Arguments &args) {
+  HandleScope scope;
+
+  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
+  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's fetch the low bits
+  int32_t low_bits = l->low_bits;
+  // Package the result in a V8 Integer object and return
+  return Integer::New(low_bits);  
+}
+
+Handle<Value> Long::GetHighBits(const Arguments &args) {
+  HandleScope scope;
+
+  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
+  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's fetch the low bits
+  int32_t high_bits = l->high_bits;
+  // Package the result in a V8 Integer object and return
+  return Integer::New(high_bits);    
 }
 
 bool Long::isZero() {
@@ -413,7 +512,7 @@ Long *Long::fromBits(int32_t low_bits, int32_t high_bits) {
   return new Long(low_bits, high_bits);
 }
 
-Long *Long::fromNumber(int64_t value) {
+Long *Long::fromNumber(double value) {
   // Ensure we have a valid ranged number
   if(std::isinf(value) || std::isnan(value)) {
     return Long::fromBits(0, 0);
@@ -424,7 +523,8 @@ Long *Long::fromNumber(int64_t value) {
   } else if(value < 0) {
     return Long::fromNumber(-value)->negate();
   } else {
-    return Long::fromBits((value % BSON_INT32_) | 0, (value / BSON_INT32_) | 0);
+    int64_t int_value = (int64_t)value;
+    return Long::fromBits((int_value % BSON_INT32_) | 0, (int_value / BSON_INT32_) | 0);
   }  
 }
 

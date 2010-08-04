@@ -28,6 +28,9 @@ class BSON : public EventEmitter {
     static long deserialize_sint32(char *data, uint32_t offset);
     static uint16_t deserialize_int8(char *data, uint32_t offset);
     static uint32_t deserialize_int32(char* data, uint32_t offset);
+    
+    // Decode function
+    static Handle<Value> encodeLong(int64_t value);
 };
 
 #endif  // BSON_H_

@@ -193,6 +193,7 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
         return_data->Set(String::New(string_name), Integer::New(value));
       }          
     } else if(type == BSON_DATA_LONG) {
+      printf("======================================== wow\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -206,27 +207,25 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
       // Decode the integer value
       int64_t value = 0;
       memcpy(&value, (data + index), 8);
-
-      for(int n = 0; n < 8; n++) {
-        printf("C:: ============ %02x\n",(unsigned char)data[index  + n]);
-      }
-
-      // printf("====================================== value: %lld\n", value);
-
+      
+      // for(int n = 0; n < 8; n++) {
+      //   printf("C:: ============ %02x\n",(unsigned char)data[index  + n]);
+      // }
+      // 
+      // Let's package the value in a long value and then wrap it up for the application
+      // Long *l = Long::fromNumber(value);
+      // Local<Value> argv[] = {Number::New(value)};
+      // Handle<Value> long_obj = constructor_template->GetFunction()->NewInstance(1, argv);    
+      // return scope.Close(long_obj);    
+      
       // Adjust the index for the size of the value
       index = index + 8;
-      
-      // printf("====================================== value: %d\n", (data + index));
-      // 
-      // for(int n = 0; n < 8; n++) {
-      //   printf("C:: ============ %02x\n",(int)*(data + index + n));
-      // }
       
       // Add the element to the object
       if(is_array_item) {
         
       } else {
-        return_data->Set(String::New(string_name), Integer::New(value));
+        return_data->Set(String::New(string_name), BSON::encodeLong(value));
       }
     }        
   }
@@ -238,6 +237,20 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
     return scope.Close(return_data);
   }
 }
+
+Handle<Value> BSON::encodeLong(int64_t value) {
+  HandleScope scope;
+  
+  // printf("============================== Deserialize: %lli\n", value);
+  // Local<Number> n = Number::New(value);
+  // printf("============================== Deserialize: %lli\n", n->IntegerValue());
+  // printf("============================== Deserialize: %f\n", n->NumberValue());
+
+  Local<Value> argv[] = {Number::New(value)};
+  Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(1, argv);    
+  return scope.Close(long_obj);      
+}
+
 
 // Search for 0 terminated C string and return the string
 char* BSON::extract_string(char *data, uint32_t offset) {

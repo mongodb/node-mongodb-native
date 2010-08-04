@@ -38,17 +38,26 @@ class Long : public ObjectWrap {
 
     static Long *fromInt(int64_t value);
     static Long *fromBits(int32_t low_bits, int32_t high_bits);
-    static Long *fromNumber(int64_t value);
-    
+    static Long *fromNumber(double value);
+
+    // Getter and Setter for object values
+    static Handle<Value> LowGetter(Local<String> property, const AccessorInfo& info);
+    static void LowSetter(Local<String> property, Local<Value> value, const AccessorInfo& info);
+    static Handle<Value> HighGetter(Local<String> property, const AccessorInfo& info);
+    static void HighSetter(Local<String> property, Local<Value> value, const AccessorInfo& info);
+    // Functions available from V8
     static void Initialize(Handle<Object> target);    
     static Handle<Value> FromNumber(const Arguments &args);
     static Handle<Value> ToString(const Arguments &args);
+    static Handle<Value> Inspect(const Arguments &args);
     static Handle<Value> IsZero(const Arguments &args);
+    static Handle<Value> GetLowBits(const Arguments &args);
+    static Handle<Value> GetHighBits(const Arguments &args);
+
+    // Constructor used for creating new Long objects from C++
+    static Persistent<FunctionTemplate> constructor_template;
     
   private:
-
-    static Persistent<FunctionTemplate> constructor_template;
-
     static Handle<Value> New(const Arguments &args);
 };
 
