@@ -5,6 +5,7 @@ var sys = require('sys'),
   Buffer = require('buffer').Buffer,
   BSONJS = require('mongodb/bson/bson').BSON,
   Long = require('mongodb/goog/math/long').Long,
+  ObjectID = require('mongodb/bson/bson').ObjectID;
   assert = require('assert');
   
 var Long2 = require('./bson').Long;
@@ -88,11 +89,17 @@ var bson = new BSON();
 // var simple_string_serialized = BSONJS.serialize({doc:date});
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
+// 
+// // Simple serialization and deserialization for a boolean value
+// var simple_string_serialized = BSONJS.serialize({doc:/abcd/mi});
+// assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(simple_string_serialized, 'binary').doc.toString());
+// assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString());
 
-// Simple serialization and deserialization for a boolean value
-var simple_string_serialized = BSONJS.serialize({doc:/abcd/mi});
-assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(simple_string_serialized, 'binary').doc.toString());
-assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString());
+// Simple serialization and deserialization for a date value
+var date = new Date();
+var simple_string_serialized = BSONJS.serialize({doc:new ObjectID()});
+assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
+assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
 
 
 

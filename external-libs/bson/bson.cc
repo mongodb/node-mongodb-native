@@ -13,6 +13,7 @@
 
 #include "bson.h"
 #include "long.h"
+#include "objectid.h"
 
 using namespace v8;
 using namespace node;
@@ -302,7 +303,6 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
         return_data->Set(String::New(string_name), Date::New((double)value));
       }      
     } else if(type == BSON_DATA_REGEXP) {
-      // printf("==================================================== decode regexp\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -363,6 +363,29 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
       } else {
         return_data->Set(String::New(string_name), result);
       }      
+    } else if(type == BSON_DATA_OID) {
+      printf("=================================================== unpacking oid\n");
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Need to handle arrays here
+      // TODO TODO TODO           
+      // TODO TODO TODO           
+      // TODO TODO TODO          
+      char *oid_string = (char *)malloc(12 * sizeof(char) + 1);
+      memcpy(oid_string, (data + index), 12);
+      *(oid_string + 12 + 1) = '\0';
+      printf("============================================ oid_string: %s\n", oid_string);
+      
+      for(int n = 0; n < 12; n++) {
+        printf("C:: ============ %02x\n",(unsigned char)oid_string[n]);
+      }
+      
+      // Adjust the index
+      index = index + 12;
+      
     }
   }
 
