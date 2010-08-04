@@ -364,7 +364,7 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
         return_data->Set(String::New(string_name), result);
       }      
     } else if(type == BSON_DATA_OID) {
-      printf("=================================================== unpacking oid\n");
+      // printf("=================================================== unpacking oid\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -373,19 +373,28 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
       // Need to handle arrays here
       // TODO TODO TODO           
       // TODO TODO TODO           
-      // TODO TODO TODO          
-      char *oid_string = (char *)malloc(12 * sizeof(char) + 1);
-      memcpy(oid_string, (data + index), 12);
-      *(oid_string + 12 + 1) = '\0';
-      printf("============================================ oid_string: %s\n", oid_string);
+      // TODO TODO TODO      
       
-      for(int n = 0; n < 12; n++) {
-        printf("C:: ============ %02x\n",(unsigned char)oid_string[n]);
-      }
-      
+      // Allocate storage for a 24 character hex oid    
+      char *oid_string = (char *)malloc(12 * 2 * sizeof(char) + 1);
+      char *pbuffer = oid_string;      
+      // Terminate the string
+      *(pbuffer + 25) = '\0';      
+      // Unpack the oid in hex form
+      for(int32_t i = 0; i < 12; i++) {
+        sprintf(pbuffer, "%02x", (unsigned char)*(data + index + i));
+        pbuffer += 2;
+      }      
+
       // Adjust the index
       index = index + 12;
-      
+
+      // Add the element to the object
+      if(is_array_item) {
+        
+      } else {
+        return_data->Set(String::New(string_name), BSON::encodeOid(oid_string));
+      }            
     }
   }
 
@@ -395,6 +404,14 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
   } else {
     return scope.Close(return_data);
   }
+}
+
+Handle<Value> BSON::encodeOid(char *oid) {
+  HandleScope scope;
+  
+  Local<Value> argv[] = {String::New(oid)};
+  Handle<Value> oid_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);
+  return scope.Close(oid_obj);
 }
 
 Handle<Value> BSON::encodeLong(int64_t value) {
@@ -458,6 +475,7 @@ extern "C" void init(Handle<Object> target) {
   HandleScope scope;
   BSON::Initialize(target);
   Long::Initialize(target);
+  ObjectID::Initialize(target);
 }
 
 // NODE_MODULE(bson, BSON::Initialize);

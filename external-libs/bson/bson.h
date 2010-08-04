@@ -31,6 +31,7 @@ class BSON : public EventEmitter {
     
     // Decode function
     static Handle<Value> encodeLong(int64_t value);
+    static Handle<Value> encodeOid(char *oid);
 };
 
 #endif  // BSON_H_

@@ -21,14 +21,35 @@ static Handle<Value> VException(const char *msg) {
 Persistent<FunctionTemplate> ObjectID::constructor_template;
 
 ObjectID::ObjectID(char *oid) : ObjectWrap() {
+  this->oid = oid;
 }
 
 ObjectID::~ObjectID() {}
 
 Handle<Value> ObjectID::New(const Arguments &args) {
   HandleScope scope;
+  
+  // Ensure we have correct parameters passed in
+  if(args.Length() != 1 && !args[0]->IsString()) {
+    return VException("Argument passed in must be a single String of 24 bytes in hex format");
+  }
 
-  return String::New("ObjectID::New");
+  // Convert the argument to a String
+  Local<String> oid_string = args[0]->ToString();  
+  if(oid_string->Length() != 24) {
+    return VException("Argument passed in must be a single String of 24 bytes in hex format");
+  }
+  
+  // Unpack the String object to char*
+  char *oid_string_c = (char *)malloc(25);
+  node::DecodeWrite(oid_string_c, 25, oid_string, node::BINARY);
+  
+  // Instantiate a ObjectID object
+  ObjectID *oid = new ObjectID(oid_string_c);
+  // Wrap it
+  oid->Wrap(args.This());
+  // Return the object
+  return args.This();
 }
 
 void ObjectID::Initialize(Handle<Object> target) {
@@ -57,5 +78,17 @@ Handle<Value> ObjectID::Inspect(const Arguments &args) {
 Handle<Value> ObjectID::ToString(const Arguments &args) {
   HandleScope scope;
 
-  return String::New("ObjectID::ToString");
+  // Unpack the ObjectID instance
+  ObjectID *oid = ObjectWrap::Unwrap<ObjectID>(args.This());  
+  // Return the id
+  return String::New(oid->oid);
 }
+
+
+
+
+
+
+
+
+

@@ -10,6 +10,8 @@ using namespace node;
 
 class ObjectID : public ObjectWrap {  
   public:
+    char *oid;
+    
     ObjectID(char *oid);
     ~ObjectID();    
 
