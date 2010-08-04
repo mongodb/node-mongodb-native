@@ -125,9 +125,9 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
   // Adjust the index to point to next piece
   index = index + 4;      
 
-  for(int n = 0; n < size; n++) {
-    printf("C:: ============ %02x\n",(unsigned char)data[n]);
-  }
+  // for(int n = 0; n < size; n++) {
+  //   printf("C:: ============ %02x\n",(unsigned char)data[n]);
+  // }
   
   // for(int n = 0; s_value[n] != '\0'; n++) {
   //   printf("C:: ============ %02x\n",(unsigned char)s_value[n]);                      
@@ -137,7 +137,7 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
   while(index < size) {
     // Read the first to bytes to indicate the type of object we are decoding
     uint16_t type = BSON::deserialize_int8(data, index);
-    printf("C:: ============================ BSON:TYPE:%d\n", type);
+    // printf("C:: ============================ BSON:TYPE:%d\n", type);
     // Handles the internal size of the object
     uint32_t insert_index = 0;
     // Adjust index to skip type byte
@@ -193,7 +193,6 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
         return_data->Set(String::New(string_name), Integer::New(value));
       }          
     } else if(type == BSON_DATA_LONG) {
-      printf("======================================== wow\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -206,18 +205,31 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
       
       // Decode the integer value
       int64_t value = 0;
-      memcpy(&value, (data + index), 8);
+      memcpy(&value, (data + index), 8);      
+      // Adjust the index for the size of the value
+      index = index + 8;
+            
+      // Add the element to the object
+      if(is_array_item) {
+        
+      } else {
+        return_data->Set(String::New(string_name), BSON::encodeLong(value));
+      }
+    } else if(type == BSON_DATA_NUMBER) {
+      // printf("===================================== decoding float/double\n");      
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Need to handle arrays here
+      // TODO TODO TODO           
+      // TODO TODO TODO           
+      // TODO TODO TODO          
       
-      // for(int n = 0; n < 8; n++) {
-      //   printf("C:: ============ %02x\n",(unsigned char)data[index  + n]);
-      // }
-      // 
-      // Let's package the value in a long value and then wrap it up for the application
-      // Long *l = Long::fromNumber(value);
-      // Local<Value> argv[] = {Number::New(value)};
-      // Handle<Value> long_obj = constructor_template->GetFunction()->NewInstance(1, argv);    
-      // return scope.Close(long_obj);    
-      
+      // Decode the integer value
+      double value = 0;
+      memcpy(&value, (data + index), 8);      
       // Adjust the index for the size of the value
       index = index + 8;
       
@@ -225,9 +237,133 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
       if(is_array_item) {
         
       } else {
-        return_data->Set(String::New(string_name), BSON::encodeLong(value));
+        return_data->Set(String::New(string_name), Number::New(value));
       }
-    }        
+    } else if(type == BSON_DATA_NULL) {
+      // printf("===================================== decoding float/double\n");      
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Need to handle arrays here
+      // TODO TODO TODO           
+      // TODO TODO TODO           
+      // TODO TODO TODO          
+      
+      // Add the element to the object
+      if(is_array_item) {
+        
+      } else {
+        return_data->Set(String::New(string_name), Null());
+      }      
+    } else if(type == BSON_DATA_BOOLEAN) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Need to handle arrays here
+      // TODO TODO TODO           
+      // TODO TODO TODO           
+      // TODO TODO TODO          
+
+      // Decode the boolean value
+      char bool_value = *(data + index);
+      // Adjust the index for the size of the value
+      index = index + 1;
+      
+      // Add the element to the object
+      if(is_array_item) {
+        
+      } else {
+        return_data->Set(String::New(string_name), bool_value == 1 ? Boolean::New(true) : Boolean::New(false));
+      }            
+    } else if(type == BSON_DATA_DATE) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Need to handle arrays here
+      // TODO TODO TODO           
+      // TODO TODO TODO           
+      // TODO TODO TODO          
+
+      // Decode the value 64 bit integer
+      int64_t value = 0;
+      memcpy(&value, (data + index), 8);      
+      // Adjust the index for the size of the value
+      index = index + 8;
+      // Add the element to the object
+      if(is_array_item) {
+        
+      } else {
+        return_data->Set(String::New(string_name), Date::New((double)value));
+      }      
+    } else if(type == BSON_DATA_REGEXP) {
+      // printf("==================================================== decode regexp\n");
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Need to handle arrays here
+      // TODO TODO TODO           
+      // TODO TODO TODO           
+      // TODO TODO TODO          
+
+      // Length variable
+      int32_t length_regexp = 0;
+      char chr;
+
+      // Locate end of the regexp expression \0
+      while((chr = *(data + index + length_regexp)) != '\0') {
+        length_regexp = length_regexp + 1;
+      }
+            
+      // Contains the reg exp
+      char *reg_exp = (char *)malloc(length_regexp * sizeof(char) + 1);
+      // Copy the regexp from the data to the char *
+      memcpy(reg_exp, (data + index), (length_regexp + 1));      
+      // Adjust the index to skip the first part of the regular expression
+      index = index + length_regexp + 1;
+            
+      // Reset the length
+      int32_t options_length = 0;
+      // Locate the end of the options for the regexp terminated with a '\0'
+      while((chr = *(data + index + options_length)) != '\0') {
+        options_length = options_length + 1;
+      }
+
+      // Contains the reg exp
+      char *options = (char *)malloc(options_length * sizeof(char) + 1);
+      // Copy the options from the data to the char *
+      memcpy(options, (data + index), (options_length + 1));      
+      // Adjust the index to skip the option part of the regular expression
+      index = index + options_length + 1;      
+      // ARRRRGH Google does not expose regular expressions through the v8 api
+      // Have to use Script to instantiate the object (slower)
+
+      // Generate the string for execution in the string context
+      char *reg_exp_string = (char *)malloc((length_regexp + options_length)*sizeof(char) + 2 + 2);
+      *(reg_exp_string) = '\0';
+      strncat(reg_exp_string, "/", 1);      
+      strncat(reg_exp_string, reg_exp, length_regexp);      
+      strncat(reg_exp_string, "/", 1);      
+      strncat(reg_exp_string, options, options_length);
+
+      // Execute script creating a regular expression object
+      Local<Script> script = Script::New(String::New(reg_exp_string), String::New("bson.<anonymous>"));
+      Handle<Value> result = script->Run();
+
+      // Add the element to the object
+      if(is_array_item) {
+        
+      } else {
+        return_data->Set(String::New(string_name), result);
+      }      
+    }
   }
 
   // Return the data object to javascript
@@ -241,11 +377,6 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
 Handle<Value> BSON::encodeLong(int64_t value) {
   HandleScope scope;
   
-  // printf("============================== Deserialize: %lli\n", value);
-  // Local<Number> n = Number::New(value);
-  // printf("============================== Deserialize: %lli\n", n->IntegerValue());
-  // printf("============================== Deserialize: %f\n", n->NumberValue());
-
   Local<Value> argv[] = {Number::New(value)};
   Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(1, argv);    
   return scope.Close(long_obj);      

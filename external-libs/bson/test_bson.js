@@ -38,11 +38,7 @@ l2_string = Long2.fromNumber(1).toString();
 l_string = Long.fromNumber(1).toString();
 assert.equal(l_string, l2_string);
 
-// sys.puts(sys.inspect(require('./bson')))
-// var l = new Long2();
-// sys.puts("=============== Long:ToString() = " + l.toString());
-
-// sys.puts(sys.inspect(require.paths))
+// Create an instance of the bson object
 var bson = new BSON();
 
 // Simple serialization and deserialization test for a Single String value
@@ -62,11 +58,60 @@ var bson = new BSON();
 // var simple_string_serialized = BSONJS.serialize({doc:-2147483648});
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
-
-// Simple serialization and deserialization test for a Long value
-var simple_string_serialized = BSONJS.serialize({doc:Long2.fromNumber(9223372036854775807)});
-// var s = bson.deserialize(simple_string_serialized, 'binary');
-// sys.debug(sys.inspect(s))
-// sys.debug("===================== number: " + s.doc)
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
+// 
+// // Simple serialization and deserialization test for a Long value
+// var simple_string_serialized = BSONJS.serialize({doc:Long2.fromNumber(9223372036854775807)});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
+// 
+// // Simple serialization and deserialization for a Float value
+// var simple_string_serialized = BSONJS.serialize({doc:2222.3333});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
+// 
+// var simple_string_serialized = BSONJS.serialize({doc:-2222.3333});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
+// 
+// // Simple serialization and deserialization for a null value
+// var simple_string_serialized = BSONJS.serialize({doc:null});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
+// 
+// // Simple serialization and deserialization for a boolean value
+// var simple_string_serialized = BSONJS.serialize({doc:true});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
+// 
+// // Simple serialization and deserialization for a date value
+// var date = new Date();
+// var simple_string_serialized = BSONJS.serialize({doc:date});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
+
+// Simple serialization and deserialization for a boolean value
+var simple_string_serialized = BSONJS.serialize({doc:/abcd/mi});
+assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(simple_string_serialized, 'binary').doc.toString());
+assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
