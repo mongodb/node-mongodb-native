@@ -72,7 +72,10 @@ void ObjectID::Initialize(Handle<Object> target) {
 Handle<Value> ObjectID::Inspect(const Arguments &args) {
   HandleScope scope;
   
-  return String::New("ObjectID::Inspect");
+  // Unpack the ObjectID instance
+  ObjectID *oid = ObjectWrap::Unwrap<ObjectID>(args.This());  
+  // Return the id
+  return String::New(oid->oid);
 }
 
 Handle<Value> ObjectID::ToString(const Arguments &args) {

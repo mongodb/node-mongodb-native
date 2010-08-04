@@ -9,6 +9,7 @@ var sys = require('sys'),
   assert = require('assert');
   
 var Long2 = require('./bson').Long;
+var ObjectID2 = require('./bson').ObjectID;
 
 // Long data type tests
 var l2_string = Long2.fromNumber(9223372036854775807).toString();
@@ -97,10 +98,18 @@ var bson = new BSON();
 
 // Simple serialization and deserialization for a date value
 var date = new Date();
-var simple_string_serialized = BSONJS.serialize({doc:new ObjectID()});
+var simple_string_serialized = BSONJS.serialize({doc:new ObjectID2()});
 sys.puts("===================== OBJECTID: " + bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString());
+sys.puts("===================== OBJECTID: " + sys.inspect(bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc));
 
-// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
+var a = BSONJS.deserialize(simple_string_serialized).doc;
+var b = bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc;
+// sys.puts("==================a " + a + "=" + b)
+sys.puts("================================= a.length: " + a.toString().length)
+sys.puts("================================= b.length: " + b.toString().length)
+sys.puts(a === b)
+
+assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
 
 
