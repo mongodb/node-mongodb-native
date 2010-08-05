@@ -125,14 +125,16 @@ Handle<Value> Long::LowGetter(Local<String> property, const AccessorInfo& info) 
 }
 
 void Long::LowSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
-  // Unpack object reference
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to Long object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
-  // Set the low bits
-  static_cast<Long *>(ptr)->low_bits = value->Int32Value();
+  if(value->IsNumber()) {
+    // Unpack object reference
+    Local<Object> self = info.Holder();
+    // Fetch external reference (reference to Long object)
+    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    // Get pointer to the object
+    void *ptr = wrap->Value();
+    // Set the low bits
+    static_cast<Long *>(ptr)->low_bits = value->Int32Value();    
+  }
 }
 
 Handle<Value> Long::HighGetter(Local<String> property, const AccessorInfo& info) {
@@ -151,14 +153,16 @@ Handle<Value> Long::HighGetter(Local<String> property, const AccessorInfo& info)
 }
 
 void Long::HighSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
-  // Unpack object reference
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to Long object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
-  // Set the low bits
-  static_cast<Long *>(ptr)->high_bits = value->Int32Value();  
+  if(value->IsNumber()) {
+    // Unpack object reference
+    Local<Object> self = info.Holder();
+    // Fetch external reference (reference to Long object)
+    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+    // Get pointer to the object
+    void *ptr = wrap->Value();
+    // Set the low bits
+    static_cast<Long *>(ptr)->high_bits = value->Int32Value();  
+  }
 }
 
 Handle<Value> Long::Inspect(const Arguments &args) {

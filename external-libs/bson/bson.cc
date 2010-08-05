@@ -124,13 +124,13 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
   uint32_t index = 0;
   // Decode the size of the BSON data structure
   uint32_t size = BSON::deserialize_int32(data, index);
-  printf("C:: ============================ BSON:SIZE:%d\n", size);            
+  // printf("C:: ============================ BSON:SIZE:%d\n", size);            
   // Adjust the index to point to next piece
   index = index + 4;      
 
-  for(int n = 0; n < size; n++) {
-    printf("C:: ============ %02x\n",(unsigned char)data[n]);
-  }
+  // for(int n = 0; n < size; n++) {
+  //   printf("C:: ============ %02x\n",(unsigned char)data[n]);
+  // }
   
   // for(int n = 0; s_value[n] != '\0'; n++) {
   //   printf("C:: ============ %02x\n",(unsigned char)s_value[n]);                      
@@ -433,7 +433,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
         return_data->Set(String::New(string_name), BSON::decodeBinary(sub_type, buffer));
       }
     } else if(type == BSON_DATA_CODE_W_SCOPE) {
-      printf("=================================================== unpacking code\n");
+      // printf("=================================================== unpacking code\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -482,7 +482,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
         return_data->Set(String::New(string_name), obj);
       }      
     } else if(type == BSON_DATA_OBJECT) {
-      printf("=================================================== unpacking object\n");
+      // printf("=================================================== unpacking object\n");
       
     }
   }
@@ -502,8 +502,7 @@ const char* BSON::ToCString(const v8::String::Utf8Value& value) {
 Handle<Value> BSON::decodeCode(char *code, Handle<Value> scope_object) {
   HandleScope scope;
   
-  // Local<Value> argv[] = {String::New(code), scope_object->ToObject()};
-  Local<Value> argv[] = {String::New("1"), String::New("2")};
+  Local<Value> argv[] = {String::New(code), scope_object->ToObject()};
   Handle<Value> code_obj = Code::constructor_template->GetFunction()->NewInstance(2, argv);
   return scope.Close(code_obj);
 }

@@ -10,7 +10,10 @@ using namespace node;
 
 class Code : public ObjectWrap {  
   public:    
-    Code();
+    char *code;
+    Handle<Value> scope_object;
+    
+    Code(char *code, Handle<Value> scope_object);
     ~Code();    
 
     // Functions available from V8
@@ -20,6 +23,12 @@ class Code : public ObjectWrap {
 
     // Constructor used for creating new Long objects from C++
     static Persistent<FunctionTemplate> constructor_template;
+    
+    // Setters and Getters for internal properties
+    static Handle<Value> CodeGetter(Local<String> property, const AccessorInfo& info);
+    static void CodeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info);
+    static Handle<Value> ScopeGetter(Local<String> property, const AccessorInfo& info);
+    static void ScopeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info);
     
   private:
     static Handle<Value> New(const Arguments &args);
