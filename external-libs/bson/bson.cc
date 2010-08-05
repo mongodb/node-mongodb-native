@@ -140,7 +140,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
   while(index < size) {
     // Read the first to bytes to indicate the type of object we are decoding
     uint16_t type = BSON::deserialize_int8(data, index);
-    printf("C:: ============================ BSON:TYPE:%d\n", type);
+    // printf("C:: ============================ BSON:TYPE:%d\n", type);
     // Handles the internal size of the object
     uint32_t insert_index = 0;
     // Adjust index to skip type byte
@@ -174,7 +174,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
         return_data->Set(String::New(string_name), String::New(value));
       }
     } else if(type == BSON_DATA_INT) {
-      printf("===================================== decoding int\n");      
+      // printf("===================================== decoding int\n");      
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -473,6 +473,9 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       Handle<Value> obj = BSON::decodeCode(code, scope_object);
       // If an error was thrown push it up the chain
       if(try_catch.HasCaught()) {
+        // Clean up memory allocation
+        free(bson_buffer);
+        // Rethrow exception
         return try_catch.ReThrow();
       }
 
@@ -481,9 +484,49 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       } else {
         return_data->Set(String::New(string_name), obj);
       }      
+      // Clean up memory allocation
+      free(bson_buffer);      
     } else if(type == BSON_DATA_OBJECT) {
       // printf("=================================================== unpacking object\n");
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Need to handle arrays here
+      // TODO TODO TODO
+      // TODO TODO TODO
+      // TODO TODO TODO
+
+      // printf("============================================ start_unpack\n");
+      // Get the object size
+      uint32_t bson_object_size = BSON::deserialize_int32(data, index);
+      // printf("======================================= size: %d\n", bson_object_size);
       
+      // Allocate bson object buffer and copy out the content
+      char *bson_buffer = (char *)malloc(bson_object_size * sizeof(char));
+      memcpy(bson_buffer, (data + index), bson_object_size);
+      // Adjust the index
+      index = index + bson_object_size;
+      // Define the try catch block
+      TryCatch try_catch;                
+      // Decode the code object
+      Handle<Value> obj = BSON::deserialize(bson_buffer, false);
+      // If an error was thrown push it up the chain
+      if(try_catch.HasCaught()) {
+        // Clean up memory allocation
+        free(bson_buffer);
+        // Rethrow exception
+        return try_catch.ReThrow();
+      }
+      
+      // Add the element to the object
+      if(is_array_item) {        
+      } else {
+        return_data->Set(String::New(string_name), obj);
+      }
+      // Clean up memory allocation
+      free(bson_buffer);
     }
   }
 

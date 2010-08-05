@@ -113,19 +113,18 @@ var bson = new BSON();
 // var simple_string_serialized = BSONJS.serialize({doc:binary});
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.value(), bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.value());
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.value(), bson.deserialize(simple_string_serialized, 'binary').doc.value());
+// 
+// // Simple serialization and deserialization for a Binary value
+// var code = new Code('this.a > i', {'i': 1});
+// var simple_string_serialized = BSONJS.serialize({doc:code});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.scope, bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.scope);
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.code, bson.deserialize(simple_string_serialized, 'binary').doc.code);
 
-// Simple serialization and deserialization for a Binary value
-var code = new Code('this.a > i', {'i': 1});
-var simple_string_serialized = BSONJS.serialize({doc:code});
-
-sys.puts("====================== scope_1: " + BSONJS.deserialize(simple_string_serialized).doc.scope.i);
-sys.puts("====================== code_1: " + BSONJS.deserialize(simple_string_serialized).doc.code);
-// sys.puts("====================== code: " + bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.code);
-sys.puts("====================== scope: " + bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.scope.i);
-sys.puts("====================== code: " + bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.code);
-
-// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.value(), bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.value());
-// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.value(), bson.deserialize(simple_string_serialized, 'binary').doc.value());
+// Simple serialization and deserialization for an Object
+var simple_string_serialized = BSONJS.serialize({doc:{a:1}});
+sys.puts(sys.inspect(bson.deserialize(new Buffer(simple_string_serialized, 'binary'))))
+assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc, bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc);
+assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc, bson.deserialize(simple_string_serialized, 'binary').doc);
 
 
 
