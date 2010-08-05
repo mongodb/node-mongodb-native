@@ -1,15 +1,20 @@
 require.paths.unshift("../../lib");
 
 var sys = require('sys'),
+  Buffer = require('buffer').Buffer,
   BSON = require('./bson').BSON,
   Buffer = require('buffer').Buffer,
   BSONJS = require('mongodb/bson/bson').BSON,
   Long = require('mongodb/goog/math/long').Long,
-  ObjectID = require('mongodb/bson/bson').ObjectID;
+  ObjectID = require('mongodb/bson/bson').ObjectID,
+  Binary = require('mongodb/bson/bson').Binary,
+  Code = require('mongodb/bson/bson').Code,  
   assert = require('assert');
   
-var Long2 = require('./bson').Long;
-var ObjectID2 = require('./bson').ObjectID;
+var Long2 = require('./bson').Long,
+    ObjectID2 = require('./bson').ObjectID,
+    Binary2 = require('./bson').Binary2,
+    Code2 = require('./bson').Code2;
 
 // Long data type tests
 var l2_string = Long2.fromNumber(9223372036854775807).toString();
@@ -95,22 +100,30 @@ var bson = new BSON();
 // var simple_string_serialized = BSONJS.serialize({doc:/abcd/mi});
 // assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(simple_string_serialized, 'binary').doc.toString());
 // assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString());
+// 
+// // Simple serialization and deserialization for a objectId value
+// var simple_string_serialized = BSONJS.serialize({doc:new ObjectID()});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString());
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.toString(), bson.deserialize(simple_string_serialized, 'binary').doc.toString());
+// 
+// // Simple serialization and deserialization for a Binary value
+// var binary = new Binary();
+// var string = 'binstring'
+// for(var index = 0; index < string.length; index++) { binary.put(string.charAt(index)); }
+// var simple_string_serialized = BSONJS.serialize({doc:binary});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.value(), bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.value());
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.value(), bson.deserialize(simple_string_serialized, 'binary').doc.value());
 
-// Simple serialization and deserialization for a date value
-var date = new Date();
-var simple_string_serialized = BSONJS.serialize({doc:new ObjectID2()});
-sys.puts("===================== OBJECTID: " + bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString());
-sys.puts("===================== OBJECTID: " + sys.inspect(bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc));
+// Simple serialization and deserialization for a Binary value
+var code = new Code('this.a > i', {'i': 1});
+var simple_string_serialized = BSONJS.serialize({doc:code});
 
-var a = BSONJS.deserialize(simple_string_serialized).doc;
-var b = bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc;
-// sys.puts("==================a " + a + "=" + b)
-sys.puts("================================= a.length: " + a.toString().length)
-sys.puts("================================= b.length: " + b.toString().length)
-sys.puts(a === b)
+sys.puts("====================== scope_1: " + BSONJS.deserialize(simple_string_serialized).doc.scope);
+// sys.puts("====================== code: " + bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.code);
+sys.puts("====================== scope: " + bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.scope);
 
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(new Buffer(simple_string_serialized, 'binary')));
-// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), bson.deserialize(simple_string_serialized, 'binary'));
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.value(), bson.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.value());
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.value(), bson.deserialize(simple_string_serialized, 'binary').doc.value());
 
 
 

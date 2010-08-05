@@ -14,6 +14,8 @@
 #include "bson.h"
 #include "long.h"
 #include "objectid.h"
+#include "binary.h"
+#include "code.h"
 
 using namespace v8;
 using namespace node;
@@ -109,11 +111,11 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
   }
   
   // Deserialize the content
-  return BSON::deserialize(data, length, NULL);
+  return BSON::deserialize(data, NULL);
 }
 
 // Deserialize the stream
-Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item) {
+Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
   HandleScope scope;
   // Holds references to the objects that are going to be returned
   Local<Object> return_data = Object::New();
@@ -122,13 +124,13 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
   uint32_t index = 0;
   // Decode the size of the BSON data structure
   uint32_t size = BSON::deserialize_int32(data, index);
-  // printf("C:: ============================ BSON:SIZE:%d\n", size);            
+  printf("C:: ============================ BSON:SIZE:%d\n", size);            
   // Adjust the index to point to next piece
   index = index + 4;      
 
-  // for(int n = 0; n < size; n++) {
-  //   printf("C:: ============ %02x\n",(unsigned char)data[n]);
-  // }
+  for(int n = 0; n < size; n++) {
+    printf("C:: ============ %02x\n",(unsigned char)data[n]);
+  }
   
   // for(int n = 0; s_value[n] != '\0'; n++) {
   //   printf("C:: ============ %02x\n",(unsigned char)s_value[n]);                      
@@ -138,7 +140,7 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
   while(index < size) {
     // Read the first to bytes to indicate the type of object we are decoding
     uint16_t type = BSON::deserialize_int8(data, index);
-    // printf("C:: ============================ BSON:TYPE:%d\n", type);
+    printf("C:: ============================ BSON:TYPE:%d\n", type);
     // Handles the internal size of the object
     uint32_t insert_index = 0;
     // Adjust index to skip type byte
@@ -172,6 +174,7 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
         return_data->Set(String::New(string_name), String::New(value));
       }
     } else if(type == BSON_DATA_INT) {
+      printf("===================================== decoding int\n");      
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -214,7 +217,7 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
       if(is_array_item) {
         
       } else {
-        return_data->Set(String::New(string_name), BSON::encodeLong(value));
+        return_data->Set(String::New(string_name), BSON::decodeLong(value));
       }
     } else if(type == BSON_DATA_NUMBER) {
       // printf("===================================== decoding float/double\n");      
@@ -393,8 +396,94 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
       if(is_array_item) {
         
       } else {
-        return_data->Set(String::New(string_name), BSON::encodeOid(oid_string));
+        return_data->Set(String::New(string_name), BSON::decodeOid(oid_string));
       }            
+    } else if(type == BSON_DATA_BINARY) {
+      // printf("=================================================== unpacking binary\n");
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Need to handle arrays here
+      // TODO TODO TODO           
+      // TODO TODO TODO           
+      // TODO TODO TODO      
+      
+      // Total number of bytes after array index
+      uint32_t total_number_of_bytes = BSON::deserialize_int32(data, index);
+      // Adjust the index
+      index = index + 4;
+      // Decode the subtype
+      uint32_t sub_type = (int)*(data + index);
+      // Adjust the index
+      index = index + 1;
+      // Read the binary data size
+      uint32_t number_of_bytes = BSON::deserialize_int32(data, index);
+      // Adjust the index
+      index = index + 4;
+      // Copy the binary data into a buffer
+      char *buffer = (char *)malloc(number_of_bytes * sizeof(char));
+      memcpy(buffer, (data + index), number_of_bytes);
+
+      // Add the element to the object
+      if(is_array_item) {
+        
+      } else {
+        return_data->Set(String::New(string_name), BSON::decodeBinary(sub_type, buffer));
+      }
+    } else if(type == BSON_DATA_CODE_W_SCOPE) {
+      printf("=================================================== unpacking code\n");
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Need to handle arrays here
+      // TODO TODO TODO
+      // TODO TODO TODO
+      // TODO TODO TODO
+      
+      // Total number of bytes after array index
+      uint32_t total_code_size = BSON::deserialize_int32(data, index);
+      // Adjust the index
+      index = index + 4;
+      // Read the string size
+      uint32_t string_size = BSON::deserialize_int32(data, index);
+      // Adjust the index
+      index = index + 4;
+      // Read the string
+      char *code = (char *)malloc(string_size * sizeof(char) + 1);
+      // Copy string + terminating 0
+      memcpy(code, (data + index), string_size);
+      // Adjust the index
+      index = index + string_size;      
+      // Get the scope object (bson object)
+      uint32_t bson_object_size = total_code_size - string_size - 8;
+      // Allocate bson object buffer and copy out the content
+      char *bson_buffer = (char *)malloc(bson_object_size * sizeof(char));
+      memcpy(bson_buffer, (data + index), bson_object_size);
+      // Adjust the index
+      index = index + bson_object_size;
+      // Parse the bson object
+      Handle<Value> scope_object = BSON::deserialize(bson_buffer, false);
+      // Define the try catch block
+      TryCatch try_catch;                
+      // Decode the code object
+      Handle<Value> obj = BSON::decodeCode(code, scope_object);
+      // If an error was thrown push it up the chain
+      if(try_catch.HasCaught()) {
+        return try_catch.ReThrow();
+      }
+
+      // Add the element to the object
+      if(is_array_item) {        
+      } else {
+        return_data->Set(String::New(string_name), obj);
+      }      
+    } else if(type == BSON_DATA_OBJECT) {
+      printf("=================================================== unpacking object\n");
+      
     }
   }
 
@@ -406,7 +495,28 @@ Handle<Value> BSON::deserialize(char *data, uint32_t length, bool is_array_item)
   }
 }
 
-Handle<Value> BSON::encodeOid(char *oid) {
+const char* BSON::ToCString(const v8::String::Utf8Value& value) {
+  return *value ? *value : "<string conversion failed>";
+}
+
+Handle<Value> BSON::decodeCode(char *code, Handle<Value> scope_object) {
+  HandleScope scope;
+  
+  // Local<Value> argv[] = {String::New(code), scope_object->ToObject()};
+  Local<Value> argv[] = {String::New("1"), String::New("2")};
+  Handle<Value> code_obj = Code::constructor_template->GetFunction()->NewInstance(2, argv);
+  return scope.Close(code_obj);
+}
+
+Handle<Value> BSON::decodeBinary(uint32_t sub_type, char *data) {
+  HandleScope scope;
+  
+  Local<Value> argv[] = {Integer::New(sub_type), String::New(data)};
+  Handle<Value> binary_obj = Binary::constructor_template->GetFunction()->NewInstance(2, argv);
+  return scope.Close(binary_obj);
+}
+
+Handle<Value> BSON::decodeOid(char *oid) {
   HandleScope scope;
   
   Local<Value> argv[] = {String::New(oid)};
@@ -414,7 +524,7 @@ Handle<Value> BSON::encodeOid(char *oid) {
   return scope.Close(oid_obj);
 }
 
-Handle<Value> BSON::encodeLong(int64_t value) {
+Handle<Value> BSON::decodeLong(int64_t value) {
   HandleScope scope;
   
   Local<Value> argv[] = {Number::New(value)};
@@ -476,6 +586,8 @@ extern "C" void init(Handle<Object> target) {
   BSON::Initialize(target);
   Long::Initialize(target);
   ObjectID::Initialize(target);
+  Binary::Initialize(target);
+  Code::Initialize(target);
 }
 
 // NODE_MODULE(bson, BSON::Initialize);

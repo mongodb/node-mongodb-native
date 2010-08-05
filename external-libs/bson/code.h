@@ -1,5 +1,5 @@
-#ifndef OBJECTID_H_
-#define OBJECTID_H_
+#ifndef CODE_H_
+#define CODE_H_
 
 #include <node.h>
 #include <node_object_wrap.h>
@@ -8,12 +8,10 @@
 using namespace v8;
 using namespace node;
 
-class ObjectID : public ObjectWrap {  
-  public:
-    char *oid;
-    
-    ObjectID(char *oid);
-    ~ObjectID();    
+class Code : public ObjectWrap {  
+  public:    
+    Code();
+    ~Code();    
 
     // Functions available from V8
     static void Initialize(Handle<Object> target);    
@@ -25,10 +23,6 @@ class ObjectID : public ObjectWrap {
     
   private:
     static Handle<Value> New(const Arguments &args);
-    
-    // Generates oid's (Based on BSON C lib)
-    static char *oid_id_generator();
-    static char *uint32_to_char(uint32_t value);
 };
 
-#endif  // OBJECTID_H_
+#endif  // CODE_H_
