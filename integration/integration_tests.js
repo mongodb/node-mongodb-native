@@ -5,7 +5,6 @@ test = require("assert");
 var mongo = require('../lib/mongodb'),
   ObjectID = require('../lib/mongodb/bson/bson').ObjectID,
   Cursor = require('../lib/mongodb/cursor').Cursor,
-  OrderedHash = require('../lib/mongodb/bson/collections').OrderedHash,
   Collection = require('../lib/mongodb/collection').Collection,
   BinaryParser = require('../lib/mongodb/bson/binary_parser').BinaryParser,
   Buffer = require('buffer').Buffer,
@@ -88,11 +87,11 @@ var all_tests = {
       client.createCollection('test.mario', function(r) {
         // Insert test documents (creates collections)
         client.collection('test.spiderman', function(err, spiderman_collection) {
-          spiderman_collection.insert(new mongo.OrderedHash().add("foo", 5));        
+          spiderman_collection.insert({foo:5});        
         });
 
         client.collection('test.mario', function(err, mario_collection) {
-          mario_collection.insert(new mongo.OrderedHash().add("bar", 0));        
+          mario_collection.insert({bar:0});        
         });
 
         // Assert collections
@@ -122,23 +121,23 @@ var all_tests = {
 
     client.collection('test_object_id_generation.data', function(err, collection) {
       // Insert test documents (creates collections and test fetch by query)
-      collection.insert(new mongo.OrderedHash().add("name", "Fred").add("age", 42), function(err, ids) {
+      collection.insert({name:"Fred", age:42}, function(err, ids) {
         test.equal(1, ids.length);    
-        test.ok(ids[0].get('_id').toHexString().length == 24);
+        test.ok(ids[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
-        collection.findOne(new mongo.OrderedHash().add("name", "Fred"), function(err, document) {
-          test.equal(ids[0].get('_id').toHexString(), document._id.toHexString());
+        collection.findOne({name:"Fred"}, function(err, document) {
+          test.equal(ids[0]['_id'].toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });      
       });
 
       // Insert another test document and collect using ObjectId
-      collection.insert(new mongo.OrderedHash().add("name", "Pat").add("age", 21), function(err, ids) {
+      collection.insert({name:"Pat", age:21}, function(err, ids) {
         test.equal(1, ids.length);  
-        test.ok(ids[0].get('_id').toHexString().length == 24);
+        test.ok(ids[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
-        collection.findOne(ids[0].get('_id'), function(err, document) {
-          test.equal(ids[0].get('_id').toHexString(), document._id.toHexString());
+        collection.findOne(ids[0]['_id'], function(err, document) {
+          test.equal(ids[0]['_id'].toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });      
       });
@@ -147,13 +146,13 @@ var all_tests = {
       var objectId = new mongo.ObjectID(null);
 
       // Insert a manually created document with generated oid
-      collection.insert(new mongo.OrderedHash().add("_id", objectId).add("name", "Donald").add("age", 95), function(err, ids) {
+      collection.insert({"_id":objectId, name:"Donald", age:95}, function(err, ids) {
         test.equal(1, ids.length);  
-        test.ok(ids[0].get('_id').toHexString().length == 24);
-        test.equal(objectId.toHexString(), ids[0].get('_id').toHexString());
+        test.ok(ids[0]['_id'].toHexString().length == 24);
+        test.equal(objectId.toHexString(), ids[0]['_id'].toHexString());
         // Locate the first document inserted
-        collection.findOne(ids[0].get('_id'), function(err, document) {
-          test.equal(ids[0].get('_id').toHexString(), document._id.toHexString());
+        collection.findOne(ids[0]['_id'], function(err, document) {
+          test.equal(ids[0]['_id'].toHexString(), document._id.toHexString());
           test.equal(objectId.toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });      
@@ -268,7 +267,7 @@ var all_tests = {
                 test.equal("forced error", documents[0].err);    
                 // Force another error
                 error_client.collection('test_error_collection', function(err, collection) {
-                  collection.findOne(new mongo.OrderedHash().add("name", "Fred"), function(err, document) {              
+                  collection.findOne({name:"Fred"}, function(err, document) {              
                     // Check that we have two previous errors
                     error_client.previousErrors(function(err, documents) {
                       test.equal(true, documents[0].ok);                
@@ -312,33 +311,31 @@ var all_tests = {
         // Remove all the elements of the collection
         collection.remove(function(err, collection) {
           // Check update of a document
-          collection.insert(new mongo.OrderedHash().add("i", 1), function(err, ids) {
+          collection.insert({i:1}, function(err, ids) {
             test.equal(1, ids.length);    
-            test.ok(ids[0].get('_id').toHexString().length == 24);        
-
+            test.ok(ids[0]._id.toHexString().length == 24);        
+          
             // Update the record
-            collection.update(new mongo.OrderedHash().add("i", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("i", 2)), function(err, result) {
+            collection.update({i:1}, {"$set":{i:2}}, function(err, result) {
               // Check for the last message from the server
               client.lastStatus(function(err, status) {
                 test.equal(true, status.documents[0].ok);                
                 test.equal(true, status.documents[0].updatedExisting);                
                 // Check for failed update of document
-                collection.update(new mongo.OrderedHash().add("i", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("i", 500)), function(err, result) {
+                collection.update({i:1}, {"$set":{i:500}}, function(err, result) {
                   client.lastStatus(function(err, status) {
                     test.equal(true, status.documents[0].ok);                
                     test.equal(false, status.documents[0].updatedExisting);                
-
+          
                     // Check safe update of a document
-                    collection.insert(new mongo.OrderedHash().add("x", 1), function(err, ids) {
-                      collection.update(new mongo.OrderedHash().add("x", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("x", 2)), {'safe':true}, function(err, document) {
-                        test.ok(document instanceof OrderedHash);
-                        test.ok(document.get('$set') instanceof OrderedHash);
+                    collection.insert({x:1}, function(err, ids) {
+                      collection.update({x:1}, {"$set":{x:2}}, {'safe':true}, function(err, document) {
                       });
-
-                      collection.update(new mongo.OrderedHash().add("y", 1), new mongo.OrderedHash().add("$set", new mongo.OrderedHash().add("y", 2)), {'safe':true}, function(err, document) {
+          
+                      collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, document) {
                         test.ok(err instanceof Error);
                         test.equal("Failed to update document", err.message);
-
+          
                         // Let's close the db 
                         finished_test({test_last_status:'ok'});                     
                       });
@@ -357,8 +354,8 @@ var all_tests = {
   test_clear : function() {
     client.createCollection('test_clear', function(err, r) {
       client.collection('test_clear', function(err, collection) {
-        collection.insert(new mongo.OrderedHash().add("i", 1), function(err, ids) {
-          collection.insert(new mongo.OrderedHash().add("i", 2), function(err, ids) {
+        collection.insert({i:1}, function(err, ids) {
+          collection.insert({i:2}, function(err, ids) {
             collection.count(function(err, count) {
               test.equal(2, count);    
               // Clear the collection
@@ -381,11 +378,11 @@ var all_tests = {
     client.createCollection('test_insert', function(err, r) {
       client.collection('test_insert', function(err, collection) {
         for(var i = 1; i < 1000; i++) {
-          collection.insert(new mongo.OrderedHash().add('c', i), function(err, r) {});
+          collection.insert({c:i}, function(err, r) {});
         }
 
-        collection.insert(new mongo.OrderedHash().add('a', 2), function(err, r) {
-          collection.insert(new mongo.OrderedHash().add('a', 3), function(err, r) {
+        collection.insert({a:2}, function(err, r) {
+          collection.insert({a:3}, function(err, r) {
             collection.count(function(err, count) {
               test.equal(1001, count);
               // Locate all the entries using find
@@ -409,11 +406,11 @@ var all_tests = {
   test_multiple_insert : function() {
     client.createCollection('test_multiple_insert', function(err, r) {
       var collection = client.collection('test_multiple_insert', function(err, collection) {
-        var docs = [new mongo.OrderedHash().add('a', 1), new mongo.OrderedHash().add('a', 2)];
+        var docs = [{a:1}, {a:2}];
 
         collection.insert(docs, function(err, ids) {
           ids.forEach(function(doc) {
-            test.ok(((doc.get('_id')) instanceof ObjectID));
+            test.ok(((doc['_id']) instanceof ObjectID));
           });
 
           // Let's ensure we have both documents
@@ -454,7 +451,7 @@ var all_tests = {
         var doc2 = null;
 
         // Insert some test documents
-        collection.insert([new mongo.OrderedHash().add('a', 2), new mongo.OrderedHash().add('b', 3)], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]});
+        collection.insert([{a:2}, {b:3}], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]});
         // Ensure correct insertion testing via the cursor and the count function
         collection.find(function(err, cursor) {
           cursor.toArray(function(err, documents) {
@@ -478,16 +475,15 @@ var all_tests = {
   },
 
   // Test advanced find
-  // Test advanced find
   test_find_advanced : function() {
     client.createCollection('test_find_advanced', function(err, r) {
       var collection = client.collection('test_find_advanced', function(err, collection) {
         var doc1 = null, doc2 = null, doc3 = null;
 
         // Insert some test documents
-        collection.insert([new mongo.OrderedHash().add('a', 1), new mongo.OrderedHash().add('a', 2), new mongo.OrderedHash().add('b', 3)], function(err, docs) {
+        collection.insert([{a:1}, {a:2}, {b:3}], function(err, docs) {
             var doc1 = docs[0], doc2 = docs[1], doc3 = docs[2];
-        
+                    
             // Locate by less than
             collection.find({'a':{'$lt':10}}, function(err, cursor) {
               cursor.toArray(function(err, documents) {
@@ -501,7 +497,7 @@ var all_tests = {
                 test.equal(2, results.length);
               });
             });    
-
+            
             // Locate by greater than
             collection.find({'a':{'$gt':1}}, function(err, cursor) {
               cursor.toArray(function(err, documents) {
@@ -509,7 +505,7 @@ var all_tests = {
                 test.equal(2, documents[0].a);
               });
             });    
-
+            
             // Locate by less than or equal to
             collection.find({'a':{'$lte':1}}, function(err, cursor) {
               cursor.toArray(function(err, documents) {
@@ -517,7 +513,7 @@ var all_tests = {
                 test.equal(1, documents[0].a);
               });
             });    
-
+            
             // Locate by greater than or equal to
             collection.find({'a':{'$gte':1}}, function(err, cursor) {
               cursor.toArray(function(err, documents) {
@@ -531,7 +527,7 @@ var all_tests = {
                 test.equal(2, results.length);
               });
             });    
-
+            
             // Locate by between
             collection.find({'a':{'$gt':1, '$lt':3}}, function(err, cursor) {
               cursor.toArray(function(err, documents) {
@@ -539,7 +535,7 @@ var all_tests = {
                 test.equal(2, documents[0].a);
               });
             });    
-
+            
             // Locate in clause
             collection.find({'a':{'$in':[1,2]}}, function(err, cursor) {
               cursor.toArray(function(err, documents) {
@@ -555,7 +551,7 @@ var all_tests = {
             });
             
             // Locate in _id clause
-            collection.find({'_id':{'$in':[doc1.values._id, doc2.values._id]}}, function(err, cursor) {
+            collection.find({'_id':{'$in':[doc1['_id'], doc2['_id']]}}, function(err, cursor) {
               cursor.toArray(function(err, documents) {
                 test.equal(2, documents.length);
                 // Check that the correct documents are returned
@@ -580,10 +576,10 @@ var all_tests = {
       client.collection('test_find_sorting', function(err, collection) {
         var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
         // Insert some test documents
-        collection.insert([new mongo.OrderedHash().add('a', 1).add('b', 2), 
-            new mongo.OrderedHash().add('a', 2).add('b', 1), 
-            new mongo.OrderedHash().add('a', 3).add('b', 2),
-            new mongo.OrderedHash().add('a', 4).add('b', 1)
+        collection.insert([{a:1, b:2}, 
+            {a:2, b:1}, 
+            {a:3, b:2},
+            {a:4, b:1}
           ], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
 
         // Test sorting (ascending)
@@ -607,7 +603,7 @@ var all_tests = {
             test.equal(1, documents[3].a);
           });
         });
-
+        
         // Sorting using array of names, assumes ascending order
         collection.find({'a': {'$lt':10}}, {'sort': ['a']}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
@@ -618,7 +614,7 @@ var all_tests = {
             test.equal(4, documents[3].a);
           });
         });
-
+        
         // Sorting using single name, assumes ascending order
         collection.find({'a': {'$lt':10}}, {'sort': 'a'}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
@@ -629,7 +625,7 @@ var all_tests = {
             test.equal(4, documents[3].a);
           });
         });
-
+        
         collection.find({'a': {'$lt':10}}, {'sort': ['b', 'a']}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             test.equal(4, documents.length);
@@ -639,22 +635,22 @@ var all_tests = {
             test.equal(3, documents[3].a);
           });
         });
-
+        
         // Sorting using empty array, no order guarantee should not blow up
         collection.find({'a': {'$lt':10}}, {'sort': []}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             test.equal(4, documents.length);
-            // Let's close the db 
-            finished_test({test_find_sorting:'ok'});     
           });
         });
-
+        
         // Sorting using ordered hash
-        collection.find({'a': {'$lt':10}}, {'sort': new mongo.OrderedHash().add('a', -1)}, function(err, cursor) {
+        collection.find({'a': {'$lt':10}}, {'sort': {a:-1}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             // Fail test if not an error
             test.ok(err instanceof Error);
             test.equal("Error: Invalid sort argument was supplied", err.message);
+            // Let's close the db 
+            finished_test({test_find_sorting:'ok'});     
           });
         });            
       });
@@ -668,10 +664,10 @@ var all_tests = {
         var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
 
         // Insert some test documents
-        collection.insert([new mongo.OrderedHash().add('a', 1), 
-            new mongo.OrderedHash().add('b', 2), 
-            new mongo.OrderedHash().add('c', 3),
-            new mongo.OrderedHash().add('d', 4)
+        collection.insert([{a:1}, 
+            {b:2}, 
+            {c:3},
+            {d:4}
           ], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
 
         // Test limits
@@ -1126,7 +1122,7 @@ var all_tests = {
             });          
           });
 
-          collection.find({'$where':new mongo.Code('this.a > i', new mongo.OrderedHash().add('i', 1))}, function(err, cursor) {
+          collection.find({'$where':new mongo.Code('this.a > i', {i:1})}, function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(2, count);
 
@@ -1210,7 +1206,7 @@ var all_tests = {
 
           // Modify hints
           collection.hint = 'a';
-          test.equal(1, collection.hint.get('a'));
+          test.equal(1, collection.hint['a']);
           collection.find({'a':1}, function(err, cursor) {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
@@ -1218,7 +1214,7 @@ var all_tests = {
           });   
 
           collection.hint = ['a'];
-          test.equal(1, collection.hint.get('a'));
+          test.equal(1, collection.hint['a']);
           collection.find({'a':1}, function(err, cursor) {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
@@ -1226,7 +1222,7 @@ var all_tests = {
           });   
 
           collection.hint = {'a':1};
-          test.equal(1, collection.hint.get('a'));
+          test.equal(1, collection.hint['a']);
           collection.find({'a':1}, function(err, cursor) {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
@@ -1384,7 +1380,7 @@ var all_tests = {
                   test.equal('mike', doc.hello);
 
                   // Save another document
-                  collection.save(new mongo.OrderedHash().add('hello', 'world'), function(err, doc) {
+                  collection.save({hello:'world'}, function(err, doc) {
                     collection.count(function(err, count) {
                       test.equal(2, count);                        
                       // Let's close the db 
@@ -1477,8 +1473,8 @@ var all_tests = {
         test.ok(docs[0].constructor == Object);
       })
 
-      collection.insert(new mongo.OrderedHash().add('hello', new mongo.OrderedHash().add('hell$o', 'world')), function(err, docs) {
-        test.ok(docs[0] instanceof OrderedHash);
+      collection.insert({'hello':{'hell$o':'world'}}, function(err, docs) {
+        test.ok(err == null);
       })
 
       collection.insert({'.hello':'world'}, function(err, doc) {
@@ -3233,7 +3229,7 @@ var all_tests = {
         'regexp': /regexp/,
         'boolean': true, 
         'long': date.getTime(),
-        'where': new mongo.Code('this.a > i', new mongo.OrderedHash().add('i', 1)),
+        'where': new mongo.Code('this.a > i', {i:1}),
         'dbref': new mongo.DBRef('namespace', oid, 'integration_tests_')
       }
 
@@ -3256,7 +3252,7 @@ var all_tests = {
           test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
           test.equal(motherOfAllDocuments.boolean, doc.boolean);
           test.equal(motherOfAllDocuments.where.code, doc.where.code);
-          test.equal(motherOfAllDocuments.where.scope.get('i'), doc.where.scope.i);
+          test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
           test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
           test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
           test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
@@ -3430,7 +3426,7 @@ var all_tests = {
         var docCount = 25, docs = [];
 
         // Insert some test documents
-        while(docCount--) docs.push(new mongo.OrderedHash().add('a',docCount).add('b',docCount));
+        while(docCount--) docs.push({a:docCount, b:docCount});
         collection.insert(docs, function(err,retDocs){ docs = retDocs; });
 
         collection.find({},{ 'a' : 1},{ limit : 3, sort : [['a',-1]] },function(err,cursor){
@@ -3648,7 +3644,7 @@ var all_tests = {
         "motherOfAllDocuments['regexp'] = /regexp/;" +
         "motherOfAllDocuments['boolean'] = true;" +
         "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
-        "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', new mongo.OrderedHash().add('i', 1));" +
+        "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
         "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
       
       var context = { motherOfAllDocuments : {}, mongo:mongo, date:date};
@@ -3676,7 +3672,7 @@ var all_tests = {
            test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
            test.equal(motherOfAllDocuments.boolean, doc.boolean);
            test.equal(motherOfAllDocuments.where.code, doc.where.code);
-           test.equal(motherOfAllDocuments.where.scope.get('i'), doc.where.scope.i);
+           test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
            test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
            test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
            test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
