@@ -152,10 +152,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO           
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
       
       // Read the length of the string (next 4 bytes)
       uint32_t string_size = BSON::deserialize_int32(data, index);
@@ -169,10 +170,13 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       index = index + string_size;
       // Add the value to the data
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), String::New(value));        
       } else {
         return_data->Set(String::New(string_name), String::New(value));
       }
+      
+      // Free up the memory
+      free(value);
     } else if(type == BSON_DATA_INT) {
       // printf("===================================== decoding int\n");      
       // Read the null terminated index String
@@ -180,10 +184,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO          
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
       
       // Decode the integer value
       long value = 0;
@@ -192,7 +197,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       index = index + 4;
       // Add the element to the object
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), Integer::New(value));
       } else {
         return_data->Set(String::New(string_name), Integer::New(value));
       }          
@@ -202,10 +207,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO          
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
       
       // Decode the integer value
       int64_t value = 0;
@@ -215,7 +221,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
             
       // Add the element to the object
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), BSON::decodeLong(value));
       } else {
         return_data->Set(String::New(string_name), BSON::decodeLong(value));
       }
@@ -226,10 +232,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO          
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
       
       // Decode the integer value
       double value = 0;
@@ -239,7 +246,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       
       // Add the element to the object
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), Number::New(value));
       } else {
         return_data->Set(String::New(string_name), Number::New(value));
       }
@@ -250,14 +257,15 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO          
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
       
       // Add the element to the object
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), Null());
       } else {
         return_data->Set(String::New(string_name), Null());
       }      
@@ -267,10 +275,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO          
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
 
       // Decode the boolean value
       char bool_value = *(data + index);
@@ -279,7 +288,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       
       // Add the element to the object
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), bool_value == 1 ? Boolean::New(true) : Boolean::New(false));
       } else {
         return_data->Set(String::New(string_name), bool_value == 1 ? Boolean::New(true) : Boolean::New(false));
       }            
@@ -289,10 +298,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO          
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
 
       // Decode the value 64 bit integer
       int64_t value = 0;
@@ -301,20 +311,21 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       index = index + 8;
       // Add the element to the object
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), Date::New((double)value));
       } else {
         return_data->Set(String::New(string_name), Date::New((double)value));
-      }      
+      }       
     } else if(type == BSON_DATA_REGEXP) {
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO          
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
 
       // Length variable
       int32_t length_regexp = 0;
@@ -362,10 +373,15 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
 
       // Add the element to the object
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), result);
       } else {
         return_data->Set(String::New(string_name), result);
-      }      
+      }  
+      
+      // Free memory
+      free(reg_exp);          
+      free(options);          
+      free(reg_exp_string);          
     } else if(type == BSON_DATA_OID) {
       // printf("=================================================== unpacking oid\n");
       // Read the null terminated index String
@@ -373,10 +389,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO      
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
       
       // Allocate storage for a 24 character hex oid    
       char *oid_string = (char *)malloc(12 * 2 * sizeof(char) + 1);
@@ -394,10 +411,12 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
 
       // Add the element to the object
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), BSON::decodeOid(oid_string));
       } else {
         return_data->Set(String::New(string_name), BSON::decodeOid(oid_string));
-      }            
+      }     
+      // Free memory
+      free(oid_string);                       
     } else if(type == BSON_DATA_BINARY) {
       // printf("=================================================== unpacking binary\n");
       // Read the null terminated index String
@@ -405,10 +424,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO           
-      // TODO TODO TODO           
-      // TODO TODO TODO      
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
       
       // Total number of bytes after array index
       uint32_t total_number_of_bytes = BSON::deserialize_int32(data, index);
@@ -428,10 +448,12 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
 
       // Add the element to the object
       if(is_array_item) {
-        
+        return_array->Set(Number::New(insert_index), BSON::decodeBinary(sub_type, buffer));
       } else {
         return_data->Set(String::New(string_name), BSON::decodeBinary(sub_type, buffer));
       }
+      // Free memory
+      free(buffer);                             
     } else if(type == BSON_DATA_CODE_W_SCOPE) {
       // printf("=================================================== unpacking code\n");
       // Read the null terminated index String
@@ -439,10 +461,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO
-      // TODO TODO TODO
-      // TODO TODO TODO
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
       
       // Total number of bytes after array index
       uint32_t total_code_size = BSON::deserialize_int32(data, index);
@@ -481,6 +504,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
 
       // Add the element to the object
       if(is_array_item) {        
+        return_array->Set(Number::New(insert_index), obj);
       } else {
         return_data->Set(String::New(string_name), obj);
       }      
@@ -493,16 +517,14 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(string_name == NULL) return VException("Invalid C String found.");
       // Let's create a new string
       index = index + strlen(string_name) + 1;
-      // Need to handle arrays here
-      // TODO TODO TODO
-      // TODO TODO TODO
-      // TODO TODO TODO
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
 
-      // printf("============================================ start_unpack\n");
       // Get the object size
       uint32_t bson_object_size = BSON::deserialize_int32(data, index);
-      // printf("======================================= size: %d\n", bson_object_size);
-      
       // Allocate bson object buffer and copy out the content
       char *bson_buffer = (char *)malloc(bson_object_size * sizeof(char));
       memcpy(bson_buffer, (data + index), bson_object_size);
@@ -522,11 +544,51 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       
       // Add the element to the object
       if(is_array_item) {        
+        return_array->Set(Number::New(insert_index), obj);
       } else {
         return_data->Set(String::New(string_name), obj);
       }
       // Clean up memory allocation
       free(bson_buffer);
+    } else if(type == BSON_DATA_ARRAY) {
+      // printf("=================================================== unpacking array\n");
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Get the array size
+      uint32_t array_size = BSON::deserialize_int32(data, index);
+      // Let's split off the data and parse all elements (keeping in mind the elements)
+      char *array_buffer = (char *)malloc(array_size * sizeof(char));
+      memcpy(array_buffer, (data + index), array_size);
+      // Define the try catch block
+      TryCatch try_catch;                
+      // Decode the code object
+      Handle<Value> obj = BSON::deserialize(array_buffer, true);
+      // If an error was thrown push it up the chain
+      if(try_catch.HasCaught()) {
+        // Clean up memory allocation
+        free(array_buffer);
+        // Rethrow exception
+        return try_catch.ReThrow();
+      }
+      // Adjust the index for the next value
+      index = index + array_size;
+      // Add the element to the object
+      if(is_array_item) {        
+        return_array->Set(Number::New(insert_index), obj);
+      } else {
+        return_data->Set(String::New(string_name), obj);
+      }      
+      // Clean up memory allocation
+      free(array_buffer);
     }
   }
 
