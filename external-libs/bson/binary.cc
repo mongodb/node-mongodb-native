@@ -107,9 +107,6 @@ Handle<Value> Binary::Data(const Arguments &args) {
   
   // Unpack the Binary object
   Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
-  
-  printf("============================ binary->number_of_bytes: %d\n", binary->number_of_bytes);
-  
   // Return the raw data  
   Local<Value> bin_value = Encode(binary->data, binary->number_of_bytes, BINARY);
   return scope.Close(bin_value);
