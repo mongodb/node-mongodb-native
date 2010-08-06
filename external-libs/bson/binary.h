@@ -11,9 +11,10 @@ using namespace node;
 class Binary : public ObjectWrap {  
   public:
     char *data;
+    uint32_t number_of_bytes;
     uint32_t sub_type;
     
-    Binary(uint32_t sub_type, char *data);
+    Binary(uint32_t sub_type, uint32_t number_of_bytes, char *data);
     ~Binary();    
 
     // Functions available from V8
@@ -21,6 +22,7 @@ class Binary : public ObjectWrap {
     static Handle<Value> ToString(const Arguments &args);
     static Handle<Value> Inspect(const Arguments &args);
     static Handle<Value> Data(const Arguments &args);
+    static Handle<Value> Length(const Arguments &args);
 
     // Constructor used for creating new Long objects from C++
     static Persistent<FunctionTemplate> constructor_template;

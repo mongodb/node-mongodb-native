@@ -19,6 +19,7 @@ class ObjectID : public ObjectWrap {
     static void Initialize(Handle<Object> target);    
     static Handle<Value> ToString(const Arguments &args);
     static Handle<Value> Inspect(const Arguments &args);
+    static Handle<Value> ToHexString(const Arguments &args);
 
     // Constructor used for creating new Long objects from C++
     static Persistent<FunctionTemplate> constructor_template;

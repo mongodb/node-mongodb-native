@@ -26,9 +26,10 @@ static Handle<Value> VException(const char *msg) {
 
 Persistent<FunctionTemplate> Binary::constructor_template;
 
-Binary::Binary(uint32_t sub_type, char *data) : ObjectWrap() {
+Binary::Binary(uint32_t sub_type, uint32_t number_of_bytes, char *data) : ObjectWrap() {
   this->sub_type = sub_type;
-  this->data = data;
+  this->number_of_bytes = number_of_bytes;
+  this->data = data;  
 }
 
 Binary::~Binary() {}
@@ -44,7 +45,7 @@ Handle<Value> Binary::New(const Arguments &args) {
   if(args.Length() == 0) {
     char *oid_string_bytes = (char *)malloc(1);
     *(oid_string_bytes) = '\0';
-    binary = new Binary(BSON_BINARY_SUBTYPE_BYTE_ARRAY, oid_string_bytes);
+    binary = new Binary(BSON_BINARY_SUBTYPE_BYTE_ARRAY, 0, oid_string_bytes);
   } else if(args.Length() == 1 && args[0]->IsString()) {
     Local<String> str = args[0]->ToString();
     // Contains the bytes for the data
@@ -53,18 +54,18 @@ Handle<Value> Binary::New(const Arguments &args) {
     // Decode the data from the string
     node::DecodeWrite(oid_string_bytes, str->Length(), str, node::BINARY);    
     // Create a binary object
-    binary = new Binary(BSON_BINARY_SUBTYPE_BYTE_ARRAY, oid_string_bytes);
-  } else if(args.Length() == 2 && args[0]->IsNumber() && args[1]->IsString()) {
+    binary = new Binary(BSON_BINARY_SUBTYPE_BYTE_ARRAY, str->Length(), oid_string_bytes);
+  } else if(args.Length() == 2 && args[0]->IsNumber() && args[1]->IsString()) {    
     Local<Integer> intr = args[0]->ToInteger();
     Local<String> str = args[1]->ToString();
     // Contains the bytes for the data
-    char *oid_string_bytes = (char *)malloc(str->Length() + 1);
+    char *oid_string_bytes = (char *)malloc(str->Length());
     *(oid_string_bytes + str->Length()) = '\0';
     // Decode the data from the string
     node::DecodeWrite(oid_string_bytes, str->Length(), str, node::BINARY);        
     // Decode the subtype
     uint32_t sub_type = intr->Uint32Value();
-    binary = new Binary(sub_type, oid_string_bytes);
+    binary = new Binary(sub_type, str->Length(), oid_string_bytes);
   } else {
     return VException("Argument must be either none, a string or a sub_type and string");        
   }
@@ -86,10 +87,19 @@ void Binary::Initialize(Handle<Object> target) {
   
   // Instance methods
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "value", Data);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "value", Data);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "length", Length);
 
   target->Set(String::NewSymbol("Binary"), constructor_template->GetFunction());
+}
+
+Handle<Value> Binary::Length(const Arguments &args) {
+  HandleScope scope;
+  
+  // Unpack the Binary object
+  Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
+  return scope.Close(Integer::New(1));
 }
 
 Handle<Value> Binary::Data(const Arguments &args) {
@@ -97,8 +107,11 @@ Handle<Value> Binary::Data(const Arguments &args) {
   
   // Unpack the Binary object
   Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
+  
+  printf("============================ binary->number_of_bytes: %d\n", binary->number_of_bytes);
+  
   // Return the raw data  
-  Local<Value> bin_value = Encode(binary->data, strlen(binary->data), BINARY);
+  Local<Value> bin_value = Encode(binary->data, binary->number_of_bytes, BINARY);
   return scope.Close(bin_value);
 }
 
@@ -108,7 +121,8 @@ Handle<Value> Binary::Inspect(const Arguments &args) {
   // Unpack the Binary object
   Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
   // Return the raw data  
-  return String::New(binary->data);  
+  Local<Value> bin_value = Encode(binary->data, binary->number_of_bytes, BINARY);
+  return scope.Close(bin_value);
 }
 
 Handle<Value> Binary::ToString(const Arguments &args) {
@@ -117,7 +131,8 @@ Handle<Value> Binary::ToString(const Arguments &args) {
   // Unpack the Binary object
   Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
   // Return the raw data  
-  return String::New(binary->data);  
+  Local<Value> bin_value = Encode(binary->data, binary->number_of_bytes, BINARY);
+  return scope.Close(bin_value);
 }
 
 

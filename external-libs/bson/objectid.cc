@@ -146,10 +146,19 @@ void ObjectID::Initialize(Handle<Object> target) {
   // Instance methods
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
 
   target->Set(String::NewSymbol("ObjectID"), constructor_template->GetFunction());
 }
 
+Handle<Value> ObjectID::ToHexString(const Arguments &args) {
+  HandleScope scope;
+  
+  // Unpack the ObjectID instance
+  ObjectID *oid = ObjectWrap::Unwrap<ObjectID>(args.This());  
+  // Return the id
+  return String::New(oid->oid);  
+}
 
 Handle<Value> ObjectID::Inspect(const Arguments &args) {
   HandleScope scope;

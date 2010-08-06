@@ -191,7 +191,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       }      
       
       // Decode the integer value
-      long value = 0;
+      uint32_t value = 0;
       memcpy(&value, (data + index), 4);
       // Adjust the index for the size of the value
       index = index + 4;
@@ -443,14 +443,23 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Adjust the index
       index = index + 4;
       // Copy the binary data into a buffer
-      char *buffer = (char *)malloc(number_of_bytes * sizeof(char));
+      char *buffer = (char *)malloc(number_of_bytes * sizeof(char) + 1);
       memcpy(buffer, (data + index), number_of_bytes);
+      *(buffer + number_of_bytes) = '\0';
+      
+      // // Allocate buffer object with space
+      // Local<Buffer> buffer_obj = Buffer::New(number_of_bytes);
+      // // Write content to buffer
+      // buffer_obj->blob().length = 1;
+            
+      // Adjust the index
+      index = index + number_of_bytes;
 
       // Add the element to the object
       if(is_array_item) {
-        return_array->Set(Number::New(insert_index), BSON::decodeBinary(sub_type, buffer));
+        return_array->Set(Number::New(insert_index), BSON::decodeBinary(sub_type, number_of_bytes, buffer));
       } else {
-        return_data->Set(String::New(string_name), BSON::decodeBinary(sub_type, buffer));
+        return_data->Set(String::New(string_name), BSON::decodeBinary(sub_type, number_of_bytes, buffer));
       }
       // Free memory
       free(buffer);                             
@@ -612,10 +621,11 @@ Handle<Value> BSON::decodeCode(char *code, Handle<Value> scope_object) {
   return scope.Close(code_obj);
 }
 
-Handle<Value> BSON::decodeBinary(uint32_t sub_type, char *data) {
+Handle<Value> BSON::decodeBinary(uint32_t sub_type, uint32_t number_of_bytes, char *data) {
   HandleScope scope;
-  
-  Local<Value> argv[] = {Integer::New(sub_type), String::New(data)};
+
+  Local<String> str = Encode(data, number_of_bytes, BINARY)->ToString();
+  Local<Value> argv[] = {Integer::New(sub_type), str};
   Handle<Value> binary_obj = Binary::constructor_template->GetFunction()->NewInstance(2, argv);
   return scope.Close(binary_obj);
 }
@@ -677,10 +687,7 @@ uint16_t BSON::deserialize_int8(char *data, uint32_t offset) {
 // Requires a 4 byte char array
 uint32_t BSON::deserialize_int32(char* data, uint32_t offset) {
   uint32_t value = 0;
-  value |= *(data + offset + 0);        
-  value |= *(data + offset + 1) << 8;
-  value |= *(data + offset + 2) << 16;
-  value |= *(data + offset + 3) << 24;
+  memcpy(&value, (data + offset), 4);
   return value;
 }
 
