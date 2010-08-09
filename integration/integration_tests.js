@@ -3700,8 +3700,14 @@ if(process.argv[2]){
 var client_tests_keys = [];
 for(key in client_tests) client_tests_keys.push(key);
 
+// Native BSON
+var BSON = require("../external-libs/bson/bson");
+
 // Set up the client connection
 var client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {}), {});
+// Use native deserializer
+client.bson_deserializer = BSON;
+
 client.open(function(err, client) {
   // Do cleanup of the db
   client.dropDatabase(function() {
