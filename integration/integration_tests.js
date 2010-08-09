@@ -3145,7 +3145,6 @@ var all_tests = {
         // Create an index on the collection
         client.createIndex(collection.collectionName, 'a', function(err, indexName) {
           test.equal("a_1", indexName);
-
           // Drop all the indexes
           collection.dropIndexes(function(err, result) {
             test.equal(true, result);          
