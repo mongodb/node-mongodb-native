@@ -53,17 +53,15 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   HandleScope scope;
   // Define a new function template
   Local<FunctionTemplate> t = FunctionTemplate::New(New);
+  constructor_template = Persistent<FunctionTemplate>::New(t);
+  constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
+  constructor_template->SetClassName(String::NewSymbol("BSON"));
   
-  // Set up function relationships for the template
-  t->Inherit(EventEmitter::constructor_template);
-  t->InstanceTemplate()->SetInternalFieldCount(1);
-  
-  // Map up functions to the object visible to Node
-  NODE_SET_PROTOTYPE_METHOD(t, "serialize", BSONSerialize);
-  NODE_SET_PROTOTYPE_METHOD(t, "deserialize", BSONDeserialize);
-  
-  // Create a V8 Class with attached methods from FunctionTemplate
-  target->Set(String::NewSymbol("BSON"), t->GetFunction());
+  // Class methods
+  NODE_SET_METHOD(constructor_template->GetFunction(), "serialize", BSONSerialize);  
+  NODE_SET_METHOD(constructor_template->GetFunction(), "deserialize", BSONDeserialize);  
+
+  target->Set(String::NewSymbol("BSON"), constructor_template->GetFunction());
 }
 
 // Create a new instance of BSON and assing it the existing context

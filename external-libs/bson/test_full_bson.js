@@ -17,8 +17,6 @@ var sys = require('sys'),
   ObjectID2 = require('mongodb/bson/bson').ObjectID,
   Code2 = require('mongodb/bson/bson').Code;
 
-var bson = new BSON();
-
 // Should Correctly Deserialize object
 var bytes = [95,0,0,0,2,110,115,0,42,0,0,0,105,110,116,101,103,114,97,116,105,111,110,95,116,101,115,116,115,95,46,116,101,115,116,95,105,110,100,101,120,95,105,110,102,111,114,109,97,116,105,111,110,0,8,117,110,105,113,117,101,0,0,3,107,101,121,0,12,0,0,0,16,97,0,1,0,0,0,0,2,110,97,109,101,0,4,0,0,0,97,95,49,0,0];
 var serialized_data = '';
@@ -26,7 +24,7 @@ var serialized_data = '';
 for(var i = 0; i < bytes.length; i++) {
   serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
 }
-var object = bson.deserialize(serialized_data, 'BINARY');
+var object = BSON.deserialize(serialized_data, 'BINARY');
 assert.equal("a_1", object.name);
 assert.equal(false, object.unique);
 assert.equal(1, object.key.a);
@@ -38,7 +36,7 @@ var serialized_data = '';
 for(var i = 0; i < bytes.length; i++) {
   serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
 }
-var object = bson.deserialize(serialized_data, 'BINARY');
+var object = BSON.deserialize(serialized_data, 'BINARY');
 assert.equal("hello", object.string);
 assert.deepEqual([1, 2, 3], object.array);
 assert.equal(1, object.hash.a);
@@ -57,60 +55,60 @@ assert.ok(object['null'] == null);
 // Should Serialize and Deserialze String
 var test_string = {hello: 'world'}
 var serialized_data = BSONJS.serialize(test_string)
-assert.deepEqual(test_string, bson.deserialize(serialized_data, 'BINARY'));
+assert.deepEqual(test_string, BSON.deserialize(serialized_data, 'BINARY'));
 
 // Should Correctly Serialize and Deserialize Integer
 var test_number = {doc: 5}
 var serialized_data = BSONJS.serialize(test_number)
-assert.deepEqual(test_number, bson.deserialize(serialized_data, 'BINARY'));
+assert.deepEqual(test_number, BSON.deserialize(serialized_data, 'BINARY'));
 
 // Should Correctly Serialize and Deserialize null value
 var test_null = {doc:null}
 var serialized_data = BSONJS.serialize(test_null)
-var object = bson.deserialize(serialized_data, 'BINARY')
+var object = BSON.deserialize(serialized_data, 'BINARY')
 assert.deepEqual(test_null, object);
 
 // Should Correctly Serialize and Deserialize Number
 var test_number = {doc: 5.5}
 var serialized_data = BSONJS.serialize(test_number)
-assert.deepEqual(test_number, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(test_number, BSON.deserialize(serialized_data, 'BINARY'))
 
 // Should Correctly Serialize and Deserialize Integer
 var test_int = {doc: 42}
 var serialized_data = BSONJS.serialize(test_int)
-assert.deepEqual(test_int, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(test_int, BSON.deserialize(serialized_data, 'BINARY'))
 
 test_int = {doc: -5600}
 serialized_data = BSONJS.serialize(test_int)
-assert.deepEqual(test_int, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(test_int, BSON.deserialize(serialized_data, 'BINARY'))
 
 test_int = {doc: 2147483647}
 serialized_data = BSONJS.serialize(test_int)
-assert.deepEqual(test_int, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(test_int, BSON.deserialize(serialized_data, 'BINARY'))
   
 test_int = {doc: -2147483648}
 serialized_data = BSONJS.serialize(test_int)
-assert.deepEqual(test_int, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(test_int, BSON.deserialize(serialized_data, 'BINARY'))
 
 // Should Correctly Serialize and Deserialize Object
 var doc = {doc: {age: 42, name: 'Spongebob', shoe_size: 9.5}}
 var serialized_data = BSONJS.serialize(doc)
-assert.deepEqual(doc, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(doc, BSON.deserialize(serialized_data, 'BINARY'))
 
 // Should Correctly Serialize and Deserialize Array
 var doc = {doc: [1, 2, 'a', 'b']}
 var serialized_data = BSONJS.serialize(doc)
-assert.deepEqual(doc, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(doc, BSON.deserialize(serialized_data, 'BINARY'))
 
 // Should Correctly Serialize and Deserialize Array with added on functions
 var doc = {doc: [1, 2, 'a', 'b']}
 var serialized_data = BSONJS.serialize(doc)
-assert.deepEqual(doc, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(doc, BSON.deserialize(serialized_data, 'BINARY'))
 
 // Should Correctly Serialize and Deserialize A Boolean
 var doc = {doc: true}
 var serialized_data = BSONJS.serialize(doc)
-assert.deepEqual(doc, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(doc, BSON.deserialize(serialized_data, 'BINARY'))
 
 // Should Correctly Serialize and Deserialize a Date
 var date = new Date()
@@ -123,22 +121,22 @@ date.setUTCMinutes(0)
 date.setUTCSeconds(30)
 var doc = {doc: date}
 var serialized_data = BSONJS.serialize(doc)
-assert.deepEqual(doc, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(doc, BSON.deserialize(serialized_data, 'BINARY'))
 
 // Should Correctly Serialize and Deserialize Oid
 var doc = {doc: new ObjectID2()}
 var serialized_data = BSONJS.serialize(doc)
-assert.deepEqual(doc.doc.toHexString(), bson.deserialize(serialized_data, 'BINARY').doc.toHexString())
+assert.deepEqual(doc.doc.toHexString(), BSON.deserialize(serialized_data, 'BINARY').doc.toHexString())
 
 // Should Correctly encode Empty Hash
 var test_code = {}
 var serialized_data = BSONJS.serialize(test_code)
-assert.deepEqual(test_code, bson.deserialize(serialized_data, 'BINARY'))
+assert.deepEqual(test_code, BSON.deserialize(serialized_data, 'BINARY'))
 
 // Should Correctly Serialize and Deserialize Ordered Hash
 var doc = {doc: {b:1, a:2, c:3, d:4}}
 var serialized_data = BSONJS.serialize(doc)
-var decoded_hash = bson.deserialize(serialized_data, 'BINARY').doc
+var decoded_hash = BSON.deserialize(serialized_data, 'BINARY').doc
 var keys = []
 for(name in decoded_hash) keys.push(name)
 assert.deepEqual(['b', 'a', 'c', 'd'], keys)
@@ -147,7 +145,7 @@ assert.deepEqual(['b', 'a', 'c', 'd'], keys)
 // Serialize the regular expression
 var doc = {doc: /foobar/mi}
 var serialized_data = BSONJS.serialize(doc)
-var doc2 = bson.deserialize(serialized_data, 'BINARY')
+var doc2 = BSON.deserialize(serialized_data, 'BINARY')
 assert.equal(doc.doc.toString(), doc2.doc.toString())
 
 // Should Correctly Serialize and Deserialize a Binary object
@@ -158,7 +156,7 @@ for(var index = 0; index < string.length; index++) {
 }
 var doc = {doc: bin}
 var serialized_data = BSONJS.serialize(doc)
-var deserialized_data = bson.deserialize(serialized_data, 'BINARY')
+var deserialized_data = BSON.deserialize(serialized_data, 'BINARY')
 assert.equal(doc.doc.value(), deserialized_data.doc.value())
 
 // Should Correctly Serialize and Deserialize a big Binary object
@@ -167,7 +165,7 @@ var bin = new Binary2()
 bin.write(data)
 var doc = {doc: bin}
 var serialized_data = BSONJS.serialize(doc)
-var deserialized_data = bson.deserialize(serialized_data, 'BINARY')
+var deserialized_data = BSON.deserialize(serialized_data, 'BINARY')
 assert.equal(doc.doc.value(), deserialized_data.doc.value())
 
 
