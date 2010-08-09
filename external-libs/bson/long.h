@@ -16,6 +16,12 @@ class Long : public ObjectWrap {
     Long(int32_t low_bits, int32_t high_bits);
     ~Long();
     
+    static inline bool HasInstance(Handle<Value> val) {
+      if (!val->IsObject()) return false;
+      Local<Object> obj = val->ToObject();
+      return constructor_template->HasInstance(obj);
+    }    
+    
     bool isZero();
     bool isNegative();
     bool equals(Long *other);

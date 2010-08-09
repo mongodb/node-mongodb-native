@@ -27,6 +27,7 @@ class BSON : public EventEmitter {
     static uint32_t calculate_object_size(Handle<Value> object);
 
     static void write_int32(char *data, uint32_t value);
+    static void write_double(char *data, double value);
     static int deserialize_sint8(char *data, uint32_t offset);
     static int deserialize_sint16(char *data, uint32_t offset);
     static long deserialize_sint32(char *data, uint32_t offset);

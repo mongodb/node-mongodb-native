@@ -86,9 +86,7 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   // Allocate the memory needed for the serializtion
   char *serialized_object = (char *)malloc(object_size * sizeof(char));
   *(serialized_object + object_size) = '\0';
-  
-  
-  printf("=================== object_size: %d\n", object_size);
+  // printf("=================== object_size: %d\n", object_size);
   
   // Serialize the object
   BSON::serialize(serialized_object, 0, String::New(""), args[0]);  
@@ -103,32 +101,39 @@ void BSON::write_int32(char *data, uint32_t value) {
   memcpy(data, &value, 4);  
 }
 
+void BSON::write_double(char *data, double value) {
+  // Write the double to the char*
+  memcpy(data, &value, 8);    
+}
+
 uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value) {
-  printf("============================================= serialized::::\n");
+  // printf("============================================= serialized::::\n");
   
   // If we have an object let's serialize it  
-  if(value->IsObject()) {
-    printf("============================================= -- serialized::::object\n");    
-    // Unwrap the object
-    Local<Object> object = value->ToObject();
-    Local<Array> property_names = object->GetPropertyNames();
-    
-    // Process all the properties on the object
-    for(uint32_t index = 0; index < property_names->Length(); index++) {
-      // Fetch the property name
-      Local<String> property_name = property_names->Get(index)->ToString();
-      // Fetch the object for the property
-      Local<Value> property = object->Get(property_name);
-      // Serialize the object and place the content in the index + 4 (4 first bytes is the size of bson object)
-      uint32_t offset = BSON::serialize(serialized_object, index + 4, property_name, property);
-      // Length is the last position - index + 1 since 0 is element 1
-      uint32_t object_length = offset - index + 1;
-      printf("================================= object_length: %d", object_length);
-      // Write the integer to the char *
-      BSON::write_int32(serialized_object, object_length);
-    }          
+  if(Long::HasInstance(value)) {
+    // printf("============================================= -- serialized::::long\n");    
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_LONG;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, BINARY);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;
+
+    // Unpack the object and encode
+    Local<Object> obj = value->ToObject();
+    Long *long_obj = Long::Unwrap<Long>(obj);
+    // Write the content to the char array
+    BSON::write_int32((serialized_object + index), long_obj->low_bits);
+    BSON::write_int32((serialized_object + index + 4), long_obj->high_bits);
+    // Adjust the index
+    index = index + 8;
   } else if(value->IsString()) {
-    printf("============================================= -- serialized::::string\n");    
+    // printf("============================================= -- serialized::::string\n");    
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_STRING;
     // Adjust writing position for the first byte
@@ -157,7 +162,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + len + 1;
   } else if(value->IsInt32()) {
-    printf("============================================= -- serialized::::int32\n");        
+    // printf("============================================= -- serialized::::int32\n");        
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_INT;
     // Adjust writing position for the first byte
@@ -176,7 +181,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + 4;
   } else if(value->IsNumber()) {
-    printf("============================================= -- serialized::::number\n");
+    // printf("============================================= -- serialized::::number\n");
+    uint32_t first_pointer = index;
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_INT;
     // Adjust writing position for the first byte
@@ -197,6 +203,13 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     double d_result = d_number - l_number;    
     // If we have a value after subtracting the integer value we have a float
     if(d_result > 0 || d_result < 0) {
+      printf("============================================= -- serialized::::double\n");
+      // Write the double to the char array
+      BSON::write_double((serialized_object + index), d_number);
+      // Adjust type to be double
+      *(serialized_object + first_pointer) = BSON_DATA_NUMBER;
+      // Adjust index for double
+      index = index + 8;
     } else if(l_number <= BSON_INT32_MAX || l_number >= BSON_INT32_MIN) {
       if(l_number == BSON_INT32_MAX) {
         BSON::write_int32((serialized_object + index), BSON_INT32_MAX);
@@ -205,13 +218,28 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       }
       // Adjust the size of the index
       index = index + 4;
-      // 
-      // int64_t int_value = number->IntegerValue();
-      // printf("--------------------------------------------------- value:%lli\n", int_value);      
-      // object_size = object_size + 4;
     } else {
       // object_size = object_size + 8;
     }        
+  } else if(value->IsObject()) {
+    // printf("============================================= -- serialized::::object\n");    
+    // Unwrap the object
+    Local<Object> object = value->ToObject();
+    Local<Array> property_names = object->GetPropertyNames();
+
+    // Process all the properties on the object
+    for(uint32_t index = 0; index < property_names->Length(); index++) {
+      // Fetch the property name
+      Local<String> property_name = property_names->Get(index)->ToString();
+      // Fetch the object for the property
+      Local<Value> property = object->Get(property_name);
+      // Serialize the object and place the content in the index + 4 (4 first bytes is the size of bson object)
+      uint32_t offset = BSON::serialize(serialized_object, index + 4, property_name, property);
+      // Length is the last position - index + 1 since 0 is element 1
+      uint32_t object_length = offset - index + 1;
+      // Write the integer to the char *
+      BSON::write_int32(serialized_object, object_length);
+    }
   }
   
   return index;
@@ -219,11 +247,38 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
 
 uint32_t BSON::calculate_object_size(Handle<Value> value) {
   uint32_t object_size = 0;
-  printf("================================ ----------- calculate_object_size\n");  
+  // printf("================================ ----------- calculate_object_size\n");  
 
   // If we have an object let's unwrap it and calculate the sub sections
-  if(value->IsObject()) {
-    printf("================================ calculate_object_size:object\n");
+  if(Long::HasInstance(value)) {
+    // printf("================================ calculate_object_size:long\n");
+    object_size = object_size + 8;
+  } else if(value->IsString()) {
+    // printf("================================ calculate_object_size:string\n");
+    Local<String> str = value->ToString();
+    // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
+    object_size += str->Length() + 1 + 4;  
+  } else if(value->IsInt32()) {
+    // printf("================================ calculate_object_size:int32\n");
+    object_size += 4;
+  } else if(value->IsNumber()) {
+    // Check if we have a float value or a long value
+    Local<Number> number = value->ToNumber();
+    double d_number = number->NumberValue();
+    int64_t l_number = number->IntegerValue();
+    // Check if we have a double value and not a int64
+    double d_result = d_number - l_number;    
+    // If we have a value after subtracting the integer value we have a float
+    if(d_result > 0 || d_result < 0) {
+      printf("================================ calculate_object_size:double\n");
+      object_size = object_size + 8;      
+    } else if(d_number <= 2147483648 || d_number >= -2147483648) {
+      object_size = object_size + 4;
+    } else {
+      object_size = object_size + 8;
+    }    
+  } else if(value->IsObject()) {
+    // printf("================================ calculate_object_size:object\n");
     // Unwrap the object
     Local<Object> object = value->ToObject();
     Local<Array> property_names = object->GetPropertyNames();
@@ -239,28 +294,6 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       // Add the bson header size
       object_size += 1 + 4 + 1;
     }      
-  } else if(value->IsString()) {
-    printf("================================ calculate_object_size:string\n");
-    Local<String> str = value->ToString();
-    // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
-    object_size += str->Length() + 1 + 4;  
-  } else if(value->IsInt32()) {
-    printf("================================ calculate_object_size:int32\n");
-    object_size += 4;
-  } else if(value->IsNumber()) {
-    // Check if we have a float value or a long value
-    Local<Number> number = value->ToNumber();
-    double d_number = number->NumberValue();
-    int64_t l_number = number->IntegerValue();
-    // Check if we have a double value and not a int64
-    double d_result = d_number - l_number;    
-    // If we have a value after subtracting the integer value we have a float
-    if(d_result > 0 || d_result < 0) {
-    } else if(d_number <= 2147483648 || d_number >= -2147483648) {
-      object_size = object_size + 4;
-    } else {
-      object_size = object_size + 8;
-    }    
   }
 
   return object_size;
