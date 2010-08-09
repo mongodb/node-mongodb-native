@@ -106,6 +106,11 @@ void BSON::write_double(char *data, double value) {
   memcpy(data, &value, 8);    
 }
 
+void BSON::write_int64(char *data, int64_t value) {
+  // Write the int to the char*
+  memcpy(data, &value, 8);      
+}
+
 uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value) {
   // printf("============================================= serialized::::\n");
   
@@ -234,7 +239,46 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       index = index + 4;
     } else {
       // object_size = object_size + 8;
-    }        
+    }     
+  } else if(value->IsBoolean()) {
+    // printf("============================================= -- serialized::::boolean\n");
+    uint32_t first_pointer = index;
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_BOOLEAN;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, BINARY);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;    
+
+    // Save the boolean value
+    *(serialized_object + index) = value->BooleanValue() ? '\1' : '\0';
+    // Adjust the index
+    index = index + 1;
+  } else if(value->IsDate()) {
+    // printf("============================================= -- serialized::::date\n");    
+    uint32_t first_pointer = index;
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_DATE;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, BINARY);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;    
+
+    // Fetch the Integer value
+    int64_t integer_value = value->IntegerValue();
+    BSON::write_int64((serialized_object + index), integer_value);
+    // Adjust the index
+    index = index + 8;
   } else if(value->IsObject()) {
     // printf("============================================= -- serialized::::object\n");    
     // Unwrap the object
@@ -293,6 +337,12 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     } else {
       object_size = object_size + 8;
     }    
+  } else if(value->IsBoolean()) {
+    // printf("================================ calculate_object_size:boolean\n");
+    object_size = object_size + 1;
+  } else if(value->IsDate()) {
+    // printf("================================ calculate_object_size:date\n");
+    object_size = object_size + 8;
   } else if(value->IsObject()) {
     // printf("================================ calculate_object_size:object\n");
     // Unwrap the object
@@ -310,7 +360,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       // Add the bson header size
       object_size += 1 + 4 + 1;
     }      
-  }
+  } 
 
   return object_size;
 }
