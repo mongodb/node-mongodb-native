@@ -72,29 +72,27 @@ assert.equal(l_string, l2_string);
 // var simple_string_serialized = BSON.serialize({doc:Long2.fromNumber(-9223372036854775807)});
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(new Buffer(simple_string_serialized, 'binary')));
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized, 'binary'));
-
-
+// 
+// // Simple serialization and deserialization for a Float value
 // var simple_string_serialized = BSON.serialize({doc:2222.3333});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(new Buffer(simple_string_serialized, 'binary')));
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized, 'binary'));
+// 
+// var simple_string_serialized = BSON.serialize({doc:-2222.3333});
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(new Buffer(simple_string_serialized, 'binary')));
+// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized, 'binary'));
+
+// var simple_string_serialized = BSON.serialize({doc:null});
 // BinaryParser.hprint(simple_string_serialized);
 // sys.puts('------------------------------------------------------------------------------')
-// var simple_string_serialized = BSONJS.serialize({doc:2222.3333});
+// var simple_string_serialized = BSONJS.serialize({doc:null});
 // BinaryParser.hprint(simple_string_serialized);
 
-
-// Simple serialization and deserialization for a Float value
-var simple_string_serialized = BSON.serialize({doc:2222.3333});
+// Simple serialization and deserialization for a null value
+var simple_string_serialized = BSON.serialize({doc:null});
 assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(new Buffer(simple_string_serialized, 'binary')));
 assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized, 'binary'));
 
-// var simple_string_serialized = BSONJS.serialize({doc:-2222.3333});
-// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(new Buffer(simple_string_serialized, 'binary')));
-// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized, 'binary'));
-// 
-// // Simple serialization and deserialization for a null value
-// var simple_string_serialized = BSONJS.serialize({doc:null});
-// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(new Buffer(simple_string_serialized, 'binary')));
-// assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized, 'binary'));
-// 
 // // Simple serialization and deserialization for a boolean value
 // var simple_string_serialized = BSONJS.serialize({doc:true});
 // assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(new Buffer(simple_string_serialized, 'binary')));

@@ -180,6 +180,20 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     BSON::write_int32((serialized_object + index), int_value);
     // Adjust the index
     index = index + 4;
+  } else if(value->IsNull()) {
+    // printf("============================================= -- serialized::::null\n");
+    uint32_t first_pointer = index;
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_NULL;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, BINARY);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;    
   } else if(value->IsNumber()) {
     // printf("============================================= -- serialized::::number\n");
     uint32_t first_pointer = index;
@@ -203,7 +217,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     double d_result = d_number - l_number;    
     // If we have a value after subtracting the integer value we have a float
     if(d_result > 0 || d_result < 0) {
-      printf("============================================= -- serialized::::double\n");
+      // printf("============================================= -- serialized::::double\n");
       // Write the double to the char array
       BSON::write_double((serialized_object + index), d_number);
       // Adjust type to be double
@@ -261,6 +275,8 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
   } else if(value->IsInt32()) {
     // printf("================================ calculate_object_size:int32\n");
     object_size += 4;
+  } else if(value->IsNull()) {
+    // printf("================================ calculate_object_size:null\n");    
   } else if(value->IsNumber()) {
     // Check if we have a float value or a long value
     Local<Number> number = value->ToNumber();
@@ -270,7 +286,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     double d_result = d_number - l_number;    
     // If we have a value after subtracting the integer value we have a float
     if(d_result > 0 || d_result < 0) {
-      printf("================================ calculate_object_size:double\n");
+      // printf("================================ calculate_object_size:double\n");
       object_size = object_size + 8;      
     } else if(d_number <= 2147483648 || d_number >= -2147483648) {
       object_size = object_size + 4;
