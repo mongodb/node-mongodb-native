@@ -279,6 +279,78 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     BSON::write_int64((serialized_object + index), integer_value);
     // Adjust the index
     index = index + 8;
+  } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
+    // printf("============================================= -- serialized::::regexp\n");    
+    uint32_t first_pointer = index;
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_REGEXP;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, BINARY);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;    
+
+    // Additional size
+    uint32_t regexp_size = 0;
+    // Fetch the string for the regexp
+    Local<String> str = value->ToString();    
+    len = DecodeBytes(str, BINARY);
+    // Let's define the buffer that contains the regexp string
+    char *data = new char[len + 1];
+    *(data + len) = '\0';
+    // Write the data to the buffer from the string object
+    written = DecodeWrite(data, len, str, BINARY);    
+    // Locate the last pointer of the string
+    char *options_ptr = strrchr(data, '/');
+    
+    // String size
+    uint32_t regexp_string_size = (options_ptr - data) - 1;
+    // printf("------------------------------------ [%s]%d:%d\n", data, (options_ptr - data), regexp_string_size);
+    // Copy the string to the char stream
+    memcpy((serialized_object + index), (data + 1), regexp_string_size);
+    *(serialized_object + index + regexp_string_size + 1) = '\0';
+    // Ajust the index
+    index = index + regexp_string_size + 1;
+    
+    // If it's not a null we have options
+    if(options_ptr != NULL && (options_ptr - data) > 0) {
+      uint32_t offset = (options_ptr - data);
+      // Validate that we have valid options
+      for(int i = 1; i < (len - offset); i++) {
+        if(*(options_ptr + i) == 'i' || *(options_ptr + i) == 'm' || *(options_ptr + i) == 'x') {
+          *(serialized_object + index) = *(options_ptr + i);
+          index = index + 1;
+        }
+      }      
+    }
+    
+    // Add termiating null
+    *(serialized_object + index) = '\0';
+    // Adjust pointer
+    index = index + 1;
+    
+    
+    // // Split up the regexp into pieces
+    // char *options_ptr = strrchr(data, '/');
+    // if(options_ptr != NULL) {
+    //   // printf("====================== regexp_string: %d:%s:%c:%lli\n", len, data, *(options_ptr), (options_ptr - data));      
+    //   // /abcd/mi
+    //   uint32_t offset = (options_ptr - data);
+    //   // Validate that we have valid options
+    //   for(int i = 1; i < (len - offset); i++) {
+    //     printf("----- %d:%c\n", i, *(options_ptr + i));
+    //     if(*(options_ptr + i) == 'i' || *(options_ptr + i) == 'm' || *(options_ptr + i) == 'x') regexp_size = regexp_size + 1;
+    //   }
+    // }
+    // 
+    // // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
+    // object_size = object_size + len - 2 + 2 + regexp_size;
+
+
   } else if(value->IsObject()) {
     // printf("============================================= -- serialized::::object\n");    
     // Unwrap the object
@@ -343,10 +415,47 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
   } else if(value->IsDate()) {
     // printf("================================ calculate_object_size:date\n");
     object_size = object_size + 8;
+  } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
+    // printf("================================ calculate_object_size:regexp\n");    
+    // Additional size
+    uint32_t regexp_size = 0;
+    // Fetch the string for the regexp
+    Local<String> str = value->ToString();    
+    ssize_t len = DecodeBytes(str, BINARY);
+    // Let's define the buffer that contains the regexp string
+    char *data = new char[len + 1];
+    *(data + len) = '\0';
+    // Write the data to the buffer from the string object
+    ssize_t written = DecodeWrite(data, len, str, BINARY);
+    // Split up the regexp into pieces
+    char *options_ptr = strrchr(data, '/');
+    if(options_ptr != NULL && (options_ptr - data) > 0) {
+      // printf("====================== regexp_string: %d:%s:%c:%lli\n", len, data, *(options_ptr), (options_ptr - data));      
+      // /abcd/mi
+      uint32_t offset = (options_ptr - data);
+      // Validate that we have valid options
+      for(int i = 1; i < (len - offset); i++) {
+        if(*(options_ptr + i) == 'i' || *(options_ptr + i) == 'm' || *(options_ptr + i) == 'x') regexp_size = regexp_size + 1;
+      }
+    }
+    
+    // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
+    object_size = object_size + ((options_ptr - data) - 1) + 2 + regexp_size;
   } else if(value->IsObject()) {
     // printf("================================ calculate_object_size:object\n");
     // Unwrap the object
     Local<Object> object = value->ToObject();
+
+    // // Get proto name
+    // Local<String> object_proto_str = object->ObjectProtoToString();    
+    // ssize_t len = DecodeBytes(object_proto_str, BINARY);
+    // // Let's define the buffer size
+    // char *data = new char[len];
+    // // Write the data to the buffer from the string object
+    // ssize_t written = DecodeWrite(data, len, object_proto_str, BINARY);    
+    // 
+    // printf("====================== object_proto: %s\n", data);    
+    
     Local<Array> property_names = object->GetPropertyNames();
     
     // Process all the properties on the object
