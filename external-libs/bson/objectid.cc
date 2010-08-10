@@ -134,6 +134,8 @@ Handle<Value> ObjectID::New(const Arguments &args) {
   }  
 }
 
+static Persistent<String> id_symbol;
+
 void ObjectID::Initialize(Handle<Object> target) {
   // Grab the scope of the call from Node
   HandleScope scope;
@@ -142,6 +144,12 @@ void ObjectID::Initialize(Handle<Object> target) {
   constructor_template = Persistent<FunctionTemplate>::New(t);
   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
   constructor_template->SetClassName(String::NewSymbol("ObjectID"));
+
+  // Propertry symbols
+  id_symbol = NODE_PSYMBOL("id");
+
+  // Getters for correct serialization of the object  
+  constructor_template->InstanceTemplate()->SetAccessor(id_symbol, IdGetter, IdSetter);
   
   // Instance methods
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
@@ -150,6 +158,58 @@ void ObjectID::Initialize(Handle<Object> target) {
 
   target->Set(String::NewSymbol("ObjectID"), constructor_template->GetFunction());
 }
+
+Handle<Value> ObjectID::IdGetter(Local<String> property, const AccessorInfo& info) {
+  HandleScope scope;
+  
+  // Unpack object reference
+  Local<Object> self = info.Holder();
+  // Fetch external reference (reference to Long object)
+  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+  // Get pointer to the object
+  void *ptr = wrap->Value();
+  // Convert the hex oid to bin
+  char *binary_oid = static_cast<ObjectID *>(ptr)->convert_hex_oid_to_bin();  
+  // Create string and return it
+  Local<String> final_str = Encode(binary_oid, 12, BINARY)->ToString();
+  // Free the memory for binary_oid
+  free(binary_oid);
+  // Close the scope
+  return scope.Close(final_str);
+}
+
+char *ObjectID::convert_hex_oid_to_bin() {
+  // Turn the oid into the binary equivalent
+  char *binary_oid = (char *)malloc(12 * sizeof(char));
+  // Let's convert the hex value to binary
+  for(uint32_t i = 0; i < 12; i++) {
+    char *nval_str = new char[2];
+    nval_str[0] = *(this->oid + (i*2));
+    nval_str[1] = *(this->oid + (i*2) + 1);
+    // Convert the string to a char    
+    char n_val = strtoul(nval_str, NULL, 16);
+    // Add to string
+    *(binary_oid + i) = n_val;
+    // release the memory for the n_val_str
+    free(nval_str);
+  }  
+  // Return the pointer to the converted string
+  return binary_oid;
+}
+
+void ObjectID::IdSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
+  // if(value->IsNumber()) {
+  //   // Unpack object reference
+  //   Local<Object> self = info.Holder();
+  //   // Fetch external reference (reference to Long object)
+  //   Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+  //   // Get pointer to the object
+  //   void *ptr = wrap->Value();
+  //   // Set the low bits
+  //   // static_cast<Long *>(ptr)->low_bits = value->Int32Value();    
+  // }
+}
+
 
 Handle<Value> ObjectID::ToHexString(const Arguments &args) {
   HandleScope scope;

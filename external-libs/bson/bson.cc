@@ -137,6 +137,30 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     BSON::write_int32((serialized_object + index + 4), long_obj->high_bits);
     // Adjust the index
     index = index + 8;
+  } else if(ObjectID::HasInstance(value)) {
+    // printf("============================================= -- serialized::::object_id\n");    
+    uint32_t first_pointer = index;
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_OID;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, BINARY);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;    
+
+    // Unpack the object and encode
+    Local<Object> obj = value->ToObject();
+    ObjectID *object_id_obj = ObjectID::Unwrap<ObjectID>(obj);
+    // Fetch the converted oid
+    char *binary_oid = object_id_obj->convert_hex_oid_to_bin();
+    // Write the oid to the char array
+    memcpy((serialized_object + index), binary_oid, 12);
+    // Adjust the index
+    index = index + 12;    
   } else if(value->IsString()) {
     // printf("============================================= -- serialized::::string\n");    
     // Save the string at the offset provided
@@ -383,6 +407,9 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
   if(Long::HasInstance(value)) {
     // printf("================================ calculate_object_size:long\n");
     object_size = object_size + 8;
+  } else if(ObjectID::HasInstance(value)) {
+    // printf("================================ calculate_object_size:objectid\n");
+    object_size = object_size + 12;
   } else if(value->IsString()) {
     // printf("================================ calculate_object_size:string\n");
     Local<String> str = value->ToString();
