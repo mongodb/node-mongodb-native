@@ -83,12 +83,9 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
 
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
   uint32_t object_size = BSON::calculate_object_size(args[0]);
-  
   // Allocate the memory needed for the serializtion
   char *serialized_object = (char *)malloc(object_size * sizeof(char));
   *(serialized_object + object_size) = '\0';
-  // printf("=================== object_size: %d\n", object_size);
-  
   // Serialize the object
   BSON::serialize(serialized_object, 0, Null(), args[0]);  
   // Encode the binary value
@@ -210,27 +207,27 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Unpack the object and encode
     Local<Object> obj = value->ToObject();
     Code *code_obj = Code::Unwrap<Code>(obj);
-    // Fetch the code str
-    char *code_str = code_obj->code;
-    // Encode the total size for the scope object
+    // Keep pointer to start
+    uint32_t first_pointer = index;
+    // Adjust the index
+    index = index + 4;
+    // Write the size of the code string
+    BSON::write_int32((serialized_object + index), strlen(code_obj->code) + 1);
+    // Adjust the index
+    index = index + 4;    
+    // Write the code string
+    memcpy((serialized_object + index), code_obj->code, strlen(code_obj->code));
+    *(serialized_object + index + strlen(code_obj->code)) = '\0';
+    // Adjust index
+    index = index + strlen(code_obj->code) + 1;
+    // Encode the scope
     uint32_t scope_object_size = BSON::calculate_object_size(code_obj->scope_object);
-    uint32_t total_size = scope_object_size + strlen(code_str) + 4 + 1 + 4;
-    // Let's write the total size
-    BSON::write_int32((serialized_object + index), total_size);
-    // Adjust the index
-    index = index + 4;    
-    // Let's write the total size
-    BSON::write_int32((serialized_object + index), strlen(code_str) + 1);
-    // Adjust the index
-    index = index + 4;    
-    // Serialize the code
-    memcpy((serialized_object + index), code_str, strlen(code_str) + 1);
-    // Adjust the index
-    index = index + strlen(code_str) + 1;
-    // Let's serialize the scope
-    BSON::serialize((serialized_object + index), index, Null(), code_obj->scope_object);
+    // Serialize the scope object
+    BSON::serialize((serialized_object + index), 0, Null(), code_obj->scope_object);
     // Adjust the index
     index = index + scope_object_size;
+    // Encode the total size of the object
+    BSON::write_int32((serialized_object + first_pointer), (index - first_pointer));
   } else if(value->IsString()) {
     // printf("============================================= -- serialized::::string\n");    
     // Save the string at the offset provided
@@ -460,8 +457,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Free up memory
     free(length_str);
   } else if(value->IsObject()) {
-    // printf("============================================= -- serialized::::object\n");
     if(!name->IsNull()) {
+      // printf("============================================= -- serialized::::object\n");
       // Save the string at the offset provided
       *(serialized_object + index) = BSON_DATA_OBJECT;
       // Adjust writing position for the first byte
@@ -474,27 +471,34 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust the index
       index = index + len + 1;          
     }
-    
+        
     // Unwrap the object
     Local<Object> object = value->ToObject();
     Local<Array> property_names = object->GetPropertyNames();
+
+    // Calculate size of the total object
+    uint32_t object_size = BSON::calculate_object_size(value);
+    // Write the size
+    BSON::write_int32((serialized_object + index), object_size);
+    // Adjust size
+    index = index + 4;    
+    
     // Process all the properties on the object
     for(uint32_t i = 0; i < property_names->Length(); i++) {
       // Fetch the property name
       Local<String> property_name = property_names->Get(i)->ToString();
       // Fetch the object for the property
       Local<Value> property = object->Get(property_name);
-      // Fetch the size of the object
-      uint32_t object_size = BSON::calculate_object_size(value);
-      // Serialize the object and place the content in the index + 4 (4 first bytes is the size of bson object)
-      uint32_t offset = BSON::serialize(serialized_object, index + 4, property_name, property);
-      // Write the object size to the char array
-      BSON::write_int32((serialized_object + index), object_size);
-      // Write trailing '\0' for object
-      *(serialized_object + index + object_size) = '\0';
-      // Adjust the index
-      index = index + object_size;
+      // Write the next serialized object
+      index = BSON::serialize(serialized_object, index, property_name, property);      
     }
+
+    // Null out reminding fields if we have a toplevel object and nested levels
+    if(name->IsNull()) {
+      for(uint32_t i = 0; i < (object_size - index); i++) {
+        *(serialized_object + index + i) = '\0';
+      }
+    }    
   }
   
   return index;
@@ -618,10 +622,10 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       // Fetch the object for the property
       Local<Value> property = object->Get(property_name);
       // Get size of property (property + property name length + 1 for terminating 0)
-      object_size += BSON::calculate_object_size(property) + property_name->Length() + 1;      
-      // Add the bson header size
-      object_size += 1 + 4 + 1;
+      object_size += BSON::calculate_object_size(property) + property_name->Length() + 1 + 1;
     }      
+    
+    object_size = object_size + 1 + 4;
   } 
 
   return object_size;
