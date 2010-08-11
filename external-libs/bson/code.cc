@@ -20,7 +20,7 @@ static Handle<Value> VException(const char *msg) {
 
 Persistent<FunctionTemplate> Code::constructor_template;
 
-Code::Code(char *code, Handle<Value> scope_object) : ObjectWrap() {
+Code::Code(char *code, Persistent<Object> scope_object) : ObjectWrap() {
   this->code = code;
   this->scope_object = scope_object;
 }
@@ -31,7 +31,7 @@ Handle<Value> Code::New(const Arguments &args) {
   HandleScope scope;
   
   char *code;
-  Local<Object> scope_object;
+  Persistent<Object> scope_object;
   
   if(args.Length() != 1 && args.Length() != 2) {
     return VException("There must be either 1 or 2 arguments passed in where the first argument is a string and the second a object for the scope");
@@ -52,11 +52,12 @@ Handle<Value> Code::New(const Arguments &args) {
   *(code + str->Length()) = '\0';
   // Copy over
   node::DecodeWrite(code, str->Length(), str, node::BINARY);  
-  // Decode the scope
+  // Decode the scope and wrap it in a persistent object to ensure
+  // v8 does not gc the object
   if(args.Length() == 2) {
-    scope_object = args[1]->ToObject();
+    scope_object = Persistent<Object>::New(args[1]->ToObject());
   } else {
-    scope_object = Object::New();    
+    scope_object = Persistent<Object>::New(Object::New());
   }
   
   // Create code object
@@ -151,8 +152,10 @@ void Code::ScopeSetter(Local<String> property, Local<Value> value, const Accesso
     Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
     // Get pointer to the object
     void *ptr = wrap->Value();
+    // Fetch the local
+    Local<Object> value_obj = value->ToObject();
     // Set the low bits
-    static_cast<Code *>(ptr)->scope_object = value;
+    static_cast<Code *>(ptr)->scope_object = Persistent<Object>::New(value_obj);
   }
 }
 

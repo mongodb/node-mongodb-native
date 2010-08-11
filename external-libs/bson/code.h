@@ -11,10 +11,17 @@ using namespace node;
 class Code : public ObjectWrap {  
   public:    
     char *code;
-    Handle<Value> scope_object;
+    Persistent<Object> scope_object;
     
-    Code(char *code, Handle<Value> scope_object);
+    Code(char *code, Persistent<Object> scope_object);
     ~Code();    
+
+    // Has instance check
+    static inline bool HasInstance(Handle<Value> val) {
+      if (!val->IsObject()) return false;
+      Local<Object> obj = val->ToObject();
+      return constructor_template->HasInstance(obj);
+    }    
 
     // Functions available from V8
     static void Initialize(Handle<Object> target);    

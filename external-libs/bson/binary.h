@@ -13,9 +13,17 @@ class Binary : public ObjectWrap {
     char *data;
     uint32_t number_of_bytes;
     uint32_t sub_type;
+    uint32_t index;
     
-    Binary(uint32_t sub_type, uint32_t number_of_bytes, char *data);
+    Binary(uint32_t sub_type, uint32_t number_of_bytes, uint32_t index, char *data);
     ~Binary();    
+
+    // Has instance check
+    static inline bool HasInstance(Handle<Value> val) {
+      if (!val->IsObject()) return false;
+      Local<Object> obj = val->ToObject();
+      return constructor_template->HasInstance(obj);
+    }    
 
     // Functions available from V8
     static void Initialize(Handle<Object> target);    
@@ -23,9 +31,14 @@ class Binary : public ObjectWrap {
     static Handle<Value> Inspect(const Arguments &args);
     static Handle<Value> Data(const Arguments &args);
     static Handle<Value> Length(const Arguments &args);
+    static Handle<Value> Put(const Arguments &args);
 
     // Constructor used for creating new Long objects from C++
     static Persistent<FunctionTemplate> constructor_template;
+
+    // Getter and Setter for object values
+    static Handle<Value> SubtypeGetter(Local<String> property, const AccessorInfo& info);
+    static void SubtypeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info);
     
   private:
     static Handle<Value> New(const Arguments &args);
