@@ -2473,12 +2473,6 @@ var all_tests = {
   },
   
   test_gs_puts_and_readlines : function() {
-    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")
-    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")
-    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")
-    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")
-    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")    
-    
     var gridStore = new GridStore(client, "test_gs_puts_and_readlines", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.puts("line one", function(err, gridStore) {

@@ -33,6 +33,7 @@ class Binary : public ObjectWrap {
     static Handle<Value> Length(const Arguments &args);
     static Handle<Value> Put(const Arguments &args);
     static Handle<Value> Write(const Arguments &args);
+    static Handle<Value> Read(const Arguments &args);
 
     // Constructor used for creating new Long objects from C++
     static Persistent<FunctionTemplate> constructor_template;

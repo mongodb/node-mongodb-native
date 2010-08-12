@@ -98,6 +98,7 @@ void Binary::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "length", Length);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "put", Put);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "write", Write);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "read", Read);
 
   // Getters for correct serialization of the object  
   constructor_template->InstanceTemplate()->SetAccessor(subtype_symbol, SubtypeGetter, SubtypeSetter);
@@ -121,6 +122,28 @@ Handle<Value> Binary::SubtypeGetter(Local<String> property, const AccessorInfo& 
 
 void Binary::SubtypeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
   // Do nothing for now
+}
+
+Handle<Value> Binary::Read(const Arguments &args) {
+  HandleScope scope;
+
+  // Ensure we have the right parameters
+  if(args.Length() != 2 && !args[0]->IsUint32() && !args[1]->IsUint32()) return VException("Function takes two arguments of type Integer, position and offset");
+  // Let's unpack the parameters
+  uint32_t position = args[0]->Uint32Value();
+  uint32_t length = args[1]->Uint32Value();
+  // Let's unpack the binary object
+  Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
+  
+  // Ensure that it's a valid range
+  if(binary->number_of_bytes >= position && binary->number_of_bytes >= (position + length)) {
+    // Decode the data
+    Local<String> encoded_data = Encode((binary->data + position), length, BINARY)->ToString();
+    // Return the data to the client
+    return scope.Close(encoded_data);
+  } else {
+    return VException("position and length is outside the size of the binary");
+  } 
 }
 
 Handle<Value> Binary::Write(const Arguments &args) {
@@ -207,7 +230,7 @@ Handle<Value> Binary::Length(const Arguments &args) {
   
   // Unpack the Binary object
   Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
-  return scope.Close(Integer::New(1));
+  return scope.Close(Integer::New(binary->index));
 }
 
 Handle<Value> Binary::Data(const Arguments &args) {
