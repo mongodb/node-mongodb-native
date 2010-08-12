@@ -163,10 +163,13 @@ Handle<Value> Code::Inspect(const Arguments &args) {
   HandleScope scope;
   
   // Unpack the Binary object
-  // Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
-  // Return the raw data  
-  // return String::New(binary->data);  
-  return String::New("Code::Inspect");
+  Code *code = ObjectWrap::Unwrap<Code>(args.This());
+  // Return a new Object
+  Local<Object> inspect_object = Object::New();
+  inspect_object->Set(String::New("code"), String::New(code->code));
+  inspect_object->Set(String::New("scope"), code->scope_object);
+  // Return the object
+  return scope.Close(inspect_object->ToString());
 }
 
 Handle<Value> Code::ToString(const Arguments &args) {

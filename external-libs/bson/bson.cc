@@ -254,7 +254,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     len = DecodeBytes(str, BINARY);
     written = DecodeWrite((serialized_object + index), len, str, BINARY);
     // Add the null termination
-    *(serialized_object + index + len + 1) = '\0';    
+    *(serialized_object + index + len) = '\0';    
     // Adjust the index
     index = index + len + 1;
   } else if(value->IsInt32()) {
@@ -689,9 +689,11 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
   
   // While we have data left let's decode
   while(index < size) {
+    // printf("C:: ==================================== current index: %d\n", index);
+    
     // Read the first to bytes to indicate the type of object we are decoding
     uint16_t type = BSON::deserialize_int8(data, index);
-    // printf("C:: ============================ BSON:TYPE:%d\n", type);
+    // printf("    C:: ============================ BSON:TYPE:%d\n", type);
     // Handles the internal size of the object
     uint32_t insert_index = 0;
     // Adjust index to skip type byte
@@ -708,7 +710,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(is_array_item) {
         insert_index = atoi(string_name);
       }      
-      
+
       // Read the length of the string (next 4 bytes)
       uint32_t string_size = BSON::deserialize_int32(data, index);
       // Adjust index to point to start of string
@@ -1075,6 +1077,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       free(bson_buffer);      
     } else if(type == BSON_DATA_OBJECT) {
       // printf("=================================================== unpacking object\n");
+      // If this is the top level object we need to skip the undecoding
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1084,8 +1087,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       uint32_t insert_index = 0;
       if(is_array_item) {
         insert_index = atoi(string_name);
-      }      
-
+      }             
+      
       // Get the object size
       uint32_t bson_object_size = BSON::deserialize_int32(data, index);
       // Allocate bson object buffer and copy out the content
@@ -1111,6 +1114,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       } else {
         return_data->Set(String::New(string_name), obj);
       }
+      
       // Clean up memory allocation
       free(bson_buffer);
     } else if(type == BSON_DATA_ARRAY) {
@@ -1144,7 +1148,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
         return try_catch.ReThrow();
       }
       // Adjust the index for the next value
-      index = index + array_size + 4;
+      index = index + array_size;
       // Add the element to the object
       if(is_array_item) {        
         return_array->Set(Number::New(insert_index), obj);

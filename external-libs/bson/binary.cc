@@ -97,6 +97,7 @@ void Binary::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "value", Data);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "length", Length);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "put", Put);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "write", Write);
 
   // Getters for correct serialization of the object  
   constructor_template->InstanceTemplate()->SetAccessor(subtype_symbol, SubtypeGetter, SubtypeSetter);
@@ -120,6 +121,48 @@ Handle<Value> Binary::SubtypeGetter(Local<String> property, const AccessorInfo& 
 
 void Binary::SubtypeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
   // Do nothing for now
+}
+
+Handle<Value> Binary::Write(const Arguments &args) {
+  HandleScope scope;
+  
+  // Ensure we have the right parameters
+  if(args.Length() != 1 && (!args[0]->IsString() || Buffer::HasInstance(args[0]))) return VException("Function takes one argument of type String or Buffer");
+  
+  // Reference variables
+  char *data;
+  uint32_t length;
+  
+  // If we have a buffer let's retrieve the data
+  if(Buffer::HasInstance(args[0])) {
+    Buffer *buffer = ObjectWrap::Unwrap<Buffer>(args[0]->ToObject());
+    data = buffer->data();
+    length = buffer->length();
+  } else {
+    Local<String> str = args[0]->ToString();
+    length = DecodeBytes(str, BINARY);
+    data = new char[length];
+    uint32_t written = DecodeWrite(data, length, str, BINARY);
+    assert(length == written);    
+  }
+  
+  // Ensure we got enough allocated space for the content
+  Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
+  // Check if we have enough space or we need to allocate more space
+  if((binary->index + length) > binary->number_of_bytes) {
+    // Realocate memory (and add double the current space to allow for more writing)
+    binary->data = (char *)realloc(binary->data, ((binary->number_of_bytes * 2) + length));
+    binary->number_of_bytes = (binary->number_of_bytes * 2) + length;
+  }
+  
+  // Write the element out
+  memcpy((binary->data + binary->index), data, length);
+  // Update the index pointer
+  binary->index = binary->index + length;
+  // free up the allocated memory
+  free(data);
+  // Close and return
+  return scope.Close(Null());
 }
 
 Handle<Value> Binary::Put(const Arguments &args) {
