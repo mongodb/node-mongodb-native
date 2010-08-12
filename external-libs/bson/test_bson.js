@@ -10,12 +10,14 @@ var sys = require('sys'),
   ObjectID = require('mongodb/bson/bson').ObjectID,
   Binary = require('mongodb/bson/bson').Binary,
   Code = require('mongodb/bson/bson').Code,  
+  DBRef = require('mongodb/bson/bson').DBRef,  
   assert = require('assert');
   
 var Long2 = require('./bson').Long,
     ObjectID2 = require('./bson').ObjectID,
     Binary2 = require('./bson').Binary,
-    Code2 = require('./bson').Code;
+    Code2 = require('./bson').Code,
+    DBRef2 = require('./bson').DBRef;
 
 // Long data type tests
 var l2_string = Long2.fromNumber(9223372036854775807).toString();
@@ -140,8 +142,16 @@ var simple_string_serialized_2 = BSONJS.serialize({doc:[9, 9, 1, 2, 3, 1, 1, 1, 
 assert.deepEqual(BSONJS.deserialize(simple_string_serialized_2).doc, BSON.deserialize(new Buffer(simple_string_serialized, 'binary')).doc);
 assert.deepEqual(BSONJS.deserialize(simple_string_serialized_2).doc, BSON.deserialize(simple_string_serialized, 'binary').doc);
 
-
-
+// Simple serialization and deserialization for a DBRef
+var oid = new ObjectID2()
+var simple_string_serialized = BSONJS.serialize({doc:new DBRef('namespace', oid, 'integration_tests_')});
+var simple_string_serialized_2 = BSON.serialize({doc:new DBRef2('namespace', oid, 'integration_tests_')});
+// Ensure we have the same values for the dbref
+var object_js = BSONJS.deserialize(simple_string_serialized_2);
+var object_c = BSON.deserialize(simple_string_serialized, 'binary');
+assert.equal(object_js.doc.namespace, object_c.doc.namespace);
+assert.equal(object_js.doc.oid.toHexString(), object_c.doc.oid.toHexString());
+assert.equal(object_js.doc.db, object_c.doc.db);
 
 
 

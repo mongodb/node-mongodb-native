@@ -16,6 +16,7 @@
 #include "objectid.h"
 #include "binary.h"
 #include "code.h"
+#include "dbref.h"
 
 using namespace v8;
 using namespace node;
@@ -77,15 +78,15 @@ Handle<Value> BSON::New(const Arguments &args) {
 }
 
 Handle<Value> BSON::BSONSerialize(const Arguments &args) {
-  const char* value = "BSONSerialize::Hello world!";
-  
+  // printf("= BSONSerialize ===================================== USING Native BSON Parser\n");  
   if(args.Length() != 1 && args[0]->IsObject()) return VException("One argument required - object");
 
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
   uint32_t object_size = BSON::calculate_object_size(args[0]);
+  // printf("=================================== object:size: %d\n", object_size);
   // Allocate the memory needed for the serializtion
   char *serialized_object = (char *)malloc(object_size * sizeof(char));
-  *(serialized_object + object_size) = '\0';
+  // *(serialized_object + object_size) = '\0';
   // Serialize the object
   BSON::serialize(serialized_object, 0, Null(), args[0]);  
   // Encode the binary value
@@ -190,6 +191,24 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     memcpy((serialized_object + index), binary_obj->data, binary_obj->index);
     // Adjust index
     index = index + binary_obj->index;
+  } else if(DBRef::HasInstance(value)) {
+    // printf("============================================= -- serialized::::dbref\n");    
+    // Unpack the dbref
+    Local<Object> dbref = value->ToObject();
+    // Create an object containing the right namespace variables
+    Local<Object> obj = Object::New();
+    // unpack dbref to get to the bin
+    DBRef *db_ref_obj = DBRef::Unwrap<DBRef>(dbref);
+    char *oid_bin = db_ref_obj->oid->convert_hex_oid_to_bin();
+    // Return the value  
+    Local<Value> argv[] = {String::New(db_ref_obj->oid->oid)};
+    Handle<Value> object_id_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);    
+    // Encode the oid to bin
+    obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
+    obj->Set(String::New("$id"), object_id_obj);
+    obj->Set(String::New("$db"), dbref->Get(String::New("db")));
+    // Encode the variable
+    index = BSON::serialize(serialized_object, index, name, obj);
   } else if(Code::HasInstance(value)) {
     // printf("============================================= -- serialized::::code\n");    
     // Save the string at the offset provided
@@ -457,8 +476,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Free up memory
     free(length_str);
   } else if(value->IsObject()) {
+    // printf("============================================= -- serialized::::object\n");
     if(!name->IsNull()) {
-      // printf("============================================= -- serialized::::object\n");
       // Save the string at the offset provided
       *(serialized_object + index) = BSON_DATA_OBJECT;
       // Adjust writing position for the first byte
@@ -478,6 +497,9 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
 
     // Calculate size of the total object
     uint32_t object_size = BSON::calculate_object_size(value);
+    // printf("------------------------------------------------------ property_names.length: %d\n", property_names->Length());
+    // printf("------------------------------------------------------ calculated_object: %d\n", object_size);
+    
     // Write the size
     BSON::write_int32((serialized_object + index), object_size);
     // Adjust size
@@ -487,6 +509,14 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     for(uint32_t i = 0; i < property_names->Length(); i++) {
       // Fetch the property name
       Local<String> property_name = property_names->Get(i)->ToString();
+      
+      // Convert name to char*
+      ssize_t len = DecodeBytes(property_name, BINARY);
+      char *data = new char[len];
+      // *(data + len) = '\0';
+      ssize_t written = DecodeWrite(data, len, property_name, BINARY);      
+      // printf("=========================== property_name:: %s\n", data);
+      
       // Fetch the object for the property
       Local<Value> property = object->Get(property_name);
       // Write the next serialized object
@@ -529,6 +559,23 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     Code *code_obj = Code::Unwrap<Code>(obj);
     // Let's calculate the size the code object adds adds
     object_size += strlen(code_obj->code) + 4 + BSON::calculate_object_size(code_obj->scope_object) + 4 + 1;
+  } else if(DBRef::HasInstance(value)) {
+    // Unpack the dbref
+    Local<Object> dbref = value->ToObject();
+    // Create an object containing the right namespace variables
+    Local<Object> obj = Object::New();
+    // unpack dbref to get to the bin
+    DBRef *db_ref_obj = DBRef::Unwrap<DBRef>(dbref);
+
+    // Return the value  
+    Local<Value> argv[] = {String::New(db_ref_obj->oid->oid)};
+    Handle<Value> object_id_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);    
+    // Encode the oid to bin
+    obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
+    obj->Set(String::New("$id"), object_id_obj);
+    obj->Set(String::New("$db"), dbref->Get(String::New("db")));
+    // Calculate size
+    object_size += BSON::calculate_object_size(obj);
   } else if(value->IsString()) {
     // printf("================================ calculate_object_size:string\n");
     Local<String> str = value->ToString();
@@ -625,14 +672,15 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       object_size += BSON::calculate_object_size(property) + property_name->Length() + 1 + 1;
     }      
     
-    object_size = object_size + 1 + 4;
+    object_size = object_size + 4 + 1;
   } 
 
   return object_size;
 }
 
 Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
-   HandleScope scope;
+  HandleScope scope;
+  // printf("= BSONDeserialize ===================================== USING Native BSON Parser\n");
   // Ensure that we have an parameter
   if(Buffer::HasInstance(args[0]) && args.Length() > 1) return VException("One argument required - buffer1.");
   if(args[0]->IsString() && args.Length() != 2) return VException("Two argument required - string and encoding.");
@@ -1159,7 +1207,13 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       free(array_buffer);
     }
   }
-
+  
+  // Check if we have a db reference
+  if(!is_array_item && return_data->Has(String::New("$ref"))) {
+    Handle<Value> dbref_value = BSON::decodeDBref(return_data->Get(String::New("$ref")), return_data->Get(String::New("$id")), return_data->Get(String::New("$db")));
+    return scope.Close(dbref_value);
+  }
+  
   // Return the data object to javascript
   if(is_array_item) {
     return scope.Close(return_array);
@@ -1170,6 +1224,14 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
 
 const char* BSON::ToCString(const v8::String::Utf8Value& value) {
   return *value ? *value : "<string conversion failed>";
+}
+
+Handle<Value> BSON::decodeDBref(Local<Value> ref, Local<Value> oid, Local<Value> db) {
+  HandleScope scope;
+  
+  Local<Value> argv[] = {ref, oid, db};
+  Handle<Value> dbref_obj = DBRef::constructor_template->GetFunction()->NewInstance(3, argv);
+  return scope.Close(dbref_obj);
 }
 
 Handle<Value> BSON::decodeCode(char *code, Handle<Value> scope_object) {
@@ -1258,6 +1320,7 @@ extern "C" void init(Handle<Object> target) {
   ObjectID::Initialize(target);
   Binary::Initialize(target);
   Code::Initialize(target);
+  DBRef::Initialize(target);
 }
 
 // NODE_MODULE(bson, BSON::Initialize);

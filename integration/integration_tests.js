@@ -2,8 +2,14 @@ GLOBAL.DEBUG = true;
 
 sys = require("sys");
 test = require("assert");
-var mongo = require('../lib/mongodb'),
+var Db = require('../lib/mongodb').Db,
+  GridStore = require('../lib/mongodb').GridStore,
+  Long = require('../lib/mongodb').Long,
+  Server = require('../lib/mongodb').Server,
+  Code = require('../lib/mongodb/bson/bson').Code;
+  Binary = require('../lib/mongodb/bson/bson').Binary;
   ObjectID = require('../lib/mongodb/bson/bson').ObjectID,
+  DBRef = require('../lib/mongodb/bson/bson').DBRef,
   Cursor = require('../lib/mongodb/cursor').Cursor,
   Collection = require('../lib/mongodb/collection').Collection,
   BinaryParser = require('../lib/mongodb/bson/binary_parser').BinaryParser,
@@ -143,7 +149,7 @@ var all_tests = {
       });
 
       // Manually created id
-      var objectId = new mongo.ObjectID(null);
+      var objectId = new ObjectID(null);
 
       // Insert a manually created document with generated oid
       collection.insert({"_id":objectId, name:"Donald", age:95}, function(err, ids) {
@@ -168,10 +174,10 @@ var all_tests = {
   },
 
   test_object_id_to_and_from_hex_string : function() {
-      var objectId = new mongo.ObjectID(null);
+      var objectId = new ObjectID(null);
       var originalHex= objectId.toHexString();
 
-      var newObjectId= new mongo.ObjectID.createFromHexString(originalHex)
+      var newObjectId= new ObjectID.createFromHexString(originalHex)
       newHex= newObjectId.toHexString();    
       test.equal(originalHex, newHex);
       finished_test({test_object_id_to_and_from_hex_string:'ok'});
@@ -179,7 +185,7 @@ var all_tests = {
 
   // Test the auto connect functionality of the db
   test_automatic_reconnect : function() {
-    var automatic_connect_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+    var automatic_connect_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
     automatic_connect_client.open(function(err, automatic_connect_client) {
       // Listener for closing event
       var closeListener = function(has_error) {
@@ -210,8 +216,8 @@ var all_tests = {
   // Test that error conditions are handled correctly
   test_connection_errors : function() {
     // Test error handling for single server connection
-    var serverConfig = new mongo.Server("127.0.0.1", 21017, {auto_reconnect: true});
-    var error_client = new mongo.Db('integration_tests_', serverConfig, {});
+    var serverConfig = new Server("127.0.0.1", 21017, {auto_reconnect: true});
+    var error_client = new Db('integration_tests_', serverConfig, {});
 
     error_client.addListener("error", function(err) {});
     error_client.addListener("close", function(connection) {
@@ -223,10 +229,10 @@ var all_tests = {
     error_client.open(function(err, error_client) {});    
 
     // Test error handling for server pair (works for cluster aswell)
-    var serverConfig = new mongo.Server("127.0.0.1", 21017, {});
-    var normalServer = new mongo.Server("127.0.0.1", 27017);
-    var serverPairConfig = new mongo.ServerPair(normalServer, serverConfig);
-    var error_client_pair = new mongo.Db('integration_tests_21', serverPairConfig, {});
+    var serverConfig = new Server("127.0.0.1", 21017, {});
+    var normalServer = new Server("127.0.0.1", 27017);
+    var serverPairConfig = new ServerPair(normalServer, serverConfig);
+    var error_client_pair = new Db('integration_tests_21', serverPairConfig, {});
 
     var closeListener = function(connection) {
       test.ok(typeof connection == typeof serverConfig);
@@ -246,7 +252,7 @@ var all_tests = {
 
   // Test the error reporting functionality
   test_error_handling : function() {
-    var error_client = new mongo.Db('integration_tests2_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {});  
+    var error_client = new Db('integration_tests2_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {});  
     error_client.open(function(err, error_client) {
       error_client.resetErrorHistory(function() {
         error_client.error(function(err, documents) {
@@ -1016,7 +1022,7 @@ var all_tests = {
   },
 
   test_strict_access_collection : function() {
-    var error_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
+    var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
     test.equal(true, error_client.strict);
     error_client.open(function(err, error_client) {
       error_client.collection('does-not-exist', function(err, collection) {
@@ -1036,7 +1042,7 @@ var all_tests = {
   },
 
   test_strict_create_collection : function() {
-    var error_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
+    var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
     test.equal(true, error_client.strict);
     error_client.open(function(err, error_client) {
       error_client.createCollection('test_strict_create_collection', function(err, collection) {
@@ -1116,13 +1122,13 @@ var all_tests = {
           test.equal(3, count);
 
           // Let's test usage of the $where statement
-          collection.find({'$where':new mongo.Code('this.a > 2')}, function(err, cursor) {
+          collection.find({'$where':new Code('this.a > 2')}, function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(1, count);
             });          
           });
 
-          collection.find({'$where':new mongo.Code('this.a > i', {i:1})}, function(err, cursor) {
+          collection.find({'$where':new Code('this.a > i', {i:1})}, function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(2, count);
 
@@ -1162,15 +1168,15 @@ var all_tests = {
       test.equal(5, result);        
     });
 
-    client.eval(new mongo.Code("2 + 3;"), function(err, result) {
+    client.eval(new Code("2 + 3;"), function(err, result) {
       test.equal(5, result);            
     });
 
-    client.eval(new mongo.Code("return i;", {'i':2}), function(err, result) {
+    client.eval(new Code("return i;", {'i':2}), function(err, result) {
       test.equal(2, result);            
     });
 
-    client.eval(new mongo.Code("i + 3;", {'i':2}), function(err, result) {
+    client.eval(new Code("i + 3;", {'i':2}), function(err, result) {
       test.equal(5, result);            
     });
 
@@ -1315,28 +1321,28 @@ var all_tests = {
             test.equal(0, count);          
 
             // Execute deref a db reference
-            client.dereference(new mongo.DBRef("test_deref", new mongo.ObjectID()), function(err, result) {
+            client.dereference(new DBRef("test_deref", new ObjectID()), function(err, result) {
               collection.insert({'x':'hello'}, function(err, ids) {
                 collection.findOne(function(err, document) {
                   test.equal('hello', document.x);
 
-                  client.dereference(new mongo.DBRef("test_deref", document._id), function(err, result) {
+                  client.dereference(new DBRef("test_deref", document._id), function(err, result) {
                     test.equal('hello', document.x);
                   });
                 });
               });            
             });
 
-            client.dereference(new mongo.DBRef("test_deref", 4), function(err, result) {
+            client.dereference(new DBRef("test_deref", 4), function(err, result) {
               var obj = {'_id':4};
 
               collection.insert(obj, function(err, ids) {
-                client.dereference(new mongo.DBRef("test_deref", 4), function(err, document) {
+                client.dereference(new DBRef("test_deref", 4), function(err, document) {
                   test.equal(obj['_id'], document._id);
 
                   collection.remove(function(err, result) {
                     collection.insert({'x':'hello'}, function(err, ids) {
-                      client.dereference(new mongo.DBRef("test_deref", null), function(err, result) {
+                      client.dereference(new DBRef("test_deref", null), function(err, result) {
                         test.equal(null, result);
                         // Let's close the db 
                         finished_test({test_deref:'ok'});                                   
@@ -1398,9 +1404,9 @@ var all_tests = {
 
   test_save_long : function() {
     client.createCollection('test_save_long', function(err, collection) {
-      collection.insert({'x':mongo.Long.fromNumber(9223372036854775807)});
+      collection.insert({'x':Long.fromNumber(9223372036854775807)});
       collection.findOne(function(err, doc) {
-        test.ok(mongo.Long.fromNumber(9223372036854775807).equals(doc.x));
+        test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
         // Let's close the db 
         finished_test({test_save_long:'ok'});                                   
       });
@@ -1416,7 +1422,7 @@ var all_tests = {
           test.equal('mike', doc.hello);
 
           var id = doc._id.toString();
-          collection.findOne({'_id':new mongo.ObjectID(id)}, function(err, doc) {
+          collection.findOne({'_id':new ObjectID(id)}, function(err, doc) {
             test.equal('mike', doc.hello);          
             // Let's close the db 
             finished_test({test_find_by_oid:'ok'});                                   
@@ -2051,7 +2057,7 @@ var all_tests = {
   },
 
   // test_kill_cursors : function() {
-  //   var test_kill_cursors_client = new mongo.Db('integration_tests4_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+  //   var test_kill_cursors_client = new Db('integration_tests4_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
   //   test_kill_cursors_client.open(function(err, test_kill_cursors_client) {
   //     var number_of_tests_done = 0;
   // 
@@ -2157,19 +2163,19 @@ var all_tests = {
 
   // Gridstore tests
   test_gs_exist : function() {
-    var gridStore = new mongo.GridStore(client, "foobar", "w");
+    var gridStore = new GridStore(client, "foobar", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
-          mongo.GridStore.exist(client, 'foobar', function(err, result) {
+          GridStore.exist(client, 'foobar', function(err, result) {
             test.equal(true, result);
           });
 
-          mongo.GridStore.exist(client, 'does_not_exist', function(err, result) {
+          GridStore.exist(client, 'does_not_exist', function(err, result) {
             test.equal(false, result);
           });
 
-          mongo.GridStore.exist(client, 'foobar', 'another_root', function(err, result) {
+          GridStore.exist(client, 'foobar', 'another_root', function(err, result) {
             test.equal(false, result);
             finished_test({test_gs_exist:'ok'});        
           });
@@ -2179,11 +2185,11 @@ var all_tests = {
   },
 
   test_gs_list : function() {
-    var gridStore = new mongo.GridStore(client, "foobar2", "w");
+    var gridStore = new GridStore(client, "foobar2", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
-          mongo.GridStore.list(client, function(err, items) {
+          GridStore.list(client, function(err, items) {
             var found = false;
             items.forEach(function(filename) {
               if(filename == 'foobar2') found = true;
@@ -2193,7 +2199,7 @@ var all_tests = {
             test.ok(found);
           });
 
-          mongo.GridStore.list(client, 'fs', function(err, items) {
+          GridStore.list(client, 'fs', function(err, items) {
             var found = false;
             items.forEach(function(filename) {
               if(filename == 'foobar2') found = true;
@@ -2203,7 +2209,7 @@ var all_tests = {
             test.ok(found);
           });
 
-          mongo.GridStore.list(client, 'my_fs', function(err, items) {
+          GridStore.list(client, 'my_fs', function(err, items) {
             var found = false;
             items.forEach(function(filename) {
               if(filename == 'foobar2') found = true;
@@ -2212,11 +2218,11 @@ var all_tests = {
             test.ok(items.length >= 0);
             test.ok(!found);
 
-            var gridStore2 = new mongo.GridStore(client, "foobar3", "w");
+            var gridStore2 = new GridStore(client, "foobar3", "w");
             gridStore2.open(function(err, gridStore) {    
               gridStore2.write('my file', function(err, gridStore) {
                 gridStore.close(function(err, result) {                
-                  mongo.GridStore.list(client, function(err, items) {
+                  GridStore.list(client, function(err, items) {
                     var found = false;
                     var found2 = false;
                     items.forEach(function(filename) {
@@ -2239,7 +2245,7 @@ var all_tests = {
   },
 
   test_gs_small_write : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_small_write", "w");
+    var gridStore = new GridStore(client, "test_gs_small_write", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
@@ -2267,7 +2273,7 @@ var all_tests = {
   },
 
   test_gs_small_file : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_small_file", "w");
+    var gridStore = new GridStore(client, "test_gs_small_file", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
@@ -2277,7 +2283,7 @@ var all_tests = {
                 test.equal(1, items.length);
 
                 // Read test of the file
-                mongo.GridStore.read(client, 'test_gs_small_file', function(err, data) {
+                GridStore.read(client, 'test_gs_small_file', function(err, data) {
                   test.equal('hello world!', data);
                   finished_test({test_gs_small_file:'ok'});        
                 });              
@@ -2290,17 +2296,17 @@ var all_tests = {
   },
 
   test_gs_overwrite : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_overwrite", "w");
+    var gridStore = new GridStore(client, "test_gs_overwrite", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
-          var gridStore2 = new mongo.GridStore(client, "test_gs_overwrite", "w");
+          var gridStore2 = new GridStore(client, "test_gs_overwrite", "w");
           gridStore2.open(function(err, gridStore) {    
             gridStore2.write("overwrite", function(err, gridStore) {
               gridStore2.close(function(err, result) {
 
                 // Assert that we have overwriten the data
-                mongo.GridStore.read(client, 'test_gs_overwrite', function(err, data) {
+                GridStore.read(client, 'test_gs_overwrite', function(err, data) {
                   test.equal('overwrite', data);
                   finished_test({test_gs_overwrite:'ok'});        
                 });                            
@@ -2313,12 +2319,12 @@ var all_tests = {
   },
 
   test_gs_read_length : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_read_length", "w");
+    var gridStore = new GridStore(client, "test_gs_read_length", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
-          mongo.GridStore.read(client, 'test_gs_read_length', 5, function(err, data) {
+          GridStore.read(client, 'test_gs_read_length', 5, function(err, data) {
             test.equal('hello', data);
             finished_test({test_gs_read_length:'ok'});        
           });                            
@@ -2328,16 +2334,16 @@ var all_tests = {
   },
 
   test_gs_read_with_offset : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_read_with_offset", "w");
+    var gridStore = new GridStore(client, "test_gs_read_with_offset", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
-          mongo.GridStore.read(client, 'test_gs_read_with_offset', 5, 7, function(err, data) {
+          GridStore.read(client, 'test_gs_read_with_offset', 5, 7, function(err, data) {
             test.equal('world', data);
           });
 
-          mongo.GridStore.read(client, 'test_gs_read_with_offset', null, 7, function(err, data) {
+          GridStore.read(client, 'test_gs_read_with_offset', null, 7, function(err, data) {
             test.equal('world!', data);
             finished_test({test_gs_read_with_offset:'ok'});        
           });
@@ -2347,11 +2353,11 @@ var all_tests = {
   },
 
   test_gs_seek : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_seek", "w");
+    var gridStore = new GridStore(client, "test_gs_seek", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(result) {        
-          var gridStore2 = new mongo.GridStore(client, "test_gs_seek", "r");
+          var gridStore2 = new GridStore(client, "test_gs_seek", "r");
           gridStore2.open(function(err, gridStore) {    
             gridStore.seek(0, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
@@ -2360,7 +2366,7 @@ var all_tests = {
             });
           });
 
-          var gridStore3 = new mongo.GridStore(client, "test_gs_seek", "r");
+          var gridStore3 = new GridStore(client, "test_gs_seek", "r");
           gridStore3.open(function(err, gridStore) {    
             gridStore.seek(7, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
@@ -2369,7 +2375,7 @@ var all_tests = {
             });
           });
 
-          var gridStore4 = new mongo.GridStore(client, "test_gs_seek", "r");
+          var gridStore4 = new GridStore(client, "test_gs_seek", "r");
           gridStore4.open(function(err, gridStore) {    
             gridStore.seek(4, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
@@ -2378,39 +2384,39 @@ var all_tests = {
             });
           });
 
-          var gridStore5 = new mongo.GridStore(client, "test_gs_seek", "r");
+          var gridStore5 = new GridStore(client, "test_gs_seek", "r");
           gridStore5.open(function(err, gridStore) {    
-            gridStore.seek(-1, mongo.GridStore.IO_SEEK_END, function(err, gridStore) {
+            gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('!', chr);
               });
             });
           });
 
-          var gridStore6 = new mongo.GridStore(client, "test_gs_seek", "r");
+          var gridStore6 = new GridStore(client, "test_gs_seek", "r");
           gridStore6.open(function(err, gridStore) {    
-            gridStore.seek(-6, mongo.GridStore.IO_SEEK_END, function(err, gridStore) {
+            gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('w', chr);
               });
             });
           });
 
-          var gridStore7 = new mongo.GridStore(client, "test_gs_seek", "r");
+          var gridStore7 = new GridStore(client, "test_gs_seek", "r");
           gridStore7.open(function(err, gridStore) {    
-            gridStore.seek(7, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
+            gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('w', chr);
 
-                gridStore.seek(-1, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
                   gridStore.getc(function(err, chr) {
                     test.equal('w', chr);
 
-                    gridStore.seek(-4, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                    gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
                       gridStore.getc(function(err, chr) {
                         test.equal('o', chr);
 
-                        gridStore.seek(3, mongo.GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                        gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
                           gridStore.getc(function(err, chr) {
                             test.equal('o', chr);
                             finished_test({test_gs_seek:'ok'});        
@@ -2429,10 +2435,10 @@ var all_tests = {
   },
 
   test_gs_multi_chunk : function() {
-    var fs_client = new mongo.Db('integration_tests_10', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db('integration_tests_10', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
-        var gridStore = new mongo.GridStore(fs_client, "test_gs_multi_chunk", "w");
+        var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
         gridStore.open(function(err, gridStore) {    
           gridStore.chunkSize = 512;
           var file1 = ''; var file2 = ''; var file3 = '';
@@ -2448,7 +2454,7 @@ var all_tests = {
                     collection.count(function(err, count) {
                       test.equal(3, count);
 
-                      mongo.GridStore.read(fs_client, 'test_gs_multi_chunk', function(err, data) {
+                      GridStore.read(fs_client, 'test_gs_multi_chunk', function(err, data) {
                         test.equal(512*3, data.length);
                         finished_test({test_gs_multi_chunk:'ok'});                    
                         fs_client.close();
@@ -2465,13 +2471,13 @@ var all_tests = {
   },
 
   test_gs_puts_and_readlines : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_puts_and_readlines", "w");
+    var gridStore = new GridStore(client, "test_gs_puts_and_readlines", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.puts("line one", function(err, gridStore) {
         gridStore.puts("line two\n", function(err, gridStore) {
           gridStore.puts("line three", function(err, gridStore) {          
             gridStore.close(function(err, result) {
-              mongo.GridStore.readlines(client, 'test_gs_puts_and_readlines', function(err, lines) {
+              GridStore.readlines(client, 'test_gs_puts_and_readlines', function(err, lines) {
                 test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
                 finished_test({test_gs_puts_and_readlines:'ok'});                    
               });
@@ -2483,10 +2489,10 @@ var all_tests = {
   },
 
   test_gs_weird_name_unlink : function() {
-    var fs_client = new mongo.Db('awesome_f0eabd4b52e30b223c010000', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db('awesome_f0eabd4b52e30b223c010000', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
-        var gridStore = new mongo.GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
+        var gridStore = new GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
         gridStore.open(function(err, gridStore) {    
           gridStore.write("hello, world!", function(err, gridStore) {
             gridStore.close(function(err, result) {
@@ -2501,7 +2507,7 @@ var all_tests = {
                   test.equal(1, count);
 
                   // Unlink the file
-                  mongo.GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
+                  GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
                     fs_client.collection('articles.files', function(err, collection) {
                       collection.count(function(err, count) {
                         test.equal(0, count);
@@ -2528,10 +2534,10 @@ var all_tests = {
   },
 
   test_gs_unlink : function() {
-    var fs_client = new mongo.Db('integration_tests_11', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db('integration_tests_11', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
-        var gridStore = new mongo.GridStore(fs_client, "test_gs_unlink", "w");
+        var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
         gridStore.open(function(err, gridStore) {    
           gridStore.write("hello, world!", function(err, gridStore) {
             gridStore.close(function(err, result) {
@@ -2546,7 +2552,7 @@ var all_tests = {
                   test.equal(1, count);
 
                   // Unlink the file
-                  mongo.GridStore.unlink(fs_client, 'test_gs_unlink', function(err, gridStore) {
+                  GridStore.unlink(fs_client, 'test_gs_unlink', function(err, gridStore) {
                     fs_client.collection('fs.files', function(err, collection) {
                       collection.count(function(err, count) {
                         test.equal(0, count);
@@ -2572,15 +2578,15 @@ var all_tests = {
   },
 
   test_gs_append : function() {
-    var fs_client = new mongo.Db('integration_tests_12', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db('integration_tests_12', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
-        var gridStore = new mongo.GridStore(fs_client, "test_gs_append", "w");
+        var gridStore = new GridStore(fs_client, "test_gs_append", "w");
         gridStore.open(function(err, gridStore) {    
           gridStore.write("hello, world!", function(err, gridStore) {
             gridStore.close(function(err, result) {
 
-              var gridStore2 = new mongo.GridStore(fs_client, "test_gs_append", "w+");
+              var gridStore2 = new GridStore(fs_client, "test_gs_append", "w+");
               gridStore2.open(function(err, gridStore) {
                 gridStore.write(" how are you?", function(err, gridStore) {
                   gridStore.close(function(err, result) {
@@ -2589,7 +2595,7 @@ var all_tests = {
                       collection.count(function(err, count) {
                         test.equal(1, count);
 
-                        mongo.GridStore.read(fs_client, 'test_gs_append', function(err, data) {
+                        GridStore.read(fs_client, 'test_gs_append', function(err, data) {
                           test.equal("hello, world! how are you?", data);                        
                           finished_test({test_gs_append:'ok'});       
                           fs_client.close();
@@ -2607,17 +2613,17 @@ var all_tests = {
   },
 
   test_gs_rewind_and_truncate_on_write : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
+    var gridStore = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
-          var gridStore2 = new mongo.GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
+          var gridStore2 = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
           gridStore2.open(function(err, gridStore) {
             gridStore.write('some text is inserted here', function(err, gridStore) {
               gridStore.rewind(function(err, gridStore) {
                 gridStore.write('abc', function(err, gridStore) {
                   gridStore.close(function(err, result) {
-                    mongo.GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
+                    GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
                       test.equal("abc", data);
                       finished_test({test_gs_rewind_and_truncate_on_write:'ok'});       
                     });
@@ -2632,11 +2638,11 @@ var all_tests = {
   },
 
   test_gs_tell : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_tell", "w");
+    var gridStore = new GridStore(client, "test_gs_tell", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
-          var gridStore2 = new mongo.GridStore(client, "test_gs_tell", "r");
+          var gridStore2 = new GridStore(client, "test_gs_tell", "r");
           gridStore2.open(function(err, gridStore) {
             gridStore.read(5, function(err, data) {
               test.equal("hello", data);
@@ -2653,10 +2659,10 @@ var all_tests = {
   },
 
   test_gs_save_empty_file : function() {
-    var fs_client = new mongo.Db('integration_tests_13', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db('integration_tests_13', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
-        var gridStore = new mongo.GridStore(fs_client, "test_gs_save_empty_file", "w");
+        var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");
         gridStore.open(function(err, gridStore) {    
           gridStore.write("", function(err, gridStore) {
             gridStore.close(function(err, result) {
@@ -2682,10 +2688,10 @@ var all_tests = {
   },
 
   test_gs_empty_file_eof : function() {
-    var gridStore = new mongo.GridStore(client, 'test_gs_empty_file_eof', "w");
+    var gridStore = new GridStore(client, 'test_gs_empty_file_eof', "w");
     gridStore.open(function(err, gridStore) {
       gridStore.close(function(err, gridStore) {      
-        var gridStore2 = new mongo.GridStore(client, 'test_gs_empty_file_eof', "r");
+        var gridStore2 = new GridStore(client, 'test_gs_empty_file_eof', "r");
         gridStore2.open(function(err, gridStore) {
           test.equal(true, gridStore.eof());
           finished_test({test_gs_empty_file_eof:'ok'});       
@@ -2695,15 +2701,15 @@ var all_tests = {
   },
 
   test_gs_cannot_change_chunk_size_on_read : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
+    var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
 
-          var gridStore2 = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
+          var gridStore2 = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
           gridStore2.open(function(err, gridStore) {
             gridStore.chunkSize = 42; 
-            test.equal(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+            test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
             finished_test({test_gs_cannot_change_chunk_size_on_read:'ok'});       
           });        
         });
@@ -2712,24 +2718,24 @@ var all_tests = {
   },
 
   test_gs_cannot_change_chunk_size_after_data_written : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
+    var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.chunkSize = 42; 
-        test.equal(mongo.Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+        test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
         finished_test({test_gs_cannot_change_chunk_size_after_data_written:'ok'});       
       });
     });              
   },
 
   test_change_chunk_size : function() {
-    var gridStore = new mongo.GridStore(client, "test_change_chunk_size", "w");
+    var gridStore = new GridStore(client, "test_change_chunk_size", "w");
     gridStore.open(function(err, gridStore) {   
       gridStore.chunkSize = 42
 
       gridStore.write('foo', function(err, gridStore) {
         gridStore.close(function(err, result) {
-          var gridStore2 = new mongo.GridStore(client, "test_change_chunk_size", "r");
+          var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal(42, gridStore.chunkSize);
             finished_test({test_change_chunk_size:'ok'});       
@@ -2740,11 +2746,11 @@ var all_tests = {
   },
 
   test_gs_chunk_size_in_option : function() {
-    var gridStore = new mongo.GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
+    var gridStore = new GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
     gridStore.open(function(err, gridStore) {   
       gridStore.write('foo', function(err, gridStore) {
         gridStore.close(function(err, result) {
-          var gridStore2 = new mongo.GridStore(client, "test_change_chunk_size", "r");
+          var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal(42, gridStore.chunkSize);
             finished_test({test_gs_chunk_size_in_option:'ok'});       
@@ -2755,20 +2761,20 @@ var all_tests = {
   },
 
   test_gs_md5 : function() {
-    var gridStore = new mongo.GridStore(client, "new-file", "w");
+    var gridStore = new GridStore(client, "new-file", "w");
     gridStore.open(function(err, gridStore) {   
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
-          var gridStore2 = new mongo.GridStore(client, "new-file", "r");
+          var gridStore2 = new GridStore(client, "new-file", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
             gridStore.md5 = "can't do this";
             test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
 
-            var gridStore2 = new mongo.GridStore(client, "new-file", "w");
+            var gridStore2 = new GridStore(client, "new-file", "w");
             gridStore2.open(function(err, gridStore) {
               gridStore.close(function(err, result) {
-                var gridStore3 = new mongo.GridStore(client, "new-file", "r");
+                var gridStore3 = new GridStore(client, "new-file", "r");
                 gridStore3.open(function(err, gridStore) {
                   test.equal("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
 
@@ -2786,24 +2792,24 @@ var all_tests = {
     var now = new Date();
     var originalFileUploadDate = null;
 
-    var gridStore = new mongo.GridStore(client, "test_gs_upload_date", "w");
+    var gridStore = new GridStore(client, "test_gs_upload_date", "w");
     gridStore.open(function(err, gridStore) {   
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
 
-          var gridStore2 = new mongo.GridStore(client, "test_gs_upload_date", "r");
+          var gridStore2 = new GridStore(client, "test_gs_upload_date", "r");
           gridStore2.open(function(err, gridStore) {
             test.ok(gridStore.uploadDate != null);
             originalFileUploadDate = gridStore.uploadDate;
 
             gridStore2.close(function(err, result) {
-              var gridStore3 = new mongo.GridStore(client, "test_gs_upload_date", "w");
+              var gridStore3 = new GridStore(client, "test_gs_upload_date", "w");
               gridStore3.open(function(err, gridStore) {
                 gridStore3.write('new data', function(err, gridStore) {
                   gridStore3.close(function(err, result) {
                     var fileUploadDate = null;
 
-                    var gridStore4 = new mongo.GridStore(client, "test_gs_upload_date", "r");
+                    var gridStore4 = new GridStore(client, "test_gs_upload_date", "r");
                     gridStore4.open(function(err, gridStore) {
                       test.equal(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
                       finished_test({test_gs_upload_date:'ok'});       
@@ -2821,21 +2827,21 @@ var all_tests = {
   test_gs_content_type : function() {
     var ct = null;
 
-    var gridStore = new mongo.GridStore(client, "test_gs_content_type", "w");
+    var gridStore = new GridStore(client, "test_gs_content_type", "w");
     gridStore.open(function(err, gridStore) {   
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
 
-          var gridStore2 = new mongo.GridStore(client, "test_gs_content_type", "r");
+          var gridStore2 = new GridStore(client, "test_gs_content_type", "r");
           gridStore2.open(function(err, gridStore) {
             ct = gridStore.contentType;
-            test.equal(mongo.GridStore.DEFAULT_CONTENT_TYPE, ct);
+            test.equal(GridStore.DEFAULT_CONTENT_TYPE, ct);
 
-            var gridStore3 = new mongo.GridStore(client, "test_gs_content_type", "w+");
+            var gridStore3 = new GridStore(client, "test_gs_content_type", "w+");
             gridStore3.open(function(err, gridStore) {
               gridStore.contentType = "text/html";
               gridStore.close(function(err, result) {              
-                var gridStore4 = new mongo.GridStore(client, "test_gs_content_type", "r");
+                var gridStore4 = new GridStore(client, "test_gs_content_type", "r");
                 gridStore4.open(function(err, gridStore) {
                   test.equal("text/html", gridStore.contentType);
                   finished_test({test_gs_content_type:'ok'});       
@@ -2849,12 +2855,12 @@ var all_tests = {
   },
 
   test_gs_content_type_option : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
+    var gridStore = new GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
     gridStore.open(function(err, gridStore) {   
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(result) {
 
-          var gridStore2 = new mongo.GridStore(client, "test_gs_content_type_option", "r");
+          var gridStore2 = new GridStore(client, "test_gs_content_type_option", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal('image/jpg', gridStore.contentType);
             finished_test({test_gs_content_type_option:'ok'});       
@@ -2865,7 +2871,7 @@ var all_tests = {
   },
 
   test_gs_unknown_mode : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_unknown_mode", "x");
+    var gridStore = new GridStore(client, "test_gs_unknown_mode", "x");
     gridStore.open(function(err, gridStore) {
       test.ok(err instanceof Error);
       test.equal("Illegal mode x", err.message);
@@ -2874,21 +2880,21 @@ var all_tests = {
   },
 
   test_gs_metadata : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
+    var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
     gridStore.open(function(err, gridStore) {   
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
 
-          var gridStore2 = new mongo.GridStore(client, "test_gs_metadata", "r");
+          var gridStore2 = new GridStore(client, "test_gs_metadata", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal(null, gridStore.metadata);
 
-            var gridStore3 = new mongo.GridStore(client, "test_gs_metadata", "w+");
+            var gridStore3 = new GridStore(client, "test_gs_metadata", "w+");
             gridStore3.open(function(err, gridStore) {
               gridStore.metadata = {'a':1};
               gridStore.close(function(err, result) {
 
-                var gridStore4 = new mongo.GridStore(client, "test_gs_metadata", "r");
+                var gridStore4 = new GridStore(client, "test_gs_metadata", "r");
                 gridStore4.open(function(err, gridStore) {
                   test.equal(1, gridStore.metadata.a);
                   finished_test({test_gs_metadata:'ok'});       
@@ -2902,7 +2908,7 @@ var all_tests = {
   },
 
   test_admin_default_profiling_level : function() {
-    var fs_client = new mongo.Db('admin_test_1', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db('admin_test_1', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -2921,7 +2927,7 @@ var all_tests = {
   },
 
   test_admin_change_profiling_level : function() {
-    var fs_client = new mongo.Db('admin_test_2', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db('admin_test_2', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -2960,7 +2966,7 @@ var all_tests = {
   },
 
   test_admin_profiling_info : function() {
-    var fs_client = new mongo.Db('admin_test_3', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db('admin_test_3', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -2992,7 +2998,7 @@ var all_tests = {
   },
 
   test_admin_validate_collection : function() {
-    var fs_client = new mongo.Db('admin_test_4', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db('admin_test_4', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -3016,15 +3022,15 @@ var all_tests = {
     CustomPKFactory = function() {}
     CustomPKFactory.prototype = new Object();
     CustomPKFactory.createPk = function() {  
-      return new mongo.ObjectID("aaaaaaaaaaaa");
+      return new ObjectID("aaaaaaaaaaaa");
     }
 
-    var p_client = new mongo.Db('integration_tests_20', new mongo.Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
+    var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
     p_client.open(function(err, p_client) {
       p_client.dropDatabase(function(err, done) {    
         p_client.createCollection('test_custom_key', function(err, collection) {
           collection.insert({'a':1}, function(err, doc) {
-            collection.find({'_id':new mongo.ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
+            collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
               cursor.toArray(function(err, items) {
                 test.equal(1, items.length);
 
@@ -3085,8 +3091,8 @@ var all_tests = {
       collection.insert([{'user_id':1}, {'user_id':2}]);
 
       // String functions
-      var map = new mongo.Code("function() { emit(this.user_id, 1); }");
-      var reduce = new mongo.Code("function(k,vals) { return 1; }");
+      var map = new Code("function() { emit(this.user_id, 1); }");
+      var reduce = new Code("function(k,vals) { return 1; }");
 
       collection.mapReduce(map, reduce, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
@@ -3105,8 +3111,8 @@ var all_tests = {
       collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}]);
 
       // String functions
-      var map = new mongo.Code("function() { emit(this.user_id, 1); }");
-      var reduce = new mongo.Code("function(k,vals) { return 1; }");
+      var map = new Code("function() { emit(this.user_id, 1); }");
+      var reduce = new Code("function(k,vals) { return 1; }");
 
       collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
         collection.count(function(err, count) {
@@ -3129,8 +3135,8 @@ var all_tests = {
       collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}]);
 
       // String functions
-      var map = new mongo.Code("function() { emit(this.user_id, 1); }");
-      var reduce = new mongo.Code("function(k,vals) { throw 'error'; }");
+      var map = new Code("function() { emit(this.user_id, 1); }");
+      var reduce = new Code("function(k,vals) { throw 'error'; }");
 
       collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
         test.ok(err != null);
@@ -3163,7 +3169,7 @@ var all_tests = {
     var user_name = 'spongebob2';
     var password = 'password';
 
-    var p_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+    var p_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
     p_client.open(function(err, automatic_connect_client) {
       p_client.authenticate('admin', 'admin', function(err, replies) {
         test.ok(err instanceof Error);
@@ -3209,9 +3215,9 @@ var all_tests = {
   test_all_serialization_types : function() {
     client.createCollection('test_all_serialization_types', function(err, collection) {    
       var date = new Date();
-      var oid = new mongo.ObjectID();
+      var oid = new ObjectID();
       var string = 'binstring'
-      var bin = new mongo.Binary()
+      var bin = new Binary()
       for(var index = 0; index < string.length; index++) {
         bin.put(string.charAt(index))
       }
@@ -3228,12 +3234,18 @@ var all_tests = {
         'regexp': /regexp/,
         'boolean': true, 
         'long': date.getTime(),
-        'where': new mongo.Code('this.a > i', {i:1}),
-        'dbref': new mongo.DBRef('namespace', oid, 'integration_tests_')
+        'where': new Code('this.a > i', {i:1}),
+        'dbref': new DBRef('namespace', oid, 'integration_tests_')
       }
 
       collection.insert(motherOfAllDocuments, function(err, docs) {
         collection.findOne(function(err, doc) {
+          sys.debug("======================================================================")
+          sys.debug(sys.inspect(motherOfAllDocuments.dbref))
+          sys.debug("======================================================================")
+          sys.debug(sys.inspect(doc.dbref))
+          
+          
           // Assert correct deserialization of the values
           test.equal(motherOfAllDocuments.string, doc.string);
           test.deepEqual(motherOfAllDocuments.array, doc.array);
@@ -3243,8 +3255,8 @@ var all_tests = {
           test.equal(date.toString(), doc.date.toString());
           test.equal(date.getTime(), doc.date.getTime());
           test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-          test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
-
+          test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
+          
           test.equal(motherOfAllDocuments.int, doc.int);
           test.equal(motherOfAllDocuments.long, doc.long);
           test.equal(motherOfAllDocuments.float, doc.float);
@@ -3252,9 +3264,10 @@ var all_tests = {
           test.equal(motherOfAllDocuments.boolean, doc.boolean);
           test.equal(motherOfAllDocuments.where.code, doc.where.code);
           test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
-          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
+          
+          // test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+          // test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+          // test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
           finished_test({test_all_serialization_types:'ok'});      
         })      
       });    
@@ -3262,7 +3275,7 @@ var all_tests = {
   },
 
   test_should_correctly_retrieve_one_record : function() {
-    var p_client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+    var p_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
     p_client.open(function(err, p_client) {
       client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {    
         collection.insert({'a':0});
@@ -3385,14 +3398,14 @@ var all_tests = {
   // },
 
   test_gs_weird_bug : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_weird_bug", "w");
+    var gridStore = new GridStore(client, "test_gs_weird_bug", "w");
     var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
 
     gridStore.open(function(err, gridStore) {    
       gridStore.write(data, function(err, gridStore) {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
-          mongo.GridStore.read(client, 'test_gs_weird_bug', function(err, fileData) {
+          GridStore.read(client, 'test_gs_weird_bug', function(err, fileData) {
             test.equal(data.length, fileData.length);
             finished_test({test_gs_weird_bug:'ok'});        
           });
@@ -3402,14 +3415,14 @@ var all_tests = {
   },
 
   test_gs_working_field_read : function() {
-    var gridStore = new mongo.GridStore(client, "test_gs_working_field_read", "w");
+    var gridStore = new GridStore(client, "test_gs_working_field_read", "w");
     var data = fs.readFileSync("./integration/test_gs_working_field_read.pdf", 'binary');
 
     gridStore.open(function(err, gridStore) {    
       gridStore.write(data, function(err, gridStore) {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
-          mongo.GridStore.read(client, 'test_gs_working_field_read', function(err, fileData) {
+          GridStore.read(client, 'test_gs_working_field_read', function(err, fileData) {
             test.equal(data.length, fileData.length);
             finished_test({test_gs_working_field_read:'ok'});        
           });
@@ -3487,7 +3500,7 @@ var all_tests = {
 
   /*
     test_pair : function() {
-      var p_client = new mongo.Db('integration_tests_21', new mongo.ServerPair(new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})), {});
+      var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
       p_client.open(function(err, p_client) {    
         p_client.dropDatabase(function(err, done) {    
           test.ok(p_client.masterConnection != null);
@@ -3513,7 +3526,7 @@ var all_tests = {
     },
 
     test_cluster : function() {
-      var p_client = new mongo.Db('integration_tests_22', new mongo.ServerCluster([new mongo.Server("127.0.0.1", 27017, {}), new mongo.Server("127.0.0.1", 27018, {})]), {});
+      var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
       p_client.open(function(err, p_client) {
         p_client.dropDatabase(function(err, done) {    
           test.ok(p_client.masterConnection != null);
@@ -3539,7 +3552,7 @@ var all_tests = {
     },
 
     test_slave_connection :function() {
-      var p_client = new mongo.Db('integration_tests_23', new mongo.Server("127.0.0.1", 27018, {}));
+      var p_client = new Db('integration_tests_23', new Server("127.0.0.1", 27018, {}));
       p_client.open(function(err, p_client) {
         test.equal(null, err);
         finished_test({test_slave_connection:'ok'});
@@ -3578,7 +3591,7 @@ var all_tests = {
   },
   
   test_insert_and_update_with_new_script_context: function() {
-    new mongo.Db('test-db', new mongo.Server('localhost', 27017, {auto_reconnect: true}, {})).open(function(err, db) {
+    new Db('test-db', new Server('localhost', 27017, {auto_reconnect: true}, {})).open(function(err, db) {
       //convience curried handler for functions of type 'a -> (err, result)
       function getResult(callback){
         return function(error, result) {
@@ -3628,7 +3641,7 @@ var all_tests = {
       var date = new Date(); 
       var scriptCode = 
         "var string = 'binstring'\n" +
-        "var bin = new mongo.Binary()\n" +
+        "var bin = new Binary()\n" +
         "for(var index = 0; index < string.length; index++) {\n" +
         "  bin.put(string.charAt(index))\n" + 
         "}\n" +             
@@ -3636,15 +3649,15 @@ var all_tests = {
         "motherOfAllDocuments['array'] = [1,2,3];" +
         "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
         "motherOfAllDocuments['date'] = date;" +
-        "motherOfAllDocuments['oid'] = new mongo.ObjectID();" +
+        "motherOfAllDocuments['oid'] = new ObjectID();" +
         "motherOfAllDocuments['binary'] = bin;" +
         "motherOfAllDocuments['int'] = 42;" +
         "motherOfAllDocuments['float'] = 33.3333;" +
         "motherOfAllDocuments['regexp'] = /regexp/;" +
         "motherOfAllDocuments['boolean'] = true;" +
         "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
-        "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
-        "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
+        "motherOfAllDocuments['where'] = new Code('this.a > i', {i:1});" +
+        "motherOfAllDocuments['dbref'] = new DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
       
       var context = { motherOfAllDocuments : {}, mongo:mongo, date:date};
       // Execute function in context
@@ -3704,7 +3717,7 @@ for(key in client_tests) client_tests_keys.push(key);
 var BSON = require("../external-libs/bson/bson");
 
 // Set up the client connection
-var client = new mongo.Db('integration_tests_', new mongo.Server("127.0.0.1", 27017, {}), {});
+var client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {}), {});
 // Use native deserializer
 client.bson_deserializer = BSON;
 
