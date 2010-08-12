@@ -4,8 +4,10 @@ sys = require("sys");
 test = require("assert");
 var Db = require('../lib/mongodb').Db,
   GridStore = require('../lib/mongodb').GridStore,
+  Chunk = require('../lib/mongodb').Chunk,
   Long = require('../lib/mongodb').Long,
   Server = require('../lib/mongodb').Server,
+  ServerPair = require('../lib/mongodb').ServerPair,
   Code = require('../lib/mongodb/bson/bson').Code;
   Binary = require('../lib/mongodb/bson/bson').Binary;
   ObjectID = require('../lib/mongodb/bson/bson').ObjectID,
@@ -2170,11 +2172,11 @@ var all_tests = {
           GridStore.exist(client, 'foobar', function(err, result) {
             test.equal(true, result);
           });
-
+  
           GridStore.exist(client, 'does_not_exist', function(err, result) {
             test.equal(false, result);
           });
-
+  
           GridStore.exist(client, 'foobar', 'another_root', function(err, result) {
             test.equal(false, result);
             finished_test({test_gs_exist:'ok'});        
@@ -2183,7 +2185,7 @@ var all_tests = {
       });
     });
   },
-
+  
   test_gs_list : function() {
     var gridStore = new GridStore(client, "foobar2", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2194,30 +2196,30 @@ var all_tests = {
             items.forEach(function(filename) {
               if(filename == 'foobar2') found = true;
             });
-
+  
             test.ok(items.length >= 1);
             test.ok(found);
           });
-
+  
           GridStore.list(client, 'fs', function(err, items) {
             var found = false;
             items.forEach(function(filename) {
               if(filename == 'foobar2') found = true;
             });
-
+  
             test.ok(items.length >= 1);
             test.ok(found);
           });
-
+  
           GridStore.list(client, 'my_fs', function(err, items) {
             var found = false;
             items.forEach(function(filename) {
               if(filename == 'foobar2') found = true;
             });
-
+  
             test.ok(items.length >= 0);
             test.ok(!found);
-
+  
             var gridStore2 = new GridStore(client, "foobar3", "w");
             gridStore2.open(function(err, gridStore) {    
               gridStore2.write('my file', function(err, gridStore) {
@@ -2229,7 +2231,7 @@ var all_tests = {
                       if(filename == 'foobar2') found = true;
                       if(filename == 'foobar3') found2 = true;
                     });
-
+  
                     test.ok(items.length >= 2);
                     test.ok(found);
                     test.ok(found2);
@@ -2243,7 +2245,7 @@ var all_tests = {
       });
     });  
   },
-
+  
   test_gs_small_write : function() {
     var gridStore = new GridStore(client, "test_gs_small_write", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2254,8 +2256,8 @@ var all_tests = {
               cursor.toArray(function(err, items) {
                 test.equal(1, items.length);
                 var item = items[0];
-                test.ok(item._id instanceof ObjectID);
-
+                test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
+  
                 client.collection('fs.chunks', function(err, collection) {
                   collection.find({'files_id':item._id}, function(err, cursor) {
                     cursor.toArray(function(err, items) {
@@ -2271,7 +2273,7 @@ var all_tests = {
       });
     });  
   },
-
+  
   test_gs_small_file : function() {
     var gridStore = new GridStore(client, "test_gs_small_file", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2281,7 +2283,7 @@ var all_tests = {
             collection.find({'filename':'test_gs_small_file'}, function(err, cursor) {
               cursor.toArray(function(err, items) {
                 test.equal(1, items.length);
-
+  
                 // Read test of the file
                 GridStore.read(client, 'test_gs_small_file', function(err, data) {
                   test.equal('hello world!', data);
@@ -2294,7 +2296,7 @@ var all_tests = {
       });
     });      
   },
-
+  
   test_gs_overwrite : function() {
     var gridStore = new GridStore(client, "test_gs_overwrite", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2304,7 +2306,7 @@ var all_tests = {
           gridStore2.open(function(err, gridStore) {    
             gridStore2.write("overwrite", function(err, gridStore) {
               gridStore2.close(function(err, result) {
-
+  
                 // Assert that we have overwriten the data
                 GridStore.read(client, 'test_gs_overwrite', function(err, data) {
                   test.equal('overwrite', data);
@@ -2317,7 +2319,7 @@ var all_tests = {
       });
     });        
   },
-
+  
   test_gs_read_length : function() {
     var gridStore = new GridStore(client, "test_gs_read_length", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2332,7 +2334,7 @@ var all_tests = {
       });
     });          
   },
-
+  
   test_gs_read_with_offset : function() {
     var gridStore = new GridStore(client, "test_gs_read_with_offset", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2342,7 +2344,7 @@ var all_tests = {
           GridStore.read(client, 'test_gs_read_with_offset', 5, 7, function(err, data) {
             test.equal('world', data);
           });
-
+  
           GridStore.read(client, 'test_gs_read_with_offset', null, 7, function(err, data) {
             test.equal('world!', data);
             finished_test({test_gs_read_with_offset:'ok'});        
@@ -2351,7 +2353,7 @@ var all_tests = {
       });
     });            
   },
-
+  
   test_gs_seek : function() {
     var gridStore = new GridStore(client, "test_gs_seek", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2365,7 +2367,7 @@ var all_tests = {
               });
             });
           });
-
+  
           var gridStore3 = new GridStore(client, "test_gs_seek", "r");
           gridStore3.open(function(err, gridStore) {    
             gridStore.seek(7, function(err, gridStore) {
@@ -2374,7 +2376,7 @@ var all_tests = {
               });
             });
           });
-
+  
           var gridStore4 = new GridStore(client, "test_gs_seek", "r");
           gridStore4.open(function(err, gridStore) {    
             gridStore.seek(4, function(err, gridStore) {
@@ -2383,7 +2385,7 @@ var all_tests = {
               });
             });
           });
-
+  
           var gridStore5 = new GridStore(client, "test_gs_seek", "r");
           gridStore5.open(function(err, gridStore) {    
             gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
@@ -2392,7 +2394,7 @@ var all_tests = {
               });
             });
           });
-
+  
           var gridStore6 = new GridStore(client, "test_gs_seek", "r");
           gridStore6.open(function(err, gridStore) {    
             gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
@@ -2401,21 +2403,21 @@ var all_tests = {
               });
             });
           });
-
+  
           var gridStore7 = new GridStore(client, "test_gs_seek", "r");
           gridStore7.open(function(err, gridStore) {    
             gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('w', chr);
-
+  
                 gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
                   gridStore.getc(function(err, chr) {
                     test.equal('w', chr);
-
+  
                     gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
                       gridStore.getc(function(err, chr) {
                         test.equal('o', chr);
-
+  
                         gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
                           gridStore.getc(function(err, chr) {
                             test.equal('o', chr);
@@ -2433,7 +2435,7 @@ var all_tests = {
       });
     });              
   },
-
+  
   test_gs_multi_chunk : function() {
     var fs_client = new Db('integration_tests_10', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
@@ -2445,7 +2447,7 @@ var all_tests = {
           for(var i = 0; i < gridStore.chunkSize; i++) { file1 = file1 + 'x'; }
           for(var i = 0; i < gridStore.chunkSize; i++) { file2 = file2 + 'y'; }
           for(var i = 0; i < gridStore.chunkSize; i++) { file3 = file3 + 'z'; }
-
+  
           gridStore.write(file1, function(err, gridStore) {
             gridStore.write(file2, function(err, gridStore) {
               gridStore.write(file3, function(err, gridStore) {
@@ -2453,7 +2455,7 @@ var all_tests = {
                   fs_client.collection('fs.chunks', function(err, collection) {
                     collection.count(function(err, count) {
                       test.equal(3, count);
-
+  
                       GridStore.read(fs_client, 'test_gs_multi_chunk', function(err, data) {
                         test.equal(512*3, data.length);
                         finished_test({test_gs_multi_chunk:'ok'});                    
@@ -2469,8 +2471,14 @@ var all_tests = {
       });
     });
   },
-
+  
   test_gs_puts_and_readlines : function() {
+    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")
+    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")
+    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")
+    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")
+    sys.puts("================================================= FAILING: test_gs_puts_and_readlines")    
+    
     var gridStore = new GridStore(client, "test_gs_puts_and_readlines", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.puts("line one", function(err, gridStore) {
@@ -2487,7 +2495,7 @@ var all_tests = {
       });
     });            
   },
-
+  
   test_gs_weird_name_unlink : function() {
     var fs_client = new Db('awesome_f0eabd4b52e30b223c010000', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
@@ -2501,11 +2509,11 @@ var all_tests = {
                   test.equal(1, count);
                 })
               });
-
+  
               fs_client.collection('articles.chunks', function(err, collection) {
                 collection.count(function(err, count) {
                   test.equal(1, count);
-
+  
                   // Unlink the file
                   GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
                     fs_client.collection('articles.files', function(err, collection) {
@@ -2513,11 +2521,11 @@ var all_tests = {
                         test.equal(0, count);
                       })
                     });
-
+  
                     fs_client.collection('articles.chunks', function(err, collection) {
                       collection.count(function(err, count) {
                         test.equal(0, count);
-
+  
                         finished_test({test_gs_unlink:'ok'});       
                         fs_client.close();
                       })
@@ -2529,10 +2537,9 @@ var all_tests = {
           });
         });              
       });
-    });
-
+    });  
   },
-
+  
   test_gs_unlink : function() {
     var fs_client = new Db('integration_tests_11', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
@@ -2546,11 +2553,11 @@ var all_tests = {
                   test.equal(1, count);
                 })
               });
-
+  
               fs_client.collection('fs.chunks', function(err, collection) {
                 collection.count(function(err, count) {
                   test.equal(1, count);
-
+  
                   // Unlink the file
                   GridStore.unlink(fs_client, 'test_gs_unlink', function(err, gridStore) {
                     fs_client.collection('fs.files', function(err, collection) {
@@ -2558,11 +2565,11 @@ var all_tests = {
                         test.equal(0, count);
                       })
                     });
-
+  
                     fs_client.collection('fs.chunks', function(err, collection) {
                       collection.count(function(err, count) {
                         test.equal(0, count);
-
+  
                         finished_test({test_gs_unlink:'ok'});       
                         fs_client.close();
                       })
@@ -2576,7 +2583,7 @@ var all_tests = {
       });
     });
   },
-
+  
   test_gs_append : function() {
     var fs_client = new Db('integration_tests_12', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
@@ -2585,16 +2592,16 @@ var all_tests = {
         gridStore.open(function(err, gridStore) {    
           gridStore.write("hello, world!", function(err, gridStore) {
             gridStore.close(function(err, result) {
-
+  
               var gridStore2 = new GridStore(fs_client, "test_gs_append", "w+");
               gridStore2.open(function(err, gridStore) {
                 gridStore.write(" how are you?", function(err, gridStore) {
                   gridStore.close(function(err, result) {
-
+  
                     fs_client.collection('fs.chunks', function(err, collection) {
                       collection.count(function(err, count) {
                         test.equal(1, count);
-
+  
                         GridStore.read(fs_client, 'test_gs_append', function(err, data) {
                           test.equal("hello, world! how are you?", data);                        
                           finished_test({test_gs_append:'ok'});       
@@ -2611,7 +2618,7 @@ var all_tests = {
       });
     });  
   },
-
+  
   test_gs_rewind_and_truncate_on_write : function() {
     var gridStore = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2636,7 +2643,7 @@ var all_tests = {
       });
     });                
   },
-
+  
   test_gs_tell : function() {
     var gridStore = new GridStore(client, "test_gs_tell", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2646,7 +2653,7 @@ var all_tests = {
           gridStore2.open(function(err, gridStore) {
             gridStore.read(5, function(err, data) {
               test.equal("hello", data);
-
+  
               gridStore.tell(function(err, position) {
                 test.equal(5, position);              
                 finished_test({test_gs_tell:'ok'});       
@@ -2657,7 +2664,7 @@ var all_tests = {
       });
     });                  
   },
-
+  
   test_gs_save_empty_file : function() {
     var fs_client = new Db('integration_tests_13', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.open(function(err, fs_client) {
@@ -2671,11 +2678,11 @@ var all_tests = {
                   test.equal(1, count);
                 });
               });
-
+  
               fs_client.collection('fs.chunks', function(err, collection) {
                 collection.count(function(err, count) {
                   test.equal(0, count);
-
+  
                   finished_test({test_gs_save_empty_file:'ok'});       
                   fs_client.close();
                 });
@@ -2686,7 +2693,7 @@ var all_tests = {
       });
     });    
   },
-
+  
   test_gs_empty_file_eof : function() {
     var gridStore = new GridStore(client, 'test_gs_empty_file_eof', "w");
     gridStore.open(function(err, gridStore) {
@@ -2699,13 +2706,13 @@ var all_tests = {
       });
     });
   },
-
+  
   test_gs_cannot_change_chunk_size_on_read : function() {
     var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
     gridStore.open(function(err, gridStore) {    
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
-
+  
           var gridStore2 = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
           gridStore2.open(function(err, gridStore) {
             gridStore.chunkSize = 42; 
@@ -2716,7 +2723,7 @@ var all_tests = {
       });
     });            
   },
-
+  
   test_gs_cannot_change_chunk_size_after_data_written : function() {
     var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
     gridStore.open(function(err, gridStore) {    
@@ -2727,12 +2734,12 @@ var all_tests = {
       });
     });              
   },
-
+  
   test_change_chunk_size : function() {
     var gridStore = new GridStore(client, "test_change_chunk_size", "w");
     gridStore.open(function(err, gridStore) {   
       gridStore.chunkSize = 42
-
+  
       gridStore.write('foo', function(err, gridStore) {
         gridStore.close(function(err, result) {
           var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
@@ -2744,7 +2751,7 @@ var all_tests = {
       });
     });
   },
-
+  
   test_gs_chunk_size_in_option : function() {
     var gridStore = new GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
     gridStore.open(function(err, gridStore) {   
@@ -2759,7 +2766,7 @@ var all_tests = {
       });
     });
   },
-
+  
   test_gs_md5 : function() {
     var gridStore = new GridStore(client, "new-file", "w");
     gridStore.open(function(err, gridStore) {   
@@ -2770,14 +2777,14 @@ var all_tests = {
             test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
             gridStore.md5 = "can't do this";
             test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
-
+  
             var gridStore2 = new GridStore(client, "new-file", "w");
             gridStore2.open(function(err, gridStore) {
               gridStore.close(function(err, result) {
                 var gridStore3 = new GridStore(client, "new-file", "r");
                 gridStore3.open(function(err, gridStore) {
                   test.equal("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
-
+  
                   finished_test({test_gs_chunk_size_in_option:'ok'});       
                 });
               })
@@ -2787,28 +2794,28 @@ var all_tests = {
       });
     });  
   },
-
+  
   test_gs_upload_date : function() {
     var now = new Date();
     var originalFileUploadDate = null;
-
+  
     var gridStore = new GridStore(client, "test_gs_upload_date", "w");
     gridStore.open(function(err, gridStore) {   
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
-
+  
           var gridStore2 = new GridStore(client, "test_gs_upload_date", "r");
           gridStore2.open(function(err, gridStore) {
             test.ok(gridStore.uploadDate != null);
             originalFileUploadDate = gridStore.uploadDate;
-
+  
             gridStore2.close(function(err, result) {
               var gridStore3 = new GridStore(client, "test_gs_upload_date", "w");
               gridStore3.open(function(err, gridStore) {
                 gridStore3.write('new data', function(err, gridStore) {
                   gridStore3.close(function(err, result) {
                     var fileUploadDate = null;
-
+  
                     var gridStore4 = new GridStore(client, "test_gs_upload_date", "r");
                     gridStore4.open(function(err, gridStore) {
                       test.equal(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
@@ -2823,20 +2830,20 @@ var all_tests = {
       });
     });  
   },
-
+  
   test_gs_content_type : function() {
     var ct = null;
-
+  
     var gridStore = new GridStore(client, "test_gs_content_type", "w");
     gridStore.open(function(err, gridStore) {   
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
-
+  
           var gridStore2 = new GridStore(client, "test_gs_content_type", "r");
           gridStore2.open(function(err, gridStore) {
             ct = gridStore.contentType;
             test.equal(GridStore.DEFAULT_CONTENT_TYPE, ct);
-
+  
             var gridStore3 = new GridStore(client, "test_gs_content_type", "w+");
             gridStore3.open(function(err, gridStore) {
               gridStore.contentType = "text/html";
@@ -2853,13 +2860,13 @@ var all_tests = {
       });
     });  
   },
-
+  
   test_gs_content_type_option : function() {
     var gridStore = new GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
     gridStore.open(function(err, gridStore) {   
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(result) {
-
+  
           var gridStore2 = new GridStore(client, "test_gs_content_type_option", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal('image/jpg', gridStore.contentType);
@@ -2869,7 +2876,7 @@ var all_tests = {
       });
     });  
   },
-
+  
   test_gs_unknown_mode : function() {
     var gridStore = new GridStore(client, "test_gs_unknown_mode", "x");
     gridStore.open(function(err, gridStore) {
@@ -2878,22 +2885,22 @@ var all_tests = {
       finished_test({test_gs_unknown_mode:'ok'});       
     });  
   },
-
+  
   test_gs_metadata : function() {
     var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
     gridStore.open(function(err, gridStore) {   
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
-
+  
           var gridStore2 = new GridStore(client, "test_gs_metadata", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal(null, gridStore.metadata);
-
+  
             var gridStore3 = new GridStore(client, "test_gs_metadata", "w+");
             gridStore3.open(function(err, gridStore) {
               gridStore.metadata = {'a':1};
               gridStore.close(function(err, result) {
-
+  
                 var gridStore4 = new GridStore(client, "test_gs_metadata", "r");
                 gridStore4.open(function(err, gridStore) {
                   test.equal(1, gridStore.metadata.a);
@@ -3240,12 +3247,6 @@ var all_tests = {
 
       collection.insert(motherOfAllDocuments, function(err, docs) {
         collection.findOne(function(err, doc) {
-          sys.debug("======================================================================")
-          sys.debug(sys.inspect(motherOfAllDocuments.dbref))
-          sys.debug("======================================================================")
-          sys.debug(sys.inspect(doc.dbref))
-          
-          
           // Assert correct deserialization of the values
           test.equal(motherOfAllDocuments.string, doc.string);
           test.deepEqual(motherOfAllDocuments.array, doc.array);
@@ -3265,9 +3266,9 @@ var all_tests = {
           test.equal(motherOfAllDocuments.where.code, doc.where.code);
           test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
           
-          // test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
-          // test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-          // test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
+          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
           finished_test({test_all_serialization_types:'ok'});      
         })      
       });    
@@ -3400,7 +3401,7 @@ var all_tests = {
   test_gs_weird_bug : function() {
     var gridStore = new GridStore(client, "test_gs_weird_bug", "w");
     var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
-
+  
     gridStore.open(function(err, gridStore) {    
       gridStore.write(data, function(err, gridStore) {
         gridStore.close(function(err, result) {
@@ -3413,11 +3414,11 @@ var all_tests = {
       });
     });            
   },
-
+  
   test_gs_working_field_read : function() {
     var gridStore = new GridStore(client, "test_gs_working_field_read", "w");
     var data = fs.readFileSync("./integration/test_gs_working_field_read.pdf", 'binary');
-
+  
     gridStore.open(function(err, gridStore) {    
       gridStore.write(data, function(err, gridStore) {
         gridStore.close(function(err, result) {
@@ -3636,63 +3637,63 @@ var all_tests = {
     });
   },
   
-  test_all_serialization_types_new_context : function() {
-    client.createCollection('test_all_serialization_types_new_context', function(err, collection) {   
-      var date = new Date(); 
-      var scriptCode = 
-        "var string = 'binstring'\n" +
-        "var bin = new Binary()\n" +
-        "for(var index = 0; index < string.length; index++) {\n" +
-        "  bin.put(string.charAt(index))\n" + 
-        "}\n" +             
-        "motherOfAllDocuments['string'] = 'hello';" +
-        "motherOfAllDocuments['array'] = [1,2,3];" +
-        "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
-        "motherOfAllDocuments['date'] = date;" +
-        "motherOfAllDocuments['oid'] = new ObjectID();" +
-        "motherOfAllDocuments['binary'] = bin;" +
-        "motherOfAllDocuments['int'] = 42;" +
-        "motherOfAllDocuments['float'] = 33.3333;" +
-        "motherOfAllDocuments['regexp'] = /regexp/;" +
-        "motherOfAllDocuments['boolean'] = true;" +
-        "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
-        "motherOfAllDocuments['where'] = new Code('this.a > i', {i:1});" +
-        "motherOfAllDocuments['dbref'] = new DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
-      
-      var context = { motherOfAllDocuments : {}, mongo:mongo, date:date};
-      // Execute function in context
-      Script.runInNewContext(scriptCode, context, "testScript");
-      // sys.puts(sys.inspect(context.motherOfAllDocuments))
-      var motherOfAllDocuments = context.motherOfAllDocuments;
-
-      collection.insert(context.motherOfAllDocuments, function(err, docs) {
-         collection.findOne(function(err, doc) {
-           // Assert correct deserialization of the values
-           test.equal(motherOfAllDocuments.string, doc.string);
-           test.deepEqual(motherOfAllDocuments.array, doc.array);
-           test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
-           test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
-           test.equal(date.getTime(), doc.long);
-           test.equal(date.toString(), doc.date.toString());
-           test.equal(date.getTime(), doc.date.getTime());
-           test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-           test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
-                 
-           test.equal(motherOfAllDocuments.int, doc.int);
-           test.equal(motherOfAllDocuments.long, doc.long);
-           test.equal(motherOfAllDocuments.float, doc.float);
-           test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
-           test.equal(motherOfAllDocuments.boolean, doc.boolean);
-           test.equal(motherOfAllDocuments.where.code, doc.where.code);
-           test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-           test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
-           test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-           test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
-           finished_test({test_all_serialization_types_new_context:'ok'});      
-         })      
-       });    
-    });    
-  },  
+  // test_all_serialization_types_new_context : function() {
+  //   client.createCollection('test_all_serialization_types_new_context', function(err, collection) {   
+  //     var date = new Date(); 
+  //     var scriptCode = 
+  //       "var string = 'binstring'\n" +
+  //       "var bin = new Binary()\n" +
+  //       "for(var index = 0; index < string.length; index++) {\n" +
+  //       "  bin.put(string.charAt(index))\n" + 
+  //       "}\n" +             
+  //       "motherOfAllDocuments['string'] = 'hello';" +
+  //       "motherOfAllDocuments['array'] = [1,2,3];" +
+  //       "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
+  //       "motherOfAllDocuments['date'] = date;" +
+  //       "motherOfAllDocuments['oid'] = new ObjectID();" +
+  //       "motherOfAllDocuments['binary'] = bin;" +
+  //       "motherOfAllDocuments['int'] = 42;" +
+  //       "motherOfAllDocuments['float'] = 33.3333;" +
+  //       "motherOfAllDocuments['regexp'] = /regexp/;" +
+  //       "motherOfAllDocuments['boolean'] = true;" +
+  //       "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
+  //       "motherOfAllDocuments['where'] = new Code('this.a > i', {i:1});" +
+  //       "motherOfAllDocuments['dbref'] = new DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
+  //     
+  //     var context = { motherOfAllDocuments : {}, mongo:mongo, date:date};
+  //     // Execute function in context
+  //     Script.runInNewContext(scriptCode, context, "testScript");
+  //     // sys.puts(sys.inspect(context.motherOfAllDocuments))
+  //     var motherOfAllDocuments = context.motherOfAllDocuments;
+  // 
+  //     collection.insert(context.motherOfAllDocuments, function(err, docs) {
+  //        collection.findOne(function(err, doc) {
+  //          // Assert correct deserialization of the values
+  //          test.equal(motherOfAllDocuments.string, doc.string);
+  //          test.deepEqual(motherOfAllDocuments.array, doc.array);
+  //          test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+  //          test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+  //          test.equal(date.getTime(), doc.long);
+  //          test.equal(date.toString(), doc.date.toString());
+  //          test.equal(date.getTime(), doc.date.getTime());
+  //          test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+  //          test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
+  //                
+  //          test.equal(motherOfAllDocuments.int, doc.int);
+  //          test.equal(motherOfAllDocuments.long, doc.long);
+  //          test.equal(motherOfAllDocuments.float, doc.float);
+  //          test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+  //          test.equal(motherOfAllDocuments.boolean, doc.boolean);
+  //          test.equal(motherOfAllDocuments.where.code, doc.where.code);
+  //          test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
+  //          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+  //          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+  //          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
+  //          finished_test({test_all_serialization_types_new_context:'ok'});      
+  //        })      
+  //      });    
+  //   });    
+  // },  
 };
 
 /*******************************************************************************************************

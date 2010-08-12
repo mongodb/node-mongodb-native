@@ -683,7 +683,7 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
   // printf("= BSONDeserialize ===================================== USING Native BSON Parser\n");
   // Ensure that we have an parameter
   if(Buffer::HasInstance(args[0]) && args.Length() > 1) return VException("One argument required - buffer1.");
-  if(args[0]->IsString() && args.Length() != 2) return VException("Two argument required - string and encoding.");
+  if(args[0]->IsString() && args.Length() > 1) return VException("One argument required - string1.");
   // Throw an exception if the argument is not of type Buffer
   if(!Buffer::HasInstance(args[0]) && !args[0]->IsString()) return VException("Argument must be a Buffer or String.");
   
@@ -698,9 +698,9 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
     uint32_t length = buffer->length();
   } else {
     // Let's fetch the encoding
-    enum encoding enc = ParseEncoding(args[1]);
+    // enum encoding enc = ParseEncoding(args[1]);
     // The length of the data for this encoding
-    ssize_t len = DecodeBytes(args[0], enc);
+    ssize_t len = DecodeBytes(args[0], BINARY);
     // Let's define the buffer size
     data = new char[len];
     // Write the data to the buffer from the string object
@@ -715,6 +715,7 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
 
 // Deserialize the stream
 Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
+  // printf("----------------------------------------------------------------- deserialize\n");
   HandleScope scope;
   // Holds references to the objects that are going to be returned
   Local<Object> return_data = Object::New();

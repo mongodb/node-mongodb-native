@@ -155,8 +155,18 @@ void ObjectID::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "createPk", CreatePk);  
 
   target->Set(String::NewSymbol("ObjectID"), constructor_template->GetFunction());
+}
+
+Handle<Value> ObjectID::CreatePk(const Arguments &args) {
+  char *oid_string = ObjectID::oid_id_generator();
+  ObjectID *oid = new ObjectID(oid_string);
+  // Wrap it
+  oid->Wrap(args.This());
+  // Return the object
+  return args.This();  
 }
 
 Handle<Value> ObjectID::IdGetter(Local<String> property, const AccessorInfo& info) {
