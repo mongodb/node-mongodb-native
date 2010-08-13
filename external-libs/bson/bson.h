@@ -19,6 +19,8 @@ class BSON : public EventEmitter {
 
     // Encode functions
     static Handle<Value> EncodeLong(const Arguments &args);
+    static Handle<Value> ToLong(const Arguments &args);
+    static Handle<Value> ToInt(const Arguments &args);
   
   private:
     static Handle<Value> New(const Arguments &args);

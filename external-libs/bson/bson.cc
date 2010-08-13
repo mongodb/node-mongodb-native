@@ -65,6 +65,8 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   NODE_SET_METHOD(constructor_template->GetFunction(), "serialize", BSONSerialize);  
   NODE_SET_METHOD(constructor_template->GetFunction(), "deserialize", BSONDeserialize);  
   NODE_SET_METHOD(constructor_template->GetFunction(), "encodeLong", EncodeLong);  
+  NODE_SET_METHOD(constructor_template->GetFunction(), "toLong", ToLong);
+  NODE_SET_METHOD(constructor_template->GetFunction(), "toInt", ToInt);
 
   target->Set(String::NewSymbol("BSON"), constructor_template->GetFunction());
 }
@@ -114,9 +116,26 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   return bin_value;
 }
 
+Handle<Value> BSON::ToLong(const Arguments &args) {
+  HandleScope scope;
+
+  if(args.Length() != 2 && !args[0]->IsString() && !args[1]->IsString()) return VException("Two arguments of type String required");
+  // Create a new Long value and return it
+  Local<Value> argv[] = {args[0], args[1]};
+  Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(2, argv);    
+  return scope.Close(long_obj);
+}
+
+Handle<Value> BSON::ToInt(const Arguments &args) {
+  HandleScope scope;
+
+  if(args.Length() != 1 && !args[0]->IsNumber() && !args[1]->IsString()) return VException("One argument of type Number required");  
+  // Return int value
+  return scope.Close(args[0]->ToInt32());
+}
+
 Handle<Value> BSON::EncodeLong(const Arguments &args) {
   HandleScope scope;
-  printf("============================================= Handle<Value> BSON::EncodeLong(const Arguments &args)\n");
   
   // Encode the value
   if(args.Length() != 1 && !Long::HasInstance(args[0])) return VException("One argument required of type Long");
