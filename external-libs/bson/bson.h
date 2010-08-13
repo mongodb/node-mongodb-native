@@ -16,11 +16,14 @@ class BSON : public EventEmitter {
     static void Initialize(Handle<Object> target);
     static Handle<Value> BSONSerialize(const Arguments &args);
     static Handle<Value> BSONDeserialize(const Arguments &args);
+
+    // Encode functions
+    static Handle<Value> EncodeLong(const Arguments &args);
   
   private:
     static Handle<Value> New(const Arguments &args);
     static Handle<Value> deserialize(char *data, bool is_array_item);
-    static uint32_t serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value);
+    static uint32_t serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key);
 
     static char* extract_string(char *data, uint32_t offset);
     static const char* ToCString(const v8::String::Utf8Value& value);
@@ -34,7 +37,8 @@ class BSON : public EventEmitter {
     static long deserialize_sint32(char *data, uint32_t offset);
     static uint16_t deserialize_int8(char *data, uint32_t offset);
     static uint32_t deserialize_int32(char* data, uint32_t offset);
-    
+    static char *check_key(Local<String> key);
+        
     // Decode function
     static Handle<Value> decodeLong(int64_t value);
     static Handle<Value> decodeOid(char *oid);

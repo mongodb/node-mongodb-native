@@ -70,7 +70,35 @@ Handle<Value> Long::New(const Arguments &args) {
     l->Wrap(args.This());
     // Return the context
     return args.This();    
+  } else if(args.Length() == 2 && args[0]->IsString() && args[1]->IsString()) {
+    // Parse the strings into int32_t values
+    int32_t low_bits = 0;
+    int32_t high_bits = 0;
+    char *low_bits_str = (char *)malloc(4 * sizeof(char));
+    char *high_bits_str = (char *)malloc(4 * sizeof(char));
+    
+    // Let's write the strings to the bits
+    DecodeWrite(low_bits_str, 4, args[0]->ToString(), BINARY);
+    DecodeWrite(high_bits_str, 4, args[1]->ToString(), BINARY);
+    // Copy the string to the int
+    memcpy(&low_bits, low_bits_str, 4);
+    memcpy(&high_bits, high_bits_str, 4);
+    // Free memory
+    free(low_bits_str);
+    free(high_bits_str);
+    // Create an instance of long
+    Long *l = new Long(low_bits, high_bits);
+    // Wrap it in the object wrap
+    l->Wrap(args.This());
+    // Return the context
+    return args.This();        
   } else {
+    printf("============================= args_length: %d\n", args.Length());
+    if(args.Length() == 2) {
+      printf("============================= args_length[0]: %s\n", args[0]->IsObject() ? "true" : "false");      
+      printf("============================= args_length[1]: %s\n", args[1]->IsObject() ? "true" : "false");      
+    }
+    
     return VException("Argument passed in must be either a 64 bit number or two 32 bit numbers.");
   }
 }

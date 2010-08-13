@@ -64,6 +64,7 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "serialize", BSONSerialize);  
   NODE_SET_METHOD(constructor_template->GetFunction(), "deserialize", BSONDeserialize);  
+  NODE_SET_METHOD(constructor_template->GetFunction(), "encodeLong", EncodeLong);  
 
   target->Set(String::NewSymbol("BSON"), constructor_template->GetFunction());
 }
@@ -79,20 +80,60 @@ Handle<Value> BSON::New(const Arguments &args) {
 
 Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   // printf("= BSONSerialize ===================================== USING Native BSON Parser\n");  
-  if(args.Length() != 1 && args[0]->IsObject()) return VException("One argument required - object");
+  if(args.Length() == 1 && !args[0]->IsObject()) return VException("One or two arguments required - [object] or [object, boolean]");
+  if(args.Length() == 2 && !args[0]->IsObject() && !args[1]->IsBoolean()) return VException("One or two arguments required - [object] or [object, boolean]");
+  if(args.Length() > 2) return VException("One or two arguments required - [object] or [object, boolean]");
 
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
   uint32_t object_size = BSON::calculate_object_size(args[0]);
-  // printf("=================================== object:size: %d\n", object_size);
   // Allocate the memory needed for the serializtion
-  char *serialized_object = (char *)malloc(object_size * sizeof(char));
-  // *(serialized_object + object_size) = '\0';
-  // Serialize the object
-  BSON::serialize(serialized_object, 0, Null(), args[0]);  
+  char *serialized_object = (char *)malloc(object_size * sizeof(char));  
+  // Catch any errors
+  try {
+    // Check if we have a boolean value
+    bool check_key = false;
+    if(args.Length() == 2 && args[1]->IsBoolean()) {
+      check_key = args[1]->BooleanValue();
+    }
+    
+    // Serialize the object
+    BSON::serialize(serialized_object, 0, Null(), args[0], check_key);      
+  } catch(char *err_msg) {
+    // Free up serialized object space
+    free(serialized_object);
+    // Throw exception with the string
+    Handle<Value> error = VException(err_msg);
+    // free error message
+    free(err_msg);
+    // Return error
+    return error;
+  }
   // Encode the binary value
   Local<Value> bin_value = Encode(serialized_object, object_size, BINARY);  
   // Return the serialized content
   return bin_value;
+}
+
+Handle<Value> BSON::EncodeLong(const Arguments &args) {
+  HandleScope scope;
+  printf("============================================= Handle<Value> BSON::EncodeLong(const Arguments &args)\n");
+  
+  // Encode the value
+  if(args.Length() != 1 && !Long::HasInstance(args[0])) return VException("One argument required of type Long");
+  // Unpack the object and encode
+  Local<Object> obj = args[0]->ToObject();
+  Long *long_obj = Long::Unwrap<Long>(obj);
+  // Allocate space
+  char *long_str = (char *)malloc(8 * sizeof(char));
+  // Write the content to the char array
+  BSON::write_int32((long_str), long_obj->low_bits);
+  BSON::write_int32((long_str + 4), long_obj->high_bits);
+  // Encode the data
+  Local<String> long_final_str = Encode(long_str, 8, BINARY)->ToString();
+  // Free up memory
+  free(long_str);
+  // Return the encoded string
+  return scope.Close(long_final_str);
 }
 
 void BSON::write_int32(char *data, uint32_t value) {
@@ -110,8 +151,43 @@ void BSON::write_int64(char *data, int64_t value) {
   memcpy(data, &value, 8);      
 }
 
-uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value) {
-  // printf("============================================= serialized::::\n");  
+char *BSON::check_key(Local<String> key) {
+  // Allocate space for they key string
+  char *key_str = (char *)malloc(key->Length() * sizeof(char) + 1);
+  // Error string
+  char *error_str = (char *)malloc(256 * sizeof(char));
+  // Decode the key
+  ssize_t len = DecodeBytes(key, BINARY);
+  ssize_t written = DecodeWrite(key_str, len, key, BINARY);
+  *(key_str + key->Length()) = '\0';
+  // Check if we have a valid key
+  if(key->Length() > 0 && *(key_str) == '$') {
+    // Create the string
+    sprintf(error_str, "key %s must not start with '$'", key_str);
+    // Free up memory
+    free(key_str);
+    // Throw exception with string
+    throw error_str;
+  } else if(key->Length() > 0 && strchr(key_str, '.') != NULL) {
+    // Create the string
+    sprintf(error_str, "key %s must not contain '.'", key_str);
+    // Free up memory
+    free(key_str);
+    // Throw exception with string
+    throw error_str;
+  }
+  
+  return NULL;
+}
+
+uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key) {
+  // printf("============================================= serialized::::\n");
+  
+  // If we have a name check that key is valid
+  if(!name->IsNull() && check_key) {
+    if(BSON::check_key(name->ToString()) != NULL) return -1;
+  }  
+  
   // If we have an object let's serialize it  
   if(Long::HasInstance(value)) {
     // printf("============================================= -- serialized::::long\n");    
@@ -135,7 +211,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     BSON::write_int32((serialized_object + index + 4), long_obj->high_bits);
     // Adjust the index
     index = index + 8;
-  } else if(ObjectID::HasInstance(value)) {
+  } else if(ObjectID::HasInstance(value) || (value->IsObject() && value->ToObject()->HasRealNamedProperty(String::New("toHexString")))) {
     // printf("============================================= -- serialized::::object_id\n");    
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_OID;
@@ -208,7 +284,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     obj->Set(String::New("$id"), object_id_obj);
     obj->Set(String::New("$db"), dbref->Get(String::New("db")));
     // Encode the variable
-    index = BSON::serialize(serialized_object, index, name, obj);
+    index = BSON::serialize(serialized_object, index, name, obj, check_key);
   } else if(Code::HasInstance(value)) {
     // printf("============================================= -- serialized::::code\n");    
     // Save the string at the offset provided
@@ -242,7 +318,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Encode the scope
     uint32_t scope_object_size = BSON::calculate_object_size(code_obj->scope_object);
     // Serialize the scope object
-    BSON::serialize((serialized_object + index), 0, Null(), code_obj->scope_object);
+    BSON::serialize((serialized_object + index), 0, Null(), code_obj->scope_object, check_key);
     // Adjust the index
     index = index + scope_object_size;
     // Encode the total size of the object
@@ -467,7 +543,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Add "index" string size for each element
       sprintf(length_str, "%d", i);
       // Encode the values      
-      index = BSON::serialize(serialized_object, index, String::New(length_str), array->Get(Integer::New(i)));
+      index = BSON::serialize(serialized_object, index, String::New(length_str), array->Get(Integer::New(i)), check_key);
       // Write trailing '\0' for object
       *(serialized_object + index) = '\0';
     }
@@ -520,8 +596,11 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Fetch the object for the property
       Local<Value> property = object->Get(property_name);
       // Write the next serialized object
-      index = BSON::serialize(serialized_object, index, property_name, property);      
+      index = BSON::serialize(serialized_object, index, property_name, property, check_key);      
     }
+    // Pad the last item
+    *(serialized_object + index) = '\0';
+    index = index + 1;
 
     // Null out reminding fields if we have a toplevel object and nested levels
     if(name->IsNull()) {

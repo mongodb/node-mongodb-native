@@ -93,36 +93,43 @@ Handle<Value> ObjectID::New(const Arguments &args) {
     return args.This();        
   } else {
     // Ensure we have correct parameters passed in
-    if(args.Length() != 1 && !args[0]->IsString()) {
+    if(args.Length() != 1 && (!args[0]->IsString() || !args[0]->IsNull())) {
       return VException("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters in hex format");
     }
 
-    // Convert the argument to a String
-    Local<String> oid_string = args[0]->ToString();  
-    if(oid_string->Length() != 12 && oid_string->Length() != 24) {
-      return VException("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters in hex format");
-    }
-  
     // Contains the final oid string
-    char *oid_string_c = (char *)malloc(25);;
-    // Terminate the string
-    *(oid_string_c + 25) = '\0';      
-  
-    if(oid_string->Length() == 12) {    
-      // Contains the bytes for the string
-      char *oid_string_bytes = (char *)malloc(13);
-      // Decode the 12 bytes of the oid
-      node::DecodeWrite(oid_string_bytes, 13, oid_string, node::BINARY);    
-      // Unpack the String object to char*
-      char *pbuffer = oid_string_c;      
-      // Unpack the oid in hex form
-      for(int32_t i = 0; i < 12; i++) {
-        sprintf(pbuffer, "%02x", (unsigned char)*(oid_string_bytes + i));
-        pbuffer += 2;
-      }          
+    char *oid_string_c;
+
+    // If we have a null generate a new oid
+    if(args[0]->IsNull()) {
+      oid_string_c = ObjectID::oid_id_generator();
     } else {
-      // Decode the content
-      node::DecodeWrite(oid_string_c, 25, oid_string, node::BINARY);        
+      oid_string_c = (char *)malloc(25);;
+      // Terminate the string
+      *(oid_string_c + 25) = '\0';      
+      
+      // Convert the argument to a String
+      Local<String> oid_string = args[0]->ToString();  
+      if(oid_string->Length() != 12 && oid_string->Length() != 24) {
+        return VException("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters in hex format");
+      }
+  
+      if(oid_string->Length() == 12) {    
+        // Contains the bytes for the string
+        char *oid_string_bytes = (char *)malloc(13);
+        // Decode the 12 bytes of the oid
+        node::DecodeWrite(oid_string_bytes, 13, oid_string, node::BINARY);    
+        // Unpack the String object to char*
+        char *pbuffer = oid_string_c;      
+        // Unpack the oid in hex form
+        for(int32_t i = 0; i < 12; i++) {
+          sprintf(pbuffer, "%02x", (unsigned char)*(oid_string_bytes + i));
+          pbuffer += 2;
+        }          
+      } else {
+        // Decode the content
+        node::DecodeWrite(oid_string_c, 25, oid_string, node::BINARY);        
+      }      
     }
   
     // Instantiate a ObjectID object
@@ -155,18 +162,23 @@ void ObjectID::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "createPk", CreatePk);  
+  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "createPk", CreatePk);  
+
+  // Class methods
+  NODE_SET_METHOD(constructor_template->GetFunction(), "createPk", CreatePk);
 
   target->Set(String::NewSymbol("ObjectID"), constructor_template->GetFunction());
 }
 
 Handle<Value> ObjectID::CreatePk(const Arguments &args) {
+  HandleScope scope;
+  
   char *oid_string = ObjectID::oid_id_generator();
-  ObjectID *oid = new ObjectID(oid_string);
-  // Wrap it
-  oid->Wrap(args.This());
-  // Return the object
-  return args.This();  
+  // Return the value  
+  Local<Value> argv[] = {String::New(oid_string)};
+  Handle<Value> object_id_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);    
+  // Return the close object
+  return scope.Close(object_id_obj);
 }
 
 Handle<Value> ObjectID::IdGetter(Local<String> property, const AccessorInfo& info) {
