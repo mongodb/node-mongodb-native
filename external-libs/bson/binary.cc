@@ -38,7 +38,6 @@ Binary::~Binary() {}
 Handle<Value> Binary::New(const Arguments &args) {
   HandleScope scope;
   Binary *binary;
-  
   if(args.Length() > 2) {
     return VException("Argument must be either none, a string or a sub_type and string");    
   }
