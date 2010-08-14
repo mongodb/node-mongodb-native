@@ -23,7 +23,7 @@ var Db = require('../lib/mongodb').Db,
   Integration Tests
 *******************************************************************************************************/
 var all_tests = {
-
+  
   // Test unicode characters
   test_unicode_characters : function() {
     client.createCollection('unicode_test_collection', function(err, collection) {
@@ -192,7 +192,7 @@ var all_tests = {
     automatic_connect_client.bson_deserializer = client.bson_deserializer;
     automatic_connect_client.bson_serializer = client.bson_serializer;
     automatic_connect_client.pkFactory = client.pkFactory;
-
+  
     automatic_connect_client.open(function(err, automatic_connect_client) {
       // Listener for closing event
       var closeListener = function(has_error) {
@@ -263,7 +263,7 @@ var all_tests = {
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
-
+  
     error_client.open(function(err, error_client) {  
       error_client.resetErrorHistory(function() {
         error_client.error(function(err, documents) {
@@ -1037,7 +1037,7 @@ var all_tests = {
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
-
+  
     test.equal(true, error_client.strict);
     error_client.open(function(err, error_client) {  
       error_client.collection('does-not-exist', function(err, collection) {
@@ -1062,7 +1062,7 @@ var all_tests = {
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
     test.equal(true, error_client.strict);
-
+  
     error_client.open(function(err, error_client) {  
       error_client.createCollection('test_strict_create_collection', function(err, collection) {
         test.ok(collection instanceof Collection);
@@ -2167,7 +2167,7 @@ var all_tests = {
   //     }, 100);        
   //   });  
   // },
-
+  
   test_count_with_fields : function() {
     client.createCollection('test_count_with_fields', function(err, collection) {
       collection.save({'x':1, 'a':2}, function(err, doc) {
@@ -2178,7 +2178,7 @@ var all_tests = {
             test.equal(null, items[0].x);
           });
         });
-
+  
         collection.findOne({}, {'fields':['a']}, function(err, item) {
           test.equal(2, item.a);
           test.equal(null, item.x);
@@ -2187,7 +2187,7 @@ var all_tests = {
       });
     });
   },
-
+  
   // // Gridstore tests
   // test_gs_exist : function() {
   //   var gridStore = new GridStore(client, "foobar", "w");
@@ -2981,7 +2981,7 @@ var all_tests = {
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
-
+  
     fs_client.open(function(err, fs_client) {  
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -3024,7 +3024,7 @@ var all_tests = {
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
-
+  
     fs_client.open(function(err, fs_client) {  
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -3060,7 +3060,7 @@ var all_tests = {
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
-
+  
     fs_client.open(function(err, fs_client) {  
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -3240,7 +3240,7 @@ var all_tests = {
     p_client.bson_deserializer = client.bson_deserializer;
     p_client.bson_serializer = client.bson_serializer;
     p_client.pkFactory = client.pkFactory;
-
+  
     p_client.open(function(err, automatic_connect_client) {  
       p_client.authenticate('admin', 'admin', function(err, replies) {
         test.ok(err instanceof Error);
@@ -3344,7 +3344,7 @@ var all_tests = {
     p_client.bson_deserializer = client.bson_deserializer;
     p_client.bson_serializer = client.bson_serializer;
     p_client.pkFactory = client.pkFactory;
-
+  
     p_client.open(function(err, p_client) {  
       client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {    
         collection.insert({'a':0});
@@ -3413,360 +3413,360 @@ var all_tests = {
     });
   },
   
-  test_should_deserialize_large_integrated_array : function() {
-    client.createCollection('test_should_deserialize_large_integrated_array', function(err, collection) {    
-      var doc = {'a':0,
-        'b':['tmp1', 'tmp2', 'tmp3', 'tmp4', 'tmp5', 'tmp6', 'tmp7', 'tmp8', 'tmp9', 'tmp10', 'tmp11', 'tmp12', 'tmp13', 'tmp14', 'tmp15', 'tmp16']
-      };
-      // Insert the collection
-      collection.insert(doc);
-      // Fetch and check the collection
-      collection.findOne({'a': 0}, function(err, result) {         
-        test.deepEqual(doc.a, result.a);
-        test.deepEqual(doc.b, result.b);
-        finished_test({test_should_deserialize_large_integrated_array:'ok'});      
-      });
-    });
-  },
-  
-  test_find_one_error_handling : function() {
-    client.createCollection('test_find_one_error_handling', function(err, collection) {    
-      // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
-      // is the error handling of the findOne Method     
-      try {
-        collection.findOne({"_id":client.bson_serializer.ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {});      
-      } catch (err) {
-        finished_test({test_find_one_error_handling:'ok'});      
-      }
-    });  
-  },
-  
-  // test_force_binary_error : function() {
-  //   client.createCollection('test_force_binary_error', function(err, collection) {    
-  //     // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
-  //     // is the error handling of the findOne Method     
-  //     var result= "";
-  //     var hexString = "5e9bd59248305adf18ebc15703a1";
-  //     for(var index=0 ; index < hexString.length; index+=2) {
-  //         var string= hexString.substr(index, 2);
-  //         var number= parseInt(string, 16);
-  //         result+= BinaryParser.fromByte(number);
-  //     }
-  // 
-  //     // Generate a illegal ID
-  //     var id = client.bson_serializer.ObjectID.createFromHexString('5e9bd59248305adf18ebc157');
-  //     id.id = result;
-  //     
-  //     // Execute with error
-  //     collection.findOne({"_id": id}, function(err, result) {
-  //       // test.equal(undefined, result)
-  //       test.ok(err != null)
-  //       finished_test({test_force_binary_error:'ok'});      
-  //     });      
-  //   });  
-  // },
-  
-  // test_gs_weird_bug : function() {
-  //   var gridStore = new GridStore(client, "test_gs_weird_bug", "w");
-  //   var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
-  // 
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write(data, function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         // Assert that we have overwriten the data
-  //         GridStore.read(client, 'test_gs_weird_bug', function(err, fileData) {
-  //           test.equal(data.length, fileData.length);
-  //           finished_test({test_gs_weird_bug:'ok'});        
-  //         });
-  //       });
-  //     });
-  //   });            
-  // },
-  // 
-  // test_gs_working_field_read : function() {
-  //   var gridStore = new GridStore(client, "test_gs_working_field_read", "w");
-  //   var data = fs.readFileSync("./integration/test_gs_working_field_read.pdf", 'binary');
-  // 
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write(data, function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         // Assert that we have overwriten the data
-  //         GridStore.read(client, 'test_gs_working_field_read', function(err, fileData) {
-  //           test.equal(data.length, fileData.length);
-  //           finished_test({test_gs_working_field_read:'ok'});        
-  //         });
-  //       });
-  //     });
-  //   });            
-  // },
-  
-  // Test field select with options
-  test_field_select_with_options : function() {
-    client.createCollection('test_field_select_with_options', function(err, r) {
-      var collection = client.collection('test_field_select_with_options', function(err, collection) {
-        var docCount = 25, docs = [];
-  
-        // Insert some test documents
-        while(docCount--) docs.push({a:docCount, b:docCount});
-        collection.insert(docs, function(err,retDocs){ docs = retDocs; });
-  
-        collection.find({},{ 'a' : 1},{ limit : 3, sort : [['a',-1]] },function(err,cursor){
-          cursor.toArray(function(err,documents){
-            test.equal(3,documents.length);
-            documents.forEach(function(doc,idx){
-              test.equal(undefined,doc.b); // making sure field select works
-              test.equal((24-idx),doc.a); // checking limit sort object with field select
-            });
-          });
-        });
-  
-        collection.find({},{},10,3,function(err,cursor){
-          cursor.toArray(function(err,documents){
-            test.equal(3,documents.length);
-            documents.forEach(function(doc,idx){
-              test.equal(doc.a,doc.b); // making sure empty field select returns properly
-              test.equal((14-idx),doc.a); // checking skip and limit in args
-            });
-            finished_test({test_field_select_with_options:'ok'}); 
-          });
-        });      
-      });
-    });
-  },
-  
-  // Test findAndModify a document
-  test_find_and_modify_a_document : function() {
-    client.createCollection('test_find_and_modify_a_document', function(err, collection) {
-      // Test return new document on change
-      collection.insert({'a':1, 'b':2}, function(err, doc) {
-        // Let's modify the document in place
-        collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, true, function(err, updated_doc) {
-          test.equal(1, updated_doc.a);
-          test.equal(3, updated_doc.b);        
-        })
-      });
-  
-      // Test return old document on change
-      collection.insert({'a':2, 'b':2}, function(err, doc) {
-        // Let's modify the document in place
-        collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, function(err, updated_doc) {
-          test.equal(2, updated_doc.a);
-          test.equal(2, updated_doc.b);        
-        })
-      });
-  
-      // Test remove object on change
-      collection.insert({'a':3, 'b':2}, function(err, doc) {
-        // Let's modify the document in place
-        collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, true, true, function(err, updated_doc) {
-          test.equal(3, updated_doc.a);
-          test.equal(2, updated_doc.b);        
-          finished_test({test_find_and_modify_a_document:'ok'}); 
-        })
-      });    
-    });  
-  },
-  
-  /*
-    test_pair : function() {
-      var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
-      p_client.open(function(err, p_client) {    
-        p_client.dropDatabase(function(err, done) {    
-          test.ok(p_client.masterConnection != null);
-          test.equal(2, p_client.connections.length);
-  
-          test.ok(p_client.serverConfig.leftServer.master);
-          test.assertFalse(p_client.serverConfig.rightServer.master);
-  
-          p_client.createCollection('test_collection', function(err, collection) {
-            collection.insert({'a':1}, function(err, doc) {
-              collection.find(function(err, cursor) {
-                cursor.toArray(function(err, items) {
-                  test.equal(1, items.length);
-  
-                  finished_test({test_pair:'ok'});       
-                  p_client.close();
-                });
-              });
-            });
-          });
-        });
-      });    
-    },
-  
-    test_cluster : function() {
-      var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
-      p_client.open(function(err, p_client) {
-        p_client.dropDatabase(function(err, done) {    
-          test.ok(p_client.masterConnection != null);
-          test.equal(2, p_client.connections.length);
-  
-          test.equal(true, p_client.serverConfig.servers[0].master);
-          test.equal(false, p_client.serverConfig.servers[1].master);
-  
-          p_client.createCollection('test_collection', function(err, collection) {
-            collection.insert({'a':1}, function(err, doc) {
-              collection.find(function(err, cursor) {
-                cursor.toArray(function(err, items) {
-                  test.equal(1, items.length);
-  
-                  finished_test({test_cluster:'ok'});       
-                  p_client.close();
-                });
-              });
-            });
-          });
-        });
-      });    
-    },
-  
-    test_slave_connection :function() {
-      var p_client = new Db('integration_tests_23', new Server("127.0.0.1", 27018, {}));
-      p_client.open(function(err, p_client) {
-        test.equal(null, err);
-        finished_test({test_slave_connection:'ok'});
-        p_client.close();
-      });          
-    }
-  */  
-  
-  test_ensure_index : function() {
-    client.createCollection('test_ensure_index', function(err, collection) {    
-      // Create an index on the collection
-      client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
-        test.equal("a_1", indexName);
-        // Let's fetch the index information
-        client.indexInformation(collection.collectionName, function(err, collectionInfo) {
-          test.ok(collectionInfo['_id_'] != null);
-          test.equal('_id', collectionInfo['_id_'][0][0]);
-          test.ok(collectionInfo['a_1'] != null);
-          test.deepEqual([["a", 1]], collectionInfo['a_1']);
-  
-          client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
-            test.equal("a_1", indexName);
-            // Let's fetch the index information
-            client.indexInformation(collection.collectionName, function(err, collectionInfo) {
-              test.ok(collectionInfo['_id_'] != null);
-              test.equal('_id', collectionInfo['_id_'][0][0]);
-              test.ok(collectionInfo['a_1'] != null);
-              test.deepEqual([["a", 1]], collectionInfo['a_1']);
-              // Let's close the db 
-              finished_test({test_ensure_index:'ok'});                 
-            });
-          });      
-        });
-      });      
-    })
-  },
-  
-  // test_insert_and_update_with_new_script_context: function() {
-  //   var db = new Db('test-db', new Server('localhost', 27017, {auto_reconnect: true}, {}));
-  //   db.bson_deserializer = client.bson_deserializer;
-  //   db.bson_serializer = client.bson_serializer;
-  //   db.pkFactory = client.pkFactory;
-  // 
-  //   db.open(function(err, db) {  
-  //     //convience curried handler for functions of type 'a -> (err, result)
-  //     function getResult(callback){
-  //       return function(error, result) {
-  //         test.ok(error == null);
-  //         callback(result);
-  //       }
+  // test_should_deserialize_large_integrated_array : function() {
+  //   client.createCollection('test_should_deserialize_large_integrated_array', function(err, collection) {    
+  //     var doc = {'a':0,
+  //       'b':['tmp1', 'tmp2', 'tmp3', 'tmp4', 'tmp5', 'tmp6', 'tmp7', 'tmp8', 'tmp9', 'tmp10', 'tmp11', 'tmp12', 'tmp13', 'tmp14', 'tmp15', 'tmp16']
   //     };
-  // 
-  //     db.collection('users', getResult(function(user_collection){
-  //       user_collection.remove(function(err, result) {
-  //         //first, create a user object   
-  //         var newUser = { name : 'Test Account', settings : {} };
-  //         user_collection.insert([newUser],  getResult(function(users){
-  //             var user = users[0];
-  // 
-  //             var scriptCode = "settings.block = []; settings.block.push('test');";
-  //             var context = { settings : { thisOneWorks : "somestring" } };
-  // 
-  //             Script.runInNewContext(scriptCode, context, "testScript");
-  // 
-  //             //now create update command and issue it
-  //             var updateCommand = { $set : context };
-  // 
-  //             user_collection.update({_id : user._id}, updateCommand, null, 
-  //               getResult(function(updateCommand) {
-  //                 // Fetch the object and check that the changes are persisted
-  //                 user_collection.findOne({_id : user._id}, function(err, doc) {
-  //                   test.ok(err == null);
-  //                   test.equal("Test Account", doc.name);
-  //                   test.equal("somestring", doc.settings.thisOneWorks);
-  //                   test.equal("test", doc.settings.block[0]);
-  // 
-  //                   // Let's close the db 
-  //                   finished_test({test_insert_and_update_with_new_script_context:'ok'});
-  //                   db.close();
-  //                 });
-  //               })
-  //             );        
-  //         }));          
-  //       });
-  //     }));      
+  //     // Insert the collection
+  //     collection.insert(doc);
+  //     // Fetch and check the collection
+  //     collection.findOne({'a': 0}, function(err, result) {         
+  //       test.deepEqual(doc.a, result.a);
+  //       test.deepEqual(doc.b, result.b);
+  //       finished_test({test_should_deserialize_large_integrated_array:'ok'});      
+  //     });
   //   });
   // },
-  
-  // test_all_serialization_types_new_context : function() {
-  //   client.createCollection('test_all_serialization_types_new_context', function(err, collection) {   
-  //     var date = new Date(); 
-  //     var scriptCode = 
-  //       "var string = 'binstring'\n" +
-  //       "var bin = new Binary()\n" +
-  //       "for(var index = 0; index < string.length; index++) {\n" +
-  //       "  bin.put(string.charAt(index))\n" + 
-  //       "}\n" +             
-  //       "motherOfAllDocuments['string'] = 'hello';" +
-  //       "motherOfAllDocuments['array'] = [1,2,3];" +
-  //       "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
-  //       "motherOfAllDocuments['date'] = date;" +
-  //       "motherOfAllDocuments['oid'] = new client.bson_serializer.ObjectID();" +
-  //       "motherOfAllDocuments['binary'] = bin;" +
-  //       "motherOfAllDocuments['int'] = 42;" +
-  //       "motherOfAllDocuments['float'] = 33.3333;" +
-  //       "motherOfAllDocuments['regexp'] = /regexp/;" +
-  //       "motherOfAllDocuments['boolean'] = true;" +
-  //       "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
-  //       "motherOfAllDocuments['where'] = new Code('this.a > i', {i:1});" +
-  //       "motherOfAllDocuments['dbref'] = new DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
-  //     
-  //     var context = { motherOfAllDocuments : {}, mongo:mongo, date:date};
-  //     // Execute function in context
-  //     Script.runInNewContext(scriptCode, context, "testScript");
-  //     // sys.puts(sys.inspect(context.motherOfAllDocuments))
-  //     var motherOfAllDocuments = context.motherOfAllDocuments;
   // 
-  //     collection.insert(context.motherOfAllDocuments, function(err, docs) {
-  //        collection.findOne(function(err, doc) {
-  //          // Assert correct deserialization of the values
-  //          test.equal(motherOfAllDocuments.string, doc.string);
-  //          test.deepEqual(motherOfAllDocuments.array, doc.array);
-  //          test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
-  //          test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
-  //          test.equal(date.getTime(), doc.long);
-  //          test.equal(date.toString(), doc.date.toString());
-  //          test.equal(date.getTime(), doc.date.getTime());
-  //          test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-  //          test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
-  //                
-  //          test.equal(motherOfAllDocuments.int, doc.int);
-  //          test.equal(motherOfAllDocuments.long, doc.long);
-  //          test.equal(motherOfAllDocuments.float, doc.float);
-  //          test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
-  //          test.equal(motherOfAllDocuments.boolean, doc.boolean);
-  //          test.equal(motherOfAllDocuments.where.code, doc.where.code);
-  //          test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-  //          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
-  //          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-  //          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
-  //          finished_test({test_all_serialization_types_new_context:'ok'});      
-  //        })      
-  //      });    
-  //   });    
-  // },  
+  // test_find_one_error_handling : function() {
+  //   client.createCollection('test_find_one_error_handling', function(err, collection) {    
+  //     // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
+  //     // is the error handling of the findOne Method     
+  //     try {
+  //       collection.findOne({"_id":client.bson_serializer.ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {});      
+  //     } catch (err) {
+  //       finished_test({test_find_one_error_handling:'ok'});      
+  //     }
+  //   });  
+  // },
+  // 
+  // // test_force_binary_error : function() {
+  // //   client.createCollection('test_force_binary_error', function(err, collection) {    
+  // //     // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
+  // //     // is the error handling of the findOne Method     
+  // //     var result= "";
+  // //     var hexString = "5e9bd59248305adf18ebc15703a1";
+  // //     for(var index=0 ; index < hexString.length; index+=2) {
+  // //         var string= hexString.substr(index, 2);
+  // //         var number= parseInt(string, 16);
+  // //         result+= BinaryParser.fromByte(number);
+  // //     }
+  // // 
+  // //     // Generate a illegal ID
+  // //     var id = client.bson_serializer.ObjectID.createFromHexString('5e9bd59248305adf18ebc157');
+  // //     id.id = result;
+  // //     
+  // //     // Execute with error
+  // //     collection.findOne({"_id": id}, function(err, result) {
+  // //       // test.equal(undefined, result)
+  // //       test.ok(err != null)
+  // //       finished_test({test_force_binary_error:'ok'});      
+  // //     });      
+  // //   });  
+  // // },
+  // 
+  // // test_gs_weird_bug : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_weird_bug", "w");
+  // //   var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
+  // // 
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write(data, function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         // Assert that we have overwriten the data
+  // //         GridStore.read(client, 'test_gs_weird_bug', function(err, fileData) {
+  // //           test.equal(data.length, fileData.length);
+  // //           finished_test({test_gs_weird_bug:'ok'});        
+  // //         });
+  // //       });
+  // //     });
+  // //   });            
+  // // },
+  // // 
+  // // test_gs_working_field_read : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_working_field_read", "w");
+  // //   var data = fs.readFileSync("./integration/test_gs_working_field_read.pdf", 'binary');
+  // // 
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write(data, function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         // Assert that we have overwriten the data
+  // //         GridStore.read(client, 'test_gs_working_field_read', function(err, fileData) {
+  // //           test.equal(data.length, fileData.length);
+  // //           finished_test({test_gs_working_field_read:'ok'});        
+  // //         });
+  // //       });
+  // //     });
+  // //   });            
+  // // },
+  // 
+  // // Test field select with options
+  // test_field_select_with_options : function() {
+  //   client.createCollection('test_field_select_with_options', function(err, r) {
+  //     var collection = client.collection('test_field_select_with_options', function(err, collection) {
+  //       var docCount = 25, docs = [];
+  // 
+  //       // Insert some test documents
+  //       while(docCount--) docs.push({a:docCount, b:docCount});
+  //       collection.insert(docs, function(err,retDocs){ docs = retDocs; });
+  // 
+  //       collection.find({},{ 'a' : 1},{ limit : 3, sort : [['a',-1]] },function(err,cursor){
+  //         cursor.toArray(function(err,documents){
+  //           test.equal(3,documents.length);
+  //           documents.forEach(function(doc,idx){
+  //             test.equal(undefined,doc.b); // making sure field select works
+  //             test.equal((24-idx),doc.a); // checking limit sort object with field select
+  //           });
+  //         });
+  //       });
+  // 
+  //       collection.find({},{},10,3,function(err,cursor){
+  //         cursor.toArray(function(err,documents){
+  //           test.equal(3,documents.length);
+  //           documents.forEach(function(doc,idx){
+  //             test.equal(doc.a,doc.b); // making sure empty field select returns properly
+  //             test.equal((14-idx),doc.a); // checking skip and limit in args
+  //           });
+  //           finished_test({test_field_select_with_options:'ok'}); 
+  //         });
+  //       });      
+  //     });
+  //   });
+  // },
+  // 
+  // // Test findAndModify a document
+  // test_find_and_modify_a_document : function() {
+  //   client.createCollection('test_find_and_modify_a_document', function(err, collection) {
+  //     // Test return new document on change
+  //     collection.insert({'a':1, 'b':2}, function(err, doc) {
+  //       // Let's modify the document in place
+  //       collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, true, function(err, updated_doc) {
+  //         test.equal(1, updated_doc.a);
+  //         test.equal(3, updated_doc.b);        
+  //       })
+  //     });
+  // 
+  //     // Test return old document on change
+  //     collection.insert({'a':2, 'b':2}, function(err, doc) {
+  //       // Let's modify the document in place
+  //       collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, function(err, updated_doc) {
+  //         test.equal(2, updated_doc.a);
+  //         test.equal(2, updated_doc.b);        
+  //       })
+  //     });
+  // 
+  //     // Test remove object on change
+  //     collection.insert({'a':3, 'b':2}, function(err, doc) {
+  //       // Let's modify the document in place
+  //       collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, true, true, function(err, updated_doc) {
+  //         test.equal(3, updated_doc.a);
+  //         test.equal(2, updated_doc.b);        
+  //         finished_test({test_find_and_modify_a_document:'ok'}); 
+  //       })
+  //     });    
+  //   });  
+  // },
+  // 
+  // /*
+  //   test_pair : function() {
+  //     var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
+  //     p_client.open(function(err, p_client) {    
+  //       p_client.dropDatabase(function(err, done) {    
+  //         test.ok(p_client.masterConnection != null);
+  //         test.equal(2, p_client.connections.length);
+  // 
+  //         test.ok(p_client.serverConfig.leftServer.master);
+  //         test.assertFalse(p_client.serverConfig.rightServer.master);
+  // 
+  //         p_client.createCollection('test_collection', function(err, collection) {
+  //           collection.insert({'a':1}, function(err, doc) {
+  //             collection.find(function(err, cursor) {
+  //               cursor.toArray(function(err, items) {
+  //                 test.equal(1, items.length);
+  // 
+  //                 finished_test({test_pair:'ok'});       
+  //                 p_client.close();
+  //               });
+  //             });
+  //           });
+  //         });
+  //       });
+  //     });    
+  //   },
+  // 
+  //   test_cluster : function() {
+  //     var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
+  //     p_client.open(function(err, p_client) {
+  //       p_client.dropDatabase(function(err, done) {    
+  //         test.ok(p_client.masterConnection != null);
+  //         test.equal(2, p_client.connections.length);
+  // 
+  //         test.equal(true, p_client.serverConfig.servers[0].master);
+  //         test.equal(false, p_client.serverConfig.servers[1].master);
+  // 
+  //         p_client.createCollection('test_collection', function(err, collection) {
+  //           collection.insert({'a':1}, function(err, doc) {
+  //             collection.find(function(err, cursor) {
+  //               cursor.toArray(function(err, items) {
+  //                 test.equal(1, items.length);
+  // 
+  //                 finished_test({test_cluster:'ok'});       
+  //                 p_client.close();
+  //               });
+  //             });
+  //           });
+  //         });
+  //       });
+  //     });    
+  //   },
+  // 
+  //   test_slave_connection :function() {
+  //     var p_client = new Db('integration_tests_23', new Server("127.0.0.1", 27018, {}));
+  //     p_client.open(function(err, p_client) {
+  //       test.equal(null, err);
+  //       finished_test({test_slave_connection:'ok'});
+  //       p_client.close();
+  //     });          
+  //   }
+  // */  
+  // 
+  // test_ensure_index : function() {
+  //   client.createCollection('test_ensure_index', function(err, collection) {    
+  //     // Create an index on the collection
+  //     client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
+  //       test.equal("a_1", indexName);
+  //       // Let's fetch the index information
+  //       client.indexInformation(collection.collectionName, function(err, collectionInfo) {
+  //         test.ok(collectionInfo['_id_'] != null);
+  //         test.equal('_id', collectionInfo['_id_'][0][0]);
+  //         test.ok(collectionInfo['a_1'] != null);
+  //         test.deepEqual([["a", 1]], collectionInfo['a_1']);
+  // 
+  //         client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
+  //           test.equal("a_1", indexName);
+  //           // Let's fetch the index information
+  //           client.indexInformation(collection.collectionName, function(err, collectionInfo) {
+  //             test.ok(collectionInfo['_id_'] != null);
+  //             test.equal('_id', collectionInfo['_id_'][0][0]);
+  //             test.ok(collectionInfo['a_1'] != null);
+  //             test.deepEqual([["a", 1]], collectionInfo['a_1']);
+  //             // Let's close the db 
+  //             finished_test({test_ensure_index:'ok'});                 
+  //           });
+  //         });      
+  //       });
+  //     });      
+  //   })
+  // },
+  // 
+  // // test_insert_and_update_with_new_script_context: function() {
+  // //   var db = new Db('test-db', new Server('localhost', 27017, {auto_reconnect: true}, {}));
+  // //   db.bson_deserializer = client.bson_deserializer;
+  // //   db.bson_serializer = client.bson_serializer;
+  // //   db.pkFactory = client.pkFactory;
+  // // 
+  // //   db.open(function(err, db) {  
+  // //     //convience curried handler for functions of type 'a -> (err, result)
+  // //     function getResult(callback){
+  // //       return function(error, result) {
+  // //         test.ok(error == null);
+  // //         callback(result);
+  // //       }
+  // //     };
+  // // 
+  // //     db.collection('users', getResult(function(user_collection){
+  // //       user_collection.remove(function(err, result) {
+  // //         //first, create a user object   
+  // //         var newUser = { name : 'Test Account', settings : {} };
+  // //         user_collection.insert([newUser],  getResult(function(users){
+  // //             var user = users[0];
+  // // 
+  // //             var scriptCode = "settings.block = []; settings.block.push('test');";
+  // //             var context = { settings : { thisOneWorks : "somestring" } };
+  // // 
+  // //             Script.runInNewContext(scriptCode, context, "testScript");
+  // // 
+  // //             //now create update command and issue it
+  // //             var updateCommand = { $set : context };
+  // // 
+  // //             user_collection.update({_id : user._id}, updateCommand, null, 
+  // //               getResult(function(updateCommand) {
+  // //                 // Fetch the object and check that the changes are persisted
+  // //                 user_collection.findOne({_id : user._id}, function(err, doc) {
+  // //                   test.ok(err == null);
+  // //                   test.equal("Test Account", doc.name);
+  // //                   test.equal("somestring", doc.settings.thisOneWorks);
+  // //                   test.equal("test", doc.settings.block[0]);
+  // // 
+  // //                   // Let's close the db 
+  // //                   finished_test({test_insert_and_update_with_new_script_context:'ok'});
+  // //                   db.close();
+  // //                 });
+  // //               })
+  // //             );        
+  // //         }));          
+  // //       });
+  // //     }));      
+  // //   });
+  // // },
+  // 
+  // // test_all_serialization_types_new_context : function() {
+  // //   client.createCollection('test_all_serialization_types_new_context', function(err, collection) {   
+  // //     var date = new Date(); 
+  // //     var scriptCode = 
+  // //       "var string = 'binstring'\n" +
+  // //       "var bin = new Binary()\n" +
+  // //       "for(var index = 0; index < string.length; index++) {\n" +
+  // //       "  bin.put(string.charAt(index))\n" + 
+  // //       "}\n" +             
+  // //       "motherOfAllDocuments['string'] = 'hello';" +
+  // //       "motherOfAllDocuments['array'] = [1,2,3];" +
+  // //       "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
+  // //       "motherOfAllDocuments['date'] = date;" +
+  // //       "motherOfAllDocuments['oid'] = new client.bson_serializer.ObjectID();" +
+  // //       "motherOfAllDocuments['binary'] = bin;" +
+  // //       "motherOfAllDocuments['int'] = 42;" +
+  // //       "motherOfAllDocuments['float'] = 33.3333;" +
+  // //       "motherOfAllDocuments['regexp'] = /regexp/;" +
+  // //       "motherOfAllDocuments['boolean'] = true;" +
+  // //       "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
+  // //       "motherOfAllDocuments['where'] = new Code('this.a > i', {i:1});" +
+  // //       "motherOfAllDocuments['dbref'] = new DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
+  // //     
+  // //     var context = { motherOfAllDocuments : {}, mongo:mongo, date:date};
+  // //     // Execute function in context
+  // //     Script.runInNewContext(scriptCode, context, "testScript");
+  // //     // sys.puts(sys.inspect(context.motherOfAllDocuments))
+  // //     var motherOfAllDocuments = context.motherOfAllDocuments;
+  // // 
+  // //     collection.insert(context.motherOfAllDocuments, function(err, docs) {
+  // //        collection.findOne(function(err, doc) {
+  // //          // Assert correct deserialization of the values
+  // //          test.equal(motherOfAllDocuments.string, doc.string);
+  // //          test.deepEqual(motherOfAllDocuments.array, doc.array);
+  // //          test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+  // //          test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+  // //          test.equal(date.getTime(), doc.long);
+  // //          test.equal(date.toString(), doc.date.toString());
+  // //          test.equal(date.getTime(), doc.date.getTime());
+  // //          test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+  // //          test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
+  // //                
+  // //          test.equal(motherOfAllDocuments.int, doc.int);
+  // //          test.equal(motherOfAllDocuments.long, doc.long);
+  // //          test.equal(motherOfAllDocuments.float, doc.float);
+  // //          test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+  // //          test.equal(motherOfAllDocuments.boolean, doc.boolean);
+  // //          test.equal(motherOfAllDocuments.where.code, doc.where.code);
+  // //          test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
+  // //          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+  // //          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+  // //          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
+  // //          finished_test({test_all_serialization_types_new_context:'ok'});      
+  // //        })      
+  // //      });    
+  // //   });    
+  // // },  
 };
 
 /*******************************************************************************************************

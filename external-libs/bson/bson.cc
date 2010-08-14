@@ -353,22 +353,38 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
-    index = index + len + 1;
+    index = index + len + 1;        
     
     // Write the actual string into the char array
     Local<String> str = value->ToString();
     // Let's fetch the int value
     uint32_t utf8_length = str->Utf8Length();
-    // Write the integer to the char *
-    BSON::write_int32((serialized_object + index), utf8_length + 1);
-    // Adjust the index
-    index = index + 4;
-    // Write string to char in utf8 format
-    str->WriteUtf8((serialized_object + index), utf8_length);
-    // Add the null termination
-    *(serialized_object + index + utf8_length) = '\0';    
-    // Adjust the index
-    index = index + utf8_length + 1;
+
+    // If the Utf8 length is different from the string length then we
+    // have a UTF8 encoded string, otherwise write it as ascii
+    if(utf8_length != str->Length()) {
+      // Write the integer to the char *
+      BSON::write_int32((serialized_object + index), utf8_length + 1);
+      // Adjust the index
+      index = index + 4;
+      // Write string to char in utf8 format
+      str->WriteUtf8((serialized_object + index), utf8_length);
+      // Add the null termination
+      *(serialized_object + index + utf8_length) = '\0';    
+      // Adjust the index
+      index = index + utf8_length + 1;      
+    } else {
+      // Write the integer to the char *
+      BSON::write_int32((serialized_object + index), str->Length() + 1);
+      // Adjust the index
+      index = index + 4;
+      // Write string to char in utf8 format
+      written = DecodeWrite((serialized_object + index), str->Length(), str, BINARY);
+      // Add the null termination
+      *(serialized_object + index + str->Length()) = '\0';    
+      // Adjust the index
+      index = index + str->Length() + 1;      
+    }    
   } else if(value->IsInt32()) {
     // printf("============================================= -- serialized::::int32\n");        
     // Save the string at the offset provided
