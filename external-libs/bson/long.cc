@@ -126,6 +126,8 @@ void Long::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "getHighBits", GetHighBits);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "greaterThan", GreatherThan);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "toInt", ToInt);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "toNumber", ToNumber);  
 
   // Getters for correct serialization of the object  
   constructor_template->InstanceTemplate()->SetAccessor(low_bits_symbol, LowGetter, LowSetter);
@@ -138,6 +140,30 @@ void Long::Initialize(Handle<Object> target) {
   // Add class to scope
   target->Set(String::NewSymbol("Long"), constructor_template->GetFunction());
 }
+
+Handle<Value> Long::ToInt(const Arguments &args) {
+  HandleScope scope;
+  
+  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
+  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Get lower bits
+  uint32_t low_bits = l->low_bits;
+  // Return the value
+  scope.Close(Int32::New(low_bits));
+}
+
+Handle<Value> Long::ToNumber(const Arguments &args) {
+  // return this.high_ * exports.Long.TWO_PWR_32_DBL_ +
+  //        this.getLowBitsUnsigned();
+  HandleScope scope;//BSON_INT32_MAX
+  
+  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
+  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Calculate the approximate value
+  double value = l->high_bits * BSON_INT32_MAX * 2 + (uint32_t)l->low_bits;
+  scope.Close(Number::New(value));
+}
+
 
 Handle<Value> Long::LowGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;

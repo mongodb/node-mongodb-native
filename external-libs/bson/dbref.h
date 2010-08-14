@@ -12,10 +12,10 @@ using namespace node;
 class DBRef : public ObjectWrap {  
   public:
     char *ref;
-    ObjectID *oid;
+    Persistent<Value> oid;
     char *db;    
     
-    DBRef(char *ref, ObjectID *oid, char *db);
+    DBRef(char *ref, Persistent<Value> oid, char *db);
     ~DBRef();
 
     static inline bool HasInstance(Handle<Value> val) {

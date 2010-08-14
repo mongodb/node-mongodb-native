@@ -294,16 +294,15 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     Local<Object> obj = Object::New();
     // unpack dbref to get to the bin
     DBRef *db_ref_obj = DBRef::Unwrap<DBRef>(dbref);
-    char *oid_bin = db_ref_obj->oid->convert_hex_oid_to_bin();
-    // Return the value  
-    Local<Value> argv[] = {String::New(db_ref_obj->oid->oid)};
-    Handle<Value> object_id_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);    
+    // Unpack the reference value
+    Persistent<Value> oid_value = db_ref_obj->oid;
     // Encode the oid to bin
+    // obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
     obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
-    obj->Set(String::New("$id"), object_id_obj);
+    obj->Set(String::New("$id"), oid_value);      
     obj->Set(String::New("$db"), dbref->Get(String::New("db")));
     // Encode the variable
-    index = BSON::serialize(serialized_object, index, name, obj, check_key);
+    index = BSON::serialize(serialized_object, index, name, obj, false);
   } else if(Code::HasInstance(value)) {
     // printf("============================================= -- serialized::::code\n");    
     // Save the string at the offset provided
@@ -421,6 +420,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Get the values
     double d_number = number->NumberValue();
     int64_t l_number = number->IntegerValue();
+    // printf("===================================================== l_number:%lli\n", l_number);
     // Check if we have a double value and not a int64
     double d_result = d_number - l_number;    
     // If we have a value after subtracting the integer value we have a float
@@ -432,7 +432,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       *(serialized_object + first_pointer) = BSON_DATA_NUMBER;
       // Adjust index for double
       index = index + 8;
-    } else if(l_number <= BSON_INT32_MAX || l_number >= BSON_INT32_MIN) {
+    } else if(l_number <= BSON_INT32_MAX && l_number >= BSON_INT32_MIN) {
+      // printf("============================================= -- serialized::::int32\n");
       if(l_number == BSON_INT32_MAX) {
         BSON::write_int32((serialized_object + index), BSON_INT32_MAX);
       } else {
@@ -441,7 +442,20 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust the size of the index
       index = index + 4;
     } else {
-      // object_size = object_size + 8;
+      // printf("============================================= -- serialized::::int64\n");
+      // Fetch the double value
+      // double double_value = value->NumberValue();
+      // printf("======================================= double_value: %f\n", double_value);
+      // Create a long object
+      // Long *long_obj = Long::fromNumber(double_value);            
+      // Write the content to the char array
+      // BSON::write_int32((serialized_object + index), long_obj->low_bits);
+      // BSON::write_int32((serialized_object + index + 4), long_obj->high_bits);      
+      BSON::write_int64((serialized_object + index), l_number);
+      // Adjust type to be double
+      *(serialized_object + first_pointer) = BSON_DATA_LONG;
+      // Adjust the size of the index
+      index = index + 8;
     }     
   } else if(value->IsBoolean()) {
     // printf("============================================= -- serialized::::boolean\n");
@@ -566,7 +580,10 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       *(serialized_object + index) = '\0';
     }
     // Write trailing '\0' for object
-    *(serialized_object + index + 1) = '\0';    
+    // *(serialized_object + index + 1) = '\0';    
+    // Pad the last item
+    *(serialized_object + index) = '\0';
+    index = index + 1;
     // Free up memory
     free(length_str);
   } else if(value->IsObject()) {
@@ -591,13 +608,12 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
 
     // Calculate size of the total object
     uint32_t object_size = BSON::calculate_object_size(value);
-    // printf("------------------------------------------------------ property_names.length: %d\n", property_names->Length());
-    // printf("------------------------------------------------------ calculated_object: %d\n", object_size);
-    
     // Write the size
     BSON::write_int32((serialized_object + index), object_size);
     // Adjust size
     index = index + 4;    
+    
+    // printf("======================================== number_of_properties: %d\n", property_names->Length());
     
     // Process all the properties on the object
     for(uint32_t i = 0; i < property_names->Length(); i++) {
@@ -607,14 +623,16 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Convert name to char*
       ssize_t len = DecodeBytes(property_name, BINARY);
       char *data = new char[len];
-      // *(data + len) = '\0';
+      *(data + len) = '\0';
       ssize_t written = DecodeWrite(data, len, property_name, BINARY);      
-      // printf("=========================== property_name:: %s\n", data);
       
+      // printf("=========================== property_name:: %s --- 1\n", data);
       // Fetch the object for the property
       Local<Value> property = object->Get(property_name);
+      // printf("=========================== property_name:: %s --- 2\n", data);
       // Write the next serialized object
       index = BSON::serialize(serialized_object, index, property_name, property, check_key);      
+      // printf("=========================== property_name:: %s --- 3\n", data);
     }
     // Pad the last item
     *(serialized_object + index) = '\0';
@@ -663,14 +681,11 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     Local<Object> obj = Object::New();
     // unpack dbref to get to the bin
     DBRef *db_ref_obj = DBRef::Unwrap<DBRef>(dbref);
-
-    // Return the value  
-    Local<Value> argv[] = {String::New(db_ref_obj->oid->oid)};
-    Handle<Value> object_id_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);    
     // Encode the oid to bin
     obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
-    obj->Set(String::New("$id"), object_id_obj);
+    obj->Set(String::New("$id"), db_ref_obj->oid);
     obj->Set(String::New("$db"), dbref->Get(String::New("db")));
+    // printf("================================ calculate_object_size:dbref:[%d]\n", BSON::calculate_object_size(obj));
     // Calculate size
     object_size += BSON::calculate_object_size(obj);
   } else if(value->IsString()) {
@@ -692,13 +707,12 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     double d_result = d_number - l_number;    
     // If we have a value after subtracting the integer value we have a float
     if(d_result > 0 || d_result < 0) {
-      // printf("================================ calculate_object_size:double\n");
       object_size = object_size + 8;      
-    } else if(d_number <= 2147483648 || d_number >= -2147483648) {
+    } else if(l_number <= BSON_INT32_MAX && l_number >= BSON_INT32_MIN) {
       object_size = object_size + 4;
     } else {
       object_size = object_size + 8;
-    }    
+    }
   } else if(value->IsBoolean()) {
     // printf("================================ calculate_object_size:boolean\n");
     object_size = object_size + 1;
@@ -750,7 +764,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       object_size = object_size + object_length;
     }
     // Add the object size
-    object_size += 1 + 4;
+    object_size = object_size + 4 + 1;
     // Free up memory
     free(length_str);
   } else if(value->IsObject()) {
@@ -873,6 +887,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
         return_data->Set(String::New(string_name), utf8_encoded_str);
       }
       
+      // Adjust index
+      index = index + string_size;
       // Free up the memory
       free(value);
     } else if(type == BSON_DATA_INT) {

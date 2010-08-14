@@ -139,7 +139,7 @@ Handle<Value> Code::ScopeGetter(Local<String> property, const AccessorInfo& info
   Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
   // Get pointer to the object
   void *ptr = wrap->Value();
-  // Extracting value doing a cast of the pointer to Long
+  // Extracting value doing a cast of the pointer to Value
   Handle<Value> scope_obj = static_cast<Code *>(ptr)->scope_object;
   return scope.Close(scope_obj);
 }
