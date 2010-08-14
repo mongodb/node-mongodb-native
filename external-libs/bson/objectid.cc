@@ -162,10 +162,10 @@ void ObjectID::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
-  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "createPk", CreatePk);  
 
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "createPk", CreatePk);
+  NODE_SET_METHOD(constructor_template->GetFunction(), "createFromHexString", CreateFromHexString);
 
   target->Set(String::NewSymbol("ObjectID"), constructor_template->GetFunction());
 }
@@ -232,6 +232,16 @@ void ObjectID::IdSetter(Local<String> property, Local<Value> value, const Access
   // }
 }
 
+
+Handle<Value> ObjectID::CreateFromHexString(const Arguments &args) {
+  HandleScope scope;
+  
+  if(args.Length() != 1 && args[0]->IsString()) return VException("One argument required of type string");
+  
+  Local<Value> argv[] = {args[0]};
+  Handle<Value> oid_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);
+  return scope.Close(oid_obj);
+}
 
 Handle<Value> ObjectID::ToHexString(const Arguments &args) {
   HandleScope scope;

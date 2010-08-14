@@ -27,6 +27,7 @@ class ObjectID : public ObjectWrap {
     static Handle<Value> Inspect(const Arguments &args);
     static Handle<Value> ToHexString(const Arguments &args);
     static Handle<Value> CreatePk(const Arguments &args);
+    static Handle<Value> CreateFromHexString(const Arguments &args);
 
     // Properties
     static Handle<Value> IdGetter(Local<String> property, const AccessorInfo& info);
