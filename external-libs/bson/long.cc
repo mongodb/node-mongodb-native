@@ -125,6 +125,7 @@ void Long::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "getLowBits", GetLowBits);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "getHighBits", GetHighBits);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "greaterThan", GreatherThan);  
 
   // Getters for correct serialization of the object  
   constructor_template->InstanceTemplate()->SetAccessor(low_bits_symbol, LowGetter, LowSetter);
@@ -132,6 +133,7 @@ void Long::Initialize(Handle<Object> target) {
   
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "fromNumber", FromNumber);
+  NODE_SET_METHOD(constructor_template->GetFunction(), "fromInt", FromInt);
   
   // Add class to scope
   target->Set(String::NewSymbol("Long"), constructor_template->GetFunction());
@@ -528,12 +530,40 @@ Long *Long::subtract(Long *other) {
   return Long::fromBits(low32, high32);
 }
 
+Handle<Value> Long::GreatherThan(const Arguments &args) {
+  HandleScope scope;
+  
+  if(args.Length() != 1 && !Long::HasInstance(args[0])) return VException("One argument of type Long required");
+  
+  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
+  Long *current_long_obj = ObjectWrap::Unwrap<Long>(args.This());  
+  // Unpack Long
+  Local<Object> obj = args[0]->ToObject();
+  Long *long_obj = Long::Unwrap<Long>(obj);
+  // Compare the longs
+  bool comparision_result = current_long_obj->greaterThan(long_obj);
+  scope.Close(Boolean::New(comparision_result));
+}
+
 bool Long::greaterThan(Long *other) {
   return this->compare(other) > 0;  
 }
 
 bool Long::greaterThanOrEqual(Long *other) {
   return this->compare(other) >= 0;
+}
+
+Handle<Value> Long::FromInt(const Arguments &args) {
+  HandleScope scope;
+  
+  // Validate the arguments
+  if(args.Length() != 1 && !args[0]->IsNumber()) return VException("One argument of type number required");
+  // Unwrap Number variable
+  Local<Number> number = args[0]->ToNumber();
+  // Instantiate Long object and return
+  Local<Value> argv[] = {number};
+  Local<Object> long_obj = constructor_template->GetFunction()->NewInstance(1, argv);
+  return scope.Close(long_obj);  
 }
 
 Long *Long::fromInt(int64_t value) {

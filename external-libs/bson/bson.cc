@@ -359,18 +359,17 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Write the actual string into the char array
     Local<String> str = value->ToString();
     // Let's fetch the int value
-    uint32_t string_length = str->Length() + 1;
+    uint32_t utf8_length = str->Utf8Length();
     // Write the integer to the char *
-    BSON::write_int32((serialized_object + index), string_length);
+    BSON::write_int32((serialized_object + index), utf8_length + 1);
     // Adjust the index
     index = index + 4;
-    // Write the string to the file
-    len = DecodeBytes(str, BINARY);
-    written = DecodeWrite((serialized_object + index), len, str, BINARY);
+    // Write string to char in utf8 format
+    str->WriteUtf8((serialized_object + index), utf8_length);
     // Add the null termination
-    *(serialized_object + index + len) = '\0';    
+    *(serialized_object + index + utf8_length) = '\0';    
     // Adjust the index
-    index = index + len + 1;
+    index = index + utf8_length + 1;
   } else if(value->IsInt32()) {
     // printf("============================================= -- serialized::::int32\n");        
     // Save the string at the offset provided
@@ -678,7 +677,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     // printf("================================ calculate_object_size:string\n");
     Local<String> str = value->ToString();
     // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
-    object_size += str->Length() + 1 + 4;  
+    object_size += str->Utf8Length() + 1 + 4;  
   } else if(value->IsInt32()) {
     // printf("================================ calculate_object_size:int32\n");
     object_size += 4;
@@ -863,16 +862,15 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Adjust index to point to start of string
       index = index + 4;
       // Decode the string and add zero terminating value at the end of the string
-      char *value = (char *)malloc((string_size * sizeof(char)) + 1);
+      char *value = (char *)malloc((string_size * sizeof(char)));
       strncpy(value, (data + index), string_size);
-      *(value + string_size) = '\0';          
-      // Adjust the index for the size of the string
-      index = index + string_size;
+      // Encode the string (string - null termiating character)
+      Local<Value> utf8_encoded_str = Encode(value, string_size - 1, UTF8)->ToString();
       // Add the value to the data
       if(is_array_item) {
-        return_array->Set(Number::New(insert_index), String::New(value));        
+        return_array->Set(Number::New(insert_index), utf8_encoded_str);
       } else {
-        return_data->Set(String::New(string_name), String::New(value));
+        return_data->Set(String::New(string_name), utf8_encoded_str);
       }
       
       // Free up the memory
@@ -1395,6 +1393,59 @@ int BSON::deserialize_sint16(char *data, uint32_t offset) {
 long BSON::deserialize_sint32(char *data, uint32_t offset) {
   return (long)BSON::deserialize_sint8(data, offset) + (BSON::deserialize_sint8(data, offset + 1) << 8) +
     (BSON::deserialize_sint8(data, offset + 2) << 16) + (BSON::deserialize_sint8(data, offset + 3) << 24);
+}
+
+// Convert raw binary string to utf8 encoded string
+char *BSON::decode_utf8(char *string, uint32_t length) {  
+  // Internal variables
+  uint32_t i = 0;
+  uint32_t utf8_i = 0;
+  // unsigned char unicode = 0;
+  uint16_t unicode = 0;
+  unsigned char c = 0;
+  unsigned char c1 = 0;
+  unsigned char c2 = 0;
+  unsigned char c3 = 0;
+  // Allocate enough space for the utf8 encoded string
+  char *utf8_string = (char*)malloc(length * sizeof(char));
+  // Process the utf8 raw string
+  while(i < length) {
+    // Fetch character
+    c = (unsigned char)string[i];
+
+    if(c < 128) {
+    //   // It's a basic ascii character just copy the string
+      *(utf8_string + utf8_i) = *(string + i);
+      // Upadate indexs
+      i = i + 1;
+      utf8_i = utf8_i + 1;
+    } else if((c > 191) && (c < 224)) {
+      // Let's create an integer containing the 16 bit value for unicode
+      c2 = (unsigned char)string[i + 1];
+      // Pack to unicode value
+      unicode = (uint16_t)(((c & 31) << 6) | (c2 & 63));
+      // Write the int 16 to the string and upate index
+      memcpy((utf8_string + utf8_i), &unicode, 2);
+      // Upadate index
+      i = i + 2;
+      utf8_i = utf8_i + 2;
+    } else {
+    //   // Let's create the integers containing the 16 bit value for unicode
+      c2 = (unsigned char)string[i + 1];
+      c3 = (unsigned char)string[i + 2];
+      // Pack to unicode value
+      unicode = (uint16_t)(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+      // Write the int 16 to the string and upate index
+      memcpy((utf8_string + utf8_i), &unicode, 2);     
+      // Upadate indexs
+      i = i + 3;
+      utf8_i = utf8_i + 2;
+    }
+  }
+  // Add null termiating character
+  *(utf8_string + utf8_i + 1) = '\0';
+  // Return pointer of converted string
+  return utf8_string;
 }
 
 // Decode a byte

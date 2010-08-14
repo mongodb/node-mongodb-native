@@ -40,6 +40,7 @@ class BSON : public EventEmitter {
     static uint16_t deserialize_int8(char *data, uint32_t offset);
     static uint32_t deserialize_int32(char* data, uint32_t offset);
     static char *check_key(Local<String> key);
+    static char *decode_utf8(char * string, uint32_t length);
         
     // Decode function
     static Handle<Value> decodeLong(int64_t value);

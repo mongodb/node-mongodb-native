@@ -59,6 +59,8 @@ class Long : public ObjectWrap {
     static Handle<Value> IsZero(const Arguments &args);
     static Handle<Value> GetLowBits(const Arguments &args);
     static Handle<Value> GetHighBits(const Arguments &args);
+    static Handle<Value> GreatherThan(const Arguments &args);
+    static Handle<Value> FromInt(const Arguments &args);
 
     // Constructor used for creating new Long objects from C++
     static Persistent<FunctionTemplate> constructor_template;

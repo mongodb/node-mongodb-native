@@ -163,16 +163,24 @@ var Long2 = require('./bson').Long,
 // var object = BSON.deserialize(simple_string_serialized, 'binary');
 // sys.puts(sys.inspect(object))
 
-// Serialized documetn
-var bytes = [47,0,0,0,2,110,97,109,101,0,6,0,0,0,80,97,116,116,121,0,16,97,103,101,0,34,0,0,0,7,95,105,100,0,76,100,12,23,11,30,39,8,89,0,0,1,0];
-var serialized_data = '';
-// Convert to chars
-for(var i = 0; i < bytes.length; i++) {
-  serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
-}
-var object = BSON.deserialize(serialized_data);
-sys.puts(sys.inspect(object))
-sys.puts(Object.prototype.toString.call(object._id))
+// // Serialized documetn
+// var bytes = [47,0,0,0,2,110,97,109,101,0,6,0,0,0,80,97,116,116,121,0,16,97,103,101,0,34,0,0,0,7,95,105,100,0,76,100,12,23,11,30,39,8,89,0,0,1,0];
+// var serialized_data = '';
+// // Convert to chars
+// for(var i = 0; i < bytes.length; i++) {
+//   serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
+// }
+// var object = BSON.deserialize(serialized_data);
+// sys.puts(sys.inspect(object))
+// sys.puts(Object.prototype.toString.call(object._id))
+
+// Serialize utf8
+var doc = { "name" : "本荘由利地域に洪水警報", "name1" : "öüóőúéáűíÖÜÓŐÚÉÁŰÍ", "name2" : "abcdedede"};
+var simple_string_serialized = BSON.serialize(doc);
+var object = BSON.deserialize(simple_string_serialized);
+assert.equal(doc.name, object.name)
+assert.equal(doc.name1, object.name1)
+assert.equal(doc.name2, object.name2)
 
 
 
