@@ -1588,8 +1588,6 @@ var all_tests = {
               
             collection1.rename("tes..t", function(err, collection) {
               test.equal("collection names cannot be empty", err.message);            
-
-              finished_test({test_rename_collection:'ok'});                                   
             });
               
             collection1.count(function(err, count) {
@@ -1649,34 +1647,34 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.count(function(err, count) {
           test.equal(0, count);
-  
+            
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i});
           }
-  
+            
           collection.find(function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(10, count);
               test.ok(count.constructor == Number);
             });
           });
-  
+            
           collection.find({}, {'limit':5}, function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(10, count);            
             });
           });
-  
+            
           collection.find({}, {'skip':5}, function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(10, count);            
             });
           });
-  
+            
           collection.find(function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(10, count);
-  
+            
               cursor.each(function(err, item) {
                 if(item == null) {
                   cursor.count(function(err, count2) {
@@ -1689,7 +1687,7 @@ var all_tests = {
               });
             });
           });
-  
+            
           client.collection('acollectionthatdoesn', function(err, collection) {
             collection.count(function(err, count) {
               test.equal(0, count);          
@@ -1699,7 +1697,7 @@ var all_tests = {
       });
     });
   },
-  // 
+  
   // test_sort : function() {
   //   client.createCollection('test_sort', function(err, collection) {
   //     for(var i = 0; i < 5; i++) {
