@@ -88,6 +88,7 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
 
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
   uint32_t object_size = BSON::calculate_object_size(args[0]);
+  // printf("======================================== object_size::: %d\n", object_size);
   // Allocate the memory needed for the serializtion
   char *serialized_object = (char *)malloc(object_size * sizeof(char));  
   // Catch any errors
@@ -705,10 +706,61 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     // Calculate size
     object_size += BSON::calculate_object_size(obj);
   } else if(value->IsString()) {
+    // // printf("============================================= -- serialized::::string\n");    
+    // // Save the string at the offset provided
+    // *(serialized_object + index) = BSON_DATA_STRING;
+    // // Adjust writing position for the first byte
+    // index = index + 1;
+    // // Convert name to char*
+    // ssize_t len = DecodeBytes(name, BINARY);
+    // ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    // // Add null termiation for the string
+    // *(serialized_object + index + len) = '\0';    
+    // // Adjust the index
+    // index = index + len + 1;        
+    // 
+    // // Write the actual string into the char array
+    // Local<String> str = value->ToString();
+    // // Let's fetch the int value
+    // uint32_t utf8_length = str->Utf8Length();
+    // 
+    // // If the Utf8 length is different from the string length then we
+    // // have a UTF8 encoded string, otherwise write it as ascii
+    // if(utf8_length != str->Length()) {
+    //   // Write the integer to the char *
+    //   BSON::write_int32((serialized_object + index), utf8_length + 1);
+    //   // Adjust the index
+    //   index = index + 4;
+    //   // Write string to char in utf8 format
+    //   str->WriteUtf8((serialized_object + index), utf8_length);
+    //   // Add the null termination
+    //   *(serialized_object + index + utf8_length) = '\0';    
+    //   // Adjust the index
+    //   index = index + utf8_length + 1;      
+    // } else {
+    //   // Write the integer to the char *
+    //   BSON::write_int32((serialized_object + index), str->Length() + 1);
+    //   // Adjust the index
+    //   index = index + 4;
+    //   // Write string to char in utf8 format
+    //   written = DecodeWrite((serialized_object + index), str->Length(), str, BINARY);
+    //   // Add the null termination
+    //   *(serialized_object + index + str->Length()) = '\0';    
+    //   // Adjust the index
+    //   index = index + str->Length() + 1;      
+    // }    
+
+
     // printf("================================ calculate_object_size:string\n");
     Local<String> str = value->ToString();
-    // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
-    object_size += str->Utf8Length() + 1 + 4;  
+    uint32_t utf8_length = str->Utf8Length();
+    
+    if(utf8_length != str->Length()) {
+      // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
+      object_size += str->Utf8Length() + 1 + 4;  
+    } else {
+      object_size += str->Length() + 1 + 4;        
+    }
   } else if(value->IsInt32()) {
     // printf("================================ calculate_object_size:int32\n");
     object_size += 4;

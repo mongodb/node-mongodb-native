@@ -1565,45 +1565,47 @@ var all_tests = {
               test.ok(err instanceof Error);
               test.equal("collection name must be a String", err.message);
             });
-  
+              
             collection1.rename("", function(err, collection) {
               test.ok(err instanceof Error);
               test.equal("collection names cannot be empty", err.message);
             });
-  
+              
             collection1.rename("te$t", function(err, collection) {
               test.ok(err instanceof Error);
               test.equal("collection names must not contain '$'", err.message);
             });
-  
+              
             collection1.rename(".test", function(err, collection) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
             });
-  
+              
             collection1.rename("test.", function(err, collection) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
             });
-  
+              
             collection1.rename("tes..t", function(err, collection) {
               test.equal("collection names cannot be empty", err.message);            
+
+              finished_test({test_rename_collection:'ok'});                                   
             });
-  
+              
             collection1.count(function(err, count) {
               test.equal(0, count);
-  
+              
               collection1.insert([{'x':1}, {'x':2}], function(err, docs) {
                 collection1.count(function(err, count) {
                   test.equal(2, count);                
-  
+                              
                   collection1.rename('test_rename_collection2', function(err, collection) {
                     test.ok(err instanceof Error);
                     test.ok(err.message.length > 0);            
-  
+                              
                     collection1.rename('test_rename_collection3', function(err, collection) {
                       test.equal("test_rename_collection3", collection.collectionName);
-  
+                              
                       // Check count
                       collection.count(function(err, count) {
                         test.equal(2, count);                                      
@@ -1615,7 +1617,7 @@ var all_tests = {
                 });
               })            
             })
-  
+              
             collection2.count(function(err, count) {
               test.equal(0, count);
             })
@@ -1697,1722 +1699,1722 @@ var all_tests = {
       });
     });
   },
-  
-  test_sort : function() {
-    client.createCollection('test_sort', function(err, collection) {
-      for(var i = 0; i < 5; i++) {
-        collection.insert({'a':i});
-      }
-  
-      collection.find(function(err, cursor) {      
-        cursor.sort(['a', 1], function(err, cursor) {
-          test.ok(cursor instanceof Cursor);
-          test.deepEqual(['a', 1], cursor.sortValue);
-        });      
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.sort('a', 1, function(err, cursor) {
-          cursor.nextObject(function(err, doc) {
-            test.equal(0, doc.a);
-          });
-        });
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.sort('a', -1, function(err, cursor) {
-          cursor.nextObject(function(err, doc) {
-            test.equal(4, doc.a);
-          });
-        });
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.sort('a', "asc", function(err, cursor) {
-          cursor.nextObject(function(err, doc) {
-            test.equal(0, doc.a);
-          });
-        });
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.sort([['a', -1], ['b', 1]], function(err, cursor) {
-          test.ok(cursor instanceof Cursor);
-          test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);
-        });
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.sort('a', 1, function(err, cursor) {
-          cursor.sort('a', -1, function(err, cursor) {
-            cursor.nextObject(function(err, doc) {
-              test.equal(4, doc.a);
-            });          
-          })
-        });      
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.sort('a', -1, function(err, cursor) {
-          cursor.sort('a', 1, function(err, cursor) {
-            cursor.nextObject(function(err, doc) {
-              test.equal(0, doc.a);
-            });          
-          })
-        });      
-      });    
-  
-      collection.find(function(err, cursor) {
-        cursor.nextObject(function(err, doc) {
-          cursor.sort(['a'], function(err, cursor) {
-            test.ok(err instanceof Error);
-            test.equal("Cursor is closed", err.message);          
-  
-            // Let's close the db 
-            finished_test({test_sort:'ok'});                                   
-          }); 
-        });          
-      }); 
-  
-      collection.find(function(err, cursor) {
-        cursor.sort('a', 25, function(err, cursor) {
-          cursor.nextObject(function(err, doc) {
-            test.ok(err instanceof Error);
-            test.equal("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
-          });
-        });
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.sort(25, function(err, cursor) {
-          cursor.nextObject(function(err, doc) {
-            test.ok(err instanceof Error);
-            test.equal("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
-          });
-        });
-      });           
-    });
-  },
-  
-  test_cursor_limit : function() {
-    client.createCollection('test_cursor_limit', function(err, collection) {
-      for(var i = 0; i < 10; i++) {
-        collection.save({'x':1}, function(err, document) {});
-      }
-  
-      collection.find(function(err, cursor) {
-        cursor.count(function(err, count) {
-          test.equal(10, count);
-        });
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.limit(5, function(err, cursor) {
-          cursor.toArray(function(err, items) {
-            test.equal(5, items.length);
-            // Let's close the db 
-            finished_test({test_cursor_limit:'ok'});                                   
-          });
-        });
-      });
-    });
-  },
-  
-  test_limit_exceptions : function() {
-    client.createCollection('test_limit_exceptions', function(err, collection) {
-      collection.insert({'a':1}, function(err, docs) {});
-      collection.find(function(err, cursor) {
-        cursor.limit('not-an-integer', function(err, cursor) {
-          test.ok(err instanceof Error);
-          test.equal("limit requires an integer", err.message);
-        });
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.nextObject(function(err, doc) {
-          cursor.limit(1, function(err, cursor) {
-            test.ok(err instanceof Error);
-            test.equal("Cursor is closed", err.message);
-            // Let's close the db 
-            finished_test({test_limit_exceptions:'ok'});                                   
-          });
-        });
-      });       
-  
-      collection.find(function(err, cursor) {
-        cursor.close(function(err, cursor) {        
-          cursor.limit(1, function(err, cursor) {
-            test.ok(err instanceof Error);
-            test.equal("Cursor is closed", err.message);
-          });
-        });
-      });
-    });
-  },
-  
-  test_skip : function() {
-    client.createCollection('test_skip', function(err, collection) {
-      for(var i = 0; i < 10; i++) { collection.insert({'x':i}); }
-  
-      collection.find(function(err, cursor) {
-        cursor.count(function(err, count) {
-          test.equal(10, count);
-        });
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.toArray(function(err, items) {
-          test.equal(10, items.length);
-  
-          collection.find(function(err, cursor) {
-            cursor.skip(2, function(err, cursor) {
-              cursor.toArray(function(err, items2) {
-                test.equal(8, items2.length);          
-  
-                // Check that we have the same elements
-                var numberEqual = 0;
-                var sliced = items.slice(2, 10);
-  
-                for(var i = 0; i < sliced.length; i++) {
-                  if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                }
-                test.equal(8, numberEqual);          
-  
-                // Let's close the db 
-                finished_test({test_skip:'ok'});                                   
-              });
-            });
-          });
-        });
-      });    
-    });
-  },
-  
-  test_skip_exceptions : function() {
-    client.createCollection('test_skip_exceptions', function(err, collection) {
-      collection.insert({'a':1}, function(err, docs) {});
-      collection.find(function(err, cursor) {
-        cursor.skip('not-an-integer', function(err, cursor) {
-          test.ok(err instanceof Error);
-          test.equal("skip requires an integer", err.message);
-        });
-      });
-  
-      collection.find(function(err, cursor) {
-        cursor.nextObject(function(err, doc) {
-          cursor.skip(1, function(err, cursor) {
-            test.ok(err instanceof Error);
-            test.equal("Cursor is closed", err.message);
-            // Let's close the db 
-            finished_test({test_skip_exceptions:'ok'});                                   
-          });
-        });
-      });       
-  
-      collection.find(function(err, cursor) {
-        cursor.close(function(err, cursor) {        
-          cursor.skip(1, function(err, cursor) {
-            test.ok(err instanceof Error);
-            test.equal("Cursor is closed", err.message);
-          });
-        });
-      });
-    });  
-  },
-  
-  test_limit_skip_chaining : function() {
-    client.createCollection('test_limit_skip_chaining', function(err, collection) {
-      for(var i = 0; i < 10; i++) { collection.insert({'x':1}); }
-  
-      collection.find(function(err, cursor) {
-        cursor.toArray(function(err, items) {
-          test.equal(10, items.length);
-  
-          collection.find(function(err, cursor) {
-            cursor.limit(5, function(err, cursor) {
-              cursor.skip(3, function(err, cursor) {
-                cursor.toArray(function(err, items2) {
-                  test.equal(5, items2.length);                
-  
-                  // Check that we have the same elements
-                  var numberEqual = 0;
-                  var sliced = items.slice(3, 8);
-  
-                  for(var i = 0; i < sliced.length; i++) {
-                    if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                  }
-                  test.equal(5, numberEqual);          
-  
-                  // Let's close the db 
-                  finished_test({test_limit_skip_chaining:'ok'});                                   
-                });
-              });
-            });
-          });        
-        });
-      });    
-    });
-  },
-  
-  test_close_no_query_sent : function() {
-    client.createCollection('test_close_no_query_sent', function(err, collection) {
-      collection.find(function(err, cursor) {
-        cursor.close(function(err, cursor) {
-          test.equal(true, cursor.isClosed());
-          // Let's close the db 
-          finished_test({test_close_no_query_sent:'ok'});                                   
-        });
-      });
-    });
-  },
-  
-  test_refill_via_get_more : function() {
-    client.createCollection('test_refill_via_get_more', function(err, collection) {
-      for(var i = 0; i < 1000; i++) { collection.save({'a': i}, function(err, doc) {}); }
-  
-      collection.count(function(err, count) {
-        test.equal(1000, count);
-      });      
-  
-      var total = 0;
-      collection.find(function(err, cursor) {
-        cursor.each(function(err, item) {
-          if(item != null) {
-            total = total + item.a;
-          } else {
-            test.equal(499500, total); 
-  
-            collection.count(function(err, count) {
-              test.equal(1000, count);
-            });                  
-  
-            collection.count(function(err, count) {
-              test.equal(1000, count);
-  
-              var total2 = 0;
-              collection.find(function(err, cursor) {
-                cursor.each(function(err, item) {
-                  if(item != null) {
-                    total2 = total2 + item.a;
-                  } else {
-                    test.equal(499500, total2); 
-                    collection.count(function(err, count) {
-                      test.equal(1000, count);
-                      test.equal(total, total2);
-                      // Let's close the db 
-                      finished_test({test_refill_via_get_more:'ok'});                                   
-                    });                  
-                  }
-                });
-              });
-            });
-          }
-        });
-      });  
-    });
-  },
-  
-  test_refill_via_get_more_alt_coll : function() {
-    client.createCollection('test_refill_via_get_more_alt_coll', function(err, collection) {
-      for(var i = 0; i < 1000; i++) {
-        collection.save({'a': i}, function(err, doc) {});
-      }
-  
-      collection.count(function(err, count) {
-        test.equal(1000, count);
-      });      
-  
-      var total = 0;
-      collection.find(function(err, cursor) {
-        cursor.each(function(err, item) {
-          if(item != null) {
-            total = total + item.a;
-          } else {
-            test.equal(499500, total); 
-  
-            collection.count(function(err, count) {
-              test.equal(1000, count);
-            });                  
-  
-            collection.count(function(err, count) {
-              test.equal(1000, count);
-  
-              var total2 = 0;
-              collection.find(function(err, cursor) {
-                cursor.each(function(err, item) {
-                  if(item != null) {
-                    total2 = total2 + item.a;
-                  } else {
-                    test.equal(499500, total2); 
-                    collection.count(function(err, count) {
-                      test.equal(1000, count);
-                      test.equal(total, total2);
-                      // Let's close the db 
-                      finished_test({test_refill_via_get_more_alt_coll:'ok'});                                   
-                    });                  
-                  }
-                });
-              });
-            });
-          }
-        });
-      });  
-    });
-  },
-  
-  test_close_after_query_sent : function() {
-    client.createCollection('test_close_after_query_sent', function(err, collection) {
-      collection.insert({'a':1});
-      collection.find({'a':1}, function(err, cursor) {
-        cursor.nextObject(function(err, item) {
-          cursor.close(function(err, cursor) {
-            test.equal(true, cursor.isClosed());
-            // Let's close the db 
-            finished_test({test_close_after_query_sent:'ok'});                                   
-          })
-        });
-      });
-    });
-  },
-  
-  // test_kill_cursors : function() {
-  //   var test_kill_cursors_client = new Db('integration_tests4_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-  //   test_kill_cursors_client.bson_deserializer = client.bson_deserializer;
-  //   test_kill_cursors_client.bson_serializer = client.bson_serializer;
-  //   test_kill_cursors_client.pkFactory = client.pkFactory;
-  //   
-  //   test_kill_cursors_client.open(function(err, test_kill_cursors_client) {
-  //     var number_of_tests_done = 0;
   // 
-  //     test_kill_cursors_client.dropCollection('test_kill_cursors', function(err, collection) {      
-  //       test_kill_cursors_client.createCollection('test_kill_cursors', function(err, collection) {
-  //         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //           var clientCursors = cursorInfo.clientCursors_size;
-  //           var byLocation = cursorInfo.byLocation_size;
+  // test_sort : function() {
+  //   client.createCollection('test_sort', function(err, collection) {
+  //     for(var i = 0; i < 5; i++) {
+  //       collection.insert({'a':i});
+  //     }
   // 
-  //           for(var i = 0; i < 1000; i++) {
-  //             collection.save({'i': i}, function(err, doc) {});
-  //           }
+  //     collection.find(function(err, cursor) {      
+  //       cursor.sort(['a', 1], function(err, cursor) {
+  //         test.ok(cursor instanceof Cursor);
+  //         test.deepEqual(['a', 1], cursor.sortValue);
+  //       });      
+  //     });
   // 
-  //           test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //             test.equal(clientCursors, cursorInfo.clientCursors_size);
-  //             test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
-  //             for(var i = 0; i < 10; i++) {
-  //               collection.findOne(function(err, item) {});
-  //             }
-  // 
-  //             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //               test.equal(clientCursors, cursorInfo.clientCursors_size);
-  //               test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
-  //               for(var i = 0; i < 10; i++) {
-  //                 collection.find(function(err, cursor) {
-  //                   cursor.nextObject(function(err, item) {
-  //                     cursor.close(function(err, cursor) {});
-  // 
-  //                     if(i == 10) {
-  //                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                         test.equal(clientCursors, cursorInfo.clientCursors_size);
-  //                         test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
-  //                         collection.find(function(err, cursor) {
-  //                           cursor.nextObject(function(err, item) {
-  //                             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                               test.equal(clientCursors, cursorInfo.clientCursors_size);                  
-  //                               test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
-  //                               cursor.close(function(err, cursor) {
-  //                                 test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                                   test.equal(clientCursors, cursorInfo.clientCursors_size);
-  //                                   test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
-  //                                   collection.find({}, {'limit':10}, function(err, cursor) {
-  //                                     cursor.nextObject(function(err, item) {                                      
-  //                                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                                         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                                           sys.puts("===================================== err: " + err)
-  //                                           sys.puts("===================================== cursorInfo: " + sys.inspect(cursorInfo))
-  //                                           
-  //                                           
-  //                                           test.equal(clientCursors, cursorInfo.clientCursors_size);
-  //                                           test.equal(byLocation, cursorInfo.byLocation_size);
-  //                                           number_of_tests_done = 1;
-  //                                         });
-  //                                       });
-  //                                     });
-  //                                   });
-  //                                 });
-  //                               });                  
-  //                             });
-  //                           });
-  //                         });
-  //                       });
-  //                     }
-  //                   });
-  //                 });
-  //               }
-  //             });        
-  //           });      
+  //     collection.find(function(err, cursor) {
+  //       cursor.sort('a', 1, function(err, cursor) {
+  //         cursor.nextObject(function(err, doc) {
+  //           test.equal(0, doc.a);
   //         });
   //       });
   //     });
   // 
-  //     var intervalId = setInterval(function() {
-  //       if(number_of_tests_done == 1) {
-  //         clearInterval(intervalId);
-  //         finished_test({test_kill_cursors:'ok'});
-  //         test_kill_cursors_client.close();
-  //       }
-  //     }, 100);        
-  //   });  
+  //     collection.find(function(err, cursor) {
+  //       cursor.sort('a', -1, function(err, cursor) {
+  //         cursor.nextObject(function(err, doc) {
+  //           test.equal(4, doc.a);
+  //         });
+  //       });
+  //     });
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.sort('a', "asc", function(err, cursor) {
+  //         cursor.nextObject(function(err, doc) {
+  //           test.equal(0, doc.a);
+  //         });
+  //       });
+  //     });
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.sort([['a', -1], ['b', 1]], function(err, cursor) {
+  //         test.ok(cursor instanceof Cursor);
+  //         test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);
+  //       });
+  //     });
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.sort('a', 1, function(err, cursor) {
+  //         cursor.sort('a', -1, function(err, cursor) {
+  //           cursor.nextObject(function(err, doc) {
+  //             test.equal(4, doc.a);
+  //           });          
+  //         })
+  //       });      
+  //     });
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.sort('a', -1, function(err, cursor) {
+  //         cursor.sort('a', 1, function(err, cursor) {
+  //           cursor.nextObject(function(err, doc) {
+  //             test.equal(0, doc.a);
+  //           });          
+  //         })
+  //       });      
+  //     });    
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.nextObject(function(err, doc) {
+  //         cursor.sort(['a'], function(err, cursor) {
+  //           test.ok(err instanceof Error);
+  //           test.equal("Cursor is closed", err.message);          
+  // 
+  //           // Let's close the db 
+  //           finished_test({test_sort:'ok'});                                   
+  //         }); 
+  //       });          
+  //     }); 
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.sort('a', 25, function(err, cursor) {
+  //         cursor.nextObject(function(err, doc) {
+  //           test.ok(err instanceof Error);
+  //           test.equal("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+  //         });
+  //       });
+  //     });
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.sort(25, function(err, cursor) {
+  //         cursor.nextObject(function(err, doc) {
+  //           test.ok(err instanceof Error);
+  //           test.equal("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+  //         });
+  //       });
+  //     });           
+  //   });
   // },
-  
-  test_count_with_fields : function() {
-    client.createCollection('test_count_with_fields', function(err, collection) {
-      collection.save({'x':1, 'a':2}, function(err, doc) {
-        collection.find({}, {'fields':['a']}, function(err, cursor) {
-          cursor.toArray(function(err, items) {
-            test.equal(1, items.length);
-            test.equal(2, items[0].a);
-            test.equal(null, items[0].x);
-          });
-        });
-  
-        collection.findOne({}, {'fields':['a']}, function(err, item) {
-          test.equal(2, item.a);
-          test.equal(null, item.x);
-          finished_test({test_count_with_fields:'ok'});
-        });
-      });
-    });
-  },
-  
-  // // Gridstore tests
-  // test_gs_exist : function() {
-  //   var gridStore = new GridStore(client, "foobar", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         GridStore.exist(client, 'foobar', function(err, result) {
-  //           test.equal(true, result);
-  //         });
   // 
-  //         GridStore.exist(client, 'does_not_exist', function(err, result) {
-  //           test.equal(false, result);
-  //         });
+  // test_cursor_limit : function() {
+  //   client.createCollection('test_cursor_limit', function(err, collection) {
+  //     for(var i = 0; i < 10; i++) {
+  //       collection.save({'x':1}, function(err, document) {});
+  //     }
   // 
-  //         GridStore.exist(client, 'foobar', 'another_root', function(err, result) {
-  //           test.equal(false, result);
-  //           finished_test({test_gs_exist:'ok'});        
+  //     collection.find(function(err, cursor) {
+  //       cursor.count(function(err, count) {
+  //         test.equal(10, count);
+  //       });
+  //     });
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.limit(5, function(err, cursor) {
+  //         cursor.toArray(function(err, items) {
+  //           test.equal(5, items.length);
+  //           // Let's close the db 
+  //           finished_test({test_cursor_limit:'ok'});                                   
   //         });
   //       });
   //     });
   //   });
   // },
   // 
-  // test_gs_list : function() {
-  //   var gridStore = new GridStore(client, "foobar2", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         GridStore.list(client, function(err, items) {
-  //           var found = false;
-  //           items.forEach(function(filename) {
-  //             if(filename == 'foobar2') found = true;
-  //           });
+  // test_limit_exceptions : function() {
+  //   client.createCollection('test_limit_exceptions', function(err, collection) {
+  //     collection.insert({'a':1}, function(err, docs) {});
+  //     collection.find(function(err, cursor) {
+  //       cursor.limit('not-an-integer', function(err, cursor) {
+  //         test.ok(err instanceof Error);
+  //         test.equal("limit requires an integer", err.message);
+  //       });
+  //     });
   // 
-  //           test.ok(items.length >= 1);
-  //           test.ok(found);
+  //     collection.find(function(err, cursor) {
+  //       cursor.nextObject(function(err, doc) {
+  //         cursor.limit(1, function(err, cursor) {
+  //           test.ok(err instanceof Error);
+  //           test.equal("Cursor is closed", err.message);
+  //           // Let's close the db 
+  //           finished_test({test_limit_exceptions:'ok'});                                   
   //         });
+  //       });
+  //     });       
   // 
-  //         GridStore.list(client, 'fs', function(err, items) {
-  //           var found = false;
-  //           items.forEach(function(filename) {
-  //             if(filename == 'foobar2') found = true;
-  //           });
-  // 
-  //           test.ok(items.length >= 1);
-  //           test.ok(found);
+  //     collection.find(function(err, cursor) {
+  //       cursor.close(function(err, cursor) {        
+  //         cursor.limit(1, function(err, cursor) {
+  //           test.ok(err instanceof Error);
+  //           test.equal("Cursor is closed", err.message);
   //         });
+  //       });
+  //     });
+  //   });
+  // },
   // 
-  //         GridStore.list(client, 'my_fs', function(err, items) {
-  //           var found = false;
-  //           items.forEach(function(filename) {
-  //             if(filename == 'foobar2') found = true;
+  // test_skip : function() {
+  //   client.createCollection('test_skip', function(err, collection) {
+  //     for(var i = 0; i < 10; i++) { collection.insert({'x':i}); }
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.count(function(err, count) {
+  //         test.equal(10, count);
+  //       });
+  //     });
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.toArray(function(err, items) {
+  //         test.equal(10, items.length);
+  // 
+  //         collection.find(function(err, cursor) {
+  //           cursor.skip(2, function(err, cursor) {
+  //             cursor.toArray(function(err, items2) {
+  //               test.equal(8, items2.length);          
+  // 
+  //               // Check that we have the same elements
+  //               var numberEqual = 0;
+  //               var sliced = items.slice(2, 10);
+  // 
+  //               for(var i = 0; i < sliced.length; i++) {
+  //                 if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+  //               }
+  //               test.equal(8, numberEqual);          
+  // 
+  //               // Let's close the db 
+  //               finished_test({test_skip:'ok'});                                   
+  //             });
   //           });
+  //         });
+  //       });
+  //     });    
+  //   });
+  // },
   // 
-  //           test.ok(items.length >= 0);
-  //           test.ok(!found);
+  // test_skip_exceptions : function() {
+  //   client.createCollection('test_skip_exceptions', function(err, collection) {
+  //     collection.insert({'a':1}, function(err, docs) {});
+  //     collection.find(function(err, cursor) {
+  //       cursor.skip('not-an-integer', function(err, cursor) {
+  //         test.ok(err instanceof Error);
+  //         test.equal("skip requires an integer", err.message);
+  //       });
+  //     });
   // 
-  //           var gridStore2 = new GridStore(client, "foobar3", "w");
-  //           gridStore2.open(function(err, gridStore) {    
-  //             gridStore2.write('my file', function(err, gridStore) {
-  //               gridStore.close(function(err, result) {                
-  //                 GridStore.list(client, function(err, items) {
-  //                   var found = false;
-  //                   var found2 = false;
-  //                   items.forEach(function(filename) {
-  //                     if(filename == 'foobar2') found = true;
-  //                     if(filename == 'foobar3') found2 = true;
-  //                   });
+  //     collection.find(function(err, cursor) {
+  //       cursor.nextObject(function(err, doc) {
+  //         cursor.skip(1, function(err, cursor) {
+  //           test.ok(err instanceof Error);
+  //           test.equal("Cursor is closed", err.message);
+  //           // Let's close the db 
+  //           finished_test({test_skip_exceptions:'ok'});                                   
+  //         });
+  //       });
+  //     });       
   // 
-  //                   test.ok(items.length >= 2);
-  //                   test.ok(found);
-  //                   test.ok(found2);
-  //                   finished_test({test_gs_list:'ok'});        
-  //                 });
+  //     collection.find(function(err, cursor) {
+  //       cursor.close(function(err, cursor) {        
+  //         cursor.skip(1, function(err, cursor) {
+  //           test.ok(err instanceof Error);
+  //           test.equal("Cursor is closed", err.message);
+  //         });
+  //       });
+  //     });
+  //   });  
+  // },
+  // 
+  // test_limit_skip_chaining : function() {
+  //   client.createCollection('test_limit_skip_chaining', function(err, collection) {
+  //     for(var i = 0; i < 10; i++) { collection.insert({'x':1}); }
+  // 
+  //     collection.find(function(err, cursor) {
+  //       cursor.toArray(function(err, items) {
+  //         test.equal(10, items.length);
+  // 
+  //         collection.find(function(err, cursor) {
+  //           cursor.limit(5, function(err, cursor) {
+  //             cursor.skip(3, function(err, cursor) {
+  //               cursor.toArray(function(err, items2) {
+  //                 test.equal(5, items2.length);                
+  // 
+  //                 // Check that we have the same elements
+  //                 var numberEqual = 0;
+  //                 var sliced = items.slice(3, 8);
+  // 
+  //                 for(var i = 0; i < sliced.length; i++) {
+  //                   if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+  //                 }
+  //                 test.equal(5, numberEqual);          
+  // 
+  //                 // Let's close the db 
+  //                 finished_test({test_limit_skip_chaining:'ok'});                                   
   //               });
+  //             });
+  //           });
+  //         });        
+  //       });
+  //     });    
+  //   });
+  // },
+  // 
+  // test_close_no_query_sent : function() {
+  //   client.createCollection('test_close_no_query_sent', function(err, collection) {
+  //     collection.find(function(err, cursor) {
+  //       cursor.close(function(err, cursor) {
+  //         test.equal(true, cursor.isClosed());
+  //         // Let's close the db 
+  //         finished_test({test_close_no_query_sent:'ok'});                                   
+  //       });
+  //     });
+  //   });
+  // },
+  // 
+  // test_refill_via_get_more : function() {
+  //   client.createCollection('test_refill_via_get_more', function(err, collection) {
+  //     for(var i = 0; i < 1000; i++) { collection.save({'a': i}, function(err, doc) {}); }
+  // 
+  //     collection.count(function(err, count) {
+  //       test.equal(1000, count);
+  //     });      
+  // 
+  //     var total = 0;
+  //     collection.find(function(err, cursor) {
+  //       cursor.each(function(err, item) {
+  //         if(item != null) {
+  //           total = total + item.a;
+  //         } else {
+  //           test.equal(499500, total); 
+  // 
+  //           collection.count(function(err, count) {
+  //             test.equal(1000, count);
+  //           });                  
+  // 
+  //           collection.count(function(err, count) {
+  //             test.equal(1000, count);
+  // 
+  //             var total2 = 0;
+  //             collection.find(function(err, cursor) {
+  //               cursor.each(function(err, item) {
+  //                 if(item != null) {
+  //                   total2 = total2 + item.a;
+  //                 } else {
+  //                   test.equal(499500, total2); 
+  //                   collection.count(function(err, count) {
+  //                     test.equal(1000, count);
+  //                     test.equal(total, total2);
+  //                     // Let's close the db 
+  //                     finished_test({test_refill_via_get_more:'ok'});                                   
+  //                   });                  
+  //                 }
+  //               });
+  //             });
+  //           });
+  //         }
+  //       });
+  //     });  
+  //   });
+  // },
+  // 
+  // test_refill_via_get_more_alt_coll : function() {
+  //   client.createCollection('test_refill_via_get_more_alt_coll', function(err, collection) {
+  //     for(var i = 0; i < 1000; i++) {
+  //       collection.save({'a': i}, function(err, doc) {});
+  //     }
+  // 
+  //     collection.count(function(err, count) {
+  //       test.equal(1000, count);
+  //     });      
+  // 
+  //     var total = 0;
+  //     collection.find(function(err, cursor) {
+  //       cursor.each(function(err, item) {
+  //         if(item != null) {
+  //           total = total + item.a;
+  //         } else {
+  //           test.equal(499500, total); 
+  // 
+  //           collection.count(function(err, count) {
+  //             test.equal(1000, count);
+  //           });                  
+  // 
+  //           collection.count(function(err, count) {
+  //             test.equal(1000, count);
+  // 
+  //             var total2 = 0;
+  //             collection.find(function(err, cursor) {
+  //               cursor.each(function(err, item) {
+  //                 if(item != null) {
+  //                   total2 = total2 + item.a;
+  //                 } else {
+  //                   test.equal(499500, total2); 
+  //                   collection.count(function(err, count) {
+  //                     test.equal(1000, count);
+  //                     test.equal(total, total2);
+  //                     // Let's close the db 
+  //                     finished_test({test_refill_via_get_more_alt_coll:'ok'});                                   
+  //                   });                  
+  //                 }
+  //               });
+  //             });
+  //           });
+  //         }
+  //       });
+  //     });  
+  //   });
+  // },
+  // 
+  // test_close_after_query_sent : function() {
+  //   client.createCollection('test_close_after_query_sent', function(err, collection) {
+  //     collection.insert({'a':1});
+  //     collection.find({'a':1}, function(err, cursor) {
+  //       cursor.nextObject(function(err, item) {
+  //         cursor.close(function(err, cursor) {
+  //           test.equal(true, cursor.isClosed());
+  //           // Let's close the db 
+  //           finished_test({test_close_after_query_sent:'ok'});                                   
+  //         })
+  //       });
+  //     });
+  //   });
+  // },
+  // 
+  // // test_kill_cursors : function() {
+  // //   var test_kill_cursors_client = new Db('integration_tests4_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+  // //   test_kill_cursors_client.bson_deserializer = client.bson_deserializer;
+  // //   test_kill_cursors_client.bson_serializer = client.bson_serializer;
+  // //   test_kill_cursors_client.pkFactory = client.pkFactory;
+  // //   
+  // //   test_kill_cursors_client.open(function(err, test_kill_cursors_client) {
+  // //     var number_of_tests_done = 0;
+  // // 
+  // //     test_kill_cursors_client.dropCollection('test_kill_cursors', function(err, collection) {      
+  // //       test_kill_cursors_client.createCollection('test_kill_cursors', function(err, collection) {
+  // //         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  // //           var clientCursors = cursorInfo.clientCursors_size;
+  // //           var byLocation = cursorInfo.byLocation_size;
+  // // 
+  // //           for(var i = 0; i < 1000; i++) {
+  // //             collection.save({'i': i}, function(err, doc) {});
+  // //           }
+  // // 
+  // //           test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  // //             test.equal(clientCursors, cursorInfo.clientCursors_size);
+  // //             test.equal(byLocation, cursorInfo.byLocation_size);
+  // // 
+  // //             for(var i = 0; i < 10; i++) {
+  // //               collection.findOne(function(err, item) {});
+  // //             }
+  // // 
+  // //             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  // //               test.equal(clientCursors, cursorInfo.clientCursors_size);
+  // //               test.equal(byLocation, cursorInfo.byLocation_size);
+  // // 
+  // //               for(var i = 0; i < 10; i++) {
+  // //                 collection.find(function(err, cursor) {
+  // //                   cursor.nextObject(function(err, item) {
+  // //                     cursor.close(function(err, cursor) {});
+  // // 
+  // //                     if(i == 10) {
+  // //                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  // //                         test.equal(clientCursors, cursorInfo.clientCursors_size);
+  // //                         test.equal(byLocation, cursorInfo.byLocation_size);
+  // // 
+  // //                         collection.find(function(err, cursor) {
+  // //                           cursor.nextObject(function(err, item) {
+  // //                             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  // //                               test.equal(clientCursors, cursorInfo.clientCursors_size);                  
+  // //                               test.equal(byLocation, cursorInfo.byLocation_size);
+  // // 
+  // //                               cursor.close(function(err, cursor) {
+  // //                                 test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  // //                                   test.equal(clientCursors, cursorInfo.clientCursors_size);
+  // //                                   test.equal(byLocation, cursorInfo.byLocation_size);
+  // // 
+  // //                                   collection.find({}, {'limit':10}, function(err, cursor) {
+  // //                                     cursor.nextObject(function(err, item) {                                      
+  // //                                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  // //                                         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+  // //                                           sys.puts("===================================== err: " + err)
+  // //                                           sys.puts("===================================== cursorInfo: " + sys.inspect(cursorInfo))
+  // //                                           
+  // //                                           
+  // //                                           test.equal(clientCursors, cursorInfo.clientCursors_size);
+  // //                                           test.equal(byLocation, cursorInfo.byLocation_size);
+  // //                                           number_of_tests_done = 1;
+  // //                                         });
+  // //                                       });
+  // //                                     });
+  // //                                   });
+  // //                                 });
+  // //                               });                  
+  // //                             });
+  // //                           });
+  // //                         });
+  // //                       });
+  // //                     }
+  // //                   });
+  // //                 });
+  // //               }
+  // //             });        
+  // //           });      
+  // //         });
+  // //       });
+  // //     });
+  // // 
+  // //     var intervalId = setInterval(function() {
+  // //       if(number_of_tests_done == 1) {
+  // //         clearInterval(intervalId);
+  // //         finished_test({test_kill_cursors:'ok'});
+  // //         test_kill_cursors_client.close();
+  // //       }
+  // //     }, 100);        
+  // //   });  
+  // // },
+  // 
+  // test_count_with_fields : function() {
+  //   client.createCollection('test_count_with_fields', function(err, collection) {
+  //     collection.save({'x':1, 'a':2}, function(err, doc) {
+  //       collection.find({}, {'fields':['a']}, function(err, cursor) {
+  //         cursor.toArray(function(err, items) {
+  //           test.equal(1, items.length);
+  //           test.equal(2, items[0].a);
+  //           test.equal(null, items[0].x);
+  //         });
+  //       });
+  // 
+  //       collection.findOne({}, {'fields':['a']}, function(err, item) {
+  //         test.equal(2, item.a);
+  //         test.equal(null, item.x);
+  //         finished_test({test_count_with_fields:'ok'});
+  //       });
+  //     });
+  //   });
+  // },
+  // 
+  // // // Gridstore tests
+  // // test_gs_exist : function() {
+  // //   var gridStore = new GridStore(client, "foobar", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         GridStore.exist(client, 'foobar', function(err, result) {
+  // //           test.equal(true, result);
+  // //         });
+  // // 
+  // //         GridStore.exist(client, 'does_not_exist', function(err, result) {
+  // //           test.equal(false, result);
+  // //         });
+  // // 
+  // //         GridStore.exist(client, 'foobar', 'another_root', function(err, result) {
+  // //           test.equal(false, result);
+  // //           finished_test({test_gs_exist:'ok'});        
+  // //         });
+  // //       });
+  // //     });
+  // //   });
+  // // },
+  // // 
+  // // test_gs_list : function() {
+  // //   var gridStore = new GridStore(client, "foobar2", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         GridStore.list(client, function(err, items) {
+  // //           var found = false;
+  // //           items.forEach(function(filename) {
+  // //             if(filename == 'foobar2') found = true;
+  // //           });
+  // // 
+  // //           test.ok(items.length >= 1);
+  // //           test.ok(found);
+  // //         });
+  // // 
+  // //         GridStore.list(client, 'fs', function(err, items) {
+  // //           var found = false;
+  // //           items.forEach(function(filename) {
+  // //             if(filename == 'foobar2') found = true;
+  // //           });
+  // // 
+  // //           test.ok(items.length >= 1);
+  // //           test.ok(found);
+  // //         });
+  // // 
+  // //         GridStore.list(client, 'my_fs', function(err, items) {
+  // //           var found = false;
+  // //           items.forEach(function(filename) {
+  // //             if(filename == 'foobar2') found = true;
+  // //           });
+  // // 
+  // //           test.ok(items.length >= 0);
+  // //           test.ok(!found);
+  // // 
+  // //           var gridStore2 = new GridStore(client, "foobar3", "w");
+  // //           gridStore2.open(function(err, gridStore) {    
+  // //             gridStore2.write('my file', function(err, gridStore) {
+  // //               gridStore.close(function(err, result) {                
+  // //                 GridStore.list(client, function(err, items) {
+  // //                   var found = false;
+  // //                   var found2 = false;
+  // //                   items.forEach(function(filename) {
+  // //                     if(filename == 'foobar2') found = true;
+  // //                     if(filename == 'foobar3') found2 = true;
+  // //                   });
+  // // 
+  // //                   test.ok(items.length >= 2);
+  // //                   test.ok(found);
+  // //                   test.ok(found2);
+  // //                   finished_test({test_gs_list:'ok'});        
+  // //                 });
+  // //               });
+  // //             });
+  // //           });          
+  // //         });
+  // //       });
+  // //     });
+  // //   });  
+  // // },
+  // // 
+  // // test_gs_small_write : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_small_write", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         client.collection('fs.files', function(err, collection) {
+  // //           collection.find({'filename':'test_gs_small_write'}, function(err, cursor) {
+  // //             cursor.toArray(function(err, items) {
+  // //               test.equal(1, items.length);
+  // //               var item = items[0];
+  // //               test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
+  // // 
+  // //               client.collection('fs.chunks', function(err, collection) {
+  // //                 collection.find({'files_id':item._id}, function(err, cursor) {
+  // //                   cursor.toArray(function(err, items) {
+  // //                     test.equal(1, items.length);                  
+  // //                     finished_test({test_gs_small_write:'ok'});        
+  // //                   })
+  // //                 });              
+  // //               });
+  // //             });
+  // //           });
+  // //         });        
+  // //       });
+  // //     });
+  // //   });  
+  // // },
+  // // 
+  // // test_gs_small_file : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_small_file", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         client.collection('fs.files', function(err, collection) {
+  // //           collection.find({'filename':'test_gs_small_file'}, function(err, cursor) {
+  // //             cursor.toArray(function(err, items) {
+  // //               test.equal(1, items.length);
+  // // 
+  // //               // Read test of the file
+  // //               GridStore.read(client, 'test_gs_small_file', function(err, data) {
+  // //                 test.equal('hello world!', data);
+  // //                 finished_test({test_gs_small_file:'ok'});        
+  // //               });              
+  // //             });
+  // //           });
+  // //         });        
+  // //       });
+  // //     });
+  // //   });      
+  // // },
+  // // 
+  // // test_gs_overwrite : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_overwrite", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         var gridStore2 = new GridStore(client, "test_gs_overwrite", "w");
+  // //         gridStore2.open(function(err, gridStore) {    
+  // //           gridStore2.write("overwrite", function(err, gridStore) {
+  // //             gridStore2.close(function(err, result) {
+  // // 
+  // //               // Assert that we have overwriten the data
+  // //               GridStore.read(client, 'test_gs_overwrite', function(err, data) {
+  // //                 test.equal('overwrite', data);
+  // //                 finished_test({test_gs_overwrite:'ok'});        
+  // //               });                            
+  // //             });
+  // //           });
+  // //         });                
+  // //       });
+  // //     });
+  // //   });        
+  // // },
+  // // 
+  // // test_gs_read_length : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_read_length", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         // Assert that we have overwriten the data
+  // //         GridStore.read(client, 'test_gs_read_length', 5, function(err, data) {
+  // //           test.equal('hello', data);
+  // //           finished_test({test_gs_read_length:'ok'});        
+  // //         });                            
+  // //       });
+  // //     });
+  // //   });          
+  // // },
+  // // 
+  // // test_gs_read_with_offset : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_read_with_offset", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello, world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         // Assert that we have overwriten the data
+  // //         GridStore.read(client, 'test_gs_read_with_offset', 5, 7, function(err, data) {
+  // //           test.equal('world', data);
+  // //         });
+  // // 
+  // //         GridStore.read(client, 'test_gs_read_with_offset', null, 7, function(err, data) {
+  // //           test.equal('world!', data);
+  // //           finished_test({test_gs_read_with_offset:'ok'});        
+  // //         });
+  // //       });
+  // //     });
+  // //   });            
+  // // },
+  // // 
+  // // test_gs_seek : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_seek", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello, world!", function(err, gridStore) {
+  // //       gridStore.close(function(result) {        
+  // //         var gridStore2 = new GridStore(client, "test_gs_seek", "r");
+  // //         gridStore2.open(function(err, gridStore) {    
+  // //           gridStore.seek(0, function(err, gridStore) {
+  // //             gridStore.getc(function(err, chr) {
+  // //               test.equal('h', chr);
+  // //             });
+  // //           });
+  // //         });
+  // // 
+  // //         var gridStore3 = new GridStore(client, "test_gs_seek", "r");
+  // //         gridStore3.open(function(err, gridStore) {    
+  // //           gridStore.seek(7, function(err, gridStore) {
+  // //             gridStore.getc(function(err, chr) {
+  // //               test.equal('w', chr);
+  // //             });
+  // //           });
+  // //         });
+  // // 
+  // //         var gridStore4 = new GridStore(client, "test_gs_seek", "r");
+  // //         gridStore4.open(function(err, gridStore) {    
+  // //           gridStore.seek(4, function(err, gridStore) {
+  // //             gridStore.getc(function(err, chr) {
+  // //               test.equal('o', chr);
+  // //             });
+  // //           });
+  // //         });
+  // // 
+  // //         var gridStore5 = new GridStore(client, "test_gs_seek", "r");
+  // //         gridStore5.open(function(err, gridStore) {    
+  // //           gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
+  // //             gridStore.getc(function(err, chr) {
+  // //               test.equal('!', chr);
+  // //             });
+  // //           });
+  // //         });
+  // // 
+  // //         var gridStore6 = new GridStore(client, "test_gs_seek", "r");
+  // //         gridStore6.open(function(err, gridStore) {    
+  // //           gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
+  // //             gridStore.getc(function(err, chr) {
+  // //               test.equal('w', chr);
+  // //             });
+  // //           });
+  // //         });
+  // // 
+  // //         var gridStore7 = new GridStore(client, "test_gs_seek", "r");
+  // //         gridStore7.open(function(err, gridStore) {    
+  // //           gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+  // //             gridStore.getc(function(err, chr) {
+  // //               test.equal('w', chr);
+  // // 
+  // //               gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+  // //                 gridStore.getc(function(err, chr) {
+  // //                   test.equal('w', chr);
+  // // 
+  // //                   gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+  // //                     gridStore.getc(function(err, chr) {
+  // //                       test.equal('o', chr);
+  // // 
+  // //                       gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+  // //                         gridStore.getc(function(err, chr) {
+  // //                           test.equal('o', chr);
+  // //                           finished_test({test_gs_seek:'ok'});        
+  // //                         });
+  // //                       });
+  // //                     });
+  // //                   });        
+  // //                 });
+  // //               });        
+  // //             });
+  // //           });
+  // //         });
+  // //       });
+  // //     });
+  // //   });              
+  // // },
+  // // 
+  // // test_gs_multi_chunk : function() {
+  // //   var fs_client = new Db('integration_tests_10', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  // //   fs_client.bson_deserializer = client.bson_deserializer;
+  // //   fs_client.bson_serializer = client.bson_serializer;
+  // //   fs_client.pkFactory = client.pkFactory;
+  // // 
+  // //   fs_client.open(function(err, fs_client) {  
+  // //     fs_client.dropDatabase(function(err, done) {
+  // //       var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
+  // //       gridStore.open(function(err, gridStore) {    
+  // //         gridStore.chunkSize = 512;
+  // //         var file1 = ''; var file2 = ''; var file3 = '';
+  // //         for(var i = 0; i < gridStore.chunkSize; i++) { file1 = file1 + 'x'; }
+  // //         for(var i = 0; i < gridStore.chunkSize; i++) { file2 = file2 + 'y'; }
+  // //         for(var i = 0; i < gridStore.chunkSize; i++) { file3 = file3 + 'z'; }
+  // // 
+  // //         gridStore.write(file1, function(err, gridStore) {
+  // //           gridStore.write(file2, function(err, gridStore) {
+  // //             gridStore.write(file3, function(err, gridStore) {
+  // //               gridStore.close(function(err, result) {
+  // //                 fs_client.collection('fs.chunks', function(err, collection) {
+  // //                   collection.count(function(err, count) {
+  // //                     test.equal(3, count);
+  // // 
+  // //                     GridStore.read(fs_client, 'test_gs_multi_chunk', function(err, data) {
+  // //                       test.equal(512*3, data.length);
+  // //                       finished_test({test_gs_multi_chunk:'ok'});                    
+  // //                       fs_client.close();
+  // //                     });              
+  // //                   })
+  // //                 });
+  // //               });
+  // //             });
+  // //           });
+  // //         });
+  // //       });                        
+  // //     });
+  // //   });
+  // // },
+  // // 
+  // // test_gs_puts_and_readlines : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_puts_and_readlines", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.puts("line one", function(err, gridStore) {
+  // //       gridStore.puts("line two\n", function(err, gridStore) {
+  // //         gridStore.puts("line three", function(err, gridStore) {          
+  // //           gridStore.close(function(err, result) {
+  // //             GridStore.readlines(client, 'test_gs_puts_and_readlines', function(err, lines) {
+  // //               test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
+  // //               finished_test({test_gs_puts_and_readlines:'ok'});                    
+  // //             });
+  // //           });
+  // //         });
+  // //       });
+  // //     });
+  // //   });            
+  // // },
+  // // 
+  // // test_gs_weird_name_unlink : function() {
+  // //   var fs_client = new Db('awesome_f0eabd4b52e30b223c010000', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  // //   fs_client.bson_deserializer = client.bson_deserializer;
+  // //   fs_client.bson_serializer = client.bson_serializer;
+  // //   fs_client.pkFactory = client.pkFactory;
+  // // 
+  // //   fs_client.open(function(err, fs_client) {  
+  // //     fs_client.dropDatabase(function(err, done) {
+  // //       var gridStore = new GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
+  // //       gridStore.open(function(err, gridStore) {    
+  // //         gridStore.write("hello, world!", function(err, gridStore) {
+  // //           gridStore.close(function(err, result) {
+  // //             fs_client.collection('articles.files', function(err, collection) {
+  // //               collection.count(function(err, count) {
+  // //                 test.equal(1, count);
+  // //               })
+  // //             });
+  // // 
+  // //             fs_client.collection('articles.chunks', function(err, collection) {
+  // //               collection.count(function(err, count) {
+  // //                 test.equal(1, count);
+  // // 
+  // //                 // Unlink the file
+  // //                 GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
+  // //                   fs_client.collection('articles.files', function(err, collection) {
+  // //                     collection.count(function(err, count) {
+  // //                       test.equal(0, count);
+  // //                     })
+  // //                   });
+  // // 
+  // //                   fs_client.collection('articles.chunks', function(err, collection) {
+  // //                     collection.count(function(err, count) {
+  // //                       test.equal(0, count);
+  // // 
+  // //                       finished_test({test_gs_unlink:'ok'});       
+  // //                       fs_client.close();
+  // //                     })
+  // //                   });
+  // //                 });
+  // //               })
+  // //             });
+  // //           });
+  // //         });
+  // //       });              
+  // //     });
+  // //   });  
+  // // },
+  // // 
+  // // test_gs_unlink : function() {
+  // //   var fs_client = new Db('integration_tests_11', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  // //   fs_client.bson_deserializer = client.bson_deserializer;
+  // //   fs_client.bson_serializer = client.bson_serializer;
+  // //   fs_client.pkFactory = client.pkFactory;
+  // // 
+  // //   fs_client.open(function(err, fs_client) {  
+  // //     fs_client.dropDatabase(function(err, done) {
+  // //       var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
+  // //       gridStore.open(function(err, gridStore) {    
+  // //         gridStore.write("hello, world!", function(err, gridStore) {
+  // //           gridStore.close(function(err, result) {
+  // //             fs_client.collection('fs.files', function(err, collection) {
+  // //               collection.count(function(err, count) {
+  // //                 test.equal(1, count);
+  // //               })
+  // //             });
+  // // 
+  // //             fs_client.collection('fs.chunks', function(err, collection) {
+  // //               collection.count(function(err, count) {
+  // //                 test.equal(1, count);
+  // // 
+  // //                 // Unlink the file
+  // //                 GridStore.unlink(fs_client, 'test_gs_unlink', function(err, gridStore) {
+  // //                   fs_client.collection('fs.files', function(err, collection) {
+  // //                     collection.count(function(err, count) {
+  // //                       test.equal(0, count);
+  // //                     })
+  // //                   });
+  // // 
+  // //                   fs_client.collection('fs.chunks', function(err, collection) {
+  // //                     collection.count(function(err, count) {
+  // //                       test.equal(0, count);
+  // // 
+  // //                       finished_test({test_gs_unlink:'ok'});       
+  // //                       fs_client.close();
+  // //                     })
+  // //                   });
+  // //                 });
+  // //               })
+  // //             });
+  // //           });
+  // //         });
+  // //       });              
+  // //     });
+  // //   });
+  // // },
+  // // 
+  // // test_gs_append : function() {
+  // //   var fs_client = new Db('integration_tests_12', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  // //   fs_client.bson_deserializer = client.bson_deserializer;
+  // //   fs_client.bson_serializer = client.bson_serializer;
+  // //   fs_client.pkFactory = client.pkFactory;
+  // // 
+  // //   fs_client.open(function(err, fs_client) {  
+  // //     fs_client.dropDatabase(function(err, done) {
+  // //       var gridStore = new GridStore(fs_client, "test_gs_append", "w");
+  // //       gridStore.open(function(err, gridStore) {    
+  // //         gridStore.write("hello, world!", function(err, gridStore) {
+  // //           gridStore.close(function(err, result) {
+  // // 
+  // //             var gridStore2 = new GridStore(fs_client, "test_gs_append", "w+");
+  // //             gridStore2.open(function(err, gridStore) {
+  // //               gridStore.write(" how are you?", function(err, gridStore) {
+  // //                 gridStore.close(function(err, result) {
+  // // 
+  // //                   fs_client.collection('fs.chunks', function(err, collection) {
+  // //                     collection.count(function(err, count) {
+  // //                       test.equal(1, count);
+  // // 
+  // //                       GridStore.read(fs_client, 'test_gs_append', function(err, data) {
+  // //                         test.equal("hello, world! how are you?", data);                        
+  // //                         finished_test({test_gs_append:'ok'});       
+  // //                         fs_client.close();
+  // //                       });
+  // //                     });
+  // //                   });
+  // //                 });
+  // //               });
+  // //             });
+  // //           });
+  // //         });
+  // //       });              
+  // //     });
+  // //   });  
+  // // },
+  // // 
+  // // test_gs_rewind_and_truncate_on_write : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello, world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         var gridStore2 = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           gridStore.write('some text is inserted here', function(err, gridStore) {
+  // //             gridStore.rewind(function(err, gridStore) {
+  // //               gridStore.write('abc', function(err, gridStore) {
+  // //                 gridStore.close(function(err, result) {
+  // //                   GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
+  // //                     test.equal("abc", data);
+  // //                     finished_test({test_gs_rewind_and_truncate_on_write:'ok'});       
+  // //                   });
+  // //                 });
+  // //               });
+  // //             });
+  // //           });
+  // //         });                
+  // //       });
+  // //     });
+  // //   });                
+  // // },
+  // // 
+  // // test_gs_tell : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_tell", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello, world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         var gridStore2 = new GridStore(client, "test_gs_tell", "r");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           gridStore.read(5, function(err, data) {
+  // //             test.equal("hello", data);
+  // // 
+  // //             gridStore.tell(function(err, position) {
+  // //               test.equal(5, position);              
+  // //               finished_test({test_gs_tell:'ok'});       
+  // //             })            
+  // //           });
+  // //         });
+  // //       });
+  // //     });
+  // //   });                  
+  // // },
+  // // 
+  // // test_gs_save_empty_file : function() {
+  // //   var fs_client = new Db('integration_tests_13', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  // //   fs_client.bson_deserializer = client.bson_deserializer;
+  // //   fs_client.bson_serializer = client.bson_serializer;
+  // //   fs_client.pkFactory = client.pkFactory;
+  // // 
+  // //   fs_client.open(function(err, fs_client) {  
+  // //     fs_client.dropDatabase(function(err, done) {
+  // //       var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");
+  // //       gridStore.open(function(err, gridStore) {    
+  // //         gridStore.write("", function(err, gridStore) {
+  // //           gridStore.close(function(err, result) {
+  // //             fs_client.collection('fs.files', function(err, collection) {
+  // //               collection.count(function(err, count) {
+  // //                 test.equal(1, count);
+  // //               });
+  // //             });
+  // // 
+  // //             fs_client.collection('fs.chunks', function(err, collection) {
+  // //               collection.count(function(err, count) {
+  // //                 test.equal(0, count);
+  // // 
+  // //                 finished_test({test_gs_save_empty_file:'ok'});       
+  // //                 fs_client.close();
+  // //               });
+  // //             });            
+  // //           });
+  // //         });
+  // //       });              
+  // //     });
+  // //   });    
+  // // },
+  // // 
+  // // test_gs_empty_file_eof : function() {
+  // //   var gridStore = new GridStore(client, 'test_gs_empty_file_eof', "w");
+  // //   gridStore.open(function(err, gridStore) {
+  // //     gridStore.close(function(err, gridStore) {      
+  // //       var gridStore2 = new GridStore(client, 'test_gs_empty_file_eof', "r");
+  // //       gridStore2.open(function(err, gridStore) {
+  // //         test.equal(true, gridStore.eof());
+  // //         finished_test({test_gs_empty_file_eof:'ok'});       
+  // //       })
+  // //     });
+  // //   });
+  // // },
+  // // 
+  // // test_gs_cannot_change_chunk_size_on_read : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello, world!", function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // // 
+  // //         var gridStore2 = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           gridStore.chunkSize = 42; 
+  // //           test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+  // //           finished_test({test_gs_cannot_change_chunk_size_on_read:'ok'});       
+  // //         });        
+  // //       });
+  // //     });
+  // //   });            
+  // // },
+  // // 
+  // // test_gs_cannot_change_chunk_size_after_data_written : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
+  // //   gridStore.open(function(err, gridStore) {    
+  // //     gridStore.write("hello, world!", function(err, gridStore) {
+  // //       gridStore.chunkSize = 42; 
+  // //       test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
+  // //       finished_test({test_gs_cannot_change_chunk_size_after_data_written:'ok'});       
+  // //     });
+  // //   });              
+  // // },
+  // // 
+  // // test_change_chunk_size : function() {
+  // //   var gridStore = new GridStore(client, "test_change_chunk_size", "w");
+  // //   gridStore.open(function(err, gridStore) {   
+  // //     gridStore.chunkSize = 42
+  // // 
+  // //     gridStore.write('foo', function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           test.equal(42, gridStore.chunkSize);
+  // //           finished_test({test_change_chunk_size:'ok'});       
+  // //         });
+  // //       });
+  // //     });
+  // //   });
+  // // },
+  // // 
+  // // test_gs_chunk_size_in_option : function() {
+  // //   var gridStore = new GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
+  // //   gridStore.open(function(err, gridStore) {   
+  // //     gridStore.write('foo', function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           test.equal(42, gridStore.chunkSize);
+  // //           finished_test({test_gs_chunk_size_in_option:'ok'});       
+  // //         });
+  // //       });
+  // //     });
+  // //   });
+  // // },
+  // // 
+  // // test_gs_md5 : function() {
+  // //   var gridStore = new GridStore(client, "new-file", "w");
+  // //   gridStore.open(function(err, gridStore) {   
+  // //     gridStore.write('hello world\n', function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // //         var gridStore2 = new GridStore(client, "new-file", "r");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
+  // //           gridStore.md5 = "can't do this";
+  // //           test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
+  // // 
+  // //           var gridStore2 = new GridStore(client, "new-file", "w");
+  // //           gridStore2.open(function(err, gridStore) {
+  // //             gridStore.close(function(err, result) {
+  // //               var gridStore3 = new GridStore(client, "new-file", "r");
+  // //               gridStore3.open(function(err, gridStore) {
+  // //                 test.equal("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
+  // // 
+  // //                 finished_test({test_gs_chunk_size_in_option:'ok'});       
+  // //               });
+  // //             })
+  // //           })
+  // //         });
+  // //       });
+  // //     });
+  // //   });  
+  // // },
+  // // 
+  // // test_gs_upload_date : function() {
+  // //   var now = new Date();
+  // //   var originalFileUploadDate = null;
+  // // 
+  // //   var gridStore = new GridStore(client, "test_gs_upload_date", "w");
+  // //   gridStore.open(function(err, gridStore) {   
+  // //     gridStore.write('hello world\n', function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // // 
+  // //         var gridStore2 = new GridStore(client, "test_gs_upload_date", "r");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           test.ok(gridStore.uploadDate != null);
+  // //           originalFileUploadDate = gridStore.uploadDate;
+  // // 
+  // //           gridStore2.close(function(err, result) {
+  // //             var gridStore3 = new GridStore(client, "test_gs_upload_date", "w");
+  // //             gridStore3.open(function(err, gridStore) {
+  // //               gridStore3.write('new data', function(err, gridStore) {
+  // //                 gridStore3.close(function(err, result) {
+  // //                   var fileUploadDate = null;
+  // // 
+  // //                   var gridStore4 = new GridStore(client, "test_gs_upload_date", "r");
+  // //                   gridStore4.open(function(err, gridStore) {
+  // //                     test.equal(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
+  // //                     finished_test({test_gs_upload_date:'ok'});       
+  // //                   });                  
+  // //                 });
+  // //               });
+  // //             });            
+  // //           });          
+  // //         });
+  // //       });
+  // //     });
+  // //   });  
+  // // },
+  // // 
+  // // test_gs_content_type : function() {
+  // //   var ct = null;
+  // // 
+  // //   var gridStore = new GridStore(client, "test_gs_content_type", "w");
+  // //   gridStore.open(function(err, gridStore) {   
+  // //     gridStore.write('hello world\n', function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // // 
+  // //         var gridStore2 = new GridStore(client, "test_gs_content_type", "r");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           ct = gridStore.contentType;
+  // //           test.equal(GridStore.DEFAULT_CONTENT_TYPE, ct);
+  // // 
+  // //           var gridStore3 = new GridStore(client, "test_gs_content_type", "w+");
+  // //           gridStore3.open(function(err, gridStore) {
+  // //             gridStore.contentType = "text/html";
+  // //             gridStore.close(function(err, result) {              
+  // //               var gridStore4 = new GridStore(client, "test_gs_content_type", "r");
+  // //               gridStore4.open(function(err, gridStore) {
+  // //                 test.equal("text/html", gridStore.contentType);
+  // //                 finished_test({test_gs_content_type:'ok'});       
+  // //               });                            
+  // //             })
+  // //           });          
+  // //         });
+  // //       });
+  // //     });
+  // //   });  
+  // // },
+  // // 
+  // // test_gs_content_type_option : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
+  // //   gridStore.open(function(err, gridStore) {   
+  // //     gridStore.write('hello world\n', function(err, gridStore) {
+  // //       gridStore.close(function(result) {
+  // // 
+  // //         var gridStore2 = new GridStore(client, "test_gs_content_type_option", "r");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           test.equal('image/jpg', gridStore.contentType);
+  // //           finished_test({test_gs_content_type_option:'ok'});       
+  // //         });        
+  // //       });
+  // //     });
+  // //   });  
+  // // },
+  // // 
+  // // test_gs_unknown_mode : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_unknown_mode", "x");
+  // //   gridStore.open(function(err, gridStore) {
+  // //     test.ok(err instanceof Error);
+  // //     test.equal("Illegal mode x", err.message);
+  // //     finished_test({test_gs_unknown_mode:'ok'});       
+  // //   });  
+  // // },
+  // // 
+  // // test_gs_metadata : function() {
+  // //   var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
+  // //   gridStore.open(function(err, gridStore) {   
+  // //     gridStore.write('hello world\n', function(err, gridStore) {
+  // //       gridStore.close(function(err, result) {
+  // // 
+  // //         var gridStore2 = new GridStore(client, "test_gs_metadata", "r");
+  // //         gridStore2.open(function(err, gridStore) {
+  // //           test.equal(null, gridStore.metadata);
+  // // 
+  // //           var gridStore3 = new GridStore(client, "test_gs_metadata", "w+");
+  // //           gridStore3.open(function(err, gridStore) {
+  // //             gridStore.metadata = {'a':1};
+  // //             gridStore.close(function(err, result) {
+  // // 
+  // //               var gridStore4 = new GridStore(client, "test_gs_metadata", "r");
+  // //               gridStore4.open(function(err, gridStore) {
+  // //                 test.equal(1, gridStore.metadata.a);
+  // //                 finished_test({test_gs_metadata:'ok'});       
+  // //               });                
+  // //             });
+  // //           });                
+  // //         });                
+  // //       });
+  // //     });
+  // //   });    
+  // // },
+  // 
+  // test_admin_default_profiling_level : function() {
+  //   var fs_client = new Db('admin_test_1', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  //   fs_client.bson_deserializer = client.bson_deserializer;
+  //   fs_client.bson_serializer = client.bson_serializer;
+  //   fs_client.pkFactory = client.pkFactory;
+  // 
+  //   fs_client.open(function(err, fs_client) {
+  //     fs_client.dropDatabase(function(err, done) {
+  //       fs_client.collection('test', function(err, collection) {
+  //         collection.insert({'a':1}, function(err, doc) {
+  //           fs_client.admin(function(err, adminDb) {
+  //             adminDb.profilingLevel(function(err, level) {
+  //               test.equal("off", level);
+  //               finished_test({test_admin_default_profiling_level:'ok'});       
+  //               fs_client.close();
   //             });
   //           });          
   //         });
   //       });
   //     });
-  //   });  
+  //   });    
   // },
   // 
-  // test_gs_small_write : function() {
-  //   var gridStore = new GridStore(client, "test_gs_small_write", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         client.collection('fs.files', function(err, collection) {
-  //           collection.find({'filename':'test_gs_small_write'}, function(err, cursor) {
-  //             cursor.toArray(function(err, items) {
-  //               test.equal(1, items.length);
-  //               var item = items[0];
-  //               test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
+  // test_admin_change_profiling_level : function() {
+  //   var fs_client = new Db('admin_test_2', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  //   fs_client.bson_deserializer = client.bson_deserializer;
+  //   fs_client.bson_serializer = client.bson_serializer;
+  //   fs_client.pkFactory = client.pkFactory;
   // 
-  //               client.collection('fs.chunks', function(err, collection) {
-  //                 collection.find({'files_id':item._id}, function(err, cursor) {
-  //                   cursor.toArray(function(err, items) {
-  //                     test.equal(1, items.length);                  
-  //                     finished_test({test_gs_small_write:'ok'});        
+  //   fs_client.open(function(err, fs_client) {  
+  //     fs_client.dropDatabase(function(err, done) {
+  //       fs_client.collection('test', function(err, collection) {
+  //         collection.insert({'a':1}, function(err, doc) {
+  //           fs_client.admin(function(err, adminDb) {
+  //             adminDb.setProfilingLevel('slow_only', function(err, level) {              
+  //               adminDb.profilingLevel(function(err, level) {
+  //                 test.equal('slow_only', level);
+  // 
+  //                 adminDb.setProfilingLevel('off', function(err, level) {              
+  //                   adminDb.profilingLevel(function(err, level) {
+  //                     test.equal('off', level);
+  // 
+  //                     adminDb.setProfilingLevel('all', function(err, level) {              
+  //                       adminDb.profilingLevel(function(err, level) {
+  //                         test.equal('all', level);
+  // 
+  //                         adminDb.setProfilingLevel('medium', function(err, level) {              
+  //                           test.ok(err instanceof Error);
+  //                           test.equal("Error: illegal profiling level value medium", err.message);
+  // 
+  //                           finished_test({test_admin_change_profiling_level:'ok'});       
+  //                           fs_client.close();                          
+  //                         });
+  //                       })
+  //                     });
   //                   })
-  //                 });              
-  //               });
+  //                 });
+  //               })
   //             });
-  //           });
-  //         });        
-  //       });
-  //     });
-  //   });  
-  // },
-  // 
-  // test_gs_small_file : function() {
-  //   var gridStore = new GridStore(client, "test_gs_small_file", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         client.collection('fs.files', function(err, collection) {
-  //           collection.find({'filename':'test_gs_small_file'}, function(err, cursor) {
-  //             cursor.toArray(function(err, items) {
-  //               test.equal(1, items.length);
-  // 
-  //               // Read test of the file
-  //               GridStore.read(client, 'test_gs_small_file', function(err, data) {
-  //                 test.equal('hello world!', data);
-  //                 finished_test({test_gs_small_file:'ok'});        
-  //               });              
-  //             });
-  //           });
-  //         });        
+  //           });          
+  //         });
   //       });
   //     });
   //   });      
   // },
   // 
-  // test_gs_overwrite : function() {
-  //   var gridStore = new GridStore(client, "test_gs_overwrite", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         var gridStore2 = new GridStore(client, "test_gs_overwrite", "w");
-  //         gridStore2.open(function(err, gridStore) {    
-  //           gridStore2.write("overwrite", function(err, gridStore) {
-  //             gridStore2.close(function(err, result) {
+  // test_admin_profiling_info : function() {
+  //   var fs_client = new Db('admin_test_3', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  //   fs_client.bson_deserializer = client.bson_deserializer;
+  //   fs_client.bson_serializer = client.bson_serializer;
+  //   fs_client.pkFactory = client.pkFactory;
   // 
-  //               // Assert that we have overwriten the data
-  //               GridStore.read(client, 'test_gs_overwrite', function(err, data) {
-  //                 test.equal('overwrite', data);
-  //                 finished_test({test_gs_overwrite:'ok'});        
-  //               });                            
+  //   fs_client.open(function(err, fs_client) {  
+  //     fs_client.dropDatabase(function(err, done) {
+  //       fs_client.collection('test', function(err, collection) {
+  //         collection.insert({'a':1}, function(doc) {
+  //           fs_client.admin(function(err, adminDb) {
+  //             adminDb.setProfilingLevel('all', function(err, level) {
+  //               collection.find(function(err, cursor) {
+  //                 cursor.toArray(function(err, items) {                  
+  //                   adminDb.setProfilingLevel('off', function(err, level) {
+  //                     adminDb.profilingInfo(function(err, infos) {
+  //                       test.ok(infos.constructor == Array);
+  //                       test.ok(infos.length >= 1);
+  //                       test.ok(infos[0].ts.constructor == Date);
+  //                       test.ok(infos[0].info.constructor == String);
+  //                       test.ok(infos[0].millis.constructor == Number);
+  // 
+  //                       finished_test({test_admin_profiling_info:'ok'});       
+  //                       fs_client.close();                          
+  //                     });                  
+  //                   });
+  //                 });
+  //               });              
   //             });
-  //           });
-  //         });                
+  //           });          
+  //         });
   //       });
   //     });
   //   });        
   // },
   // 
-  // test_gs_read_length : function() {
-  //   var gridStore = new GridStore(client, "test_gs_read_length", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         // Assert that we have overwriten the data
-  //         GridStore.read(client, 'test_gs_read_length', 5, function(err, data) {
-  //           test.equal('hello', data);
-  //           finished_test({test_gs_read_length:'ok'});        
-  //         });                            
+  // test_admin_validate_collection : function() {
+  //   var fs_client = new Db('admin_test_4', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+  //   fs_client.bson_deserializer = client.bson_deserializer;
+  //   fs_client.bson_serializer = client.bson_serializer;
+  //   fs_client.pkFactory = client.pkFactory;
+  // 
+  //   fs_client.open(function(err, fs_client) {  
+  //     fs_client.dropDatabase(function(err, done) {
+  //       fs_client.collection('test', function(err, collection) {
+  //         collection.insert({'a':1}, function(err, doc) {
+  //           fs_client.admin(function(err, adminDb) {
+  //             adminDb.validatCollection('test', function(err, doc) {
+  //               test.ok(doc.result != null);
+  //               test.ok(doc.result.match(/firstExtent/) != null);
+  // 
+  //               finished_test({test_admin_validate_collection:'ok'});       
+  //               fs_client.close();                          
+  //             });
+  //           });          
+  //         });
   //       });
   //     });
   //   });          
   // },
   // 
-  // test_gs_read_with_offset : function() {
-  //   var gridStore = new GridStore(client, "test_gs_read_with_offset", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello, world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         // Assert that we have overwriten the data
-  //         GridStore.read(client, 'test_gs_read_with_offset', 5, 7, function(err, data) {
-  //           test.equal('world', data);
-  //         });
+  // // test_custom_primary_key_generator : function() {    
+  // //   // Custom factory (need to provide a 12 byte array);
+  // //   CustomPKFactory = function() {}
+  // //   CustomPKFactory.prototype = new Object();
+  // //   CustomPKFactory.createPk = function() {  
+  // //     return new client.bson_serializer.ObjectID("aaaaaaaaaaaa");
+  // //   }
+  // // 
+  // //   var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
+  // //   p_client.bson_deserializer = client.bson_deserializer;
+  // //   p_client.bson_serializer = client.bson_serializer;
+  // //   p_client.pkFactory = client.pkFactory;
+  // // 
+  // //   p_client.open(function(err, p_client) {  
+  // //     p_client.dropDatabase(function(err, done) {    
+  // //       p_client.createCollection('test_custom_key', function(err, collection) {
+  // //         collection.insert({'a':1}, function(err, doc) {
+  // //           collection.find({'_id':new client.bson_serializer.ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
+  // //             cursor.toArray(function(err, items) {
+  // //               test.equal(1, items.length);
+  // // 
+  // //               finished_test({test_custom_primary_key_generator:'ok'});       
+  // //               p_client.close();
+  // //             });
+  // //           });
+  // //         });
+  // //       });
+  // //     });
+  // //   });      
+  // // },
   // 
-  //         GridStore.read(client, 'test_gs_read_with_offset', null, 7, function(err, data) {
-  //           test.equal('world!', data);
-  //           finished_test({test_gs_read_with_offset:'ok'});        
-  //         });
+  // // Mapreduce tests
+  // test_map_reduce : function() {
+  //   client.createCollection('test_map_reduce', function(err, collection) {
+  //     collection.insert([{'user_id':1}, {'user_id':2}]);
+  // 
+  //     // String functions
+  //     var map = "function() { emit(this.user_id, 1); }";
+  //     var reduce = "function(k,vals) { return 1; }";
+  // 
+  //     collection.mapReduce(map, reduce, function(err, collection) {
+  //       collection.findOne({'_id':1}, function(err, result) {
+  //         test.equal(1, result.value);
   //       });
-  //     });
-  //   });            
-  // },
   // 
-  // test_gs_seek : function() {
-  //   var gridStore = new GridStore(client, "test_gs_seek", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello, world!", function(err, gridStore) {
-  //       gridStore.close(function(result) {        
-  //         var gridStore2 = new GridStore(client, "test_gs_seek", "r");
-  //         gridStore2.open(function(err, gridStore) {    
-  //           gridStore.seek(0, function(err, gridStore) {
-  //             gridStore.getc(function(err, chr) {
-  //               test.equal('h', chr);
-  //             });
-  //           });
-  //         });
-  // 
-  //         var gridStore3 = new GridStore(client, "test_gs_seek", "r");
-  //         gridStore3.open(function(err, gridStore) {    
-  //           gridStore.seek(7, function(err, gridStore) {
-  //             gridStore.getc(function(err, chr) {
-  //               test.equal('w', chr);
-  //             });
-  //           });
-  //         });
-  // 
-  //         var gridStore4 = new GridStore(client, "test_gs_seek", "r");
-  //         gridStore4.open(function(err, gridStore) {    
-  //           gridStore.seek(4, function(err, gridStore) {
-  //             gridStore.getc(function(err, chr) {
-  //               test.equal('o', chr);
-  //             });
-  //           });
-  //         });
-  // 
-  //         var gridStore5 = new GridStore(client, "test_gs_seek", "r");
-  //         gridStore5.open(function(err, gridStore) {    
-  //           gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
-  //             gridStore.getc(function(err, chr) {
-  //               test.equal('!', chr);
-  //             });
-  //           });
-  //         });
-  // 
-  //         var gridStore6 = new GridStore(client, "test_gs_seek", "r");
-  //         gridStore6.open(function(err, gridStore) {    
-  //           gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
-  //             gridStore.getc(function(err, chr) {
-  //               test.equal('w', chr);
-  //             });
-  //           });
-  //         });
-  // 
-  //         var gridStore7 = new GridStore(client, "test_gs_seek", "r");
-  //         gridStore7.open(function(err, gridStore) {    
-  //           gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-  //             gridStore.getc(function(err, chr) {
-  //               test.equal('w', chr);
-  // 
-  //               gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-  //                 gridStore.getc(function(err, chr) {
-  //                   test.equal('w', chr);
-  // 
-  //                   gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-  //                     gridStore.getc(function(err, chr) {
-  //                       test.equal('o', chr);
-  // 
-  //                       gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-  //                         gridStore.getc(function(err, chr) {
-  //                           test.equal('o', chr);
-  //                           finished_test({test_gs_seek:'ok'});        
-  //                         });
-  //                       });
-  //                     });
-  //                   });        
-  //                 });
-  //               });        
-  //             });
-  //           });
-  //         });
+  //       collection.findOne({'_id':2}, function(err, result) {
+  //         test.equal(1, result.value);
+  //         finished_test({test_map_reduce:'ok'});       
   //       });
-  //     });
-  //   });              
-  // },
-  // 
-  // test_gs_multi_chunk : function() {
-  //   var fs_client = new Db('integration_tests_10', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  //   fs_client.bson_deserializer = client.bson_deserializer;
-  //   fs_client.bson_serializer = client.bson_serializer;
-  //   fs_client.pkFactory = client.pkFactory;
-  // 
-  //   fs_client.open(function(err, fs_client) {  
-  //     fs_client.dropDatabase(function(err, done) {
-  //       var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
-  //       gridStore.open(function(err, gridStore) {    
-  //         gridStore.chunkSize = 512;
-  //         var file1 = ''; var file2 = ''; var file3 = '';
-  //         for(var i = 0; i < gridStore.chunkSize; i++) { file1 = file1 + 'x'; }
-  //         for(var i = 0; i < gridStore.chunkSize; i++) { file2 = file2 + 'y'; }
-  //         for(var i = 0; i < gridStore.chunkSize; i++) { file3 = file3 + 'z'; }
-  // 
-  //         gridStore.write(file1, function(err, gridStore) {
-  //           gridStore.write(file2, function(err, gridStore) {
-  //             gridStore.write(file3, function(err, gridStore) {
-  //               gridStore.close(function(err, result) {
-  //                 fs_client.collection('fs.chunks', function(err, collection) {
-  //                   collection.count(function(err, count) {
-  //                     test.equal(3, count);
-  // 
-  //                     GridStore.read(fs_client, 'test_gs_multi_chunk', function(err, data) {
-  //                       test.equal(512*3, data.length);
-  //                       finished_test({test_gs_multi_chunk:'ok'});                    
-  //                       fs_client.close();
-  //                     });              
-  //                   })
-  //                 });
-  //               });
-  //             });
-  //           });
-  //         });
-  //       });                        
-  //     });
+  //     });    
   //   });
   // },
   // 
-  // test_gs_puts_and_readlines : function() {
-  //   var gridStore = new GridStore(client, "test_gs_puts_and_readlines", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.puts("line one", function(err, gridStore) {
-  //       gridStore.puts("line two\n", function(err, gridStore) {
-  //         gridStore.puts("line three", function(err, gridStore) {          
-  //           gridStore.close(function(err, result) {
-  //             GridStore.readlines(client, 'test_gs_puts_and_readlines', function(err, lines) {
-  //               test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
-  //               finished_test({test_gs_puts_and_readlines:'ok'});                    
-  //             });
-  //           });
-  //         });
+  // test_map_reduce_with_functions_as_arguments : function() {
+  //   client.createCollection('test_map_reduce_with_functions_as_arguments', function(err, collection) {
+  //     collection.insert([{'user_id':1}, {'user_id':2}]);
+  // 
+  //     // String functions
+  //     var map = function() { emit(this.user_id, 1); };
+  //     var reduce = function(k,vals) { return 1; };
+  // 
+  //     collection.mapReduce(map, reduce, function(err, collection) {
+  //       collection.findOne({'_id':1}, function(err, result) {
+  //         test.equal(1, result.value);
   //       });
-  //     });
-  //   });            
-  // },
-  // 
-  // test_gs_weird_name_unlink : function() {
-  //   var fs_client = new Db('awesome_f0eabd4b52e30b223c010000', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  //   fs_client.bson_deserializer = client.bson_deserializer;
-  //   fs_client.bson_serializer = client.bson_serializer;
-  //   fs_client.pkFactory = client.pkFactory;
-  // 
-  //   fs_client.open(function(err, fs_client) {  
-  //     fs_client.dropDatabase(function(err, done) {
-  //       var gridStore = new GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
-  //       gridStore.open(function(err, gridStore) {    
-  //         gridStore.write("hello, world!", function(err, gridStore) {
-  //           gridStore.close(function(err, result) {
-  //             fs_client.collection('articles.files', function(err, collection) {
-  //               collection.count(function(err, count) {
-  //                 test.equal(1, count);
-  //               })
-  //             });
-  // 
-  //             fs_client.collection('articles.chunks', function(err, collection) {
-  //               collection.count(function(err, count) {
-  //                 test.equal(1, count);
-  // 
-  //                 // Unlink the file
-  //                 GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
-  //                   fs_client.collection('articles.files', function(err, collection) {
-  //                     collection.count(function(err, count) {
-  //                       test.equal(0, count);
-  //                     })
-  //                   });
-  // 
-  //                   fs_client.collection('articles.chunks', function(err, collection) {
-  //                     collection.count(function(err, count) {
-  //                       test.equal(0, count);
-  // 
-  //                       finished_test({test_gs_unlink:'ok'});       
-  //                       fs_client.close();
-  //                     })
-  //                   });
-  //                 });
-  //               })
-  //             });
-  //           });
-  //         });
-  //       });              
-  //     });
+  //       collection.findOne({'_id':2}, function(err, result) {
+  //         test.equal(1, result.value);
+  //         finished_test({test_map_reduce_with_functions_as_arguments:'ok'});       
+  //       });
+  //     });    
   //   });  
   // },
   // 
-  // test_gs_unlink : function() {
-  //   var fs_client = new Db('integration_tests_11', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  //   fs_client.bson_deserializer = client.bson_deserializer;
-  //   fs_client.bson_serializer = client.bson_serializer;
-  //   fs_client.pkFactory = client.pkFactory;
+  // test_map_reduce_with_code_objects : function() {
+  //   client.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
+  //     collection.insert([{'user_id':1}, {'user_id':2}]);
   // 
-  //   fs_client.open(function(err, fs_client) {  
-  //     fs_client.dropDatabase(function(err, done) {
-  //       var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
-  //       gridStore.open(function(err, gridStore) {    
-  //         gridStore.write("hello, world!", function(err, gridStore) {
-  //           gridStore.close(function(err, result) {
-  //             fs_client.collection('fs.files', function(err, collection) {
-  //               collection.count(function(err, count) {
-  //                 test.equal(1, count);
-  //               })
-  //             });
+  //     // String functions
+  //     var map = new client.bson_serializer.Code("function() { emit(this.user_id, 1); }");
+  //     var reduce = new client.bson_serializer.Code("function(k,vals) { return 1; }");
   // 
-  //             fs_client.collection('fs.chunks', function(err, collection) {
-  //               collection.count(function(err, count) {
-  //                 test.equal(1, count);
-  // 
-  //                 // Unlink the file
-  //                 GridStore.unlink(fs_client, 'test_gs_unlink', function(err, gridStore) {
-  //                   fs_client.collection('fs.files', function(err, collection) {
-  //                     collection.count(function(err, count) {
-  //                       test.equal(0, count);
-  //                     })
-  //                   });
-  // 
-  //                   fs_client.collection('fs.chunks', function(err, collection) {
-  //                     collection.count(function(err, count) {
-  //                       test.equal(0, count);
-  // 
-  //                       finished_test({test_gs_unlink:'ok'});       
-  //                       fs_client.close();
-  //                     })
-  //                   });
-  //                 });
-  //               })
-  //             });
-  //           });
-  //         });
-  //       });              
-  //     });
-  //   });
-  // },
-  // 
-  // test_gs_append : function() {
-  //   var fs_client = new Db('integration_tests_12', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  //   fs_client.bson_deserializer = client.bson_deserializer;
-  //   fs_client.bson_serializer = client.bson_serializer;
-  //   fs_client.pkFactory = client.pkFactory;
-  // 
-  //   fs_client.open(function(err, fs_client) {  
-  //     fs_client.dropDatabase(function(err, done) {
-  //       var gridStore = new GridStore(fs_client, "test_gs_append", "w");
-  //       gridStore.open(function(err, gridStore) {    
-  //         gridStore.write("hello, world!", function(err, gridStore) {
-  //           gridStore.close(function(err, result) {
-  // 
-  //             var gridStore2 = new GridStore(fs_client, "test_gs_append", "w+");
-  //             gridStore2.open(function(err, gridStore) {
-  //               gridStore.write(" how are you?", function(err, gridStore) {
-  //                 gridStore.close(function(err, result) {
-  // 
-  //                   fs_client.collection('fs.chunks', function(err, collection) {
-  //                     collection.count(function(err, count) {
-  //                       test.equal(1, count);
-  // 
-  //                       GridStore.read(fs_client, 'test_gs_append', function(err, data) {
-  //                         test.equal("hello, world! how are you?", data);                        
-  //                         finished_test({test_gs_append:'ok'});       
-  //                         fs_client.close();
-  //                       });
-  //                     });
-  //                   });
-  //                 });
-  //               });
-  //             });
-  //           });
-  //         });
-  //       });              
-  //     });
-  //   });  
-  // },
-  // 
-  // test_gs_rewind_and_truncate_on_write : function() {
-  //   var gridStore = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello, world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         var gridStore2 = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
-  //         gridStore2.open(function(err, gridStore) {
-  //           gridStore.write('some text is inserted here', function(err, gridStore) {
-  //             gridStore.rewind(function(err, gridStore) {
-  //               gridStore.write('abc', function(err, gridStore) {
-  //                 gridStore.close(function(err, result) {
-  //                   GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
-  //                     test.equal("abc", data);
-  //                     finished_test({test_gs_rewind_and_truncate_on_write:'ok'});       
-  //                   });
-  //                 });
-  //               });
-  //             });
-  //           });
-  //         });                
+  //     collection.mapReduce(map, reduce, function(err, collection) {
+  //       collection.findOne({'_id':1}, function(err, result) {
+  //         test.equal(1, result.value);
   //       });
-  //     });
-  //   });                
-  // },
-  // 
-  // test_gs_tell : function() {
-  //   var gridStore = new GridStore(client, "test_gs_tell", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello, world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         var gridStore2 = new GridStore(client, "test_gs_tell", "r");
-  //         gridStore2.open(function(err, gridStore) {
-  //           gridStore.read(5, function(err, data) {
-  //             test.equal("hello", data);
-  // 
-  //             gridStore.tell(function(err, position) {
-  //               test.equal(5, position);              
-  //               finished_test({test_gs_tell:'ok'});       
-  //             })            
-  //           });
-  //         });
+  //       collection.findOne({'_id':2}, function(err, result) {
+  //         test.equal(1, result.value);
+  //         finished_test({test_map_reduce_with_code_objects:'ok'});       
   //       });
-  //     });
-  //   });                  
-  // },
-  // 
-  // test_gs_save_empty_file : function() {
-  //   var fs_client = new Db('integration_tests_13', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-  //   fs_client.bson_deserializer = client.bson_deserializer;
-  //   fs_client.bson_serializer = client.bson_serializer;
-  //   fs_client.pkFactory = client.pkFactory;
-  // 
-  //   fs_client.open(function(err, fs_client) {  
-  //     fs_client.dropDatabase(function(err, done) {
-  //       var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");
-  //       gridStore.open(function(err, gridStore) {    
-  //         gridStore.write("", function(err, gridStore) {
-  //           gridStore.close(function(err, result) {
-  //             fs_client.collection('fs.files', function(err, collection) {
-  //               collection.count(function(err, count) {
-  //                 test.equal(1, count);
-  //               });
-  //             });
-  // 
-  //             fs_client.collection('fs.chunks', function(err, collection) {
-  //               collection.count(function(err, count) {
-  //                 test.equal(0, count);
-  // 
-  //                 finished_test({test_gs_save_empty_file:'ok'});       
-  //                 fs_client.close();
-  //               });
-  //             });            
-  //           });
-  //         });
-  //       });              
-  //     });
+  //     });    
   //   });    
   // },
   // 
-  // test_gs_empty_file_eof : function() {
-  //   var gridStore = new GridStore(client, 'test_gs_empty_file_eof', "w");
-  //   gridStore.open(function(err, gridStore) {
-  //     gridStore.close(function(err, gridStore) {      
-  //       var gridStore2 = new GridStore(client, 'test_gs_empty_file_eof', "r");
-  //       gridStore2.open(function(err, gridStore) {
-  //         test.equal(true, gridStore.eof());
-  //         finished_test({test_gs_empty_file_eof:'ok'});       
-  //       })
-  //     });
-  //   });
-  // },
+  // test_map_reduce_with_options : function() {
+  //   client.createCollection('test_map_reduce_with_options', function(err, collection) {
+  //     collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}]);
   // 
-  // test_gs_cannot_change_chunk_size_on_read : function() {
-  //   var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello, world!", function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
+  //     // String functions
+  //     var map = new client.bson_serializer.Code("function() { emit(this.user_id, 1); }");
+  //     var reduce = new client.bson_serializer.Code("function(k,vals) { return 1; }");
   // 
-  //         var gridStore2 = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
-  //         gridStore2.open(function(err, gridStore) {
-  //           gridStore.chunkSize = 42; 
-  //           test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
-  //           finished_test({test_gs_cannot_change_chunk_size_on_read:'ok'});       
-  //         });        
-  //       });
-  //     });
-  //   });            
-  // },
+  //     collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
+  //       collection.count(function(err, count) {
+  //         test.equal(2, count);
   // 
-  // test_gs_cannot_change_chunk_size_after_data_written : function() {
-  //   var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
-  //   gridStore.open(function(err, gridStore) {    
-  //     gridStore.write("hello, world!", function(err, gridStore) {
-  //       gridStore.chunkSize = 42; 
-  //       test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
-  //       finished_test({test_gs_cannot_change_chunk_size_after_data_written:'ok'});       
-  //     });
-  //   });              
-  // },
-  // 
-  // test_change_chunk_size : function() {
-  //   var gridStore = new GridStore(client, "test_change_chunk_size", "w");
-  //   gridStore.open(function(err, gridStore) {   
-  //     gridStore.chunkSize = 42
-  // 
-  //     gridStore.write('foo', function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
-  //         gridStore2.open(function(err, gridStore) {
-  //           test.equal(42, gridStore.chunkSize);
-  //           finished_test({test_change_chunk_size:'ok'});       
+  //         collection.findOne({'_id':2}, function(err, result) {
+  //           test.equal(1, result.value);
+  //         });
+  //         collection.findOne({'_id':3}, function(err, result) {
+  //           test.equal(1, result.value);
+  //           finished_test({test_map_reduce_with_options:'ok'});       
   //         });
   //       });
-  //     });
-  //   });
+  //     });    
+  //   });    
   // },
   // 
-  // test_gs_chunk_size_in_option : function() {
-  //   var gridStore = new GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
-  //   gridStore.open(function(err, gridStore) {   
-  //     gridStore.write('foo', function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
-  //         gridStore2.open(function(err, gridStore) {
-  //           test.equal(42, gridStore.chunkSize);
-  //           finished_test({test_gs_chunk_size_in_option:'ok'});       
-  //         });
-  //       });
-  //     });
-  //   });
+  // test_map_reduce_error : function() {
+  //   client.createCollection('test_map_reduce_error', function(err, collection) {
+  //     collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}]);
+  // 
+  //     // String functions
+  //     var map = new client.bson_serializer.Code("function() { emit(this.user_id, 1); }");
+  //     var reduce = new client.bson_serializer.Code("function(k,vals) { throw 'error'; }");
+  // 
+  //     collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
+  //       test.ok(err != null);
+  //       finished_test({test_map_reduce_error:'ok'});       
+  //     });    
+  //   });      
   // },
   // 
-  // test_gs_md5 : function() {
-  //   var gridStore = new GridStore(client, "new-file", "w");
-  //   gridStore.open(function(err, gridStore) {   
-  //     gridStore.write('hello world\n', function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  //         var gridStore2 = new GridStore(client, "new-file", "r");
-  //         gridStore2.open(function(err, gridStore) {
-  //           test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
-  //           gridStore.md5 = "can't do this";
-  //           test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
+  // test_drop_indexes : function() {
+  //   client.createCollection('test_drop_indexes', function(err, collection) {    
+  //     collection.insert({a:1}, function(err, ids) {
+  //       // Create an index on the collection
+  //       client.createIndex(collection.collectionName, 'a', function(err, indexName) {
+  //         test.equal("a_1", indexName);
+  //         // Drop all the indexes
+  //         collection.dropIndexes(function(err, result) {
+  //           test.equal(true, result);          
   // 
-  //           var gridStore2 = new GridStore(client, "new-file", "w");
-  //           gridStore2.open(function(err, gridStore) {
-  //             gridStore.close(function(err, result) {
-  //               var gridStore3 = new GridStore(client, "new-file", "r");
-  //               gridStore3.open(function(err, gridStore) {
-  //                 test.equal("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
-  // 
-  //                 finished_test({test_gs_chunk_size_in_option:'ok'});       
-  //               });
-  //             })
+  //           collection.indexInformation(function(err, result) {
+  //             test.ok(result['a_1'] == null);
+  //             finished_test({test_drop_indexes:'ok'});       
   //           })
+  //         })
+  //       });      
+  //     })
+  //   });  
+  // },
+  // 
+  // test_add_and_remove_user : function() {
+  //   var user_name = 'spongebob2';
+  //   var password = 'password';
+  // 
+  //   var p_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+  //   p_client.bson_deserializer = client.bson_deserializer;
+  //   p_client.bson_serializer = client.bson_serializer;
+  //   p_client.pkFactory = client.pkFactory;
+  // 
+  //   p_client.open(function(err, automatic_connect_client) {  
+  //     p_client.authenticate('admin', 'admin', function(err, replies) {
+  //       test.ok(err instanceof Error);
+  // 
+  //       // Add a user
+  //       p_client.addUser(user_name, password, function(err, result) {
+  //         p_client.authenticate(user_name, password, function(err, replies) {
+  //           test.ok(replies);
+  // 
+  //           // Remove the user and try to authenticate again
+  //           p_client.removeUser(user_name, function(err, result) {
+  //             p_client.authenticate(user_name, password, function(err, replies) {
+  //               test.ok(err instanceof Error);
+  // 
+  //               finished_test({test_add_and_remove_user:'ok'});
+  //               p_client.close();
+  //             });          
+  //           });        
+  //         });      
+  //       });    
+  //     });
+  //   });
+  // },
+  // 
+  // test_distinct_queries : function() {
+  //   client.createCollection('test_distinct_queries', function(err, collection) {    
+  //     collection.insert([{'a':0, 'b':{'c':'a'}},
+  //       {'a':1, 'b':{'c':'b'}},
+  //       {'a':1, 'b':{'c':'c'}},
+  //       {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], function(err, ids) {
+  //         collection.distinct('a', function(err, docs) {
+  //           test.deepEqual([0, 1, 2, 3], docs.sort());
   //         });
-  //       });
-  //     });
-  //   });  
-  // },
   // 
-  // test_gs_upload_date : function() {
-  //   var now = new Date();
-  //   var originalFileUploadDate = null;
-  // 
-  //   var gridStore = new GridStore(client, "test_gs_upload_date", "w");
-  //   gridStore.open(function(err, gridStore) {   
-  //     gridStore.write('hello world\n', function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  // 
-  //         var gridStore2 = new GridStore(client, "test_gs_upload_date", "r");
-  //         gridStore2.open(function(err, gridStore) {
-  //           test.ok(gridStore.uploadDate != null);
-  //           originalFileUploadDate = gridStore.uploadDate;
-  // 
-  //           gridStore2.close(function(err, result) {
-  //             var gridStore3 = new GridStore(client, "test_gs_upload_date", "w");
-  //             gridStore3.open(function(err, gridStore) {
-  //               gridStore3.write('new data', function(err, gridStore) {
-  //                 gridStore3.close(function(err, result) {
-  //                   var fileUploadDate = null;
-  // 
-  //                   var gridStore4 = new GridStore(client, "test_gs_upload_date", "r");
-  //                   gridStore4.open(function(err, gridStore) {
-  //                     test.equal(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
-  //                     finished_test({test_gs_upload_date:'ok'});       
-  //                   });                  
-  //                 });
-  //               });
-  //             });            
-  //           });          
+  //         collection.distinct('b.c', function(err, docs) {
+  //           test.deepEqual(['a', 'b', 'c'], docs.sort());
+  //           finished_test({test_distinct_queries:'ok'});
   //         });
-  //       });
-  //     });
-  //   });  
-  // },
-  // 
-  // test_gs_content_type : function() {
-  //   var ct = null;
-  // 
-  //   var gridStore = new GridStore(client, "test_gs_content_type", "w");
-  //   gridStore.open(function(err, gridStore) {   
-  //     gridStore.write('hello world\n', function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  // 
-  //         var gridStore2 = new GridStore(client, "test_gs_content_type", "r");
-  //         gridStore2.open(function(err, gridStore) {
-  //           ct = gridStore.contentType;
-  //           test.equal(GridStore.DEFAULT_CONTENT_TYPE, ct);
-  // 
-  //           var gridStore3 = new GridStore(client, "test_gs_content_type", "w+");
-  //           gridStore3.open(function(err, gridStore) {
-  //             gridStore.contentType = "text/html";
-  //             gridStore.close(function(err, result) {              
-  //               var gridStore4 = new GridStore(client, "test_gs_content_type", "r");
-  //               gridStore4.open(function(err, gridStore) {
-  //                 test.equal("text/html", gridStore.contentType);
-  //                 finished_test({test_gs_content_type:'ok'});       
-  //               });                            
-  //             })
-  //           });          
-  //         });
-  //       });
-  //     });
-  //   });  
-  // },
-  // 
-  // test_gs_content_type_option : function() {
-  //   var gridStore = new GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
-  //   gridStore.open(function(err, gridStore) {   
-  //     gridStore.write('hello world\n', function(err, gridStore) {
-  //       gridStore.close(function(result) {
-  // 
-  //         var gridStore2 = new GridStore(client, "test_gs_content_type_option", "r");
-  //         gridStore2.open(function(err, gridStore) {
-  //           test.equal('image/jpg', gridStore.contentType);
-  //           finished_test({test_gs_content_type_option:'ok'});       
-  //         });        
-  //       });
-  //     });
-  //   });  
-  // },
-  // 
-  // test_gs_unknown_mode : function() {
-  //   var gridStore = new GridStore(client, "test_gs_unknown_mode", "x");
-  //   gridStore.open(function(err, gridStore) {
-  //     test.ok(err instanceof Error);
-  //     test.equal("Illegal mode x", err.message);
-  //     finished_test({test_gs_unknown_mode:'ok'});       
-  //   });  
-  // },
-  // 
-  // test_gs_metadata : function() {
-  //   var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
-  //   gridStore.open(function(err, gridStore) {   
-  //     gridStore.write('hello world\n', function(err, gridStore) {
-  //       gridStore.close(function(err, result) {
-  // 
-  //         var gridStore2 = new GridStore(client, "test_gs_metadata", "r");
-  //         gridStore2.open(function(err, gridStore) {
-  //           test.equal(null, gridStore.metadata);
-  // 
-  //           var gridStore3 = new GridStore(client, "test_gs_metadata", "w+");
-  //           gridStore3.open(function(err, gridStore) {
-  //             gridStore.metadata = {'a':1};
-  //             gridStore.close(function(err, result) {
-  // 
-  //               var gridStore4 = new GridStore(client, "test_gs_metadata", "r");
-  //               gridStore4.open(function(err, gridStore) {
-  //                 test.equal(1, gridStore.metadata.a);
-  //                 finished_test({test_gs_metadata:'ok'});       
-  //               });                
-  //             });
-  //           });                
-  //         });                
-  //       });
-  //     });
+  //     })
   //   });    
   // },
-  
-  test_admin_default_profiling_level : function() {
-    var fs_client = new Db('admin_test_1', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
-    fs_client.open(function(err, fs_client) {
-      fs_client.dropDatabase(function(err, done) {
-        fs_client.collection('test', function(err, collection) {
-          collection.insert({'a':1}, function(err, doc) {
-            fs_client.admin(function(err, adminDb) {
-              adminDb.profilingLevel(function(err, level) {
-                test.equal("off", level);
-                finished_test({test_admin_default_profiling_level:'ok'});       
-                fs_client.close();
-              });
-            });          
-          });
-        });
-      });
-    });    
-  },
-  
-  test_admin_change_profiling_level : function() {
-    var fs_client = new Db('admin_test_2', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
-    fs_client.open(function(err, fs_client) {  
-      fs_client.dropDatabase(function(err, done) {
-        fs_client.collection('test', function(err, collection) {
-          collection.insert({'a':1}, function(err, doc) {
-            fs_client.admin(function(err, adminDb) {
-              adminDb.setProfilingLevel('slow_only', function(err, level) {              
-                adminDb.profilingLevel(function(err, level) {
-                  test.equal('slow_only', level);
-  
-                  adminDb.setProfilingLevel('off', function(err, level) {              
-                    adminDb.profilingLevel(function(err, level) {
-                      test.equal('off', level);
-  
-                      adminDb.setProfilingLevel('all', function(err, level) {              
-                        adminDb.profilingLevel(function(err, level) {
-                          test.equal('all', level);
-  
-                          adminDb.setProfilingLevel('medium', function(err, level) {              
-                            test.ok(err instanceof Error);
-                            test.equal("Error: illegal profiling level value medium", err.message);
-  
-                            finished_test({test_admin_change_profiling_level:'ok'});       
-                            fs_client.close();                          
-                          });
-                        })
-                      });
-                    })
-                  });
-                })
-              });
-            });          
-          });
-        });
-      });
-    });      
-  },
-  
-  test_admin_profiling_info : function() {
-    var fs_client = new Db('admin_test_3', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
-    fs_client.open(function(err, fs_client) {  
-      fs_client.dropDatabase(function(err, done) {
-        fs_client.collection('test', function(err, collection) {
-          collection.insert({'a':1}, function(doc) {
-            fs_client.admin(function(err, adminDb) {
-              adminDb.setProfilingLevel('all', function(err, level) {
-                collection.find(function(err, cursor) {
-                  cursor.toArray(function(err, items) {                  
-                    adminDb.setProfilingLevel('off', function(err, level) {
-                      adminDb.profilingInfo(function(err, infos) {
-                        test.ok(infos.constructor == Array);
-                        test.ok(infos.length >= 1);
-                        test.ok(infos[0].ts.constructor == Date);
-                        test.ok(infos[0].info.constructor == String);
-                        test.ok(infos[0].millis.constructor == Number);
-  
-                        finished_test({test_admin_profiling_info:'ok'});       
-                        fs_client.close();                          
-                      });                  
-                    });
-                  });
-                });              
-              });
-            });          
-          });
-        });
-      });
-    });        
-  },
-  
-  test_admin_validate_collection : function() {
-    var fs_client = new Db('admin_test_4', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
-    fs_client.open(function(err, fs_client) {  
-      fs_client.dropDatabase(function(err, done) {
-        fs_client.collection('test', function(err, collection) {
-          collection.insert({'a':1}, function(err, doc) {
-            fs_client.admin(function(err, adminDb) {
-              adminDb.validatCollection('test', function(err, doc) {
-                test.ok(doc.result != null);
-                test.ok(doc.result.match(/firstExtent/) != null);
-  
-                finished_test({test_admin_validate_collection:'ok'});       
-                fs_client.close();                          
-              });
-            });          
-          });
-        });
-      });
-    });          
-  },
-  
-  // test_custom_primary_key_generator : function() {    
-  //   // Custom factory (need to provide a 12 byte array);
-  //   CustomPKFactory = function() {}
-  //   CustomPKFactory.prototype = new Object();
-  //   CustomPKFactory.createPk = function() {  
-  //     return new client.bson_serializer.ObjectID("aaaaaaaaaaaa");
-  //   }
   // 
-  //   var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
+  // test_all_serialization_types : function() {
+  //   client.createCollection('test_all_serialization_types', function(err, collection) {    
+  //     var date = new Date();
+  //     var oid = new client.bson_serializer.ObjectID();
+  //     var string = 'binstring'
+  //     var bin = new client.bson_serializer.Binary()
+  //     for(var index = 0; index < string.length; index++) {
+  //       bin.put(string.charAt(index))
+  //     }
+  // 
+  //     var motherOfAllDocuments = {
+  //       'string': 'hello',
+  //       'array': [1,2,3],
+  //       'hash': {'a':1, 'b':2},
+  //       'date': date,
+  //       'oid': oid,
+  //       'binary': bin,
+  //       'int': 42,
+  //       'float': 33.3333,
+  //       'regexp': /regexp/,
+  //       'boolean': true, 
+  //       'long': date.getTime(),
+  //       'where': new client.bson_serializer.Code('this.a > i', {i:1}),
+  //       'dbref': new client.bson_serializer.DBRef('namespace', oid, 'integration_tests_')
+  //     }
+  // 
+  //     collection.insert(motherOfAllDocuments, function(err, docs) {
+  //       collection.findOne(function(err, doc) {
+  //         // // Assert correct deserialization of the values
+  //         test.equal(motherOfAllDocuments.string, doc.string);
+  //         test.deepEqual(motherOfAllDocuments.array, doc.array);
+  //         test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+  //         test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+  //         test.equal(date.getTime(), doc.long);
+  //         test.equal(date.toString(), doc.date.toString());
+  //         test.equal(date.getTime(), doc.date.getTime());
+  //         test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+  //         test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
+  //         
+  //         test.equal(motherOfAllDocuments.int, doc.int);
+  //         test.equal(motherOfAllDocuments.long, doc.long);
+  //         test.equal(motherOfAllDocuments.float, doc.float);
+  //         test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+  //         test.equal(motherOfAllDocuments.boolean, doc.boolean);
+  //         test.equal(motherOfAllDocuments.where.code, doc.where.code);
+  //         test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
+  //         
+  //         test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+  //         test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+  //         test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
+  //         finished_test({test_all_serialization_types:'ok'});      
+  //       })      
+  //     });    
+  //   });    
+  // },
+  // 
+  // test_should_correctly_retrieve_one_record : function() {
+  //   var p_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
   //   p_client.bson_deserializer = client.bson_deserializer;
   //   p_client.bson_serializer = client.bson_serializer;
   //   p_client.pkFactory = client.pkFactory;
   // 
   //   p_client.open(function(err, p_client) {  
-  //     p_client.dropDatabase(function(err, done) {    
-  //       p_client.createCollection('test_custom_key', function(err, collection) {
-  //         collection.insert({'a':1}, function(err, doc) {
-  //           collection.find({'_id':new client.bson_serializer.ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
-  //             cursor.toArray(function(err, items) {
-  //               test.equal(1, items.length);
+  //     client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {    
+  //       collection.insert({'a':0});
   // 
-  //               finished_test({test_custom_primary_key_generator:'ok'});       
-  //               p_client.close();
-  //             });
-  //           });
+  //       p_client.collection('test_should_correctly_retrieve_one_record', function(err, usercollection) {
+  //         usercollection.findOne({'a': 0}, function(err, result) {          
+  //           finished_test({test_should_correctly_retrieve_one_record:'ok'});      
+  //           p_client.close();
   //         });
   //       });
   //     });
-  //   });      
+  //   });
   // },
-  
-  // Mapreduce tests
-  test_map_reduce : function() {
-    client.createCollection('test_map_reduce', function(err, collection) {
-      collection.insert([{'user_id':1}, {'user_id':2}]);
-  
-      // String functions
-      var map = "function() { emit(this.user_id, 1); }";
-      var reduce = "function(k,vals) { return 1; }";
-  
-      collection.mapReduce(map, reduce, function(err, collection) {
-        collection.findOne({'_id':1}, function(err, result) {
-          test.equal(1, result.value);
-        });
-  
-        collection.findOne({'_id':2}, function(err, result) {
-          test.equal(1, result.value);
-          finished_test({test_map_reduce:'ok'});       
-        });
-      });    
-    });
-  },
-  
-  test_map_reduce_with_functions_as_arguments : function() {
-    client.createCollection('test_map_reduce_with_functions_as_arguments', function(err, collection) {
-      collection.insert([{'user_id':1}, {'user_id':2}]);
-  
-      // String functions
-      var map = function() { emit(this.user_id, 1); };
-      var reduce = function(k,vals) { return 1; };
-  
-      collection.mapReduce(map, reduce, function(err, collection) {
-        collection.findOne({'_id':1}, function(err, result) {
-          test.equal(1, result.value);
-        });
-        collection.findOne({'_id':2}, function(err, result) {
-          test.equal(1, result.value);
-          finished_test({test_map_reduce_with_functions_as_arguments:'ok'});       
-        });
-      });    
-    });  
-  },
-  
-  test_map_reduce_with_code_objects : function() {
-    client.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
-      collection.insert([{'user_id':1}, {'user_id':2}]);
-  
-      // String functions
-      var map = new client.bson_serializer.Code("function() { emit(this.user_id, 1); }");
-      var reduce = new client.bson_serializer.Code("function(k,vals) { return 1; }");
-  
-      collection.mapReduce(map, reduce, function(err, collection) {
-        collection.findOne({'_id':1}, function(err, result) {
-          test.equal(1, result.value);
-        });
-        collection.findOne({'_id':2}, function(err, result) {
-          test.equal(1, result.value);
-          finished_test({test_map_reduce_with_code_objects:'ok'});       
-        });
-      });    
-    });    
-  },
-  
-  test_map_reduce_with_options : function() {
-    client.createCollection('test_map_reduce_with_options', function(err, collection) {
-      collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}]);
-  
-      // String functions
-      var map = new client.bson_serializer.Code("function() { emit(this.user_id, 1); }");
-      var reduce = new client.bson_serializer.Code("function(k,vals) { return 1; }");
-  
-      collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
-        collection.count(function(err, count) {
-          test.equal(2, count);
-  
-          collection.findOne({'_id':2}, function(err, result) {
-            test.equal(1, result.value);
-          });
-          collection.findOne({'_id':3}, function(err, result) {
-            test.equal(1, result.value);
-            finished_test({test_map_reduce_with_options:'ok'});       
-          });
-        });
-      });    
-    });    
-  },
-  
-  test_map_reduce_error : function() {
-    client.createCollection('test_map_reduce_error', function(err, collection) {
-      collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}]);
-  
-      // String functions
-      var map = new client.bson_serializer.Code("function() { emit(this.user_id, 1); }");
-      var reduce = new client.bson_serializer.Code("function(k,vals) { throw 'error'; }");
-  
-      collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
-        test.ok(err != null);
-        finished_test({test_map_reduce_error:'ok'});       
-      });    
-    });      
-  },
-  
-  test_drop_indexes : function() {
-    client.createCollection('test_drop_indexes', function(err, collection) {    
-      collection.insert({a:1}, function(err, ids) {
-        // Create an index on the collection
-        client.createIndex(collection.collectionName, 'a', function(err, indexName) {
-          test.equal("a_1", indexName);
-          // Drop all the indexes
-          collection.dropIndexes(function(err, result) {
-            test.equal(true, result);          
-  
-            collection.indexInformation(function(err, result) {
-              test.ok(result['a_1'] == null);
-              finished_test({test_drop_indexes:'ok'});       
-            })
-          })
-        });      
-      })
-    });  
-  },
-  
-  test_add_and_remove_user : function() {
-    var user_name = 'spongebob2';
-    var password = 'password';
-  
-    var p_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
-    p_client.open(function(err, automatic_connect_client) {  
-      p_client.authenticate('admin', 'admin', function(err, replies) {
-        test.ok(err instanceof Error);
-  
-        // Add a user
-        p_client.addUser(user_name, password, function(err, result) {
-          p_client.authenticate(user_name, password, function(err, replies) {
-            test.ok(replies);
-  
-            // Remove the user and try to authenticate again
-            p_client.removeUser(user_name, function(err, result) {
-              p_client.authenticate(user_name, password, function(err, replies) {
-                test.ok(err instanceof Error);
-  
-                finished_test({test_add_and_remove_user:'ok'});
-                p_client.close();
-              });          
-            });        
-          });      
-        });    
-      });
-    });
-  },
-  
-  test_distinct_queries : function() {
-    client.createCollection('test_distinct_queries', function(err, collection) {    
-      collection.insert([{'a':0, 'b':{'c':'a'}},
-        {'a':1, 'b':{'c':'b'}},
-        {'a':1, 'b':{'c':'c'}},
-        {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], function(err, ids) {
-          collection.distinct('a', function(err, docs) {
-            test.deepEqual([0, 1, 2, 3], docs.sort());
-          });
-  
-          collection.distinct('b.c', function(err, docs) {
-            test.deepEqual(['a', 'b', 'c'], docs.sort());
-            finished_test({test_distinct_queries:'ok'});
-          });
-      })
-    });    
-  },
-  
-  test_all_serialization_types : function() {
-    client.createCollection('test_all_serialization_types', function(err, collection) {    
-      var date = new Date();
-      var oid = new client.bson_serializer.ObjectID();
-      var string = 'binstring'
-      var bin = new client.bson_serializer.Binary()
-      for(var index = 0; index < string.length; index++) {
-        bin.put(string.charAt(index))
-      }
-  
-      var motherOfAllDocuments = {
-        'string': 'hello',
-        'array': [1,2,3],
-        'hash': {'a':1, 'b':2},
-        'date': date,
-        'oid': oid,
-        'binary': bin,
-        'int': 42,
-        'float': 33.3333,
-        'regexp': /regexp/,
-        'boolean': true, 
-        'long': date.getTime(),
-        'where': new client.bson_serializer.Code('this.a > i', {i:1}),
-        'dbref': new client.bson_serializer.DBRef('namespace', oid, 'integration_tests_')
-      }
-  
-      collection.insert(motherOfAllDocuments, function(err, docs) {
-        collection.findOne(function(err, doc) {
-          // // Assert correct deserialization of the values
-          test.equal(motherOfAllDocuments.string, doc.string);
-          test.deepEqual(motherOfAllDocuments.array, doc.array);
-          test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
-          test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
-          test.equal(date.getTime(), doc.long);
-          test.equal(date.toString(), doc.date.toString());
-          test.equal(date.getTime(), doc.date.getTime());
-          test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-          test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
-          
-          test.equal(motherOfAllDocuments.int, doc.int);
-          test.equal(motherOfAllDocuments.long, doc.long);
-          test.equal(motherOfAllDocuments.float, doc.float);
-          test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
-          test.equal(motherOfAllDocuments.boolean, doc.boolean);
-          test.equal(motherOfAllDocuments.where.code, doc.where.code);
-          test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-          
-          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
-          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
-          finished_test({test_all_serialization_types:'ok'});      
-        })      
-      });    
-    });    
-  },
-  
-  test_should_correctly_retrieve_one_record : function() {
-    var p_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
-    p_client.open(function(err, p_client) {  
-      client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {    
-        collection.insert({'a':0});
-  
-        p_client.collection('test_should_correctly_retrieve_one_record', function(err, usercollection) {
-          usercollection.findOne({'a': 0}, function(err, result) {          
-            finished_test({test_should_correctly_retrieve_one_record:'ok'});      
-            p_client.close();
-          });
-        });
-      });
-    });
-  },
-  
-  test_should_correctly_save_unicode_containing_document : function() {
-    var doc = {statuses_count: 1687
-    , created_at: 'Mon Oct 22 14:55:08 +0000 2007'
-    , description: 'NodeJS hacker, Cofounder of Debuggable, CakePHP core alumnus'
-    , favourites_count: 6
-    , profile_sidebar_fill_color: 'EADEAA'
-    , screen_name: 'felixge'
-    , status: 
-       { created_at: 'Fri Mar 12 08:59:44 +0000 2010'
-       , in_reply_to_screen_name: null
-       , truncated: false
-       , in_reply_to_user_id: null
-       , source: '<a href="http://www.atebits.com/" rel="nofollow">Tweetie</a>'
-       , favorited: false
-       , in_reply_to_status_id: null
-       , id: 10364119169
-       , text: '#berlin #snow = #fail : ('
-       }
-    , contributors_enabled: false
-    , following: null
-    , geo_enabled: false
-    , time_zone: 'Eastern Time (US & Canada)'
-    , profile_sidebar_border_color: 'D9B17E'
-    , url: 'http://debuggable.com'
-    , verified: false
-    , location: 'Berlin'
-    , profile_text_color: '333333'
-    , notifications: null
-    , profile_background_image_url: 'http://s.twimg.com/a/1268354287/images/themes/theme8/bg.gif'
-    , protected: false
-    , profile_link_color: '9D582E'
-    , followers_count: 840
-    , name: 'Felix Geisend\u00f6rfer'
-    , profile_background_tile: false
-    , id: 9599342
-    , lang: 'en'
-    , utc_offset: -18000
-    , friends_count: 450
-    , profile_background_color: '8B542B'
-    , profile_image_url: 'http://a3.twimg.com/profile_images/107142257/passbild-square_normal.jpg'
-    };
-  
-    client.createCollection('test_should_correctly_save_unicode_containing_document', function(err, collection) {    
-      doc['_id'] = 'felixge';
-  
-      collection.save(doc, function(err, doc) {
-        collection.findOne(function(err, doc) {
-          test.equal('felixge', doc._id);        
-          finished_test({test_should_correctly_save_unicode_containing_document:'ok'});      
-        });
-      });
-    });
-  },
-  
+  // 
+  // test_should_correctly_save_unicode_containing_document : function() {
+  //   var doc = {statuses_count: 1687
+  //   , created_at: 'Mon Oct 22 14:55:08 +0000 2007'
+  //   , description: 'NodeJS hacker, Cofounder of Debuggable, CakePHP core alumnus'
+  //   , favourites_count: 6
+  //   , profile_sidebar_fill_color: 'EADEAA'
+  //   , screen_name: 'felixge'
+  //   , status: 
+  //      { created_at: 'Fri Mar 12 08:59:44 +0000 2010'
+  //      , in_reply_to_screen_name: null
+  //      , truncated: false
+  //      , in_reply_to_user_id: null
+  //      , source: '<a href="http://www.atebits.com/" rel="nofollow">Tweetie</a>'
+  //      , favorited: false
+  //      , in_reply_to_status_id: null
+  //      , id: 10364119169
+  //      , text: '#berlin #snow = #fail : ('
+  //      }
+  //   , contributors_enabled: false
+  //   , following: null
+  //   , geo_enabled: false
+  //   , time_zone: 'Eastern Time (US & Canada)'
+  //   , profile_sidebar_border_color: 'D9B17E'
+  //   , url: 'http://debuggable.com'
+  //   , verified: false
+  //   , location: 'Berlin'
+  //   , profile_text_color: '333333'
+  //   , notifications: null
+  //   , profile_background_image_url: 'http://s.twimg.com/a/1268354287/images/themes/theme8/bg.gif'
+  //   , protected: false
+  //   , profile_link_color: '9D582E'
+  //   , followers_count: 840
+  //   , name: 'Felix Geisend\u00f6rfer'
+  //   , profile_background_tile: false
+  //   , id: 9599342
+  //   , lang: 'en'
+  //   , utc_offset: -18000
+  //   , friends_count: 450
+  //   , profile_background_color: '8B542B'
+  //   , profile_image_url: 'http://a3.twimg.com/profile_images/107142257/passbild-square_normal.jpg'
+  //   };
+  // 
+  //   client.createCollection('test_should_correctly_save_unicode_containing_document', function(err, collection) {    
+  //     doc['_id'] = 'felixge';
+  // 
+  //     collection.save(doc, function(err, doc) {
+  //       collection.findOne(function(err, doc) {
+  //         test.equal('felixge', doc._id);        
+  //         finished_test({test_should_correctly_save_unicode_containing_document:'ok'});      
+  //       });
+  //     });
+  //   });
+  // },
+  // 
   // test_should_deserialize_large_integrated_array : function() {
   //   client.createCollection('test_should_deserialize_large_integrated_array', function(err, collection) {    
   //     var doc = {'a':0,
