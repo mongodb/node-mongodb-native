@@ -8,10 +8,17 @@ VERSION = "0.1.0"
 
 def set_options(opt):
   opt.tool_options("compiler_cxx")
+  opt.add_option( '--debug'
+                , action='store_true'
+                , default=False
+                , help='Build debug variant [Default: False]'
+                , dest='debug'
+                )  
 
 def configure(conf):
   conf.check_tool("compiler_cxx")
   conf.check_tool("node_addon")
+  # conf.env.append_value('CXXFLAGS', ['-DDEBUG', '-g', '-O0', '-Wall', '-Wextra'])
 
   # conf.check(lib='node', libpath=['/usr/lib', '/usr/local/lib'], uselib_store='NODE')
 

@@ -93,12 +93,6 @@ Handle<Value> Long::New(const Arguments &args) {
     // Return the context
     return args.This();        
   } else {
-    printf("============================= args_length: %d\n", args.Length());
-    if(args.Length() == 2) {
-      printf("============================= args_length[0]: %s\n", args[0]->IsObject() ? "true" : "false");      
-      printf("============================= args_length[1]: %s\n", args[1]->IsObject() ? "true" : "false");      
-    }
-    
     return VException("Argument passed in must be either a 64 bit number or two 32 bit numbers.");
   }
 }
@@ -322,6 +316,7 @@ char *Long::toString(int32_t opt_radix) {
       strncat(final_buffer, div_result, strlen(div_result));
       strncat(final_buffer + strlen(div_result), int_buf, strlen(div_result));
       // Release some memory
+      free(div_result);
       free(int_buf);
       return final_buffer;
     } else {
@@ -390,7 +385,11 @@ Handle<Value> Long::ToString(const Arguments &args) {
   // Let's create the string from the Long number
   char *result = l->toString(10);
   // Package the result in a V8 String object and return
-  return String::New(result);
+  Handle<Value> result_str = String::New(result);
+  // Free memory
+  free(result);
+  // Return string
+  return result_str;
 }
 
 Long *Long::shiftRight(int32_t number_bits) {

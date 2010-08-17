@@ -21,10 +21,24 @@ static Handle<Value> VException(const char *msg) {
 Persistent<FunctionTemplate> ObjectID::constructor_template;
 
 ObjectID::ObjectID(char *oid) : ObjectWrap() {
-  this->oid = oid;
+  // Allocate space for the oid
+  char *oid_internal = (char *)malloc(25);
+  memcpy(oid_internal, oid, 25);
+  // Save the char pointer
+  this->oid = oid_internal;
+  
+  // Adjust of external allocated memory
+  V8::AdjustAmountOfExternalAllocatedMemory(sizeof(ObjectID));        
 }
 
-ObjectID::~ObjectID() {}
+ObjectID::~ObjectID() {
+  // Adjust the cleaning up of the oid size
+  V8::AdjustAmountOfExternalAllocatedMemory(-25);  
+  // Adjust the allocated memory
+  V8::AdjustAmountOfExternalAllocatedMemory(-static_cast<long int>(sizeof(ObjectID)));
+  // oid
+  free(this->oid);
+}
 
 char *ObjectID::uint32_to_char(uint32_t value) {
   char *buf = (char *) malloc(4 * sizeof(char) + 1);
@@ -53,28 +67,37 @@ char *ObjectID::oid_id_generator() {
   
   // Build a 12 byte char string based on the address of the current object, the rand number and the current time
   char *oid_string_c = (char *)malloc(12 * sizeof(char) + 1);
-  *(oid_string_c + 13) = '\0';
+  *(oid_string_c + 12) = '\0';
   
   // Fetch the address int value from the variable t
   int *m_p = &t;
   int *i_p = &i;  
+  
+  // Parts of the string
+  char *first_four_bytes = ObjectID::uint32_to_char(t);
+  char *second_four_bytes = ObjectID::uint32_to_char(fuzz);
+  char *third_four_bytes = ObjectID::uint32_to_char(i);
+  
   // Build the string
-  memcpy(oid_string_c, ObjectID::uint32_to_char(t), 4);
-  memcpy((oid_string_c + 4), ObjectID::uint32_to_char(fuzz), 4);
-  memcpy((oid_string_c + 8), ObjectID::uint32_to_char(i), 4);
+  memcpy(oid_string_c, first_four_bytes, 4);
+  memcpy((oid_string_c + 4), second_four_bytes, 4);
+  memcpy((oid_string_c + 8), third_four_bytes, 4);
   // Allocate storage for a 24 character hex oid    
   char *oid_string = (char *)malloc(12 * 2 * sizeof(char) + 1);
   char *pbuffer = oid_string;      
   // Terminate the string
-  *(pbuffer + 25) = '\0';      
+  *(pbuffer + 24) = '\0';      
   // Unpack the oid in hex form
   for(int32_t i = 0; i < 12; i++) {
     sprintf(pbuffer, "%02x", (unsigned char)*(oid_string_c + i));
     pbuffer += 2;
   }        
   
-  // Free c string
+  // Free memory
   free(oid_string_c);
+  free(first_four_bytes);
+  free(second_four_bytes);
+  free(third_four_bytes);
   // Return encoded hex string
   return oid_string;
 }
@@ -87,6 +110,8 @@ Handle<Value> ObjectID::New(const Arguments &args) {
     // Instantiate a ObjectID object
     char *oid_string = ObjectID::oid_id_generator();
     ObjectID *oid = new ObjectID(oid_string);
+    // Release oid_string
+    free(oid_string);
     // Wrap it
     oid->Wrap(args.This());
     // Return the object
@@ -106,7 +131,7 @@ Handle<Value> ObjectID::New(const Arguments &args) {
     } else {
       oid_string_c = (char *)malloc(25);;
       // Terminate the string
-      *(oid_string_c + 25) = '\0';      
+      *(oid_string_c + 24) = '\0';      
       
       // Convert the argument to a String
       Local<String> oid_string = args[0]->ToString();  
@@ -125,8 +150,10 @@ Handle<Value> ObjectID::New(const Arguments &args) {
         for(int32_t i = 0; i < 12; i++) {
           sprintf(pbuffer, "%02x", (unsigned char)*(oid_string_bytes + i));
           pbuffer += 2;
-        }                  
-        // printf("================================================== oid_string::12 bytes::%s\n", oid_string_c);
+        } 
+        
+        // Free up memory
+        free(oid_string_bytes);
       } else {
         // Decode the content
         node::DecodeWrite(oid_string_c, 25, oid_string, node::BINARY);        
@@ -135,6 +162,8 @@ Handle<Value> ObjectID::New(const Arguments &args) {
   
     // Instantiate a ObjectID object
     ObjectID *oid = new ObjectID(oid_string_c);
+    // Free string
+    free(oid_string_c);
     // Wrap it
     oid->Wrap(args.This());
     // Return the object
@@ -178,6 +207,8 @@ Handle<Value> ObjectID::CreatePk(const Arguments &args) {
   // Return the value  
   Local<Value> argv[] = {String::New(oid_string)};
   Handle<Value> object_id_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);    
+  // Free oid string
+  free(oid_string);
   // Return the close object
   return scope.Close(object_id_obj);
 }
@@ -203,34 +234,26 @@ Handle<Value> ObjectID::IdGetter(Local<String> property, const AccessorInfo& inf
 
 char *ObjectID::convert_hex_oid_to_bin() {
   // Turn the oid into the binary equivalent
-  char *binary_oid = (char *)malloc(12 * sizeof(char));
+  char *binary_oid = (char *)malloc(12 * sizeof(char) + 1);
+  char n_val;
+  char *nval_str = (char *)malloc(3);
+  *(nval_str + 2) = '\0';  
   // Let's convert the hex value to binary
   for(uint32_t i = 0; i < 12; i++) {
-    char *nval_str = new char[2];
     nval_str[0] = *(this->oid + (i*2));
     nval_str[1] = *(this->oid + (i*2) + 1);
     // Convert the string to a char    
-    char n_val = strtoul(nval_str, NULL, 16);
+    n_val = strtoul(nval_str, NULL, 16);
     // Add to string
     *(binary_oid + i) = n_val;
-    // release the memory for the n_val_str
-    free(nval_str);
   }  
+  // release the memory for the n_val_str
+  free(nval_str);
   // Return the pointer to the converted string
   return binary_oid;
 }
 
 void ObjectID::IdSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
-  // if(value->IsNumber()) {
-  //   // Unpack object reference
-  //   Local<Object> self = info.Holder();
-  //   // Fetch external reference (reference to Long object)
-  //   Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  //   // Get pointer to the object
-  //   void *ptr = wrap->Value();
-  //   // Set the low bits
-  //   // static_cast<Long *>(ptr)->low_bits = value->Int32Value();    
-  // }
 }
 
 

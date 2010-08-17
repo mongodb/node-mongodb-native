@@ -52,6 +52,38 @@ static Handle<Value> VException(const char *msg) {
     return ThrowException(Exception::Error(String::New(msg)));
   };
 
+class MyExternal : public String::ExternalAsciiStringResource {
+ public:
+  MyExternal (char *d, size_t length) : ExternalAsciiStringResource() {
+    data_ = static_cast<char*>(malloc(length));
+    memcpy(data_, d, length);
+    // data_ = d;
+    length_ = length;
+    
+    // Adjust of external allocated memory
+    V8::AdjustAmountOfExternalAllocatedMemory(sizeof(MyExternal));      
+  }
+
+  virtual ~MyExternal () {
+    // Adjust the memory allocated
+    V8::AdjustAmountOfExternalAllocatedMemory(-length_);  
+    // Free the string
+    free(data_);
+  }
+
+  virtual const char * data () const {
+    return data_;
+  }
+
+  virtual size_t length () const {
+    return length_;
+  }
+
+ private:
+  char *data_;
+  size_t length_;
+};
+
 void BSON::Initialize(v8::Handle<v8::Object> target) {
   // Grab the scope of the call from Node
   HandleScope scope;
@@ -103,6 +135,7 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   } catch(char *err_msg) {
     // Free up serialized object space
     free(serialized_object);
+    V8::AdjustAmountOfExternalAllocatedMemory(-object_size);
     // Throw exception with the string
     Handle<Value> error = VException(err_msg);
     // free error message
@@ -113,10 +146,14 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   
   // Write the object size
   BSON::write_int32((serialized_object), object_size);
-  // Encode the binary value
-  Local<Value> bin_value = Encode(serialized_object, object_size, BINARY);  
-  // Free memory
+  // Try out wrapping the char* in an externalresource to avoid copying data
+  MyExternal *my_external = new MyExternal(serialized_object, object_size);
+  // Free the serialized object
   free(serialized_object);
+  // Adjust the memory for V8
+  V8::AdjustAmountOfExternalAllocatedMemory(-object_size);
+  // Create a new external
+  Local<String> bin_value = String::NewExternal(my_external);    
   // Return the serialized content
   return bin_value;
 }
@@ -200,12 +237,16 @@ char *BSON::check_key(Local<String> key) {
     // Throw exception with string
     throw error_str;
   }
-  
+  // Free allocated space
+  free(key_str);
+  free(error_str);
+  // Return No check key error
   return NULL;
 }
 
 uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key) {
   // printf("============================================= serialized::::\n");
+  HandleScope scope;
   
   // If we have a name check that key is valid
   if(!name->IsNull() && check_key) {
@@ -256,6 +297,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     char *binary_oid = object_id_obj->convert_hex_oid_to_bin();
     // Write the oid to the char array
     memcpy((serialized_object + index), binary_oid, 12);
+    // Free memory
+    free(binary_oid);
     // Adjust the index
     index = index + 12;    
   } else if(Binary::HasInstance(value)) {
@@ -302,7 +345,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Unpack the reference value
     Persistent<Value> oid_value = db_ref_obj->oid;
     // Encode the oid to bin
-    // obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
     obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
     obj->Set(String::New("$id"), oid_value);      
     obj->Set(String::New("$db"), dbref->Get(String::New("db")));
@@ -389,7 +431,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       *(serialized_object + index + str->Length()) = '\0';    
       // Adjust the index
       index = index + str->Length() + 1;      
-    }    
+    }       
   } else if(value->IsInt32()) {
     // printf("============================================= -- serialized::::int32\n");        
     // Save the string at the offset provided
@@ -463,15 +505,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust the size of the index
       index = index + 4;
     } else {
-      // printf("============================================= -- serialized::::int64\n");
       // Fetch the double value
-      // double double_value = value->NumberValue();
-      // printf("======================================= double_value: %f\n", double_value);
-      // Create a long object
-      // Long *long_obj = Long::fromNumber(double_value);            
-      // Write the content to the char array
-      // BSON::write_int32((serialized_object + index), long_obj->low_bits);
-      // BSON::write_int32((serialized_object + index + 4), long_obj->high_bits);      
       BSON::write_int64((serialized_object + index), l_number);
       // Adjust type to be double
       *(serialized_object + first_pointer) = BSON_DATA_LONG;
@@ -535,7 +569,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     Local<String> str = value->ToString();    
     len = DecodeBytes(str, BINARY);
     // Let's define the buffer that contains the regexp string
-    char *data = new char[len + 1];
+    // char *data = new char[len + 1];
+    char *data = (char *)malloc(len + 1);
     *(data + len) = '\0';
     // Write the data to the buffer from the string object
     written = DecodeWrite(data, len, str, BINARY);    
@@ -567,6 +602,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     *(serialized_object + index) = '\0';
     // Adjust pointer
     index = index + 1;
+    // Free up the memory
+    free(data);
   } else if(value->IsArray()) {
     // printf("============================================= -- serialized::::array\n");
     // Cast to array
@@ -643,17 +680,16 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       
       // Convert name to char*
       ssize_t len = DecodeBytes(property_name, BINARY);
-      char *data = new char[len];
+      // char *data = new char[len];
+      char *data = (char *)malloc(len + 1);
       *(data + len) = '\0';
       ssize_t written = DecodeWrite(data, len, property_name, BINARY);      
-      
-      // printf("=========================== property_name:: %s --- 1\n", data);
       // Fetch the object for the property
       Local<Value> property = object->Get(property_name);
-      // printf("=========================== property_name:: %s --- 2\n", data);
       // Write the next serialized object
       index = BSON::serialize(serialized_object, index, property_name, property, check_key);      
-      // printf("=========================== property_name:: %s --- 3\n", data);
+      // Free up memory of data
+      free(data);
     }
     // Pad the last item
     *(serialized_object + index) = '\0';
@@ -754,7 +790,8 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     Local<String> str = value->ToString();    
     ssize_t len = DecodeBytes(str, BINARY);
     // Let's define the buffer that contains the regexp string
-    char *data = new char[len + 1];
+    // char *data = new char[len + 1];
+    char *data = (char *)malloc(len + 1);
     *(data + len) = '\0';
     // Write the data to the buffer from the string object
     ssize_t written = DecodeWrite(data, len, str, BINARY);
@@ -772,6 +809,8 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     
     // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
     object_size = object_size + ((options_ptr - data) - 1) + 2 + regexp_size;
+    // Free up memory
+    free(data);
   } else if(value->IsArray()) {
     // printf("================================ calculate_object_size:array\n");
     // Cast to array
@@ -834,21 +873,26 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
     Buffer *buffer = ObjectWrap::Unwrap<Buffer>(args[0]->ToObject());
     data = buffer->data();        
     uint32_t length = buffer->length();
+    return BSON::deserialize(data, NULL);
   } else {
     // Let's fetch the encoding
     // enum encoding enc = ParseEncoding(args[1]);
     // The length of the data for this encoding
     ssize_t len = DecodeBytes(args[0], BINARY);
     // Let's define the buffer size
-    data = new char[len];
+    // data = new char[len];
+    data = (char *)malloc(len);
     // Write the data to the buffer from the string object
     ssize_t written = DecodeWrite(data, len, args[0], BINARY);
     // Assert that we wrote the same number of bytes as we have length
     assert(written == len);
-  }
-  
-  // Deserialize the content
-  return BSON::deserialize(data, NULL);
+    // Get result
+    Handle<Value> result = BSON::deserialize(data, NULL);
+    // Free memory
+    free(data);
+    // Deserialize the content
+    return result;
+  }  
 }
 
 // Deserialize the stream
@@ -862,7 +906,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
   uint32_t index = 0;
   // Decode the size of the BSON data structure
   uint32_t size = BSON::deserialize_int32(data, index);
-  // printf("C:: ============================ BSON:SIZE:%d\n", size);            
   // Adjust the index to point to next piece
   index = index + 4;      
 
@@ -876,11 +919,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
   
   // While we have data left let's decode
   while(index < size) {
-    // printf("C:: ==================================== current index: %d\n", index);
-    
     // Read the first to bytes to indicate the type of object we are decoding
     uint16_t type = BSON::deserialize_int8(data, index);
-    // printf("    C:: ============================ BSON:TYPE:%d\n", type);
     // Handles the internal size of the object
     uint32_t insert_index = 0;
     // Adjust index to skip type byte
@@ -918,6 +958,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       index = index + string_size;
       // Free up the memory
       free(value);
+      free(string_name);
     } else if(type == BSON_DATA_INT) {
       // printf("===================================== decoding int\n");      
       // Read the null terminated index String
@@ -945,6 +986,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       } else {
         return_data->Set(String::New(string_name), Integer::New(value));
       }          
+      // Free up the memory
+      free(string_name);
     } else if(type == BSON_DATA_LONG) {
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
@@ -969,6 +1012,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       } else {
         return_data->Set(String::New(string_name), BSON::decodeLong(value));
       }
+      // Free up the memory
+      free(string_name);      
     } else if(type == BSON_DATA_NUMBER) {
       // printf("===================================== decoding float/double\n");      
       // Read the null terminated index String
@@ -994,6 +1039,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       } else {
         return_data->Set(String::New(string_name), Number::New(value));
       }
+      // Free up the memory
+      free(string_name);      
     } else if(type == BSON_DATA_NULL) {
       // printf("===================================== decoding float/double\n");      
       // Read the null terminated index String
@@ -1013,6 +1060,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       } else {
         return_data->Set(String::New(string_name), Null());
       }      
+      // Free up the memory
+      free(string_name);      
     } else if(type == BSON_DATA_BOOLEAN) {
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
@@ -1036,6 +1085,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       } else {
         return_data->Set(String::New(string_name), bool_value == 1 ? Boolean::New(true) : Boolean::New(false));
       }            
+      // Free up the memory
+      free(string_name);      
     } else if(type == BSON_DATA_DATE) {
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
@@ -1058,7 +1109,9 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
         return_array->Set(Number::New(insert_index), Date::New((double)value));
       } else {
         return_data->Set(String::New(string_name), Date::New((double)value));
-      }       
+      }     
+      // Free up the memory
+      free(string_name);        
     } else if(type == BSON_DATA_REGEXP) {
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
@@ -1125,7 +1178,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Free memory
       free(reg_exp);          
       free(options);          
-      free(reg_exp_string);          
+      free(reg_exp_string); 
+      free(string_name);
     } else if(type == BSON_DATA_OID) {
       // printf("=================================================== unpacking oid\n");
       // Read the null terminated index String
@@ -1143,7 +1197,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       char *oid_string = (char *)malloc(12 * 2 * sizeof(char) + 1);
       char *pbuffer = oid_string;      
       // Terminate the string
-      *(pbuffer + 25) = '\0';      
+      *(pbuffer + 24) = '\0';      
       // Unpack the oid in hex form
       for(int32_t i = 0; i < 12; i++) {
         sprintf(pbuffer, "%02x", (unsigned char)*(data + index + i));
@@ -1161,6 +1215,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       }     
       // Free memory
       free(oid_string);                       
+      free(string_name);
     } else if(type == BSON_DATA_BINARY) {
       // printf("=================================================== unpacking binary\n");
       // Read the null terminated index String
@@ -1190,15 +1245,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       char *buffer = (char *)malloc(number_of_bytes * sizeof(char) + 1);
       memcpy(buffer, (data + index), number_of_bytes);
       *(buffer + number_of_bytes) = '\0';
-      
-      // // Allocate buffer object with space
-      // Local<Buffer> buffer_obj = Buffer::New(number_of_bytes);
-      // // Write content to buffer
-      // buffer_obj->blob().length = 1;
-            
       // Adjust the index
       index = index + number_of_bytes;
-
       // Add the element to the object
       if(is_array_item) {
         return_array->Set(Number::New(insert_index), BSON::decodeBinary(sub_type, number_of_bytes, buffer));
@@ -1207,6 +1255,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       }
       // Free memory
       free(buffer);                             
+      free(string_name);
     } else if(type == BSON_DATA_CODE_W_SCOPE) {
       // printf("=================================================== unpacking code\n");
       // Read the null terminated index String
@@ -1263,6 +1312,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       }      
       // Clean up memory allocation
       free(bson_buffer);      
+      free(string_name);
     } else if(type == BSON_DATA_OBJECT) {
       // printf("=================================================== unpacking object\n");
       // If this is the top level object we need to skip the undecoding
@@ -1305,6 +1355,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       
       // Clean up memory allocation
       free(bson_buffer);
+      free(string_name);
     } else if(type == BSON_DATA_ARRAY) {
       // printf("=================================================== unpacking array\n");
       // Read the null terminated index String
@@ -1345,6 +1396,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       }      
       // Clean up memory allocation
       free(array_buffer);
+      free(string_name);
     }
   }
   
