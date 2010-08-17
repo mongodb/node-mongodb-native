@@ -1,7 +1,7 @@
 GLOBAL.DEBUG = true;
 
 sys = require("sys");
-test = require("mjsunit");
+test = require("assert");
 
 var mongo = require('../lib/mongodb');
 
