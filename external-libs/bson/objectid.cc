@@ -114,7 +114,7 @@ Handle<Value> ObjectID::New(const Arguments &args) {
         return VException("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters in hex format");
       }
   
-      if(oid_string->Length() == 12) {    
+      if(oid_string->Length() == 12) {            
         // Contains the bytes for the string
         char *oid_string_bytes = (char *)malloc(13);
         // Decode the 12 bytes of the oid
@@ -125,7 +125,8 @@ Handle<Value> ObjectID::New(const Arguments &args) {
         for(int32_t i = 0; i < 12; i++) {
           sprintf(pbuffer, "%02x", (unsigned char)*(oid_string_bytes + i));
           pbuffer += 2;
-        }          
+        }                  
+        // printf("================================================== oid_string::12 bytes::%s\n", oid_string_c);
       } else {
         // Decode the content
         node::DecodeWrite(oid_string_c, 25, oid_string, node::BINARY);        
