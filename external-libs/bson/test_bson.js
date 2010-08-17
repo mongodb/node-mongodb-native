@@ -18,6 +18,8 @@ var Long2 = require('./bson').Long,
     Binary2 = require('./bson').Binary,
     Code2 = require('./bson').Code,
     DBRef2 = require('./bson').DBRef;
+    
+sys.puts("=== EXCEUTING TEST_BSON ===");
 
 // Long data type tests
 var l2_string = Long2.fromNumber(9223372036854775807).toString();

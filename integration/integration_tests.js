@@ -3772,9 +3772,10 @@ var all_tests = {
   Setup For Running Tests
 *******************************************************************************************************/
 var client_tests = {};
+var type = process.argv[2];
 
-if(process.argv[2]){
-  var test_arg = process.argv[2];
+if(process.argv[3]){
+  var test_arg = process.argv[3];
   if(test_arg == 'all') client_tests = all_tests;
   else {
     test_arg.split(',').forEach(function(aTest){
@@ -3788,13 +3789,22 @@ for(key in client_tests) client_tests_keys.push(key);
 
 // Native BSON
 var BSON = require("../external-libs/bson/bson");
+var BSONJS = require('../lib/mongodb/bson/bson');
 
 // Set up the client connection
 var client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {}), {});
 // Use native deserializer
-client.bson_deserializer = BSON;
-client.bson_serializer = BSON;
-client.pkFactory = BSON.ObjectID;
+if(type == "native") {
+  sys.puts("========= Integration tests running Native BSON Parser == ")
+  client.bson_deserializer = BSON;
+  client.bson_serializer = BSON;
+  client.pkFactory = BSON.ObjectID;  
+} else {
+  sys.puts("========= Integration tests running Pure JS BSON Parser == ")  
+  client.bson_deserializer = BSONJS;
+  client.bson_serializer = BSONJS;
+  client.pkFactory = BSONJS.ObjectID;  
+}
 
 client.open(function(err, client) {
   // Do cleanup of the db
@@ -3816,6 +3826,7 @@ function ensure_tests_finished() {
       // Ensure we don't have any more cursors hanging about
       client.cursorInfo(function(err, cursorInfo) {
         sys.puts(sys.inspect(cursorInfo));
+        sys.puts("");
         client.close();
       });
     }
