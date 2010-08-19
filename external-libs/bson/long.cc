@@ -14,15 +14,15 @@
 #include "long.h"
 
 // BSON MAX VALUES
-const int32_t BSON_INT32_MAX = 2147483648;
-const int32_t BSON_INT32_MIN = -2147483648;
+const int32_t BSON_INT32_MAX = (int32_t)2147483648L;
+const int32_t BSON_INT32_MIN = (int32_t)(-1) * 2147483648L;
 const int64_t BSON_INT32_ = pow(2, 32);
 
 const double LN2 = 0.6931471805599453;
 
 // Max Values
-const int64_t BSON_INT64_MAX = 9223372036854775807;
-const int64_t BSON_INT64_MIN = -(9223372036854775807);
+const int64_t BSON_INT64_MAX = (int64_t)9223372036854775807LL;
+const int64_t BSON_INT64_MIN = (int64_t)(-1)*(9223372036854775807LL);
 
 // Constant objects used in calculations
 Long* MIN_VALUE = Long::fromBits(0, 0x80000000 | 0);
