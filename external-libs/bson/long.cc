@@ -304,7 +304,8 @@ char *Long::toString(int32_t opt_radix) {
       // the bottom-most digit in this base and then recurse to do the rest.
       Long *radix_long = Long::fromNumber(radix);
       Long *div = this->div(radix_long);
-      Long *rem = div->multiply(radix_long)->subtract(this);
+      Long *mul = div->multiply(radix_long);
+      Long *rem = mul->subtract(this);
       // Fetch div result      
       char *div_result = div->toString(radix);
       // Unpack the rem result and convert int to string
@@ -322,15 +323,18 @@ char *Long::toString(int32_t opt_radix) {
       free(int_buf);
       // Delete object
       delete rem;
+      delete mul;
       return final_buffer;
     } else {
       char *buf = (char *)malloc(50 * sizeof(char) + 1);
       *(buf) = '\0';
-      char *result = this->negate()->toString(radix);      
+      Long *negate = this->negate();
+      char *result = negate->toString(radix);      
       strncat(buf, "-", 1);
       strncat(buf + 1, result, strlen(result));
       // Release memory
       free(result);
+      delete negate;
       return buf;
     }  
   }
@@ -345,10 +349,13 @@ char *Long::toString(int32_t opt_radix) {
   
   while(true) {
     Long *rem_div = rem->div(radix_to_power);
-    int32_t interval = rem->subtract(rem_div->multiply(radix_to_power))->toInt();
+    Long *mul = rem_div->multiply(radix_to_power);
+    int32_t interval = rem->subtract(mul)->toInt();
     // Convert interval into string
     char digits[50];    
     sprintf(digits, "%d", interval);
+    // Remove existing object if it's not this
+    if(this != rem) delete rem;    
     
     rem = rem_div;
     if(rem->isZero()) {
@@ -360,6 +367,9 @@ char *Long::toString(int32_t opt_radix) {
       strncat(new_result + strlen(digits), result, strlen(result));
       // Free the existing structure
       free(result);
+      delete rem_div;
+      delete mul;
+      delete radix_to_power;
       return new_result;
     } else {
       // Allocate some new space for the number
@@ -380,6 +390,8 @@ char *Long::toString(int32_t opt_radix) {
       free(result);
       result = new_result;
     }
+    // Free memory
+    delete mul;
   }  
 }
 
@@ -534,7 +546,10 @@ Long *Long::negate() {
   if(this->equals(MIN_VALUE)) {
     return MIN_VALUE;
   } else {
-    return this->not_()->add(ONE);
+    Long *not_obj = this->not_();
+    Long *add = not_obj->add(ONE);
+    delete not_obj;
+    return add;
   }
 }
 
