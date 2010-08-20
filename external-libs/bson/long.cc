@@ -455,12 +455,24 @@ Long *Long::div(Long *other) {
       return Long::fromNumber(1);
     } else {
       Long *half_this = this->shiftRight(1);
-      Long *approx = half_this->div(other)->shiftLeft(1);
+      Long *div_obj = half_this->div(other);
+      Long *approx = div_obj->shiftLeft(1);
+      // Free memory
+      delete div_obj;
+      delete half_this;
+      // Check if we are done
       if(approx->equals(ZERO)) {
         return other->isNegative() ? Long::fromNumber(0) : Long::fromNumber(-1);
       } else {
-        Long *rem = this->subtract(other->multiply(approx));
-        Long *result = approx->add(rem->div(other));
+        Long *mul = other->multiply(approx);
+        Long *rem = this->subtract(mul);
+        Long *rem_div = rem->div(other);
+        Long *result = approx->add(rem_div);
+        // Free memory
+        delete mul;
+        delete rem;
+        delete rem_div;
+        // Return result
         return result;
       }
     }    
@@ -469,14 +481,35 @@ Long *Long::div(Long *other) {
   }
   
   // If the value is negative
-  if(this->isNegative()) {
+  if(this->isNegative()) {    
     if(other->isNegative()) {
-      return this->negate()->div(other->negate());
+      Long *neg = this->negate();
+      Long *other_neg = other->negate();
+      Long *result = neg->div(other_neg);
+      // Free memory
+      delete neg;
+      delete other_neg;
+      // Return result 
+      return result;
     } else {
-      return this->negate()->div(other)->negate();
-    }    
+      Long *neg = this->negate();
+      Long *neg_result = neg->div(other);
+      Long *result = neg_result->negate();
+      // Free memory
+      delete neg;
+      delete neg_result;
+      // Return result
+      return result;
+    }
   } else if(other->isNegative()) {
-    return this->div(other->negate())->negate();
+    Long *other_neg = other->negate();
+    Long *div_result = this->div(other_neg);
+    Long *result = div_result->negate();
+    // Free memory
+    delete other_neg;
+    delete div_result;
+    // Return the result
+    return result;
   }  
   
   int64_t this_number = this->toNumber();
