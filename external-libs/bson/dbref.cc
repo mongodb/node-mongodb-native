@@ -27,68 +27,22 @@ DBRef::DBRef(char *ref, Persistent<Value> oid, char *db) : ObjectWrap() {
   this->db = db;
 }
 
-DBRef::~DBRef() {}
+DBRef::~DBRef() {
+  if(this->ref != NULL) free(this->ref);
+  if(this->db != NULL) free(this->db);
+}
 
 Handle<Value> DBRef::New(const Arguments &args) {
   HandleScope scope;
   
-  // printf("================================================= length: %d\n", args.Length());
-  // printf("================================================= string: %s\n", args[0]->IsString() ? "true" : "false");
-  // printf("================================================= objectid: %s\n", ObjectID::HasInstance(args[1]) ? "true" : "false");
-  // 
   // Ensure we have the parameters needed
   if(args.Length() != 2 && args.Length() != 3) return VException("Two or Three arguments needed [String, String|ObjectID, String|Null]");
-  // if(!args[0]->IsString() && !args[1]->IsString() && !ObjectID::HasInstance(args[1])) return VException("Two or Three arguments needed [String, String|ObjectID, String|Null]");  
   
   // Initialize the objectid
-  // ObjectID *oid;
   char *db_data = NULL;
 
   // Unpack the values and create the associated objects
   Local<String> ref = args[0]->ToString();
-  
-  // Check what type of arg we have for the oid
-  // if(ObjectID::HasInstance(args[1])) {
-  //   Local<Object> obj = args[1]->ToObject();
-  //   oid = ObjectID::Unwrap<ObjectID>(obj);    
-  // } else {
-  //   printf("============================== FFFFFFFFFFFFFFFFFFFFFFFFFF\n");
-  //   Local<String> id = args[1]->ToString();    
-  //   uint32_t id_length = id->Length();
-  //   
-  //   if(id_length < 12) {
-  //     id_length = 12;
-  //   }
-  //   // Unpack the string
-  //   char *id_data = (char *)malloc(id->Length() + 1);
-  //   // Write the id into the memory space
-  //   memset(id_data, '\0', id_length);
-  //   node::DecodeWrite(id_data, id->Length(), id, node::BINARY);
-  //   printf("======================================== id_data::%s\n", id_data);
-  // 
-  //   // Prepare the space for the hex encoded string
-  //   char *hex_encoded = (char *)malloc(24 * sizeof(char) + 1);
-  //   memset(hex_encoded, '0', 24);
-  //   *(hex_encoded + 24) = '\0';
-  // 
-  //   // Unpack the String object to char*
-  //   char *pbuffer = hex_encoded;          
-  // 
-  //   // Unpack the oid in hex form
-  //   for(int32_t i = 0; i < 12; i++) {
-  //     sprintf(pbuffer, "%02x", (unsigned char)*(id_data + i));
-  //     pbuffer += 2;
-  //   }          
-  // 
-  //   printf("======================================== id_data::hex::%s\n", hex_encoded);
-  // 
-  //   // Free some space
-  //   free(id_data);
-  //   // char *id_data = (char *)malloc(id_length);
-  //   // *(id_data + id->Length()) = '\0';
-  //   // Create ObjectID
-  //   oid = new ObjectID(hex_encoded);        
-  // }
   
   // Persist the oid key object
   Persistent<Value> oid_value = Persistent<Value>::New(args[1]);

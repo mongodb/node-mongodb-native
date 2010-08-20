@@ -25,7 +25,9 @@ Code::Code(char *code, Persistent<Object> scope_object) : ObjectWrap() {
   this->scope_object = scope_object;
 }
 
-Code::~Code() {}
+Code::~Code() {
+  if(this->code != NULL) free(this->code);
+}
 
 Handle<Value> Code::New(const Arguments &args) {
   HandleScope scope;
@@ -125,8 +127,12 @@ void Code::CodeSetter(Local<String> property, Local<Value> value, const Accessor
     *(code + str->Length()) = '\0';
     // Copy over
     node::DecodeWrite(code, str->Length(), str, node::BINARY);  
+    // code object
+    Code *code_obj = static_cast<Code *>(ptr);
+    // Free existing pointer if any
+    if(code_obj->code != NULL) free(code_obj->code);
     // Return the code
-    static_cast<Code *>(ptr)->code = code;
+    code_obj->code = code;
   }
 }
 

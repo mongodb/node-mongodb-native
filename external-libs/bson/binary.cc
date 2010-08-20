@@ -33,11 +33,14 @@ Binary::Binary(uint32_t sub_type, uint32_t number_of_bytes, uint32_t index, char
   this->data = data;  
 }
 
-Binary::~Binary() {}
+Binary::~Binary() {
+  free(this->data);
+}
 
 Handle<Value> Binary::New(const Arguments &args) {
   HandleScope scope;
   Binary *binary;
+  
   if(args.Length() > 2) {
     return VException("Argument must be either none, a string or a sub_type and string");    
   }
@@ -59,7 +62,7 @@ Handle<Value> Binary::New(const Arguments &args) {
     Local<Integer> intr = args[0]->ToInteger();
     Local<String> str = args[1]->ToString();
     // Contains the bytes for the data
-    char *oid_string_bytes = (char *)malloc(str->Length());
+    char *oid_string_bytes = (char *)malloc(str->Length() + 1);
     *(oid_string_bytes + str->Length()) = '\0';
     // Decode the data from the string
     node::DecodeWrite(oid_string_bytes, str->Length(), str, node::BINARY);        
@@ -163,7 +166,7 @@ Handle<Value> Binary::Write(const Arguments &args) {
   } else {
     Local<String> str = args[0]->ToString();
     length = DecodeBytes(str, BINARY);
-    data = new char[length];
+    data = (char *)malloc(length * sizeof(char));
     uint32_t written = DecodeWrite(data, length, str, BINARY);
     assert(length == written);    
   }
@@ -181,8 +184,10 @@ Handle<Value> Binary::Write(const Arguments &args) {
   memcpy((binary->data + binary->index), data, length);
   // Update the index pointer
   binary->index = binary->index + length;
-  // free up the allocated memory
-  free(data);
+  // free the memory if we have allocated
+  if(!Buffer::HasInstance(args[0])) {
+    free(data);
+  }
   // Close and return
   return scope.Close(Null());
 }
@@ -200,7 +205,8 @@ Handle<Value> Binary::Put(const Arguments &args) {
   if(len != 1) return VException("Function takes one argument of type String containing one character");
 
   // Let's define the buffer that contains the regexp string
-  char *data = new char[len];
+  // char *data = new char[len + 1];
+  char *data = (char *)malloc(len * sizeof(char) + 1);
   // Write the data to the buffer from the string object
   ssize_t written = DecodeWrite(data, len, str, BINARY);
 
@@ -219,6 +225,7 @@ Handle<Value> Binary::Put(const Arguments &args) {
   // Update the index pointer
   binary->index = binary->index + 1;
   // Free up the data
+  // delete data;
   free(data);
   // Return a null
   return scope.Close(Null());

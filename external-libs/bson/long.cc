@@ -223,7 +223,9 @@ Handle<Value> Long::Inspect(const Arguments &args) {
   // Let's create the string from the Long number
   char *result = l->toString(10);
   // Package the result in a V8 String object and return
-  return String::New(result);
+  Local<Value> str = String::New(result);
+  free(result);
+  return str;
 }
 
 Handle<Value> Long::GetLowBits(const Arguments &args) {
@@ -318,6 +320,8 @@ char *Long::toString(int32_t opt_radix) {
       // Release some memory
       free(div_result);
       free(int_buf);
+      // Delete object
+      delete rem;
       return final_buffer;
     } else {
       char *buf = (char *)malloc(50 * sizeof(char) + 1);
@@ -325,6 +329,8 @@ char *Long::toString(int32_t opt_radix) {
       char *result = this->negate()->toString(radix);      
       strncat(buf, "-", 1);
       strncat(buf + 1, result, strlen(result));
+      // Release memory
+      free(result);
       return buf;
     }  
   }
@@ -513,10 +519,13 @@ int64_t Long::compare(Long *other) {
     return 1;
   }
   
+  Long *return_value = this->subtract(other);  
   // At this point, the signs are the same, so subtraction will not overflow
-  if(this->subtract(other)->isNegative()) {
+  if(return_value->isNegative()) {
+    delete return_value;
     return -1;
   } else {
+    delete return_value;
     return 1;
   }
 }

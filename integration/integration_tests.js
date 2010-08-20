@@ -23,7 +23,7 @@ var Db = require('../lib/mongodb').Db,
   Integration Tests
 *******************************************************************************************************/
 var all_tests = {
-  
+
   // Test unicode characters
   test_unicode_characters : function() {
     client.createCollection('unicode_test_collection', function(err, collection) {
@@ -56,14 +56,14 @@ var all_tests = {
         var found = false;
         documents.forEach(function(document) {
           if(document.name == "integration_tests_.test_collection_methods") found = true;
-        });      
+        });
         test.ok(true, found);
         // Rename the collection and check that it's gone
         client.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
           test.equal(1, reply.documents[0].ok);
           // Drop the collection and check that it's gone
           client.dropCollection("test_collection_methods2", function(err, result) {
-            test.equal(true, result);          
+            test.equal(true, result);
             finished_test({test_collection_methods:'ok'});
           })
         });
@@ -85,23 +85,23 @@ var all_tests = {
         client.authenticate(user_name, password, function(err, replies) {
           // test.ok(replies);
           finished_test({test_authentication:'ok'});
-        });      
-      });    
+        });
+      });
     });
   },
   
   // Test the access to collections
-  test_collections : function() {  
+  test_collections : function() {
     // Create two collections
     client.createCollection('test.spiderman', function(r) {
       client.createCollection('test.mario', function(r) {
         // Insert test documents (creates collections)
         client.collection('test.spiderman', function(err, spiderman_collection) {
-          spiderman_collection.insert({foo:5});        
+          spiderman_collection.insert({foo:5});
         });
   
         client.collection('test.mario', function(err, mario_collection) {
-          mario_collection.insert({bar:0});        
+          mario_collection.insert({bar:0});
         });
   
         // Assert collections
@@ -122,7 +122,7 @@ var all_tests = {
           finished_test({test_collections:'ok'});
         });
       });
-    });  
+    });
   },
   
   // Test the generation of the object ids
@@ -132,31 +132,31 @@ var all_tests = {
     client.collection('test_object_id_generation.data', function(err, collection) {
       // Insert test documents (creates collections and test fetch by query)
       collection.insert({name:"Fred", age:42}, function(err, ids) {
-        test.equal(1, ids.length);    
+        test.equal(1, ids.length);
         test.ok(ids[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
         collection.findOne({name:"Fred"}, function(err, document) {
           test.equal(ids[0]['_id'].toHexString(), document._id.toHexString());
           number_of_tests_done++;
-        });      
+        });
       });
-      
+  
       // Insert another test document and collect using ObjectId
       collection.insert({name:"Pat", age:21}, function(err, ids) {
-        test.equal(1, ids.length);  
+        test.equal(1, ids.length);
         test.ok(ids[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
         collection.findOne(ids[0]['_id'], function(err, document) {
           test.equal(ids[0]['_id'].toHexString(), document._id.toHexString());
           number_of_tests_done++;
-        });      
+        });
       });
-      
+  
       // Manually created id
-      var objectId = new client.bson_serializer.ObjectID(null);      
+      var objectId = new client.bson_serializer.ObjectID(null);
       // Insert a manually created document with generated oid
       collection.insert({"_id":objectId, name:"Donald", age:95}, function(err, ids) {
-        test.equal(1, ids.length);  
+        test.equal(1, ids.length);
         test.ok(ids[0]['_id'].toHexString().length == 24);
         test.equal(objectId.toHexString(), ids[0]['_id'].toHexString());
         // Locate the first document inserted
@@ -164,8 +164,8 @@ var all_tests = {
           test.equal(ids[0]['_id'].toHexString(), document._id.toHexString());
           test.equal(objectId.toHexString(), document._id.toHexString());
           number_of_tests_done++;
-        });      
-      });    
+        });
+      });
     });
   
     var intervalId = setInterval(function() {
@@ -173,7 +173,7 @@ var all_tests = {
         clearInterval(intervalId);
         finished_test({test_object_id_generation:'ok'});
       }
-    }, 100);    
+    }, 100);
   },
   
   test_object_id_to_and_from_hex_string : function() {
@@ -181,7 +181,7 @@ var all_tests = {
       var originalHex= objectId.toHexString();
   
       var newObjectId= new client.bson_serializer.ObjectID.createFromHexString(originalHex)
-      newHex= newObjectId.toHexString();    
+      newHex= newObjectId.toHexString();
       test.equal(originalHex, newHex);
       finished_test({test_object_id_to_and_from_hex_string:'ok'});
   },
@@ -202,22 +202,22 @@ var all_tests = {
         automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
           // Insert another test document and collect using ObjectId
           collection.insert({"name":"Patty", "age":34}, function(err, ids) {
-            test.equal(1, ids.length);    
+            test.equal(1, ids.length);
             test.ok(ids[0]._id.toHexString().length == 24);
   
             collection.findOne({"name":"Patty"}, function(err, document) {
               test.equal(ids[0]._id.toHexString(), document._id.toHexString());
-              // Let's close the db 
-              finished_test({test_automatic_reconnect:'ok'});    
+              // Let's close the db
+              finished_test({test_automatic_reconnect:'ok'});
               automatic_connect_client.close();
-            });      
-          });        
+            });
+          });
         });
-      };    
+      };
       // Add listener to close event
       automatic_connect_client.serverConfig.masterConnection.addListener("close", closeListener);
       automatic_connect_client.serverConfig.masterConnection.connection.end();
-    });  
+    });
   },
   
   // Test that error conditions are handled correctly
@@ -233,7 +233,7 @@ var all_tests = {
       test.equal(21017, connection.port);
       test.equal(true, connection.autoReconnect);
     });
-    error_client.open(function(err, error_client) {});    
+    error_client.open(function(err, error_client) {});
   
     // Test error handling for server pair (works for cluster aswell)
     var serverConfig = new Server("127.0.0.1", 20017, {});
@@ -259,49 +259,49 @@ var all_tests = {
   
   // Test the error reporting functionality
   test_error_handling : function() {
-    var error_client = new Db('integration_tests2_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {});  
+    var error_client = new Db('integration_tests2_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
   
-    error_client.open(function(err, error_client) {  
+    error_client.open(function(err, error_client) {
       error_client.resetErrorHistory(function() {
         error_client.error(function(err, documents) {
-          test.equal(true, documents[0].ok);                
-          test.equal(0, documents[0].n);    
+          test.equal(true, documents[0].ok);
+          test.equal(0, documents[0].n);
   
           // Force error on server
           error_client.executeDbCommand({forceerror: 1}, function(err, r) {
-            test.equal(0, r.documents[0].ok);                
-            test.ok(r.documents[0].errmsg.length > 0);    
+            test.equal(0, r.documents[0].ok);
+            test.ok(r.documents[0].errmsg.length > 0);
             // // Check for previous errors
             error_client.previousErrors(function(err, documents) {
-              test.equal(true, documents[0].ok);                
-              test.equal(1, documents[0].nPrev);    
+              test.equal(true, documents[0].ok);
+              test.equal(1, documents[0].nPrev);
               test.equal("forced error", documents[0].err);
               // Check for the last error
               error_client.error(function(err, documents) {
-                test.equal("forced error", documents[0].err);    
+                test.equal("forced error", documents[0].err);
                 // Force another error
                 error_client.collection('test_error_collection', function(err, collection) {
-                  collection.findOne({name:"Fred"}, function(err, document) {              
+                  collection.findOne({name:"Fred"}, function(err, document) {
                     // Check that we have two previous errors
                     error_client.previousErrors(function(err, documents) {
-                      test.equal(true, documents[0].ok);                
-                      test.equal(2, documents[0].nPrev);    
+                      test.equal(true, documents[0].ok);
+                      test.equal(2, documents[0].nPrev);
                       test.equal("forced error", documents[0].err);
   
                       error_client.resetErrorHistory(function() {
                         error_client.previousErrors(function(err, documents) {
-                          test.equal(true, documents[0].ok);                
-                          test.equal(-1, documents[0].nPrev);                        
+                          test.equal(true, documents[0].ok);
+                          test.equal(-1, documents[0].nPrev);
   
                           error_client.error(function(err, documents) {
-                            test.equal(true, documents[0].ok);                
+                            test.equal(true, documents[0].ok);
                             test.equal(0, documents[0].n);
   
-                            // Let's close the db 
-                            finished_test({test_error_handling:'ok'}); 
+                            // Let's close the db
+                            finished_test({test_error_handling:'ok'});
                             error_client.close();
                           });
                         })
@@ -309,64 +309,64 @@ var all_tests = {
                     });
                   });
                 });
-              })          
+              })
             });
           });
         });
       });
     });
   },
-  
+
   // Test the last status functionality of the driver
-  test_last_status : function() {  
+  test_last_status : function() {
     client.createCollection('test_last_status', function(err, collection) {
       test.ok(collection instanceof Collection);
       test.equal('test_last_status', collection.collectionName);
-  
+
       // Get the collection
       client.collection('test_last_status', function(err, collection) {
         // Remove all the elements of the collection
         collection.remove(function(err, collection) {
           // Check update of a document
           collection.insert({i:1}, function(err, ids) {
-            test.equal(1, ids.length);    
-            test.ok(ids[0]._id.toHexString().length == 24);        
-          
+            test.equal(1, ids.length);
+            test.ok(ids[0]._id.toHexString().length == 24);
+
             // Update the record
             collection.update({i:1}, {"$set":{i:2}}, function(err, result) {
               // Check for the last message from the server
               client.lastStatus(function(err, status) {
-                test.equal(true, status.documents[0].ok);                
-                test.equal(true, status.documents[0].updatedExisting);                
+                test.equal(true, status.documents[0].ok);
+                test.equal(true, status.documents[0].updatedExisting);
                 // Check for failed update of document
                 collection.update({i:1}, {"$set":{i:500}}, function(err, result) {
                   client.lastStatus(function(err, status) {
-                    test.equal(true, status.documents[0].ok);                
-                    test.equal(false, status.documents[0].updatedExisting);                
-          
+                    test.equal(true, status.documents[0].ok);
+                    test.equal(false, status.documents[0].updatedExisting);
+
                     // Check safe update of a document
                     collection.insert({x:1}, function(err, ids) {
                       collection.update({x:1}, {"$set":{x:2}}, {'safe':true}, function(err, document) {
                       });
-          
+
                       collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, document) {
                         test.ok(err instanceof Error);
                         test.equal("Failed to update document", err.message);
-          
-                        // Let's close the db 
-                        finished_test({test_last_status:'ok'});                     
+
+                        // Let's close the db
+                        finished_test({test_last_status:'ok'});
                       });
-                    });                
+                    });
                   });
                 });
               });
             });
-          });      
-        });      
-      });  
+          });
+        });
+      });
     });
   },
-  
+
   // Test clearing out of the collection
   test_clear : function() {
     client.createCollection('test_clear', function(err, r) {
@@ -374,22 +374,22 @@ var all_tests = {
         collection.insert({i:1}, function(err, ids) {
           collection.insert({i:2}, function(err, ids) {
             collection.count(function(err, count) {
-              test.equal(2, count);    
+              test.equal(2, count);
               // Clear the collection
               collection.remove(function(err, collection) {
                 collection.count(function(err, count) {
-                  test.equal(0, count);    
-                  // Let's close the db 
-                  finished_test({test_clear:'ok'}); 
+                  test.equal(0, count);
+                  // Let's close the db
+                  finished_test({test_clear:'ok'});
                 });
-              });        
+              });
             });
           });
-        });          
-      });    
-    });  
+        });
+      });
+    });
   },
-  
+
   // Test insert of documents
   test_insert : function() {
     client.createCollection('test_insert', function(err, r) {
@@ -397,7 +397,7 @@ var all_tests = {
         for(var i = 1; i < 1000; i++) {
           collection.insert({c:i}, function(err, r) {});
         }
-  
+
         collection.insert({a:2}, function(err, r) {
           collection.insert({a:3}, function(err, r) {
             collection.count(function(err, count) {
@@ -407,29 +407,29 @@ var all_tests = {
                 cursor.toArray(function(err, results) {
                   test.equal(1001, results.length);
                   test.ok(results[0] != null);
-  
-                  // Let's close the db 
-                  finished_test({test_insert:'ok'}); 
+
+                  // Let's close the db
+                  finished_test({test_insert:'ok'});
                 });
-              });          
-            });        
+              });
+            });
           });
-        });      
-      });    
+        });
+      });
     });
   },
-  
+
   // Test multiple document insert
   test_multiple_insert : function() {
     client.createCollection('test_multiple_insert', function(err, r) {
       var collection = client.collection('test_multiple_insert', function(err, collection) {
         var docs = [{a:1}, {a:2}];
-  
+
         collection.insert(docs, function(err, ids) {
           ids.forEach(function(doc) {
             test.ok(((doc['_id']) instanceof ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
           });
-            
+
           // Let's ensure we have both documents
           collection.find(function(err, cursor) {
             cursor.toArray(function(err, docs) {
@@ -440,57 +440,57 @@ var all_tests = {
                 if(doc.a == 1 || doc.a == 2) results.push(1);
               });
               test.equal(2, results.length);
-              // Let's close the db 
-              finished_test({test_multiple_insert:'ok'}); 
+              // Let's close the db
+              finished_test({test_multiple_insert:'ok'});
             });
           });
-        });      
+        });
       });
-    });  
-  },
-  
-  // Test the count result on a collection that does not exist
-  test_count_on_nonexisting : function() {
-    client.collection('test_multiple_insert', function(err, collection) {
-      collection.count(function(err, count) {  
-        test.equal(0, count);
-        // Let's close the db 
-        finished_test({test_count_on_nonexisting:'ok'}); 
-      });    
     });
   },
-  
+
+  // Test the count result on a collection that does not exist
+  test_count_on_nonexisting : function() {
+    client.collection('test_multiple_insert_2', function(err, collection) {
+      collection.count(function(err, count) {
+        test.equal(0, count);
+        // Let's close the db
+        finished_test({test_count_on_nonexisting:'ok'});
+      });
+    });
+  },
+
   // Test a simple find
   test_find_simple : function() {
     client.createCollection('test_find_simple', function(err, r) {
       var collection = client.collection('test_find_simple', function(err, collection) {
         var doc1 = null;
         var doc2 = null;
-  
+
         // Insert some test documents
         collection.insert([{a:2}, {b:3}], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]});
         // Ensure correct insertion testing via the cursor and the count function
         collection.find(function(err, cursor) {
           cursor.toArray(function(err, documents) {
             test.equal(2, documents.length);
-          })            
-        });    
-        collection.count(function(err, count) {
-          test.equal(2, count);      
+          })
         });
-        // Fetch values by selection    
+        collection.count(function(err, count) {
+          test.equal(2, count);
+        });
+        // Fetch values by selection
         collection.find({'a': doc1.a}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             test.equal(1, documents.length);
             test.equal(doc1.a, documents[0].a);
-            // Let's close the db 
-            finished_test({test_find_simple:'ok'}); 
+            // Let's close the db
+            finished_test({test_find_simple:'ok'});
           });
-        });      
+        });
       });
     });
   },
-  
+
   // Test advanced find
   test_find_advanced : function() {
     client.createCollection('test_find_advanced', function(err, r) {
@@ -500,7 +500,7 @@ var all_tests = {
         // Insert some test documents
         collection.insert([{a:1}, {a:2}, {b:3}], function(err, docs) {
           var doc1 = docs[0], doc2 = docs[1], doc3 = docs[2];
-                  
+  
           // Locate by less than
           collection.find({'a':{'$lt':10}}, function(err, cursor) {
             cursor.toArray(function(err, documents) {
@@ -513,24 +513,24 @@ var all_tests = {
               });
               test.equal(2, results.length);
             });
-          });    
-          
+          });
+  
           // Locate by greater than
           collection.find({'a':{'$gt':1}}, function(err, cursor) {
             cursor.toArray(function(err, documents) {
               test.equal(1, documents.length);
               test.equal(2, documents[0].a);
             });
-          });    
-          
+          });
+  
           // Locate by less than or equal to
           collection.find({'a':{'$lte':1}}, function(err, cursor) {
             cursor.toArray(function(err, documents) {
               test.equal(1, documents.length);
               test.equal(1, documents[0].a);
             });
-          });    
-          
+          });
+  
           // Locate by greater than or equal to
           collection.find({'a':{'$gte':1}}, function(err, cursor) {
             cursor.toArray(function(err, documents) {
@@ -543,16 +543,16 @@ var all_tests = {
               });
               test.equal(2, results.length);
             });
-          });    
-          
+          });
+  
           // Locate by between
           collection.find({'a':{'$gt':1, '$lt':3}}, function(err, cursor) {
             cursor.toArray(function(err, documents) {
               test.equal(1, documents.length);
               test.equal(2, documents[0].a);
             });
-          });    
-          
+          });
+  
           // Locate in clause
           collection.find({'a':{'$in':[1,2]}}, function(err, cursor) {
             cursor.toArray(function(err, documents) {
@@ -563,10 +563,10 @@ var all_tests = {
               documents.forEach(function(doc) {
                 if(doc.a == 1 || doc.a == 2) results.push(1);
               });
-              test.equal(2, results.length);    
+              test.equal(2, results.length);
             });
           });
-          
+  
           // Locate in _id clause
           collection.find({'_id':{'$in':[doc1['_id'], doc2['_id']]}}, function(err, cursor) {
             cursor.toArray(function(err, documents) {
@@ -578,8 +578,8 @@ var all_tests = {
                 if(doc.a == 1 || doc.a == 2) results.push(1);
               });
               test.equal(2, results.length);
-              // Let's close the db 
-              finished_test({test_find_advanced:'ok'});     
+              // Let's close the db
+              finished_test({test_find_advanced:'ok'});
             });
           });
         });
@@ -593,8 +593,8 @@ var all_tests = {
       client.collection('test_find_sorting', function(err, collection) {
         var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
         // Insert some test documents
-        collection.insert([{a:1, b:2}, 
-            {a:2, b:1}, 
+        collection.insert([{a:1, b:2},
+            {a:2, b:1},
             {a:3, b:2},
             {a:4, b:1}
           ], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
@@ -620,7 +620,7 @@ var all_tests = {
             test.equal(1, documents[3].a);
           });
         });
-        
+  
         // Sorting using array of names, assumes ascending order
         collection.find({'a': {'$lt':10}}, {'sort': ['a']}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
@@ -631,7 +631,7 @@ var all_tests = {
             test.equal(4, documents[3].a);
           });
         });
-        
+  
         // Sorting using single name, assumes ascending order
         collection.find({'a': {'$lt':10}}, {'sort': 'a'}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
@@ -642,7 +642,7 @@ var all_tests = {
             test.equal(4, documents[3].a);
           });
         });
-        
+  
         collection.find({'a': {'$lt':10}}, {'sort': ['b', 'a']}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             test.equal(4, documents.length);
@@ -652,26 +652,26 @@ var all_tests = {
             test.equal(3, documents[3].a);
           });
         });
-        
+  
         // Sorting using empty array, no order guarantee should not blow up
         collection.find({'a': {'$lt':10}}, {'sort': []}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             test.equal(4, documents.length);
           });
         });
-        
+  
         // Sorting using ordered hash
         collection.find({'a': {'$lt':10}}, {'sort': {a:-1}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             // Fail test if not an error
             test.ok(err instanceof Error);
             test.equal("Error: Invalid sort argument was supplied", err.message);
-            // Let's close the db 
-            finished_test({test_find_sorting:'ok'});     
+            // Let's close the db
+            finished_test({test_find_sorting:'ok'});
           });
-        });            
+        });
       });
-    });  
+    });
   },
   
   // Test the limit function of the db
@@ -681,8 +681,8 @@ var all_tests = {
         var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
   
         // Insert some test documents
-        collection.insert([{a:1}, 
-            {b:2}, 
+        collection.insert([{a:1},
+            {b:2},
             {c:3},
             {d:4}
           ], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
@@ -690,43 +690,43 @@ var all_tests = {
         // Test limits
         collection.find({}, {'limit': 1}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.equal(1, documents.length);        
+            test.equal(1, documents.length);
           });
-        });    
+        });
   
-        collection.find({}, {'limit': 2}, function(err, cursor) {        
+        collection.find({}, {'limit': 2}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.equal(2, documents.length);        
+            test.equal(2, documents.length);
           });
-        });    
+        });
   
         collection.find({}, {'limit': 3}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.equal(3, documents.length);        
+            test.equal(3, documents.length);
           });
-        });    
+        });
   
         collection.find({}, {'limit': 4}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);        
+            test.equal(4, documents.length);
           });
-        });    
+        });
   
         collection.find({}, {}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);        
+            test.equal(4, documents.length);
           });
-        });    
+        });
   
         collection.find({}, {'limit':99}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);        
-            // Let's close the db 
-            finished_test({test_find_limits:'ok'});     
+            test.equal(4, documents.length);
+            // Let's close the db
+            finished_test({test_find_limits:'ok'});
           });
-        });          
+        });
       });
-    });  
+    });
   },
   
   // Find no records
@@ -735,13 +735,13 @@ var all_tests = {
       client.collection('test_find_one_no_records', function(err, collection) {
         collection.find({'a':1}, {}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
-            test.equal(0, documents.length);        
-            // Let's close the db 
-            finished_test({test_find_one_no_records:'ok'});     
+            test.equal(0, documents.length);
+            // Let's close the db
+            finished_test({test_find_one_no_records:'ok'});
           });
-        });              
+        });
       });
-    });  
+    });
   },
   
   // Test dropping of collections
@@ -758,9 +758,9 @@ var all_tests = {
               found = true;
               break;
             }
-          });        
-          // Let's close the db 
-          finished_test({test_drop_collection:'ok'});     
+          });
+          // Let's close the db
+          finished_test({test_drop_collection:'ok'});
           // If we have an instance of the index throw and error
           if(found) throw new Error("should not fail");
         });
@@ -781,14 +781,14 @@ var all_tests = {
                 found = true;
                 break;
               }
-            });        
-            // Let's close the db 
-            finished_test({test_other_drop:'ok'});     
+            });
+            // Let's close the db
+            finished_test({test_other_drop:'ok'});
             // If we have an instance of the index throw and error
             if(found) throw new Error("should not fail");
-          });      
-        });      
-      });        
+          });
+        });
+      });
     });
   },
   
@@ -808,15 +808,15 @@ var all_tests = {
             documents.forEach(function(document) {
               if(document.name == 'integration_tests_.test_collection_names2') found = true;
               if(document.name == 'integration_tests_.test_collection_names') found2 = true;
-            });        
+            });
   
-            test.ok(found);      
-            test.ok(found2);      
+            test.ok(found);
+            test.ok(found2);
           });
-          // Let's close the db 
-          finished_test({test_collection_names:'ok'});             
+          // Let's close the db
+          finished_test({test_collection_names:'ok'});
         });
-      });    
+      });
     });
   },
   
@@ -833,15 +833,15 @@ var all_tests = {
             if(document.name == 'integration_tests_.test_collections_info') found = true;
           });
           test.ok(found);
-        });    
-        // Let's close the db 
-        finished_test({test_collections_info:'ok'});         
+        });
+        // Let's close the db
+        finished_test({test_collections_info:'ok'});
       });
     });
   },
   
   test_collection_options : function() {
-    client.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {    
+    client.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {
       test.ok(collection instanceof Collection);
       test.equal('test_collection_options', collection.collectionName);
       // Let's fetch the collection options
@@ -849,14 +849,14 @@ var all_tests = {
         test.equal(true, options.capped);
         test.equal(1024, options.size);
         test.equal("test_collection_options", options.create);
-        // Let's close the db 
-        finished_test({test_collection_options:'ok'});         
+        // Let's close the db
+        finished_test({test_collection_options:'ok'});
       });
     });
   },
   
   test_index_information : function() {
-    client.createCollection('test_index_information', function(err, collection) {    
+    client.createCollection('test_index_information', function(err, collection) {
       collection.insert({a:1}, function(err, ids) {
         // Create an index on the collection
         client.createIndex(collection.collectionName, 'a', function(err, indexName) {
@@ -879,21 +879,21 @@ var all_tests = {
               test.ok(collectionInfo2['_id_'] != null);
               test.equal('_id', collectionInfo2['_id_'][0][0]);
               test.ok(collectionInfo2['a_1'] != null);
-              test.deepEqual([["a", 1]], collectionInfo2['a_1']);            
+              test.deepEqual([["a", 1]], collectionInfo2['a_1']);
               test.ok((collectionInfo[indexName] != null));
-              test.deepEqual([["a", 1]], collectionInfo[indexName]);            
+              test.deepEqual([["a", 1]], collectionInfo[indexName]);
   
-              // Let's close the db 
-              finished_test({test_index_information:'ok'});                 
-            });          
+              // Let's close the db
+              finished_test({test_index_information:'ok'});
+            });
           });
-        });      
+        });
       })
     });
   },
   
   test_multiple_index_cols : function() {
-    client.createCollection('test_multiple_index_cols', function(err, collection) {    
+    client.createCollection('test_multiple_index_cols', function(err, collection) {
       collection.insert({a:1}, function(err, ids) {
         // Create an index on the collection
         client.createIndex(collection.collectionName, [['a', -1], ['b', 1], ['c', -1]], function(err, indexName) {
@@ -902,16 +902,16 @@ var all_tests = {
           client.indexInformation(collection.collectionName, function(err, collectionInfo) {
             var count1 = 0;
             // Get count of indexes
-            for(var i in collectionInfo) { count1 += 1;}          
+            for(var i in collectionInfo) { count1 += 1;}
   
             // Test
             test.equal(2, count1);
             test.ok(collectionInfo[indexName] != null);
             test.deepEqual([['a', -1], ['b', 1], ['c', -1]], collectionInfo[indexName]);
   
-            // Let's close the db 
-            finished_test({test_multiple_index_cols:'ok'});                 
-          });        
+            // Let's close the db
+            finished_test({test_multiple_index_cols:'ok'});
+          });
         });
       });
     });
@@ -919,7 +919,7 @@ var all_tests = {
   
   test_unique_index : function() {
     // Create a non-unique index and test inserts
-    client.createCollection('test_unique_index', function(err, collection) {    
+    client.createCollection('test_unique_index', function(err, collection) {
       client.createIndex(collection.collectionName, 'hello', function(err, indexName) {
         // Insert some docs
         collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(err, ids) {
@@ -929,11 +929,11 @@ var all_tests = {
             test.equal(null, errors[0].err);
           });
         });
-      });        
+      });
     });
   
     // Create a unique index and test that insert fails
-    client.createCollection('test_unique_index2', function(err, collection) {    
+    client.createCollection('test_unique_index2', function(err, collection) {
       client.createIndex(collection.collectionName, 'hello', true, function(err, indexName) {
         // Insert some docs
         collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], function(err, ids) {
@@ -941,51 +941,51 @@ var all_tests = {
           client.error(function(err, errors) {
             test.equal(1, errors.length);
             test.ok(errors[0].err != null);
-            // Let's close the db 
-            finished_test({test_unique_index:'ok'});                 
+            // Let's close the db
+            finished_test({test_unique_index:'ok'});
           });
         });
-      });        
-    });  
+      });
+    });
   },
   
   test_index_on_subfield : function() {
     // Create a non-unique index and test inserts
-    client.createCollection('test_index_on_subfield', function(err, collection) {  
+    client.createCollection('test_index_on_subfield', function(err, collection) {
       collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], function(err, ids) {
         // Assert that we have no erros
         client.error(function(err, errors) {
           test.equal(1, errors.length);
           test.ok(errors[0].err == null);
-        });      
-      });  
+        });
+      });
     });
   
     // Create a unique subfield index and test that insert fails
-    client.createCollection('test_index_on_subfield2', function(err, collection) {  
+    client.createCollection('test_index_on_subfield2', function(err, collection) {
       client.createIndex(collection.collectionName, 'hello.a', true, function(err, indexName) {
         collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], function(err, ids) {
           // Assert that we have erros
           client.error(function(err, errors) {
             test.equal(1, errors.length);
             test.ok(errors[0].err != null);
-            // Let's close the db 
-            finished_test({test_index_on_subfield:'ok'});                 
+            // Let's close the db
+            finished_test({test_index_on_subfield:'ok'});
           });
-        });  
+        });
       });
-    });  
+    });
   },
   
   test_array : function() {
     // Create a non-unique index and test inserts
-    client.createCollection('test_array', function(err, collection) {  
+    client.createCollection('test_array', function(err, collection) {
       collection.insert({'b':[1, 2, 3]}, function(err, ids) {
         collection.find(function(err, cursor) {
           cursor.toArray(function(err, documents) {
             test.deepEqual([1, 2, 3], documents[0].b);
-            // Let's close the db 
-            finished_test({test_array:'ok'});                 
+            // Let's close the db
+            finished_test({test_array:'ok'});
           });
         }, {});
       });
@@ -995,13 +995,13 @@ var all_tests = {
   test_regex : function() {
     var regexp = /foobar/i;
   
-    client.createCollection('test_regex', function(err, collection) {  
+    client.createCollection('test_regex', function(err, collection) {
       collection.insert({'b':regexp}, function(err, ids) {
         collection.find({}, {'fields': ['b']}, function(err, cursor) {
           cursor.toArray(function(err, items) {
             test.equal(("" + regexp), ("" + items[0].b));
-            // Let's close the db 
-            finished_test({test_regex:'ok'});                 
+            // Let's close the db
+            finished_test({test_regex:'ok'});
           });
         });
       });
@@ -1010,7 +1010,7 @@ var all_tests = {
   
   // Use some other id than the standard for inserts
   test_non_oid_id : function() {
-    client.createCollection('test_non_oid_id', function(err, collection) {  
+    client.createCollection('test_non_oid_id', function(err, collection) {
       var date = new Date();
       date.setUTCDate(12);
       date.setUTCFullYear(2009);
@@ -1019,16 +1019,16 @@ var all_tests = {
       date.setUTCMinutes(0);
       date.setUTCSeconds(30);
   
-      collection.insert({'_id':date}, function(err, ids) {      
+      collection.insert({'_id':date}, function(err, ids) {
         collection.find({'_id':date}, function(err, cursor) {
           cursor.toArray(function(err, items) {
             test.equal(("" + date), ("" + items[0]._id));
   
-            // Let's close the db 
-            finished_test({test_non_oid_id:'ok'});                 
+            // Let's close the db
+            finished_test({test_non_oid_id:'ok'});
           });
-        });      
-      });    
+        });
+      });
     });
   },
   
@@ -1039,17 +1039,17 @@ var all_tests = {
     error_client.pkFactory = client.pkFactory;
   
     test.equal(true, error_client.strict);
-    error_client.open(function(err, error_client) {  
+    error_client.open(function(err, error_client) {
       error_client.collection('does-not-exist', function(err, collection) {
         test.ok(err instanceof Error);
-        test.equal("Collection does-not-exist does not exist. Currently in strict mode.", err.message);      
-      });      
+        test.equal("Collection does-not-exist does not exist. Currently in strict mode.", err.message);
+      });
   
-      error_client.createCollection('test_strict_access_collection', function(err, collection) {  
+      error_client.createCollection('test_strict_access_collection', function(err, collection) {
         error_client.collection('test_strict_access_collection', function(err, collection) {
           test.ok(collection instanceof Collection);
-          // Let's close the db 
-          finished_test({test_strict_access_collection:'ok'});                 
+          // Let's close the db
+          finished_test({test_strict_access_collection:'ok'});
           error_client.close();
         });
       });
@@ -1063,7 +1063,7 @@ var all_tests = {
     error_client.pkFactory = client.pkFactory;
     test.equal(true, error_client.strict);
   
-    error_client.open(function(err, error_client) {  
+    error_client.open(function(err, error_client) {
       error_client.createCollection('test_strict_create_collection', function(err, collection) {
         test.ok(collection instanceof Collection);
   
@@ -1077,13 +1077,13 @@ var all_tests = {
           error_client.createCollection('test_strict_create_collection', function(err, collection) {
             test.ok(collection instanceof Collection);
   
-            // Let's close the db 
-            finished_test({test_strict_create_collection:'ok'});                 
+            // Let's close the db
+            finished_test({test_strict_create_collection:'ok'});
             error_client.close();
-          });                
+          });
         });
       });
-    });  
+    });
   },
   
   test_to_a : function() {
@@ -1091,7 +1091,7 @@ var all_tests = {
       test.ok(collection instanceof Collection);
       collection.insert({'a':1}, function(err, ids) {
         collection.find({}, function(err, cursor) {
-          cursor.toArray(function(err, items) {          
+          cursor.toArray(function(err, items) {
             // Should fail if called again (cursor should be closed)
             cursor.toArray(function(err, items) {
               test.ok(err instanceof Error);
@@ -1100,15 +1100,15 @@ var all_tests = {
               // Each should allow us to iterate over the entries due to cache
               cursor.each(function(err, item) {
                 if(item != null) {
-                  test.equal(1, item.a);                
-                  // Let's close the db 
-                  finished_test({test_to_a:'ok'});                 
+                  test.equal(1, item.a);
+                  // Let's close the db
+                  finished_test({test_to_a:'ok'});
                 }
               });
             });
           });
-        });      
-      });    
+        });
+      });
     });
   },
   
@@ -1121,10 +1121,10 @@ var all_tests = {
             if(item == null) {
               cursor.toArray(function(err, items) {
                 test.ok(err instanceof Error);
-                test.equal("Cursor is closed", err.message);                            
+                test.equal("Cursor is closed", err.message);
   
-                // Let's close the db 
-                finished_test({test_to_a_after_each:'ok'});                 
+                // Let's close the db
+                finished_test({test_to_a_after_each:'ok'});
               });
             };
           });
@@ -1144,19 +1144,19 @@ var all_tests = {
           collection.find({'$where':new client.bson_serializer.Code('this.a > 2')}, function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(1, count);
-            });          
+            });
           });
   
           collection.find({'$where':new client.bson_serializer.Code('this.a > i', {i:1})}, function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(2, count);
   
-              // Let's close the db 
-              finished_test({test_where:'ok'});                 
+              // Let's close the db
+              finished_test({test_where:'ok'});
             });
           });
         });
-      });    
+      });
     });
   },
   
@@ -1166,44 +1166,44 @@ var all_tests = {
     });
   
     client.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
-      test.equal(null, result)        
+      test.equal(null, result)
       // Locate the entry
       client.collection('test_eval', function(err, collection) {
         collection.findOne(function(err, item) {
           test.equal(5, item.y);
         });
-      });    
-    });  
+      });
+    });
   
     client.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
-      test.equal(5, result);    
+      test.equal(5, result);
     });
   
     client.eval('function () {return 5;}', function(err, result) {
-      test.equal(5, result);    
+      test.equal(5, result);
     });
   
     client.eval('2 + 3;', function(err, result) {
-      test.equal(5, result);        
+      test.equal(5, result);
     });
   
     client.eval(new client.bson_serializer.Code("2 + 3;"), function(err, result) {
-      test.equal(5, result);            
+      test.equal(5, result);
     });
   
     client.eval(new client.bson_serializer.Code("return i;", {'i':2}), function(err, result) {
-      test.equal(2, result);            
+      test.equal(2, result);
     });
   
     client.eval(new client.bson_serializer.Code("i + 3;", {'i':2}), function(err, result) {
-      test.equal(5, result);            
+      test.equal(5, result);
     });
   
     client.eval("5 ++ 5;", function(err, result) {
       test.ok(err instanceof Error);
       test.ok(err.message != null);
-      // Let's close the db 
-      finished_test({test_eval:'ok'});                             
+      // Let's close the db
+      finished_test({test_eval:'ok'});
     });
   },
   
@@ -1215,19 +1215,19 @@ var all_tests = {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
             });
-          });     
+          });
   
           collection.find({'a':1}, {'hint':['a']}, function(err, cursor) {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
             });
-          });        
+          });
   
           collection.find({'a':1}, {'hint':{'a':1}}, function(err, cursor) {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
             });
-          });      
+          });
   
           // Modify hints
           collection.hint = 'a';
@@ -1236,7 +1236,7 @@ var all_tests = {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
             });
-          });   
+          });
   
           collection.hint = ['a'];
           test.equal(1, collection.hint['a']);
@@ -1244,7 +1244,7 @@ var all_tests = {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
             });
-          });   
+          });
   
           collection.hint = {'a':1};
           test.equal(1, collection.hint['a']);
@@ -1252,17 +1252,17 @@ var all_tests = {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
             });
-          });           
+          });
   
           collection.hint = null;
           test.ok(collection.hint == null);
           collection.find({'a':1}, function(err, cursor) {
             cursor.toArray(function(err, items) {
               test.equal(1, items.length);
-              // Let's close the db 
-              finished_test({test_hint:'ok'});                             
+              // Let's close the db
+              finished_test({test_hint:'ok'});
             });
-          });           
+          });
         });
       });
     });
@@ -1281,11 +1281,11 @@ var all_tests = {
         collection.insert([{'a':2}, {'b':5}, {'a':1}], function(err, ids) {
           collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
             test.equal(3, results[0].count);
-          });        
+          });
   
           collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
             test.equal(3, results[0].count);
-          });        
+          });
   
           collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
             test.equal(1, results[0].count);
@@ -1322,12 +1322,12 @@ var all_tests = {
               collection.group([], {}, {}, "5 ++ 5", true, function(err, results) {
                 test.ok(err instanceof Error);
                 test.ok(err.message != null);
-                // Let's close the db 
-                finished_test({test_group:'ok'});                                   
+                // Let's close the db
+                finished_test({test_group:'ok'});
               });
-            });          
-          });        
-        });      
+            });
+          });
+        });
       });
     });
   },
@@ -1337,43 +1337,43 @@ var all_tests = {
       collection.insert({'a':1}, function(err, ids) {
         collection.remove(function(err, result) {
           collection.count(function(err, count) {
-            test.equal(0, count);          
+            test.equal(0, count);
   
             // Execute deref a db reference
             client.dereference(new client.bson_serializer.DBRef("test_deref", new client.bson_serializer.ObjectID()), function(err, result) {
               collection.insert({'x':'hello'}, function(err, ids) {
                 collection.findOne(function(err, document) {
                   test.equal('hello', document.x);
-                
+  
                   client.dereference(new client.bson_serializer.DBRef("test_deref", document._id), function(err, result) {
                     test.equal('hello', document.x);
                   });
                 });
-              });            
+              });
             });
   
             client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, result) {
               var obj = {'_id':4};
-              
+  
               collection.insert(obj, function(err, ids) {
                 client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, document) {
-                  
+  
                   test.equal(obj['_id'], document._id);
                   collection.remove(function(err, result) {
                     collection.insert({'x':'hello'}, function(err, ids) {
                       client.dereference(new client.bson_serializer.DBRef("test_deref", null), function(err, result) {
                         test.equal(null, result);
-                        // Let's close the db 
-                        finished_test({test_deref:'ok'});                                   
+                        // Let's close the db
+                        finished_test({test_deref:'ok'});
                       });
                     });
                   });
                 });
               });
-            });          
+            });
           })
-        })          
-      })    
+        })
+      })
     });
   },
   
@@ -1388,7 +1388,7 @@ var all_tests = {
   
           collection.save(doc, function(err, doc) {
             collection.count(function(err, count) {
-              test.equal(1, count);                        
+              test.equal(1, count);
             });
   
             collection.findOne(function(err, doc) {
@@ -1398,7 +1398,7 @@ var all_tests = {
               doc.hello = 'mike';
               collection.save(doc, function(err, doc) {
                 collection.count(function(err, count) {
-                  test.equal(1, count);                        
+                  test.equal(1, count);
                 });
   
                 collection.findOne(function(err, doc) {
@@ -1407,15 +1407,15 @@ var all_tests = {
                   // Save another document
                   collection.save({hello:'world'}, function(err, doc) {
                     collection.count(function(err, count) {
-                      test.equal(2, count);                        
-                      // Let's close the db 
-                      finished_test({test_save:'ok'});                                   
-                    });                  
+                      test.equal(2, count);
+                      // Let's close the db
+                      finished_test({test_save:'ok'});
+                    });
                   });
-                });              
-              });            
+                });
+              });
             });
-          });        
+          });
         });
       });
     });
@@ -1426,8 +1426,8 @@ var all_tests = {
       collection.insert({'x':Long.fromNumber(9223372036854775807)});
       collection.findOne(function(err, doc) {
         test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
-        // Let's close the db 
-        finished_test({test_save_long:'ok'});                                   
+        // Let's close the db
+        finished_test({test_save_long:'ok'});
       });
     });
   },
@@ -1442,12 +1442,12 @@ var all_tests = {
   
           var id = doc._id.toString();
           collection.findOne({'_id':new client.bson_serializer.ObjectID(id)}, function(err, doc) {
-            test.equal('mike', doc.hello);          
-            // Let's close the db 
-            finished_test({test_find_by_oid:'ok'});                                   
-          });        
-        });      
-      });    
+            test.equal('mike', doc.hello);
+            // Let's close the db
+            finished_test({test_find_by_oid:'ok'});
+          });
+        });
+      });
     });
   },
   
@@ -1469,13 +1469,13 @@ var all_tests = {
   
               collection.findOne(function(err, doc) {
                 test.equal('mike', doc.hello);
-                // Let's close the db 
-                finished_test({test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection:'ok'});                                   
+                // Let's close the db
+                finished_test({test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection:'ok'});
               });
-            });          
-          });        
+            });
+          });
         });
-      });    
+      });
     });
   },
   
@@ -1486,12 +1486,12 @@ var all_tests = {
       // Illegal insert for key
       collection.insert({'$hello':'world'}, function(err, doc) {
         test.ok(err instanceof Error);
-        test.equal("key $hello must not start with '$'", err.message);            
+        test.equal("key $hello must not start with '$'", err.message);
       });
   
       collection.insert({'hello':{'$hello':'world'}}, function(err, doc) {
         test.ok(err instanceof Error);
-        test.equal("key $hello must not start with '$'", err.message);              
+        test.equal("key $hello must not start with '$'", err.message);
       });
   
       collection.insert({'he$llo':'world'}, function(err, docs) {
@@ -1504,124 +1504,124 @@ var all_tests = {
   
       collection.insert({'.hello':'world'}, function(err, doc) {
         test.ok(err instanceof Error);
-        test.equal("key .hello must not contain '.'", err.message);            
+        test.equal("key .hello must not contain '.'", err.message);
       });
   
       collection.insert({'hello':{'.hello':'world'}}, function(err, doc) {
         test.ok(err instanceof Error);
-        test.equal("key .hello must not contain '.'", err.message);            
+        test.equal("key .hello must not contain '.'", err.message);
       });
   
       collection.insert({'hello.':'world'}, function(err, doc) {
         test.ok(err instanceof Error);
-        test.equal("key hello. must not contain '.'", err.message);            
+        test.equal("key hello. must not contain '.'", err.message);
       });
   
       collection.insert({'hello':{'hello.':'world'}}, function(err, doc) {
         test.ok(err instanceof Error);
-        test.equal("key hello. must not contain '.'", err.message);            
-        // Let's close the db 
-        finished_test({test_invalid_key_names:'ok'});                                   
-      });    
+        test.equal("key hello. must not contain '.'", err.message);
+        // Let's close the db
+        finished_test({test_invalid_key_names:'ok'});
+      });
     });
   },
   
   test_collection_names2 : function() {
     client.collection(5, function(err, collection) {
-      test.equal("collection name must be a String", err.message);            
+      test.equal("collection name must be a String", err.message);
     });
   
     client.collection("", function(err, collection) {
-      test.equal("collection names cannot be empty", err.message);            
-    });  
+      test.equal("collection names cannot be empty", err.message);
+    });
   
     client.collection("te$t", function(err, collection) {
-      test.equal("collection names must not contain '$'", err.message);            
-    });  
+      test.equal("collection names must not contain '$'", err.message);
+    });
   
     client.collection(".test", function(err, collection) {
-      test.equal("collection names must not start or end with '.'", err.message);            
-    });  
+      test.equal("collection names must not start or end with '.'", err.message);
+    });
   
     client.collection("test.", function(err, collection) {
-      test.equal("collection names must not start or end with '.'", err.message);            
-    });  
+      test.equal("collection names must not start or end with '.'", err.message);
+    });
   
     client.collection("test..t", function(err, collection) {
-      test.equal("collection names cannot be empty", err.message);            
+      test.equal("collection names cannot be empty", err.message);
   
-      // Let's close the db 
-      finished_test({test_collection_names2:'ok'});                                   
-    });  
+      // Let's close the db
+      finished_test({test_collection_names2:'ok'});
+    });
   },
   
   test_rename_collection : function() {
     client.createCollection('test_rename_collection', function(err, collection) {
       client.createCollection('test_rename_collection2', function(err, collection) {
-        client.collection('test_rename_collection', function(err, collection1) {        
+        client.collection('test_rename_collection', function(err, collection1) {
           client.collection('test_rename_collection2', function(err, collection2) {
             // Assert rename
             collection1.rename(5, function(err, collection) {
               test.ok(err instanceof Error);
               test.equal("collection name must be a String", err.message);
             });
-              
+  
             collection1.rename("", function(err, collection) {
               test.ok(err instanceof Error);
               test.equal("collection names cannot be empty", err.message);
             });
-              
+  
             collection1.rename("te$t", function(err, collection) {
               test.ok(err instanceof Error);
               test.equal("collection names must not contain '$'", err.message);
             });
-              
+  
             collection1.rename(".test", function(err, collection) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
             });
-              
+  
             collection1.rename("test.", function(err, collection) {
               test.ok(err instanceof Error);
               test.equal("collection names must not start or end with '.'", err.message);
             });
-              
+  
             collection1.rename("tes..t", function(err, collection) {
-              test.equal("collection names cannot be empty", err.message);            
+              test.equal("collection names cannot be empty", err.message);
             });
-              
+  
             collection1.count(function(err, count) {
               test.equal(0, count);
-              
+  
               collection1.insert([{'x':1}, {'x':2}], function(err, docs) {
                 collection1.count(function(err, count) {
-                  test.equal(2, count);                
-                              
+                  test.equal(2, count);
+  
                   collection1.rename('test_rename_collection2', function(err, collection) {
                     test.ok(err instanceof Error);
-                    test.ok(err.message.length > 0);            
-                              
+                    test.ok(err.message.length > 0);
+  
                     collection1.rename('test_rename_collection3', function(err, collection) {
                       test.equal("test_rename_collection3", collection.collectionName);
-                              
+  
                       // Check count
                       collection.count(function(err, count) {
-                        test.equal(2, count);                                      
-                        // Let's close the db 
-                        finished_test({test_rename_collection:'ok'});                                   
-                      });                    
+                        test.equal(2, count);
+                        // Let's close the db
+                        finished_test({test_rename_collection:'ok'});
+                      });
                     });
                   });
                 });
-              })            
+              })
             })
-              
+  
             collection2.count(function(err, count) {
               test.equal(0, count);
             })
           });
-        });      
-      });    
+        });
+      });
     });
   },
   
@@ -1635,8 +1635,8 @@ var all_tests = {
           test.ok(explaination.millis.constructor == Number);
           test.ok(explaination.nscanned.constructor == Number);
   
-          // Let's close the db 
-          finished_test({test_explain:'ok'});                                   
+          // Let's close the db
+          finished_test({test_explain:'ok'});
         });
       });
     });
@@ -1647,50 +1647,50 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.count(function(err, count) {
           test.equal(0, count);
-            
+  
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i});
           }
-            
+  
           collection.find(function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(10, count);
               test.ok(count.constructor == Number);
             });
           });
-            
+  
           collection.find({}, {'limit':5}, function(err, cursor) {
             cursor.count(function(err, count) {
-              test.equal(10, count);            
+              test.equal(10, count);
             });
           });
-            
+  
           collection.find({}, {'skip':5}, function(err, cursor) {
             cursor.count(function(err, count) {
-              test.equal(10, count);            
+              test.equal(10, count);
             });
           });
-            
+  
           collection.find(function(err, cursor) {
             cursor.count(function(err, count) {
               test.equal(10, count);
-            
+  
               cursor.each(function(err, item) {
                 if(item == null) {
                   cursor.count(function(err, count2) {
-                    test.equal(10, count2);                  
-                    test.equal(count, count2);                  
-                    // Let's close the db 
-                    finished_test({test_count:'ok'});                                   
+                    test.equal(10, count2);
+                    test.equal(count, count2);
+                    // Let's close the db
+                    finished_test({test_count:'ok'});
                   });
                 }
               });
             });
           });
-            
+  
           client.collection('acollectionthatdoesn', function(err, collection) {
             collection.count(function(err, count) {
-              test.equal(0, count);          
+              test.equal(0, count);
             });
           })
         });
@@ -1704,11 +1704,11 @@ var all_tests = {
         collection.insert({'a':i});
       }
   
-      collection.find(function(err, cursor) {      
+      collection.find(function(err, cursor) {
         cursor.sort(['a', 1], function(err, cursor) {
           test.ok(cursor instanceof Cursor);
           test.deepEqual(['a', 1], cursor.sortValue);
-        });      
+        });
       });
   
       collection.find(function(err, cursor) {
@@ -1747,9 +1747,9 @@ var all_tests = {
           cursor.sort('a', -1, function(err, cursor) {
             cursor.nextObject(function(err, doc) {
               test.equal(4, doc.a);
-            });          
+            });
           })
-        });      
+        });
       });
   
       collection.find(function(err, cursor) {
@@ -1757,22 +1757,22 @@ var all_tests = {
           cursor.sort('a', 1, function(err, cursor) {
             cursor.nextObject(function(err, doc) {
               test.equal(0, doc.a);
-            });          
+            });
           })
-        });      
-      });    
+        });
+      });
   
       collection.find(function(err, cursor) {
         cursor.nextObject(function(err, doc) {
           cursor.sort(['a'], function(err, cursor) {
             test.ok(err instanceof Error);
-            test.equal("Cursor is closed", err.message);          
+            test.equal("Cursor is closed", err.message);
   
-            // Let's close the db 
-            finished_test({test_sort:'ok'});                                   
-          }); 
-        });          
-      }); 
+            // Let's close the db
+            finished_test({test_sort:'ok'});
+          });
+        });
+      });
   
       collection.find(function(err, cursor) {
         cursor.sort('a', 25, function(err, cursor) {
@@ -1790,7 +1790,7 @@ var all_tests = {
             test.equal("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
           });
         });
-      });           
+      });
     });
   },
   
@@ -1810,8 +1810,8 @@ var all_tests = {
         cursor.limit(5, function(err, cursor) {
           cursor.toArray(function(err, items) {
             test.equal(5, items.length);
-            // Let's close the db 
-            finished_test({test_cursor_limit:'ok'});                                   
+            // Let's close the db
+            finished_test({test_cursor_limit:'ok'});
           });
         });
       });
@@ -1833,14 +1833,14 @@ var all_tests = {
           cursor.limit(1, function(err, cursor) {
             test.ok(err instanceof Error);
             test.equal("Cursor is closed", err.message);
-            // Let's close the db 
-            finished_test({test_limit_exceptions:'ok'});                                   
+            // Let's close the db
+            finished_test({test_limit_exceptions:'ok'});
           });
         });
-      });       
+      });
   
       collection.find(function(err, cursor) {
-        cursor.close(function(err, cursor) {        
+        cursor.close(function(err, cursor) {
           cursor.limit(1, function(err, cursor) {
             test.ok(err instanceof Error);
             test.equal("Cursor is closed", err.message);
@@ -1867,7 +1867,7 @@ var all_tests = {
           collection.find(function(err, cursor) {
             cursor.skip(2, function(err, cursor) {
               cursor.toArray(function(err, items2) {
-                test.equal(8, items2.length);          
+                test.equal(8, items2.length);
   
                 // Check that we have the same elements
                 var numberEqual = 0;
@@ -1876,15 +1876,15 @@ var all_tests = {
                 for(var i = 0; i < sliced.length; i++) {
                   if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
                 }
-                test.equal(8, numberEqual);          
+                test.equal(8, numberEqual);
   
-                // Let's close the db 
-                finished_test({test_skip:'ok'});                                   
+                // Let's close the db
+                finished_test({test_skip:'ok'});
               });
             });
           });
         });
-      });    
+      });
     });
   },
   
@@ -1903,21 +1903,21 @@ var all_tests = {
           cursor.skip(1, function(err, cursor) {
             test.ok(err instanceof Error);
             test.equal("Cursor is closed", err.message);
-            // Let's close the db 
-            finished_test({test_skip_exceptions:'ok'});                                   
+            // Let's close the db
+            finished_test({test_skip_exceptions:'ok'});
           });
         });
-      });       
+      });
   
       collection.find(function(err, cursor) {
-        cursor.close(function(err, cursor) {        
+        cursor.close(function(err, cursor) {
           cursor.skip(1, function(err, cursor) {
             test.ok(err instanceof Error);
             test.equal("Cursor is closed", err.message);
           });
         });
       });
-    });  
+    });
   },
   
   test_limit_skip_chaining : function() {
@@ -1932,7 +1932,7 @@ var all_tests = {
             cursor.limit(5, function(err, cursor) {
               cursor.skip(3, function(err, cursor) {
                 cursor.toArray(function(err, items2) {
-                  test.equal(5, items2.length);                
+                  test.equal(5, items2.length);
   
                   // Check that we have the same elements
                   var numberEqual = 0;
@@ -1941,16 +1941,46 @@ var all_tests = {
                   for(var i = 0; i < sliced.length; i++) {
                     if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
                   }
-                  test.equal(5, numberEqual);          
+                  test.equal(5, numberEqual);
   
-                  // Let's close the db 
-                  finished_test({test_limit_skip_chaining:'ok'});                                   
+                  // Let's close the db
+                  finished_test({test_limit_skip_chaining:'ok'});
                 });
               });
             });
-          });        
+          });
         });
-      });    
+      });
+    });
+  },
+  
+  test_limit_skip_chaining_inline : function() {
+    client.createCollection('test_limit_skip_chaining_inline', function(err, collection) {
+      for(var i = 0; i < 10; i++) { collection.insert({'x':1}); }
+  
+      collection.find(function(err, cursor) {
+        cursor.toArray(function(err, items) {
+          test.equal(10, items.length);
+  
+          collection.find(function(err, cursor) {
+            cursor.limit(5).skip(3).toArray(function(err, items2) {
+              test.equal(5, items2.length);
+  
+              // Check that we have the same elements
+              var numberEqual = 0;
+              var sliced = items.slice(3, 8);
+  
+              for(var i = 0; i < sliced.length; i++) {
+                if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+              }
+              test.equal(5, numberEqual);
+  
+              // Let's close the db
+              finished_test({test_limit_skip_chaining_inline:'ok'});
+            });
+          });
+        });
+      });
     });
   },
   
@@ -1959,8 +1989,8 @@ var all_tests = {
       collection.find(function(err, cursor) {
         cursor.close(function(err, cursor) {
           test.equal(true, cursor.isClosed());
-          // Let's close the db 
-          finished_test({test_close_no_query_sent:'ok'});                                   
+          // Let's close the db
+          finished_test({test_close_no_query_sent:'ok'});
         });
       });
     });
@@ -1972,7 +2002,7 @@ var all_tests = {
   
       collection.count(function(err, count) {
         test.equal(1000, count);
-      });      
+      });
   
       var total = 0;
       collection.find(function(err, cursor) {
@@ -1980,11 +2010,11 @@ var all_tests = {
           if(item != null) {
             total = total + item.a;
           } else {
-            test.equal(499500, total); 
+            test.equal(499500, total);
   
             collection.count(function(err, count) {
               test.equal(1000, count);
-            });                  
+            });
   
             collection.count(function(err, count) {
               test.equal(1000, count);
@@ -1995,20 +2025,20 @@ var all_tests = {
                   if(item != null) {
                     total2 = total2 + item.a;
                   } else {
-                    test.equal(499500, total2); 
+                    test.equal(499500, total2);
                     collection.count(function(err, count) {
                       test.equal(1000, count);
                       test.equal(total, total2);
-                      // Let's close the db 
-                      finished_test({test_refill_via_get_more:'ok'});                                   
-                    });                  
+                      // Let's close the db
+                      finished_test({test_refill_via_get_more:'ok'});
+                    });
                   }
                 });
               });
             });
           }
         });
-      });  
+      });
     });
   },
   
@@ -2020,7 +2050,7 @@ var all_tests = {
   
       collection.count(function(err, count) {
         test.equal(1000, count);
-      });      
+      });
   
       var total = 0;
       collection.find(function(err, cursor) {
@@ -2028,11 +2058,11 @@ var all_tests = {
           if(item != null) {
             total = total + item.a;
           } else {
-            test.equal(499500, total); 
+            test.equal(499500, total);
   
             collection.count(function(err, count) {
               test.equal(1000, count);
-            });                  
+            });
   
             collection.count(function(err, count) {
               test.equal(1000, count);
@@ -2043,20 +2073,20 @@ var all_tests = {
                   if(item != null) {
                     total2 = total2 + item.a;
                   } else {
-                    test.equal(499500, total2); 
+                    test.equal(499500, total2);
                     collection.count(function(err, count) {
                       test.equal(1000, count);
                       test.equal(total, total2);
-                      // Let's close the db 
-                      finished_test({test_refill_via_get_more_alt_coll:'ok'});                                   
-                    });                  
+                      // Let's close the db
+                      finished_test({test_refill_via_get_more_alt_coll:'ok'});
+                    });
                   }
                 });
               });
             });
           }
         });
-      });  
+      });
     });
   },
   
@@ -2067,8 +2097,8 @@ var all_tests = {
         cursor.nextObject(function(err, item) {
           cursor.close(function(err, cursor) {
             test.equal(true, cursor.isClosed());
-            // Let's close the db 
-            finished_test({test_close_after_query_sent:'ok'});                                   
+            // Let's close the db
+            finished_test({test_close_after_query_sent:'ok'});
           })
         });
       });
@@ -2080,61 +2110,61 @@ var all_tests = {
   //   test_kill_cursors_client.bson_deserializer = client.bson_deserializer;
   //   test_kill_cursors_client.bson_serializer = client.bson_serializer;
   //   test_kill_cursors_client.pkFactory = client.pkFactory;
-  //   
+  //
   //   test_kill_cursors_client.open(function(err, test_kill_cursors_client) {
   //     var number_of_tests_done = 0;
-  // 
-  //     test_kill_cursors_client.dropCollection('test_kill_cursors', function(err, collection) {      
+  //
+  //     test_kill_cursors_client.dropCollection('test_kill_cursors', function(err, collection) {
   //       test_kill_cursors_client.createCollection('test_kill_cursors', function(err, collection) {
   //         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
   //           var clientCursors = cursorInfo.clientCursors_size;
   //           var byLocation = cursorInfo.byLocation_size;
-  // 
+  //
   //           for(var i = 0; i < 1000; i++) {
   //             collection.save({'i': i}, function(err, doc) {});
   //           }
-  // 
+  //
   //           test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
   //             test.equal(clientCursors, cursorInfo.clientCursors_size);
   //             test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
+  //
   //             for(var i = 0; i < 10; i++) {
   //               collection.findOne(function(err, item) {});
   //             }
-  // 
+  //
   //             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
   //               test.equal(clientCursors, cursorInfo.clientCursors_size);
   //               test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
+  //
   //               for(var i = 0; i < 10; i++) {
   //                 collection.find(function(err, cursor) {
   //                   cursor.nextObject(function(err, item) {
   //                     cursor.close(function(err, cursor) {});
-  // 
+  //
   //                     if(i == 10) {
   //                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
   //                         test.equal(clientCursors, cursorInfo.clientCursors_size);
   //                         test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
+  //
   //                         collection.find(function(err, cursor) {
   //                           cursor.nextObject(function(err, item) {
   //                             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
-  //                               test.equal(clientCursors, cursorInfo.clientCursors_size);                  
+  //                               test.equal(clientCursors, cursorInfo.clientCursors_size);
   //                               test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
+  //
   //                               cursor.close(function(err, cursor) {
   //                                 test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
   //                                   test.equal(clientCursors, cursorInfo.clientCursors_size);
   //                                   test.equal(byLocation, cursorInfo.byLocation_size);
-  // 
+  //
   //                                   collection.find({}, {'limit':10}, function(err, cursor) {
-  //                                     cursor.nextObject(function(err, item) {                                      
+  //                                     cursor.nextObject(function(err, item) {
   //                                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
   //                                         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
   //                                           sys.puts("===================================== err: " + err)
   //                                           sys.puts("===================================== cursorInfo: " + sys.inspect(cursorInfo))
-  //                                           
-  //                                           
+  //
+  //
   //                                           test.equal(clientCursors, cursorInfo.clientCursors_size);
   //                                           test.equal(byLocation, cursorInfo.byLocation_size);
   //                                           number_of_tests_done = 1;
@@ -2143,7 +2173,7 @@ var all_tests = {
   //                                     });
   //                                   });
   //                                 });
-  //                               });                  
+  //                               });
   //                             });
   //                           });
   //                         });
@@ -2152,20 +2182,20 @@ var all_tests = {
   //                   });
   //                 });
   //               }
-  //             });        
-  //           });      
+  //             });
+  //           });
   //         });
   //       });
   //     });
-  // 
+  //
   //     var intervalId = setInterval(function() {
   //       if(number_of_tests_done == 1) {
   //         clearInterval(intervalId);
   //         finished_test({test_kill_cursors:'ok'});
   //         test_kill_cursors_client.close();
   //       }
-  //     }, 100);        
-  //   });  
+  //     }, 100);
+  //   });
   // },
   
   test_count_with_fields : function() {
@@ -2191,7 +2221,7 @@ var all_tests = {
   // Gridstore tests
   test_gs_exist : function() {
     var gridStore = new GridStore(client, "foobar", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           GridStore.exist(client, 'foobar', function(err, result) {
@@ -2204,7 +2234,7 @@ var all_tests = {
   
           GridStore.exist(client, 'foobar', 'another_root', function(err, result) {
             test.equal(false, result);
-            finished_test({test_gs_exist:'ok'});        
+            finished_test({test_gs_exist:'ok'});
           });
         });
       });
@@ -2213,7 +2243,7 @@ var all_tests = {
   
   test_gs_list : function() {
     var gridStore = new GridStore(client, "foobar2", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           GridStore.list(client, function(err, items) {
@@ -2246,9 +2276,9 @@ var all_tests = {
             test.ok(!found);
   
             var gridStore2 = new GridStore(client, "foobar3", "w");
-            gridStore2.open(function(err, gridStore) {    
+            gridStore2.open(function(err, gridStore) {
               gridStore2.write('my file', function(err, gridStore) {
-                gridStore.close(function(err, result) {                
+                gridStore.close(function(err, result) {
                   GridStore.list(client, function(err, items) {
                     var found = false;
                     var found2 = false;
@@ -2260,20 +2290,20 @@ var all_tests = {
                     test.ok(items.length >= 2);
                     test.ok(found);
                     test.ok(found2);
-                    finished_test({test_gs_list:'ok'});        
+                    finished_test({test_gs_list:'ok'});
                   });
                 });
               });
-            });          
+            });
           });
         });
       });
-    });  
+    });
   },
   
   test_gs_small_write : function() {
     var gridStore = new GridStore(client, "test_gs_small_write", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           client.collection('fs.files', function(err, collection) {
@@ -2286,22 +2316,22 @@ var all_tests = {
                 client.collection('fs.chunks', function(err, collection) {
                   collection.find({'files_id':item._id}, function(err, cursor) {
                     cursor.toArray(function(err, items) {
-                      test.equal(1, items.length);                  
-                      finished_test({test_gs_small_write:'ok'});        
+                      test.equal(1, items.length);
+                      finished_test({test_gs_small_write:'ok'});
                     })
-                  });              
+                  });
                 });
               });
             });
-          });        
+          });
         });
       });
-    });  
+    });
   },
   
   test_gs_small_file : function() {
     var gridStore = new GridStore(client, "test_gs_small_file", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           client.collection('fs.files', function(err, collection) {
@@ -2312,57 +2342,57 @@ var all_tests = {
                 // Read test of the file
                 GridStore.read(client, 'test_gs_small_file', function(err, data) {
                   test.equal('hello world!', data);
-                  finished_test({test_gs_small_file:'ok'});        
-                });              
+                  finished_test({test_gs_small_file:'ok'});
+                });
               });
             });
-          });        
+          });
         });
       });
-    });      
+    });
   },
   
   test_gs_overwrite : function() {
     var gridStore = new GridStore(client, "test_gs_overwrite", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           var gridStore2 = new GridStore(client, "test_gs_overwrite", "w");
-          gridStore2.open(function(err, gridStore) {    
+          gridStore2.open(function(err, gridStore) {
             gridStore2.write("overwrite", function(err, gridStore) {
               gridStore2.close(function(err, result) {
   
                 // Assert that we have overwriten the data
                 GridStore.read(client, 'test_gs_overwrite', function(err, data) {
                   test.equal('overwrite', data);
-                  finished_test({test_gs_overwrite:'ok'});        
-                });                            
+                  finished_test({test_gs_overwrite:'ok'});
+                });
               });
             });
-          });                
+          });
         });
       });
-    });        
+    });
   },
   
   test_gs_read_length : function() {
     var gridStore = new GridStore(client, "test_gs_read_length", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
           GridStore.read(client, 'test_gs_read_length', 5, function(err, data) {
             test.equal('hello', data);
-            finished_test({test_gs_read_length:'ok'});        
-          });                            
+            finished_test({test_gs_read_length:'ok'});
+          });
         });
       });
-    });          
+    });
   },
   
   test_gs_read_with_offset : function() {
     var gridStore = new GridStore(client, "test_gs_read_with_offset", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
@@ -2372,20 +2402,20 @@ var all_tests = {
   
           GridStore.read(client, 'test_gs_read_with_offset', null, 7, function(err, data) {
             test.equal('world!', data);
-            finished_test({test_gs_read_with_offset:'ok'});        
+            finished_test({test_gs_read_with_offset:'ok'});
           });
         });
       });
-    });            
+    });
   },
   
   test_gs_seek : function() {
     var gridStore = new GridStore(client, "test_gs_seek", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello, world!", function(err, gridStore) {
-        gridStore.close(function(result) {        
+        gridStore.close(function(result) {
           var gridStore2 = new GridStore(client, "test_gs_seek", "r");
-          gridStore2.open(function(err, gridStore) {    
+          gridStore2.open(function(err, gridStore) {
             gridStore.seek(0, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('h', chr);
@@ -2394,7 +2424,7 @@ var all_tests = {
           });
   
           var gridStore3 = new GridStore(client, "test_gs_seek", "r");
-          gridStore3.open(function(err, gridStore) {    
+          gridStore3.open(function(err, gridStore) {
             gridStore.seek(7, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('w', chr);
@@ -2403,7 +2433,7 @@ var all_tests = {
           });
   
           var gridStore4 = new GridStore(client, "test_gs_seek", "r");
-          gridStore4.open(function(err, gridStore) {    
+          gridStore4.open(function(err, gridStore) {
             gridStore.seek(4, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('o', chr);
@@ -2412,7 +2442,7 @@ var all_tests = {
           });
   
           var gridStore5 = new GridStore(client, "test_gs_seek", "r");
-          gridStore5.open(function(err, gridStore) {    
+          gridStore5.open(function(err, gridStore) {
             gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('!', chr);
@@ -2421,7 +2451,7 @@ var all_tests = {
           });
   
           var gridStore6 = new GridStore(client, "test_gs_seek", "r");
-          gridStore6.open(function(err, gridStore) {    
+          gridStore6.open(function(err, gridStore) {
             gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('w', chr);
@@ -2430,7 +2460,7 @@ var all_tests = {
           });
   
           var gridStore7 = new GridStore(client, "test_gs_seek", "r");
-          gridStore7.open(function(err, gridStore) {    
+          gridStore7.open(function(err, gridStore) {
             gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
               gridStore.getc(function(err, chr) {
                 test.equal('w', chr);
@@ -2446,19 +2476,19 @@ var all_tests = {
                         gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
                           gridStore.getc(function(err, chr) {
                             test.equal('o', chr);
-                            finished_test({test_gs_seek:'ok'});        
+                            finished_test({test_gs_seek:'ok'});
                           });
                         });
                       });
-                    });        
+                    });
                   });
-                });        
+                });
               });
             });
           });
         });
       });
-    });              
+    });
   },
   
   test_gs_multi_chunk : function() {
@@ -2467,10 +2497,10 @@ var all_tests = {
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
   
-    fs_client.open(function(err, fs_client) {  
+    fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
-        gridStore.open(function(err, gridStore) {    
+        gridStore.open(function(err, gridStore) {
           gridStore.chunkSize = 512;
           var file1 = ''; var file2 = ''; var file3 = '';
           for(var i = 0; i < gridStore.chunkSize; i++) { file1 = file1 + 'x'; }
@@ -2487,36 +2517,36 @@ var all_tests = {
   
                       GridStore.read(fs_client, 'test_gs_multi_chunk', function(err, data) {
                         test.equal(512*3, data.length);
-                        finished_test({test_gs_multi_chunk:'ok'});                    
+                        finished_test({test_gs_multi_chunk:'ok'});
                         fs_client.close();
-                      });              
+                      });
                     })
                   });
                 });
               });
             });
           });
-        });                        
+        });
       });
     });
   },
   
   test_gs_puts_and_readlines : function() {
     var gridStore = new GridStore(client, "test_gs_puts_and_readlines", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.puts("line one", function(err, gridStore) {
         gridStore.puts("line two\n", function(err, gridStore) {
-          gridStore.puts("line three", function(err, gridStore) {          
+          gridStore.puts("line three", function(err, gridStore) {
             gridStore.close(function(err, result) {
               GridStore.readlines(client, 'test_gs_puts_and_readlines', function(err, lines) {
                 test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
-                finished_test({test_gs_puts_and_readlines:'ok'});                    
+                finished_test({test_gs_puts_and_readlines:'ok'});
               });
             });
           });
         });
       });
-    });            
+    });
   },
   
   test_gs_weird_name_unlink : function() {
@@ -2525,10 +2555,10 @@ var all_tests = {
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
   
-    fs_client.open(function(err, fs_client) {  
+    fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
-        gridStore.open(function(err, gridStore) {    
+        gridStore.open(function(err, gridStore) {
           gridStore.write("hello, world!", function(err, gridStore) {
             gridStore.close(function(err, result) {
               fs_client.collection('articles.files', function(err, collection) {
@@ -2553,7 +2583,7 @@ var all_tests = {
                       collection.count(function(err, count) {
                         test.equal(0, count);
   
-                        finished_test({test_gs_weird_name_unlink:'ok'});       
+                        finished_test({test_gs_weird_name_unlink:'ok'});
                         fs_client.close();
                       })
                     });
@@ -2562,9 +2592,9 @@ var all_tests = {
               });
             });
           });
-        });              
+        });
       });
-    });  
+    });
   },
   
   test_gs_unlink : function() {
@@ -2573,10 +2603,10 @@ var all_tests = {
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
   
-    fs_client.open(function(err, fs_client) {  
+    fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
-        gridStore.open(function(err, gridStore) {    
+        gridStore.open(function(err, gridStore) {
           gridStore.write("hello, world!", function(err, gridStore) {
             gridStore.close(function(err, result) {
               fs_client.collection('fs.files', function(err, collection) {
@@ -2601,7 +2631,7 @@ var all_tests = {
                       collection.count(function(err, count) {
                         test.equal(0, count);
   
-                        finished_test({test_gs_unlink:'ok'});       
+                        finished_test({test_gs_unlink:'ok'});
                         fs_client.close();
                       })
                     });
@@ -2610,7 +2640,7 @@ var all_tests = {
               });
             });
           });
-        });              
+        });
       });
     });
   },
@@ -2621,10 +2651,10 @@ var all_tests = {
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
   
-    fs_client.open(function(err, fs_client) {  
+    fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_append", "w");
-        gridStore.open(function(err, gridStore) {    
+        gridStore.open(function(err, gridStore) {
           gridStore.write("hello, world!", function(err, gridStore) {
             gridStore.close(function(err, result) {
   
@@ -2638,8 +2668,8 @@ var all_tests = {
                         test.equal(1, count);
   
                         GridStore.read(fs_client, 'test_gs_append', function(err, data) {
-                          test.equal("hello, world! how are you?", data);                        
-                          finished_test({test_gs_append:'ok'});       
+                          test.equal("hello, world! how are you?", data);
+                          finished_test({test_gs_append:'ok'});
                           fs_client.close();
                         });
                       });
@@ -2649,14 +2679,14 @@ var all_tests = {
               });
             });
           });
-        });              
+        });
       });
-    });  
+    });
   },
   
   test_gs_rewind_and_truncate_on_write : function() {
     var gridStore = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           var gridStore2 = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
@@ -2667,21 +2697,21 @@ var all_tests = {
                   gridStore.close(function(err, result) {
                     GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
                       test.equal("abc", data);
-                      finished_test({test_gs_rewind_and_truncate_on_write:'ok'});       
+                      finished_test({test_gs_rewind_and_truncate_on_write:'ok'});
                     });
                   });
                 });
               });
             });
-          });                
+          });
         });
       });
-    });                
+    });
   },
   
   test_gs_tell : function() {
     var gridStore = new GridStore(client, "test_gs_tell", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           var gridStore2 = new GridStore(client, "test_gs_tell", "r");
@@ -2690,14 +2720,14 @@ var all_tests = {
               test.equal("hello", data);
   
               gridStore.tell(function(err, position) {
-                test.equal(5, position);              
-                finished_test({test_gs_tell:'ok'});       
-              })            
+                test.equal(5, position);
+                finished_test({test_gs_tell:'ok'});
+              })
             });
           });
         });
       });
-    });                  
+    });
   },
   
   test_gs_save_empty_file : function() {
@@ -2706,10 +2736,10 @@ var all_tests = {
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
   
-    fs_client.open(function(err, fs_client) {  
+    fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");
-        gridStore.open(function(err, gridStore) {    
+        gridStore.open(function(err, gridStore) {
           gridStore.write("", function(err, gridStore) {
             gridStore.close(function(err, result) {
               fs_client.collection('fs.files', function(err, collection) {
@@ -2722,25 +2752,25 @@ var all_tests = {
                 collection.count(function(err, count) {
                   test.equal(0, count);
   
-                  finished_test({test_gs_save_empty_file:'ok'});       
+                  finished_test({test_gs_save_empty_file:'ok'});
                   fs_client.close();
                 });
-              });            
+              });
             });
           });
-        });              
+        });
       });
-    });    
+    });
   },
   
   test_gs_empty_file_eof : function() {
     var gridStore = new GridStore(client, 'test_gs_empty_file_eof', "w");
     gridStore.open(function(err, gridStore) {
-      gridStore.close(function(err, gridStore) {      
+      gridStore.close(function(err, gridStore) {
         var gridStore2 = new GridStore(client, 'test_gs_empty_file_eof', "r");
         gridStore2.open(function(err, gridStore) {
           test.equal(true, gridStore.eof());
-          finished_test({test_gs_empty_file_eof:'ok'});       
+          finished_test({test_gs_empty_file_eof:'ok'});
         })
       });
     });
@@ -2748,35 +2778,35 @@ var all_tests = {
   
   test_gs_cannot_change_chunk_size_on_read : function() {
     var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
   
           var gridStore2 = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "r");
           gridStore2.open(function(err, gridStore) {
-            gridStore.chunkSize = 42; 
+            gridStore.chunkSize = 42;
             test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
-            finished_test({test_gs_cannot_change_chunk_size_on_read:'ok'});       
-          });        
+            finished_test({test_gs_cannot_change_chunk_size_on_read:'ok'});
+          });
         });
       });
-    });            
+    });
   },
   
   test_gs_cannot_change_chunk_size_after_data_written : function() {
     var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write("hello, world!", function(err, gridStore) {
-        gridStore.chunkSize = 42; 
+        gridStore.chunkSize = 42;
         test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
-        finished_test({test_gs_cannot_change_chunk_size_after_data_written:'ok'});       
+        finished_test({test_gs_cannot_change_chunk_size_after_data_written:'ok'});
       });
-    });              
+    });
   },
   
   test_change_chunk_size : function() {
     var gridStore = new GridStore(client, "test_change_chunk_size", "w");
-    gridStore.open(function(err, gridStore) {   
+    gridStore.open(function(err, gridStore) {
       gridStore.chunkSize = 42
   
       gridStore.write('foo', function(err, gridStore) {
@@ -2784,7 +2814,7 @@ var all_tests = {
           var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal(42, gridStore.chunkSize);
-            finished_test({test_change_chunk_size:'ok'});       
+            finished_test({test_change_chunk_size:'ok'});
           });
         });
       });
@@ -2793,13 +2823,13 @@ var all_tests = {
   
   test_gs_chunk_size_in_option : function() {
     var gridStore = new GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
-    gridStore.open(function(err, gridStore) {   
+    gridStore.open(function(err, gridStore) {
       gridStore.write('foo', function(err, gridStore) {
         gridStore.close(function(err, result) {
           var gridStore2 = new GridStore(client, "test_change_chunk_size", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal(42, gridStore.chunkSize);
-            finished_test({test_gs_chunk_size_in_option:'ok'});       
+            finished_test({test_gs_chunk_size_in_option:'ok'});
           });
         });
       });
@@ -2808,12 +2838,12 @@ var all_tests = {
   
   test_gs_md5 : function() {
     var gridStore = new GridStore(client, "new-file", "w");
-    gridStore.open(function(err, gridStore) {   
+    gridStore.open(function(err, gridStore) {
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
           var gridStore2 = new GridStore(client, "new-file", "r");
           gridStore2.open(function(err, gridStore) {
-            test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);          
+            test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
             gridStore.md5 = "can't do this";
             test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
   
@@ -2822,16 +2852,16 @@ var all_tests = {
               gridStore.close(function(err, result) {
                 var gridStore3 = new GridStore(client, "new-file", "r");
                 gridStore3.open(function(err, gridStore) {
-                  test.equal("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);                
+                  test.equal("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);
   
-                  finished_test({test_gs_chunk_size_in_option:'ok'});       
+                  finished_test({test_gs_chunk_size_in_option:'ok'});
                 });
               })
             })
           });
         });
       });
-    });  
+    });
   },
   
   test_gs_upload_date : function() {
@@ -2839,7 +2869,7 @@ var all_tests = {
     var originalFileUploadDate = null;
   
     var gridStore = new GridStore(client, "test_gs_upload_date", "w");
-    gridStore.open(function(err, gridStore) {   
+    gridStore.open(function(err, gridStore) {
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
   
@@ -2858,23 +2888,23 @@ var all_tests = {
                     var gridStore4 = new GridStore(client, "test_gs_upload_date", "r");
                     gridStore4.open(function(err, gridStore) {
                       test.equal(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
-                      finished_test({test_gs_upload_date:'ok'});       
-                    });                  
+                      finished_test({test_gs_upload_date:'ok'});
+                    });
                   });
                 });
-              });            
-            });          
+              });
+            });
           });
         });
       });
-    });  
+    });
   },
   
   test_gs_content_type : function() {
     var ct = null;
   
     var gridStore = new GridStore(client, "test_gs_content_type", "w");
-    gridStore.open(function(err, gridStore) {   
+    gridStore.open(function(err, gridStore) {
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
   
@@ -2886,34 +2916,34 @@ var all_tests = {
             var gridStore3 = new GridStore(client, "test_gs_content_type", "w+");
             gridStore3.open(function(err, gridStore) {
               gridStore.contentType = "text/html";
-              gridStore.close(function(err, result) {              
+              gridStore.close(function(err, result) {
                 var gridStore4 = new GridStore(client, "test_gs_content_type", "r");
                 gridStore4.open(function(err, gridStore) {
                   test.equal("text/html", gridStore.contentType);
-                  finished_test({test_gs_content_type:'ok'});       
-                });                            
+                  finished_test({test_gs_content_type:'ok'});
+                });
               })
-            });          
+            });
           });
         });
       });
-    });  
+    });
   },
   
   test_gs_content_type_option : function() {
     var gridStore = new GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
-    gridStore.open(function(err, gridStore) {   
+    gridStore.open(function(err, gridStore) {
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(result) {
   
           var gridStore2 = new GridStore(client, "test_gs_content_type_option", "r");
           gridStore2.open(function(err, gridStore) {
             test.equal('image/jpg', gridStore.contentType);
-            finished_test({test_gs_content_type_option:'ok'});       
-          });        
+            finished_test({test_gs_content_type_option:'ok'});
+          });
         });
       });
-    });  
+    });
   },
   
   test_gs_unknown_mode : function() {
@@ -2921,13 +2951,13 @@ var all_tests = {
     gridStore.open(function(err, gridStore) {
       test.ok(err instanceof Error);
       test.equal("Illegal mode x", err.message);
-      finished_test({test_gs_unknown_mode:'ok'});       
-    });  
+      finished_test({test_gs_unknown_mode:'ok'});
+    });
   },
   
   test_gs_metadata : function() {
     var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
-    gridStore.open(function(err, gridStore) {   
+    gridStore.open(function(err, gridStore) {
       gridStore.write('hello world\n', function(err, gridStore) {
         gridStore.close(function(err, result) {
   
@@ -2943,14 +2973,14 @@ var all_tests = {
                 var gridStore4 = new GridStore(client, "test_gs_metadata", "r");
                 gridStore4.open(function(err, gridStore) {
                   test.equal(1, gridStore.metadata.a);
-                  finished_test({test_gs_metadata:'ok'});       
-                });                
+                  finished_test({test_gs_metadata:'ok'});
+                });
               });
-            });                
-          });                
+            });
+          });
         });
       });
-    });    
+    });
   },
   
   test_admin_default_profiling_level : function() {
@@ -2966,14 +2996,14 @@ var all_tests = {
             fs_client.admin(function(err, adminDb) {
               adminDb.profilingLevel(function(err, level) {
                 test.equal("off", level);
-                finished_test({test_admin_default_profiling_level:'ok'});       
+                finished_test({test_admin_default_profiling_level:'ok'});
                 fs_client.close();
               });
-            });          
+            });
           });
         });
       });
-    });    
+    });
   },
   
   test_admin_change_profiling_level : function() {
@@ -2982,29 +3012,29 @@ var all_tests = {
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
   
-    fs_client.open(function(err, fs_client) {  
+    fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
           collection.insert({'a':1}, function(err, doc) {
             fs_client.admin(function(err, adminDb) {
-              adminDb.setProfilingLevel('slow_only', function(err, level) {              
+              adminDb.setProfilingLevel('slow_only', function(err, level) {
                 adminDb.profilingLevel(function(err, level) {
                   test.equal('slow_only', level);
   
-                  adminDb.setProfilingLevel('off', function(err, level) {              
+                  adminDb.setProfilingLevel('off', function(err, level) {
                     adminDb.profilingLevel(function(err, level) {
                       test.equal('off', level);
   
-                      adminDb.setProfilingLevel('all', function(err, level) {              
+                      adminDb.setProfilingLevel('all', function(err, level) {
                         adminDb.profilingLevel(function(err, level) {
                           test.equal('all', level);
   
-                          adminDb.setProfilingLevel('medium', function(err, level) {              
+                          adminDb.setProfilingLevel('medium', function(err, level) {
                             test.ok(err instanceof Error);
                             test.equal("Error: illegal profiling level value medium", err.message);
   
-                            finished_test({test_admin_change_profiling_level:'ok'});       
-                            fs_client.close();                          
+                            finished_test({test_admin_change_profiling_level:'ok'});
+                            fs_client.close();
                           });
                         })
                       });
@@ -3012,11 +3042,11 @@ var all_tests = {
                   });
                 })
               });
-            });          
+            });
           });
         });
       });
-    });      
+    });
   },
   
   test_admin_profiling_info : function() {
@@ -3025,14 +3055,14 @@ var all_tests = {
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
   
-    fs_client.open(function(err, fs_client) {  
+    fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
           collection.insert({'a':1}, function(doc) {
             fs_client.admin(function(err, adminDb) {
               adminDb.setProfilingLevel('all', function(err, level) {
                 collection.find(function(err, cursor) {
-                  cursor.toArray(function(err, items) {                  
+                  cursor.toArray(function(err, items) {
                     adminDb.setProfilingLevel('off', function(err, level) {
                       adminDb.profilingInfo(function(err, infos) {
                         test.ok(infos.constructor == Array);
@@ -3041,18 +3071,18 @@ var all_tests = {
                         test.ok(infos[0].info.constructor == String);
                         test.ok(infos[0].millis.constructor == Number);
   
-                        finished_test({test_admin_profiling_info:'ok'});       
-                        fs_client.close();                          
-                      });                  
+                        finished_test({test_admin_profiling_info:'ok'});
+                        fs_client.close();
+                      });
                     });
                   });
-                });              
+                });
               });
-            });          
+            });
           });
         });
       });
-    });        
+    });
   },
   
   test_admin_validate_collection : function() {
@@ -3061,7 +3091,7 @@ var all_tests = {
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
   
-    fs_client.open(function(err, fs_client) {  
+    fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
           collection.insert({'a':1}, function(err, doc) {
@@ -3070,21 +3100,21 @@ var all_tests = {
                 test.ok(doc.result != null);
                 test.ok(doc.result.match(/firstExtent/) != null);
   
-                finished_test({test_admin_validate_collection:'ok'});       
-                fs_client.close();                          
+                finished_test({test_admin_validate_collection:'ok'});
+                fs_client.close();
               });
-            });          
+            });
           });
         });
       });
-    });          
+    });
   },
   
-  test_custom_primary_key_generator : function() {    
+  test_custom_primary_key_generator : function() {
     // Custom factory (need to provide a 12 byte array);
     CustomPKFactory = function() {}
     CustomPKFactory.prototype = new Object();
-    CustomPKFactory.createPk = function() {  
+    CustomPKFactory.createPk = function() {
       return new client.bson_serializer.ObjectID("aaaaaaaaaaaa");
     }
   
@@ -3092,22 +3122,22 @@ var all_tests = {
     p_client.bson_deserializer = client.bson_deserializer;
     p_client.bson_serializer = client.bson_serializer;
   
-    p_client.open(function(err, p_client) {  
-      p_client.dropDatabase(function(err, done) {    
+    p_client.open(function(err, p_client) {
+      p_client.dropDatabase(function(err, done) {
         p_client.createCollection('test_custom_key', function(err, collection) {
           collection.insert({'a':1}, function(err, doc) {
             collection.find({'_id':new client.bson_serializer.ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
               cursor.toArray(function(err, items) {
                 test.equal(1, items.length);
   
-                finished_test({test_custom_primary_key_generator:'ok'});       
+                finished_test({test_custom_primary_key_generator:'ok'});
                 p_client.close();
               });
             });
           });
         });
       });
-    });      
+    });
   },
   
   // Mapreduce tests
@@ -3126,9 +3156,9 @@ var all_tests = {
   
         collection.findOne({'_id':2}, function(err, result) {
           test.equal(1, result.value);
-          finished_test({test_map_reduce:'ok'});       
+          finished_test({test_map_reduce:'ok'});
         });
-      });    
+      });
     });
   },
   
@@ -3146,10 +3176,10 @@ var all_tests = {
         });
         collection.findOne({'_id':2}, function(err, result) {
           test.equal(1, result.value);
-          finished_test({test_map_reduce_with_functions_as_arguments:'ok'});       
+          finished_test({test_map_reduce_with_functions_as_arguments:'ok'});
         });
-      });    
-    });  
+      });
+    });
   },
   
   test_map_reduce_with_code_objects : function() {
@@ -3166,10 +3196,10 @@ var all_tests = {
         });
         collection.findOne({'_id':2}, function(err, result) {
           test.equal(1, result.value);
-          finished_test({test_map_reduce_with_code_objects:'ok'});       
+          finished_test({test_map_reduce_with_code_objects:'ok'});
         });
-      });    
-    });    
+      });
+    });
   },
   
   test_map_reduce_with_options : function() {
@@ -3189,11 +3219,11 @@ var all_tests = {
           });
           collection.findOne({'_id':3}, function(err, result) {
             test.equal(1, result.value);
-            finished_test({test_map_reduce_with_options:'ok'});       
+            finished_test({test_map_reduce_with_options:'ok'});
           });
         });
-      });    
-    });    
+      });
+    });
   },
   
   test_map_reduce_error : function() {
@@ -3206,29 +3236,29 @@ var all_tests = {
   
       collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
         test.ok(err != null);
-        finished_test({test_map_reduce_error:'ok'});       
-      });    
-    });      
+        finished_test({test_map_reduce_error:'ok'});
+      });
+    });
   },
   
   test_drop_indexes : function() {
-    client.createCollection('test_drop_indexes', function(err, collection) {    
+    client.createCollection('test_drop_indexes', function(err, collection) {
       collection.insert({a:1}, function(err, ids) {
         // Create an index on the collection
         client.createIndex(collection.collectionName, 'a', function(err, indexName) {
           test.equal("a_1", indexName);
           // Drop all the indexes
           collection.dropIndexes(function(err, result) {
-            test.equal(true, result);          
+            test.equal(true, result);
   
             collection.indexInformation(function(err, result) {
               test.ok(result['a_1'] == null);
-              finished_test({test_drop_indexes:'ok'});       
+              finished_test({test_drop_indexes:'ok'});
             })
           })
-        });      
+        });
       })
-    });  
+    });
   },
   
   test_add_and_remove_user : function() {
@@ -3240,7 +3270,7 @@ var all_tests = {
     p_client.bson_serializer = client.bson_serializer;
     p_client.pkFactory = client.pkFactory;
   
-    p_client.open(function(err, automatic_connect_client) {  
+    p_client.open(function(err, automatic_connect_client) {
       p_client.authenticate('admin', 'admin', function(err, replies) {
         test.ok(err instanceof Error);
   
@@ -3256,16 +3286,16 @@ var all_tests = {
   
                 finished_test({test_add_and_remove_user:'ok'});
                 p_client.close();
-              });          
-            });        
-          });      
-        });    
+              });
+            });
+          });
+        });
       });
     });
   },
   
   test_distinct_queries : function() {
-    client.createCollection('test_distinct_queries', function(err, collection) {    
+    client.createCollection('test_distinct_queries', function(err, collection) {
       collection.insert([{'a':0, 'b':{'c':'a'}},
         {'a':1, 'b':{'c':'b'}},
         {'a':1, 'b':{'c':'c'}},
@@ -3279,11 +3309,11 @@ var all_tests = {
             finished_test({test_distinct_queries:'ok'});
           });
       })
-    });    
+    });
   },
   
   test_all_serialization_types : function() {
-    client.createCollection('test_all_serialization_types', function(err, collection) {    
+    client.createCollection('test_all_serialization_types', function(err, collection) {
       var date = new Date();
       var oid = new client.bson_serializer.ObjectID();
       var string = 'binstring'
@@ -3302,7 +3332,7 @@ var all_tests = {
         'int': 42,
         'float': 33.3333,
         'regexp': /regexp/,
-        'boolean': true, 
+        'boolean': true,
         'long': date.getTime(),
         'where': new client.bson_serializer.Code('this.a > i', {i:1}),
         'dbref': new client.bson_serializer.DBRef('namespace', oid, 'integration_tests_')
@@ -3320,7 +3350,7 @@ var all_tests = {
           test.equal(date.getTime(), doc.date.getTime());
           test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
           test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
-          
+  
           test.equal(motherOfAllDocuments.int, doc.int);
           test.equal(motherOfAllDocuments.long, doc.long);
           test.equal(motherOfAllDocuments.float, doc.float);
@@ -3328,14 +3358,14 @@ var all_tests = {
           test.equal(motherOfAllDocuments.boolean, doc.boolean);
           test.equal(motherOfAllDocuments.where.code, doc.where.code);
           test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-          
+  
           test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
           test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
-          finished_test({test_all_serialization_types:'ok'});      
-        })      
-      });    
-    });    
+          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
+          finished_test({test_all_serialization_types:'ok'});
+        })
+      });
+    });
   },
   
   test_should_correctly_retrieve_one_record : function() {
@@ -3344,13 +3374,13 @@ var all_tests = {
     p_client.bson_serializer = client.bson_serializer;
     p_client.pkFactory = client.pkFactory;
   
-    p_client.open(function(err, p_client) {  
-      client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {    
+    p_client.open(function(err, p_client) {
+      client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {
         collection.insert({'a':0});
   
         p_client.collection('test_should_correctly_retrieve_one_record', function(err, usercollection) {
-          usercollection.findOne({'a': 0}, function(err, result) {          
-            finished_test({test_should_correctly_retrieve_one_record:'ok'});      
+          usercollection.findOne({'a': 0}, function(err, result) {
+            finished_test({test_should_correctly_retrieve_one_record:'ok'});
             p_client.close();
           });
         });
@@ -3365,7 +3395,7 @@ var all_tests = {
     , favourites_count: 6
     , profile_sidebar_fill_color: 'EADEAA'
     , screen_name: 'felixge'
-    , status: 
+    , status:
        { created_at: 'Fri Mar 12 08:59:44 +0000 2010'
        , in_reply_to_screen_name: null
        , truncated: false
@@ -3400,50 +3430,50 @@ var all_tests = {
     , profile_image_url: 'http://a3.twimg.com/profile_images/107142257/passbild-square_normal.jpg'
     };
   
-    client.createCollection('test_should_correctly_save_unicode_containing_document', function(err, collection) {    
+    client.createCollection('test_should_correctly_save_unicode_containing_document', function(err, collection) {
       doc['_id'] = 'felixge';
   
       collection.save(doc, function(err, doc) {
         collection.findOne(function(err, doc) {
-          test.equal('felixge', doc._id);        
-          finished_test({test_should_correctly_save_unicode_containing_document:'ok'});      
+          test.equal('felixge', doc._id);
+          finished_test({test_should_correctly_save_unicode_containing_document:'ok'});
         });
       });
     });
   },
   
   test_should_deserialize_large_integrated_array : function() {
-    client.createCollection('test_should_deserialize_large_integrated_array', function(err, collection) {    
+    client.createCollection('test_should_deserialize_large_integrated_array', function(err, collection) {
       var doc = {'a':0,
         'b':['tmp1', 'tmp2', 'tmp3', 'tmp4', 'tmp5', 'tmp6', 'tmp7', 'tmp8', 'tmp9', 'tmp10', 'tmp11', 'tmp12', 'tmp13', 'tmp14', 'tmp15', 'tmp16']
       };
       // Insert the collection
       collection.insert(doc);
       // Fetch and check the collection
-      collection.findOne({'a': 0}, function(err, result) {         
+      collection.findOne({'a': 0}, function(err, result) {
         test.deepEqual(doc.a, result.a);
         test.deepEqual(doc.b, result.b);
-        finished_test({test_should_deserialize_large_integrated_array:'ok'});      
+        finished_test({test_should_deserialize_large_integrated_array:'ok'});
       });
     });
   },
   
   test_find_one_error_handling : function() {
-    client.createCollection('test_find_one_error_handling', function(err, collection) {    
+    client.createCollection('test_find_one_error_handling', function(err, collection) {
       // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
-      // is the error handling of the findOne Method     
+      // is the error handling of the findOne Method
       try {
-        collection.findOne({"_id":client.bson_serializer.ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {});      
+        collection.findOne({"_id":client.bson_serializer.ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {});
       } catch (err) {
-        finished_test({test_find_one_error_handling:'ok'});      
+        finished_test({test_find_one_error_handling:'ok'});
       }
-    });  
+    });
   },
   
   // test_force_binary_error : function() {
-  //   client.createCollection('test_force_binary_error', function(err, collection) {    
+  //   client.createCollection('test_force_binary_error', function(err, collection) {
   //     // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
-  //     // is the error handling of the findOne Method     
+  //     // is the error handling of the findOne Method
   //     var result= "";
   //     var hexString = "5e9bd59248305adf18ebc15703a1";
   //     for(var index=0 ; index < hexString.length; index+=2) {
@@ -3451,52 +3481,52 @@ var all_tests = {
   //         var number= parseInt(string, 16);
   //         result+= BinaryParser.fromByte(number);
   //     }
-  // 
+  //
   //     // Generate a illegal ID
   //     var id = client.bson_serializer.ObjectID.createFromHexString('5e9bd59248305adf18ebc157');
   //     id.id = result;
-  //     
+  //
   //     // Execute with error
   //     collection.findOne({"_id": id}, function(err, result) {
   //       // test.equal(undefined, result)
   //       test.ok(err != null)
-  //       finished_test({test_force_binary_error:'ok'});      
-  //     });      
-  //   });  
+  //       finished_test({test_force_binary_error:'ok'});
+  //     });
+  //   });
   // },
   
   test_gs_weird_bug : function() {
     var gridStore = new GridStore(client, "test_gs_weird_bug", "w");
     var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
   
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write(data, function(err, gridStore) {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
           GridStore.read(client, 'test_gs_weird_bug', function(err, fileData) {
             test.equal(data.length, fileData.length);
-            finished_test({test_gs_weird_bug:'ok'});        
+            finished_test({test_gs_weird_bug:'ok'});
           });
         });
       });
-    });            
+    });
   },
   
   test_gs_working_field_read : function() {
     var gridStore = new GridStore(client, "test_gs_working_field_read", "w");
     var data = fs.readFileSync("./integration/test_gs_working_field_read.pdf", 'binary');
   
-    gridStore.open(function(err, gridStore) {    
+    gridStore.open(function(err, gridStore) {
       gridStore.write(data, function(err, gridStore) {
         gridStore.close(function(err, result) {
           // Assert that we have overwriten the data
           GridStore.read(client, 'test_gs_working_field_read', function(err, fileData) {
             test.equal(data.length, fileData.length);
-            finished_test({test_gs_working_field_read:'ok'});        
+            finished_test({test_gs_working_field_read:'ok'});
           });
         });
       });
-    });            
+    });
   },
   
   // Test field select with options
@@ -3526,9 +3556,9 @@ var all_tests = {
               test.equal(doc.a,doc.b); // making sure empty field select returns properly
               test.equal((14-idx),doc.a); // checking skip and limit in args
             });
-            finished_test({test_field_select_with_options:'ok'}); 
+            finished_test({test_field_select_with_options:'ok'});
           });
-        });      
+        });
       });
     });
   },
@@ -3541,7 +3571,7 @@ var all_tests = {
         // Let's modify the document in place
         collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, true, function(err, updated_doc) {
           test.equal(1, updated_doc.a);
-          test.equal(3, updated_doc.b);        
+          test.equal(3, updated_doc.b);
         })
       });
   
@@ -3550,7 +3580,7 @@ var all_tests = {
         // Let's modify the document in place
         collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, function(err, updated_doc) {
           test.equal(2, updated_doc.a);
-          test.equal(2, updated_doc.b);        
+          test.equal(2, updated_doc.b);
         })
       });
   
@@ -3559,18 +3589,18 @@ var all_tests = {
         // Let's modify the document in place
         collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, true, true, function(err, updated_doc) {
           test.equal(3, updated_doc.a);
-          test.equal(2, updated_doc.b);        
-          finished_test({test_find_and_modify_a_document:'ok'}); 
+          test.equal(2, updated_doc.b);
+          finished_test({test_find_and_modify_a_document:'ok'});
         })
-      });    
-    });  
+      });
+    });
   },
   
   /*
     test_pair : function() {
       var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
-      p_client.open(function(err, p_client) {    
-        p_client.dropDatabase(function(err, done) {    
+      p_client.open(function(err, p_client) {
+        p_client.dropDatabase(function(err, done) {
           test.ok(p_client.masterConnection != null);
           test.equal(2, p_client.connections.length);
   
@@ -3583,20 +3613,20 @@ var all_tests = {
                 cursor.toArray(function(err, items) {
                   test.equal(1, items.length);
   
-                  finished_test({test_pair:'ok'});       
+                  finished_test({test_pair:'ok'});
                   p_client.close();
                 });
               });
             });
           });
         });
-      });    
+      });
     },
   
     test_cluster : function() {
       var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
       p_client.open(function(err, p_client) {
-        p_client.dropDatabase(function(err, done) {    
+        p_client.dropDatabase(function(err, done) {
           test.ok(p_client.masterConnection != null);
           test.equal(2, p_client.connections.length);
   
@@ -3609,14 +3639,14 @@ var all_tests = {
                 cursor.toArray(function(err, items) {
                   test.equal(1, items.length);
   
-                  finished_test({test_cluster:'ok'});       
+                  finished_test({test_cluster:'ok'});
                   p_client.close();
                 });
               });
             });
           });
         });
-      });    
+      });
     },
   
     test_slave_connection :function() {
@@ -3625,12 +3655,12 @@ var all_tests = {
         test.equal(null, err);
         finished_test({test_slave_connection:'ok'});
         p_client.close();
-      });          
+      });
     }
-  */  
+  */
   
   test_ensure_index : function() {
-    client.createCollection('test_ensure_index', function(err, collection) {    
+    client.createCollection('test_ensure_index', function(err, collection) {
       // Create an index on the collection
       client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
         test.equal("a_1", indexName);
@@ -3649,12 +3679,12 @@ var all_tests = {
               test.equal('_id', collectionInfo['_id_'][0][0]);
               test.ok(collectionInfo['a_1'] != null);
               test.deepEqual([["a", 1]], collectionInfo['a_1']);
-              // Let's close the db 
-              finished_test({test_ensure_index:'ok'});                 
+              // Let's close the db
+              finished_test({test_ensure_index:'ok'});
             });
-          });      
+          });
         });
-      });      
+      });
     })
   },
   
@@ -3664,7 +3694,7 @@ var all_tests = {
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
   
-    db.open(function(err, db) {  
+    db.open(function(err, db) {
       //convience curried handler for functions of type 'a -> (err, result)
       function getResult(callback){
         return function(error, result) {
@@ -3675,7 +3705,7 @@ var all_tests = {
   
       db.collection('users', getResult(function(user_collection){
         user_collection.remove(function(err, result) {
-          //first, create a user object   
+          //first, create a user object
           var newUser = { name : 'Test Account', settings : {} };
           user_collection.insert([newUser],  getResult(function(users){
               var user = users[0];
@@ -3688,7 +3718,7 @@ var all_tests = {
               //now create update command and issue it
               var updateCommand = { $set : context };
   
-              user_collection.update({_id : user._id}, updateCommand, null, 
+              user_collection.update({_id : user._id}, updateCommand, null,
                 getResult(function(updateCommand) {
                   // Fetch the object and check that the changes are persisted
                   user_collection.findOne({_id : user._id}, function(err, doc) {
@@ -3697,27 +3727,27 @@ var all_tests = {
                     test.equal("somestring", doc.settings.thisOneWorks);
                     test.equal("test", doc.settings.block[0]);
   
-                    // Let's close the db 
+                    // Let's close the db
                     finished_test({test_insert_and_update_with_new_script_context:'ok'});
                     db.close();
                   });
                 })
-              );        
-          }));          
+              );
+          }));
         });
-      }));      
+      }));
     });
   },
   
   test_all_serialization_types_new_context : function() {
-    client.createCollection('test_all_serialization_types_new_context', function(err, collection) {   
-      var date = new Date(); 
-      var scriptCode = 
+    client.createCollection('test_all_serialization_types_new_context', function(err, collection) {
+      var date = new Date();
+      var scriptCode =
         "var string = 'binstring'\n" +
         "var bin = new mongo.Binary()\n" +
         "for(var index = 0; index < string.length; index++) {\n" +
-        "  bin.put(string.charAt(index))\n" + 
-        "}\n" +             
+        "  bin.put(string.charAt(index))\n" +
+        "}\n" +
         "motherOfAllDocuments['string'] = 'hello';" +
         "motherOfAllDocuments['array'] = [1,2,3];" +
         "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
@@ -3731,7 +3761,7 @@ var all_tests = {
         "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
         "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
         "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
-      
+  
       var context = { motherOfAllDocuments : {}, mongo:client.bson_serializer, date:date};
       // Execute function in context
       Script.runInNewContext(scriptCode, context, "testScript");
@@ -3750,7 +3780,7 @@ var all_tests = {
            test.equal(date.getTime(), doc.date.getTime());
            test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
            test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
-                 
+  
            test.equal(motherOfAllDocuments.int, doc.int);
            test.equal(motherOfAllDocuments.long, doc.long);
            test.equal(motherOfAllDocuments.float, doc.float);
@@ -3760,12 +3790,12 @@ var all_tests = {
            test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
            test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
            test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-           test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);        
-           finished_test({test_all_serialization_types_new_context:'ok'});      
-         })      
-       });    
-    });    
-  },  
+           test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
+           finished_test({test_all_serialization_types_new_context:'ok'});
+         })
+       });
+    });
+  },
 };
 
 /*******************************************************************************************************
@@ -3787,42 +3817,57 @@ if(process.argv[3]){
 var client_tests_keys = [];
 for(key in client_tests) client_tests_keys.push(key);
 
-// Native BSON
-var BSON = require("../external-libs/bson/bson");
-var BSONJS = require('../lib/mongodb/bson/bson');
-
 // Set up the client connection
 var client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {}), {});
 // Use native deserializer
 if(type == "native") {
+  var BSON = require("../external-libs/bson/bson");
   sys.puts("========= Integration tests running Native BSON Parser == ")
   client.bson_deserializer = BSON;
   client.bson_serializer = BSON;
-  client.pkFactory = BSON.ObjectID;  
+  client.pkFactory = BSON.ObjectID;
 } else {
-  sys.puts("========= Integration tests running Pure JS BSON Parser == ")  
+  var BSONJS = require('../lib/mongodb/bson/bson');
+  sys.puts("========= Integration tests running Pure JS BSON Parser == ")
   client.bson_deserializer = BSONJS;
   client.bson_serializer = BSONJS;
-  client.pkFactory = BSONJS.ObjectID;  
+  client.pkFactory = BSONJS.ObjectID;
 }
 
 client.open(function(err, client) {
   // Do cleanup of the db
   client.dropDatabase(function() {
     // Run  all the tests
-    run_tests();  
+    run_tests();
     // Start the timer that checks that all the tests have finished or failed
-    ensure_tests_finished();  
+    ensure_tests_finished();
   });
 });
 
+// function ensure_tests_finished() {
+//   var intervalId = setInterval(function() {
+//     if(finished_tests.length >= client_tests_keys.length) {
+//       // Print out the result
+//       sys.puts("= Final Checks =========================================================");
+//       // Stop interval timer and close db connection
+//       clearInterval(intervalId);
+//       // Ensure we don't have any more cursors hanging about
+//       client.cursorInfo(function(err, cursorInfo) {
+//         sys.puts(sys.inspect(cursorInfo));
+//         sys.puts("");
+//         client.close();
+//       });
+//     }
+//   }, 100);
+// };
+
 function ensure_tests_finished() {
   var intervalId = setInterval(function() {
-    if(finished_tests.length >= client_tests_keys.length) {
+    if(client_tests_keys.length == 0) {
       // Print out the result
       sys.puts("= Final Checks =========================================================");
       // Stop interval timer and close db connection
-      clearInterval(intervalId);      
+      clearInterval(intervalId);
       // Ensure we don't have any more cursors hanging about
       client.cursorInfo(function(err, cursorInfo) {
         sys.puts(sys.inspect(cursorInfo));
@@ -3837,32 +3882,47 @@ function ensure_tests_finished() {
 var finished_tests = [];
 
 // Run all the tests
+// function run_tests() {
+//   // client_tests = client_tests.sort(randOrd);
+//   // Run all the tests
+//   client_tests_keys.forEach(function(t){
+//   //  sys.puts('....starting...'+t);
+//     var function_name = t;
+//     try{
+//       client_tests[function_name]();
+//     } catch(error){
+//       sys.puts(sys.inspect(error));
+//      // var obj = {}; obj[function_name] = error;
+//       finished_test({function_name:error});
+//     }
+//   });
+// }
+
 function run_tests() {
   // client_tests = client_tests.sort(randOrd);
-  // Run all the tests
-  client_tests_keys.forEach(function(t){
-  //  sys.puts('....starting...'+t);
-    var function_name = t;
-    try{
-      client_tests[function_name]();
-    } catch(error){
-      sys.puts(sys.inspect(error));
-     // var obj = {}; obj[function_name] = error;
-      finished_test({function_name:error});
-    }
-  });
+  // Run first test
+  client_tests[client_tests_keys[0]]();  
 }
 
+// function finished_test(test_object) {
+//   for(var name in test_object) {
+//     sys.puts("= executing test: " + name + " [" + test_object[name] + "]");
+//   }
+//   finished_tests.push(test_object);
+// }
 
 function finished_test(test_object) {
   for(var name in test_object) {
     sys.puts("= executing test: " + name + " [" + test_object[name] + "]");
-  }  
+  }
   finished_tests.push(test_object);
+  client_tests_keys.shift();
+  // Execute next test
+  if(client_tests_keys.length > 0) client_tests[client_tests_keys[0]]();
 }
 
 function randOrd() {
-  return (Math.round(Math.random()) - 0.5); 
+  return (Math.round(Math.random()) - 0.5);
 }
 
 /**
