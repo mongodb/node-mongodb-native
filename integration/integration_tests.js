@@ -236,7 +236,7 @@ var all_tests = {
     error_client.open(function(err, error_client) {});    
   
     // Test error handling for server pair (works for cluster aswell)
-    var serverConfig = new Server("127.0.0.1", 21017, {});
+    var serverConfig = new Server("127.0.0.1", 20017, {});
     var normalServer = new Server("127.0.0.1", 27017);
     var serverPairConfig = new ServerPair(normalServer, serverConfig);
     var error_client_pair = new Db('integration_tests_21', serverPairConfig, {});
@@ -244,7 +244,7 @@ var all_tests = {
     var closeListener = function(connection) {
       test.ok(typeof connection == typeof serverConfig);
       test.equal("127.0.0.1", connection.host);
-      test.equal(21017, connection.port);
+      test.equal(20017, connection.port);
       test.equal(false, connection.autoReconnect);
         // Let's close the db
       finished_test({test_connection_errors:'ok'});
