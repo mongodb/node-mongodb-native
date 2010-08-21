@@ -154,7 +154,7 @@ Handle<Value> Long::ToNumber(const Arguments &args) {
   // Let's unpack the Long instance that contains the number in low_bits and high_bits form
   Long *l = ObjectWrap::Unwrap<Long>(args.This());
   // Calculate the approximate value
-  int64_t value = l->high_bits * BSON_INT32_MAX * 2 + (uint32_t)l->low_bits;
+  int64_t value = (int64_t)l->high_bits * BSON_INT32_MAX * 2 + (uint32_t)l->low_bits;
   scope.Close(Number::New(value));
 }
 
