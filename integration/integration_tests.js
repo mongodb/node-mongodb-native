@@ -3796,6 +3796,20 @@ var all_tests = {
        });
     });
   },
+  
+  test_should_correctly_do_upsert : function() {
+    client.createCollection('test_should_correctly_do_upsert', function(err, collection) {
+      var id = new client.bson_serializer.ObjectID(null)
+      var doc = {_id:id, a:1};
+      
+      collection.update({"_id":id}, doc, {upsert:true}, function(err, doc) {
+        collection.findOne({"_id":id}, function(err, doc) {
+          test.equal(1, doc.a);
+          finished_test({test_should_correctly_do_upsert:'ok'});
+        });
+      });      
+    });
+  },
 };
 
 /*******************************************************************************************************
