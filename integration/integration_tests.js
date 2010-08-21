@@ -244,7 +244,7 @@ var all_tests = {
     var closeListener = function(connection) {
       test.ok(typeof connection == typeof serverConfig);
       test.equal("127.0.0.1", connection.host);
-      //test.equal(21017, connection.port);
+      test.equal(21017, connection.port);
       test.equal(false, connection.autoReconnect);
         // Let's close the db
       finished_test({test_connection_errors:'ok'});
@@ -3569,7 +3569,7 @@ var all_tests = {
       // Test return new document on change
       collection.insert({'a':1, 'b':2}, function(err, doc) {
         // Let's modify the document in place
-        collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, true, function(err, updated_doc) {
+        collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new': true}, function(err, updated_doc) {
           test.equal(1, updated_doc.a);
           test.equal(3, updated_doc.b);
         })
@@ -3587,12 +3587,19 @@ var all_tests = {
       // Test remove object on change
       collection.insert({'a':3, 'b':2}, function(err, doc) {
         // Let's modify the document in place
-        collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, true, true, function(err, updated_doc) {
+        collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {'new': true, remove: true}, function(err, updated_doc) {
           test.equal(3, updated_doc.a);
           test.equal(2, updated_doc.b);
           finished_test({test_find_and_modify_a_document:'ok'});
         })
       });
+
+      // Let's upsert!
+      collection.findAndModify({'a':4}, [], {'$set':{'b':3}}, {'new': true, upsert: true}, function(err, updated_doc) {
+        test.equal(4, updated_doc.a);
+        test.equal(3, updated_doc.b);
+        finished_test({test_find_and_modify_a_document:'ok'});
+      })
     });
   },
 
