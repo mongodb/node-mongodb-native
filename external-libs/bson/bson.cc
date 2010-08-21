@@ -575,7 +575,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     Local<String> str = value->ToString();    
     len = DecodeBytes(str, BINARY);
     // Let's define the buffer that contains the regexp string
-    // char *data = new char[len + 1];
     char *data = (char *)malloc(len);
     // Write the data to the buffer from the string object
     written = DecodeWrite(data, len, str, BINARY);    
@@ -602,40 +601,9 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     memcpy((serialized_object + index), options_string, options_string_length + 1);
     // Adjust the index
     index = index + options_string_length + 1;      
-      // printf("======================= there is options:: [%d]:%s\n", options_string_length, options_string);
-    // } else {
-    //   
-    // }
-    
-    // Write the string
-
-    
-    // // String size
-    // uint32_t regexp_string_size = (options_ptr - data) - 1;
-    // // printf("------------------------------------ [%s]%d:%d\n", data, (options_ptr - data), regexp_string_size);
-    // // Copy the string to the char stream
-    // memcpy((serialized_object + index), (data + 1), regexp_string_size);
-    // *(serialized_object + index + regexp_string_size + 1) = '\0';
-    // // Ajust the index
-    // index = index + regexp_string_size + 1;
-    // 
-    // // If it's not a null we have options
-    // if(options_ptr != NULL && (options_ptr - data) > 0) {
-    //   uint32_t offset = (options_ptr - data);
-    //   // Validate that we have valid options
-    //   for(int i = 1; i < (len - offset); i++) {
-    //     if(*(options_ptr + i) == 'i' || *(options_ptr + i) == 'm' || *(options_ptr + i) == 'x') {
-    //       *(serialized_object + index) = *(options_ptr + i);
-    //       index = index + 1;
-    //     }
-    //   }      
-    // }
-    // 
-    // // Add termiating null
-    // *(serialized_object + index) = '\0';
-    // Adjust pointer
-    // index = index + 1;
     // Free up the memory
+    free(options_string);
+    free(reg_exp_string);
     free(data);
   } else if(value->IsArray()) {
     // printf("============================================= -- serialized::::array\n");
@@ -817,36 +785,13 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     // printf("================================ calculate_object_size:date\n");
     object_size = object_size + 8;
   } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
-    // printf("================================ calculate_object_size:regexp\n");    
     // Additional size
     uint32_t regexp_size = 0;
     // Fetch the string for the regexp
     Local<String> str = value->ToString();    
     ssize_t len = DecodeBytes(str, BINARY);
-    // Let's define the buffer that contains the regexp string
-    // char *data = new char[len + 1];
-    // char *data = (char *)malloc(len + 1);
-    // *(data + len) = '\0';
-    // // Write the data to the buffer from the string object
-    // ssize_t written = DecodeWrite(data, len, str, BINARY);
-    // // Split up the regexp into pieces
-    // char *options_ptr = strrchr(data, '/');
-    // if(options_ptr != NULL && (options_ptr - data) > 0) {
-    //   // printf("====================== regexp_string: %d:%s:%c:%lli\n", len, data, *(options_ptr), (options_ptr - data));      
-    //   // /abcd/mi
-    //   uint32_t offset = (options_ptr - data);
-    //   // Validate that we have valid options
-    //   for(int i = 1; i < (len - offset); i++) {
-    //     if(*(options_ptr + i) == 'i' || *(options_ptr + i) == 'm' || *(options_ptr + i) == 'x') regexp_size = regexp_size + 1;
-    //   }
-    // }
-    
     // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
-    // object_size = object_size + ((options_ptr - data) - 1) + 2 + regexp_size;
-    // printf("========================== len::%d\n", len);
     object_size = object_size + len;
-    // Free up memory
-    // free(data);
   } else if(value->IsArray()) {
     // printf("================================ calculate_object_size:array\n");
     // Cast to array
