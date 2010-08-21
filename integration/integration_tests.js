@@ -1007,7 +1007,7 @@ var all_tests = {
       });
     });
   },
-  
+
   // Use some other id than the standard for inserts
   test_non_oid_id : function() {
     client.createCollection('test_non_oid_id', function(err, collection) {

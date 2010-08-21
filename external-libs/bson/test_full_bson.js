@@ -145,6 +145,14 @@ assert.deepEqual(['b', 'a', 'c', 'd'], keys)
 var doc = {doc: /foobar/mi}
 var serialized_data = BSON.serialize(doc)
 var doc2 = BSON.deserialize(serialized_data);
+
+// sys.puts("================================================================== 1")
+// sys.puts(sys.inspect(doc))
+// sys.puts("================================================================== 2")
+// sys.puts(sys.inspect(doc2))
+// sys.puts("================================================================== 3")
+// sys.puts(sys.inspect(doc2.doc))
+
 assert.equal(doc.doc.toString(), doc2.doc.toString())
 
 // Should Correctly Serialize and Deserialize a Binary object
