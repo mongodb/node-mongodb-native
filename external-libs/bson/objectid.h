@@ -28,6 +28,7 @@ class ObjectID : public ObjectWrap {
     static Handle<Value> ToHexString(const Arguments &args);
     static Handle<Value> CreatePk(const Arguments &args);
     static Handle<Value> CreateFromHexString(const Arguments &args);
+		static Handle<Value> Equals(const Arguments &args);
 
     // Properties
     static Handle<Value> IdGetter(Local<String> property, const AccessorInfo& info);
@@ -37,6 +38,7 @@ class ObjectID : public ObjectWrap {
     static Persistent<FunctionTemplate> constructor_template;
     // Instance methods
     char *convert_hex_oid_to_bin();    
+		bool equals(ObjectID *object_id);
   private:
     static Handle<Value> New(const Arguments &args);
     

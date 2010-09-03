@@ -188,6 +188,12 @@ var simple_string_serialized_2 = BSONJS.serialize(doc);
 var object = BSON.deserialize(simple_string_serialized);
 assert.deepEqual(doc, object)
 
+// Test equality of an object ID
+var object_id = new ObjectID2();
+var object_id_2 = new ObjectID2();
+assert.ok(object_id.equals(object_id));
+assert.ok(!(object_id.equals(object_id_2)))
+
 
 
 

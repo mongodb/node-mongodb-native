@@ -192,12 +192,31 @@ void ObjectID::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "equals", Equals);
 
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "createPk", CreatePk);
   NODE_SET_METHOD(constructor_template->GetFunction(), "createFromHexString", CreateFromHexString);
 
   target->Set(String::NewSymbol("ObjectID"), constructor_template->GetFunction());
+}
+
+Handle<Value> ObjectID::Equals(const Arguments &args) {
+  HandleScope scope;
+  
+  if(args.Length() != 1 && !args[0]->IsObject()) return scope.Close(Boolean::New(false));
+  // Retrieve the object
+  Local<Object> object_id_obj = args[0]->ToObject();
+  // Ensure it's a valid type object (of type Object ID)
+  if(!ObjectID::HasInstance(object_id_obj)) return scope.Close(Boolean::New(false));
+  // Ok we got an object ID, let's unwrap the value to compare the actual id's
+  ObjectID *object_id = ObjectWrap::Unwrap<ObjectID>(object_id_obj);
+  // Let's unpack the current object
+  ObjectID *current_object_id = ObjectWrap::Unwrap<ObjectID>(args.This());
+  // Now let's compare the id values between out current object and the existing one
+  bool result = current_object_id->equals(object_id);
+  // Return the result of the comparision
+  return scope.Close(Boolean::New(result));
 }
 
 Handle<Value> ObjectID::CreatePk(const Arguments &args) {
@@ -230,6 +249,18 @@ Handle<Value> ObjectID::IdGetter(Local<String> property, const AccessorInfo& inf
   free(binary_oid);
   // Close the scope
   return scope.Close(final_str);
+}
+
+bool ObjectID::equals(ObjectID *object_id) {
+  char *current_id = this->oid;
+  char *compare_id = object_id->oid;
+  bool result = true;
+  
+  for(uint32_t i = 0; i < 24; i++) {
+    if(*(current_id + i) != *(compare_id + i)) result = false;
+  }
+  
+  return result;
 }
 
 char *ObjectID::convert_hex_oid_to_bin() {
