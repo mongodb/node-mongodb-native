@@ -3817,6 +3817,29 @@ var all_tests = {
       });      
     });
   },
+  
+  test_should_execute_insert_update_delete_safe_mode : function() {
+    client.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
+      test.ok(collection instanceof Collection);
+      test.equal('test_should_execute_insert_update_delete_safe_mode', collection.collectionName);
+
+      collection.insert({i:1}, {safe:true}, function(err, ids) {
+        test.equal(1, ids.length);
+        test.ok(ids[0]._id.toHexString().length == 24);
+
+        // Update the record
+        collection.update({i:1}, {"$set":{i:2}}, {safe:true}, function(err, result) {
+          test.equal(null, err);
+        
+          // Remove safely
+          collection.remove({}, {safe:true}, function(err, result) {
+            test.equal(null, err);            
+            finished_test({test_should_execute_insert_update_delete_safe_mode:'ok'});
+          });
+        });
+      });
+    });
+  }
 };
 
 /*******************************************************************************************************
@@ -3865,23 +3888,6 @@ client.open(function(err, client) {
   });
 });
 
-// function ensure_tests_finished() {
-//   var intervalId = setInterval(function() {
-//     if(finished_tests.length >= client_tests_keys.length) {
-//       // Print out the result
-//       sys.puts("= Final Checks =========================================================");
-//       // Stop interval timer and close db connection
-//       clearInterval(intervalId);
-//       // Ensure we don't have any more cursors hanging about
-//       client.cursorInfo(function(err, cursorInfo) {
-//         sys.puts(sys.inspect(cursorInfo));
-//         sys.puts("");
-//         client.close();
-//       });
-//     }
-//   }, 100);
-// };
-
 function ensure_tests_finished() {
   var intervalId = setInterval(function() {
     if(client_tests_keys.length == 0) {
@@ -3902,35 +3908,10 @@ function ensure_tests_finished() {
 // All the finished client tests
 var finished_tests = [];
 
-// Run all the tests
-// function run_tests() {
-//   // client_tests = client_tests.sort(randOrd);
-//   // Run all the tests
-//   client_tests_keys.forEach(function(t){
-//   //  sys.puts('....starting...'+t);
-//     var function_name = t;
-//     try{
-//       client_tests[function_name]();
-//     } catch(error){
-//       sys.puts(sys.inspect(error));
-//      // var obj = {}; obj[function_name] = error;
-//       finished_test({function_name:error});
-//     }
-//   });
-// }
-
 function run_tests() {
-  // client_tests = client_tests.sort(randOrd);
   // Run first test
   client_tests[client_tests_keys[0]]();  
 }
-
-// function finished_test(test_object) {
-//   for(var name in test_object) {
-//     sys.puts("= executing test: " + name + " [" + test_object[name] + "]");
-//   }
-//   finished_tests.push(test_object);
-// }
 
 function finished_test(test_object) {
   for(var name in test_object) {
