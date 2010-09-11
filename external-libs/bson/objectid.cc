@@ -235,14 +235,10 @@ Handle<Value> ObjectID::CreatePk(const Arguments &args) {
 Handle<Value> ObjectID::IdGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
   
-  // Unpack object reference
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to Long object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
+  // Unpack the long object
+  ObjectID *objectid_obj = ObjectWrap::Unwrap<ObjectID>(info.Holder());
   // Convert the hex oid to bin
-  char *binary_oid = static_cast<ObjectID *>(ptr)->convert_hex_oid_to_bin();  
+  char *binary_oid = objectid_obj->convert_hex_oid_to_bin();
   // Create string and return it
   Local<String> final_str = Encode(binary_oid, 12, BINARY)->ToString();
   // Free the memory for binary_oid

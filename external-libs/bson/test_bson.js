@@ -154,6 +154,7 @@ assert.deepEqual(BSONJS.deserialize(simple_string_serialized_2).doc, BSON.deseri
 var oid = new ObjectID2()
 var simple_string_serialized = BSONJS.serialize({doc:new DBRef('namespace', oid, 'integration_tests_')});
 var simple_string_serialized_2 = BSON.serialize({doc:new DBRef2('namespace', oid, 'integration_tests_')});
+
 // Ensure we have the same values for the dbref
 var object_js = BSONJS.deserialize(simple_string_serialized_2);
 var object_c = BSON.deserialize(simple_string_serialized);

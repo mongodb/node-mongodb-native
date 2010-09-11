@@ -103,59 +103,14 @@ void DBRef::Initialize(Handle<Object> target) {
   target->Set(String::NewSymbol("DBRef"), constructor_template->GetFunction());
 }
 
-// id setter/getter
-// Handle<Value> DBRef::IdGetter(Local<String> property, const AccessorInfo& info) {
-//   HandleScope scope;
-// 
-//   Local<Object> self = info.Holder();
-//   // Fetch external reference (reference to DBRef object)
-//   Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-//   // Get pointer to the object
-//   void *ptr = wrap->Value();
-//   // Char value
-//   DBRef *dbref = static_cast<DBRef *>(ptr);
-//   // ObjectID
-//   scope.Close()
-//   
-//   // char *oid = dbref->oid->convert_hex_oid_to_bin();
-//   // Retrieve the object id
-//   // Local<String> oid_str = Encode(oid, 12, BINARY)->ToString();
-//   // return oid_str;
-// 
-//   // // Initialize the values
-//   // Local<String> oid_str = Encode(dbref->oid, strlen(dbref->oid), BINARY)->ToString();
-//   // 
-//   // // Return the value  
-//   // Local<Value> argv[] = {oid_str};
-//   // Handle<Value> object_id_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);
-// 
-//   
-//   // Local<Object> self = info.Holder();
-//   // // Fetch external reference (reference to DBRef object)
-//   // Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-//   // // Get pointer to the object
-//   // void *ptr = wrap->Value();
-//   // // Char value
-//   // char *value = static_cast<DBRef *>(ptr)->ref;
-//   // // Return the value  
-//   // return scope.Close(String::New(value));
-// }
-// 
-// void DBRef::IdSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
-//   HandleScope scope;
-// }
-
 // Namespace setter/getter
 Handle<Value> DBRef::NamespaceGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
   
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to DBRef object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
+  // Unpack the long object
+  DBRef *dbref_obj = ObjectWrap::Unwrap<DBRef>(info.Holder());
   // Char value
-  char *value = static_cast<DBRef *>(ptr)->ref;
+  char *value = dbref_obj->ref;
   // Return the value  
   return scope.Close(String::New(value));
 }
@@ -168,21 +123,10 @@ void DBRef::NamespaceSetter(Local<String> property, Local<Value> value, const Ac
 Handle<Value> DBRef::OidGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
   
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to DBRef object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
-  // Char value
-  DBRef *dbref = static_cast<DBRef *>(ptr);
-  // // Initialize the values
-  // Local<String> oid_str = String::New(dbref->oid->oid);
-  // // Return the value  
-  // Local<Value> argv[] = {oid_str};
-  // Handle<Value> object_id_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);
+  // Unpack the long object
+  DBRef *dbref_obj = ObjectWrap::Unwrap<DBRef>(info.Holder());
   // Return the oid
-  // return scope.Close(object_id_obj);
-  return scope.Close(dbref->oid);
+  return scope.Close(dbref_obj->oid);
 }
 
 void DBRef::OidSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
@@ -193,13 +137,10 @@ void DBRef::OidSetter(Local<String> property, Local<Value> value, const Accessor
 Handle<Value> DBRef::DbGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
   
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to DBRef object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
+  // Unpack the long object
+  DBRef *dbref_obj = ObjectWrap::Unwrap<DBRef>(info.Holder());
   // Char value
-  char *value = static_cast<DBRef *>(ptr)->db;
+  char *value = dbref_obj->db;
   // Return the value  
   return scope.Close(String::New(value));
 }

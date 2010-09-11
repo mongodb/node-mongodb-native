@@ -110,14 +110,11 @@ void Binary::Initialize(Handle<Object> target) {
 
 Handle<Value> Binary::SubtypeGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;  
+
   // Unpack object reference
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to Long object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
+  Binary *binary_obj = ObjectWrap::Unwrap<Binary>(info.Holder());
   // Extract value doing a cast of the pointer to Long and accessing low_bits
-  int32_t sub_type = static_cast<Binary *>(ptr)->sub_type;
+  int32_t sub_type = binary_obj->sub_type;
   Local<Integer> sub_type_int = Integer::New(sub_type);
   return scope.Close(sub_type_int);
 }

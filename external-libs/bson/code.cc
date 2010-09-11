@@ -100,26 +100,18 @@ void Code::Initialize(Handle<Object> target) {
 Handle<Value> Code::CodeGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
   
-  // Unpack object reference
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to Code object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
+  // Unpack the long object
+  Code *code_obj = ObjectWrap::Unwrap<Code>(info.Holder());
   // Extract value doing a cast of the pointer to Long and accessing code
-  char *code = static_cast<Code *>(ptr)->code;
+  char *code = code_obj->code;
   // Return the string
   return scope.Close(String::New(code));
 }
 
 void Code::CodeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
   if(value->IsString()) {
-    // Unpack object reference
-    Local<Object> self = info.Holder();
-    // Fetch external reference (reference to Code object)
-    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-    // Get pointer to the object
-    void *ptr = wrap->Value();
+    // Unpack the long object
+    Code *code_obj = ObjectWrap::Unwrap<Code>(info.Holder());
     // Convert the value to a string
     Local<String> str = value->ToString();
     // Set up the string
@@ -127,8 +119,6 @@ void Code::CodeSetter(Local<String> property, Local<Value> value, const Accessor
     *(code + str->Length()) = '\0';
     // Copy over
     node::DecodeWrite(code, str->Length(), str, node::BINARY);  
-    // code object
-    Code *code_obj = static_cast<Code *>(ptr);
     // Free existing pointer if any
     if(code_obj->code != NULL) free(code_obj->code);
     // Return the code
@@ -139,29 +129,20 @@ void Code::CodeSetter(Local<String> property, Local<Value> value, const Accessor
 Handle<Value> Code::ScopeGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
   
-  // Unpack object reference
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to Long object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
+  // Unpack the long object
+  Code *code_obj = ObjectWrap::Unwrap<Code>(info.Holder());
   // Extracting value doing a cast of the pointer to Value
-  Handle<Value> scope_obj = static_cast<Code *>(ptr)->scope_object;
-  return scope.Close(scope_obj);
+  return scope.Close(code_obj->scope_object);
 }
 
 void Code::ScopeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
   if(value->IsObject()) {
-    // Unpack object reference
-    Local<Object> self = info.Holder();
-    // Fetch external reference (reference to Long object)
-    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-    // Get pointer to the object
-    void *ptr = wrap->Value();
+    // Unpack the long object
+    Code *code_obj = ObjectWrap::Unwrap<Code>(info.Holder());
     // Fetch the local
     Local<Object> value_obj = value->ToObject();
     // Set the low bits
-    static_cast<Code *>(ptr)->scope_object = Persistent<Object>::New(value_obj);
+    code_obj->scope_object = Persistent<Object>::New(value_obj);
   }
 }
 

@@ -162,56 +162,36 @@ Handle<Value> Long::ToNumber(const Arguments &args) {
 Handle<Value> Long::LowGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
   
-  // Unpack object reference
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to Long object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
-  // Extract value doing a cast of the pointer to Long and accessing low_bits
-  int32_t low_bits = static_cast<Long *>(ptr)->low_bits;
-  Local<Integer> integer = Integer::New(low_bits);
-  return scope.Close(integer);
+  // Unpack the long object
+  Long *l = ObjectWrap::Unwrap<Long>(info.Holder());
+  // Return the low bits
+  return scope.Close(Integer::New(l->low_bits));
 }
 
 void Long::LowSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
   if(value->IsNumber()) {
-    // Unpack object reference
-    Local<Object> self = info.Holder();
-    // Fetch external reference (reference to Long object)
-    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-    // Get pointer to the object
-    void *ptr = wrap->Value();
+    // Unpack the long object
+    Long *l = ObjectWrap::Unwrap<Long>(info.Holder());
     // Set the low bits
-    static_cast<Long *>(ptr)->low_bits = value->Int32Value();    
+    l->low_bits = value->Int32Value();    
   }
 }
 
 Handle<Value> Long::HighGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
-  
-  // Unpack object reference
-  Local<Object> self = info.Holder();
-  // Fetch external reference (reference to Long object)
-  Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-  // Get pointer to the object
-  void *ptr = wrap->Value();
-  // Extract value doing a cast of the pointer to Long and accessing low_bits
-  int32_t high_bits = static_cast<Long *>(ptr)->high_bits;
-  Local<Integer> integer = Integer::New(high_bits);
-  return scope.Close(integer);
+
+  // Unpack the long object
+  Long *l = ObjectWrap::Unwrap<Long>(info.Holder());
+  // Return the low bits
+  return scope.Close(Integer::New(l->high_bits));  
 }
 
 void Long::HighSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
   if(value->IsNumber()) {
-    // Unpack object reference
-    Local<Object> self = info.Holder();
-    // Fetch external reference (reference to Long object)
-    Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
-    // Get pointer to the object
-    void *ptr = wrap->Value();
+    // Unpack the long object
+    Long *l = ObjectWrap::Unwrap<Long>(info.Holder());
     // Set the low bits
-    static_cast<Long *>(ptr)->high_bits = value->Int32Value();  
+    l->high_bits = value->Int32Value();  
   }
 }
 
