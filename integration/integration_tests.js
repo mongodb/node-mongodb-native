@@ -3139,6 +3139,58 @@ var all_tests = {
       });
     });
   },
+
+  // Mapreduce tests functions
+  test_map_reduce_functions : function() {
+    client.createCollection('test_map_reduce_functions', function(err, collection) {
+      collection.insert([{'user_id':1}, {'user_id':2}]);
+  
+      // String functions
+      var map = function() { emit(this.user_id, 1); };
+      var reduce = function(k,vals) { return 1; };
+  
+      collection.mapReduce(map, reduce, function(err, collection) {
+        collection.findOne({'_id':1}, function(err, result) {
+          test.equal(1, result.value);
+        });
+  
+        collection.findOne({'_id':2}, function(err, result) {
+          test.equal(1, result.value);
+          finished_test({test_map_reduce_functions:'ok'});
+        });
+      });
+    });
+  },
+  
+  // Mapreduce different test
+  test_map_reduce_functions_scope : function() {
+    client.createCollection('test_map_reduce_functions_scope', function(err, collection) {
+      collection.insert([{'user_id':1, 'timestamp':new Date()}, {'user_id':2, 'timestamp':new Date()}]);
+
+      var map = function(){
+          emit(test(this.timestamp.getYear()), 1);
+      }
+      
+      var reduce = function(k, v){
+          count = 0;
+          for(i = 0; i < v.length; i++) {
+              count += v[i];
+          }
+          return count;
+      }
+      
+      var t = function(val){ return val+1; }
+        
+      collection.mapReduce(map, reduce, {scope:{test:new client.bson_serializer.Code(t.toString())}}, function(err, collection) {
+        collection.find(function(err, cursor) {
+          cursor.toArray(function(err, results) {
+            test.equal(2, results[0].value)
+            finished_test({test_map_reduce_functions_scope:'ok'});            
+          })
+        })
+      });
+    });
+  },
   
   // Mapreduce tests
   test_map_reduce : function() {
