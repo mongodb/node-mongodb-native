@@ -3563,6 +3563,19 @@ var all_tests = {
       });
     });
   },
+
+  test_gs_writing_file: function() {
+    var gridStore = new GridStore(client, 'test_gs_writing_file', 'w');
+    var fileSize = fs.statSync('./integration/test_gs_weird_bug.png').size;
+    gridStore.open(function(err, gridStore) {
+      gridStore.writeFile('./integration/test_gs_weird_bug.png', function(err, gridStore) {
+        GridStore.read(client, 'test_gs_writing_file', function(err, fileData) {
+          test.equal(fileSize, fileData.length);
+          finished_test({test_gs_writing_file: 'ok'});
+        });
+      });
+    });
+  },
   
   test_gs_working_field_read : function() {
     var gridStore = new GridStore(client, "test_gs_working_field_read", "w");
