@@ -3655,7 +3655,6 @@ var all_tests = {
         collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {'new': true, remove: true}, function(err, updated_doc) {
           test.equal(3, updated_doc.a);
           test.equal(2, updated_doc.b);
-          finished_test({test_find_and_modify_a_document:'ok'});
         })
       });
 
