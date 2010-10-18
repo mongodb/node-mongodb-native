@@ -1,3 +1,9 @@
+= Install
+
+Run:
+
+  make
+
 = Community
 Check out the google group http://groups.google.com/group/node-mongodb-native for questions/answers from users of the driver.
 

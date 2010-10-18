@@ -2804,6 +2804,29 @@ var all_tests = {
     });
   },
   
+  // checks if 8 bit values will be preserved in gridstore
+  test_gs_check_high_bits : function() {
+      var gridStore = new GridStore(client, "test_gs_check_high_bits", "w");
+      var data = new Buffer(255);
+      for(var i=0; i<255; i++){
+          data[i] = i;
+      }
+    
+      gridStore.open(function(err, gridStore) {
+        gridStore.write(data, function(err, gridStore) {
+          gridStore.close(function(err, result) {
+            // Assert that we have overwriten the data
+            GridStore.read(client, 'test_gs_check_high_bits', function(err, fileData) {
+              // change testvalue into a string like "0,1,2,...,255"
+              test.equal(Array.prototype.join.call(data),
+                      Array.prototype.join.call(new Buffer(fileData, "binary")));
+              finished_test({test_gs_check_high_bits:'ok'});
+            });
+          });
+        });
+      });
+    },
+  
   test_change_chunk_size : function() {
     var gridStore = new GridStore(client, "test_change_chunk_size", "w");
     gridStore.open(function(err, gridStore) {
