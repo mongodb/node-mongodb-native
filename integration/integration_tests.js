@@ -1133,6 +1133,51 @@ var all_tests = {
     });
   },
   
+  test_stream_records_calls_data_the_right_number_of_times : function() {
+    client.createCollection('test_stream_records', function(err, collection) {
+      test.ok(collection instanceof Collection);
+      collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], function(err, ids) {
+        collection.find({}, {'limit' : 3}, function(err, cursor) {
+          var stream = cursor.streamRecords(function(er,item) {}); 
+          var callsToEnd = 0;
+          stream.addListener('end', function() { 
+            finished_test({test_stream_records_calls_data_the_right_number_of_times:'ok'});
+          });
+          
+          var callsToData = 0;
+          stream.addListener('data',function(data){ 
+            callsToData += 1;
+            test.ok(callsToData <= 3);
+          }); 
+        });
+      });
+    });    
+  },
+
+  test_stream_records_calls_end_the_right_number_of_times : function() {
+    client.createCollection('test_stream_records', function(err, collection) {
+      test.ok(collection instanceof Collection);
+      collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], function(err, ids) {
+        collection.find({}, {'limit' : 3}, function(err, cursor) {
+          var stream = cursor.streamRecords(function(er,item) {}); 
+          var callsToEnd = 0;
+          stream.addListener('end', function() { 
+            callsToEnd += 1;
+            test.equal(1, callsToEnd);
+            setTimeout(function() {
+              // Let's close the db
+              if (callsToEnd == 1) {
+                finished_test({test_stream_records_calls_end_the_right_number_of_times:'ok'});
+              }
+            }.bind(this), 1000);
+          });
+          
+          stream.addListener('data',function(data){ /* nothing here */ }); 
+        });
+      });
+    });    
+  },
+  
   test_where : function() {
     client.createCollection('test_where', function(err, collection) {
       test.ok(collection instanceof Collection);
