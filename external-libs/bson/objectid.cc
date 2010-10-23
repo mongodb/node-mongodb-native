@@ -42,10 +42,10 @@ ObjectID::~ObjectID() {
 
 char *ObjectID::uint32_to_char(uint32_t value) {
   char *buf = (char *) malloc(4 * sizeof(char) + 1);
-  *(buf) = (char)(value & 0xff);
-  *(buf + 1) = (char)((value >> 8) & 0xff);
-  *(buf + 2) = (char)((value >> 16) & 0xff);
-  *(buf + 3) = (char)((value >> 24) & 0xff);
+  *(buf) = (char)((value >> 24) & 0xff);
+  *(buf + 1) = (char)((value >> 16) & 0xff);
+  *(buf + 2) = (char)((value >> 8) & 0xff);
+  *(buf + 3) = (char)(value & 0xff);
   *(buf + 4) = '\0';
   return buf;
 }
