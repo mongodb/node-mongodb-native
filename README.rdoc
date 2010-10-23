@@ -57,7 +57,7 @@ or when using the native bson parser use
 	
 To enable the driver to use the C/C++ bson parser pass it the option native_parser:true like below
 
-	var client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {native_parser:true}));
+	var client = new Db('integration_tests_20', new Server("127.0.0.1", 27017), {native_parser:true});
 	
 === GitHub information
 
