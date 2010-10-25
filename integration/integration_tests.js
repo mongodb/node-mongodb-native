@@ -3971,6 +3971,35 @@ var all_tests = {
         });
       });
     });
+  },
+  
+  test_streaming_function_with_limit_for_fetching : function() {
+    var docs = []
+    
+    for(var i = 0; i < 3000; i++) {
+      docs.push({'a':i})
+    }
+
+    client.createCollection('test_something_1', function(err, collection) {
+      test.ok(collection instanceof Collection);
+
+      collection.insertAll(docs, function(err, ids) {        
+        collection.find({}, function(err, cursor) {
+          // Execute find on all the documents
+          var stream = cursor.streamRecords({limit:1000}, function(er,item) {}); 
+          var callsToEnd = 0;
+          stream.addListener('end', function() { 
+            finished_test({test_streaming_function_with_limit_for_fetching:'ok'});
+          });
+
+          var callsToData = 0;
+          stream.addListener('data',function(data){ 
+            callsToData += 1;
+            test.ok(callsToData <= 3000);
+          }); 
+        });        
+      });
+    });    
   }
 };
 
