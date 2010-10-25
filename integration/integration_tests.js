@@ -1138,7 +1138,7 @@ var all_tests = {
       test.ok(collection instanceof Collection);
       collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], function(err, ids) {
         collection.find({}, {'limit' : 3}, function(err, cursor) {
-          var stream = cursor.streamRecords(function(er,item) {}); 
+          var stream = cursor.streamRecords(); 
           var callsToEnd = 0;
           stream.addListener('end', function() { 
             finished_test({test_stream_records_calls_data_the_right_number_of_times:'ok'});
@@ -3986,7 +3986,7 @@ var all_tests = {
       collection.insertAll(docs, function(err, ids) {        
         collection.find({}, function(err, cursor) {
           // Execute find on all the documents
-          var stream = cursor.streamRecords({fetchSize:1000}, function(er,item) {}); 
+          var stream = cursor.streamRecords({fetchSize:1000}); 
           var callsToEnd = 0;
           stream.addListener('end', function() { 
             finished_test({test_streaming_function_with_limit_for_fetching:'ok'});
