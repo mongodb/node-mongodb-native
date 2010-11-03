@@ -14,10 +14,20 @@ var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NO
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
 
+var port1 = 27018;
+var port2 = 27019;
+var server = new Server(host, port, {});
+var server1 = new Server(host, port1, {});
+var server2 = new Server(host, port2, {});
+var servers = new Array();
+servers[0] = server2;
+servers[1] = server1;
+servers[2] = server;
 
+var replStat = new ReplSetServers(servers);
 sys.puts("Connecting to " + host + ":" + port);
 
-var db = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
+var db = new Db('node-mongo-examples', replStat, {native_parser:true});
 db.open(function(err, db) {
   db.dropDatabase(function() {
     // Fetch the collection test
