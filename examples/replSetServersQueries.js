@@ -5,9 +5,9 @@ test = require("assert");
 
 var Db = require('../lib/mongodb').Db,
   Connection = require('../lib/mongodb').Connection,
-  ReplSetServers = require('../lib/mongodb').ReplSetServers,
     Server = require('../lib/mongodb').Server,
-  // BSON = require('../lib/mongodb').BSONPure;
+    ReplSetServers = require('../lib/mongodb').ReplSetServers,
+      // BSON = require('../lib/mongodb').BSONPure;
   BSON = require('../lib/mongodb').BSONNative;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
