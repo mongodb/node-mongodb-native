@@ -4013,6 +4013,17 @@ var all_tests = {
         });        
       });
     });        
+  },
+  
+  test_failed_connection_caught : function() {
+    var fs_client = new Db('admin_test_4', new Server("127.0.0.1", 27117, {auto_reconnect: false}));
+    fs_client.bson_deserializer = client.bson_deserializer;
+    fs_client.bson_serializer = client.bson_serializer;
+    fs_client.pkFactory = client.pkFactory;  
+    fs_client.open(function(err, fs_client) {
+      test.ok(err != null)
+      finished_test({test_failed_connection_caught:'ok'});
+    })
   }
 };
 
