@@ -63,6 +63,8 @@ class Long : public ObjectWrap {
     static Handle<Value> FromInt(const Arguments &args);
     static Handle<Value> ToInt(const Arguments &args);
     static Handle<Value> ToNumber(const Arguments &args);
+    static Handle<Value> ToJSON(const Arguments &args);
+    static Handle<Value> Equals(const Arguments &args);
 
     // Constructor used for creating new Long objects from C++
     static Persistent<FunctionTemplate> constructor_template;

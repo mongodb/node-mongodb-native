@@ -5,7 +5,7 @@ test = require("assert");
 var Db = require('../lib/mongodb').Db,
   GridStore = require('../lib/mongodb').GridStore,
   Chunk = require('../lib/mongodb').Chunk,
-  Long = require('../lib/mongodb').Long,
+  // Long = require('../lib/mongodb').Long,
   Server = require('../lib/mongodb').Server,
   ServerPair = require('../lib/mongodb').ServerPair,
   Code = require('../lib/mongodb/bson/bson').Code;
@@ -1468,9 +1468,9 @@ var all_tests = {
   
   test_save_long : function() {
     client.createCollection('test_save_long', function(err, collection) {
-      collection.insert({'x':Long.fromNumber(9223372036854775807)});
+      collection.insert({'x':client.bson_serializer.Long.fromNumber(9223372036854775807)});
       collection.findOne(function(err, doc) {
-        test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
+        test.ok(client.bson_serializer.Long.fromNumber(9223372036854775807).equals(doc.x));
         // Let's close the db
         finished_test({test_save_long:'ok'});
       });
@@ -4000,6 +4000,19 @@ var all_tests = {
         });        
       });
     });    
+  }, 
+  
+  test_to_json_for_long : function() {
+    client.createCollection('test_to_json_for_long', function(err, collection) {
+      test.ok(collection instanceof Collection);
+
+      collection.insertAll([{value: new client.bson_serializer.Long(32222432)}], function(err, ids) {        
+        collection.findOne({}, function(err, item) {
+          test.equal("32222432", item.value.toJSON())
+          finished_test({test_to_json_for_long:'ok'});
+        });        
+      });
+    });        
   }
 };
 

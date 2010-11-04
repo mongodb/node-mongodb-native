@@ -122,6 +122,8 @@ void Long::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "greaterThan", GreatherThan);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toInt", ToInt);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toNumber", ToNumber);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "toJSON", ToJSON);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "equals", Equals);
 
   // Getters for correct serialization of the object  
   constructor_template->InstanceTemplate()->SetAccessor(low_bits_symbol, LowGetter, LowSetter);
@@ -390,6 +392,21 @@ Handle<Value> Long::ToString(const Arguments &args) {
   return result_str;
 }
 
+Handle<Value> Long::ToJSON(const Arguments &args) {
+  HandleScope scope;
+
+  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
+  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's create the string from the Long number
+  char *result = l->toString(10);
+  // Package the result in a V8 String object and return
+  Handle<Value> result_str = String::New(result);
+  // Free memory
+  free(result);
+  // Return string
+  return result_str;
+}
+
 Long *Long::shiftRight(int32_t number_bits) {
   number_bits &= 63;
   if(number_bits == 0) {
@@ -604,6 +621,21 @@ Handle<Value> Long::GreatherThan(const Arguments &args) {
   Long *long_obj = Long::Unwrap<Long>(obj);
   // Compare the longs
   bool comparision_result = current_long_obj->greaterThan(long_obj);
+  scope.Close(Boolean::New(comparision_result));
+}
+
+Handle<Value> Long::Equals(const Arguments &args) {
+  HandleScope scope;
+  
+  if(args.Length() != 1 && !Long::HasInstance(args[0])) return VException("One argument of type Long required");
+  
+  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
+  Long *current_long_obj = ObjectWrap::Unwrap<Long>(args.This());  
+  // Unpack Long
+  Local<Object> obj = args[0]->ToObject();
+  Long *long_obj = Long::Unwrap<Long>(obj);
+  // Compare the longs
+  bool comparision_result = (current_long_obj->compare(long_obj) == 0);
   scope.Close(Boolean::New(comparision_result));
 }
 
