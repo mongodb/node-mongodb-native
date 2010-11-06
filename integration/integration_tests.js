@@ -419,6 +419,22 @@ var all_tests = {
     });
   },
 
+  test_failing_insert_due_to_unique_index : function () {
+    client.createCollection('test_failing_insert_due_to_unique_index', function(err, r) {
+      client.collection('test_failing_insert_due_to_unique_index', function(err, collection) {
+        collection.ensureIndex([['a', 1 ]], true, function(err, indexName) {
+          collection.insert({a:2}, {safe: true}, function(err, r) {
+            test.ok(err == null);
+            collection.insert({a:2}, {safe: true}, function(err, r) {
+              test.ok(err != null);
+              finished_test({test_failing_insert_due_to_unique_index:'ok'});
+            })
+          })
+        })
+      })
+    })
+  },
+
   // Test multiple document insert
   test_multiple_insert : function() {
     client.createCollection('test_multiple_insert', function(err, r) {
