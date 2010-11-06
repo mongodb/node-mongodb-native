@@ -3940,13 +3940,27 @@ var all_tests = {
     client.createCollection('test_should_correctly_do_upsert', function(err, collection) {
       var id = new client.bson_serializer.ObjectID(null)
       var doc = {_id:id, a:1};
-      
       collection.update({"_id":id}, doc, {upsert:true}, function(err, doc) {
+        test.equal(null, err);
         collection.findOne({"_id":id}, function(err, doc) {
           test.equal(1, doc.a);
+        });
+      });
+      id = new client.bson_serializer.ObjectID(null)
+      doc = {_id:id, a:2};
+      collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, doc) {
+        test.equal(null, err);
+        collection.findOne({"_id":id}, function(err, doc) {
+          test.equal(2, doc.a);
+        });
+      });
+      collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, doc) {
+        test.equal(null, err);
+        collection.findOne({"_id":id}, function(err, doc) {
+          test.equal(2, doc.a);
           finished_test({test_should_correctly_do_upsert:'ok'});
         });
-      });      
+      });
     });
   },
   
