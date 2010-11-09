@@ -1024,6 +1024,22 @@ var all_tests = {
     });
   },
 
+  test_utf8_regex : function() {
+    var regexp = /foobaré/;
+  
+    client.createCollection('test_utf8_regex', function(err, collection) {
+      collection.insert({'b':regexp}, function(err, ids) {
+        collection.find({}, {'fields': ['b']}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
+            test.equal(("" + regexp), ("" + items[0].b));
+            // Let's close the db
+            finished_test({test_utf8_regex:'ok'});
+          });
+        });
+      });
+    });
+  },
+
   // Use some other id than the standard for inserts
   test_non_oid_id : function() {
     client.createCollection('test_non_oid_id', function(err, collection) {
