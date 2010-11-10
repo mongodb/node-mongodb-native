@@ -36,11 +36,12 @@ servers[2] = server;
 var replStat = new ReplSetServers(servers);
 
 
-var db = new Db('mongo-example', replStat, {native_parser:true});
+ var db = new Db('mongo-example', replStat, {native_parser:true});
+
 db.open(function(err, db) {
+
   db.dropDatabase(function(err, result) {
-    db.collection('test', function(err, collection) {
-      
+          db.collection('test', function(err, collection) {
       collection.remove(function(err, collection) {
         // Insert 3 records
         for(var i = 0; i < 3; i++) {
@@ -70,10 +71,6 @@ db.open(function(err, db) {
     });
   });
 });
-
-
-
-
 
 
 
