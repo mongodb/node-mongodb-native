@@ -26,7 +26,8 @@ servers[2] = server;
 
 var replStat = new ReplSetServers(servers);
 sys.puts("Connecting to " + host + ":" + port);
-
+sys.puts("Connecting to " + host1 + ":" + port1);
+sys.puts("Connecting to " + host2 + ":" + port2);
 var db = new Db('node-mongo-examples', replStat, {native_parser:true});
 db.open(function(err, db) {
   db.dropDatabase(function() {
