@@ -573,11 +573,11 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     uint32_t regexp_size = 0;
     // Fetch the string for the regexp
     Local<String> str = value->ToString();    
-    len = DecodeBytes(str, BINARY);
+    len = DecodeBytes(str, UTF8);
     // Let's define the buffer that contains the regexp string
     char *data = (char *)malloc(len);
     // Write the data to the buffer from the string object
-    written = DecodeWrite(data, len, str, BINARY);    
+    written = DecodeWrite(data, len, str, UTF8);    
     // Locate the last pointer of the string
     char *options_ptr = strrchr(data, '/');
     // Copy out the code string
@@ -585,12 +585,12 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     char *reg_exp_string = (char *)malloc(reg_exp_string_length + 1);
     memcpy(reg_exp_string, (data + 1), reg_exp_string_length);
     *(reg_exp_string + reg_exp_string_length) = '\0';
+
     // Write the string to the data
     memcpy((serialized_object + index), reg_exp_string, reg_exp_string_length + 1);
     // Adjust index
     index = index + reg_exp_string_length + 1;
-    
-    // printf("========================= regexp::[%d]:%s\n", reg_exp_string_length, reg_exp_string);
+        
     // Check if we have options
     // if((options_ptr - data) < len) {
     uint32_t options_string_length = (len - (reg_exp_string_length + 2));
@@ -789,7 +789,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     uint32_t regexp_size = 0;
     // Fetch the string for the regexp
     Local<String> str = value->ToString();    
-    ssize_t len = DecodeBytes(str, BINARY);
+    ssize_t len = DecodeBytes(str, UTF8);
     // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
     object_size = object_size + len;
   } else if(value->IsArray()) {
@@ -1107,17 +1107,18 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
 
       // Length variable
       int32_t length_regexp = 0;
+      int32_t start_index = index;
       char chr;
-
+      
       // Locate end of the regexp expression \0
       while((chr = *(data + index + length_regexp)) != '\0') {
         length_regexp = length_regexp + 1;
       }
-            
+
       // Contains the reg exp
-      char *reg_exp = (char *)malloc(length_regexp * sizeof(char) + 1);
+      char *reg_exp = (char *)malloc(length_regexp * sizeof(char) + 2);
       // Copy the regexp from the data to the char *
-      memcpy(reg_exp, (data + index), (length_regexp + 1));      
+      memcpy(reg_exp, (data + index), (length_regexp + 1));
       // Adjust the index to skip the first part of the regular expression
       index = index + length_regexp + 1;
             
@@ -1141,7 +1142,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       char *reg_exp_string = (char *)malloc((length_regexp + options_length)*sizeof(char) + 2 + 2);
       *(reg_exp_string) = '\0';
       strncat(reg_exp_string, "/", 1);      
-      strncat(reg_exp_string, reg_exp, length_regexp);      
+      strncat(reg_exp_string, reg_exp, length_regexp);
       strncat(reg_exp_string, "/", 1);      
       strncat(reg_exp_string, options, options_length);
 
