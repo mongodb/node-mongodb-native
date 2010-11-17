@@ -969,7 +969,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       }          
       // Free up the memory
       free(string_name);
-    } else if(type == BSON_DATA_LONG) {
+    } else if(type == BSON_DATA_LONG || type == BSON_DATA_TIMESTAMP) {
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
