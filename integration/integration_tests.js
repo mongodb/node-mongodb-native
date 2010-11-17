@@ -3746,8 +3746,18 @@ var all_tests = {
       collection.findAndModify({'a':4}, [], {'$set':{'b':3}}, {'new': true, upsert: true}, function(err, updated_doc) {
         test.equal(4, updated_doc.a);
         test.equal(3, updated_doc.b);
-        finished_test({test_find_and_modify_a_document:'ok'});
-      })
+      });
+
+      // Test selecting a subset of fields
+      collection.insert({a: 100, b: 101}, function (err, ids) {
+        collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
+          test.equal(2, Object.keys(updated_doc).length);
+          test.equal(ids[0]['_id'].toHexString(), updated_doc._id.toHexString());
+          test.equal(5, updated_doc.b);
+          test.equal("undefined", typeof updated_doc.a);
+          finished_test({test_find_and_modify_a_document:'ok'});
+        });
+      });
     });
   },
   
