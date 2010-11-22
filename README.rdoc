@@ -14,7 +14,7 @@ This is a node.js driver for MongoDB. It's a port (or close to a port) of the li
 A simple example of inserting a document.
 
   var client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}));
-  client.open(function(p_client) {
+  client.open(function(err, p_client) {
   	client.createCollection('test_insert', function(err, collection) {
   	  client.collection('test_insert', function(err, collection) {
   	    for(var i = 1; i < 1000; i++) {
@@ -103,7 +103,7 @@ Simple example below
 	}
 
 	var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
-	p_client.open(function(p_client) {
+	p_client.open(function(err, p_client) {
 	  p_client.dropDatabase(function(err, done) {    
 	    p_client.createCollection('test_custom_key', function(err, collection) {
 	      collection.insert({'a':1}, function(err, docs) {
@@ -128,7 +128,7 @@ attempt to create a collection that already exists. Strict is provided for conve
 
 	var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
 	test.assertEquals(true, error_client.strict);
-	error_client.open(function(error_client) {
+	error_client.open(function(err, error_client) {
 	  error_client.collection('does-not-exist', function(err, collection) {
 	    test.assertTrue(err instanceof Error);
 	    test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", err.message);      
