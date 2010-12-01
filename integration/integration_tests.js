@@ -4070,6 +4070,20 @@ var all_tests = {
       test.ok(err != null)
       finished_test({test_failed_connection_caught:'ok'});
     })
+  },
+  
+  test_insert_and_update_no_callback : function() {
+    client.createCollection('test_insert_and_update_no_callback', function(err, collection) {
+      // Insert the update
+      collection.insert({i:1}, {safe:true})
+      // Update the record
+      collection.update({i:1}, {"$set":{i:2}}, {safe:true})
+      // Locate document
+      collection.findOne({}, function(err, item) {
+        test.equal(2, item.i)
+        finished_test({test_insert_and_update_no_callback:'ok'});
+      });        
+    })
   }
 };
 
