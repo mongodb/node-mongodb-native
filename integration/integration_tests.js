@@ -5,7 +5,6 @@ test = require("assert");
 var Db = require('../lib/mongodb').Db,
   GridStore = require('../lib/mongodb').GridStore,
   Chunk = require('../lib/mongodb').Chunk,
-  // Long = require('../lib/mongodb').Long,
   Server = require('../lib/mongodb').Server,
   ServerPair = require('../lib/mongodb').ServerPair,
   Code = require('../lib/mongodb/bson/bson').Code;
@@ -3762,8 +3761,18 @@ var all_tests = {
       collection.findAndModify({'a':4}, [], {'$set':{'b':3}}, {'new': true, upsert: true}, function(err, updated_doc) {
         test.equal(4, updated_doc.a);
         test.equal(3, updated_doc.b);
-        finished_test({test_find_and_modify_a_document:'ok'});
-      })
+      });
+
+      // Test selecting a subset of fields
+      collection.insert({a: 100, b: 101}, function (err, ids) {
+        collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
+          test.equal(2, Object.keys(updated_doc).length);
+          test.equal(ids[0]['_id'].toHexString(), updated_doc._id.toHexString());
+          test.equal(5, updated_doc.b);
+          test.equal("undefined", typeof updated_doc.a);
+          finished_test({test_find_and_modify_a_document:'ok'});
+        });
+      });
     });
   },
   
@@ -4052,11 +4061,12 @@ var all_tests = {
     client.createCollection('test_to_json_for_long', function(err, collection) {
       test.ok(collection instanceof Collection);
 
-      collection.insertAll([{value: new client.bson_serializer.Long(32222432)}], function(err, ids) {        
+      // collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], function(err, ids) {
+      collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], function(err, ids) {
         collection.findOne({}, function(err, item) {
           test.equal("32222432", item.value.toJSON())
           finished_test({test_to_json_for_long:'ok'});
-        });        
+        });
       });
     });        
   },
@@ -4070,7 +4080,36 @@ var all_tests = {
       test.ok(err != null)
       finished_test({test_failed_connection_caught:'ok'});
     })
+  },
+  
+  test_insert_and_update_no_callback : function() {
+    client.createCollection('test_insert_and_update_no_callback', function(err, collection) {
+      // Insert the update
+      collection.insert({i:1}, {safe:true})
+      // Update the record
+      collection.update({i:1}, {"$set":{i:2}}, {safe:true})
+      // Locate document
+      collection.findOne({}, function(err, item) {
+        test.equal(2, item.i)
+        finished_test({test_insert_and_update_no_callback:'ok'});
+      });        
+    })
+  },
+  
+  test_insert_and_query_timestamp : function() {
+    client.createCollection('test_insert_and_query_timestamp', function(err, collection) {
+      // Insert the update
+      collection.insert({i:client.bson_serializer.Timestamp.fromNumber(100), j:client.bson_serializer.Long.fromNumber(200)}, {safe:true})
+      // Locate document
+      collection.findOne({}, function(err, item) {
+        test.equal(100, item.i.toNumber())
+        test.equal(200, item.j.toNumber())
+        
+        finished_test({test_insert_and_query_timestamp:'ok'});
+      });        
+    })
   }
+  
 };
 
 /*******************************************************************************************************

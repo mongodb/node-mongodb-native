@@ -13,6 +13,7 @@
 
 #include "bson.h"
 #include "long.h"
+#include "timestamp.h"
 #include "objectid.h"
 #include "binary.h"
 #include "code.h"
@@ -281,6 +282,28 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     BSON::write_int32((serialized_object + index + 4), long_obj->high_bits);
     // Adjust the index
     index = index + 8;
+  } else if(Timestamp::HasInstance(value)) {
+      // printf("============================================= -- serialized::::long\n");    
+      // Save the string at the offset provided
+      *(serialized_object + index) = BSON_DATA_TIMESTAMP;
+      // Adjust writing position for the first byte
+      index = index + 1;
+      // Convert name to char*
+      ssize_t len = DecodeBytes(name, BINARY);
+      ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+      // Add null termiation for the string
+      *(serialized_object + index + len) = '\0';    
+      // Adjust the index
+      index = index + len + 1;
+
+      // Unpack the object and encode
+      Local<Object> obj = value->ToObject();
+      Timestamp *timestamp_obj = Timestamp::Unwrap<Timestamp>(obj);
+      // Write the content to the char array
+      BSON::write_int32((serialized_object + index), timestamp_obj->low_bits);
+      BSON::write_int32((serialized_object + index + 4), timestamp_obj->high_bits);
+      // Adjust the index
+      index = index + 8;
   } else if(ObjectID::HasInstance(value) || (value->IsObject() && value->ToObject()->HasRealNamedProperty(String::New("toHexString")))) {
     // printf("============================================= -- serialized::::object_id\n");    
     // Save the string at the offset provided
@@ -969,7 +992,33 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       }          
       // Free up the memory
       free(string_name);
-    } else if(type == BSON_DATA_LONG || type == BSON_DATA_TIMESTAMP) {
+    } else if(type == BSON_DATA_TIMESTAMP) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Decode the integer value
+      int64_t value = 0;
+      memcpy(&value, (data + index), 8);      
+      // Adjust the index for the size of the value
+      index = index + 8;
+            
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), BSON::decodeTimestamp(value));
+      } else {
+        return_data->Set(String::New(string_name), BSON::decodeTimestamp(value));
+      }
+      // Free up the memory
+      free(string_name);            
+    } else if(type == BSON_DATA_LONG) {
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1441,6 +1490,13 @@ Handle<Value> BSON::decodeLong(int64_t value) {
   return scope.Close(long_obj);      
 }
 
+Handle<Value> BSON::decodeTimestamp(int64_t value) {
+  HandleScope scope;
+  
+  Local<Value> argv[] = {Number::New(value)};
+  Handle<Value> timestamp_obj = Timestamp::constructor_template->GetFunction()->NewInstance(1, argv);    
+  return scope.Close(timestamp_obj);      
+}
 
 // Search for 0 terminated C string and return the string
 char* BSON::extract_string(char *data, uint32_t offset) {
@@ -1548,6 +1604,7 @@ extern "C" void init(Handle<Object> target) {
   Binary::Initialize(target);
   Code::Initialize(target);
   DBRef::Initialize(target);
+  Timestamp::Initialize(target);
 }
 
 // NODE_MODULE(bson, BSON::Initialize);

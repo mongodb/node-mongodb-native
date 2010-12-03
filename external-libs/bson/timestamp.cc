@@ -11,7 +11,7 @@
 #include <iostream>
 #include <limits>
 
-#include "long.h"
+#include "timestamp.h"
 
 // BSON MAX VALUES
 const int32_t BSON_INT32_MAX = (int32_t)2147483648L;
@@ -25,11 +25,11 @@ const int64_t BSON_INT64_MAX = (int64_t)9223372036854775807LL;
 const int64_t BSON_INT64_MIN = (int64_t)(-1)*(9223372036854775807LL);
 
 // Constant objects used in calculations
-Long* LONG_MIN_VALUE = Long::fromBits(0, 0x80000000 | 0);
-Long* LONG_MAX_VALUE = Long::fromBits(0xFFFFFFFF | 0, 0x7FFFFFFF | 0);
-Long* LONG_ZERO = Long::fromInt(0);
-Long* LONG_ONE = Long::fromInt(1);
-Long* LONG_NEG_ONE = Long::fromInt(-1);
+Timestamp* TIMESTAMP_MIN_VALUE = Timestamp::fromBits(0, 0x80000000 | 0);
+Timestamp* TIMESTAMP_MAX_VALUE = Timestamp::fromBits(0xFFFFFFFF | 0, 0x7FFFFFFF | 0);
+Timestamp* TIMESTAMP_ZERO = Timestamp::fromInt(0);
+Timestamp* TIMESTAMP_ONE = Timestamp::fromInt(1);
+Timestamp* TIMESTAMP_NEG_ONE = Timestamp::fromInt(-1);
 
 #define max(a,b) ({ typeof (a) _a = (a); typeof (b) _b = (b); _a > _b ? _a : _b; })
 
@@ -38,19 +38,16 @@ static Handle<Value> VException(const char *msg) {
     return ThrowException(Exception::Error(String::New(msg)));
   };
 
-Persistent<FunctionTemplate> Long::constructor_template;
+Persistent<FunctionTemplate> Timestamp::constructor_template;
 
-static Persistent<String> low_bits_symbol;
-static Persistent<String> high_bits_symbol;
-
-Long::Long(int32_t low_bits, int32_t high_bits) : ObjectWrap() {
+Timestamp::Timestamp(int32_t low_bits, int32_t high_bits) : ObjectWrap() {
   this->low_bits = low_bits;
   this->high_bits = high_bits;
 }
 
-Long::~Long() {}
+Timestamp::~Timestamp() {}
 
-Handle<Value> Long::New(const Arguments &args) {
+Handle<Value> Timestamp::New(const Arguments &args) {
   HandleScope scope;
 
   // Ensure that we have an parameter
@@ -58,7 +55,7 @@ Handle<Value> Long::New(const Arguments &args) {
     // Unpack the value
     double value = args[0]->NumberValue();
     // Create an instance of long
-    Long *l = Long::fromNumber(value);
+    Timestamp *l = Timestamp::fromNumber(value);
     // Wrap it in the object wrap
     l->Wrap(args.This());
     // Return the context
@@ -68,7 +65,7 @@ Handle<Value> Long::New(const Arguments &args) {
     int32_t low_bits = args[0]->Int32Value();
     int32_t high_bits = args[1]->Int32Value();
     // Create an instance of long
-    Long *l = new Long(low_bits, high_bits);
+    Timestamp *l = new Timestamp(low_bits, high_bits);
     // Wrap it in the object wrap
     l->Wrap(args.This());
     // Return the context
@@ -90,7 +87,7 @@ Handle<Value> Long::New(const Arguments &args) {
     free(low_bits_str);
     free(high_bits_str);
     // Create an instance of long
-    Long *l = new Long(low_bits, high_bits);
+    Timestamp *l = new Timestamp(low_bits, high_bits);
     // Wrap it in the object wrap
     l->Wrap(args.This());
     // Return the context
@@ -100,14 +97,14 @@ Handle<Value> Long::New(const Arguments &args) {
   }
 }
 
-void Long::Initialize(Handle<Object> target) {
+void Timestamp::Initialize(Handle<Object> target) {
   // Grab the scope of the call from Node
   HandleScope scope;
   // Define a new function template
   Local<FunctionTemplate> t = FunctionTemplate::New(New);
   constructor_template = Persistent<FunctionTemplate>::New(t);
   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-  constructor_template->SetClassName(String::NewSymbol("Long"));
+  constructor_template->SetClassName(String::NewSymbol("Timestamp"));
   
   // Propertry symbols
   low_bits_symbol = NODE_PSYMBOL("low_");
@@ -134,70 +131,70 @@ void Long::Initialize(Handle<Object> target) {
   NODE_SET_METHOD(constructor_template->GetFunction(), "fromInt", FromInt);
   
   // Add class to scope
-  target->Set(String::NewSymbol("Long"), constructor_template->GetFunction());
+  target->Set(String::NewSymbol("Timestamp"), constructor_template->GetFunction());
 }
 
-Handle<Value> Long::ToInt(const Arguments &args) {
+Handle<Value> Timestamp::ToInt(const Arguments &args) {
   HandleScope scope;
   
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(args.This());
   // Get lower bits
   uint32_t low_bits = l->low_bits;
   // Return the value
   return Int32::New(low_bits);
 }
 
-Handle<Value> Long::ToNumber(const Arguments &args) {
+Handle<Value> Timestamp::ToNumber(const Arguments &args) {
   HandleScope scope;  
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(args.This());
   return Number::New(l->toNumber());
 }
 
 
-Handle<Value> Long::LowGetter(Local<String> property, const AccessorInfo& info) {
+Handle<Value> Timestamp::LowGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
   
   // Unpack the long object
-  Long *l = ObjectWrap::Unwrap<Long>(info.Holder());
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(info.Holder());
   // Return the low bits
   return Integer::New(l->low_bits);
 }
 
-void Long::LowSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
+void Timestamp::LowSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
   if(value->IsNumber()) {
     // Unpack the long object
-    Long *l = ObjectWrap::Unwrap<Long>(info.Holder());
+    Timestamp *l = ObjectWrap::Unwrap<Timestamp>(info.Holder());
     // Set the low bits
     l->low_bits = value->Int32Value();    
   }
 }
 
-Handle<Value> Long::HighGetter(Local<String> property, const AccessorInfo& info) {
+Handle<Value> Timestamp::HighGetter(Local<String> property, const AccessorInfo& info) {
   HandleScope scope;
 
   // Unpack the long object
-  Long *l = ObjectWrap::Unwrap<Long>(info.Holder());
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(info.Holder());
   // Return the low bits
   return Integer::New(l->high_bits);
 }
 
-void Long::HighSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
+void Timestamp::HighSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
   if(value->IsNumber()) {
     // Unpack the long object
-    Long *l = ObjectWrap::Unwrap<Long>(info.Holder());
+    Timestamp *l = ObjectWrap::Unwrap<Timestamp>(info.Holder());
     // Set the low bits
     l->high_bits = value->Int32Value();  
   }
 }
 
-Handle<Value> Long::Inspect(const Arguments &args) {
+Handle<Value> Timestamp::Inspect(const Arguments &args) {
   HandleScope scope;
   
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *l = ObjectWrap::Unwrap<Long>(args.This());
-  // Let's create the string from the Long number
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(args.This());
+  // Let's create the string from the Timestamp number
   char *result = l->toString(10);
   // Package the result in a V8 String object and return
   Local<Value> str = String::New(result);
@@ -205,59 +202,59 @@ Handle<Value> Long::Inspect(const Arguments &args) {
   return str;
 }
 
-Handle<Value> Long::GetLowBits(const Arguments &args) {
+Handle<Value> Timestamp::GetLowBits(const Arguments &args) {
   HandleScope scope;
 
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(args.This());
   // Let's fetch the low bits
   int32_t low_bits = l->low_bits;
   // Package the result in a V8 Integer object and return
   return Integer::New(low_bits);  
 }
 
-Handle<Value> Long::GetHighBits(const Arguments &args) {
+Handle<Value> Timestamp::GetHighBits(const Arguments &args) {
   HandleScope scope;
 
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(args.This());
   // Let's fetch the low bits
   int32_t high_bits = l->high_bits;
   // Package the result in a V8 Integer object and return
   return Integer::New(high_bits);    
 }
 
-bool Long::isZero() {
+bool Timestamp::isZero() {
   int32_t low_bits = this->low_bits;
   int32_t high_bits = this->high_bits;
   return low_bits == 0 && high_bits == 0;
 }
 
-bool Long::isNegative() {
+bool Timestamp::isNegative() {
   int32_t low_bits = this->low_bits;
   int32_t high_bits = this->high_bits;
   return high_bits < 0;
 }
 
-bool Long::equals(Long *l) {
+bool Timestamp::equals(Timestamp *l) {
   int32_t low_bits = this->low_bits;
   int32_t high_bits = this->high_bits;  
   return (high_bits == l->high_bits) && (low_bits == l->low_bits);
 }
 
-Handle<Value> Long::IsZero(const Arguments &args) {
+Handle<Value> Timestamp::IsZero(const Arguments &args) {
   HandleScope scope;      
     
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *l = ObjectWrap::Unwrap<Long>(args.This());
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(args.This());
   return Boolean::New(l->isZero());
 }
 
-int32_t Long::toInt() {
+int32_t Timestamp::toInt() {
   return this->low_bits;
 }
 
-char *Long::toString(int32_t opt_radix) {
+char *Timestamp::toString(int32_t opt_radix) {
   // Set the radix
   int32_t radix = opt_radix;
   // Check if we have a zero value
@@ -274,15 +271,15 @@ char *Long::toString(int32_t opt_radix) {
   // If the long is negative we need to perform som arithmetics
   if(this->isNegative()) {
     // Min value object
-    Long *minLong = new Long(0, 0x80000000 | 0);
+    Timestamp *minTimestamp = new Timestamp(0, 0x80000000 | 0);
     
-    if(this->equals(minLong)) {
-      // We need to change the exports.Long value before it can be negated, so we remove
+    if(this->equals(minTimestamp)) {
+      // We need to change the exports.Timestamp value before it can be negated, so we remove
       // the bottom-most digit in this base and then recurse to do the rest.
-      Long *radix_long = Long::fromNumber(radix);
-      Long *div = this->div(radix_long);
-      Long *mul = div->multiply(radix_long);
-      Long *rem = mul->subtract(this);
+      Timestamp *radix_long = Timestamp::fromNumber(radix);
+      Timestamp *div = this->div(radix_long);
+      Timestamp *mul = div->multiply(radix_long);
+      Timestamp *rem = mul->subtract(this);
       // Fetch div result      
       char *div_result = div->toString(radix);
       // Unpack the rem result and convert int to string
@@ -305,7 +302,7 @@ char *Long::toString(int32_t opt_radix) {
     } else {
       char *buf = (char *)malloc(50 * sizeof(char) + 1);
       *(buf) = '\0';
-      Long *negate = this->negate();
+      Timestamp *negate = this->negate();
       char *result = negate->toString(radix);      
       strncat(buf, "-", 1);
       strncat(buf + 1, result, strlen(result));
@@ -318,15 +315,15 @@ char *Long::toString(int32_t opt_radix) {
   
   // Do several (6) digits each time through the loop, so as to
   // minimize the calls to the very expensive emulated div.
-  Long *radix_to_power = Long::fromInt(pow(radix, 6));
-  Long *rem = this;
+  Timestamp *radix_to_power = Timestamp::fromInt(pow(radix, 6));
+  Timestamp *rem = this;
   char *result = (char *)malloc(1024 * sizeof(char) + 1);
   // Ensure the allocated space is null terminated to ensure a proper CString
   *(result) = '\0';
   
   while(true) {
-    Long *rem_div = rem->div(radix_to_power);
-    Long *mul = rem_div->multiply(radix_to_power);
+    Timestamp *rem_div = rem->div(radix_to_power);
+    Timestamp *mul = rem_div->multiply(radix_to_power);
     int32_t interval = rem->subtract(mul)->toInt();
     // Convert interval into string
     char digits[50];    
@@ -372,12 +369,12 @@ char *Long::toString(int32_t opt_radix) {
   }  
 }
 
-Handle<Value> Long::ToString(const Arguments &args) {
+Handle<Value> Timestamp::ToString(const Arguments &args) {
   HandleScope scope;
 
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *l = ObjectWrap::Unwrap<Long>(args.This());
-  // Let's create the string from the Long number
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(args.This());
+  // Let's create the string from the Timestamp number
   char *result = l->toString(10);
   // Package the result in a V8 String object and return
   Handle<Value> result_str = String::New(result);
@@ -387,12 +384,12 @@ Handle<Value> Long::ToString(const Arguments &args) {
   return result_str;
 }
 
-Handle<Value> Long::ToJSON(const Arguments &args) {
+Handle<Value> Timestamp::ToJSON(const Arguments &args) {
   HandleScope scope;
 
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *l = ObjectWrap::Unwrap<Long>(args.This());
-  // Let's create the string from the Long number
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *l = ObjectWrap::Unwrap<Timestamp>(args.This());
+  // Let's create the string from the Timestamp number
   char *result = l->toString(10);
   // Package the result in a V8 String object and return
   Handle<Value> result_str = String::New(result);
@@ -402,7 +399,7 @@ Handle<Value> Long::ToJSON(const Arguments &args) {
   return result_str;
 }
 
-Long *Long::shiftRight(int32_t number_bits) {
+Timestamp *Timestamp::shiftRight(int32_t number_bits) {
   number_bits &= 63;
   if(number_bits == 0) {
     return this;
@@ -410,14 +407,14 @@ Long *Long::shiftRight(int32_t number_bits) {
     int32_t high_bits = this->high_bits;
     if(number_bits < 32) {
       int32_t low_bits = this->low_bits;
-      return Long::fromBits((low_bits >> number_bits) | (high_bits << (32 - number_bits)), high_bits >> number_bits);
+      return Timestamp::fromBits((low_bits >> number_bits) | (high_bits << (32 - number_bits)), high_bits >> number_bits);
     } else {
-      return Long::fromBits(high_bits >> (number_bits - 32), high_bits >= 0 ? 0 : -1);
+      return Timestamp::fromBits(high_bits >> (number_bits - 32), high_bits >= 0 ? 0 : -1);
     }
   }
 }
 
-Long *Long::shiftLeft(int32_t number_bits) {
+Timestamp *Timestamp::shiftLeft(int32_t number_bits) {
   number_bits &= 63;
   if(number_bits == 0) {
     return this;
@@ -425,41 +422,41 @@ Long *Long::shiftLeft(int32_t number_bits) {
     int32_t low_bits = this->low_bits;
     if(number_bits < 32) {
       int32_t high_bits = this->high_bits;
-      return Long::fromBits(low_bits << number_bits, (high_bits << number_bits) | (low_bits >> (32 - number_bits)));
+      return Timestamp::fromBits(low_bits << number_bits, (high_bits << number_bits) | (low_bits >> (32 - number_bits)));
     } else {
-      return Long::fromBits(0, low_bits << (number_bits - 32));
+      return Timestamp::fromBits(0, low_bits << (number_bits - 32));
     }
   }  
 }
 
-Long *Long::div(Long *other) {
+Timestamp *Timestamp::div(Timestamp *other) {
   // If we are about to do a divide by zero throw an exception
   if(other->isZero()) {
     throw "division by zero";
   } else if(this->isZero()) {
-    return new Long(0, 0);
+    return new Timestamp(0, 0);
   }
     
-  if(this->equals(LONG_MIN_VALUE)) {    
-    if(other->equals(LONG_ONE) || other->equals(LONG_NEG_ONE)) {
-      return Long::fromBits(0, 0x80000000 | 0);
-    } else if(other->equals(LONG_MIN_VALUE)) {
-      return Long::fromNumber(1);
+  if(this->equals(TIMESTAMP_MIN_VALUE)) {    
+    if(other->equals(TIMESTAMP_ONE) || other->equals(TIMESTAMP_NEG_ONE)) {
+      return Timestamp::fromBits(0, 0x80000000 | 0);
+    } else if(other->equals(TIMESTAMP_MIN_VALUE)) {
+      return Timestamp::fromNumber(1);
     } else {
-      Long *half_this = this->shiftRight(1);
-      Long *div_obj = half_this->div(other);
-      Long *approx = div_obj->shiftLeft(1);
+      Timestamp *half_this = this->shiftRight(1);
+      Timestamp *div_obj = half_this->div(other);
+      Timestamp *approx = div_obj->shiftLeft(1);
       // Free memory
       delete div_obj;
       delete half_this;
       // Check if we are done
-      if(approx->equals(LONG_ZERO)) {
-        return other->isNegative() ? Long::fromNumber(0) : Long::fromNumber(-1);
+      if(approx->equals(TIMESTAMP_ZERO)) {
+        return other->isNegative() ? Timestamp::fromNumber(0) : Timestamp::fromNumber(-1);
       } else {
-        Long *mul = other->multiply(approx);
-        Long *rem = this->subtract(mul);
-        Long *rem_div = rem->div(other);
-        Long *result = approx->add(rem_div);
+        Timestamp *mul = other->multiply(approx);
+        Timestamp *rem = this->subtract(mul);
+        Timestamp *rem_div = rem->div(other);
+        Timestamp *result = approx->add(rem_div);
         // Free memory
         delete mul;
         delete rem;
@@ -468,25 +465,25 @@ Long *Long::div(Long *other) {
         return result;
       }
     }    
-  } else if(other->equals(LONG_MIN_VALUE)) {
-    return new Long(0, 0);
+  } else if(other->equals(TIMESTAMP_MIN_VALUE)) {
+    return new Timestamp(0, 0);
   }
   
   // If the value is negative
   if(this->isNegative()) {    
     if(other->isNegative()) {
-      Long *neg = this->negate();
-      Long *other_neg = other->negate();
-      Long *result = neg->div(other_neg);
+      Timestamp *neg = this->negate();
+      Timestamp *other_neg = other->negate();
+      Timestamp *result = neg->div(other_neg);
       // Free memory
       delete neg;
       delete other_neg;
       // Return result 
       return result;
     } else {
-      Long *neg = this->negate();
-      Long *neg_result = neg->div(other);
-      Long *result = neg_result->negate();
+      Timestamp *neg = this->negate();
+      Timestamp *neg_result = neg->div(other);
+      Timestamp *result = neg_result->negate();
       // Free memory
       delete neg;
       delete neg_result;
@@ -494,9 +491,9 @@ Long *Long::div(Long *other) {
       return result;
     }
   } else if(other->isNegative()) {
-    Long *other_neg = other->negate();
-    Long *div_result = this->div(other_neg);
-    Long *result = div_result->negate();
+    Timestamp *other_neg = other->negate();
+    Timestamp *div_result = this->div(other_neg);
+    Timestamp *result = div_result->negate();
     // Free memory
     delete other_neg;
     delete div_result;
@@ -511,12 +508,12 @@ Long *Long::div(Long *other) {
   int32_t low32, high32;
   high32 = (uint64_t)result >> 32;
   low32 = (int32_t)result;
-  return Long::fromBits(low32, high32);
+  return Timestamp::fromBits(low32, high32);
 }
 
-Long *Long::multiply(Long *other) {
+Timestamp *Timestamp::multiply(Timestamp *other) {
   if(this->isZero() || other->isZero()) {
-    return new Long(0, 0);    
+    return new Timestamp(0, 0);    
   }
   
   int64_t this_number = this->toNumber();
@@ -527,28 +524,28 @@ Long *Long::multiply(Long *other) {
   int32_t low32, high32;
   high32 = (uint64_t)result >> 32;
   low32 = (int32_t)result;
-  return Long::fromBits(low32, high32);
+  return Timestamp::fromBits(low32, high32);
 }
 
-bool Long::isOdd() {
+bool Timestamp::isOdd() {
   return (this->low_bits & 1) == 1;
 }
 
 // /** @return {number} The closest floating-point representation to this value. */
-// exports.Long.prototype.toNumber = function() {
-//   return this.high_ * exports.Long.TWO_PWR_32_DBL_ +
+// exports.Timestamp.prototype.toNumber = function() {
+//   return this.high_ * exports.Timestamp.TWO_PWR_32_DBL_ +
 //          this.getLowBitsUnsigned();
 // };
 
-int64_t Long::toNumber() {
+int64_t Timestamp::toNumber() {
   return (int64_t)(this->high_bits * BSON_INT32_ + this->getLowBitsUnsigned());
 }
 
-int64_t Long::getLowBitsUnsigned() {
+int64_t Timestamp::getLowBitsUnsigned() {
   return (this->low_bits >= 0) ? this->low_bits : BSON_INT32_ + this->low_bits;
 }
 
-int64_t Long::compare(Long *other) {
+int64_t Timestamp::compare(Timestamp *other) {
   if(this->equals(other)) {
     return 0;
   }
@@ -562,7 +559,7 @@ int64_t Long::compare(Long *other) {
     return 1;
   }
   
-  Long *return_value = this->subtract(other);  
+  Timestamp *return_value = this->subtract(other);  
   // At this point, the signs are the same, so subtraction will not overflow
   if(return_value->isNegative()) {
     delete return_value;
@@ -573,22 +570,22 @@ int64_t Long::compare(Long *other) {
   }
 }
 
-Long *Long::negate() {
-  if(this->equals(LONG_MIN_VALUE)) {
-    return LONG_MIN_VALUE;
+Timestamp *Timestamp::negate() {
+  if(this->equals(TIMESTAMP_MIN_VALUE)) {
+    return TIMESTAMP_MIN_VALUE;
   } else {
-    Long *not_obj = this->not_();
-    Long *add = not_obj->add(LONG_ONE);
+    Timestamp *not_obj = this->not_();
+    Timestamp *add = not_obj->add(TIMESTAMP_ONE);
     delete not_obj;
     return add;
   }
 }
 
-Long *Long::not_() {
-  return new Long(~this->low_bits, ~this->high_bits);
+Timestamp *Timestamp::not_() {
+  return new Timestamp(~this->low_bits, ~this->high_bits);
 }
 
-Long *Long::add(Long *other) {
+Timestamp *Timestamp::add(Timestamp *other) {
   int64_t this_number = this->toNumber();
   int64_t other_number = other->toNumber();
   int64_t result = this_number + other_number;  
@@ -596,10 +593,10 @@ Long *Long::add(Long *other) {
   int32_t low32, high32;
   high32 = (uint64_t)result >> 32;
   low32 = (int32_t)result;
-  return Long::fromBits(low32, high32);
+  return Timestamp::fromBits(low32, high32);
 }
 
-Long *Long::subtract(Long *other) {
+Timestamp *Timestamp::subtract(Timestamp *other) {
   int64_t this_number = this->toNumber();
   int64_t other_number = other->toNumber();
   int64_t result = this_number - other_number;
@@ -607,85 +604,85 @@ Long *Long::subtract(Long *other) {
   int32_t low32, high32;
   high32 = (uint64_t)result >> 32;
   low32 = (int32_t)result;
-  return Long::fromBits(low32, high32);
+  return Timestamp::fromBits(low32, high32);
 }
 
-Handle<Value> Long::GreatherThan(const Arguments &args) {
+Handle<Value> Timestamp::GreatherThan(const Arguments &args) {
   HandleScope scope;
   
-  if(args.Length() != 1 && !Long::HasInstance(args[0])) return VException("One argument of type Long required");
+  if(args.Length() != 1 && !Timestamp::HasInstance(args[0])) return VException("One argument of type Timestamp required");
   
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *current_long_obj = ObjectWrap::Unwrap<Long>(args.This());  
-  // Unpack Long
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *current_long_obj = ObjectWrap::Unwrap<Timestamp>(args.This());  
+  // Unpack Timestamp
   Local<Object> obj = args[0]->ToObject();
-  Long *long_obj = Long::Unwrap<Long>(obj);
+  Timestamp *long_obj = Timestamp::Unwrap<Timestamp>(obj);
   // Compare the longs
   bool comparision_result = current_long_obj->greaterThan(long_obj);
   scope.Close(Boolean::New(comparision_result));
 }
 
-Handle<Value> Long::Equals(const Arguments &args) {
+Handle<Value> Timestamp::Equals(const Arguments &args) {
   HandleScope scope;
   
-  if(args.Length() != 1 && !Long::HasInstance(args[0])) return VException("One argument of type Long required");
+  if(args.Length() != 1 && !Timestamp::HasInstance(args[0])) return VException("One argument of type Timestamp required");
   
-  // Let's unpack the Long instance that contains the number in low_bits and high_bits form
-  Long *current_long_obj = ObjectWrap::Unwrap<Long>(args.This());  
-  // Unpack Long
+  // Let's unpack the Timestamp instance that contains the number in low_bits and high_bits form
+  Timestamp *current_long_obj = ObjectWrap::Unwrap<Timestamp>(args.This());  
+  // Unpack Timestamp
   Local<Object> obj = args[0]->ToObject();
-  Long *long_obj = Long::Unwrap<Long>(obj);
+  Timestamp *long_obj = Timestamp::Unwrap<Timestamp>(obj);
   // Compare the longs
   bool comparision_result = (current_long_obj->compare(long_obj) == 0);
   scope.Close(Boolean::New(comparision_result));
 }
 
-bool Long::greaterThan(Long *other) {
+bool Timestamp::greaterThan(Timestamp *other) {
   return this->compare(other) > 0;  
 }
 
-bool Long::greaterThanOrEqual(Long *other) {
+bool Timestamp::greaterThanOrEqual(Timestamp *other) {
   return this->compare(other) >= 0;
 }
 
-Handle<Value> Long::FromInt(const Arguments &args) {
+Handle<Value> Timestamp::FromInt(const Arguments &args) {
   HandleScope scope;
   
   // Validate the arguments
   if(args.Length() != 1 && !args[0]->IsNumber()) return VException("One argument of type number required");
   // Unwrap Number variable
   Local<Number> number = args[0]->ToNumber();
-  // Instantiate Long object and return
+  // Instantiate Timestamp object and return
   Local<Value> argv[] = {number};
   Local<Object> long_obj = constructor_template->GetFunction()->NewInstance(1, argv);
   return scope.Close(long_obj);  
 }
 
-Long *Long::fromInt(int64_t value) {
-  return new Long((value | 0), (value < 0 ? -1 : 0));
+Timestamp *Timestamp::fromInt(int64_t value) {
+  return new Timestamp((value | 0), (value < 0 ? -1 : 0));
 }
 
-Long *Long::fromBits(int32_t low_bits, int32_t high_bits) {
-  return new Long(low_bits, high_bits);
+Timestamp *Timestamp::fromBits(int32_t low_bits, int32_t high_bits) {
+  return new Timestamp(low_bits, high_bits);
 }
 
-Long *Long::fromNumber(double value) {
+Timestamp *Timestamp::fromNumber(double value) {
   // Ensure we have a valid ranged number
   if(std::isinf(value) || std::isnan(value)) {
-    return Long::fromBits(0, 0);
+    return Timestamp::fromBits(0, 0);
   } else if(value <= BSON_INT64_MIN) {
-    return Long::fromBits(0, 0x80000000 | 0);
+    return Timestamp::fromBits(0, 0x80000000 | 0);
   } else if(value >= BSON_INT64_MAX) {
-    return Long::fromBits(0xFFFFFFFF | 0, 0x7FFFFFFF | 0);
+    return Timestamp::fromBits(0xFFFFFFFF | 0, 0x7FFFFFFF | 0);
   } else if(value < 0) {
-    return Long::fromNumber(-value)->negate();
+    return Timestamp::fromNumber(-value)->negate();
   } else {
     int64_t int_value = (int64_t)value;
-    return Long::fromBits((int_value % BSON_INT32_) | 0, (int_value / BSON_INT32_) | 0);
+    return Timestamp::fromBits((int_value % BSON_INT32_) | 0, (int_value / BSON_INT32_) | 0);
   }  
 }
 
-Handle<Value> Long::FromNumber(const Arguments &args) {
+Handle<Value> Timestamp::FromNumber(const Arguments &args) {
   HandleScope scope;
   
   // Ensure that we have an parameter

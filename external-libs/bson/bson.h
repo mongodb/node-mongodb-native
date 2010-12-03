@@ -44,6 +44,7 @@ class BSON : public EventEmitter {
         
     // Decode function
     static Handle<Value> decodeLong(int64_t value);
+    static Handle<Value> decodeTimestamp(int64_t value);
     static Handle<Value> decodeOid(char *oid);
     static Handle<Value> decodeBinary(uint32_t sub_type, uint32_t number_of_bytes, char *data);
     static Handle<Value> decodeCode(char *code, Handle<Value> scope);

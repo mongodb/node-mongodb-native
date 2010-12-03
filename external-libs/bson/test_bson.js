@@ -22,6 +22,10 @@ var Long2 = require('./bson').Long,
 sys.puts("=== EXCEUTING TEST_BSON ===");
 
 // Long data type tests
+var l2_string = Long2.fromNumber(100);
+var l_string = Long.fromNumber(100);
+assert.equal(l_string.toNumber(), l2_string.toNumber());
+
 var l2_string = Long2.fromNumber(9223372036854775807).toString();
 var l_string = Long.fromNumber(9223372036854775807).toString();
 assert.equal(l_string, l2_string);

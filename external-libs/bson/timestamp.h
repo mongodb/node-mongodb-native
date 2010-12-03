@@ -1,5 +1,5 @@
-#ifndef LONG_H_
-#define LONG_H_
+#ifndef TIMESTAMP_H_
+#define TIMESTAMP_H_
 
 #include <node.h>
 #include <node_object_wrap.h>
@@ -8,13 +8,16 @@
 using namespace v8;
 using namespace node;
 
-class Long : public ObjectWrap {  
+static Persistent<String> low_bits_symbol;
+static Persistent<String> high_bits_symbol;
+
+class Timestamp : public ObjectWrap {  
   public:
     int32_t low_bits;
     int32_t high_bits;
 
-    Long(int32_t low_bits, int32_t high_bits);
-    ~Long();
+    Timestamp(int32_t low_bits, int32_t high_bits);
+    ~Timestamp();
     
     static inline bool HasInstance(Handle<Value> val) {
       if (!val->IsObject()) return false;
@@ -24,27 +27,27 @@ class Long : public ObjectWrap {
         
     bool isZero();
     bool isNegative();
-    bool equals(Long *other);
-    Long *div(Long *other);
-    Long *subtract(Long *other);
-    Long *negate();
-    Long *multiply(Long *other);
-    Long *add(Long *other);
-    Long *not_();
+    bool equals(Timestamp *other);
+    Timestamp *div(Timestamp *other);
+    Timestamp *subtract(Timestamp *other);
+    Timestamp *negate();
+    Timestamp *multiply(Timestamp *other);
+    Timestamp *add(Timestamp *other);
+    Timestamp *not_();
     bool isOdd();
-    bool greaterThanOrEqual(Long *other);
-    bool greaterThan(Long *other);
+    bool greaterThanOrEqual(Timestamp *other);
+    bool greaterThan(Timestamp *other);
     int64_t toNumber();
     int32_t toInt();
-    int64_t compare(Long *other);
+    int64_t compare(Timestamp *other);
     int64_t getLowBitsUnsigned();
     char *toString(int32_t radix);
-    Long *shiftRight(int32_t number_bits);
-    Long *shiftLeft(int32_t number_bits);
+    Timestamp *shiftRight(int32_t number_bits);
+    Timestamp *shiftLeft(int32_t number_bits);
 
-    static Long *fromInt(int64_t value);
-    static Long *fromBits(int32_t low_bits, int32_t high_bits);
-    static Long *fromNumber(double value);
+    static Timestamp *fromInt(int64_t value);
+    static Timestamp *fromBits(int32_t low_bits, int32_t high_bits);
+    static Timestamp *fromNumber(double value);
 
     // Getter and Setter for object values
     static Handle<Value> LowGetter(Local<String> property, const AccessorInfo& info);
@@ -66,11 +69,11 @@ class Long : public ObjectWrap {
     static Handle<Value> ToJSON(const Arguments &args);
     static Handle<Value> Equals(const Arguments &args);
 
-    // Constructor used for creating new Long objects from C++
+    // Constructor used for creating new Timestamp objects from C++
     static Persistent<FunctionTemplate> constructor_template;
     
   protected:
     static Handle<Value> New(const Arguments &args);
 };
 
-#endif  // LONG_H_
+#endif  // TIMESTAMP_H_
