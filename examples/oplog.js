@@ -115,3 +115,5 @@ var watcher = new Slave();
 watcher.onObject(function(obj) {
   sys.puts(sys.inspect(obj));
 });
+
+watcher.start();
