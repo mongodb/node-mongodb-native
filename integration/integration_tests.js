@@ -346,8 +346,7 @@ var all_tests = {
 
                     // Check safe update of a document
                     collection.insert({x:1}, function(err, ids) {
-                      collection.update({x:1}, {"$set":{x:2}}, {'safe':true}, function(err, document) {
-                      });
+                      collection.update({x:1}, {"$set":{x:2}}, {'safe':true}); // callback should not be mandatory
 
                       collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, document) {
                         test.ok(err instanceof Error);
