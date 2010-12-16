@@ -480,7 +480,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     BSON::write_int32((serialized_object + index), int_value);
     // Adjust the index
     index = index + 4;
-  } else if(value->IsNull()) {
+  } else if(value->IsNull() || value->IsUndefined()) {
     // printf("============================================= -- serialized::::null\n");
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_NULL;

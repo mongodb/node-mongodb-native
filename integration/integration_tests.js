@@ -4107,7 +4107,20 @@ var all_tests = {
         finished_test({test_insert_and_query_timestamp:'ok'});
       });        
     })
-  }
+  },
+  
+  test_insert_and_query_undefined : function() {
+    client.createCollection('test_insert_and_query_undefined', function(err, collection) {
+      // Insert the update
+      collection.insert({i:undefined}, {safe:true})
+      // Locate document
+      collection.findOne({}, function(err, item) {
+        test.equal(null, item.i)
+        
+        finished_test({test_insert_and_query_undefined:'ok'});
+      });        
+    })
+  }  
   
 };
 
