@@ -347,6 +347,8 @@ var all_tests = {
                     collection.insert({x:1}, function(err, ids) {
                       collection.update({x:1}, {"$set":{x:2}}, {'safe':true}, function(err, document) {
                       });
+                      
+                      collection.update({x:1}, {"$set":{x:2}}, {'safe':true});
 
                       collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, document) {
                         test.ok(err instanceof Error);
