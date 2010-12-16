@@ -1128,13 +1128,12 @@ var all_tests = {
               test.ok(err instanceof Error);
               test.equal("Cursor is closed", err.message);
   
-              // Each should allow us to iterate over the entries due to cache
+              // Should fail if called again (cursor should be closed)
               cursor.each(function(err, item) {
-                if(item != null) {
-                  test.equal(1, item.a);
-                  // Let's close the db
-                  finished_test({test_to_a:'ok'});
-                }
+                test.ok(err instanceof Error);
+                test.equal("Cursor is closed", err.message);
+                // Let's close the db
+                finished_test({test_to_a:'ok'});
               });
             });
           });
