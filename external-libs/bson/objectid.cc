@@ -193,6 +193,7 @@ void ObjectID::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "equals", Equals);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "toJSON", ToJSON);
 
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "createPk", CreatePk);
@@ -321,6 +322,14 @@ Handle<Value> ObjectID::ToString(const Arguments &args) {
   return String::New(oid->oid);
 }
 
+Handle<Value> ObjectID::ToJSON(const Arguments &args) {
+  HandleScope scope;
+
+  // Unpack the ObjectID instance
+  ObjectID *oid = ObjectWrap::Unwrap<ObjectID>(args.This());  
+  // Return the id
+  return String::New(oid->oid);
+}
 
 
 

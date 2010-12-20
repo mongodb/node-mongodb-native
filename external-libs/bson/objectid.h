@@ -26,6 +26,7 @@ class ObjectID : public ObjectWrap {
     static Handle<Value> ToString(const Arguments &args);
     static Handle<Value> Inspect(const Arguments &args);
     static Handle<Value> ToHexString(const Arguments &args);
+    static Handle<Value> ToJSON(const Arguments &args);
     static Handle<Value> CreatePk(const Arguments &args);
     static Handle<Value> CreateFromHexString(const Arguments &args);
 		static Handle<Value> Equals(const Arguments &args);
