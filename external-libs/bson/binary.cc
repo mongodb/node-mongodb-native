@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <v8.h>
 #include <node.h>
+#include <node_version.h>
 #include <node_events.h>
 #include <node_buffer.h>
 #include <cstring>
@@ -154,12 +155,18 @@ Handle<Value> Binary::Write(const Arguments &args) {
   // Reference variables
   char *data;
   uint32_t length;
+  Local<Object> obj = args[0]->ToObject();
   
   // If we have a buffer let's retrieve the data
-  if(Buffer::HasInstance(args[0])) {
-    Buffer *buffer = ObjectWrap::Unwrap<Buffer>(args[0]->ToObject());
-    data = buffer->data();
-    length = buffer->length();
+  if(Buffer::HasInstance(obj)) {
+    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+     Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+     data = buffer->data();
+     length = buffer->length();
+    #else
+     data = Buffer::Data(obj);
+     length = Buffer::Length(obj);
+    #endif
   } else {
     Local<String> str = args[0]->ToString();
     length = DecodeBytes(str, BINARY);
