@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <v8.h>
 #include <node.h>
+#include <node_version.h>
 #include <node_events.h>
 #include <node_buffer.h>
 #include <cstring>
@@ -871,12 +872,20 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
   // Define pointer to data
   char *data;
   uint32_t length;      
-  
+  Local<Object> obj = args[0]->ToObject();
+
   // If we passed in a buffer, let's unpack it, otherwise let's unpack the string
-  if(Buffer::HasInstance(args[0])) {
-    Buffer *buffer = ObjectWrap::Unwrap<Buffer>(args[0]->ToObject());
-    data = buffer->data();        
-    uint32_t length = buffer->length();
+  if(Buffer::HasInstance(obj)) {
+
+    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+     Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+     data = buffer->data();
+     uint32_t length = buffer->length();
+    #else
+     data = Buffer::Data(obj);
+     uint32_t length = Buffer::Length(obj);
+    #endif
+
     return BSON::deserialize(data, NULL);
   } else {
     // Let's fetch the encoding
