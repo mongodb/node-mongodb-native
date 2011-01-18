@@ -619,7 +619,7 @@ Handle<Value> Timestamp::GreatherThan(const Arguments &args) {
   Timestamp *long_obj = Timestamp::Unwrap<Timestamp>(obj);
   // Compare the longs
   bool comparision_result = current_long_obj->greaterThan(long_obj);
-  scope.Close(Boolean::New(comparision_result));
+  return scope.Close(Boolean::New(comparision_result));
 }
 
 Handle<Value> Timestamp::Equals(const Arguments &args) {
@@ -634,7 +634,7 @@ Handle<Value> Timestamp::Equals(const Arguments &args) {
   Timestamp *long_obj = Timestamp::Unwrap<Timestamp>(obj);
   // Compare the longs
   bool comparision_result = (current_long_obj->compare(long_obj) == 0);
-  scope.Close(Boolean::New(comparision_result));
+  return scope.Close(Boolean::New(comparision_result));
 }
 
 bool Timestamp::greaterThan(Timestamp *other) {
