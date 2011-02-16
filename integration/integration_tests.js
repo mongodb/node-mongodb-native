@@ -770,6 +770,54 @@ var all_tests = {
       });
     });
   },
+    
+  // Test find by non-quoted values (issue #128)
+  test_find_non_quoted_values : function() {
+    client.createCollection('test_find_non_quoted_values', function(err, r) {
+      client.collection('test_find_non_quoted_values', function(err, collection) {
+        // insert test document
+        collection.insert([{ a: 19, b: 'teststring', c: 59920303 },
+                           { a: "19", b: 'teststring', c: 3984929 }]);
+        
+        collection.find({ a: 19 }, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(1, documents.length);
+            finished_test({test_find_non_quoted_values:'ok'});
+          });
+        });
+      });
+    });
+  },
+  
+  // Test for querying embedded document using dot-notation (issue #126)
+  test_find_embedded_document : function() {
+    client.createCollection('test_find_non_quoted_values', function(err, r) {
+      client.collection('test_find_non_quoted_values', function(err, collection) {
+        // insert test document
+        collection.insert([{ a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' }},
+                           { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}]);
+        
+        // test using integer value
+        collection.find({ 'a.id': 10 }, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(1, documents.length);
+            test.equal('bar', documents[0].b);
+          });
+        });
+        
+        // test using string value
+        collection.find({ 'a.value': 'foo' }, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            // should yield 2 documents
+            test.equal(2, documents.length);
+            test.equal('bar', documents[0].b);
+            test.equal('bar2', documents[1].b);
+            finished_test({test_find_embedded_document:'ok'});
+          });
+        });
+      });
+    });
+  },
   
   // Find no records
   test_find_one_no_records : function() {
