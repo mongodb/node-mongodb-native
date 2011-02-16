@@ -791,8 +791,8 @@ var all_tests = {
   
   // Test for querying embedded document using dot-notation (issue #126)
   test_find_embedded_document : function() {
-    client.createCollection('test_find_non_quoted_values', function(err, r) {
-      client.collection('test_find_non_quoted_values', function(err, collection) {
+    client.createCollection('test_find_embedded_document', function(err, r) {
+      client.collection('test_find_embedded_document', function(err, collection) {
         // insert test document
         collection.insert([{ a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' }},
                            { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}]);
