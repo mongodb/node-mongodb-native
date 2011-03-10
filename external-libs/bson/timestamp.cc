@@ -6,12 +6,39 @@
 #include <node_events.h>
 #include <node_buffer.h>
 #include <cstring>
-#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <limits>
 
 #include "timestamp.h"
+
+#if defined(sun) || defined(__sun) 
+
+#include <math.h>
+
+#    if defined(__SVR4) || defined(__svr4__) 
+/* Solaris */ 
+  //inline bool isnan(const float& v)  { return ( (bool)::isnan(v) ); } 
+  //inline bool isnan(const double& v) { return ( (bool)::isnan(v) ); } 
+  inline bool isinf(const float& v)  { return ( ::isinf(v) ); } 
+  inline bool isinf(const double& v) { return ( ::isinf(v) ); } 
+#    else 
+/* SunOS */ 
+  //inline bool isnan(const float& v)  { return ( (bool)::isnan(v) ); } 
+  //inline bool isnan(const double& v) { return ( (bool)::isnan(v) ); } 
+  inline bool isinf(const float& v)  { return ( ::isinf(v) ); } 
+  inline bool isinf(const double& v) { return ( ::isinf(v) ); } 
+#   endif 
+#else 
+
+#include <cmath>
+
+  //inline bool isnan(const float& v)  { return ( (bool)isnan(v) ); } 
+  //inline bool isnan(const double& v) { return ( (bool)isnan(v) ); }
+  inline bool isinf(const float& v)  { return ( isinf(v) ); } 
+  inline bool isinf(const double& v) { return ( isinf(v) ); }
+#endif
+
 
 // BSON MAX VALUES
 const int32_t BSON_INT32_MAX = (int32_t)2147483648L;
@@ -668,7 +695,7 @@ Timestamp *Timestamp::fromBits(int32_t low_bits, int32_t high_bits) {
 
 Timestamp *Timestamp::fromNumber(double value) {
   // Ensure we have a valid ranged number
-  if(std::isinf(value) || std::isnan(value)) {
+  if(isinf(value) || isnan(value)) {
     return Timestamp::fromBits(0, 0);
   } else if(value <= BSON_INT64_MIN) {
     return Timestamp::fromBits(0, 0x80000000 | 0);
@@ -692,7 +719,7 @@ Handle<Value> Timestamp::FromNumber(const Arguments &args) {
   int64_t value = args[0]->IntegerValue();
   double double_value = args[0]->NumberValue();
   // Ensure we have a valid ranged number
-  if(std::isinf(double_value) || std::isnan(double_value)) {
+  if(isinf(double_value) || isnan(double_value)) {
     Local<Value> argv[] = {Integer::New(0), Integer::New(0)};
     Local<Object> long_obj = constructor_template->GetFunction()->NewInstance(2, argv);
     return scope.Close(long_obj);
