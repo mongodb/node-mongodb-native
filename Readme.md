@@ -138,16 +138,22 @@ Each database has an optional strict mode. If it is set then asking for a collec
 that does not exist will return an Error object in the callback. Similarly if you
 attempt to create a collection that already exists. Strict is provided for convenience. 
 
-	var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
+	var error_client = new Db(
+	    'integration_tests_',
+	    new Server("127.0.0.1", 27017, {auto_reconnect: false}),
+	    {strict:true});
 	test.assertEquals(true, error_client.strict);
 	error_client.open(function(err, error_client) {
 	  error_client.collection('does-not-exist', function(err, collection) {
 	    test.assertTrue(err instanceof Error);
-	    test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", err.message);      
+	    test.assertEquals("Collection does-not-exist does not exist. " +
+	                      "Currently in strict mode.", err.message);      
 	  });      
   
-	  error_client.createCollection('test_strict_access_collection', function(err, collection) {  
-	    error_client.collection('test_strict_access_collection', function(err, collection) {
+	  error_client.createCollection('test_strict_access_collection',
+	                                function(err, collection) {  
+	    error_client.collection('test_strict_access_collection',
+	                            function(err, collection) {
 	      test.assertTrue(collection instanceof Collection);
 	      // Let's close the db 
 	      error_client.close();
@@ -166,7 +172,7 @@ or the documentation at MongoDB for query and update formats.
 Find
 --------
 
-The find method is actually an (inconvenient) factory method to create
+The find method is actually a factory method to create
 Cursor objects. A Cursor lazily uses the connection the first time
 you call `nextObject`, `each`, or `toArray`.
 
@@ -269,7 +275,7 @@ the modifier (`$inc`, etc.) formats.
 
 Signature:
 
-    collection.update(criteria, objNew, options, \[callback\]);
+    collection.update(criteria, objNew, options, [callback]);
 
 Useful options:
 
