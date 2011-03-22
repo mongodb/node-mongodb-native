@@ -3481,7 +3481,7 @@ var all_tests = {
       });
     });
   },
-  
+
   test_custom_primary_key_generator : function() {
     // Custom factory (need to provide a 12 byte array);
     CustomPKFactory = function() {}
@@ -3538,7 +3538,7 @@ var all_tests = {
   test_map_reduce_functions_scope : function() {
     client.createCollection('test_map_reduce_functions_scope', function(err, collection) {
       collection.insert([{'user_id':1, 'timestamp':new Date()}, {'user_id':2, 'timestamp':new Date()}]);
-
+  
       var map = function(){
           emit(test(this.timestamp.getYear()), 1);
       }
