@@ -47,23 +47,23 @@ A simple example of inserting a document.
 
 Important
 ========
-
-The version V0.8.0 > contains a C/C++ native BSON parser, this leads to some small changes in the way you need to access the
-BSON classes as you need to use the right versions of the classes with the right driver.
-
-For the existing javascript driver please reference BSON via
-
-	BSON = require('./mongodb').BSONPure
-	
-or when using the native bson parser use
-
-	BSON = require('./mongodb').BSONNative
 	
 To enable the driver to use the C/C++ bson parser pass it the option native_parser:true like below
 
     var client = new Db('integration_tests_20',
                         new Server("127.0.0.1", 27017),
                         {native_parser:true});
+
+The version V0.8.0 > contains a C/C++ native BSON parser, this leads to some small changes in the way you need to access the BSON classes as you need to use the right versions of the classes with the right driver.
+
+To access the correct version of BSON objects for your instance do the following
+
+    client.bson_serializer.Long
+    client.bson_serializer.ObjectID
+    client.bson_serializer.Timestamp
+    client.bson_serializer.DBRef  
+    client.bson_serializer.Binary
+    client.bson_serializer.Code
 	
 GitHub information
 --------
