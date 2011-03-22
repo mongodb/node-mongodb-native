@@ -436,6 +436,33 @@ var all_tests = {
     })
   },
 
+  // Test the error reporting functionality
+  test_failing_insert_due_to_unique_index_strict : function() {
+    var error_client = new Db('integration_tests2_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
+    error_client.bson_deserializer = client.bson_deserializer;
+    error_client.bson_serializer = client.bson_serializer;
+    error_client.pkFactory = client.pkFactory;
+    
+    error_client.open(function(err, error_client) {
+      error_client.dropCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
+        error_client.createCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
+          error_client.collection('test_failing_insert_due_to_unique_index_strict', function(err, collection) {
+            collection.ensureIndex([['a', 1 ]], true, function(err, indexName) {
+              collection.insert({a:2}, function(err, r) {
+                test.ok(err == null);
+                collection.insert({a:2}, function(err, r) {
+                  test.ok(err != null);
+                  error_client.close();
+                  finished_test({test_failing_insert_due_to_unique_index_strict:'ok'});
+                })
+              })
+            })
+          })
+        })                  
+      });
+    });
+  },
+
   // Test multiple document insert
   test_multiple_insert : function() {
     client.createCollection('test_multiple_insert', function(err, r) {
