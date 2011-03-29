@@ -4442,8 +4442,14 @@ var all_tests = {
         finished_test({test_insert_and_query_undefined:'ok'});
       });        
     })
-  }  
-  
+  },
+
+  // // Test the count result on a collection that does not exist
+  // test_shutdown : function() {
+  //   client.executeDbCommand({shutdown:1}, function(err, result) {
+  //     finished_test({test_shutdown:'ok'});      
+  //   });
+  // },  
 };
 
 /*******************************************************************************************************
