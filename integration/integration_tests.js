@@ -1971,6 +1971,36 @@ var all_tests = {
     });
   },
   
+  test_to_array : function() {
+    client.createCollection('test_to_array', function(err, collection) {
+      for(var i = 0; i < 2; i++) {
+        collection.save({'x':1}, function(err, document) {});
+      }
+  
+      collection.find(function(err, cursor) {
+        test.throws(function () {
+          cursor.toArray();
+        });
+        finished_test({test_to_array:'ok'});
+      });
+    });
+  },
+  
+  test_each : function() {
+    client.createCollection('test_each', function(err, collection) {
+      for(var i = 0; i < 2; i++) {
+        collection.save({'x':1}, function(err, document) {});
+      }
+  
+      collection.find(function(err, cursor) {
+        test.throws(function () {
+          cursor.each();
+        });
+        finished_test({test_each:'ok'});
+      });
+    });
+  },
+
   test_cursor_limit : function() {
     client.createCollection('test_cursor_limit', function(err, collection) {
       for(var i = 0; i < 10; i++) {
