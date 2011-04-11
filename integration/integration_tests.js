@@ -535,6 +535,33 @@ var all_tests = {
     });
   },
 
+  // Test a simple find chained
+  test_find_simple_chained : function() {
+    client.createCollection('test_find_simple_chained', function(err, r) {
+      var collection = client.collection('test_find_simple_chained', function(err, collection) {
+        var doc1 = null;
+        var doc2 = null;
+
+        // Insert some test documents
+        collection.insert([{a:2}, {b:3}], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]});
+        // Ensure correct insertion testing via the cursor and the count function
+        collection.find().toArray(function(err, documents) {
+          test.equal(2, documents.length);
+        });
+        collection.count(function(err, count) {
+          test.equal(2, count);
+        });
+        // Fetch values by selection
+        collection.find({'a': doc1.a}).toArray(function(err, documents) {
+          test.equal(1, documents.length);
+          test.equal(doc1.a, documents[0].a);
+          // Let's close the db
+          finished_test({test_find_simple_chained:'ok'});
+        });
+      });
+    });
+  },
+
   // Test advanced find
   test_find_advanced : function() {
     client.createCollection('test_find_advanced', function(err, r) {
