@@ -100,30 +100,30 @@ Defining your own primary key factory allows you to generate your own series of 
 
 Simple example below
 
-  // Custom factory (need to provide a 12 byte array);
-  CustomPKFactory = function() {}
-  CustomPKFactory.prototype = new Object();
-  CustomPKFactory.createPk = function() {
-    return new ObjectID("aaaaaaaaaaaa");
-  }
+    // Custom factory (need to provide a 12 byte array);
+    CustomPKFactory = function() {}
+    CustomPKFactory.prototype = new Object();
+    CustomPKFactory.createPk = function() {
+      return new ObjectID("aaaaaaaaaaaa");
+    }
 
-  var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
-  p_client.open(function(err, p_client) {
-    p_client.dropDatabase(function(err, done) {
-      p_client.createCollection('test_custom_key', function(err, collection) {
-        collection.insert({'a':1}, function(err, docs) {
-          collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
-            cursor.toArray(function(err, items) {
-              test.assertEquals(1, items.length);
+    var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
+    p_client.open(function(err, p_client) {
+      p_client.dropDatabase(function(err, done) {
+        p_client.createCollection('test_custom_key', function(err, collection) {
+          collection.insert({'a':1}, function(err, docs) {
+            collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
+              cursor.toArray(function(err, items) {
+                test.assertEquals(1, items.length);
 
-              // Let's close the db
-              p_client.close();
+                // Let's close the db
+                p_client.close();
+              });
             });
           });
         });
       });
     });
-  });
 
 Strict mode
 --------
@@ -132,28 +132,23 @@ Each database has an optional strict mode. If it is set then asking for a collec
 that does not exist will return an Error object in the callback. Similarly if you
 attempt to create a collection that already exists. Strict is provided for convenience.
 
-  var error_client = new Db(
-      'integration_tests_',
-      new Server("127.0.0.1", 27017, {auto_reconnect: false}),
-      {strict:true});
-  test.assertEquals(true, error_client.strict);
-  error_client.open(function(err, error_client) {
-    error_client.collection('does-not-exist', function(err, collection) {
-      test.assertTrue(err instanceof Error);
-      test.assertEquals("Collection does-not-exist does not exist. " +
-                        "Currently in strict mode.", err.message);
-    });
+    var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});    
+      test.assertEquals(true, error_client.strict);
+      
+      error_client.open(function(err, error_client) {
+      error_client.collection('does-not-exist', function(err, collection) {
+        test.assertTrue(err instanceof Error);
+        test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", err.message);
+      });
 
-    error_client.createCollection('test_strict_access_collection',
-                                  function(err, collection) {
-      error_client.collection('test_strict_access_collection',
-                              function(err, collection) {
-        test.assertTrue(collection instanceof Collection);
-        // Let's close the db
-        error_client.close();
+      error_client.createCollection('test_strict_access_collection', function(err, collection) {
+        error_client.collection('test_strict_access_collection', function(err, collection) {
+          test.assertTrue(collection instanceof Collection);
+          // Let's close the db
+          error_client.close();
+        });
       });
     });
-  });
 
 Documentation
 ========
