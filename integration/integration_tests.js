@@ -4057,6 +4057,37 @@ var all_tests = {
     });
   },
 
+  test_gs_read_stream : function() {
+    var gridStoreR = new GridStore(client, "test_gs_read_stream", "r");
+    var gridStoreW = new GridStore(client, "test_gs_read_stream", "w");
+    var data = fs.readFileSync("./integration/test_gs_weird_bug.png", 'binary');
+
+    var readLen = 0;
+    var gotEnd = 0;
+
+    gridStoreW.open(function(err, gs) {
+      gs.write(data, function(err, gs) {
+          gs.close(function(err, result) {
+              gridStoreR.open(function(err, gs) {
+                  var stream = gs.stream(true);
+                  stream.on("data", function(chunk) {
+                      readLen += chunk.length;
+                  });
+                  stream.on("end", function() {
+                      ++gotEnd;
+                  });
+                  stream.on("close", function() {
+                      test.equal(data.length, readLen);
+                      test.equal(1, gotEnd);
+                      finished_test({test_gs_read_stream:'ok'});
+                  });
+              });
+          });
+      });
+    });
+  },
+
+
   test_gs_writing_file: function() {
     var gridStore = new GridStore(client, 'test_gs_writing_file', 'w');
     var fileSize = fs.statSync('./integration/test_gs_weird_bug.png').size;
