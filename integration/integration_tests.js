@@ -4517,6 +4517,15 @@ var all_tests = {
     })
   },
 
+
+  test_nativedbref_json_crash : function() {
+    var dbref = new client.bson_serializer.DBRef("foo",
+                                                 client.bson_serializer.ObjectID.createFromHexString("fc24a04d4560531f00000000"),
+                                                 null);
+    JSON.stringify(dbref);
+    finished_test({test_nativedbref_json_crash:'ok'});
+  }
+
   // // Test the count result on a collection that does not exist
   // test_shutdown : function() {
   //   client.executeDbCommand({shutdown:1}, function(err, result) {
