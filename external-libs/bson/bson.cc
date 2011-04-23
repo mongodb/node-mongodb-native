@@ -39,7 +39,7 @@ const uint32_t BSON_DATA_INT = 16;
 const uint32_t BSON_DATA_TIMESTAMP = 17;
 const uint32_t BSON_DATA_LONG = 18;
 
-const int32_t BSON_INT32_MAX = (int32_t)2147483648L;
+const int32_t BSON_INT32_MAX = (int32_t)2147483647L;
 const int32_t BSON_INT32_MIN = (int32_t)(-1) * 2147483648L;
 
 // BSON BINARY DATA SUBTYPES
