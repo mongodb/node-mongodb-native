@@ -3099,6 +3099,54 @@ var all_tests = {
     });
   },
   
+  test_gs_unlink_as_array : function() {
+    var fs_client = new Db('integration_tests_11', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    fs_client.bson_deserializer = client.bson_deserializer;
+    fs_client.bson_serializer = client.bson_serializer;
+    fs_client.pkFactory = client.pkFactory;
+
+    fs_client.open(function(err, fs_client) {
+      fs_client.dropDatabase(function(err, done) {
+        var gridStore = new GridStore(fs_client, "test_gs_unlink_as_array", "w");
+        gridStore.open(function(err, gridStore) {
+          gridStore.write("hello, world!", function(err, gridStore) {
+            gridStore.close(function(err, result) {
+              fs_client.collection('fs.files', function(err, collection) {
+                collection.count(function(err, count) {
+                  test.equal(1, count);
+                })
+              });
+
+              fs_client.collection('fs.chunks', function(err, collection) {
+                collection.count(function(err, count) {
+                  test.equal(1, count);
+
+                  // Unlink the file
+                  GridStore.unlink(fs_client, ['test_gs_unlink_as_array'], function(err, gridStore) {
+                    fs_client.collection('fs.files', function(err, collection) {
+                      collection.count(function(err, count) {
+                        test.equal(0, count);
+                      })
+                    });
+
+                    fs_client.collection('fs.chunks', function(err, collection) {
+                      collection.count(function(err, count) {
+                        test.equal(0, count);
+
+                        finished_test({test_gs_unlink_as_array:'ok'});
+                        fs_client.close();
+                      })
+                    });
+                  });
+                })
+              });
+            });
+          });
+        });
+      });
+    });
+  },
+
   test_gs_append : function() {
     var fs_client = new Db('integration_tests_12', new Server("127.0.0.1", 27017, {auto_reconnect: false}));
     fs_client.bson_deserializer = client.bson_deserializer;
