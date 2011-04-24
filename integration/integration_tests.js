@@ -16,7 +16,7 @@ var Db = require('../lib/mongodb').Db,
   BinaryParser = require('../lib/mongodb/bson/binary_parser').BinaryParser,
   Buffer = require('buffer').Buffer,
   fs = require('fs'),
-  Script = process.binding('evals').Script;
+  Script = require('vm');
 
 /*******************************************************************************************************
   Integration Tests
