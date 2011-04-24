@@ -436,6 +436,33 @@ var all_tests = {
     })
   },
 
+  // Test the error reporting functionality
+  test_failing_insert_due_to_unique_index_strict : function() {
+    var error_client = new Db('integration_tests2_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
+    error_client.bson_deserializer = client.bson_deserializer;
+    error_client.bson_serializer = client.bson_serializer;
+    error_client.pkFactory = client.pkFactory;
+    
+    error_client.open(function(err, error_client) {
+      error_client.dropCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
+        error_client.createCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
+          error_client.collection('test_failing_insert_due_to_unique_index_strict', function(err, collection) {
+            collection.ensureIndex([['a', 1 ]], true, function(err, indexName) {
+              collection.insert({a:2}, function(err, r) {
+                test.ok(err == null);
+                collection.insert({a:2}, function(err, r) {
+                  test.ok(err != null);
+                  error_client.close();
+                  finished_test({test_failing_insert_due_to_unique_index_strict:'ok'});
+                })
+              })
+            })
+          })
+        })                  
+      });
+    });
+  },
+
   // Test multiple document insert
   test_multiple_insert : function() {
     client.createCollection('test_multiple_insert', function(err, r) {
@@ -638,6 +665,17 @@ var all_tests = {
           });
         });
   
+        // Test sorting (descending), sort is hash
+        collection.find({'a': {'$lt':10}}, {sort: {a: -1}}, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(4, documents.length);
+            test.equal(4, documents[0].a);
+            test.equal(3, documents[1].a);
+            test.equal(2, documents[2].a);
+            test.equal(1, documents[3].a);
+          });
+        });
+  
         // Sorting using array of names, assumes ascending order
         collection.find({'a': {'$lt':10}}, {'sort': ['a']}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
@@ -651,6 +689,17 @@ var all_tests = {
   
         // Sorting using single name, assumes ascending order
         collection.find({'a': {'$lt':10}}, {'sort': 'a'}, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(4, documents.length);
+            test.equal(1, documents[0].a);
+            test.equal(2, documents[1].a);
+            test.equal(3, documents[2].a);
+            test.equal(4, documents[3].a);
+          });
+        });
+  
+        // Sorting using single name, assumes ascending order, sort is hash
+        collection.find({'a': {'$lt':10}}, {sort: {'a':1}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             test.equal(4, documents.length);
             test.equal(1, documents[0].a);
@@ -677,16 +726,19 @@ var all_tests = {
           });
         });
   
+        /* NONACTUAL */
         // Sorting using ordered hash
         collection.find({'a': {'$lt':10}}, {'sort': {a:-1}}, function(err, cursor) {
           cursor.toArray(function(err, documents) {
             // Fail test if not an error
-            test.ok(err instanceof Error);
-            test.equal("Error: Invalid sort argument was supplied", err.message);
+            //test.ok(err instanceof Error);
+            //test.equal("Error: Invalid sort argument was supplied", err.message);
+            test.equal(4, documents.length);
             // Let's close the db
             finished_test({test_find_sorting:'ok'});
           });
         });
+
       });
     });
   },
@@ -745,6 +797,54 @@ var all_tests = {
       });
     });
   },
+    
+  // Test find by non-quoted values (issue #128)
+  test_find_non_quoted_values : function() {
+    client.createCollection('test_find_non_quoted_values', function(err, r) {
+      client.collection('test_find_non_quoted_values', function(err, collection) {
+        // insert test document
+        collection.insert([{ a: 19, b: 'teststring', c: 59920303 },
+                           { a: "19", b: 'teststring', c: 3984929 }]);
+        
+        collection.find({ a: 19 }, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(1, documents.length);
+            finished_test({test_find_non_quoted_values:'ok'});
+          });
+        });
+      });
+    });
+  },
+  
+  // Test for querying embedded document using dot-notation (issue #126)
+  test_find_embedded_document : function() {
+    client.createCollection('test_find_non_quoted_values', function(err, r) {
+      client.collection('test_find_non_quoted_values', function(err, collection) {
+        // insert test document
+        collection.insert([{ a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' }},
+                           { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}]);
+        
+        // test using integer value
+        collection.find({ 'a.id': 10 }, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(1, documents.length);
+            test.equal('bar', documents[0].b);
+          });
+        });
+        
+        // test using string value
+        collection.find({ 'a.value': 'foo' }, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            // should yield 2 documents
+            test.equal(2, documents.length);
+            test.equal('bar', documents[0].b);
+            test.equal('bar2', documents[1].b);
+            finished_test({test_find_embedded_document:'ok'});
+          });
+        });
+      });
+    });
+  },
   
   // Find no records
   test_find_one_no_records : function() {
@@ -773,7 +873,7 @@ var all_tests = {
           replies.forEach(function(err, document) {
             if(document.name == "test_drop_collection") {
               found = true;
-              break;
+              return;
             }
           });
           // Let's close the db
@@ -796,7 +896,7 @@ var all_tests = {
             replies.forEach(function(document) {
               if(document.name == "test_other_drop") {
                 found = true;
-                break;
+                return;
               }
             });
             // Let's close the db
@@ -3429,7 +3529,7 @@ var all_tests = {
       });
     });
   },
-  
+
   test_custom_primary_key_generator : function() {
     // Custom factory (need to provide a 12 byte array);
     CustomPKFactory = function() {}
@@ -3486,7 +3586,7 @@ var all_tests = {
   test_map_reduce_functions_scope : function() {
     client.createCollection('test_map_reduce_functions_scope', function(err, collection) {
       collection.insert([{'user_id':1, 'timestamp':new Date()}, {'user_id':2, 'timestamp':new Date()}]);
-
+  
       var map = function(){
           emit(test(this.timestamp.getYear()), 1);
       }
@@ -4342,8 +4442,14 @@ var all_tests = {
         finished_test({test_insert_and_query_undefined:'ok'});
       });        
     })
-  }  
-  
+  },
+
+  // // Test the count result on a collection that does not exist
+  // test_shutdown : function() {
+  //   client.executeDbCommand({shutdown:1}, function(err, result) {
+  //     finished_test({test_shutdown:'ok'});      
+  //   });
+  // },  
 };
 
 /*******************************************************************************************************

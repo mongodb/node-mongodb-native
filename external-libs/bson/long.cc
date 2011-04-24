@@ -11,6 +11,7 @@
 #include <iostream>
 #include <limits>
 
+#include "local.h"
 #include "long.h"
 
 // BSON MAX VALUES
@@ -622,7 +623,7 @@ Handle<Value> Long::GreatherThan(const Arguments &args) {
   Long *long_obj = Long::Unwrap<Long>(obj);
   // Compare the longs
   bool comparision_result = current_long_obj->greaterThan(long_obj);
-  scope.Close(Boolean::New(comparision_result));
+  return scope.Close(Boolean::New(comparision_result));
 }
 
 Handle<Value> Long::Equals(const Arguments &args) {
@@ -637,7 +638,7 @@ Handle<Value> Long::Equals(const Arguments &args) {
   Long *long_obj = Long::Unwrap<Long>(obj);
   // Compare the longs
   bool comparision_result = (current_long_obj->compare(long_obj) == 0);
-  scope.Close(Boolean::New(comparision_result));
+  return scope.Close(Boolean::New(comparision_result));
 }
 
 bool Long::greaterThan(Long *other) {
