@@ -2671,6 +2671,21 @@ var all_tests = {
       });
     });
   },
+
+  test_count_with_fields_using_exclude : function() {
+    client.createCollection('test_count_with_fields', function(err, collection) {
+      collection.save({'x':1, 'a':2}, function(err, doc) {
+        collection.find({}, {'fields':{'x':0}}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
+            test.equal(1, items.length);
+            test.equal(2, items[0].a);
+            test.equal(null, items[0].x);
+            finished_test({test_count_with_fields_using_exclude:'ok'});
+          });
+        });
+      });
+    });
+  },
   
   // Gridstore tests
   test_gs_exist : function() {
