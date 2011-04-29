@@ -16,7 +16,7 @@ var Db = require('../lib/mongodb').Db,
   BinaryParser = require('../lib/mongodb/bson/binary_parser').BinaryParser,
   Buffer = require('buffer').Buffer,
   fs = require('fs'),
-  Script = process.binding('evals').Script;
+  Script = require('vm');
 
 /*******************************************************************************************************
   Integration Tests
@@ -2783,6 +2783,36 @@ var all_tests = {
     });
   },
   
+  test_gs_small_write_with_buffer : function() {
+    var gridStore = new GridStore(client, "test_gs_small_write_with_buffer", "w");
+    gridStore.open(function(err, gridStore) {
+      var data = new Buffer("hello world", "utf8");
+    
+      gridStore.writeBuffer(data, function(err, gridStore) {
+        gridStore.close(function(err, result) {
+          client.collection('fs.files', function(err, collection) {
+            collection.find({'filename':'test_gs_small_write_with_buffer'}, function(err, cursor) {
+              cursor.toArray(function(err, items) {
+                test.equal(1, items.length);
+                var item = items[0];
+                test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
+  
+                client.collection('fs.chunks', function(err, collection) {
+                  collection.find({'files_id':item._id}, function(err, cursor) {
+                    cursor.toArray(function(err, items) {
+                      test.equal(1, items.length);
+                      finished_test({test_gs_small_write_with_buffer:'ok'});
+                    })
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  },
+  
   test_gs_small_file : function() {
     var gridStore = new GridStore(client, "test_gs_small_file", "w");
     gridStore.open(function(err, gridStore) {
@@ -2857,6 +2887,89 @@ var all_tests = {
           GridStore.read(client, 'test_gs_read_with_offset', null, 7, function(err, data) {
             test.equal('world!', data);
             finished_test({test_gs_read_with_offset:'ok'});
+          });
+        });
+      });
+    });
+  },
+  
+  test_gs_seek_with_buffer : function() {
+    var gridStore = new GridStore(client, "test_gs_seek_with_buffer", "w");
+    gridStore.open(function(err, gridStore) {
+      var data = new Buffer("hello, world!", "utf8");
+      gridStore.writeBuffer(data, function(err, gridStore) {
+        gridStore.close(function(result) {
+          var gridStore2 = new GridStore(client, "test_gs_seek_with_buffer", "r");
+          gridStore2.open(function(err, gridStore) {
+            gridStore.seek(0, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('h', chr);
+              });
+            });
+          });
+  
+          var gridStore3 = new GridStore(client, "test_gs_seek_with_buffer", "r");
+          gridStore3.open(function(err, gridStore) {
+            gridStore.seek(7, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('w', chr);
+              });
+            });
+          });
+  
+          var gridStore4 = new GridStore(client, "test_gs_seek_with_buffer", "r");
+          gridStore4.open(function(err, gridStore) {
+            gridStore.seek(4, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('o', chr);
+              });
+            });
+          });
+  
+          var gridStore5 = new GridStore(client, "test_gs_seek_with_buffer", "r");
+          gridStore5.open(function(err, gridStore) {
+            gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('!', chr);
+              });
+            });
+          });
+  
+          var gridStore6 = new GridStore(client, "test_gs_seek_with_buffer", "r");
+          gridStore6.open(function(err, gridStore) {
+            gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('w', chr);
+              });
+            });
+          });
+  
+          var gridStore7 = new GridStore(client, "test_gs_seek_with_buffer", "r");
+          gridStore7.open(function(err, gridStore) {
+            gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('w', chr);
+  
+                gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                  gridStore.getc(function(err, chr) {
+                    test.equal('w', chr);
+  
+                    gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                      gridStore.getc(function(err, chr) {
+                        test.equal('o', chr);
+  
+                        gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                          gridStore.getc(function(err, chr) {
+                            test.equal('o', chr);
+                            finished_test({test_gs_seek_with_buffer:'ok'});
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
           });
         });
       });
