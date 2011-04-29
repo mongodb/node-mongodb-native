@@ -350,9 +350,8 @@ var all_tests = {
                       
                       collection.update({x:1}, {"$set":{x:2}}, {'safe':true});
 
-                      collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, document) {
-                        test.ok(err instanceof Error);
-                        test.equal("Failed to update document", err.message);
+                      collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, result) {
+                        test.equal(0, result);
 
                         // Let's close the db
                         finished_test({test_last_status:'ok'});
@@ -2673,7 +2672,7 @@ var all_tests = {
   },
 
   test_count_with_fields_using_exclude : function() {
-    client.createCollection('test_count_with_fields', function(err, collection) {
+    client.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
       collection.save({'x':1, 'a':2}, function(err, doc) {
         collection.find({}, {'fields':{'x':0}}, function(err, cursor) {
           cursor.toArray(function(err, items) {
@@ -4582,22 +4581,27 @@ var all_tests = {
     client.createCollection('test_should_correctly_do_upsert', function(err, collection) {
       var id = new client.bson_serializer.ObjectID(null)
       var doc = {_id:id, a:1};
-      collection.update({"_id":id}, doc, {upsert:true}, function(err, doc) {
-        test.equal(null, err);
+      collection.update({"_id":id}, doc, {upsert:true}, function(err, result) {
+        test.equal(null, err);        
+        test.equal(1, result);
         collection.findOne({"_id":id}, function(err, doc) {
           test.equal(1, doc.a);
         });
       });
+
       id = new client.bson_serializer.ObjectID(null)
       doc = {_id:id, a:2};
-      collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, doc) {
+      collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, result) {
         test.equal(null, err);
+        test.equal(1, result);
         collection.findOne({"_id":id}, function(err, doc) {
           test.equal(2, doc.a);
         });
       });
-      collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, doc) {
+
+      collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, result) {
         test.equal(null, err);
+        test.equal(1, result);
         collection.findOne({"_id":id}, function(err, doc) {
           test.equal(2, doc.a);
           finished_test({test_should_correctly_do_upsert:'ok'});
@@ -4610,13 +4614,14 @@ var all_tests = {
     client.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
       var id = new client.bson_serializer.ObjectID(null)
       var doc = {_id:id, a:1};
-      collection.update({"_id":id}, doc, {safe:true}, function(err, doc) {
-        test.ok(err != null);
+      collection.update({"_id":id}, doc, {safe:true}, function(err, numberofupdateddocs) {
+        test.equal(null, err);
+        test.equal(0, numberofupdateddocs);
         finished_test({test_should_correctly_do_update_with_no_docs_found:'ok'});
       });
     });
   },
-  
+
   test_should_execute_insert_update_delete_safe_mode : function() {
     client.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
       test.ok(collection instanceof Collection);
@@ -4629,6 +4634,7 @@ var all_tests = {
         // Update the record
         collection.update({i:1}, {"$set":{i:2}}, {safe:true}, function(err, result) {
           test.equal(null, err);
+          test.equal(1, result);
         
           // Remove safely
           collection.remove({}, {safe:true}, function(err, result) {
@@ -4757,8 +4763,24 @@ var all_tests = {
       collection.insertAll(fixtures, {safe:true}, function(err, result) {
         collection.count(function(err, count) {
           test.equal(3, count);
-          finished_test({test_safe_insert:'ok'});
         });
+        
+        collection.find().toArray(function(err, docs) {
+          test.equal(3, docs.length)
+        });
+        
+        collection.find({}, {}, function(err, cursor) {
+          var counter = 0;
+          
+          cursor.each(function(err, doc) {
+            if(doc == null) {
+              test.equal(3, counter);
+              finished_test({test_safe_insert:'ok'});              
+            } else {
+              counter = counter + 1;
+            }
+          });
+        });        
       });        
     })
   },  
