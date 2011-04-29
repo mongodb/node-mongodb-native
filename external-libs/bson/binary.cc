@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits>
+#include <sys/param.h>
 
 #include "binary.h"
 
@@ -102,6 +103,7 @@ void Binary::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "put", Put);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "write", Write);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "read", Read);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "readInto", ReadInto);
 
   // Getters for correct serialization of the object  
   constructor_template->InstanceTemplate()->SetAccessor(subtype_symbol, SubtypeGetter, SubtypeSetter);
@@ -144,6 +146,35 @@ Handle<Value> Binary::Read(const Arguments &args) {
   } else {
     return VException("position and length is outside the size of the binary");
   } 
+}
+
+Handle<Value> Binary::ReadInto(const Arguments &args) {
+  HandleScope scope;
+  
+  if (args.Length() == 0 || !Buffer::HasInstance(args[0])) {
+      return VException("Function takes at least one argument of type Buffer");
+  }
+  
+  size_t offset = args[1]->IsInt32() ? args[1]->Uint32Value() : 0;
+  if (offset < 0) {
+      return VException("offset argument must be non-negative integer");
+  }
+  
+  Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
+  if (binary->index - offset < 0) {
+     return VException("offset argument out of bounds"); 
+  }
+  
+  Local<Object> obj = args[0]->ToObject();
+  size_t blength = Buffer::Length(obj);
+  char *data = Buffer::Data(obj);
+  size_t towrite = MIN(blength, binary->index - offset);
+  
+  if (towrite > 0) {
+      memmove(data, binary->data + offset, towrite);
+  }
+  
+  return scope.Close(Integer::New(towrite));
 }
 
 Handle<Value> Binary::Write(const Arguments &args) {
