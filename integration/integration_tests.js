@@ -4590,6 +4590,17 @@ var all_tests = {
       });
     });
   },
+
+  test_should_correctly_do_update_with_no_docs_found : function() {
+    client.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
+      var id = new client.bson_serializer.ObjectID(null)
+      var doc = {_id:id, a:1};
+      collection.update({"_id":id}, doc, {safe:true}, function(err, doc) {
+        test.ok(err != null);
+        finished_test({test_should_correctly_do_update_with_no_docs_found:'ok'});
+      });
+    });
+  },
   
   test_should_execute_insert_update_delete_safe_mode : function() {
     client.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
@@ -4709,21 +4720,33 @@ var all_tests = {
     })
   },
 
-
   test_nativedbref_json_crash : function() {
     var dbref = new client.bson_serializer.DBRef("foo",
                                                  client.bson_serializer.ObjectID.createFromHexString("fc24a04d4560531f00000000"),
                                                  null);
     JSON.stringify(dbref);
     finished_test({test_nativedbref_json_crash:'ok'});
-  }
+  },
+  
+  test_safe_insert : function() {
+    var fixtures = [{
+        name: "empty", array: [], bool: false, dict: {}, float: 0.0, string: ""
+      }, {
+        name: "not empty", array: [1], bool: true, dict: {x: "y"}, float: 1.0, string: "something"
+      }, {
+        name: "simple nested", array: [1, [2, [3]]], bool: true, dict: {x: "y", array: [1,2,3,4], dict: {x: "y", array: [1,2,3,4]}}, float: 1.5, string: "something simply nested"
+      }];
 
-  // // Test the count result on a collection that does not exist
-  // test_shutdown : function() {
-  //   client.executeDbCommand({shutdown:1}, function(err, result) {
-  //     finished_test({test_shutdown:'ok'});      
-  //   });
-  // },  
+
+    client.createCollection('test_safe_insert', function(err, collection) {
+      collection.insertAll(fixtures, {safe:true}, function(err, result) {
+        collection.count(function(err, count) {
+          test.equal(3, count);
+          finished_test({test_safe_insert:'ok'});
+        });
+      });        
+    })
+  },  
 };
 
 /*******************************************************************************************************
