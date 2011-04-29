@@ -11,9 +11,10 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits>
-#include <sys/param.h>
 
 #include "binary.h"
+
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 const uint32_t BSON_BINARY_SUBTYPE_FUNCTION = 1;
 const uint32_t BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;
