@@ -4760,27 +4760,30 @@ var all_tests = {
 
 
     client.createCollection('test_safe_insert', function(err, collection) {
-      collection.insertAll(fixtures, {safe:true}, function(err, result) {
-        collection.count(function(err, count) {
-          test.equal(3, count);
-        });
-        
+      for(var i = 0; i < fixtures.length; i++) {
+        collection.insert(fixtures[i], {safe:true})          
+      }
+    
+      collection.count(function(err, count) {
+        test.equal(3, count);
+
         collection.find().toArray(function(err, docs) {
           test.equal(3, docs.length)
         });
+      });
+      
+      
+      collection.find({}, {}, function(err, cursor) {
+        var counter = 0;
         
-        collection.find({}, {}, function(err, cursor) {
-          var counter = 0;
-          
-          cursor.each(function(err, doc) {
-            if(doc == null) {
-              test.equal(3, counter);
-              finished_test({test_safe_insert:'ok'});              
-            } else {
-              counter = counter + 1;
-            }
-          });
-        });        
+        cursor.each(function(err, doc) {
+          if(doc == null) {
+            test.equal(3, counter);
+            finished_test({test_safe_insert:'ok'});              
+          } else {
+            counter = counter + 1;
+          }
+        });
       });        
     })
   },  
