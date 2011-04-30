@@ -157,10 +157,6 @@ Handle<Value> Binary::ReadInto(const Arguments &args) {
   }
   
   size_t offset = args[1]->IsInt32() ? args[1]->Uint32Value() : 0;
-  if (offset < 0) {
-      return VException("offset argument must be non-negative integer");
-  }
-  
   Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
   if (binary->index - offset < 0) {
      return VException("offset argument out of bounds"); 
