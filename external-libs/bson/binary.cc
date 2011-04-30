@@ -156,7 +156,7 @@ Handle<Value> Binary::ReadInto(const Arguments &args) {
       return VException("Function takes at least one argument of type Buffer");
   }
   
-  size_t offset = args[1]->IsInt32() ? args[1]->Uint32Value() : 0;
+  size_t offset = args[1]->IsUint32() ? args[1]->Uint32Value() : 0;
   Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
   if (binary->index - offset < 0) {
      return VException("offset argument out of bounds"); 
