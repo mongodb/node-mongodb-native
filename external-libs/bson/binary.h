@@ -38,7 +38,8 @@ class Binary : public ObjectWrap {
     /**
      * Writes this binary data into node Buffer passed as first js arg. 
      * Optional second js arg: internal data offset of this binary (Integer)
-     * Up to Min(Buffer.length, Binary.length - offset) bytes will be writen into buffer
+     * Up to Min(Buffer.length, Binary.length - offset) bytes will be writen into buffer.
+     * Return number of bytes actually written into buffer.
      */
     static Handle<Value> ReadInto(const Arguments &args);
 
