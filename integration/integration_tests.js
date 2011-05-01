@@ -4793,11 +4793,9 @@ var all_tests = {
     // the original regex invalid, and leads to segmentation fault.
     client.createCollection('test_regex_serialization', function(err, collection) {
       collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, {safe:true});      
-      var total = 20,
-          count = total,
+      var count = 20,
           run = function(i) {
-            // search by regex
-            //collection.findOne({keywords: /ser/}, function(err, item) {
+            // search by regex            
             collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {            
               test.equal(6, item.keywords.length);              
               if (i === 0) {
