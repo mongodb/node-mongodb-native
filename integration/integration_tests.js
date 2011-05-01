@@ -4786,6 +4786,29 @@ var all_tests = {
         });
       });        
     })
+  },
+
+  test_regex_serialization : function() {    
+    // Serialized regexes contain extra trailing chars. Sometimes these trailing chars contain / which makes
+    // the original regex invalid, and leads to segmentation fault.
+    client.createCollection('test_regex_serialization', function(err, collection) {
+      collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, {safe:true});      
+      var total = 20,
+          count = total,
+          run = function(i) {
+            // search by regex
+            collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {
+              test.equal(6, item.keywords.length);              
+              if (i === total) {
+	            finished_test({test_regex_serialization:'ok'});
+	          }
+            });
+          };
+      // loop a few times to catch the / in trailing chars case
+      while (count--) {
+        run(count);
+      }
+    });
   },  
 };
 
