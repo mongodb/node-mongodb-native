@@ -4797,9 +4797,10 @@ var all_tests = {
           count = total,
           run = function(i) {
             // search by regex
-            collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {
+            //collection.findOne({keywords: /ser/}, function(err, item) {
+            collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {            
               test.equal(6, item.keywords.length);              
-              if (i === total) {
+              if (i === 0) {
 	            finished_test({test_regex_serialization:'ok'});
 	          }
             });
