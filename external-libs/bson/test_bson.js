@@ -199,6 +199,8 @@ var object_id_2 = new ObjectID2();
 assert.ok(object_id.equals(object_id));
 assert.ok(!(object_id.equals(object_id_2)))
 
+// Force garbage collect
+global.gc();
 
 
 
