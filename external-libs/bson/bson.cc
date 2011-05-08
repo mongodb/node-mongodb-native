@@ -270,8 +270,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -292,8 +292,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust writing position for the first byte
       index = index + 1;
       // Convert name to char*
-      ssize_t len = DecodeBytes(name, BINARY);
-      ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+      ssize_t len = DecodeBytes(name, UTF8);
+      ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
       // Add null termiation for the string
       *(serialized_object + index + len) = '\0';    
       // Adjust the index
@@ -314,8 +314,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -339,8 +339,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -389,8 +389,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -427,8 +427,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -471,8 +471,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -490,8 +490,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -504,8 +504,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -551,8 +551,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -569,8 +569,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -588,8 +588,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -642,8 +642,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust writing position for the first byte
     index = index + 1;
     // Convert name to char*
-    ssize_t len = DecodeBytes(name, BINARY);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -680,8 +680,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust writing position for the first byte
       index = index + 1;
       // Convert name to char*
-      ssize_t len = DecodeBytes(name, BINARY);
-      ssize_t written = DecodeWrite((serialized_object + index), len, name, BINARY);
+      ssize_t len = DecodeBytes(name, UTF8);
+      ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
       // Add null termiation for the string
       *(serialized_object + index + len) = '\0';    
       // Adjust the index
@@ -850,12 +850,26 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     
     // Process all the properties on the object
     for(uint32_t index = 0; index < property_names->Length(); index++) {
+      // printf("================================ calculate_object_size:string\n");
+      Local<String> str = property_names->Get(index)->ToString();
+      uint32_t utf8_length = str->Utf8Length();
+          
+      // if(utf8_length != str->Length()) {
+      //   // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
+      //   object_size += str->Utf8Length() + 1 + 4;  
+      // } else {
+      //   object_size += str->Length() + 1 + 4;        
+      // }
+
+
       // Fetch the property name
-      Local<String> property_name = property_names->Get(index)->ToString();
+      // Local<String> property_name = property_names->Get(index)->ToString();
+      
       // Fetch the object for the property
-      Local<Value> property = object->Get(property_name);
+      Local<Value> property = object->Get(str);
       // Get size of property (property + property name length + 1 for terminating 0)
-      object_size += BSON::calculate_object_size(property) + property_name->Length() + 1 + 1;
+      // object_size += BSON::calculate_object_size(property) + property_name->Length() + 1 + 1;
+      object_size += BSON::calculate_object_size(property) + utf8_length + 1 + 1;
     }      
     
     object_size = object_size + 4 + 1;

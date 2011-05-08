@@ -1735,6 +1735,7 @@ var all_tests = {
   test_utf8_key_name : function() { 
     client.createCollection('test_utf8_key_name', function(err, collection) { 
       collection.insert({'šđžčćŠĐŽČĆ':1}, function(err, ids) { 
+            // finished_test({test_utf8_key_name:'ok'}); 
         collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}, function(err, cursor) { 
           cursor.toArray(function(err, items) { 
             test.equal(1, items[0]['šđžčćŠĐŽČĆ']); 
