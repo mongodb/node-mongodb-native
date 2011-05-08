@@ -1,6 +1,7 @@
 GLOBAL.DEBUG = true;
 
-sys = require("sys");
+debug = require("sys").debug,
+inspect = require("sys").inspect;
 test = require("assert");
 var Db = require('../lib/mongodb').Db,
   GridStore = require('../lib/mongodb').GridStore,
@@ -325,7 +326,7 @@ var all_tests = {
       // Get the collection
       client.collection('test_last_status', function(err, collection) {
         // Remove all the elements of the collection
-        collection.remove(function(err, collection) {
+        collection.remove(function(err, result) {          
           // Check update of a document
           collection.insert({i:1}, function(err, ids) {
             test.equal(1, ids.length);
@@ -376,7 +377,9 @@ var all_tests = {
             collection.count(function(err, count) {
               test.equal(2, count);
               // Clear the collection
-              collection.remove(function(err, collection) {
+              collection.remove({}, {safe:true}, function(err, result) {
+                test.equal(2, result);
+                
                 collection.count(function(err, count) {
                   test.equal(0, count);
                   // Let's close the db
@@ -4583,7 +4586,7 @@ var all_tests = {
       var doc = {_id:id, a:1};
       collection.update({"_id":id}, doc, {upsert:true}, function(err, result) {
         test.equal(null, err);        
-        test.equal(1, result);
+        test.equal(null, result);
         collection.findOne({"_id":id}, function(err, doc) {
           test.equal(1, doc.a);
         });
@@ -4787,6 +4790,44 @@ var all_tests = {
       });        
     })
   },  
+  
+  test_should_throw_error_if_serializing_function : function() {
+    client.createCollection('test_should_throw_error_if_serializing_function', function(err, collection) {
+      // Insert the update
+      collection.insert({i:1, z:function() { return 1} }, {safe:true}, function(err, result) {
+        collection.findOne({_id:result[0]._id}, function(err, object) {
+          test.equal(null, object.z);
+          test.equal(1, object.i);
+
+          finished_test({test_should_throw_error_if_serializing_function:'ok'});          
+        })        
+      })
+    })    
+  },
+  
+  multiple_save_test : function() {
+		client.createCollection("multiple_save_test", function(err, collection) {
+			//insert new user
+			collection.save({
+				name: 'amit',
+				text: 'some text'
+			})
+			collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
+				user = users[0]
+				if(err) {
+					throw new Error(err)
+				} else if(user) {
+					user.pants = 'worn'
+					
+					collection.save(user, {safe:true}, function(err, result){
+					  test.equal(null, err);
+					  test.equal(1, result);
+            finished_test({multiple_save_test:'ok'});          					  
+					})
+				}
+			});
+    });
+  },
 };
 
 /*******************************************************************************************************
@@ -4813,13 +4854,13 @@ var client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {}), {}
 // Use native deserializer
 if(type == "native") {
   var BSON = require("../external-libs/bson/bson");
-  sys.puts("========= Integration tests running Native BSON Parser == ")
+  debug("========= Integration tests running Native BSON Parser == ")
   client.bson_deserializer = BSON;
   client.bson_serializer = BSON;
   client.pkFactory = BSON.ObjectID;
 } else {
   var BSONJS = require('../lib/mongodb/bson/bson');
-  sys.puts("========= Integration tests running Pure JS BSON Parser == ")
+  debug("========= Integration tests running Pure JS BSON Parser == ")
   client.bson_deserializer = BSONJS;
   client.bson_serializer = BSONJS;
   client.pkFactory = BSONJS.ObjectID;
@@ -4839,13 +4880,13 @@ function ensure_tests_finished() {
   var intervalId = setInterval(function() {
     if(client_tests_keys.length == 0) {
       // Print out the result
-      sys.puts("= Final Checks =========================================================");
+      debug("= Final Checks =========================================================");
       // Stop interval timer and close db connection
       clearInterval(intervalId);
       // Ensure we don't have any more cursors hanging about
       client.cursorInfo(function(err, cursorInfo) {
-        sys.puts(sys.inspect(cursorInfo));
-        sys.puts("");
+        debug(inspect(cursorInfo));
+        debug("");
         client.close();
       });
     }
@@ -4862,7 +4903,7 @@ function run_tests() {
 
 function finished_test(test_object) {
   for(var name in test_object) {
-    sys.puts("= executing test: " + name + " [" + test_object[name] + "]");
+    debug("= executing test: " + name + " [" + test_object[name] + "]");
   }
   finished_tests.push(test_object);
   client_tests_keys.shift();

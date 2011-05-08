@@ -671,6 +671,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     index = index + 1;
     // Free up memory
     free(length_str);
+  } else if(value->IsFunction()) {
   } else if(value->IsObject()) {
     // printf("============================================= -- serialized::::object\n");
     if(!name->IsNull()) {
@@ -840,6 +841,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     object_size = object_size + 4 + 1;
     // Free up memory
     free(length_str);
+  } else if(value->IsFunction()) {
   } else if(value->IsObject()) {
     // printf("================================ calculate_object_size:object\n");
     // Unwrap the object
