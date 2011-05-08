@@ -1732,6 +1732,20 @@ var all_tests = {
     });
   },
   
+  test_utf8_key_name : function() { 
+    client.createCollection('test_utf8_key_name', function(err, collection) { 
+      collection.insert({'šđžčćŠĐŽČĆ':1}, function(err, ids) { 
+        collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}, function(err, cursor) { 
+          cursor.toArray(function(err, items) { 
+            test.equal(1, items[0]['šđžčćŠĐŽČĆ']); 
+            // Let's close the db 
+            finished_test({test_utf8_key_name:'ok'}); 
+          }); 
+        }); 
+      }); 
+    }); 
+  }, 
+  
   test_collection_names2 : function() {
     client.collection(5, function(err, collection) {
       test.equal("collection name must be a String", err.message);
