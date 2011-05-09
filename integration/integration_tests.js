@@ -4865,6 +4865,28 @@ var all_tests = {
 			});
     });
   },
+  
+  save_error_on_save_test : function() {
+    client.collection("testing", function(err, collection) {
+			collection.find({}).limit(1).toArray(function(err, users){
+			  debug("================ hello")
+			  
+				user = users[0]
+				if(err) {
+					console.log(err.message)
+				} else if(user) {
+					user.friends.splice(1,1)
+					collection.save(user, function(err, doc){
+						if(err) {
+							console.log(err.message)
+						}
+
+            finished_test({save_error_on_save_test:'ok'});          					  
+					});
+				}
+			});
+		});
+  },
 };
 
 /*******************************************************************************************************
