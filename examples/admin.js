@@ -44,7 +44,7 @@ db.open(function(err, db) {
 
                       // Validate returns a hash if all is well or return an error has if there is a
                       // problem.
-                      admin.validatCollection(collection.collectionName, function(err, result) {
+                      admin.validateCollection(collection.collectionName, function(err, result) {
                         sys.puts(result.result);
                         db.close();
                       });

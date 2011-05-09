@@ -1,21 +1,23 @@
 var debug = require('util').debug,
   inspect = require('util').inspect,
   path = require('path'),
+  fs = require('fs'),
   exec = require('child_process').exec,
   spawn = require('child_process').spawn,
   Connection = require('../../lib/mongodb').Connection,
   Db = require('../../lib/mongodb').Db,
-  Server = require('../../lib/mongodb').Server;  
+  Server = require('../../lib/mongodb').Server,
+  Step = require("step");  
 
 var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   options = options == null ? {} : options;
   this.startPort = options["start_port"] || 30000;
   this.ports = [];
-  this.name = options["name"] : "replica-set-foo";
-  this.host = options["host"] : "localhost";
-  this.retries = options["retries"] : 60;
+  this.name = options["name"] || "replica-set-foo";
+  this.host = options["host"] || "localhost";
+  this.retries = options["retries"] || 60;
   this.config = {"_id": this.name, "members": []};
-  this.durable = options["durable"] : false;
+  this.durable = options["durable"] || false;
   this.path = path.resolve("data");
   
   this.arbiterCount = options["arbiter_count"] || 2;
@@ -32,41 +34,128 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
 }
 
 ReplicaSetManager.prototype.startSet = function(callback) {
+  var self = this;
   debug("** Starting a replica set with " + this.count + " nodes");
-  
+
   // Kill all existing mongod instances
   exec('killall mongod', function(err, stdout, stderr) {
-    if(err != null) return callback(err, null);
-    
+    // debug("=================== err " + inspect(err))
+    // if(err != null) return callback(err, null);
+        
+    // debug("============= this.primaryCount = " + self.primaryCount)
+    // debug("============= this.primaryCount = " + self.primaryCount)
+        
     var n = 0;
-    for(var i = 0; i < (this.primaryCount + this.secondaryCount); i++) {
-      this.initNode(n++);      
-    }    
+
+    Step(
+        function startPrimaries() {
+          var group = this.group();
+          // Start primary instances
+          for(n = 0; n < (self.primaryCount + self.secondaryCount); n++) {
+            self.initNode(n, {}, group());
+          }  
+          
+          // Start passive instances
+          for(var i = 0; i < self.passiveCount; i++) {
+            self.initNode(n, {priority:0}, group())
+            n = n + 1;
+          }
+          
+          // Start arbiter instances
+          for(var i = 0; i < self.arbiterCount; i++) {
+            self.initNode(n, {arbiterOnly:true}, group());
+            n = n + 1;
+          }          
+        },
+        
+        function finishUp(err, values) {
+          self.numberOfInitiateRetries = 0;
+          // Initiate
+          self.initiate(function(err, result) {
+            if(err != null) return callback(err, null);
+            self.ensureUpRetries = 0;
+
+            // Ensure all the members are up
+            process.stdout.write("** Ensuring members are up...");
+            // Let's ensure everything is up
+            self.ensureUp(function(err, result) {
+              if(err != null) return callback(err, null);
+              // Return a correct result
+              callback(null, result);
+            })            
+          });          
+        }
+    );
   })
 }
 
-ReplicaSetManager.prototype.initNode = function(n) {
+ReplicaSetManager.prototype.initiate = function(callback) {
+  var self = this;
+  // Get master connection
+  self.getConnection(function(err, connection) {
+    if(err != null) return callback(err, null);    
+    // Set replica configuration
+    connection.admin().command({replSetInitiate:self.config}, function(err, result) {
+      // If we have an error let's 
+      if(err != null) {
+        // Retry a number of times
+        if(self.numberOfInitiateRetries < self.retries) {
+          setTimeout(function() {
+            self.numberOfInitiateRetries = self.numberOfInitiateRetries + 1;
+            self.initiate(callback);
+          }, 1000);          
+        }
+      } else {
+        self.numberOfInitiateRetries = 0;
+        callback(null, null);        
+      }      
+    });    
+  });
+}
+
+// Get absolute path
+var getPath = function(self, name) {
+  return path.join(self.path, name);
+}
+
+ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
   var self = this;
   this.mongods[n] = this.mongods[n] == null ? {} : this.mongods[n];
   var port = this.startPort + n;
   this.ports.push(port);
   this.mongods[n]["port"] = port;
-  this.mongods[n]["db_path"] = getPath("rs-" + port);
-  this.mongods[n]["log_path"] = getPath("log-" + port);
+  this.mongods[n]["db_path"] = getPath(this, "rs-" + port);
+  this.mongods[n]["log_path"] = getPath(this, "log-" + port);
+  
+  // Add extra fields provided
+  for(var name in fields) {
+    this.mongods[n][name] = fields[name];
+  }
+  
+  // debug("================================================== initNode")
+  // debug(inspect(this.mongods[n]));
   
   // Perform cleanup of directories
   exec("rm -rf " + self.mongods[n]["db_path"], function(err, stdout, stderr) {
+    // debug("======================================== err1::" + err)
+    
     if(err != null) return callback(err, null);
     
     // Create directory
     exec("mkdir -p " + self.mongods[n]["db_path"], function(err, stdout, stderr) {
+      // debug("======================================== err2::" + err)
+
       if(err != null) return callback(err, null);
+
+      // debug("= ======================================= start1::" + self.mongods[n]["start"])
 
       self.mongods[n]["start"] = self.startCmd(n);
       self.start(n, function() {
         // Add instance to list of members
-        var member = {"_id": n, "host": this.host + ":" + this.mongods[n]["port"]};      
-        this.config["members"].push(members);        
+        var member = {"_id": n, "host": self.host + ":" + self.mongods[n]["port"]};      
+        self.config["members"].push(member);
+        // Return
+        return callback();
       });      
     });    
   });
@@ -120,69 +209,77 @@ ReplicaSetManager.prototype.getNodeWithState = function(state, callback) {
   });
 }
 
-// def ensure_up
-//   print "** Ensuring members are up..."
-// 
-//   attempt do
-//     con = get_connection
-//     status = con['admin'].command({'replSetGetStatus' => 1})
-//     print "."
-//     if status['members'].all? { |m| m['health'] == 1 && [1, 2, 7].include?(m['state']) } &&
-//        status['members'].any? { |m| m['state'] == 1 }
-//       print "all members up!\n\n"
-//       return status
-//     else
-//       raise Mongo::OperationFailure
-//     end
-//   end
-// end
 ReplicaSetManager.prototype.ensureUp = function(callback) {
-  debug("** Ensuring members are up...");
   var count = 0;
   var self = this;
   
+  // Write out the ensureUp
+  process.stdout.write(".");  
   // Retry check for server up sleeping inbetween
   self.retriedConnects = 0;
   // Attemp to retrieve a connection
   self.getConnection(function(err, connection) {
     // Check repl set get status
-    connection.admin().executeDbCommand({"replSetGetStatus": 1}, function(err, status) {
-      // Establish all health member
-      var healthyMembers = status["members"].filter(new function(element, index, array) {
-        return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1             
-      });
-      var stateCheck = status["members"].filter(new function(element, indexOf, array) {
-        return element["state"] == 1;
-      });
-      
-      if(healthyMembers.length == status["members"].length && stateCheck.length > 0) {
-        debug("all members up! \n\n");
-        return callback(null, status);
-      } else {
+    connection.admin().command({"replSetGetStatus": 1}, function(err, object) {
+      /// Get documents
+      var documents = object.documents;
+      // Get status object
+      var status = documents[0];
+
+      // If no members set
+      if(status["members"] == null || err != null) {
         // Ensure we perform enough retries
-        if(self.ensureUpRetries <  self.retriedConnects) {
+        if(self.ensureUpRetries <  self.retries) {
           setTimeout(function() {
             self.ensureUpRetries++;
             self.ensureUp(callback);
           }, 1000)
         } else {
           return callback(new Error("Operation Failure"), null);          
+        }                
+      } else {
+        // Establish all health member
+        var healthyMembers = status.members.filter(function(element) {
+          return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1             
+        });
+        var stateCheck = status["members"].filter(function(element, indexOf, array) {
+          return element["state"] == 1;
+        });
+
+        if(healthyMembers.length == status.members.length && stateCheck.length > 0) {
+          process.stdout.write("all members up! \n\n");  
+          return callback(null, status);
+        } else {
+          // Ensure we perform enough retries
+          if(self.ensureUpRetries <  self.retries) {
+            setTimeout(function() {
+              self.ensureUpRetries++;
+              self.ensureUp(callback);
+            }, 1000)
+          } else {
+            return callback(new Error("Operation Failure"), null);          
+          }        
         }        
-      }
+      }      
     });
   });
 }
 
-// def get_connection(node=nil)
-//   con = attempt do
-//     if !node
-//       node = @mongods.keys.detect {|key| !@mongods[key]['arbiterOnly'] && @mongods[key]['up'] }
-//     end
-//     con = Mongo::Connection.new(@host, @mongods[node]['port'], :slave_ok => true)
-//   end
-// 
-//   return con
-// end
+// Restart 
+ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
+  var self = this;
+
+  // debug("===============================================================")
+  // debug(inspect(self.mongods))
+  
+  var nodes = Object.keys(self.mongods).filter(function(key) {
+    return self.mongods[key]["up"] == false;
+  });
+  
+  // debug("===============================================================")
+  // debug(inspect(nodes))
+}
+
 ReplicaSetManager.prototype.getConnection = function(node, callback) {
   var self = this;
   // Unpack callback and variables
@@ -193,6 +290,7 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
   if(node == null) {
     var keys = Object.keys(this.mongods);
     for(var i = 0; i < keys.length; i++) {
+      var key = keys[i];
       // Locate first db that's runing and is not an arbiter
       if(this.mongods[keys[i]]["arbiterOnly"] == null && this.mongods[key]["up"]) {
         node = keys[i];
@@ -222,39 +320,36 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
   })
 }
 
-// def attempt
-//   raise "No block given!" unless block_given?
-//   count = 0
-// 
-//   while count < @retries do
-//     begin
-//       return yield
-//       rescue Mongo::OperationFailure, Mongo::ConnectionFailure => ex
-//         sleep(1)
-//         count += 1
-//     end
-//   end
-// 
-//   raise ex
-// end
-
-
 // Fire up the mongodb instance
 var start = ReplicaSetManager.prototype.start = function(node, callback) {
-  // Fire up the server
-  var mongodb = spawn(this.mongodb[node]["start"]);
-  this.mongodb[node]["up"] = true;
-  this.mongodb[node]["pid"]= mongodb.pid;  
-  // Wait for a half a second
-  setTimeout(callback, 500);
+  var self = this;
+
+  // Start up mongod process
+  var mongodb = exec(self.mongods[node]["start"],
+    function (error, stdout, stderr) {
+      console.log('stdout: ' + stdout);
+      console.log('stderr: ' + stderr);
+      if (error !== null) {
+        console.log('exec error: ' + error);
+      }
+  });
+      
+  // Wait for a half a second then save the pids
+  setTimeout(function() {
+    // Mark server as running
+    self.mongods[node]["up"] = true;
+    self.mongods[node]["pid"]= fs.readFileSync(path.join(self.mongods[node]["db_path"], "mongod.lock"), 'ascii').trim();
+    // Callback
+    callback();
+  }, 500);
 }
 
 ReplicaSetManager.prototype.restart = start;
 
-ReplicaSetManager.prototype.setCmd = function(n) {
+ReplicaSetManager.prototype.startCmd = function(n) {
   // Create boot command
   this.mongods[n]["start"] = "mongod --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
-      " --dbpath " + this.@mongods[n]['db_path'] + " --port " + this.mongods[n]['port'] + " --fork";
+      " --dbpath " + this.mongods[n]['db_path'] + " --port " + this.mongods[n]['port'] + " --fork";
   this.mongods[n]["start"] = this.durable ? this.mongods[n]["start"] + "  --dur" : this.mongods[n]["start"];
   return this.mongods[n]["start"];
 }

@@ -3766,7 +3766,7 @@ var all_tests = {
         fs_client.collection('test', function(err, collection) {
           collection.insert({'a':1}, function(err, doc) {
             fs_client.admin(function(err, adminDb) {
-              adminDb.validatCollection('test', function(err, doc) {
+              adminDb.validateCollection('test', function(err, doc) {
                 test.ok(doc.result != null);
                 test.ok(doc.result.match(/firstExtent/) != null);
   
