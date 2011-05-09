@@ -8,6 +8,7 @@ var Db = require('../lib/mongodb').Db,
   Chunk = require('../lib/mongodb').Chunk,
   Server = require('../lib/mongodb').Server,
   ServerPair = require('../lib/mongodb').ServerPair,
+  ServerCluster = require('../lib/mongodb').ServerCluster,
   Code = require('../lib/mongodb/bson/bson').Code;
   Binary = require('../lib/mongodb/bson/bson').Binary;
   ObjectID = require('../lib/mongodb/bson/bson').ObjectID,
@@ -4393,69 +4394,71 @@ var all_tests = {
       });
     });
   },
-  
-  /*
-    test_pair : function() {
-      var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
-      p_client.open(function(err, p_client) {
-        p_client.dropDatabase(function(err, done) {
-          test.ok(p_client.masterConnection != null);
-          test.equal(2, p_client.connections.length);
-  
-          test.ok(p_client.serverConfig.leftServer.master);
-          test.assertFalse(p_client.serverConfig.rightServer.master);
-  
-          p_client.createCollection('test_collection', function(err, collection) {
-            collection.insert({'a':1}, function(err, doc) {
-              collection.find(function(err, cursor) {
-                cursor.toArray(function(err, items) {
-                  test.equal(1, items.length);
-  
-                  finished_test({test_pair:'ok'});
-                  p_client.close();
-                });
-              });
-            });
-          });
-        });
-      });
-    },
-  
-    test_cluster : function() {
-      var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
-      p_client.open(function(err, p_client) {
-        p_client.dropDatabase(function(err, done) {
-          test.ok(p_client.masterConnection != null);
-          test.equal(2, p_client.connections.length);
-  
-          test.equal(true, p_client.serverConfig.servers[0].master);
-          test.equal(false, p_client.serverConfig.servers[1].master);
-  
-          p_client.createCollection('test_collection', function(err, collection) {
-            collection.insert({'a':1}, function(err, doc) {
-              collection.find(function(err, cursor) {
-                cursor.toArray(function(err, items) {
-                  test.equal(1, items.length);
-  
-                  finished_test({test_cluster:'ok'});
-                  p_client.close();
-                });
-              });
-            });
-          });
-        });
-      });
-    },
-  
-    test_slave_connection :function() {
-      var p_client = new Db('integration_tests_23', new Server("127.0.0.1", 27018, {}));
-      p_client.open(function(err, p_client) {
-        test.equal(null, err);
-        finished_test({test_slave_connection:'ok'});
-        p_client.close();
-      });
-    }
-  */
+    
+  // test_pair : function() {
+  //   var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
+  //   p_client.open(function(err, p_client) {
+  //     p_client.dropDatabase(function(err, done) {
+  //       test.ok(p_client.masterConnection != null);
+  //       test.equal(2, p_client.connections.length);
+  // 
+  //       // Check both server running
+  //       test.equal(true, p_client.serverConfig.leftServer.connected);
+  //       test.equal(true, p_client.serverConfig.rightServer.connected);
+  // 
+  //       test.ok(p_client.serverConfig.leftServer.master);
+  //       test.equal(false, p_client.serverConfig.rightServer.master);
+  // 
+  //       p_client.createCollection('test_collection', function(err, collection) {
+  //         collection.insert({'a':1}, function(err, doc) {
+  //           collection.find(function(err, cursor) {
+  //             cursor.toArray(function(err, items) {
+  //               test.equal(1, items.length);
+  // 
+  //               finished_test({test_pair:'ok'});
+  //               p_client.close();
+  //             });
+  //           });
+  //         });
+  //       });
+  //     });
+  //   });
+  // },
+  // 
+  // test_cluster : function() {
+  //   var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
+  //   p_client.open(function(err, p_client) {
+  //     p_client.dropDatabase(function(err, done) {
+  //       test.ok(p_client.masterConnection != null);
+  //       test.equal(2, p_client.connections.length);
+  // 
+  //       test.equal(true, p_client.serverConfig.servers[0].master);
+  //       test.equal(false, p_client.serverConfig.servers[1].master);
+  // 
+  //       p_client.createCollection('test_collection', function(err, collection) {
+  //         collection.insert({'a':1}, function(err, doc) {
+  //           collection.find(function(err, cursor) {
+  //             cursor.toArray(function(err, items) {
+  //               test.equal(1, items.length);
+  // 
+  //               finished_test({test_cluster:'ok'});
+  //               p_client.close();
+  //             });
+  //           });
+  //         });
+  //       });
+  //     });
+  //   });
+  // },
+  // 
+  // test_slave_connection :function() {
+  //   var p_client = new Db('integration_tests_23', new Server("127.0.0.1", 27018, {}));
+  //   p_client.open(function(err, p_client) {
+  //     test.equal(null, err);
+  //     finished_test({test_slave_connection:'ok'});
+  //     p_client.close();
+  //   });
+  // },
   
   test_ensure_index : function() {
     client.createCollection('test_ensure_index', function(err, collection) {
