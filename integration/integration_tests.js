@@ -4870,7 +4870,7 @@ var all_tests = {
   },
   
   save_error_on_save_test : function() {
-    var db = new Db('test-save_error_on_save_test-db', new Server('localhost', 27017, {auto_reconnect: true}, {strict:true}));
+    var db = new Db('test-save_error_on_save_test-db', new Server('localhost', 27017, {auto_reconnect: true}), {strict:true});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -4901,8 +4901,14 @@ var all_tests = {
 
     				collection.save(user, function(err, doc){
       			  test.equal(null, err);		
-      			  db.close();
-              finished_test({save_error_on_save_test:'ok'});          					  
+      			  
+      			  // Update again
+      			  collection.update({_id:new client.bson_serializer.ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true}, function(err, result) {
+      			    test.equal(null, err);
+      			    test.equal(1, result);      			    
+                finished_test({save_error_on_save_test:'ok'});                     
+                db.close();
+      			  });      			  
     				});
     			});        
         })
