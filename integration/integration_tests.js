@@ -4867,16 +4867,29 @@ var all_tests = {
   },
   
   save_error_on_save_test : function() {
-    client.collection("testing", function(err, collection) {
+    client.collection("save_error_on_save_test", function(err, collection) {
+			//insert new user
+			collection.save({
+			  email: 'email@email.com',
+			  encrypted_password: 'password',
+			  friends: 
+			   [ '4db96b973d01205364000006',
+			     '4db94a1948a683a176000001',
+			     '4dc77b24c5ba38be14000002' ],
+			  location: [ 72.4930088, 23.0431957 ],
+			  name: 'Amit Kumar',
+			  password_salt: 'salty',
+			  profile_fields: [],
+			  username: 'amit' }, function(err, doc){
+			});
+
 			collection.find({}).limit(1).toArray(function(err, users){
-			  debug("================ hello")
-			  
 				user = users[0]
 				if(err) {
 					console.log(err.message)
 				} else if(user) {
 					user.friends.splice(1,1)
-					collection.save(user, function(err, doc){
+					collection.save(user, {safe:true}, function(err, doc){
 						if(err) {
 							console.log(err.message)
 						}
