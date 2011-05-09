@@ -4867,39 +4867,65 @@ var all_tests = {
   },
   
   save_error_on_save_test : function() {
-    client.collection("save_error_on_save_test", function(err, collection) {
-			//insert new user
-			collection.save({
-			  email: 'email@email.com',
-			  encrypted_password: 'password',
-			  friends: 
-			   [ '4db96b973d01205364000006',
-			     '4db94a1948a683a176000001',
-			     '4dc77b24c5ba38be14000002' ],
-			  location: [ 72.4930088, 23.0431957 ],
-			  name: 'Amit Kumar',
-			  password_salt: 'salty',
-			  profile_fields: [],
-			  username: 'amit' }, function(err, doc){
-			});
+    var db = new Db('test-save_error_on_save_test-db', new Server('localhost', 27017, {auto_reconnect: true}, {strict:true}));
+    db.bson_deserializer = client.bson_deserializer;
+    db.bson_serializer = client.bson_serializer;
+    db.pkFactory = client.pkFactory;
+  
+    db.open(function(err, db) {
+      db.collection("save_error_on_save_test", function(err, collection) {      
+        // Create unique index for username
+        collection.createIndex([['username', 1]], true, function(err, result) {
+    			//insert new user
+    			collection.save({
+    			  email: 'email@email.com',
+    			  encrypted_password: 'password',
+    			  friends: 
+    			   [ '4db96b973d01205364000006',
+    			     '4db94a1948a683a176000001',
+    			     '4dc77b24c5ba38be14000002' ],
+    			  location: [ 72.4930088, 23.0431957 ],
+    			  name: 'Amit Kumar',
+    			  password_salt: 'salty',
+    			  profile_fields: [],
+    			  username: 'amit' }, function(err, doc){
+    			});
 
-			collection.find({}).limit(1).toArray(function(err, users){
-				user = users[0]
-				if(err) {
-					console.log(err.message)
-				} else if(user) {
-					user.friends.splice(1,1)
-					collection.save(user, {safe:true}, function(err, doc){
-						if(err) {
-							console.log(err.message)
-						}
+    			collection.find({}).limit(1).toArray(function(err, users){
+    			  test.equal(null, err);			  
+    				user = users[0]
+    				user.friends.splice(1,1)
 
-            finished_test({save_error_on_save_test:'ok'});          					  
-					});
-				}
-			});
+    				collection.save(user, function(err, doc){
+      			  test.equal(null, err);		
+      			  db.close();
+              finished_test({save_error_on_save_test:'ok'});          					  
+    				});
+    			});        
+        })
+  		});
 		});
   },
+  
+  remove_with_no_callback_bug_test : function() {
+		client.collection("remove_with_no_callback_bug_test", function(err, collection) {
+			collection.save({a:1}, {safe:true}, function(){
+				collection.save({b:1}, {safe:true}, function(){
+					collection.save({c:1}, {safe:true}, function(){
+						collection.remove({a:1})
+						
+						// Let's perform a count
+						collection.count(function(err, count) {
+      			  test.equal(null, err);		
+      			  test.equal(2, count);
+      			        			  
+              finished_test({remove_with_no_callback_bug_test:'ok'});          					    						  
+						});
+					});
+				});
+			});
+		});
+  },  
 };
 
 /*******************************************************************************************************
