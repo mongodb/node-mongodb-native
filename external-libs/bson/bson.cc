@@ -1218,28 +1218,27 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Have to use Script to instantiate the object (slower)
 
       // Generate the string for execution in the string context
-      char *reg_exp_string = (char *)malloc((length_regexp + options_length)*sizeof(char) + 2 + 2);
-      *(reg_exp_string) = '\0';
-      strncat(reg_exp_string, "/", 1);      
-      strncat(reg_exp_string, reg_exp, length_regexp);
-      strncat(reg_exp_string, "/", 1);      
-      strncat(reg_exp_string, options, options_length);
+      int flag = 0;
 
-      // Execute script creating a regular expression object
-      Local<Script> script = Script::New(String::New(reg_exp_string), String::New("bson.<anonymous>"));
-      Handle<Value> result = script->Run();
+      for(int i = 0; i < options_length; i++) {
+        // Multiline
+        if(*(options + i) == 'm') {
+          flag = flag | 4;
+        } else if(*(options + i) == 'i') {
+          flag = flag | 2;          
+        }
+      }
 
       // Add the element to the object
       if(is_array_item) {
-        return_array->Set(Number::New(insert_index), result);
+        return_array->Set(Number::New(insert_index), RegExp::New(String::New(reg_exp), (v8::RegExp::Flags)flag));
       } else {
-        return_data->Set(String::New(string_name), result);
+        return_data->Set(String::New(string_name), RegExp::New(String::New(reg_exp), (v8::RegExp::Flags)flag));
       }  
       
       // Free memory
       free(reg_exp);          
       free(options);          
-      free(reg_exp_string); 
       free(string_name);
     } else if(type == BSON_DATA_OID) {
       // printf("=================================================== unpacking oid\n");
