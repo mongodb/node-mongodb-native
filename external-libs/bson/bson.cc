@@ -707,11 +707,11 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       Local<String> property_name = property_names->Get(i)->ToString();
       
       // Convert name to char*
-      ssize_t len = DecodeBytes(property_name, BINARY);
+      ssize_t len = DecodeBytes(property_name, UTF8);
       // char *data = new char[len];
       char *data = (char *)malloc(len + 1);
       *(data + len) = '\0';
-      ssize_t written = DecodeWrite(data, len, property_name, BINARY);      
+      ssize_t written = DecodeWrite(data, len, property_name, UTF8);      
       // Fetch the object for the property
       Local<Value> property = object->Get(property_name);
       // Write the next serialized object
@@ -851,8 +851,15 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     // Process all the properties on the object
     for(uint32_t index = 0; index < property_names->Length(); index++) {
       // printf("================================ calculate_object_size:string\n");
-      Local<String> str = property_names->Get(index)->ToString();
-      uint32_t utf8_length = str->Utf8Length();
+
+      // Fetch the property name
+      Local<String> property_name = property_names->Get(index)->ToString();
+      
+      // Convert name to char*
+      ssize_t len = DecodeBytes(property_name, UTF8);
+
+      // Local<String> str = property_names->Get(index)->ToString();
+      // uint32_t utf8_length = str->Utf8Length();
           
       // if(utf8_length != str->Length()) {
       //   // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
@@ -866,10 +873,10 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       // Local<String> property_name = property_names->Get(index)->ToString();
       
       // Fetch the object for the property
-      Local<Value> property = object->Get(str);
+      Local<Value> property = object->Get(property_name);
       // Get size of property (property + property name length + 1 for terminating 0)
       // object_size += BSON::calculate_object_size(property) + property_name->Length() + 1 + 1;
-      object_size += BSON::calculate_object_size(property) + utf8_length + 1 + 1;
+      object_size += BSON::calculate_object_size(property) + len + 1 + 1;
     }      
     
     object_size = object_size + 4 + 1;

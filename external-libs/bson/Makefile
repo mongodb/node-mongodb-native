@@ -1,6 +1,7 @@
 
 NODE = node
 name = all
+JOBS = 1
 
 all:
 	rm -rf build .lock-wscript bson.node
