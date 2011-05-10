@@ -4870,7 +4870,7 @@ var all_tests = {
   },
   
   save_error_on_save_test : function() {
-    var db = new Db('test-save_error_on_save_test-db', new Server('localhost', 27017, {auto_reconnect: true}), {strict:true});
+    var db = new Db('test-save_error_on_save_test-db', new Server('localhost', 27017, {auto_reconnect: true}));
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -4903,7 +4903,7 @@ var all_tests = {
       			  test.equal(null, err);		
       			  
       			  // Update again
-      			  collection.update({_id:new client.bson_serializer.ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true}, function(err, result) {
+      			  collection.update({_id:new client.bson_serializer.ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, safe:true}, function(err, result) {
       			    test.equal(null, err);
       			    test.equal(1, result);      			    
                 finished_test({save_error_on_save_test:'ok'});                     
