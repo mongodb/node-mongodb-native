@@ -581,7 +581,8 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     BSON::write_int64((serialized_object + index), integer_value);
     // Adjust the index
     index = index + 8;
-  } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
+  // } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
+  } else if(value->IsRegExp()) {
     // printf("============================================= -- serialized::::regexp\n");    
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_REGEXP;
@@ -595,42 +596,32 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + len + 1;    
 
-    // Additional size
-    uint32_t regexp_size = 0;
     // Fetch the string for the regexp
-    Local<String> str = value->ToString();    
-    len = DecodeBytes(str, UTF8);
-    // Let's define the buffer that contains the regexp string
-    char *data = (char *)malloc(len);
-    // Write the data to the buffer from the string object
-    written = DecodeWrite(data, len, str, UTF8);    
-    // Locate the last pointer of the string
-    char *options_ptr = strrchr(data, '/');
-    // Copy out the code string
-    uint32_t reg_exp_string_length = (options_ptr - (data + 1)) * sizeof(char);
-    char *reg_exp_string = (char *)malloc(reg_exp_string_length + 1);
-    memcpy(reg_exp_string, (data + 1), reg_exp_string_length);
-    *(reg_exp_string + reg_exp_string_length) = '\0';
-
-    // Write the string to the data
-    memcpy((serialized_object + index), reg_exp_string, reg_exp_string_length + 1);
-    // Adjust index
-    index = index + reg_exp_string_length + 1;
-        
-    // Check if we have options
-    // if((options_ptr - data) < len) {
-    uint32_t options_string_length = (len - (reg_exp_string_length + 2));
-    char *options_string = (char *)malloc(options_string_length * sizeof(char) + 1);
-    memcpy(options_string, (data + reg_exp_string_length + 2), options_string_length);
-    *(options_string + options_string_length) = '\0';
-    // Write the options string to the serialized string
-    memcpy((serialized_object + index), options_string, options_string_length + 1);
+    Handle<RegExp> regExp = Handle<RegExp>::Cast(value);    
+    len = DecodeBytes(regExp->GetSource(), UTF8);
+    written = DecodeWrite((serialized_object + index), len, regExp->GetSource(), UTF8);
+    int flags = regExp->GetFlags();
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
     // Adjust the index
-    index = index + options_string_length + 1;      
-    // Free up the memory
-    free(options_string);
-    free(reg_exp_string);
-    free(data);
+    index = index + len + 1;
+    
+    // ignorecase
+    if((flags & (1 << 1)) != 0) {
+      *(serialized_object + index) = 'i';
+      index = index + 1;
+    }
+    
+    //multiline
+    if((flags & (1 << 2)) != 0) {
+      *(serialized_object + index) = 'm';      
+      index = index + 1;
+    }
+    
+    // Add null termiation for the string
+    *(serialized_object + index) = '\0';    
+    // Adjust the index
+    index = index + 1;
   } else if(value->IsArray()) {
     // printf("============================================= -- serialized::::array\n");
     // Cast to array
@@ -811,14 +802,19 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
   } else if(value->IsDate()) {
     // printf("================================ calculate_object_size:date\n");
     object_size = object_size + 8;
-  } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
-    // Additional size
-    uint32_t regexp_size = 0;
+  // } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
+  } else if(value->IsRegExp()) {
     // Fetch the string for the regexp
-    Local<String> str = value->ToString();    
-    ssize_t len = DecodeBytes(str, UTF8);
+    Handle<RegExp> regExp = Handle<RegExp>::Cast(value);    
+    ssize_t len = DecodeBytes(regExp->GetSource(), UTF8);
+    int flags = regExp->GetFlags();
+    
+    // ignorecase
+    if((flags & (1 << 1)) != 0) len++;
+    //multiline
+    if((flags & (1 << 2)) != 0) len++;
     // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
-    object_size = object_size + len;
+    object_size = object_size + len + 2;
   } else if(value->IsArray()) {
     // printf("================================ calculate_object_size:array\n");
     // Cast to array
