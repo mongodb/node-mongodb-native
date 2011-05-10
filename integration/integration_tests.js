@@ -4876,7 +4876,7 @@ var all_tests = {
     db.pkFactory = client.pkFactory;
   
     db.open(function(err, db) {
-      db.collection("save_error_on_save_test", function(err, collection) {      
+      db.createCollection("save_error_on_save_test", function(err, collection) {      
         // Create unique index for username
         collection.createIndex([['username', 1]], true, function(err, result) {
     			//insert new user
