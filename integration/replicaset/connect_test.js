@@ -35,6 +35,7 @@ module.exports = testCase({
   },
   
   shouldCorrectlyConnect: function(test) {
+    // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
@@ -45,15 +46,28 @@ module.exports = testCase({
 
     var db = new Db('connect_test', replSet );
     db.open( function ( err, p_db ) {
-      debug("================================================================ db.open");
-      debug("err:: " + inspect(err))
-      debug("p_db:: " + inspect(p_db))      
-      
-      // Check
-      
-      
+      // Test primary
+      RS.primary(function(err, primary) {
+        test.notEqual(null, primary);        
+        test.equal(primary, p_db.serverConfig.primary.host + ":" + p_db.serverConfig.primary.port);
 
-      test.done();
+        // Perform tests
+        RS.secondaries(function(err, items) {
+          // Test if we have the right secondaries
+          test.deepEqual(items.sort(), p_db.serverConfig.secondaries.map(function(item) {
+                                          return item.host + ":" + item.port;
+                                        }).sort());
+
+          // Test if we have the right arbiters
+          RS.arbiters(function(err, items) {
+            test.deepEqual(items.sort(), p_db.serverConfig.arbiters.map(function(item) {
+                                            return item.host + ":" + item.port;
+                                          }).sort());
+
+            test.done();
+          });
+        });
+      })            
     });        
   }  
 })

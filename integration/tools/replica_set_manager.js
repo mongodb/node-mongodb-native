@@ -33,6 +33,44 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.mongods = {};
 }
 
+ReplicaSetManager.prototype.secondaries = function(callback) {
+  return this.allHostPairsWithState(2, callback);
+}
+
+ReplicaSetManager.prototype.arbiters = function(callback) {
+  return this.allHostPairsWithState(7, callback);
+}
+
+ReplicaSetManager.prototype.primary = function(callback) {
+  return this.allHostPairsWithState(1, function(err, items) {
+    if(items.length == 0) {
+      return callback(null, null);
+    } else {
+      return callback(null, items[0]);
+    }
+  });
+}
+
+ReplicaSetManager.prototype.allHostPairsWithState = function(state, callback) {
+  this.ensureUp(function(err, status) {
+    if(err != null) return callback(err, null);
+
+    var members = status["members"];
+    // Get the correct state memebers
+    var nodes = members.filter(function(value) {
+      return value["state"] == state;
+    });    
+    
+    // Filter out address of the server
+    var servers = nodes.map(function(item) {
+      return item["name"];
+    });
+
+    // Map nodes
+    return callback(null, servers);
+  })            
+}
+
 ReplicaSetManager.prototype.startSet = function(callback) {
   var self = this;
   debug("** Starting a replica set with " + this.count + " nodes");
@@ -192,7 +230,7 @@ ReplicaSetManager.prototype.getNodeWithState = function(state, callback) {
   this.ensureUp(function(err, status) {
     if(err != null) return callback(err, null);
     
-    var node = status["members"].filter(new function(element, index, array) {
+    var node = status["members"].filter(function(element, index, array) {
       return element["state"] = state;
     }).shift();
         
