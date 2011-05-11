@@ -3835,18 +3835,24 @@ var all_tests = {
   
   //map/reduce inline option test
   test_map_reduce_functions_inline : function() {
-    client.createCollection('test_map_reduce_functions_inline', function(err, collection) {
-      collection.insert([{'user_id':1}, {'user_id':2}]);
-  
-      // String functions
-      var map = function() { emit(this.user_id, 1); };
-      var reduce = function(k,vals) { return 1; };
-  
-      collection.mapReduce(map, reduce, {out : {inline: 1}}, function(err, results) {
-        test.equal(2, results.length);
-        finished_test({test_map_reduce_functions_inline:'ok'});
-      });
-    });
+    // Parse version of server if available
+    var version = client.version != null ? parseInt(client.version.replace(/\./g, '')) : 0;
+    if(version >= 176) {
+      client.createCollection('test_map_reduce_functions_inline', function(err, collection) {
+        collection.insert([{'user_id':1}, {'user_id':2}]);
+
+        // String functions
+        var map = function() { emit(this.user_id, 1); };
+        var reduce = function(k,vals) { return 1; };
+
+        collection.mapReduce(map, reduce, {out : {inline: 1}}, function(err, results) {
+          test.equal(2, results.length);
+          finished_test({test_map_reduce_functions_inline:'ok'});
+        });
+      });      
+    } else {
+      finished_test({test_map_reduce_functions_inline:'ok'});      
+    }
   },
   
   // Mapreduce different test
