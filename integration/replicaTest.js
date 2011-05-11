@@ -34,6 +34,16 @@ var runHttp = function () {
 db.open( function ( err, p_db ) {
   db.collection( collName, function( err, coll ) {
     collection = coll;
-	runHttp();
-  } );
-} );
+    // runHttp();
+
+    collection.findOne( {"name":"somename"}, function( err, item ) {
+      if ( !item || err) { 
+        console.log('Not found.');
+      } else {
+        console.log('Found.');
+      }
+
+      db.close();    
+    });
+  });
+});
