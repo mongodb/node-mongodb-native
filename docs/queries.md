@@ -118,7 +118,7 @@ Queried field values can also be matched with regular expressions
 
 ### Special query operators
 
-In addition to OR and conditional operators there's even more
+In addition to OR and conditional there's some more operators:
 
   * `$in` - specifies an array of possible matches, `{"name":{$in:[1,2,3]}}`
   * `$nin` - specifies an array of unwanted matches

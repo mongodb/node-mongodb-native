@@ -47,20 +47,19 @@ To delete a database you need a pointer to it first. Deletion can be done with m
     
 ## Custom primary keys
 
-Every record in the database has a unique primary key called `_id`. Default primary keys are 12 byte hashes but a custom key generator can be used for something else. If you set `_id` "by hand" when
+Every record in the database has an unique primary key called `_id`. Default primary keys are 12 byte hashes but a custom key generator can be used for something else. If you set `_id` "by hand" when
 inserting records then you can use whatever you want, primary key factory generates `_id` values only for records without ones.
 
-No need to generate primary key, as its already defined:
+Example 1: No need to generate primary key, as its already defined:
 
     collection.insert({name:"Daniel", _id:"12345"});
 
-No primary key, so it needs to be generated before save:
+Example 2: No primary key, so it needs to be generated before save:
 
     collectionn.insert({name:"Daniel"});
 
-Custom primary key factory is actually an with method `createPK` which returns a primary key. 
-The context (value for `this`) for `createPK` is left untouched, so the key factory object can use extra
-properties and methods.
+Custom primary key factory is actually an object with method `createPK` which returns a primary key. 
+The context (value for `this`) for `createPK` is left untouched.
 
     var CustomPKFactory = {
         counter:0,
