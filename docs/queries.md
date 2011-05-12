@@ -1,6 +1,11 @@
 Queries
 =======
 
+See also:
+
+  * [Database](database.md)
+  * [Collections](collections.md)
+
 ## Making queries with `find`
 
 [Collections](collections.md) can be queried with `find`. 
@@ -17,10 +22,10 @@ The result for the query is actually a cursor object. This can be used directly 
 
 To indicate which fields must or must no be returned `fields` value can be used. For example the following `fields` value
 
-{
-    "name": true,
-    "title": true
-}
+    {
+        "name": true,
+        "title": true
+    }
 
 retrieves fields `name` and `title` (and as a default: `_id`) but not any others.
 
@@ -34,21 +39,22 @@ To make a simple query where one field must match to a defined value, one can do
 
 This query matches all the records that a) have fields called *fieldname* and b) its value is *"fieldvalue"*.
 
-For example if we have a collection of blog posts named `posts` where the structure of the 
-records is {title, author, contents} and we want 
-to retrieve all the posts for a specific author we can do it like this:
+For example if we have a collection of blog posts where the structure of the 
+records is `{title, author, contents}` and we want 
+to retrieve all the posts for a specific author then we can do it like this:
 
+    posts = pointer_to_collection;
     posts.find({author:"Daniel"}).toArray(function(err, results){
         console.log(results); // output all records
     });
 
 If the queried field is inside an object then that can be queried also. For example if we have a record with the following structure:
 
-{
-    user: {
-        name: "Daniel"
+    {
+        user: {
+            name: "Daniel"
+        }
     }
-}
 
 Then we can query the "name" field like this: `{"user.name":"Daniel"}`
 
@@ -170,7 +176,13 @@ Cursor objects are the results for queries and can be used to fetch individual f
 
 ### toArray
 
-`cursor.toArray(function(err, docs){})` converts the cursor object into an array of all the matching records.
+`cursor.toArray(function(err, docs){})` converts the cursor object into an array of all the matching records. Probably the 
+most convenient way to retrieve results but be careful with large datasets as every record is loaded into memory. 
+
+    collection.find().toArray(function(err, docs){
+        console.log("retrieved records:");
+        console.log(docs);
+    });
 
 ### rewind
 
