@@ -24,7 +24,7 @@ To indicate which fields must or must no be returned `fields` value can be used.
 
 retrieves fields `name` and `title` (and as a default: `_id`) but not any others.
 
-### Query object
+## Query object
 
 The simplest query object is an empty one `{}` which matches every record in the database.
 
@@ -52,7 +52,7 @@ If the queried field is inside an object then that can be queried also. For exam
 
 Then we can query the "name" field like this: `{"user.name":"Daniel"}`
 
-#### AND
+### AND
 
 If more than one fieldname is specified, then it's an AND query
 
@@ -63,7 +63,7 @@ If more than one fieldname is specified, then it's an AND query
 
 Whis query matches all records where *key1* is *"value1"* and  *key2* is *"value2"*
 
-#### OR
+### OR
 
 OR queries are a bit trickier but doable with the `$or` operator. Query operator takes an array which includes
 a set of query objects and at least one of these must match a document before it is retrieved
@@ -87,7 +87,7 @@ To mix AND and OR queries, you just need to use $or as one of regular query fiel
         ]
     }
 
-#### Conditionals
+### Conditionals
 
 Conditional operators `<`, `<=`, `>`, `>=` and `!=` can't be used directly, as the query object format doesn't support it but the same
 can be achieved with their aliases `$lt`, `$lte`, `$gt`, `$gte` and `$ne`. When a field value needs to match a conditional, the value
@@ -101,13 +101,13 @@ Conditionals can also be mixed to create ranges.
 
     {"fieldname": {$lte:10, $gte:100}} 
 
-#### Regular expressions
+### Regular expressions in queries
 
 Queried field values can also be matched with regular expressions
 
     {author:/^Daniel/}
 
-#### Special query operators
+### Special query operators
 
 In addition to OR and conditional operators there's even more
 
@@ -119,7 +119,7 @@ In addition to OR and conditional operators there's even more
   * `$size` - checks the size of an array value `{"name": {$size:2}}` matches arrays *name* with 2 elements
 
 
-### Possible query options
+## Query options
 
 Query options define the behavior of the query. For example the following `options` value
 
@@ -127,7 +127,7 @@ Query options define the behavior of the query. For example the following `optio
         "limit": 20
     }
 
-#### Paging
+### Paging
 
 Paging can be achieved with option parameters `limit` and `skip`
 
@@ -138,7 +138,7 @@ Paging can be achieved with option parameters `limit` and `skip`
 
 retrieves 10 elements starting from 20
 
-#### Sorting
+### Sorting
 
 Sorting can be acieved with option parameter `sort` which takes an array of sort preferences
 
@@ -152,27 +152,27 @@ With single ascending field the array can be replaced with the name of the field
         "sort": "name"
     }
 
-#### Explain
+### Explain
 
 Option parameter `explain` turns the query into an explain query.
 
-### Cursors
+## Cursors
 
 Cursor objects are the results for queries and can be used to fetch individual fields from the database.
 
-#### nextObject
+### nextObject
 
 `cursor.nextObject(function(err, doc){})` retrieves the next record from database. If doc is null, then there weren't any more records.
 
-#### each
+### each
 
 `cursor.each(function(err, doc){})` retrieves all matching records one by one.
 
-#### toArray
+### toArray
 
 `cursor.toArray(function(err, docs){})` converts the cursor object into an array of all the matching records.
 
-#### rewind
+### rewind
 
 `cursor.rewind()` resets the internal pointer in the cursor to the beginning.    
     
