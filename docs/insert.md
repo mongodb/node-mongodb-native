@@ -73,11 +73,11 @@ To update and retrieve the contents for one single record you can use `findAndMo
     
 Where
 
-    * `criteria` is the query object to find the record
-    * `sort` indicates the order of the matches if there's more than one matching record. The first record on the result set will be used. See [Queries->find->options->sort](queries.md) for the format.
-    * `update` is the replacement object
-    * `options` define the behavior of the function
-    * `callback` is the function to run after the update is done. Has two parameters - error object (if error occured) and the record that was updated.
+  * `criteria` is the query object to find the record
+  * `sort` indicates the order of the matches if there's more than one matching record. The first record on the result set will be used. See [Queries->find->options->sort](queries.md) for the format.
+  * `update` is the replacement object
+  * `options` define the behavior of the function
+  * `callback` is the function to run after the update is done. Has two parameters - error object (if error occured) and the record that was updated.
  
 ### Options
 
