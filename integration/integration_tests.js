@@ -1512,7 +1512,7 @@ var all_tests = {
                 test.equal(1, results[2].count);
               });
   
-              collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
+              collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true, function(err, results) {
                 test.equal(2, results[0].a);
                 test.equal(2, results[0].count);
                 test.equal(null, results[1].a);
