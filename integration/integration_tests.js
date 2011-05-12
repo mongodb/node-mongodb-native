@@ -4941,6 +4941,22 @@ var all_tests = {
 			});
 		});
   },  
+
+  insert_doc_with_uuid : function() {
+		client.collection("insert_doc_with_uuid", function(err, collection) {
+		  collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
+		    test.equal(null, err);
+
+  		  collection.find({_id : "12345678123456781234567812345678"}).toArray(function(err, items) {
+  		    test.equal(null, err);
+  		    test.equal(items[0]._id, "12345678123456781234567812345678")
+  		    test.equal(items[0].field, '1')
+
+          finished_test({insert_doc_with_uuid:'ok'});          					    						  
+  		  })		  		    
+		  });		  
+		});
+  },  
 };
 
 /*******************************************************************************************************
