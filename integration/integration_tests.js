@@ -4942,7 +4942,7 @@ var all_tests = {
 		});
   },  
 
-  insert_doc_with_uuid : function() {
+  insert_doc_with_uuid_test : function() {
 		client.collection("insert_doc_with_uuid", function(err, collection) {
 		  collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
 		    test.equal(null, err);
@@ -4952,11 +4952,38 @@ var all_tests = {
   		    test.equal(items[0]._id, "12345678123456781234567812345678")
   		    test.equal(items[0].field, '1')
 
-          finished_test({insert_doc_with_uuid:'ok'});          					    						  
+          finished_test({insert_doc_with_uuid_test:'ok'});          					    						  
   		  })		  		    
 		  });		  
 		});
   },  
+  
+  create_and_use_sparse_index_test : function() {
+    client.createCollection('create_and_use_sparse_index_test', function(err, r) {
+      client.collection('create_and_use_sparse_index_test', function(err, collection) {
+        
+        collection.ensureIndex({title:1}, {sparse:true}, function(err, indexName) {
+          collection.insert({name:"Jim"});
+          collection.insert({name:"Sarah", title:"Princess"});
+          
+          collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
+            test.equal(1, items.length);
+            test.equal("Sarah", items[0].name);
+            
+            finished_test({create_and_use_sparse_index_test:'ok'});
+          })
+          
+          // collection.insert({a:2}, {safe: true}, function(err, r) {
+          //   test.ok(err == null);
+          //   collection.insert({a:2}, {safe: true}, function(err, r) {
+          //     test.ok(err != null);
+          //     finished_test({test_failing_insert_due_to_unique_index:'ok'});
+          //   })
+          // })
+        })
+      })
+    })    
+  }
 };
 
 /*******************************************************************************************************
