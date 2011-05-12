@@ -1,7 +1,8 @@
 Collections
 ===========
 
-Collection obejct is a pointer to a specific collection in the [database](database.md).
+Collection obejct is a pointer to a specific collection in the [database](database.md). If you want to [insert](insert.md) new records or
+[query](queries.md) existing ones then you need to have a valid collection object. 
 
 ## Creating collections
 
