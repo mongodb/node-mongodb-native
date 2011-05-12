@@ -20,6 +20,9 @@ Where
   
 The result for the query is actually a cursor object. This can be used directly or converted to an array.
 
+    var cursor = collection.find({});
+    cursor.each(...);
+
 To indicate which fields must or must no be returned `fields` value can be used. For example the following `fields` value
 
     {
@@ -127,11 +130,15 @@ In addition to OR and conditional operators there's even more
 
 ## Query options
 
-Query options define the behavior of the query. For example the following `options` value
+Query options define the behavior of the query.
 
-    {
-        "limit": 20
+    var options = {
+        "limit": 20,
+        "skip": 10,
+        "sort": title
     }
+
+    collection.find({}, options).toArray(...);
 
 ### Paging
 
