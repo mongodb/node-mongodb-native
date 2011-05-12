@@ -85,7 +85,7 @@ Options object can be used for the following options:
 
   * `remove` - if set to true (default is false), removes the record from the collection. Callback function still gets the object but it doesn't exist in the collection any more.
   * `new` - if set to true, callback function returns the modified record. Default is false (original record is returned)
-  * `upsert' - if set to true and no record matched to the query, replacement object is inserted as a new record
+  * `upsert` - if set to true and no record matched to the query, replacement object is inserted as a new record
   
 ### Example
 
@@ -98,7 +98,7 @@ Options object can be used for the following options:
         collection.findAndModify(
             {hello: 'world'}, // query
             [['_id','asc']],  // sort order
-            {$set: {hi: 'there'}}, // replacement
+            {$set: {hi: 'there'}}, // replacement, replaces only the field "hi"
             {}, // options
             function(err, object) {
                 if (err){
