@@ -35,6 +35,13 @@ When GridStore object is created, it needs to be opened
     
 `callback` gets two parameters - and error object (if error occured) and the GridStore object.
 
+Opened GridStore object has a set of useful properties
+
+  * `gs.contentType` - the content type for the file
+  * `gs.uploadDate` - when the file was uploaded
+  * `gs.metadata` - metadata that was saved with the file
+  * `gs.chunkSize` - chunk size
+
 ## Writing to GridStore
 
 Writing can be done with `write`
