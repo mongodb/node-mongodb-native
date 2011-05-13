@@ -28,6 +28,33 @@ the function simple returns the pointer to the existing collection and does not 
         collection.insert({"test":"value"});
     });
 
+## List existing collections
+
+Collections can be listed with `collectionNames`
+
+    db.collectionNames(callback);
+    
+`callback` gets two parameters - an error object (if error occured) and an array of collection names as strings.
+
+Collection names also include database name, so a collection named `posts` in a database `blog` will be listed as `blog.posts`.
+
+Additionally there's system collections which should not be altered without knowing exactly what you are doing, these sollections
+can be identified with `system` prefix. For example `posts.system.indexes`.
+
+Example:
+
+    
+    var mongodb = require("mongodb"),
+        mongoserver = new mongodb.Server("localhost"),
+        db_connector = new mongodb.Db("blog", mongoserver);
+
+    db_connector.open(function(err, db){
+        db.collectionNames(function(err, collections){
+            console.log(collections); // ["blog.posts", "blog.system.indexes"]
+        });
+    });
+    
+
 ## Selecting collections
 
 Existing collections can be opened with `collection`
@@ -47,3 +74,7 @@ All the records from a collection can be erased with `remove`
 A collection can be dropped with `drop`
 
     collection.drop(callback);
+
+or with `dropCollection`
+
+    db.dropCollection(collection_name, callback)
