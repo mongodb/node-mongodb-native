@@ -38,6 +38,7 @@ When GridStore object is created, it needs to be opened
 
 Opened GridStore object has a set of useful properties
 
+  * `gs.length` - length of the file in bytes
   * `gs.contentType` - the content type for the file
   * `gs.uploadDate` - when the file was uploaded
   * `gs.metadata` - metadata that was saved with the file
@@ -73,7 +74,7 @@ where
   
 ## Closing the GridStore
 
-GridStore needs to be closed after usage. THis can be done with `close`
+GridStore needs to be closed after usage. This can be done with `close`
 
     gs.close(callback)
     

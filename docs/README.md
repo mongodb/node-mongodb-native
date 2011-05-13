@@ -10,5 +10,3 @@ Select topic of interest for detailed description:
   * [GridStore](gridfs.md)
   
 This documentation is incomplete, the best source for all possible methods are [the source fornode-mongodb-native](https://github.com/christkv/node-mongodb-native) and [MongDB manual](http://www.mongodb.org/display/DOCS/Manual).
-
-https://github.com/andris9/node-mongodb-native/blob/master/docs/collections.md
