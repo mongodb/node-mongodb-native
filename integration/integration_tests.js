@@ -3514,9 +3514,9 @@ var all_tests = {
         gridStore.close(function(err, result) {
           var gridStore2 = new GridStore(client, "new-file", "r");
           gridStore2.open(function(err, gridStore) {
-            test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
+            test.equal("41ca11b48009a1cf1ce60dbddf81194a", gridStore.md5);
             gridStore.md5 = "can't do this";
-            test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
+            test.equal("41ca11b48009a1cf1ce60dbddf81194a", gridStore.md5);
   
             var gridStore2 = new GridStore(client, "new-file", "w");
             gridStore2.open(function(err, gridStore) {
@@ -4951,8 +4951,18 @@ var all_tests = {
   		    test.equal(null, err);
   		    test.equal(items[0]._id, "12345678123456781234567812345678")
   		    test.equal(items[0].field, '1')
+          
+          // Generate a binary id
+          var binaryUUID = new client.bson_serializer.Binary('00000078123456781234567812345678', client.bson_serializer.BSON.BSON_BINARY_SUBTYPE_UUID);
 
-          finished_test({insert_doc_with_uuid_test:'ok'});          					    						  
+          collection.insert({_id : binaryUUID, field: '2'}, {safe:true}, function(err, result) {
+      		  collection.find({_id : binaryUUID}).toArray(function(err, items) {
+      		    test.equal(null, err);
+              test.equal(items[0].field, '2')
+
+              finished_test({insert_doc_with_uuid_test:'ok'});          					    						  
+    		    });
+          });
   		  })		  		    
 		  });		  
 		});
@@ -4972,14 +4982,6 @@ var all_tests = {
             
             finished_test({create_and_use_sparse_index_test:'ok'});
           })
-          
-          // collection.insert({a:2}, {safe: true}, function(err, r) {
-          //   test.ok(err == null);
-          //   collection.insert({a:2}, {safe: true}, function(err, r) {
-          //     test.ok(err != null);
-          //     finished_test({test_failing_insert_due_to_unique_index:'ok'});
-          //   })
-          // })
         })
       })
     })    
@@ -5009,7 +5011,7 @@ for(key in client_tests) client_tests_keys.push(key);
 var client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {}), {});
 // Use native deserializer
 if(type == "native") {
-  var BSON = require("../external-libs/bson/bson");
+  var BSON = require("../external-libs/bson");
   debug("========= Integration tests running Native BSON Parser == ")
   client.bson_deserializer = BSON;
   client.bson_serializer = BSON;

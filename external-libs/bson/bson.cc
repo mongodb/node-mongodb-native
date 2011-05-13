@@ -1486,7 +1486,7 @@ Handle<Value> BSON::decodeBinary(uint32_t sub_type, uint32_t number_of_bytes, ch
   HandleScope scope;
 
   Local<String> str = Encode(data, number_of_bytes, BINARY)->ToString();
-  Local<Value> argv[] = {Integer::New(sub_type), str};
+  Local<Value> argv[] = {str, Integer::New(sub_type)};
   Handle<Value> binary_obj = Binary::constructor_template->GetFunction()->NewInstance(2, argv);
   return scope.Close(binary_obj);
 }
