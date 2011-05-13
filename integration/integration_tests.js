@@ -4985,6 +4985,26 @@ var all_tests = {
         })
       })
     })    
+  },
+  
+  create_object_with_chinese_object_name_test : function() {
+    var object = {'客家话' : 'Hello'};
+    
+    client.createCollection('create_object_with_chinese_object_name', function(err, r) {
+      client.collection('create_object_with_chinese_object_name', function(err, collection) {        
+        collection.insert(object, {safe:false}, function(err, result) {
+
+          collection.findOne(function(err, item) {
+            test.equal(object['客家话'], item['客家话'])
+
+            collection.find().toArray(function(err, items) {
+              test.equal(object['客家话'], items[0]['客家话'])
+              finished_test({create_object_with_chinese_object_name:'ok'});
+            })
+          })          
+        });
+      })
+    })        
   }
 };
 
