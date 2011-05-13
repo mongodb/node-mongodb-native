@@ -42,6 +42,12 @@ Opened GridStore object has a set of useful properties
   * `gs.metadata` - metadata that was saved with the file
   * `gs.chunkSize` - chunk size
 
+Example
+
+    gs.open(function(err, gs){
+        console.log("this file was uploaded at "+gs.uploadDate);
+    });
+
 ## Writing to GridStore
 
 Writing can be done with `write`
@@ -50,7 +56,7 @@ Writing can be done with `write`
     
 where `data` is a `Buffer` or a string, callback gets two parameters - an error object (if error occured) and result value which indicates if the write was successful or not.
 
-If writing to the GridStore then every write until the GridStore object is closed is appended to the Store.
+While the GridStore is not closed,  every write is appended to the opened GridStore.
 
 ## Reading from GridStore
 
