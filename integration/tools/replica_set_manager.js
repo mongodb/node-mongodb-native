@@ -235,6 +235,42 @@ ReplicaSetManager.prototype.killPrimary = function(signal, callback) {
   });
 }
 
+ReplicaSetManager.prototype.killSecondary = function(callback) {
+  var self = this;
+  
+  this.getNodeWithState(2, function(err, node) {
+    if(err != null) return callback(err, null);
+    // Kill process and return node reference
+    self.kill(node, function() {
+      callback(null, node);
+    })    
+  });  
+}
+
+ReplicaSetManager.prototype.stepDownPrimary = function(callback) {
+  var self = this;
+
+  this.getNodeWithState(1, function(err, primary) {
+    self.getConnection(primary, function(err, connection) {
+      if(err) return callback(err, null);
+
+      // Closes the connection so never gets a response
+      connection.admin().command({"replSetStepDown": 90});
+      // Call back
+      return callback(null, null);
+    });
+  });
+}
+
+ReplicaSetManager.prototype.getNodeFromPort = function(port, callback) {
+  var self = this;
+  var nodes = Object.keys(this.mongods).filter(function(key, index, array) {
+    return self.mongods[key]["port"] == port;
+  });
+  // Return first node
+  callback(null, nodes.length > 0 ? nodes.shift() : null);
+}
+
 ReplicaSetManager.prototype.getNodeWithState = function(state, callback) {
   var self = this;
   self.ensureUpRetries = 0;
@@ -242,7 +278,7 @@ ReplicaSetManager.prototype.getNodeWithState = function(state, callback) {
     if(err != null) return callback(err, null);
     
     var node = status["members"].filter(function(element, index, array) {
-      return element["state"] = state;
+      return element["state"] == state;
     }).shift();
         
     if(node != null) {

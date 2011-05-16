@@ -28,13 +28,17 @@ var ensureConnection = function(test, numberOfTries, callback) {
     // debug("err :: " + inspect(err));
     
     if(err != null) {
+      // debug("=================================== 1")
       db.close();
+      // debug("=================================== 2")
       // Wait for a sec and retry
       setTimeout(function() {
+        // debug("============================ timeout")        
         numberOfTries = numberOfTries - 1;
         ensureConnection(test, numberOfTries, callback);
       }, 1000);
     } else {
+      // debug("=================================== 3")
       return callback(null, p_db);
     }    
   })            
@@ -66,6 +70,72 @@ module.exports = testCase({
     })
   },
   
+  shouldConnectWithPrimarySteppedDown : function(test) {
+    // Step down primary server
+    RS.stepDownPrimary(function(err, result) {
+      // debug("========================================================= stepdown")
+      // debug("err :: " + inspect(err))
+      // debug("result :: " + inspect(result))
+      
+      // Wait for new primary to pop up
+      ensureConnection(test, 60, function(err, p_db) {
+        test.ok(err == null);
+        test.equal(true, p_db.serverConfig.isConnected());
+        
+        p_db.close();
+        test.done();          
+      });        
+    });
+  },
+  
+  shouldConnectWithThirdNodeKilled : function(test) {
+    RS.getNodeFromPort(RS.ports[2], function(err, node) {
+      RS.kill(node, function(err, result) {
+        // Replica configuration
+        var replSet = new ReplSetServers( [ 
+            new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+            new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+            new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+          ], 
+          {rs_name:RS.name}
+        );
+    
+        var db = new Db('connect_test', replSet);
+        db.open(function(err, p_db) {
+          test.ok(err == null);
+          test.equal(true, p_db.serverConfig.isConnected());
+    
+          // Close and cleanup
+          db.close();        
+          test.done();          
+        })                  
+      });      
+    });
+  },
+  
+  shouldConnectWithSecondaryNodeKilled : function(test) {
+    RS.killSecondary(function(node) {
+      // Replica configuration
+      var replSet = new ReplSetServers( [ 
+          new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+        ], 
+        {rs_name:RS.name}
+      );
+  
+      var db = new Db('connect_test', replSet);
+      db.open(function(err, p_db) {
+        test.ok(err == null);
+        test.equal(true, p_db.serverConfig.isConnected());
+  
+        // Close and cleanup
+        db.close();        
+        test.done();          
+      })                  
+    });
+  },
+  
   shouldConnectWithPrimaryNodeKilled : function(test) {
     RS.killPrimary(function(node) {
       // Replica configuration
@@ -85,6 +155,9 @@ module.exports = testCase({
         
         ensureConnection(test, 60, function(err, p_db) {
           test.ok(err == null);
+          test.equal(true, p_db.serverConfig.isConnected());
+          
+          p_db.close();
           test.done();          
         });        
       })            
