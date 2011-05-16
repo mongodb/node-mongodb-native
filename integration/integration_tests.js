@@ -198,7 +198,7 @@ var all_tests = {
       // Listener for closing event
       var closeListener = function(has_error) {
         // Remove the listener for the close to avoid loop
-        automatic_connect_client.serverConfig.primary.removeListener("close", closeListener);
+        automatic_connect_client.removeListener("close", closeListener);
         // Let's insert a document
         automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
           // Insert another test document and collect using ObjectId
@@ -216,8 +216,8 @@ var all_tests = {
         });
       };
       // Add listener to close event
-      automatic_connect_client.serverConfig.primary.on("close", closeListener);
-      automatic_connect_client.serverConfig.primary.connection.end();
+      automatic_connect_client.on("close", closeListener);
+      automatic_connect_client.close();
     });
   },
   
