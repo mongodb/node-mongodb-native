@@ -50,7 +50,7 @@ module.exports = testCase({
       
       // Test primary
       RS.primary(function(err, primary) {
-        test.notEqual(null, primary);        
+        test.notEqual(null, primary);                
         test.equal(primary, p_db.serverConfig.primary.host + ":" + p_db.serverConfig.primary.port);
 
         // Perform tests
@@ -66,7 +66,16 @@ module.exports = testCase({
                                             return item.host + ":" + item.port;
                                           }).sort());
 
-            test.done();
+            // Force new instance 
+            var db2 = new Db('connect_test', replSet );
+            db2.open(function(err, p_db2) {
+              test.equal(true, p_db2.serverConfig.isConnected());
+
+              // Close top instance
+              db.close();
+              db2.close();
+              test.done();
+            });            
           });
         });
       })            
