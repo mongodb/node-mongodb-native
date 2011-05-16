@@ -7,31 +7,64 @@ var testCase = require('nodeunit').testCase,
   Server = require('../../lib/mongodb').Server;
 
 // Keep instance of ReplicaSetManager
-var RS = null;
+var serversUp = false;
 
 module.exports = testCase({
   setUp: function(callback) {
-    // Create instance of replicaset manager
-    RS = new ReplicaSetManager();
-    RS.startSet(function(err, result) {      
-      if(err != null) throw err;
-      // Finish setup
-      callback();      
-    });
-    // // Restart killed nodes
-    // RS.restartKilledNodes(function(err, result) {
-    //   // Finish setup
-    //   callback();      
-    // });
+    // Create instance of replicaset manager but only for the first call
+    if(!serversUp) {
+      serversUp = true;
+      RS = new ReplicaSetManager();
+      RS.startSet(function(err, result) {      
+        if(err != null) throw err;
+        // Finish setup
+        callback();      
+      });      
+    } else {
+      callback();            
+    }
   },
   
   tearDown: function(callback) {
-    // // Restart killed nodes
-    // RS.restartKilledNodes(function(err, result) {
-    //   // Finish setup
-    //   callback();      
-    // });
     callback();
+  },
+  
+  shouldCorrectlyBeAbleToUsePortAccessors : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {rs_name:RS.name}
+    );
+
+    var db = new Db('connect_test', replSet);
+    db.open(function(err, p_db) {
+      test.equal(replSet.host, p_db.serverConfig.primary.host);
+      test.equal(replSet.port, p_db.serverConfig.primary.port);
+      
+      db.close();
+      test.done();
+    })            
+  },
+  
+  shouldCorrectlyHandleBadName : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers([ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {rs_name:RS.name + "-wrong"}
+    );
+  
+    var db = new Db('connect_test', replSet );
+    db.open(function(err, p_db) {
+      test.notEqual(null, err);
+      db.close();
+      test.done();
+    })    
   },
   
   shouldCorrectlyConnect: function(test) {
@@ -43,7 +76,7 @@ module.exports = testCase({
       ], 
       {rs_name:RS.name}
     );
-
+  
     var db = new Db('connect_test', replSet );
     db.open(function(err, p_db) {
       test.equal(true, p_db.serverConfig.isConnected());
@@ -52,25 +85,25 @@ module.exports = testCase({
       RS.primary(function(err, primary) {
         test.notEqual(null, primary);                
         test.equal(primary, p_db.serverConfig.primary.host + ":" + p_db.serverConfig.primary.port);
-
+  
         // Perform tests
         RS.secondaries(function(err, items) {
           // Test if we have the right secondaries
           test.deepEqual(items.sort(), p_db.serverConfig.secondaries.map(function(item) {
                                           return item.host + ":" + item.port;
                                         }).sort());
-
+  
           // Test if we have the right arbiters
           RS.arbiters(function(err, items) {
             test.deepEqual(items.sort(), p_db.serverConfig.arbiters.map(function(item) {
                                             return item.host + ":" + item.port;
                                           }).sort());
-
+  
             // Force new instance 
             var db2 = new Db('connect_test', replSet );
             db2.open(function(err, p_db2) {
               test.equal(true, p_db2.serverConfig.isConnected());
-
+  
               // Close top instance
               db.close();
               db2.close();

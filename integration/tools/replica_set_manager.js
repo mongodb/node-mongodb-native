@@ -77,12 +77,6 @@ ReplicaSetManager.prototype.startSet = function(callback) {
 
   // Kill all existing mongod instances
   exec('killall mongod', function(err, stdout, stderr) {
-    // debug("=================== err " + inspect(err))
-    // if(err != null) return callback(err, null);
-        
-    // debug("============= this.primaryCount = " + self.primaryCount)
-    // debug("============= this.primaryCount = " + self.primaryCount)
-        
     var n = 0;
 
     Step(
@@ -114,7 +108,8 @@ ReplicaSetManager.prototype.startSet = function(callback) {
             self.ensureUpRetries = 0;
 
             // Ensure all the members are up
-            process.stdout.write("** Ensuring members are up...");
+            // process.stdout.write("** Ensuring members are up...");
+            debug("** Ensuring members are up...");
             // Let's ensure everything is up
             self.ensureUp(function(err, result) {
               if(err != null) return callback(err, null);
@@ -164,6 +159,7 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
   this.mongods[n]["port"] = port;
   this.mongods[n]["db_path"] = getPath(this, "rs-" + port);
   this.mongods[n]["log_path"] = getPath(this, "log-" + port);
+  this.up = false;
   
   // Add extra fields provided
   for(var name in fields) {
@@ -252,7 +248,8 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
   var self = this;
   
   // Write out the ensureUp
-  process.stdout.write(".");  
+  // process.stdout.write(".");  
+  if(!self.up) process.stdout.write(".");
   // Retry check for server up sleeping inbetween
   self.retriedConnects = 0;
   // Attemp to retrieve a connection
@@ -280,12 +277,15 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
         var healthyMembers = status.members.filter(function(element) {
           return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1             
         });
+        
         var stateCheck = status["members"].filter(function(element, indexOf, array) {
           return element["state"] == 1;
         });
 
         if(healthyMembers.length == status.members.length && stateCheck.length > 0) {
-          process.stdout.write("all members up! \n\n");  
+          // process.stdout.write("all members up! \n\n");  
+          if(!self.up) process.stdout.write("all members up!\n\n")
+          self.up = true;
           return callback(null, status);
         } else {
           // Ensure we perform enough retries
