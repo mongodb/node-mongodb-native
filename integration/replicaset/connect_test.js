@@ -8,6 +8,37 @@ var testCase = require('nodeunit').testCase,
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
+var RS = null;
+
+var ensureConnection = function(test, numberOfTries, callback) {
+  // Replica configuration
+  var replSet = new ReplSetServers( [ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ], 
+    {rs_name:RS.name}
+  );
+  
+  if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
+
+  var db = new Db('connect_test', replSet);
+  db.open(function(err, p_db) {
+    // debug("============================================================ :: " + numberOfTries);
+    // debug("err :: " + inspect(err));
+    
+    if(err != null) {
+      db.close();
+      // Wait for a sec and retry
+      setTimeout(function() {
+        numberOfTries = numberOfTries - 1;
+        ensureConnection(test, numberOfTries, callback);
+      }, 1000);
+    } else {
+      return callback(null, p_db);
+    }    
+  })            
+}
 
 module.exports = testCase({
   setUp: function(callback) {
@@ -21,12 +52,43 @@ module.exports = testCase({
         callback();      
       });      
     } else {
-      callback();            
+      RS.restartKilledNodes(function(err, result) {
+        if(err != null) throw err;
+        callback();        
+      })
     }
   },
   
   tearDown: function(callback) {
-    callback();
+    RS.restartKilledNodes(function(err, result) {
+      if(err != null) throw err;
+      callback();        
+    })
+  },
+  
+  shouldConnectWithPrimaryNodeKilled : function(test) {
+    RS.killPrimary(function(node) {
+      // Replica configuration
+      var replSet = new ReplSetServers( [ 
+          new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+        ], 
+        {rs_name:RS.name}
+      );
+    
+      var db = new Db('connect_test', replSet);
+      db.open(function(err, p_db) {
+        test.ok(err != null);
+        test.equal("No master available", err.message);
+        db.close();
+        
+        ensureConnection(test, 60, function(err, p_db) {
+          test.ok(err == null);
+          test.done();          
+        });        
+      })            
+    });    
   },
   
   shouldCorrectlyBeAbleToUsePortAccessors : function(test) {
@@ -38,7 +100,7 @@ module.exports = testCase({
       ], 
       {rs_name:RS.name}
     );
-
+  
     var db = new Db('connect_test', replSet);
     db.open(function(err, p_db) {
       test.equal(replSet.host, p_db.serverConfig.primary.host);

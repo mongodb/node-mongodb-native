@@ -196,34 +196,49 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
 }
 
 ReplicaSetManager.prototype.kill = function(node, signal, callback) {
+  var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 1);
   callback = args.pop();
   signal = args.length ? args.shift() : 2;
 
-  debug("** Killing node with pid #{pid} at port " + this.mongods[node]['port']);
-  spawn("kill " + signal + " " + this.mongods[node]["pid"]);
-  this.mongods[node]["up"] = false;
-  // Wait for a second
-  setTimeout(callback, 1000);
+  debug("** Killing node with pid " + this.mongods[node]["pid"] + " at port " + this.mongods[node]['port']);
+  var command = "kill -" + signal + " " + this.mongods[node]["pid"];
+  // Kill process
+  exec(command,
+    function (error, stdout, stderr) {
+      console.log('stdout: ' + stdout);
+      console.log('stderr: ' + stderr);
+      if (error !== null) {
+        console.log('exec error: ' + error);
+      }
+
+      self.mongods[node]["up"] = false;
+      // Wait for a second
+      setTimeout(callback, 1000);
+  });  
 }
 
 ReplicaSetManager.prototype.killPrimary = function(signal, callback) {
+  var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
   callback = args.pop();  
   signal = args.length ? args.shift() : 2;
   
-  var node = this.getNodeWithState(1);
-  // Kill process and return node reference
-  this.kill(node, signal, function() {
-    callback(null, node);
-  })
+  this.getNodeWithState(1, function(err, node) {
+    if(err != null) return callback(err, null);
+    // Kill process and return node reference
+    self.kill(node, signal, function() {
+      callback(null, node);
+    })    
+  });
 }
 
 ReplicaSetManager.prototype.getNodeWithState = function(state, callback) {
-  this.ensureUpRetries = 0;
-  this.ensureUp(function(err, status) {
+  var self = this;
+  self.ensureUpRetries = 0;
+  self.ensureUp(function(err, status) {
     if(err != null) return callback(err, null);
     
     var node = status["members"].filter(function(element, index, array) {
@@ -233,8 +248,8 @@ ReplicaSetManager.prototype.getNodeWithState = function(state, callback) {
     if(node != null) {
       var hostPort = node["name"].split(":");
       var port = hostPort[1] != null ? parseInt(hostPort[1]) : 27017;
-      var key = Object.keys(this.mongods).filter(function(element, index, array) {
-        return this.mongods[element]["port"] == port;
+      var key = Object.keys(self.mongods).filter(function(element, index, array) {
+        return self.mongods[element]["port"] == port;
       }).shift();
       return callback(null, key);
     } else {
@@ -307,15 +322,15 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
 ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
   var self = this;
 
-  // debug("===============================================================")
-  // debug(inspect(self.mongods))
-  
   var nodes = Object.keys(self.mongods).filter(function(key) {
     return self.mongods[key]["up"] == false;
   });
   
-  // debug("===============================================================")
-  // debug(inspect(nodes))
+  nodes.forEach(function(node) {
+    self.start(node, function() {});
+  });
+  
+  self.ensureUp(callback);  
 }
 
 ReplicaSetManager.prototype.getConnection = function(node, callback) {
