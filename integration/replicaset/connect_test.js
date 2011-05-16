@@ -45,7 +45,9 @@ module.exports = testCase({
     );
 
     var db = new Db('connect_test', replSet );
-    db.open( function ( err, p_db ) {
+    db.open(function(err, p_db) {
+      test.equal(true, p_db.serverConfig.isConnected());
+      
       // Test primary
       RS.primary(function(err, primary) {
         test.notEqual(null, primary);        

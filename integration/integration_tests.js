@@ -198,7 +198,7 @@ var all_tests = {
       // Listener for closing event
       var closeListener = function(has_error) {
         // Remove the listener for the close to avoid loop
-        automatic_connect_client.serverConfig.masterConnection.removeListener("close", closeListener);
+        automatic_connect_client.serverConfig.primary.removeListener("close", closeListener);
         // Let's insert a document
         automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
           // Insert another test document and collect using ObjectId
@@ -216,8 +216,8 @@ var all_tests = {
         });
       };
       // Add listener to close event
-      automatic_connect_client.serverConfig.masterConnection.addListener("close", closeListener);
-      automatic_connect_client.serverConfig.masterConnection.connection.end();
+      automatic_connect_client.serverConfig.primary.on("close", closeListener);
+      automatic_connect_client.serverConfig.primary.connection.end();
     });
   },
   
@@ -227,8 +227,8 @@ var all_tests = {
     var serverConfig = new Server("127.0.0.1", 21017, {auto_reconnect: true});
     var error_client = new Db('integration_tests_', serverConfig, {});
   
-    error_client.addListener("error", function(err) {});
-    error_client.addListener("close", function(connection) {
+    error_client.on("error", function(err) {});
+    error_client.on("close", function(connection) {
       test.ok(typeof connection == typeof serverConfig);
       test.equal("127.0.0.1", connection.host);
       test.equal(21017, connection.port);
@@ -253,8 +253,8 @@ var all_tests = {
       normalServer.close();
     };
   
-    error_client_pair.addListener("error", function(err) {});
-    error_client_pair.addListener("close", closeListener);
+    error_client_pair.on("error", function(err) {});
+    error_client_pair.on("close", closeListener);
     error_client_pair.open(function(err, error_client_pair) {});
   },
   
@@ -1302,12 +1302,12 @@ var all_tests = {
         collection.find({}, {'limit' : 3}, function(err, cursor) {
           var stream = cursor.streamRecords(); 
           var callsToEnd = 0;
-          stream.addListener('end', function() { 
+          stream.on('end', function() { 
             finished_test({test_stream_records_calls_data_the_right_number_of_times:'ok'});
           });
           
           var callsToData = 0;
-          stream.addListener('data',function(data){ 
+          stream.on('data',function(data){ 
             callsToData += 1;
             test.ok(callsToData <= 3);
           }); 
@@ -1323,7 +1323,7 @@ var all_tests = {
         collection.find({}, {'limit' : 3}, function(err, cursor) {
           var stream = cursor.streamRecords(function(er,item) {}); 
           var callsToEnd = 0;
-          stream.addListener('end', function() { 
+          stream.on('end', function() { 
             callsToEnd += 1;
             test.equal(1, callsToEnd);
             setTimeout(function() {
@@ -1334,7 +1334,7 @@ var all_tests = {
             }.bind(this), 1000);
           });
           
-          stream.addListener('data',function(data){ /* nothing here */ }); 
+          stream.on('data',function(data){ /* nothing here */ }); 
         });
       });
     });    
@@ -4405,7 +4405,7 @@ var all_tests = {
   //   var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
   //   p_client.open(function(err, p_client) {
   //     p_client.dropDatabase(function(err, done) {
-  //       test.ok(p_client.masterConnection != null);
+  //       test.ok(p_client.primary != null);
   //       test.equal(2, p_client.connections.length);
   // 
   //       // Check both server running
@@ -4435,7 +4435,7 @@ var all_tests = {
   //   var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
   //   p_client.open(function(err, p_client) {
   //     p_client.dropDatabase(function(err, done) {
-  //       test.ok(p_client.masterConnection != null);
+  //       test.ok(p_client.primary != null);
   //       test.equal(2, p_client.connections.length);
   // 
   //       test.equal(true, p_client.serverConfig.servers[0].master);
@@ -4688,12 +4688,12 @@ var all_tests = {
           // Execute find on all the documents
           var stream = cursor.streamRecords({fetchSize:1000}); 
           var callsToEnd = 0;
-          stream.addListener('end', function() { 
+          stream.on('end', function() { 
             finished_test({test_streaming_function_with_limit_for_fetching:'ok'});
           });
 
           var callsToData = 0;
-          stream.addListener('data',function(data){ 
+          stream.on('data',function(data){ 
             callsToData += 1;
             test.ok(callsToData <= 3000);
           }); 
@@ -5005,7 +5005,27 @@ var all_tests = {
         });
       })
     })        
-  }
+  },  
+  
+  // test_long_term_insert : function() {
+  //   var numberOfTimes = 21000;
+  //   
+  //   client.createCollection('test_safe_insert', function(err, collection) {
+  //     var timer = setInterval(function() {        
+  //       collection.insert({'test': 1}, {safe:true}, function(err, result) {
+  //         numberOfTimes = numberOfTimes - 1;
+  // 
+  //         if(numberOfTimes <= 0) {
+  //           clearInterval(timer);
+  //           collection.count(function(err, count) {
+  //             test.equal(21000, count);
+  //             finished_test({test_long_term_insert:'ok'})
+  //           });
+  //         }          
+  //       });
+  //     }, 1);      
+  //   });
+  // },  
 };
 
 /*******************************************************************************************************
