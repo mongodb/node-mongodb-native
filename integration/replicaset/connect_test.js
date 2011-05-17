@@ -22,23 +22,16 @@ var ensureConnection = function(test, numberOfTries, callback) {
   
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('connect_test', replSet);
+  var db = new Db('integration_test_', replSet);
   db.open(function(err, p_db) {
-    // debug("============================================================ :: " + numberOfTries);
-    // debug("err :: " + inspect(err));
-    
     if(err != null) {
-      // debug("=================================== 1")
       db.close();
-      // debug("=================================== 2")
       // Wait for a sec and retry
       setTimeout(function() {
-        // debug("============================ timeout")        
         numberOfTries = numberOfTries - 1;
         ensureConnection(test, numberOfTries, callback);
       }, 1000);
     } else {
-      // debug("=================================== 3")
       return callback(null, p_db);
     }    
   })            
@@ -73,10 +66,6 @@ module.exports = testCase({
   shouldConnectWithPrimarySteppedDown : function(test) {
     // Step down primary server
     RS.stepDownPrimary(function(err, result) {
-      // debug("========================================================= stepdown")
-      // debug("err :: " + inspect(err))
-      // debug("result :: " + inspect(result))
-      
       // Wait for new primary to pop up
       ensureConnection(test, 60, function(err, p_db) {
         test.ok(err == null);
@@ -100,7 +89,7 @@ module.exports = testCase({
           {rs_name:RS.name}
         );
     
-        var db = new Db('connect_test', replSet);
+        var db = new Db('integration_test_', replSet);
         db.open(function(err, p_db) {
           test.ok(err == null);
           test.equal(true, p_db.serverConfig.isConnected());
@@ -124,7 +113,7 @@ module.exports = testCase({
         {rs_name:RS.name}
       );
   
-      var db = new Db('connect_test', replSet);
+      var db = new Db('integration_test_', replSet);
       db.open(function(err, p_db) {
         test.ok(err == null);
         test.equal(true, p_db.serverConfig.isConnected());
@@ -147,7 +136,7 @@ module.exports = testCase({
         {rs_name:RS.name}
       );
     
-      var db = new Db('connect_test', replSet);
+      var db = new Db('integration_test_', replSet);
       db.open(function(err, p_db) {
         test.ok(err != null);
         test.equal("No master available", err.message);
@@ -174,7 +163,7 @@ module.exports = testCase({
       {rs_name:RS.name}
     );
   
-    var db = new Db('connect_test', replSet);
+    var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
       test.equal(replSet.host, p_db.serverConfig.primary.host);
       test.equal(replSet.port, p_db.serverConfig.primary.port);
@@ -194,7 +183,7 @@ module.exports = testCase({
       {rs_name:RS.name + "-wrong"}
     );
   
-    var db = new Db('connect_test', replSet );
+    var db = new Db('integration_test_', replSet );
     db.open(function(err, p_db) {
       test.notEqual(null, err);
       db.close();
@@ -212,7 +201,7 @@ module.exports = testCase({
       {rs_name:RS.name}
     );
   
-    var db = new Db('connect_test', replSet );
+    var db = new Db('integration_test_', replSet );
     db.open(function(err, p_db) {
       test.equal(true, p_db.serverConfig.isConnected());
       
@@ -235,7 +224,7 @@ module.exports = testCase({
                                           }).sort());
   
             // Force new instance 
-            var db2 = new Db('connect_test', replSet );
+            var db2 = new Db('integration_test_', replSet );
             db2.open(function(err, p_db2) {
               test.equal(true, p_db2.serverConfig.isConnected());
   
