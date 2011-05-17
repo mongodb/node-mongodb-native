@@ -34,7 +34,9 @@ the function simple returns the pointer to the existing collection and does not 
 
   * `collectionName` is the name of the collection (not including the database name as a prefix)
   * `db` is the pointer to the corresponding databse object
-  
+
+Example of usage:
+
     console.log("Collection name: "+collection.collectionName)
 
 ## List existing collections
