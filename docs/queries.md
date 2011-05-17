@@ -6,7 +6,7 @@ See also:
   * [Database](database.md)
   * [Collections](collections.md)
 
-## Making queries with `find`
+## Making queries with find()
 
 [Collections](collections.md) can be queried with `find`. 
 
@@ -32,7 +32,7 @@ To indicate which fields must or must no be returned `fields` value can be used.
 
 retrieves fields `name` and `title` (and as a default also `_id`) but not any others.
 
-## Find first occurence with `findOne`
+## Find first occurence with findOne()
 
 `findOne` is a convinence method finding and returning the first match of a query while regular `find` returns a cursor object instead.
 Use it when you expect only one record, for example when querying with `_id` or another unique property.
@@ -58,16 +58,16 @@ In order to treat these binary _id values as strings it would be wise to convert
 
     var idHex = document._id.toHexString();
     
-Hex strings can be reverted back to binary (needed to perform queries) with `db.bson_serializer.ObjectID.createFromHexString`
+Hex strings can be reverted back to binary (for example to perform queries) with `db.bson_serializer.ObjectID.createFromHexString`
 
     {_id: db.bson_serializer.ObjectID.createFromHexString(idHex)}
 
-When inserting new records it is possible to use custom `_id` values as well, for example strings.
+When inserting new records it is possible to use custom `_id` values as well which do not need to be binary hashes, for example strings.
 
     collection.insert({_id: "abc", ...});
     collection.findOne({_id: "abc"},...);
 
-This way converting `_id` values to hex strings is unnecessary.
+This way converting `_id` values to hex strings and back is unnecessary.
 
 ## Query object
 
