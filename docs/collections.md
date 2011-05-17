@@ -99,7 +99,7 @@ Where
 
   * `query` is the query that records to be removed need to match. If not set all records will be removed
   * `options` indicate advanced options. For example use `{safe: true}` when using callbacks
-  * `callback` callback function
+  * `callback` callback function that gets two parameters - an error object (if an error occured) and the count of removed records
     
 ## Removing collections
 
