@@ -37,6 +37,16 @@ Resulting database object can be used for creating and selecting [collections](c
         db.collection(...);
     });
 
+### Database properties
+
+  * `databaseName` is the name of the database
+  * `serverConfig` includes information about the server (`serverConfig.host', `serverConfig.port` etc.)
+  * `bson_serializer` points to the correct BSON serializer (native or non native, depending on the initial setup) for this connection
+  * `bson_deserializer` points to the correct BSON deserializer
+  * `state` indicates if the database is connected or not
+  * `strict` indicates if *strict mode* is on (true) or off (false, default)
+  * `version` indicates the version of the driver
+
 ## Deleting a database
 
 To delete a database you need a pointer to it first. Deletion can be done with method `dropDatabase`.

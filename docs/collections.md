@@ -30,7 +30,16 @@ the function simple returns the pointer to the existing collection and does not 
         collection.insert({"test":"value"});
     });
 
+### Collection properties
+
+  * `collectionName` is the name of the collection (not including the database name as a prefix)
+  * `db` is the pointer to the corresponding databse object
+  
+    console.log("Collection name: "+collection.collectionName)
+
 ## List existing collections
+
+### List names
 
 Collections can be listed with `collectionNames`
 
@@ -55,7 +64,14 @@ Example:
             console.log(collections); // ["blog.posts", "blog.system.indexes"]
         });
     });
-    
+
+## List collections
+
+Collection objects can be listed with database method `collections`
+
+    db.collections(callback)
+
+Where `callback` gets two parameters - an error object (if an error occured) and an array of collection objects.
 
 ## Selecting collections
 
