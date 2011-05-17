@@ -45,7 +45,19 @@ Resulting database object can be used for creating and selecting [collections](c
   * `bson_deserializer` points to the correct BSON deserializer
   * `state` indicates if the database is connected or not
   * `strict` indicates if *strict mode* is on (true) or off (false, default)
-  * `version` indicates the version of the driver
+  * `version` indicates the version of the MongoDB database
+
+### Database events
+
+  * `close` to indicate that the connection to the database was closed
+  
+For example
+
+    db.on("close", function(error){
+        console.log("Connection to the database was closed!");
+    });
+    
+NB! If `auto_reconnect` was set to true when creating the server, then the connection will be automatically reopened on next database operation. Nevertheless the `close` event will be fired.
 
 ## Deleting a database
 
