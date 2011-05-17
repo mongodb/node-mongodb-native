@@ -71,11 +71,17 @@ A collection can be renamed with collection method `rename`
 
     collection.rename(new_name, callback);
 
-## Emtpying collections
+## Removing records from collections
 
-All the records from a collection can be erased with `remove`
+Records from a collection can be erased with `remove`
 
-    collection.remove(callback);
+    collection.remove([[query[, options]], callback]);
+    
+Where
+
+  * `query` is the query objects removed records need to match. If not set all records will be removed
+  * `options` indicate advanced options. For example use `{safe: true}` when using callbacks
+  * `callback` callback function
     
 ## Removing collections
 
