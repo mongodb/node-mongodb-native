@@ -76,9 +76,6 @@ module.exports = testCase({
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
-      debug("======================================================= open")
-      debug("err :: " + inspect(err))
-      
       // Drop collection on replicaset
       p_db.dropCollection('testsets', function(err, r) {
         test.equal(false, p_db.serverConfig.isReadPrimary());
@@ -86,6 +83,72 @@ module.exports = testCase({
         test.done();
       });
     })                
+  },
+  
+  shouldCorrectlyTestConnection : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      ], 
+      {rs_name:RS.name, read_secondary:true}
+    );
+
+    // Insert some data
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      // Drop collection on replicaset
+      p_db.dropCollection('testsets', function(err, r) {
+        test.ok(p_db.serverConfig.primary != null);
+        test.ok(p_db.serverConfig.read != null);
+        test.ok(p_db.serverConfig.primary.port != p_db.serverConfig.read.port);
+        test.done();
+      });
+    })
+  },
+  
+  shouldCorrectlyQuerySecondaries : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      ], 
+      {rs_name:RS.name, read_secondary:true}
+    );
+
+    // Insert some data
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      p_db.collection("testsets", {safe:{w:3, wtimeout:10000}}, function(err, collection) {
+        Step(
+          function inserts() {
+            var group = this.group();
+            collection.save({a:20}, group());
+            collection.save({a:30}, group());
+            collection.save({a:40}, group());
+          },
+          
+          function done(err, values) {
+            var results = [];
+            
+            collection.find().each(function(err, item) {
+              if(item == null) {
+                // Check all the values
+                var r = [20, 30, 40];
+                for(var i = 0; i < r.length; i++) {
+                  test.equal(1, results.filter(function(element) {
+                    return element.a == r[i];
+                  }).length);
+                }
+                
+                // p_db.close();
+                test.done();
+              } else {
+                results.push(item);
+              }
+            });            
+          }
+        );
+      });      
+    })    
   }
 })
 
