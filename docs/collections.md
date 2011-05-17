@@ -73,13 +73,13 @@ A collection can be renamed with collection method `rename`
 
 ## Removing records from collections
 
-Records from a collection can be erased with `remove`
+Records can be erased from a collection with `remove`
 
     collection.remove([[query[, options]], callback]);
     
 Where
 
-  * `query` is the query objects removed records need to match. If not set all records will be removed
+  * `query` is the query that records to be removed need to match. If not set all records will be removed
   * `options` indicate advanced options. For example use `{safe: true}` when using callbacks
   * `callback` callback function
     
