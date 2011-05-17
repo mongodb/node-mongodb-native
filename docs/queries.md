@@ -165,6 +165,35 @@ In addition to OR and conditional there's some more operators:
   * `$size` - checks the size of an array value `{"name": {$size:2}}` matches arrays *name* with 2 elements
 
 
+## Queries inside objects and arrays
+
+If you have a document with nested objects/arrays then the keys inside these nested objects can still be used for queries.
+
+For example with the following document
+
+    {
+        "_id": idvalue,
+        "author":{
+            "firstname":"Daniel",
+            "lastname": "Defoe"
+        },
+        "books":[
+            {
+                "title":"Robinson Crusoe"
+                "year": 1714
+            }
+        ]
+    }
+
+not only the `_id` field can be used as a query field - also the `firstname` and even `title` can be used. This can be done when
+using nested field names as strings, concated with periods.
+
+    collection.find({"author.firstname":"Daniel})
+    
+Works even inside arrays
+
+    collection.find({"author.books.year":1714})
+
 ## Query options
 
 Query options define the behavior of the query.
