@@ -67,7 +67,7 @@ When inserting new records it is possible to use custom `_id` values as well whi
     collection.insert({_id: "abc", ...});
     collection.findOne({_id: "abc"},...);
 
-This way converting `_id` values to hex strings and back is unnecessary.
+This way it is not necessary to convert `_id` values to hex strings and back.
 
 ## Query object
 
