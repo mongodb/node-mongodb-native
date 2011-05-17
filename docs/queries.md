@@ -52,15 +52,22 @@ Example:
 
 ## _id values
 
-Default `_id` values are 12 byte hashes. You can alter the format with custom Primary Key factories (see *Custom Primarky Keys* in [Database](database.md)).
+Default `_id` values are 12 byte binary hashes. You can alter the format with custom Primary Key factories (see *Custom Primarky Keys* in [Database](database.md)).
 
-The `_id` values are binary values, so in order to treat these as strings it woul be wise to convert these to hex (etc.) values. This can be done with `toHexString` property.
+In order to treat these binary _id values as strings it would be wise to convert binary values to hex strings. This can be done with `toHexString` property.
 
     var idHex = document._id.toHexString();
     
-This can be reversed with `db.bson_serializer.ObjectID.createFromHexString`
+Hex strings can be reverted back to binary (needed to perform queries) with `db.bson_serializer.ObjectID.createFromHexString`
 
     {_id: db.bson_serializer.ObjectID.createFromHexString(idHex)}
+
+When inserting new records it is possible to use custom `_id` values as well, for example strings.
+
+    collection.insert({_id: "abc", ...});
+    collection.findOne({_id: "abc"},...);
+
+This way converting `_id` values to hex strings is unnecessary.
 
 ## Query object
 
