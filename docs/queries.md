@@ -30,7 +30,37 @@ To indicate which fields must or must no be returned `fields` value can be used.
         "title": true
     }
 
-retrieves fields `name` and `title` (and as a default: `_id`) but not any others.
+retrieves fields `name` and `title` (and as a default also `_id`) but not any others.
+
+## Find first occurence with `findOne`
+
+`findOne` is a convinence method finding and returning the first match of a query while regular `find` returns a cursor object instead.
+Use it when you expect only one record, for example when querying with `_id` or another unique property.
+
+    collection.findOne([query], callback)
+
+Where
+
+  * `query` is a query object or an `_id` value
+  * `callback` has two parameters - an error object (if an error occured) and the document object. 
+
+Example:
+
+    collection.findOne({_id: doc_id}, function(err, document) {
+        console.log(document.name);
+    });
+
+## _id values
+
+Default `_id` values are 12 byte hashes. You can alter the format with custom Primary Key factories (see *Custom Primarky Keys* in [Database](database.md)).
+
+The `_id` values are binary values, so in order to treat these as strings it woul be wise to convert these to hex (etc.) values. This can be done with `toHexString` property.
+
+    var idHex = document._id.toHexString();
+    
+This can be reversed with `db.bson_serializer.ObjectID.createFromHexString`
+
+    {_id: db.bson_serializer.ObjectID.createFromHexString(idHex)}
 
 ## Query object
 
@@ -194,4 +224,19 @@ most convenient way to retrieve results but be careful with large datasets as ev
 ### rewind
 
 `cursor.rewind()` resets the internal pointer in the cursor to the beginning.    
-    
+
+## Counting matches
+
+Counting total number of found matches can be done against cursors with method `count`.
+
+    cursor.count(callback)
+
+Where
+
+  * `callback` is the callback function with two parameters - an error object (if an error occured) and the number on matches as an integer.
+  
+Example
+
+    cursor.count(function(err, count){
+        console.log("Total matches: "+count);
+    });

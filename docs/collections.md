@@ -11,6 +11,8 @@ See also:
 Collection obejct is a pointer to a specific collection in the [database](database.md). If you want to [insert](insert.md) new records or
 [query](queries.md) existing ones then you need to have a valid collection object. 
 
+**NB** Collection names can't start or end with a period nor contain a dollar sign! (`.tes$t` is not allowed)
+
 ## Creating collections
 
 Collections can be created with `createCollection`
@@ -62,6 +64,12 @@ Existing collections can be opened with `collection`
     db.collection("name", callback);
 
 If strict mode is off, then a new collection is created if not already present.
+
+## Renaming collections
+
+A collection can be renamed with collection method `rename`
+
+    collection.rename(new_name, callback);
 
 ## Emtpying collections
 
