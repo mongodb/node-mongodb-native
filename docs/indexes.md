@@ -6,7 +6,7 @@ the field has a related index set, then the query will be a lot faster compared 
 
 See [MongoDB documentation](http://www.mongodb.org/display/DOCS/Indexes) for details.
 
-## createIndex
+## Create indexes with createIndex()
 
 `createIndex` adds a new index to a collection. For checking if the index was already set, use `ensureIndex` instead.
 
@@ -20,13 +20,13 @@ where
 
   * `index` is the field or fields to be indexed. See *index field*
   * `options` are options, for example `{sparse: true}` to include only records that have indexed field set or `{unique: true}` for unique indexes.
-  * `callback` gets two parameters - an error object (if an error occured) and the name for the index
+  * `callback` gets two parameters - an error object (if an error occured) and the name for the newly created index
 
-## ensureIndex
+## Ensure indexes with ensureIndex()
 
 Same as `createIndex` with the difference that the index is checked for existence before adding to avoid duplicate indexes.
 
-## index field
+## Index field
 
 Index field can be a simple string like `"user"` to index certain field (in this case, named as *user*).
 
@@ -41,13 +41,13 @@ if it's -1 then it's descending. For example if you have documents with a field 
 
     collection.ensureIndex({"date":-1}, callback)
 
-## dropIndex
+## Remove indexes with dropIndex()
 
 All indexes can be dropped at once with `dropIndexes`
 
     collection.dropIndexes(callback)
 
-## indexInformation
+## Get index information with indexInformation()
 
 `indexInformation` can be used to fetch some useful information about collection indexes. 
 
