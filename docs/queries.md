@@ -192,7 +192,7 @@ using nested field names as strings, concated with periods.
     
 Works even inside arrays
 
-    collection.find({"author.books.year":1714})
+    collection.find({"books.year":1714})
 
 ## Query options
 
