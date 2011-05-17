@@ -1,8 +1,8 @@
 Indexes
 =======
 
-Indexes are needed to make certain faster. For example if you need to find records by a field named *username* and 
-the field has a related index set, the query will be a lot faster compared to if the index was not set.
+Indexes are needed to make queries faster. For example if you need to find records by a field named *username* and 
+the field has a related index set, then the query will be a lot faster compared to if the index was not present.
 
 See [MongoDB documentation](http://www.mongodb.org/display/DOCS/Indexes) for details.
 
@@ -37,13 +37,13 @@ It is also possible to create mixed indexes to include several fields at once.
     {"firstname":1, "lastname":1}
     
 The number value indicates direction - if it's 1, then it is an ascending value,
-if it's -1 then it's descending. For example if you have documents with a field *date* and you want to sort these fields descenging then you might want to add descending index
+if it's -1 then it's descending. For example if you have documents with a field *date* and you want to sort these records in descending order then you might want to add correcponding index
 
     collection.ensureIndex({"date":-1}, callback)
 
 ## dropIndex
 
-Indexes can be dropped with `dropIndexes`
+All indexes can be dropped at once with `dropIndexes`
 
     collection.dropIndexes(callback)
 
