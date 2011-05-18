@@ -126,7 +126,10 @@ ReplicaSetManager.prototype.initiate = function(callback) {
   var self = this;
   // Get master connection
   self.getConnection(function(err, connection) {    
-    if(err != null) return callback(err, null);    
+    if(err != null) return callback(err, null);   
+    // debug("=================================================== replicaset config")
+    // debug(inspect(self.config))
+     
     // Set replica configuration
     connection.admin().command({replSetInitiate:self.config}, function(err, result) {
       // If we have an error let's 
@@ -186,7 +189,10 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
       self.mongods[n]["start"] = self.startCmd(n);
       self.start(n, function() {
         // Add instance to list of members
-        var member = {"_id": n, "host": self.host + ":" + self.mongods[n]["port"]};      
+        var member = {"_id": n, "host": self.host + ":" + self.mongods[n]["port"]};   
+        if(self.mongods[n]['arbiterOnly']) {
+          member['arbiterOnly'] = true;
+        }
         self.config["members"].push(member);
         // Return
         return callback();
@@ -440,6 +446,8 @@ ReplicaSetManager.prototype.startCmd = function(n) {
   this.mongods[n]["start"] = "mongod --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
       " --dbpath " + this.mongods[n]['db_path'] + " --port " + this.mongods[n]['port'] + " --fork";
   this.mongods[n]["start"] = this.durable ? this.mongods[n]["start"] + "  --dur" : this.mongods[n]["start"];
+  // debug("================================================== start server")
+  // debug(this.mongods[n]["start"])  
   return this.mongods[n]["start"];
 }
 

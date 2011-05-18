@@ -12,32 +12,32 @@ var testCase = require('nodeunit').testCase,
 var serversUp = false;
 var RS = null;
 
-// var ensureConnection = function(test, numberOfTries, callback) {
-//   // Replica configuration
-//   var replSet = new ReplSetServers( [ 
-//       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-//       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-//       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-//     ], 
-//     {rs_name:RS.name}
-//   );
-//   
-//   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
-// 
-//   var db = new Db('integration_test_', replSet);
-//   db.open(function(err, p_db) {
-//     if(err != null) {
-//       db.close();
-//       // Wait for a sec and retry
-//       setTimeout(function() {
-//         numberOfTries = numberOfTries - 1;
-//         ensureConnection(test, numberOfTries, callback);
-//       }, 1000);
-//     } else {
-//       return callback(null, p_db);
-//     }    
-//   })            
-// }
+var ensureConnection = function(test, numberOfTries, callback) {
+  // Replica configuration
+  var replSet = new ReplSetServers( [ 
+      // new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      // new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ], 
+    {rs_name:RS.name, read_secondary:true}
+  );
+  
+  if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
+
+  var db = new Db('ruby-test-db', replSet);
+  db.open(function(err, p_db) {
+    if(err != null) {
+      db.close();
+      // Wait for a sec and retry
+      setTimeout(function() {
+        numberOfTries = numberOfTries - 1;
+        ensureConnection(test, numberOfTries, callback);
+      }, 1000);
+    } else {
+      return callback(null, p_db);
+    }    
+  })            
+}
 
 module.exports = testCase({
   setUp: function(callback) {
@@ -72,7 +72,7 @@ module.exports = testCase({
       ], 
       {rs_name:RS.name, read_secondary:true}
     );
-
+  
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
@@ -92,7 +92,7 @@ module.exports = testCase({
       ], 
       {rs_name:RS.name, read_secondary:true}
     );
-
+  
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
@@ -107,6 +107,7 @@ module.exports = testCase({
   },
   
   shouldCorrectlyQuerySecondaries : function(test) {
+    var self = this;
     // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
@@ -115,9 +116,9 @@ module.exports = testCase({
     );
 
     // Insert some data
-    var db = new Db('integration_test_', replSet);
+    var db = new Db('ruby-test-db', replSet);
     db.open(function(err, p_db) {
-      p_db.collection("testsets", {safe:{w:3, wtimeout:10000}}, function(err, collection) {
+      p_db.collection("test-sets", {safe:{w:3, wtimeout:10000}}, function(err, collection) {
         Step(
           function inserts() {
             var group = this.group();
@@ -129,28 +130,82 @@ module.exports = testCase({
           function done(err, values) {
             var results = [];
             
-            collection.find().each(function(err, item) {
-              if(item == null) {
-                // Check all the values
-                var r = [20, 30, 40];
-                for(var i = 0; i < r.length; i++) {
-                  test.equal(1, results.filter(function(element) {
-                    return element.a == r[i];
-                  }).length);
+            retryEnsure(60, function(done) {
+              results = [];
+              
+              collection.find().each(function(err, item) {                
+                if(item == null) {
+                  var correct = 0;
+                  // Check all the values
+                  var r = [20, 30, 40];
+                  for(var i = 0; i < r.length; i++) {
+                    correct += results.filter(function(element) {
+                      return element.a == r[i];
+                    }).length;                  
+                  }                  
+                  return correct == 3 ? done(true) : done(false);
+                } else {
+                  results.push(item);
                 }
-                
-                // p_db.close();
-                test.done();
-              } else {
-                results.push(item);
-              }
-            });            
+              });
+            }, function(err, result) {
+              test.ifError(err);
+              
+              // Kill the primary
+              RS.killPrimary(function(node) {
+
+                //
+                //  Retry again to read the docs with primary dead
+                retryEnsure(60, function(done) {
+                  results = [];
+
+                  collection.find().each(function(err, item) {
+                    if(item == null) {
+                      var correct = 0;
+                      // Check all the values
+                      var r = [20, 30, 40];
+                      for(var i = 0; i < r.length; i++) {
+                        correct += results.filter(function(element) {
+                          return element.a == r[i];
+                        }).length;                  
+                      }                  
+                      return correct == 3 ? done(true) : done(false);
+                    } else {
+                      results.push(item);
+                    }
+                  });
+                }, function(err, result) {
+                  test.ifError(err);
+
+                  test.done();
+                  p_db.close();
+                })
+              });              
+            })
           }
         );
       });      
     })    
   }
 })
+
+var retryEnsure = function(numberOfRetries, execute, callback) {
+  execute(function(done) {
+    if(done) {
+      return callback(null, null);              
+    } else {
+      numberOfRetries = numberOfRetries - 1;
+
+      if(numberOfRetries <= 0) {
+        return callback(new Error("Failed to execute command"), null);
+      } else {
+        setTimeout(function() {
+          retryEnsure(numberOfRetries, execute, callback);
+        }, 1000);
+      }        
+    }
+  });
+}
 
 
 
