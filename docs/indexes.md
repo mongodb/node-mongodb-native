@@ -19,7 +19,7 @@ or
 where
 
   * `index` is the field or fields to be indexed. See *index field*
-  * `options` are options, for example `{sparse: true}` to include only records that have indexed field set or `{unique: true}` for unique indexes.
+  * `options` are options, for example `{sparse: true}` to include only records that have indexed field set or `{unique: true}` for unique indexes. If the `options` is a boolean value, then it indicates if it's an unique index or not.
   * `callback` gets two parameters - an error object (if an error occured) and the name for the newly created index
 
 ## Ensure indexes with ensureIndex()
@@ -45,7 +45,7 @@ or with tuples
     collection.ensureIndex([["firstname", 1], ["lastname", 1]], callback)
     
 The number value indicates direction - if it's 1, then it is an ascending value,
-if it's -1 then it's descending. For example if you have documents with a field *date* and you want to sort these records in descending order then you might want to add correcponding index
+if it's -1 then it's descending. For example if you have documents with a field *date* and you want to sort these records in descending order then you might want to add corresponding index
 
     collection.ensureIndex({date:-1}, callback)
 
@@ -54,6 +54,8 @@ if it's -1 then it's descending. For example if you have documents with a field 
 All indexes can be dropped at once with `dropIndexes`
 
     collection.dropIndexes(callback)
+    
+`callback` gets two parameters - an error object (if an error occured) and a boolean value true if operation succeeded.
 
 ## Get index information with indexInformation()
 
@@ -61,4 +63,13 @@ All indexes can be dropped at once with `dropIndexes`
 
     collection.indexInformation(callback)
     
-Where `callback` gets two parameters - an error object (if an error occured) and an array of index information objects.
+Where `callback` gets two parameters - an error object (if an error occured) and an index information object.
+
+The keys in the index object are the index names and the values are tuples of ioncluded fields.
+
+For example if a collection has two indexes - as a default an ascending index for the `_id` field and an additonal descending index for `"username"` field, then the index information object would look like the following
+
+    {
+        "_id":[["_id", 1]],
+        "username_-1":[["username", -1]]
+    } 
