@@ -28,18 +28,26 @@ Same as `createIndex` with the difference that the index is checked for existenc
 
 ## Index field
 
-Index field can be a simple string like `"user"` to index certain field (in this case, named as *user*).
+Index field can be a simple string like `"username"` to index certain field (in this case, a field named as *username*).
 
-It is possible to index fields inside nested objects, for example `"user.firstaname"` to index field named *firstname* inside a document named *user*.
+    collection.ensureIndex("username",callback)
+
+It is possible to index fields inside nested objects, for example `"user.firstname"` to index field named *firstname* inside a document named *user*.
+
+    collection.ensureIndex("user.firstname",callback)
 
 It is also possible to create mixed indexes to include several fields at once.
 
-    {"firstname":1, "lastname":1}
+    collection.ensureIndex({firstname:1, lastname:1}, callback)
+    
+or with tuples
+    
+    collection.ensureIndex([["firstname", 1], ["lastname", 1]], callback)
     
 The number value indicates direction - if it's 1, then it is an ascending value,
 if it's -1 then it's descending. For example if you have documents with a field *date* and you want to sort these records in descending order then you might want to add correcponding index
 
-    collection.ensureIndex({"date":-1}, callback)
+    collection.ensureIndex({date:-1}, callback)
 
 ## Remove indexes with dropIndex()
 
