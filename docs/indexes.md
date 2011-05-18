@@ -65,7 +65,7 @@ All indexes can be dropped at once with `dropIndexes`
     
 Where `callback` gets two parameters - an error object (if an error occured) and an index information object.
 
-The keys in the index object are the index names and the values are tuples of ioncluded fields.
+The keys in the index object are the index names and the values are tuples of included fields.
 
 For example if a collection has two indexes - as a default an ascending index for the `_id` field and an additonal descending index for `"username"` field, then the index information object would look like the following
 
