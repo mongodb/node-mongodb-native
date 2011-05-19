@@ -71,7 +71,19 @@ where
   * `size` is the length of the data to be read
   * `offset` is the position to start reading
   * `callback` is a callback function with two parameters - error object (if an error occured) and data (binary string)
-  
+
+## Delete a GridStore
+
+GridStore files can be unlinked with `unlink`
+
+    mongodb.GridStore.unlink(db, name, callback)
+
+Where
+
+  * `db` is the databse object
+  * `name` is either the name of a GridStore object or an array of GridStore object names
+  * `callback` is the callback function
+
 ## Closing the GridStore
 
 GridStore needs to be closed after usage. This can be done with `close`
@@ -82,7 +94,7 @@ GridStore needs to be closed after usage. This can be done with `close`
 
 Checking if a file exists in GridFS can be done with `exist`
 
-    GridStore.exist(db, filename, callback)
+    mongodb.GridStore.exist(db, filename, callback)
     
 Where
 
