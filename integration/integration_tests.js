@@ -72,25 +72,6 @@ var all_tests = {
     })
   },
   
-  // Test the authentication method for the user
-  test_authentication : function() {
-    var user_name = 'spongebob';
-    var password = 'password';
-  
-    client.authenticate('admin', 'admin', function(err, replies) {
-      test.ok(err instanceof Error);
-      test.ok(!replies);
-  
-      // Add a user
-      client.addUser(user_name, password, function(err, result) {
-        client.authenticate(user_name, password, function(err, replies) {
-          // test.ok(replies);
-          finished_test({test_authentication:'ok'});
-        });
-      });
-    });
-  },
-  
   // Test the access to collections
   test_collections : function() {
     // Create two collections
@@ -1139,38 +1120,6 @@ var all_tests = {
     });
   },
   
-  test_regex : function() {
-    var regexp = /foobar/i;
-  
-    client.createCollection('test_regex', function(err, collection) {
-      collection.insert({'b':regexp}, function(err, ids) {
-        collection.find({}, {'fields': ['b']}, function(err, cursor) {
-          cursor.toArray(function(err, items) {
-            test.equal(("" + regexp), ("" + items[0].b));
-            // Let's close the db
-            finished_test({test_regex:'ok'});
-          });
-        });
-      });
-    });
-  },
-
-  test_utf8_regex : function() {
-    var regexp = /foobaré/;
-  
-    client.createCollection('test_utf8_regex', function(err, collection) {
-      collection.insert({'b':regexp}, function(err, ids) {
-        collection.find({}, {'fields': ['b']}, function(err, cursor) {
-          cursor.toArray(function(err, items) {
-            test.equal(("" + regexp), ("" + items[0].b));
-            // Let's close the db
-            finished_test({test_utf8_regex:'ok'});
-          });
-        });
-      });
-    });
-  },
-
   // Use some other id than the standard for inserts
   test_non_oid_id : function() {
     client.createCollection('test_non_oid_id', function(err, collection) {
@@ -4006,39 +3955,6 @@ var all_tests = {
     });
   },
   
-  test_add_and_remove_user : function() {
-    var user_name = 'spongebob2';
-    var password = 'password';
-  
-    var p_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
-    p_client.open(function(err, automatic_connect_client) {
-      p_client.authenticate('admin', 'admin', function(err, replies) {
-        test.ok(err instanceof Error);
-  
-        // Add a user
-        p_client.addUser(user_name, password, function(err, result) {
-          p_client.authenticate(user_name, password, function(err, replies) {
-            test.ok(replies);
-  
-            // Remove the user and try to authenticate again
-            p_client.removeUser(user_name, function(err, result) {
-              p_client.authenticate(user_name, password, function(err, replies) {
-                test.ok(err instanceof Error);
-  
-                finished_test({test_add_and_remove_user:'ok'});
-                p_client.close();
-              });
-            });
-          });
-        });
-      });
-    });
-  },
-  
   test_distinct_queries : function() {
     client.createCollection('test_distinct_queries', function(err, collection) {
       collection.insert([{'a':0, 'b':{'c':'a'}},
@@ -4815,28 +4731,6 @@ var all_tests = {
     })
   },
 
-  test_regex_serialization : function() {    
-    // Serialized regexes contain extra trailing chars. Sometimes these trailing chars contain / which makes
-    // the original regex invalid, and leads to segmentation fault.
-    client.createCollection('test_regex_serialization', function(err, collection) {
-      collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, {safe:true});      
-      var count = 20,
-          run = function(i) {
-            // search by regex            
-            collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {            
-              test.equal(6, item.keywords.length);              
-              if (i === 0) {
-               finished_test({test_regex_serialization:'ok'});
-             }
-            });
-          };
-      // loop a few times to catch the / in trailing chars case
-      while (count--) {
-        run(count);
-      }
-    });
-  },  
-  
   test_should_throw_error_if_serializing_function : function() {
     client.createCollection('test_should_throw_error_if_serializing_function', function(err, collection) {
       // Insert the update
