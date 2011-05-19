@@ -6,7 +6,7 @@ See also:
   * [Database](database.md)
   * [Collections](collections.md)
 
-## Making queries with `find`
+## Making queries with find()
 
 [Collections](collections.md) can be queried with `find`. 
 
@@ -30,7 +30,44 @@ To indicate which fields must or must no be returned `fields` value can be used.
         "title": true
     }
 
-retrieves fields `name` and `title` (and as a default: `_id`) but not any others.
+retrieves fields `name` and `title` (and as a default also `_id`) but not any others.
+
+## Find first occurence with findOne()
+
+`findOne` is a convinence method finding and returning the first match of a query while regular `find` returns a cursor object instead.
+Use it when you expect only one record, for example when querying with `_id` or another unique property.
+
+    collection.findOne([query], callback)
+
+Where
+
+  * `query` is a query object or an `_id` value
+  * `callback` has two parameters - an error object (if an error occured) and the document object. 
+
+Example:
+
+    collection.findOne({_id: doc_id}, function(err, document) {
+        console.log(document.name);
+    });
+
+## _id values
+
+Default `_id` values are 12 byte binary hashes. You can alter the format with custom Primary Key factories (see *Custom Primarky Keys* in [Database](database.md)).
+
+In order to treat these binary _id values as strings it would be wise to convert binary values to hex strings. This can be done with `toHexString` property.
+
+    var idHex = document._id.toHexString();
+    
+Hex strings can be reverted back to binary (for example to perform queries) with `db.bson_serializer.ObjectID.createFromHexString`
+
+    {_id: db.bson_serializer.ObjectID.createFromHexString(idHex)}
+
+When inserting new records it is possible to use custom `_id` values as well which do not need to be binary hashes, for example strings.
+
+    collection.insert({_id: "abc", ...});
+    collection.findOne({_id: "abc"},...);
+
+This way it is not necessary to convert `_id` values to hex strings and back.
 
 ## Query object
 
@@ -128,6 +165,35 @@ In addition to OR and conditional there's some more operators:
   * `$size` - checks the size of an array value `{"name": {$size:2}}` matches arrays *name* with 2 elements
 
 
+## Queries inside objects and arrays
+
+If you have a document with nested objects/arrays then the keys inside these nested objects can still be used for queries.
+
+For example with the following document
+
+    {
+        "_id": idvalue,
+        "author":{
+            "firstname":"Daniel",
+            "lastname": "Defoe"
+        },
+        "books":[
+            {
+                "title":"Robinson Crusoe"
+                "year": 1714
+            }
+        ]
+    }
+
+not only the `_id` field can be used as a query field - also the `firstname` and even `title` can be used. This can be done when
+using nested field names as strings, concated with periods.
+
+    collection.find({"author.firstname":"Daniel})
+    
+Works even inside arrays
+
+    collection.find({"books.year":1714})
+
 ## Query options
 
 Query options define the behavior of the query.
@@ -194,4 +260,19 @@ most convenient way to retrieve results but be careful with large datasets as ev
 ### rewind
 
 `cursor.rewind()` resets the internal pointer in the cursor to the beginning.    
-    
+
+## Counting matches
+
+Counting total number of found matches can be done against cursors with method `count`.
+
+    cursor.count(callback)
+
+Where
+
+  * `callback` is the callback function with two parameters - an error object (if an error occured) and the number on matches as an integer.
+  
+Example
+
+    cursor.count(function(err, count){
+        console.log("Total matches: "+count);
+    });

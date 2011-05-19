@@ -11,6 +11,8 @@ See also:
 Collection obejct is a pointer to a specific collection in the [database](database.md). If you want to [insert](insert.md) new records or
 [query](queries.md) existing ones then you need to have a valid collection object. 
 
+**NB** Collection names can't start or end with a period nor contain a dollar sign! (`.tes$t` is not allowed)
+
 ## Creating collections
 
 Collections can be created with `createCollection`
@@ -28,7 +30,18 @@ the function simple returns the pointer to the existing collection and does not 
         collection.insert({"test":"value"});
     });
 
+### Collection properties
+
+  * `collectionName` is the name of the collection (not including the database name as a prefix)
+  * `db` is the pointer to the corresponding databse object
+
+Example of usage:
+
+    console.log("Collection name: "+collection.collectionName)
+
 ## List existing collections
+
+### List names
 
 Collections can be listed with `collectionNames`
 
@@ -53,7 +66,14 @@ Example:
             console.log(collections); // ["blog.posts", "blog.system.indexes"]
         });
     });
-    
+
+## List collections
+
+Collection objects can be listed with database method `collections`
+
+    db.collections(callback)
+
+Where `callback` gets two parameters - an error object (if an error occured) and an array of collection objects.
 
 ## Selecting collections
 
@@ -63,11 +83,23 @@ Existing collections can be opened with `collection`
 
 If strict mode is off, then a new collection is created if not already present.
 
-## Emtpying collections
+## Renaming collections
 
-All the records from a collection can be erased with `remove`
+A collection can be renamed with collection method `rename`
 
-    collection.remove(callback);
+    collection.rename(new_name, callback);
+
+## Removing records from collections
+
+Records can be erased from a collection with `remove`
+
+    collection.remove([[query[, options]], callback]);
+    
+Where
+
+  * `query` is the query that records to be removed need to match. If not set all records will be removed
+  * `options` indicate advanced options. For example use `{safe: true}` when using callbacks
+  * `callback` callback function that gets two parameters - an error object (if an error occured) and the count of removed records
     
 ## Removing collections
 

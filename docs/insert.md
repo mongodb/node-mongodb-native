@@ -16,7 +16,7 @@ Where
 
   * `docs` is a single document object or an array of documents
   * `options` is an object of parameters, if you use a callback, set `safe` to true - this way the callback is executed *after* the record is saved to the database, if `safe` is false (default) callback is fired immediately and thus doesn't make much sense.
-  * `callback` - callback function to run after the record is inserted. Set `safe` to true in `options` when using callback. First parameter for callbac
+  * `callback` - callback function to run after the record is inserted. Set `safe` to true in `options` when using callback. First parameter for callback
     is the error object (if an error occured) and the second is an array of records inserted. 
 
 For example
@@ -26,8 +26,22 @@ For example
         console.log("Record added as "+records[0]._id);
     });
 
-Simple update can be done as a regular insert but with the `_id` value set - if a record with this id value exists,
-it will be overwritten.
+If trying to insert a record with an existing `_id` value, then the operation yields in error.
+
+    collection.insert({_id:1}, {safe:true}, function(err, doc){
+        // no error, inserted new document, with _id=1
+        collection.insert({_id:1}, {safe:true}, function(err, doc){
+            // error occured since _id=1 already existed
+        });
+    });
+
+## Save
+
+Shorthand for insert/update is `save` - if `_id` value set, the record is updated if it exists or inserted if it does not; if the `_id` value is not set, then the record is inserted as a new one.
+
+    collection.save({_id:"abc", user:"David"},{safe:true}, callback)
+    
+`callback` gets two parameters - an error object (if an error occured) and the record if it was inserted or `1` if the record was updated. 
 
 ## Update
 
