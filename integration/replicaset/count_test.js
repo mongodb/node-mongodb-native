@@ -64,6 +64,7 @@ module.exports = testCase({
   },
 
   shouldRetrieveCorrectCountAfterInsertionReconnect : function(test) {
+    // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect")
     // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),

@@ -66,6 +66,7 @@ module.exports = testCase({
   },
 
   shouldReadPrimary : function(test) {
+    // debug("=========================================== shouldReadPrimary")
     // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
@@ -86,6 +87,7 @@ module.exports = testCase({
   },
   
   shouldCorrectlyTestConnection : function(test) {
+    // debug("=========================================== shouldCorrectlyTestConnection")
     // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
@@ -107,6 +109,7 @@ module.exports = testCase({
   },
   
   shouldCorrectlyQuerySecondaries : function(test) {
+    // debug("=========================================== shouldCorrectlyQuerySecondaries")
     var self = this;
     // Replica configuration
     var replSet = new ReplSetServers( [ 

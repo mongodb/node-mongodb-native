@@ -66,6 +66,7 @@ module.exports = testCase({
   },
 
   shouldWorkCorrectlyWithInserts : function(test) {
+    // debug("=========================================== shouldWorkCorrectlyWithInserts")
     // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),

@@ -8,7 +8,10 @@ var testCase = require('nodeunit').testCase,
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
+// var RS = new ReplicaSetManager();
 var RS = null;
+// if()
+
 
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
@@ -64,6 +67,7 @@ module.exports = testCase({
   },
   
   shouldConnectWithPrimarySteppedDown : function(test) {
+    // debug("=========================================== shouldConnectWithPrimarySteppedDown")
     // Step down primary server
     RS.stepDownPrimary(function(err, result) {
       // Wait for new primary to pop up
@@ -78,6 +82,7 @@ module.exports = testCase({
   },
   
   shouldConnectWithThirdNodeKilled : function(test) {
+    // debug("=========================================== shouldConnectWithThirdNodeKilled")
     RS.getNodeFromPort(RS.ports[2], function(err, node) {
       RS.kill(node, function(err, result) {
         // Replica configuration
@@ -92,6 +97,12 @@ module.exports = testCase({
         var db = new Db('integration_test_', replSet);
         db.open(function(err, p_db) {
           test.ok(err == null);
+          
+          // debug("====================================================================")
+          // debug(inspect(p_db))
+          // debug("--------------------------------------------------------------------")
+          // debug(inspect(p_db.serverConfig))
+          
           test.equal(true, p_db.serverConfig.isConnected());
     
           // Close and cleanup
@@ -103,6 +114,7 @@ module.exports = testCase({
   },
   
   shouldConnectWithSecondaryNodeKilled : function(test) {
+    // debug("=========================================== shouldConnectWithSecondaryNodeKilled")
     RS.killSecondary(function(node) {
       // Replica configuration
       var replSet = new ReplSetServers( [ 
@@ -126,6 +138,7 @@ module.exports = testCase({
   },
   
   shouldConnectWithPrimaryNodeKilled : function(test) {
+    // debug("=========================================== shouldConnectWithPrimaryNodeKilled")
     RS.killPrimary(function(node) {
       // Replica configuration
       var replSet = new ReplSetServers( [ 
@@ -154,6 +167,7 @@ module.exports = testCase({
   },
   
   shouldCorrectlyBeAbleToUsePortAccessors : function(test) {
+    // debug("=========================================== shouldCorrectlyBeAbleToUsePortAccessors")
     // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -174,6 +188,7 @@ module.exports = testCase({
   },
   
   shouldCorrectlyHandleBadName : function(test) {
+    // debug("=========================================== shouldCorrectlyHandleBadName")
     // Replica configuration
     var replSet = new ReplSetServers([ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -192,6 +207,7 @@ module.exports = testCase({
   },
   
   shouldCorrectlyConnect: function(test) {
+    // debug("=========================================== shouldCorrectlyConnect")
     // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
