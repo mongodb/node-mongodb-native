@@ -1,0 +1,74 @@
+var testCase = require('nodeunit').testCase,
+  debug = require('sys').debug
+  inspect = require('sys').inspect,
+  nodeunit = require('nodeunit'),
+  fs = require('fs'),  
+  Db = require('../../lib/mongodb').Db,
+  Collection = require('../../lib/mongodb').Collection,
+  GridStore = require('../../lib/mongodb').GridStore,
+  Server = require('../../lib/mongodb').Server;
+
+var MONGODB = 'integration_tests';
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+
+// Define the tests, we want them to run as a nested test so we only clean up the 
+// db connection once
+var tests = testCase({
+  setUp: function(callback) {
+    client.open(function(err, db_p) {
+      // Save reference to db
+      client = db_p;
+      // Start tests
+      callback();
+    });
+  },
+  
+  tearDown: function(callback) {
+    numberOfTestsRun = numberOfTestsRun - 1;
+    // Drop the database and close it
+    if(numberOfTestsRun <= 0) {
+      client.dropDatabase(function(err, done) {
+        client.close();
+        callback();
+      });        
+    } else {
+      client.close();
+      callback();        
+    }      
+  },
+
+  shouldCorrectlyReadFileUsingStream : function(test) {
+    var gridStoreR = new GridStore(client, "test_gs_read_stream", "r");
+    var gridStoreW = new GridStore(client, "test_gs_read_stream", "w");
+    var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png", 'binary');
+
+    var readLen = 0;
+    var gotEnd = 0;
+
+    gridStoreW.open(function(err, gs) {
+      gs.write(data, function(err, gs) {
+        gs.close(function(err, result) {
+          gridStoreR.open(function(err, gs) {
+            var stream = gs.stream(true);
+            stream.on("data", function(chunk) {
+              readLen += chunk.length;
+            });
+            stream.on("end", function() {
+              ++gotEnd;
+            });
+            stream.on("close", function() {
+              test.equal(data.length, readLen);
+              test.equal(1, gotEnd);
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  },
+})
+
+// Stupid freaking workaround due to there being no way to run setup once for each suite
+var numberOfTestsRun = Object.keys(tests).length;
+// Assign out tests
+module.exports = tests;

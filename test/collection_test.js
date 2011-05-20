@@ -337,6 +337,265 @@ var tests = testCase({
       test.done();
     });
   },  
+  
+  // Test the count result on a collection that does not exist
+  shouldCorrectlyCountOnNonExistingCollection : function(test) {
+    client.collection('test_multiple_insert_2', function(err, collection) {
+      collection.count(function(err, count) {
+        test.equal(0, count);
+        // Let's close the db
+        test.done();
+      });
+    });
+  },  
+  
+  shouldCorrectlyExecuteSave : function(test) {
+    client.createCollection('test_save', function(err, collection) {
+      var doc = {'hello':'world'};
+      collection.save(doc, function(err, docs) {
+        test.ok(docs._id instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
+        collection.count(function(err, count) {
+          test.equal(1, count);
+          doc = docs;
+  
+          collection.save(doc, function(err, doc) {
+            collection.count(function(err, count) {
+              test.equal(1, count);
+            });
+  
+            collection.findOne(function(err, doc) {
+              test.equal('world', doc.hello);
+  
+              // Modify doc and save
+              doc.hello = 'mike';
+              collection.save(doc, function(err, doc) {
+                collection.count(function(err, count) {
+                  test.equal(1, count);
+                });
+  
+                collection.findOne(function(err, doc) {
+                  test.equal('mike', doc.hello);
+  
+                  // Save another document
+                  collection.save({hello:'world'}, function(err, doc) {
+                    collection.count(function(err, count) {
+                      test.equal(2, count);
+                      // Let's close the db
+                      test.done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  },
+  
+  shouldCorrectlySaveDocumentWithLongValue : function(test) {
+    client.createCollection('test_save_long', function(err, collection) {
+      collection.insert({'x':client.bson_serializer.Long.fromNumber(9223372036854775807)});
+      collection.findOne(function(err, doc) {
+        test.ok(client.bson_serializer.Long.fromNumber(9223372036854775807).equals(doc.x));
+        // Let's close the db
+        test.done();
+      });
+    });
+  },
+    
+  shouldSaveObjectThatHasIdButDoesNotExistInCollection : function(test) {
+    client.createCollection('test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection', function(err, collection) {
+      var a = {'_id':'1', 'hello':'world'};
+      collection.save(a, function(err, docs) {
+        collection.count(function(err, count) {
+          test.equal(1, count);
+  
+          collection.findOne(function(err, doc) {
+            test.equal('world', doc.hello);
+  
+            doc.hello = 'mike';
+            collection.save(doc, function(err, doc) {
+              collection.count(function(err, count) {
+                test.equal(1, count);
+              });
+  
+              collection.findOne(function(err, doc) {
+                test.equal('mike', doc.hello);
+                // Let's close the db
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  },  
+  
+  shouldCorrectlyPerformUpsert : function(test) {
+    client.createCollection('test_should_correctly_do_upsert', function(err, collection) {
+      var id = new client.bson_serializer.ObjectID(null)
+      var doc = {_id:id, a:1};
+      collection.update({"_id":id}, doc, {upsert:true}, function(err, result) {
+        test.equal(null, err);        
+        test.equal(null, result);
+        collection.findOne({"_id":id}, function(err, doc) {
+          test.equal(1, doc.a);
+        });
+      });
+
+      id = new client.bson_serializer.ObjectID(null)
+      doc = {_id:id, a:2};
+      collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, result) {
+        test.equal(null, err);
+        test.equal(1, result);
+        collection.findOne({"_id":id}, function(err, doc) {
+          test.equal(2, doc.a);
+        });
+      });
+
+      collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, result) {
+        test.equal(null, err);
+        test.equal(1, result);
+        collection.findOne({"_id":id}, function(err, doc) {
+          test.equal(2, doc.a);
+          
+          test.done();
+        });
+      });
+    });
+  },
+
+  shouldCorrectlyUpdateWithNoDocs : function(test) {
+    client.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
+      var id = new client.bson_serializer.ObjectID(null)
+      var doc = {_id:id, a:1};
+      collection.update({"_id":id}, doc, {safe:true}, function(err, numberofupdateddocs) {
+        test.equal(null, err);
+        test.equal(0, numberofupdateddocs);
+
+        test.done();
+      });
+    });
+  },
+
+  shouldCorrectlyExecuteInsertUpdateDeleteSafeMode : function(test) {
+    client.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
+      test.ok(collection instanceof Collection);
+      test.equal('test_should_execute_insert_update_delete_safe_mode', collection.collectionName);
+
+      collection.insert({i:1}, {safe:true}, function(err, ids) {
+        test.equal(1, ids.length);
+        test.ok(ids[0]._id.toHexString().length == 24);
+
+        // Update the record
+        collection.update({i:1}, {"$set":{i:2}}, {safe:true}, function(err, result) {
+          test.equal(null, err);
+          test.equal(1, result);
+        
+          // Remove safely
+          collection.remove({}, {safe:true}, function(err, result) {
+            test.equal(null, err);            
+            
+            test.done();
+          });
+        });
+      });
+    });
+  },  
+  
+  shouldPerformMultipleSaves : function(test) {
+		client.createCollection("multiple_save_test", function(err, collection) {
+			//insert new user
+			collection.save({
+				name: 'amit',
+				text: 'some text'
+			})
+			collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
+				user = users[0]
+				if(err) {
+					throw new Error(err)
+				} else if(user) {
+					user.pants = 'worn'
+					
+					collection.save(user, {safe:true}, function(err, result){
+					  test.equal(null, err);
+					  test.equal(1, result);
+            
+            test.done();
+					})
+				}
+			});
+    });
+  },
+  
+  shouldCorrectlySaveDocumentWithNestedArray : function(test) {
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}));
+    db.bson_deserializer = client.bson_deserializer;
+    db.bson_serializer = client.bson_serializer;
+    db.pkFactory = client.pkFactory;
+  
+    db.open(function(err, db) {
+      db.createCollection("save_error_on_save_test", function(err, collection) {      
+        // Create unique index for username
+        collection.createIndex([['username', 1]], true, function(err, result) {
+    			//insert new user
+    			collection.save({
+    			  email: 'email@email.com',
+    			  encrypted_password: 'password',
+    			  friends: 
+    			   [ '4db96b973d01205364000006',
+    			     '4db94a1948a683a176000001',
+    			     '4dc77b24c5ba38be14000002' ],
+    			  location: [ 72.4930088, 23.0431957 ],
+    			  name: 'Amit Kumar',
+    			  password_salt: 'salty',
+    			  profile_fields: [],
+    			  username: 'amit' }, function(err, doc){
+    			});
+
+    			collection.find({}).limit(1).toArray(function(err, users){
+    			  test.equal(null, err);			  
+    				user = users[0]
+    				user.friends.splice(1,1)
+
+    				collection.save(user, function(err, doc){
+      			  test.equal(null, err);		
+      			  
+      			  // Update again
+      			  collection.update({_id:new client.bson_serializer.ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, safe:true}, function(err, result) {
+      			    test.equal(null, err);
+      			    test.equal(1, result);      			    
+                
+                db.close();
+                test.done();
+      			  });      			  
+    				});
+    			});        
+        })
+  		});
+		});
+  },
+  
+  shouldPeformCollectionRemoveWithNoCallback : function(test) {
+		client.collection("remove_with_no_callback_bug_test", function(err, collection) {
+			collection.save({a:1}, {safe:true}, function(){
+				collection.save({b:1}, {safe:true}, function(){
+					collection.save({c:1}, {safe:true}, function(){
+						collection.remove({a:1})
+						
+						// Let's perform a count
+						collection.count(function(err, count) {
+      			  test.equal(null, err);		
+      			  test.equal(2, count);
+      			        			  
+              test.done();
+						});
+					});
+				});
+			});
+		});
+  },    
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

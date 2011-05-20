@@ -267,6 +267,17 @@ var tests = testCase({
       });
     });
   },  
+  
+  shouldCorrectlyHandleFailedConnection : function(test) {
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27117, {auto_reconnect: false}));
+    fs_client.bson_deserializer = client.bson_deserializer;
+    fs_client.bson_serializer = client.bson_serializer;
+    fs_client.pkFactory = client.pkFactory;  
+    fs_client.open(function(err, fs_client) {
+      test.ok(err != null)
+      test.done();
+    })
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

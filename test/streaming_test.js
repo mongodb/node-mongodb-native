@@ -79,6 +79,34 @@ var tests = testCase({
     });    
   },
   
+  shouldStreamDocumentsWithLimitForFetching : function(test) {
+    var docs = []
+    
+    for(var i = 0; i < 3000; i++) {
+      docs.push({'a':i})
+    }
+
+    client.createCollection('test_streaming_function_with_limit_for_fetching', function(err, collection) {
+      test.ok(collection instanceof Collection);
+
+      collection.insertAll(docs, function(err, ids) {        
+        collection.find({}, function(err, cursor) {
+          // Execute find on all the documents
+          var stream = cursor.streamRecords({fetchSize:1000}); 
+          var callsToEnd = 0;
+          stream.on('end', function() { 
+            test.done();
+          });
+
+          var callsToData = 0;
+          stream.on('data',function(data){ 
+            callsToData += 1;
+            test.ok(callsToData <= 3000);
+          }); 
+        });        
+      });
+    });    
+  },   
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

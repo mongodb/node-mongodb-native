@@ -277,6 +277,150 @@ var tests = testCase({
        });
     });
   },  
+  
+  shouldCorrectlyDoToJsonForLongValue : function(test) {
+    client.createCollection('test_to_json_for_long', function(err, collection) {
+      test.ok(collection instanceof Collection);
+
+      // collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], function(err, ids) {
+      collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], function(err, ids) {
+        collection.findOne({}, function(err, item) {
+          test.equal("32222432", item.value.toJSON())
+          
+          test.done();
+        });
+      });
+    });        
+  },  
+  
+  shouldCorrectlyInsertAndUpdateWithNoCallback : function(test) {
+    client.createCollection('test_insert_and_update_no_callback', function(err, collection) {
+      // Insert the update
+      collection.insert({i:1}, {safe:true})
+      // Update the record
+      collection.update({i:1}, {"$set":{i:2}}, {safe:true})
+      // Locate document
+      collection.findOne({}, function(err, item) {
+        test.equal(2, item.i)
+        
+        test.done();
+      });        
+    })
+  },
+  
+  shouldInsertAndQueryTimestamp : function(test) {
+    client.createCollection('test_insert_and_query_timestamp', function(err, collection) {
+      // Insert the update
+      collection.insert({i:client.bson_serializer.Timestamp.fromNumber(100), j:client.bson_serializer.Long.fromNumber(200)}, {safe:true})
+      // Locate document
+      collection.findOne({}, function(err, item) {
+        test.equal(100, item.i.toNumber())
+        test.equal(200, item.j.toNumber())
+        
+        test.done();
+      });        
+    })
+  },
+  
+  shouldCorrectlyInsertAndQueryUndefined : function(test) {
+    client.createCollection('test_insert_and_query_undefined', function(err, collection) {
+      // Insert the update
+      collection.insert({i:undefined}, {safe:true})
+      // Locate document
+      collection.findOne({}, function(err, item) {
+        test.equal(null, item.i)
+        
+        test.done();
+      });        
+    })
+  },
+  
+  shouldCorrectlySerializeDBRefToJSON : function(test) {
+    var dbref = new client.bson_serializer.DBRef("foo",
+                                                 client.bson_serializer.ObjectID.createFromHexString("fc24a04d4560531f00000000"),
+                                                 null);
+    JSON.stringify(dbref);
+    test.done();
+  },
+  
+  shouldCorrectlyPerformSafeInsert : function(test) {
+    var fixtures = [{
+        name: "empty", array: [], bool: false, dict: {}, float: 0.0, string: ""
+      }, {
+        name: "not empty", array: [1], bool: true, dict: {x: "y"}, float: 1.0, string: "something"
+      }, {
+        name: "simple nested", array: [1, [2, [3]]], bool: true, dict: {x: "y", array: [1,2,3,4], dict: {x: "y", array: [1,2,3,4]}}, float: 1.5, string: "something simply nested"
+      }];
+  
+  
+    client.createCollection('test_safe_insert', function(err, collection) {
+      for(var i = 0; i < fixtures.length; i++) {
+        collection.insert(fixtures[i], {safe:true})          
+      }
+    
+      collection.count(function(err, count) {
+        test.equal(3, count);
+  
+        collection.find().toArray(function(err, docs) {
+          test.equal(3, docs.length)
+        });
+      });
+      
+      
+      collection.find({}, {}, function(err, cursor) {
+        var counter = 0;
+        
+        cursor.each(function(err, doc) {
+          if(doc == null) {
+            test.equal(3, counter);            
+            test.done();
+          } else {
+            counter = counter + 1;
+          }          
+        });
+      });        
+    })
+  },  
+  
+  shouldThrowErrorIfSerializingFunction : function(test) {
+    client.createCollection('test_should_throw_error_if_serializing_function', function(err, collection) {
+      // Insert the update
+      collection.insert({i:1, z:function() { return 1} }, {safe:true}, function(err, result) {
+        collection.findOne({_id:result[0]._id}, function(err, object) {
+          test.equal(null, object.z);
+          test.equal(1, object.i);
+
+          test.done();
+        })        
+      })
+    })    
+  }, 
+  
+  shouldCorrectlyInsertDocumentWithUUID : function(test) {
+		client.collection("insert_doc_with_uuid", function(err, collection) {
+		  collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
+		    test.equal(null, err);
+
+  		  collection.find({_id : "12345678123456781234567812345678"}).toArray(function(err, items) {
+  		    test.equal(null, err);
+  		    test.equal(items[0]._id, "12345678123456781234567812345678")
+  		    test.equal(items[0].field, '1')
+          
+          // Generate a binary id
+          var binaryUUID = new client.bson_serializer.Binary('00000078123456781234567812345678', client.bson_serializer.BSON.BSON_BINARY_SUBTYPE_UUID);
+
+          collection.insert({_id : binaryUUID, field: '2'}, {safe:true}, function(err, result) {
+      		  collection.find({_id : binaryUUID}).toArray(function(err, items) {
+      		    test.equal(null, err);
+              test.equal(items[0].field, '2')
+
+              test.done();
+    		    });
+          });
+  		  })		  		    
+		  });		  
+		});
+  },     
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
