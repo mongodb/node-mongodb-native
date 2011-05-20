@@ -1,0 +1,72 @@
+var testCase = require('nodeunit').testCase,
+  debug = require('sys').debug
+  inspect = require('sys').inspect,
+  nodeunit = require('nodeunit'),
+  Db = require('../lib/mongodb').Db,
+  Server = require('../lib/mongodb').Server,
+  ServerPair = require('../lib/mongodb').ServerPair;
+
+var MONGODB = 'integration_tests';
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+
+// Define the tests, we want them to run as a nested test so we only clean up the 
+// db connection once
+var tests = testCase({
+  setUp: function(callback) {
+    client.open(function(err, db_p) {
+      // Save reference to db
+      client = db_p;
+      // Start tests
+      callback();
+    });
+  },
+  
+  tearDown: function(callback) {
+    numberOfTestsRun = numberOfTestsRun - 1;
+    // Drop the database and close it
+    if(numberOfTestsRun <= 0) {
+      client.dropDatabase(function(err, done) {
+        client.close();
+        callback();
+      });        
+    } else {
+      client.close();
+      callback();        
+    }      
+  },
+
+  shouldCreateRecordsWithCustomPKFactory : function(test) {
+    // Custom factory (need to provide a 12 byte array);
+    CustomPKFactory = function() {}
+    CustomPKFactory.prototype = new Object();
+    CustomPKFactory.createPk = function() {
+      return new client.bson_serializer.ObjectID("aaaaaaaaaaaa");
+    }
+  
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
+    p_client.bson_deserializer = client.bson_deserializer;
+    p_client.bson_serializer = client.bson_serializer;
+  
+    p_client.open(function(err, p_client) {
+      p_client.dropDatabase(function(err, done) {
+        p_client.createCollection('test_custom_key', function(err, collection) {
+          collection.insert({'a':1}, function(err, doc) {
+            collection.find({'_id':new client.bson_serializer.ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
+              cursor.toArray(function(err, items) {
+                test.equal(1, items.length);
+  
+                p_client.close();
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  },
+})
+
+// Stupid freaking workaround due to there being no way to run setup once for each suite
+var numberOfTestsRun = Object.keys(tests).length;
+// Assign out tests
+module.exports = tests;

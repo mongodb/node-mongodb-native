@@ -3,6 +3,7 @@ var testCase = require('nodeunit').testCase,
   inspect = require('sys').inspect,
   nodeunit = require('nodeunit'),
   Db = require('../lib/mongodb').Db,
+  Script = require('vm'),
   Server = require('../lib/mongodb').Server,
   Collection = require('../lib/mongodb').Collection,
   ServerPair = require('../lib/mongodb').ServerPair;
@@ -92,7 +93,190 @@ var tests = testCase({
         });
       });
     });    
-  }
+  },
+  
+  shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument : function(test) {
+    client.createCollection('test_should_deserialize_large_integrated_array', function(err, collection) {
+      var doc = {'a':0,
+        'b':['tmp1', 'tmp2', 'tmp3', 'tmp4', 'tmp5', 'tmp6', 'tmp7', 'tmp8', 'tmp9', 'tmp10', 'tmp11', 'tmp12', 'tmp13', 'tmp14', 'tmp15', 'tmp16']
+      };
+      // Insert the collection
+      collection.insert(doc);
+      // Fetch and check the collection
+      collection.findOne({'a': 0}, function(err, result) {
+        test.deepEqual(doc.a, result.a);
+        test.deepEqual(doc.b, result.b);
+        test.done();
+      });
+    });
+  },  
+  
+  shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes : function(test) {
+    client.createCollection('test_all_serialization_types', function(err, collection) {
+      var date = new Date();
+      var oid = new client.bson_serializer.ObjectID();
+      var string = 'binstring'
+      var bin = new client.bson_serializer.Binary()
+      for(var index = 0; index < string.length; index++) {
+        bin.put(string.charAt(index))
+      }
+  
+      var motherOfAllDocuments = {
+        'string': 'hello',
+        'array': [1,2,3],
+        'hash': {'a':1, 'b':2},
+        'date': date,
+        'oid': oid,
+        'binary': bin,
+        'int': 42,
+        'float': 33.3333,
+        'regexp': /regexp/,
+        'boolean': true,
+        'long': date.getTime(),
+        'where': new client.bson_serializer.Code('this.a > i', {i:1}),
+        'dbref': new client.bson_serializer.DBRef('namespace', oid, 'integration_tests_')
+      }
+  
+      collection.insert(motherOfAllDocuments, function(err, docs) {
+        collection.findOne(function(err, doc) {
+          // // Assert correct deserialization of the values
+          test.equal(motherOfAllDocuments.string, doc.string);
+          test.deepEqual(motherOfAllDocuments.array, doc.array);
+          test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+          test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+          test.equal(date.getTime(), doc.long);
+          test.equal(date.toString(), doc.date.toString());
+          test.equal(date.getTime(), doc.date.getTime());
+          test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+          test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
+  
+          test.equal(motherOfAllDocuments.int, doc.int);
+          test.equal(motherOfAllDocuments.long, doc.long);
+          test.equal(motherOfAllDocuments.float, doc.float);
+          test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+          test.equal(motherOfAllDocuments.boolean, doc.boolean);
+          test.equal(motherOfAllDocuments.where.code, doc.where.code);
+          test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
+  
+          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
+          
+          test.done();
+        })
+      });
+    });
+  },  
+  
+  shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext: function(test) {
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}, {}));
+    db.bson_deserializer = client.bson_deserializer;
+    db.bson_serializer = client.bson_serializer;
+    db.pkFactory = client.pkFactory;
+  
+    db.open(function(err, db) {
+      //convience curried handler for functions of type 'a -> (err, result)
+      function getResult(callback){
+        return function(error, result) {
+          test.ok(error == null);
+          return callback(result);
+        }
+      };
+  
+      db.collection('users', getResult(function(user_collection){
+        user_collection.remove(function(err, result) {
+          //first, create a user object
+          var newUser = { name : 'Test Account', settings : {} };
+          user_collection.insert([newUser],  getResult(function(users){
+              var user = users[0];
+  
+              var scriptCode = "settings.block = []; settings.block.push('test');";
+              var context = { settings : { thisOneWorks : "somestring" } };
+  
+              Script.runInNewContext(scriptCode, context, "testScript");
+  
+              //now create update command and issue it
+              var updateCommand = { $set : context };
+  
+              user_collection.update({_id : user._id}, updateCommand, null,
+                getResult(function(updateCommand) {
+                  // Fetch the object and check that the changes are persisted
+                  user_collection.findOne({_id : user._id}, function(err, doc) {
+                    test.ok(err == null);
+                    test.equal("Test Account", doc.name);
+                    test.equal("somestring", doc.settings.thisOneWorks);
+                    test.equal("test", doc.settings.block[0]);
+  
+                    // Let's close the db                    
+                    db.close();
+                    test.done();
+                  });
+                })
+              );
+          }));
+        });
+      }));
+    });
+  },
+  
+  shouldCorrectlySerializeDocumentWithAllTypesInNewContext : function(test) {
+    client.createCollection('test_all_serialization_types_new_context', function(err, collection) {
+      var date = new Date();
+      var scriptCode =
+        "var string = 'binstring'\n" +
+        "var bin = new mongo.Binary()\n" +
+        "for(var index = 0; index < string.length; index++) {\n" +
+        "  bin.put(string.charAt(index))\n" +
+        "}\n" +
+        "motherOfAllDocuments['string'] = 'hello';" +
+        "motherOfAllDocuments['array'] = [1,2,3];" +
+        "motherOfAllDocuments['hash'] = {'a':1, 'b':2};" +
+        "motherOfAllDocuments['date'] = date;" +
+        "motherOfAllDocuments['oid'] = new mongo.ObjectID();" +
+        "motherOfAllDocuments['binary'] = bin;" +
+        "motherOfAllDocuments['int'] = 42;" +
+        "motherOfAllDocuments['float'] = 33.3333;" +
+        "motherOfAllDocuments['regexp'] = /regexp/;" +
+        "motherOfAllDocuments['boolean'] = true;" +
+        "motherOfAllDocuments['long'] = motherOfAllDocuments['date'].getTime();" +
+        "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
+        "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
+  
+      var context = { motherOfAllDocuments : {}, mongo:client.bson_serializer, date:date};
+      // Execute function in context
+      Script.runInNewContext(scriptCode, context, "testScript");
+      // sys.puts(sys.inspect(context.motherOfAllDocuments))
+      var motherOfAllDocuments = context.motherOfAllDocuments;
+  
+      collection.insert(context.motherOfAllDocuments, function(err, docs) {
+         collection.findOne(function(err, doc) {
+           // Assert correct deserialization of the values
+           test.equal(motherOfAllDocuments.string, doc.string);
+           test.deepEqual(motherOfAllDocuments.array, doc.array);
+           test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
+           test.equal(motherOfAllDocuments.hash.b, doc.hash.b);
+           test.equal(date.getTime(), doc.long);
+           test.equal(date.toString(), doc.date.toString());
+           test.equal(date.getTime(), doc.date.getTime());
+           test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
+           test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
+  
+           test.equal(motherOfAllDocuments.int, doc.int);
+           test.equal(motherOfAllDocuments.long, doc.long);
+           test.equal(motherOfAllDocuments.float, doc.float);
+           test.equal(motherOfAllDocuments.regexp.toString(), doc.regexp.toString());
+           test.equal(motherOfAllDocuments.boolean, doc.boolean);
+           test.equal(motherOfAllDocuments.where.code, doc.where.code);
+           test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
+           test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
+           test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
+           test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
+           
+           test.done();
+         })
+       });
+    });
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

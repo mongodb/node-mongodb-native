@@ -261,6 +261,82 @@ var tests = testCase({
       });
     });
   },  
+  
+  shouldFailToInsertDueToIllegalKeys : function(test) {
+    client.createCollection('test_invalid_key_names', function(err, collection) {
+      // Legal inserts
+      collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}]);
+      // Illegal insert for key
+      collection.insert({'$hello':'world'}, function(err, doc) {
+        test.ok(err instanceof Error);
+        test.equal("key $hello must not start with '$'", err.message);
+      });
+  
+      collection.insert({'hello':{'$hello':'world'}}, function(err, doc) {
+        test.ok(err instanceof Error);
+        test.equal("key $hello must not start with '$'", err.message);
+      });
+  
+      collection.insert({'he$llo':'world'}, function(err, docs) {
+        test.ok(docs[0].constructor == Object);
+      })
+  
+      collection.insert({'hello':{'hell$o':'world'}}, function(err, docs) {
+        test.ok(err == null);
+      })
+  
+      collection.insert({'.hello':'world'}, function(err, doc) {
+        test.ok(err instanceof Error);
+        test.equal("key .hello must not contain '.'", err.message);
+      });
+  
+      collection.insert({'hello':{'.hello':'world'}}, function(err, doc) {
+        test.ok(err instanceof Error);
+        test.equal("key .hello must not contain '.'", err.message);
+      });
+  
+      collection.insert({'hello.':'world'}, function(err, doc) {
+        test.ok(err instanceof Error);
+        test.equal("key hello. must not contain '.'", err.message);
+      });
+  
+      collection.insert({'hello':{'hello.':'world'}}, function(err, doc) {
+        test.ok(err instanceof Error);
+        test.equal("key hello. must not contain '.'", err.message);
+        // Let's close the db
+        test.done();
+      });
+    });
+  },  
+  
+  shouldFailDueToIllegalCollectionNames : function(test) {
+    client.collection(5, function(err, collection) {
+      test.equal("collection name must be a String", err.message);
+    });
+  
+    client.collection("", function(err, collection) {
+      test.equal("collection names cannot be empty", err.message);
+    });
+  
+    client.collection("te$t", function(err, collection) {
+      test.equal("collection names must not contain '$'", err.message);
+    });
+  
+    client.collection(".test", function(err, collection) {
+      test.equal("collection names must not start or end with '.'", err.message);
+    });
+  
+    client.collection("test.", function(err, collection) {
+      test.equal("collection names must not start or end with '.'", err.message);
+    });
+  
+    client.collection("test..t", function(err, collection) {
+      test.equal("collection names cannot be empty", err.message);
+  
+      // Let's close the db
+      test.done();
+    });
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

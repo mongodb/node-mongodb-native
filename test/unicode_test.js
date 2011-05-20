@@ -127,7 +127,22 @@ var tests = testCase({
         });
       })
     })            
-  }
+  },
+  
+  shouldCorrectlyHandleUT8KeyNames : function(test) { 
+    client.createCollection('test_utf8_key_name', function(err, collection) { 
+      collection.insert({'šđžčćŠĐŽČĆ':1}, function(err, ids) { 
+            // finished_test({test_utf8_key_name:'ok'}); 
+        collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}, function(err, cursor) { 
+          cursor.toArray(function(err, items) { 
+            test.equal(1, items[0]['šđžčćŠĐŽČĆ']); 
+            // Let's close the db 
+            test.done();
+          }); 
+        }); 
+      }); 
+    }); 
+  },   
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

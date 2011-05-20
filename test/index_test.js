@@ -224,6 +224,25 @@ var tests = testCase({
       });
     })
   },  
+  
+  shouldCorrectlyCreateAndUseSparseIndex : function(test) {
+    client.createCollection('create_and_use_sparse_index_test', function(err, r) {
+      client.collection('create_and_use_sparse_index_test', function(err, collection) {
+        
+        collection.ensureIndex({title:1}, {sparse:true}, function(err, indexName) {
+          collection.insert({name:"Jim"});
+          collection.insert({name:"Sarah", title:"Princess"});
+          
+          collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
+            test.equal(1, items.length);
+            test.equal("Sarah", items[0].name);
+            
+            test.done();
+          })
+        })
+      })
+    })    
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

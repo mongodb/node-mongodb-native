@@ -152,6 +152,121 @@ var tests = testCase({
       test.done();
     });
   },  
+  
+  shouldCorrectlyDereferenceDbRef : function(test) {
+    client.createCollection('test_deref', function(err, collection) {
+      collection.insert({'a':1}, function(err, ids) {
+        collection.remove(function(err, result) {
+          collection.count(function(err, count) {
+            test.equal(0, count);
+  
+            // Execute deref a db reference
+            client.dereference(new client.bson_serializer.DBRef("test_deref", new client.bson_serializer.ObjectID()), function(err, result) {
+              collection.insert({'x':'hello'}, function(err, ids) {
+                collection.findOne(function(err, document) {
+                  test.equal('hello', document.x);
+  
+                  client.dereference(new client.bson_serializer.DBRef("test_deref", document._id), function(err, result) {
+                    test.equal('hello', document.x);
+                  });
+                });
+              });
+            });
+  
+            client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, result) {
+              var obj = {'_id':4};
+  
+              collection.insert(obj, function(err, ids) {
+                client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, document) {
+  
+                  test.equal(obj['_id'], document._id);
+                  collection.remove(function(err, result) {
+                    collection.insert({'x':'hello'}, function(err, ids) {
+                      client.dereference(new client.bson_serializer.DBRef("test_deref", null), function(err, result) {
+                        test.equal(null, result);
+                        // Let's close the db
+                        test.done();
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          })
+        })
+      })
+    });
+  },  
+  
+  shouldCorrectlyRenameCollection : function(test) {
+    client.createCollection('test_rename_collection', function(err, collection) {
+      client.createCollection('test_rename_collection2', function(err, collection) {
+        client.collection('test_rename_collection', function(err, collection1) {
+          client.collection('test_rename_collection2', function(err, collection2) {
+            // Assert rename
+            collection1.rename(5, function(err, collection) {
+              test.ok(err instanceof Error);
+              test.equal("collection name must be a String", err.message);
+            });
+  
+            collection1.rename("", function(err, collection) {
+              test.ok(err instanceof Error);
+              test.equal("collection names cannot be empty", err.message);
+            });
+  
+            collection1.rename("te$t", function(err, collection) {
+              test.ok(err instanceof Error);
+              test.equal("collection names must not contain '$'", err.message);
+            });
+  
+            collection1.rename(".test", function(err, collection) {
+              test.ok(err instanceof Error);
+              test.equal("collection names must not start or end with '.'", err.message);
+            });
+  
+            collection1.rename("test.", function(err, collection) {
+              test.ok(err instanceof Error);
+              test.equal("collection names must not start or end with '.'", err.message);
+            });
+  
+            collection1.rename("tes..t", function(err, collection) {
+              test.equal("collection names cannot be empty", err.message);
+            });
+  
+            collection1.count(function(err, count) {
+              test.equal(0, count);
+  
+              collection1.insert([{'x':1}, {'x':2}], function(err, docs) {
+                collection1.count(function(err, count) {
+                  test.equal(2, count);
+  
+                  collection1.rename('test_rename_collection2', function(err, collection) {
+                    test.ok(err instanceof Error);
+                    test.ok(err.message.length > 0);
+  
+                    collection1.rename('test_rename_collection3', function(err, collection) {
+                      test.equal("test_rename_collection3", collection.collectionName);
+  
+                      // Check count
+                      collection.count(function(err, count) {
+                        test.equal(2, count);
+                        // Let's close the db
+                        test.done();
+                      });
+                    });
+                  });
+                });
+              })
+            })
+  
+            collection2.count(function(err, count) {
+              test.equal(0, count);
+            })
+          });
+        });
+      });
+    });
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
