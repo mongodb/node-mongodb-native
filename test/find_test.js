@@ -297,7 +297,213 @@ var tests = testCase({
         });
       });
     });    
-  }
+  },
+  
+  // Test the limit function of the db
+  shouldCorrectlyPerformFindWithLimit : function(test) {
+    client.createCollection('test_find_limits', function(err, r) {
+      client.collection('test_find_limits', function(err, collection) {
+        var doc1 = null, doc2 = null, doc3 = null, doc4 = null;
+  
+        // Insert some test documents
+        collection.insert([{a:1},
+            {b:2},
+            {c:3},
+            {d:4}
+          ], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
+  
+        // Test limits
+        collection.find({}, {'limit': 1}, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(1, documents.length);
+          });
+        });
+  
+        collection.find({}, {'limit': 2}, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(2, documents.length);
+          });
+        });
+  
+        collection.find({}, {'limit': 3}, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(3, documents.length);
+          });
+        });
+  
+        collection.find({}, {'limit': 4}, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(4, documents.length);
+          });
+        });
+  
+        collection.find({}, {}, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(4, documents.length);
+          });
+        });
+  
+        collection.find({}, {'limit':99}, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(4, documents.length);
+            // Let's close the db
+            test.done();
+          });
+        });
+      });
+    });    
+  },
+  
+  // Test find by non-quoted values (issue #128)
+  shouldCorrectlyFindWithNonQuotedValues : function(test) {
+    client.createCollection('test_find_non_quoted_values', function(err, r) {
+      client.collection('test_find_non_quoted_values', function(err, collection) {
+        // insert test document
+        collection.insert([{ a: 19, b: 'teststring', c: 59920303 },
+                           { a: "19", b: 'teststring', c: 3984929 }]);
+        
+        collection.find({ a: 19 }, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(1, documents.length);
+            test.done();
+          });
+        });
+      });
+    });    
+  },
+  
+  // Test for querying embedded document using dot-notation (issue #126)
+  shouldCorrectlyFindEmbeddedDocument : function(test) {
+    client.createCollection('test_find_embedded_document', function(err, r) {
+      client.collection('test_find_embedded_document', function(err, collection) {
+        // insert test document
+        collection.insert([{ a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' }},
+                           { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}]);
+        
+        // test using integer value
+        collection.find({ 'a.id': 10 }, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(1, documents.length);
+            test.equal('bar', documents[0].b);
+          });
+        });
+        
+        // test using string value
+        collection.find({ 'a.value': 'foo' }, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            // should yield 2 documents
+            test.equal(2, documents.length);
+            test.equal('bar', documents[0].b);
+            test.equal('bar2', documents[1].b);
+            test.done();
+          });
+        });
+      });
+    });    
+  },
+  
+  // Find no records
+  shouldCorrectlyFindNoRecords : function(test) {
+    client.createCollection('test_find_one_no_records', function(err, r) {
+      client.collection('test_find_one_no_records', function(err, collection) {
+        collection.find({'a':1}, {}, function(err, cursor) {
+          cursor.toArray(function(err, documents) {
+            test.equal(0, documents.length);
+            // Let's close the db
+            test.done();
+          });
+        });
+      });
+    });    
+  },
+  
+  shouldCorrectlyPerformFindByWhere : function(test) {
+    client.createCollection('test_where', function(err, collection) {
+      test.ok(collection instanceof Collection);
+      collection.insert([{'a':1}, {'a':2}, {'a':3}], function(err, ids) {
+        collection.count(function(err, count) {
+          test.equal(3, count);
+  
+          // Let's test usage of the $where statement
+          collection.find({'$where':new client.bson_serializer.Code('this.a > 2')}, function(err, cursor) {
+            cursor.count(function(err, count) {
+              test.equal(1, count);
+            });
+          });
+  
+          collection.find({'$where':new client.bson_serializer.Code('this.a > i', {i:1})}, function(err, cursor) {
+            cursor.count(function(err, count) {
+              test.equal(2, count);
+  
+              // Let's close the db
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  },  
+  
+  shouldCorrectlyPerformFindsWithHintTurnedOn : function(test) {
+    client.createCollection('test_hint', function(err, collection) {
+      collection.insert({'a':1}, function(err, ids) {
+        client.createIndex(collection.collectionName, "a", function(err, indexName) {
+          collection.find({'a':1}, {'hint':'a'}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(1, items.length);
+            });
+          });
+  
+          collection.find({'a':1}, {'hint':['a']}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(1, items.length);
+            });
+          });
+  
+          collection.find({'a':1}, {'hint':{'a':1}}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(1, items.length);
+            });
+          });
+  
+          // Modify hints
+          collection.hint = 'a';
+          test.equal(1, collection.hint['a']);
+          collection.find({'a':1}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(1, items.length);
+            });
+          });
+  
+          collection.hint = ['a'];
+          test.equal(1, collection.hint['a']);
+          collection.find({'a':1}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(1, items.length);
+            });
+          });
+  
+          collection.hint = {'a':1};
+          test.equal(1, collection.hint['a']);
+          collection.find({'a':1}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(1, items.length);
+            });
+          });
+  
+          collection.hint = null;
+          test.ok(collection.hint == null);
+          collection.find({'a':1}, function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(1, items.length);
+              // Let's close the db
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

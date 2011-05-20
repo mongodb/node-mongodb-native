@@ -92,7 +92,31 @@ var tests = testCase({
     newHex= newObjectId.toHexString();
     test.equal(originalHex, newHex);
     test.done();
-  }
+  },
+  
+  // Use some other id than the standard for inserts
+  shouldCorrectlyCreateOIDNotUsingObjectID : function(test) {
+    client.createCollection('test_non_oid_id', function(err, collection) {
+      var date = new Date();
+      date.setUTCDate(12);
+      date.setUTCFullYear(2009);
+      date.setUTCMonth(11 - 1);
+      date.setUTCHours(12);
+      date.setUTCMinutes(0);
+      date.setUTCSeconds(30);
+  
+      collection.insert({'_id':date}, function(err, ids) {
+        collection.find({'_id':date}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
+            test.equal(("" + date), ("" + items[0]._id));
+  
+            // Let's close the db
+            test.done();
+          });
+        });
+      });
+    });
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

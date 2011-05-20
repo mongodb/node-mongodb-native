@@ -104,7 +104,54 @@ var tests = testCase({
     error_client_pair.on("error", function(err) {});
     error_client_pair.on("close", closeListener);
     error_client_pair.open(function(err, error_client_pair) {});    
-  }
+  },
+  
+  shouldCorrectlyExecuteEvalFunctions : function(test) {
+    client.eval('function (x) {return x;}', [3], function(err, result) {
+      test.equal(3, result);
+    });
+  
+    client.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
+      test.equal(null, result)
+      // Locate the entry
+      client.collection('test_eval', function(err, collection) {
+        collection.findOne(function(err, item) {
+          test.equal(5, item.y);
+        });
+      });
+    });
+  
+    client.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
+      test.equal(5, result);
+    });
+  
+    client.eval('function () {return 5;}', function(err, result) {
+      test.equal(5, result);
+    });
+  
+    client.eval('2 + 3;', function(err, result) {
+      test.equal(5, result);
+    });
+  
+    client.eval(new client.bson_serializer.Code("2 + 3;"), function(err, result) {
+      test.equal(5, result);
+    });
+  
+    client.eval(new client.bson_serializer.Code("return i;", {'i':2}), function(err, result) {
+      test.equal(2, result);
+    });
+  
+    client.eval(new client.bson_serializer.Code("i + 3;", {'i':2}), function(err, result) {
+      test.equal(5, result);
+    });
+  
+    client.eval("5 ++ 5;", function(err, result) {
+      test.ok(err instanceof Error);
+      test.ok(err.message != null);
+      // Let's close the db
+      test.done();
+    });
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
