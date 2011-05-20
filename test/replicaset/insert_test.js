@@ -2,7 +2,7 @@
 var testCase = require('nodeunit').testCase,
   debug = require('sys').debug
   inspect = require('sys').inspect,
-  ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager,
+  ReplicaSetManager = require('./tools/replica_set_manager').ReplicaSetManager,
   Db = require('../../lib/mongodb').Db,
   ReplSetServers = require('../../lib/mongodb').ReplSetServers,
   Server = require('../../lib/mongodb').Server,

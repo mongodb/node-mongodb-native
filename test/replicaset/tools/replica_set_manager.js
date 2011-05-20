@@ -4,9 +4,9 @@ var debug = require('util').debug,
   fs = require('fs'),
   exec = require('child_process').exec,
   spawn = require('child_process').spawn,
-  Connection = require('../lib/mongodb').Connection,
-  Db = require('../lib/mongodb').Db,
-  Server = require('../lib/mongodb').Server,
+  Connection = require('../../../lib/mongodb').Connection,
+  Db = require('../../../lib/mongodb').Db,
+  Server = require('../../../lib/mongodb').Server,
   Step = require("step");  
 
 var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
