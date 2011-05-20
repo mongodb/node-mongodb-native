@@ -1,0 +1,68 @@
+var testCase = require('nodeunit').testCase,
+  debug = require('sys').debug
+  inspect = require('sys').inspect,
+  nodeunit = require('nodeunit'),
+  Db = require('../lib/mongodb').Db,
+  Server = require('../lib/mongodb').Server,
+  Collection = require('../lib/mongodb').Collection,
+  ServerPair = require('../lib/mongodb').ServerPair;
+
+var MONGODB = 'integration_tests';
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+
+// Define the tests, we want them to run as a nested test so we only clean up the 
+// db connection once
+var tests = testCase({
+  setUp: function(callback) {
+    client.open(function(err, db_p) {
+      // Save reference to db
+      client = db_p;
+      // Start tests
+      callback();
+    });
+  },
+  
+  tearDown: function(callback) {
+    numberOfTestsRun = numberOfTestsRun - 1;
+    // Drop the database and close it
+    if(numberOfTestsRun <= 0) {
+      client.dropDatabase(function(err, done) {
+        client.close();
+        callback();
+      });        
+    } else {
+      client.close();
+      callback();        
+    }      
+  },
+
+  // Test clearing out of the collection
+  shouldCorrectlyClearOutCollection : function(test) {
+    client.createCollection('test_clear', function(err, r) {
+      client.collection('test_clear', function(err, collection) {
+        collection.insert({i:1}, function(err, ids) {
+          collection.insert({i:2}, function(err, ids) {
+            collection.count(function(err, count) {
+              test.equal(2, count);
+              // Clear the collection
+              collection.remove({}, {safe:true}, function(err, result) {
+                test.equal(2, result);
+                
+                collection.count(function(err, count) {
+                  test.equal(0, count);
+                  // Let's close the db
+                  test.done();
+                });
+              });
+            });
+          });
+        });
+      });
+    });    
+  }
+})
+
+// Stupid freaking workaround due to there being no way to run setup once for each suite
+var numberOfTestsRun = Object.keys(tests).length;
+// Assign out tests
+module.exports = tests;
