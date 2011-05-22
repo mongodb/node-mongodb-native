@@ -1,11 +1,13 @@
+var mongodb = require('../lib/mongodb').pure();
+
 var testCase = require('nodeunit').testCase,
-  debug = require('sys').debug
-  inspect = require('sys').inspect,
+  debug = require('util').debug
+  inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
-  Db = require('../lib/mongodb').Db,
-  Cursor = require('../lib/mongodb').Cursor,
-  Collection = require('../lib/mongodb').Collection,
-  Server = require('../lib/mongodb').Server;
+  Db = mongodb.Db,
+  Cursor = mongodb.Cursor,
+  Collection = mongodb.Collection,
+  Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));

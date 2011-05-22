@@ -1,6 +1,6 @@
 var testCase = require('nodeunit').testCase,
-  debug = require('sys').debug
-  inspect = require('sys').inspect,
+  debug = require('util').debug
+  inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
   Db = require('../lib/mongodb').Db,
   Cursor = require('../lib/mongodb').Cursor,

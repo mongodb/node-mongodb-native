@@ -1,6 +1,6 @@
 require.paths.unshift("../../lib");
 
-var sys = require('sys'),
+var sys = require('util'),
   fs = require('fs'),
   Buffer = require('buffer').Buffer,
   BSON = require('./bson').BSON,

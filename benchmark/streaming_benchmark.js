@@ -5,7 +5,7 @@ var Db = require('mongodb').Db,
   Server = require('mongodb').Server,
   Cursor = require('mongodb').Cursor,
   Collection = require('mongodb').Collection,
-  sys = require('sys');  
+  sys = require('util');  
 var BSON = require('bson');
 
 var db = new Db('streaming_benchmark', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {})
