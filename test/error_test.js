@@ -1,24 +1,31 @@
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
-  Db = require('../lib/mongodb').Db,
-  Server = require('../lib/mongodb').Server,
-  Collection = require('../lib/mongodb').Collection,
-  ServerPair = require('../lib/mongodb').ServerPair;
+  Db = mongodb.Db,
+  Cursor = mongodb.Cursor,
+  Collection = mongodb.Collection,
+  Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
 var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
-      // Save reference to db
-      client = db_p;
-      // Start tests
-      callback();
+      if(numberOfTestsRun == 0) {
+        client.dropDatabase(function(err, done) {
+          client.close();
+          callback();
+        });        
+      } else {
+        // Start tests
+        callback();        
+      }
     });
   },
   
@@ -38,7 +45,7 @@ var tests = testCase({
 
   // Test the error reporting functionality
   shouldCorrectlyRetrieveErrorMessagesFromServer : function(test) {
-    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {});
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
@@ -165,7 +172,7 @@ var tests = testCase({
   
   // Test the error reporting functionality
   shouldFailInsertDueToUniqueIndexStrict : function(test) {
-    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {strict:true});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;

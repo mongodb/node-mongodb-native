@@ -165,7 +165,7 @@ var deserialized_data = BSON.deserialize(serialized_data);
 assert.equal(doc.doc.value(), deserialized_data.doc.value())
 
 // Should Correctly Serialize and Deserialize a big Binary object
-var data = fs.readFileSync("../../integration/test_gs_weird_bug.png", 'binary');
+var data = fs.readFileSync("../../test/gridstore/test_gs_weird_bug.png", 'binary');
 var bin = new Binary()
 bin.write(data)
 var doc = {doc: bin}

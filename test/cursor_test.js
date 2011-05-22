@@ -15,10 +15,15 @@ var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: fal
 var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
-      // Save reference to db
-      client = db_p;
-      // Start tests
-      callback();
+      if(numberOfTestsRun == 0) {
+        client.dropDatabase(function(err, done) {
+          client.close();
+          callback();
+        });        
+      } else {
+        // Start tests
+        callback();        
+      }
     });
   },
   

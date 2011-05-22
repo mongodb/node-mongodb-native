@@ -94,21 +94,14 @@ module.exports = testCase({
           {rs_name:RS.name}
         );
     
-        var db = new Db('integration_test_', replSet);
-        db.open(function(err, p_db) {
+        // Wait for new primary to pop up
+        ensureConnection(test, 60, function(err, p_db) {
           test.ok(err == null);
-          
-          // debug("====================================================================")
-          // debug(inspect(p_db))
-          // debug("--------------------------------------------------------------------")
-          // debug(inspect(p_db.serverConfig))
-          
           test.equal(true, p_db.serverConfig.isConnected());
-    
-          // Close and cleanup
-          db.close();        
+
+          p_db.close();
           test.done();          
-        })                  
+        });        
       });      
     });
   },

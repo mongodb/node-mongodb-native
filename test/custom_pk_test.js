@@ -1,23 +1,31 @@
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
-  Db = require('../lib/mongodb').Db,
-  Server = require('../lib/mongodb').Server,
-  ServerPair = require('../lib/mongodb').ServerPair;
+  Db = mongodb.Db,
+  Cursor = mongodb.Cursor,
+  Collection = mongodb.Collection,
+  Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
 var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
-      // Save reference to db
-      client = db_p;
-      // Start tests
-      callback();
+      if(numberOfTestsRun == 0) {
+        client.dropDatabase(function(err, done) {
+          client.close();
+          callback();
+        });        
+      } else {
+        // Start tests
+        callback();        
+      }
     });
   },
   
@@ -43,7 +51,7 @@ var tests = testCase({
       return new client.bson_serializer.ObjectID("aaaaaaaaaaaa");
     }
   
-    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {'pk':CustomPKFactory});
     p_client.bson_deserializer = client.bson_deserializer;
     p_client.bson_serializer = client.bson_serializer;
   

@@ -1,25 +1,32 @@
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
-  Db = require('../lib/mongodb').Db,
+  Db = mongodb.Db,
+  Cursor = mongodb.Cursor,
   Script = require('vm'),
-  Server = require('../lib/mongodb').Server,
-  Collection = require('../lib/mongodb').Collection,
-  ServerPair = require('../lib/mongodb').ServerPair;
+  Collection = mongodb.Collection,
+  Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
 var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
-      // Save reference to db
-      client = db_p;
-      // Start tests
-      callback();
+      if(numberOfTestsRun == 0) {
+        client.dropDatabase(function(err, done) {
+          client.close();
+          callback();
+        });        
+      } else {
+        // Start tests
+        callback();        
+      }
     });
   },
   
@@ -43,7 +50,7 @@ var tests = testCase({
         for(var i = 1; i < 1000; i++) {
           collection.insert({c:i}, function(err, r) {});
         }
-
+  
         collection.insert({a:2}, function(err, r) {
           collection.insert({a:3}, function(err, r) {
             collection.count(function(err, count) {
@@ -53,7 +60,7 @@ var tests = testCase({
                 cursor.toArray(function(err, results) {
                   test.equal(1001, results.length);
                   test.ok(results[0] != null);
-
+  
                   // Let's close the db
                   test.done();
                 });
@@ -70,12 +77,12 @@ var tests = testCase({
     client.createCollection('test_multiple_insert', function(err, r) {
       var collection = client.collection('test_multiple_insert', function(err, collection) {
         var docs = [{a:1}, {a:2}];
-
+  
         collection.insert(docs, function(err, ids) {
           ids.forEach(function(doc) {
             test.ok(((doc['_id']) instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
           });
-
+  
           // Let's ensure we have both documents
           collection.find(function(err, cursor) {
             cursor.toArray(function(err, docs) {
@@ -169,7 +176,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext: function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}, {}));
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}, {}));
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -281,7 +288,7 @@ var tests = testCase({
   shouldCorrectlyDoToJsonForLongValue : function(test) {
     client.createCollection('test_to_json_for_long', function(err, collection) {
       test.ok(collection instanceof Collection);
-
+  
       // collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], function(err, ids) {
       collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], function(err, ids) {
         collection.findOne({}, function(err, item) {
@@ -389,7 +396,7 @@ var tests = testCase({
         collection.findOne({_id:result[0]._id}, function(err, object) {
           test.equal(null, object.z);
           test.equal(1, object.i);
-
+  
           test.done();
         })        
       })
@@ -397,29 +404,29 @@ var tests = testCase({
   }, 
   
   shouldCorrectlyInsertDocumentWithUUID : function(test) {
-		client.collection("insert_doc_with_uuid", function(err, collection) {
-		  collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
-		    test.equal(null, err);
-
-  		  collection.find({_id : "12345678123456781234567812345678"}).toArray(function(err, items) {
-  		    test.equal(null, err);
-  		    test.equal(items[0]._id, "12345678123456781234567812345678")
-  		    test.equal(items[0].field, '1')
+     client.collection("insert_doc_with_uuid", function(err, collection) {
+       collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
+         test.equal(null, err);
+  
+       collection.find({_id : "12345678123456781234567812345678"}).toArray(function(err, items) {
+         test.equal(null, err);
+         test.equal(items[0]._id, "12345678123456781234567812345678")
+         test.equal(items[0].field, '1')
           
           // Generate a binary id
           var binaryUUID = new client.bson_serializer.Binary('00000078123456781234567812345678', client.bson_serializer.BSON.BSON_BINARY_SUBTYPE_UUID);
-
+  
           collection.insert({_id : binaryUUID, field: '2'}, {safe:true}, function(err, result) {
-      		  collection.find({_id : binaryUUID}).toArray(function(err, items) {
-      		    test.equal(null, err);
+           collection.find({_id : binaryUUID}).toArray(function(err, items) {
+             test.equal(null, err);
               test.equal(items[0].field, '2')
-
+  
               test.done();
-    		    });
+           });
           });
-  		  })		  		    
-		  });		  
-		});
+       })              
+       });     
+     });
   },     
 })
 

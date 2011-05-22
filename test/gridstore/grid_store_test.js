@@ -1,11 +1,15 @@
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
+
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
-  Db = require('../../lib/mongodb').Db,
-  Collection = require('../../lib/mongodb').Collection,
-  GridStore = require('../../lib/mongodb').GridStore,
-  Server = require('../../lib/mongodb').Server;
+  Db = mongodb.Db,
+  Cursor = mongodb.Cursor,
+  Collection = mongodb.Collection,
+  GridStore = mongodb.GridStore,
+  Chunk = mongodb.Chunk,
+  Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
@@ -15,10 +19,15 @@ var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: fal
 var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
-      // Save reference to db
-      client = db_p;
-      // Start tests
-      callback();
+      if(numberOfTestsRun == 0) {
+        client.dropDatabase(function(err, done) {
+          client.close();
+          callback();
+        });        
+      } else {
+        // Start tests
+        callback();        
+      }
     });
   },
   
@@ -155,7 +164,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlyHandleMultipleChunkGridStore : function(test) {
-    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
@@ -214,7 +223,7 @@ var tests = testCase({
   },
   
   shouldCorrectlyHandleUnlinkingWeirdName : function(test) {
-    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
@@ -262,7 +271,7 @@ var tests = testCase({
   },
   
   shouldCorrectlyUnlink : function(test) {
-    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
@@ -310,7 +319,7 @@ var tests = testCase({
   },
   
   shouldCorrectlyUnlinkAnArrayOfFiles : function(test) {
-    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
