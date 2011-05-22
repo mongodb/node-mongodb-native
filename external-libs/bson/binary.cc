@@ -118,14 +118,19 @@ Handle<Value> Binary::SubtypeGetter(Local<String> property, const AccessorInfo& 
 
   // Unpack object reference
   Binary *binary_obj = ObjectWrap::Unwrap<Binary>(info.Holder());
+  
   // Extract value doing a cast of the pointer to Long and accessing low_bits
-  int32_t sub_type = binary_obj->sub_type;
-  Local<Integer> sub_type_int = Integer::New(sub_type);
+  Local<Integer> sub_type_int = Integer::New(binary_obj->sub_type);
   return scope.Close(sub_type_int);
 }
 
 void Binary::SubtypeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
-  // Do nothing for now
+  if(value->IsNumber()) {
+    // Unpack the long object
+    Binary *b = ObjectWrap::Unwrap<Binary>(info.Holder());
+    // Set the low bits
+    b->sub_type = value->IntegerValue();
+  }
 }
 
 Handle<Value> Binary::Read(const Arguments &args) {

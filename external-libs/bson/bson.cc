@@ -1293,8 +1293,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       uint32_t total_number_of_bytes = BSON::deserialize_int32(data, index);
       // Adjust the index
       index = index + 4;
-      // Decode the subtype
-      uint32_t sub_type = (int)*(data + index);
+      // Decode the subtype, ensure it's positive
+      uint32_t sub_type = (int)*(data + index) & 0xff;
       // Adjust the index
       index = index + 1;
       // Read the binary data size
