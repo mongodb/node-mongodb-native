@@ -1,8 +1,9 @@
+var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
-  ReplicaSetManager = require('./tools/replica_set_manager').ReplicaSetManager,
+  ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = require('../../lib/mongodb').Db,
   ReplSetServers = require('../../lib/mongodb').ReplSetServers,
   Server = require('../../lib/mongodb').Server,
@@ -10,7 +11,7 @@ var testCase = require('nodeunit').testCase,
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
-var RS = null;
+// var RS = null;
 
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
@@ -42,7 +43,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 module.exports = testCase({
   setUp: function(callback) {
     // Create instance of replicaset manager but only for the first call
-    if(!serversUp) {
+    if(!serversUp && !noReplicasetStart) {
       serversUp = true;
       RS = new ReplicaSetManager();
       RS.startSet(function(err, result) {      

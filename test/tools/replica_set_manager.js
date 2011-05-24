@@ -4,9 +4,9 @@ var debug = require('util').debug,
   fs = require('fs'),
   exec = require('child_process').exec,
   spawn = require('child_process').spawn,
-  Connection = require('../../../lib/mongodb').Connection,
-  Db = require('../../../lib/mongodb').Db,
-  Server = require('../../../lib/mongodb').Server,
+  Connection = require('../../lib/mongodb').Connection,
+  Db = require('../../lib/mongodb').Db,
+  Server = require('../../lib/mongodb').Server,
   Step = require("step");  
 
 var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
@@ -71,12 +71,17 @@ ReplicaSetManager.prototype.allHostPairsWithState = function(state, callback) {
   })            
 }
 
-ReplicaSetManager.prototype.startSet = function(callback) {
+ReplicaSetManager.prototype.startSet = function(killall, callback) {
   var self = this;
+  // Unpack callback and variables
+  var args = Array.prototype.slice.call(arguments, 0);
+  callback = args.pop();
+  killall = args.length ? args.shift() : true;  
+
   debug("** Starting a replica set with " + this.count + " nodes");
 
   // Kill all existing mongod instances
-  exec('killall mongod', function(err, stdout, stderr) {
+  exec(killall ? 'killall mongod' : '', function(err, stdout, stderr) {
     var n = 0;
 
     Step(
@@ -199,6 +204,12 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
       });      
     });    
   });
+}
+
+ReplicaSetManager.prototype.killAll = function(callback) {
+  exec('killall mongod', function(err, stdout, stderr) {
+    return callback();
+  });  
 }
 
 ReplicaSetManager.prototype.kill = function(node, signal, callback) {
@@ -418,7 +429,6 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
 // Fire up the mongodb instance
 var start = ReplicaSetManager.prototype.start = function(node, callback) {
   var self = this;
-
   // Start up mongod process
   var mongodb = exec(self.mongods[node]["start"],
     function (error, stdout, stderr) {

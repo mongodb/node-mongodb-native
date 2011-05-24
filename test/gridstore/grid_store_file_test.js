@@ -1,9 +1,9 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 
-var testCase = require('nodeunit').testCase,
+var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
-  nodeunit = require('nodeunit'),
+  nodeunit = require('../../deps/nodeunit'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -20,10 +20,9 @@ var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
       if(numberOfTestsRun == 0) {
-        client.dropDatabase(function(err, done) {
-          client.close();
+        // client.dropDatabase(function(err, done) {
           callback();
-        });        
+        // });        
       } else {
         // Start tests
         callback();        
@@ -35,10 +34,10 @@ var tests = testCase({
     numberOfTestsRun = numberOfTestsRun - 1;
     // Drop the database and close it
     if(numberOfTestsRun <= 0) {
-      client.dropDatabase(function(err, done) {
+      // client.dropDatabase(function(err, done) {
         client.close();
         callback();
-      });        
+      // });        
     } else {
       client.close();
       callback();        

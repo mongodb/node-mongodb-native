@@ -1,17 +1,13 @@
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
-  ReplicaSetManager = require('./tools/replica_set_manager').ReplicaSetManager,
+  ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = require('../../lib/mongodb').Db,
   ReplSetServers = require('../../lib/mongodb').ReplSetServers,
   Server = require('../../lib/mongodb').Server;
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
-// var RS = new ReplicaSetManager();
-var RS = null;
-// if()
-
 
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
@@ -47,13 +43,10 @@ module.exports = testCase({
       serversUp = true;
       RS = new ReplicaSetManager();
       RS.startSet(function(err, result) {      
-        if(err != null) throw err;
-        // Finish setup
         callback();      
       });      
     } else {
       RS.restartKilledNodes(function(err, result) {
-        if(err != null) throw err;
         callback();        
       })
     }
@@ -61,7 +54,6 @@ module.exports = testCase({
   
   tearDown: function(callback) {
     RS.restartKilledNodes(function(err, result) {
-      if(err != null) throw err;
       callback();        
     })
   },
@@ -98,7 +90,7 @@ module.exports = testCase({
         ensureConnection(test, 60, function(err, p_db) {
           test.ok(err == null);
           test.equal(true, p_db.serverConfig.isConnected());
-
+  
           p_db.close();
           test.done();          
         });        
@@ -179,26 +171,7 @@ module.exports = testCase({
       test.done();
     })            
   },
-  
-  shouldCorrectlyHandleBadName : function(test) {
-    // debug("=========================================== shouldCorrectlyHandleBadName")
-    // Replica configuration
-    var replSet = new ReplSetServers([ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {rs_name:RS.name + "-wrong"}
-    );
-  
-    var db = new Db('integration_test_', replSet );
-    db.open(function(err, p_db) {
-      test.notEqual(null, err);
-      db.close();
-      test.done();
-    })    
-  },
-  
+    
   shouldCorrectlyConnect: function(test) {
     // debug("=========================================== shouldCorrectlyConnect")
     // Replica configuration
@@ -246,5 +219,25 @@ module.exports = testCase({
         });
       })            
     });        
-  }  
+  },
+  
+  shouldCorrectlyPassErrorWhenWrongReplicaSet : function(test) {
+    // debug("=========================================== shouldCorrectlyHandleBadName")
+    // Replica configuration
+    var replSet = new ReplSetServers([ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {rs_name:RS.name + "-wrong"}
+    );
+
+    // test.done();
+  
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      test.notEqual(null, err);
+      test.done();
+    })    
+  },  
 })

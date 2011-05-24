@@ -1,14 +1,15 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
-var testCase = require('nodeunit').testCase,
+var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
-  nodeunit = require('nodeunit'),
+  nodeunit = require('../deps/nodeunit'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Script = require('vm'),
   Collection = mongodb.Collection,
-  Server = mongodb.Server;
+  Server = mongodb.Server,
+  ServerManager = require('./tools/server_manager').ServerManager;
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
@@ -18,26 +19,23 @@ var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: fal
 var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
-      if(numberOfTestsRun == 0) {
-        client.dropDatabase(function(err, done) {
-          client.close();
-          callback();
-        });        
-      } else {
-        // Start tests
-        callback();        
-      }
-    });
+      if(numberOfTestsRun > 0) return callback();
+      // If first test drop the db
+      // client.dropDatabase(function(err, done) {
+        callback();
+      // });        
+    });            
   },
   
   tearDown: function(callback) {
     numberOfTestsRun = numberOfTestsRun - 1;
     // Drop the database and close it
     if(numberOfTestsRun <= 0) {
-      client.dropDatabase(function(err, done) {
-        client.close();
+      // client.dropDatabase(function(err, done) {
+        // Close the client
+        client.close();        
         callback();
-      });        
+      // });        
     } else {
       client.close();
       callback();        

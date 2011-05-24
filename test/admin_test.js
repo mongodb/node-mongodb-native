@@ -1,9 +1,9 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
-var testCase = require('nodeunit').testCase,
+var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
-  nodeunit = require('nodeunit'),
+  nodeunit = require('../deps/nodeunit'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -18,10 +18,9 @@ var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
       if(numberOfTestsRun == 0) {
-        client.dropDatabase(function(err, done) {
-          client.close();
+        // client.dropDatabase(function(err, done) {
           callback();
-        });        
+        // });        
       } else {
         // Start tests
         callback();        
@@ -33,10 +32,10 @@ var tests = testCase({
     numberOfTestsRun = numberOfTestsRun - 1;
     // Drop the database and close it
     if(numberOfTestsRun <= 0) {
-      client.dropDatabase(function(err, done) {
+      // client.dropDatabase(function(err, done) {
         client.close();
         callback();
-      });        
+      // });        
     } else {
       client.close();
       callback();        
@@ -176,3 +175,206 @@ var tests = testCase({
 var numberOfTestsRun = Object.keys(tests).length;
 // Assign out tests
 module.exports = tests;
+
+// test_kill_cursors : function() {
+//   var test_kill_cursors_client = new Db('integration_tests4_', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {});
+//   test_kill_cursors_client.bson_deserializer = client.bson_deserializer;
+//   test_kill_cursors_client.bson_serializer = client.bson_serializer;
+//   test_kill_cursors_client.pkFactory = client.pkFactory;
+//
+//   test_kill_cursors_client.open(function(err, test_kill_cursors_client) {
+//     var number_of_tests_done = 0;
+//
+//     test_kill_cursors_client.dropCollection('test_kill_cursors', function(err, collection) {
+//       test_kill_cursors_client.createCollection('test_kill_cursors', function(err, collection) {
+//         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+//           var clientCursors = cursorInfo.clientCursors_size;
+//           var byLocation = cursorInfo.byLocation_size;
+//
+//           for(var i = 0; i < 1000; i++) {
+//             collection.save({'i': i}, function(err, doc) {});
+//           }
+//
+//           test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+//             test.equal(clientCursors, cursorInfo.clientCursors_size);
+//             test.equal(byLocation, cursorInfo.byLocation_size);
+//
+//             for(var i = 0; i < 10; i++) {
+//               collection.findOne(function(err, item) {});
+//             }
+//
+//             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+//               test.equal(clientCursors, cursorInfo.clientCursors_size);
+//               test.equal(byLocation, cursorInfo.byLocation_size);
+//
+//               for(var i = 0; i < 10; i++) {
+//                 collection.find(function(err, cursor) {
+//                   cursor.nextObject(function(err, item) {
+//                     cursor.close(function(err, cursor) {});
+//
+//                     if(i == 10) {
+//                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+//                         test.equal(clientCursors, cursorInfo.clientCursors_size);
+//                         test.equal(byLocation, cursorInfo.byLocation_size);
+//
+//                         collection.find(function(err, cursor) {
+//                           cursor.nextObject(function(err, item) {
+//                             test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+//                               test.equal(clientCursors, cursorInfo.clientCursors_size);
+//                               test.equal(byLocation, cursorInfo.byLocation_size);
+//
+//                               cursor.close(function(err, cursor) {
+//                                 test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+//                                   test.equal(clientCursors, cursorInfo.clientCursors_size);
+//                                   test.equal(byLocation, cursorInfo.byLocation_size);
+//
+//                                   collection.find({}, {'limit':10}, function(err, cursor) {
+//                                     cursor.nextObject(function(err, item) {
+//                                       test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+//                                         test_kill_cursors_client.cursorInfo(function(err, cursorInfo) {
+//                                           sys.puts("===================================== err: " + err)
+//                                           sys.puts("===================================== cursorInfo: " + sys.inspect(cursorInfo))
+//
+//
+//                                           test.equal(clientCursors, cursorInfo.clientCursors_size);
+//                                           test.equal(byLocation, cursorInfo.byLocation_size);
+//                                           number_of_tests_done = 1;
+//                                         });
+//                                       });
+//                                     });
+//                                   });
+//                                 });
+//                               });
+//                             });
+//                           });
+//                         });
+//                       });
+//                     }
+//                   });
+//                 });
+//               }
+//             });
+//           });
+//         });
+//       });
+//     });
+//
+//     var intervalId = setInterval(function() {
+//       if(number_of_tests_done == 1) {
+//         clearInterval(intervalId);
+//         finished_test({test_kill_cursors:'ok'});
+//         test_kill_cursors_client.close();
+//       }
+//     }, 100);
+//   });
+// },
+                                      
+// test_force_binary_error : function() {
+//   client.createCollection('test_force_binary_error', function(err, collection) {
+//     // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
+//     // is the error handling of the findOne Method
+//     var result= "";
+//     var hexString = "5e9bd59248305adf18ebc15703a1";
+//     for(var index=0 ; index < hexString.length; index+=2) {
+//         var string= hexString.substr(index, 2);
+//         var number= parseInt(string, 16);
+//         result+= BinaryParser.fromByte(number);
+//     }
+//
+//     // Generate a illegal ID
+//     var id = client.bson_serializer.ObjectID.createFromHexString('5e9bd59248305adf18ebc157');
+//     id.id = result;
+//
+//     // Execute with error
+//     collection.findOne({"_id": id}, function(err, result) {
+//       // test.equal(undefined, result)
+//       test.ok(err != null)
+//       finished_test({test_force_binary_error:'ok'});
+//     });
+//   });
+// },
+    
+// test_pair : function() {
+//   var p_client = new Db('integration_tests_21', new ServerPair(new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})), {});
+//   p_client.open(function(err, p_client) {
+//     p_client.dropDatabase(function(err, done) {
+//       test.ok(p_client.primary != null);
+//       test.equal(2, p_client.connections.length);
+// 
+//       // Check both server running
+//       test.equal(true, p_client.serverConfig.leftServer.connected);
+//       test.equal(true, p_client.serverConfig.rightServer.connected);
+// 
+//       test.ok(p_client.serverConfig.leftServer.master);
+//       test.equal(false, p_client.serverConfig.rightServer.master);
+// 
+//       p_client.createCollection('test_collection', function(err, collection) {
+//         collection.insert({'a':1}, function(err, doc) {
+//           collection.find(function(err, cursor) {
+//             cursor.toArray(function(err, items) {
+//               test.equal(1, items.length);
+// 
+//               finished_test({test_pair:'ok'});
+//               p_client.close();
+//             });
+//           });
+//         });
+//       });
+//     });
+//   });
+// },
+// 
+// test_cluster : function() {
+//   var p_client = new Db('integration_tests_22', new ServerCluster([new Server("127.0.0.1", 27017, {}), new Server("127.0.0.1", 27018, {})]), {});
+//   p_client.open(function(err, p_client) {
+//     p_client.dropDatabase(function(err, done) {
+//       test.ok(p_client.primary != null);
+//       test.equal(2, p_client.connections.length);
+// 
+//       test.equal(true, p_client.serverConfig.servers[0].master);
+//       test.equal(false, p_client.serverConfig.servers[1].master);
+// 
+//       p_client.createCollection('test_collection', function(err, collection) {
+//         collection.insert({'a':1}, function(err, doc) {
+//           collection.find(function(err, cursor) {
+//             cursor.toArray(function(err, items) {
+//               test.equal(1, items.length);
+// 
+//               finished_test({test_cluster:'ok'});
+//               p_client.close();
+//             });
+//           });
+//         });
+//       });
+//     });
+//   });
+// },
+// 
+// test_slave_connection :function() {
+//   var p_client = new Db('integration_tests_23', new Server("127.0.0.1", 27018, {}));
+//   p_client.open(function(err, p_client) {
+//     test.equal(null, err);
+//     finished_test({test_slave_connection:'ok'});
+//     p_client.close();
+//   });
+// },
+                  
+// test_long_term_insert : function() {
+//   var numberOfTimes = 21000;
+//   
+//   client.createCollection('test_safe_insert', function(err, collection) {
+//     var timer = setInterval(function() {        
+//       collection.insert({'test': 1}, {safe:true}, function(err, result) {
+//         numberOfTimes = numberOfTimes - 1;
+// 
+//         if(numberOfTimes <= 0) {
+//           clearInterval(timer);
+//           collection.count(function(err, count) {
+//             test.equal(21000, count);
+//             finished_test({test_long_term_insert:'ok'})
+//           });
+//         }          
+//       });
+//     }, 1);      
+//   });
+// },  
