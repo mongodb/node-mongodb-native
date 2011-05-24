@@ -150,9 +150,11 @@ exports.run = function (files, opts, callback) {
                         var rendered = ejs.render(tmpl, {
                             locals: {suites: [module]}
                         });
+                        var suffix = opts.suffix == null ? '' : "_" + opts.suffix;
+                        
                         var filename = path.join(
                             opts.output,
-                            module.name + '.xml'
+                            module.name + suffix + '.xml'
                         );
                         sys.puts('Writing ' + filename);
                         fs.writeFile(filename, rendered, cb);
@@ -173,8 +175,14 @@ exports.run = function (files, opts, callback) {
                                 ' assertions (' + assertions.duration + 'ms)'
                             );
                         }
-                        setTimeout(function () {
+                        var timer = setTimeout(function () {
+                           clearTimeout(timer);
+
+                          if(callback != null) {
+                            return callback();
+                          } else {                
                             process.reallyExit(assertions.failures());
+                          }              
                         }, 10);
                     });
 

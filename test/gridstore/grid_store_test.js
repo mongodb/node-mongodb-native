@@ -4,6 +4,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
   nodeunit = require('../../deps/nodeunit'),
+  fs = require('fs'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -12,6 +13,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
+// var MONGODB = 'ruby-test-db';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
@@ -322,7 +324,7 @@ var tests = testCase({
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
-
+  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_unlink_as_array", "w");
@@ -334,11 +336,11 @@ var tests = testCase({
                   test.equal(1, count);
                 })
               });
-
+  
               fs_client.collection('fs.chunks', function(err, collection) {
                 collection.count(function(err, count) {
                   test.equal(1, count);
-
+  
                   // Unlink the file
                   GridStore.unlink(fs_client, ['test_gs_unlink_as_array'], function(err, gridStore) {
                     fs_client.collection('fs.files', function(err, collection) {
@@ -346,7 +348,7 @@ var tests = testCase({
                         test.equal(0, count);
                       })
                     });
-
+  
                     fs_client.collection('fs.chunks', function(err, collection) {
                       collection.count(function(err, count) {
                         test.equal(0, count);
@@ -368,11 +370,20 @@ var tests = testCase({
   shouldCorrectlyWriteFileToGridStore: function(test) {
     var gridStore = new GridStore(client, 'test_gs_writing_file', 'w');
     var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
+    var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png', 'binary');
+    
     gridStore.open(function(err, gridStore) {
       gridStore.writeFile('./test/gridstore/test_gs_weird_bug.png', function(err, gridStore) {
         GridStore.read(client, 'test_gs_writing_file', function(err, fileData) {
+          test.equal(data, fileData)
           test.equal(fileSize, fileData.length);
-          test.done();
+          
+          // Ensure we have a md5
+          var gridStore2 = new GridStore(client, 'test_gs_writing_file', 'r');
+          gridStore2.open(function(err, gridStore2) {
+            test.ok(gridStore2.md5 != null)            
+            test.done();
+          });          
         });
       });
     });

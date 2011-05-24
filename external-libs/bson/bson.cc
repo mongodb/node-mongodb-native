@@ -349,18 +349,18 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Unpack the object and encode
     Local<Object> obj = value->ToObject();
     Binary *binary_obj = Binary::Unwrap<Binary>(obj);
-    // Let's write the total size of the binary 
-    BSON::write_int32((serialized_object + index), (binary_obj->index + 4));
+    // // Let's write the total size of the binary 
+    // BSON::write_int32((serialized_object + index), (binary_obj->index + 4));
+    // // Adjust index
+    // index = index + 4;
+    // Let's write the content to the char* array
+    BSON::write_int32((serialized_object + index), binary_obj->index);
     // Adjust index
     index = index + 4;
     // Write subtype
     *(serialized_object + index)  = (char)binary_obj->sub_type;
     // Adjust index
     index = index + 1;
-    // Let's write the content to the char* array
-    BSON::write_int32((serialized_object + index), binary_obj->index);
-    // Adjust index
-    index = index + 4;
     // Write binary content
     memcpy((serialized_object + index), binary_obj->data, binary_obj->index);
     // Adjust index
@@ -742,7 +742,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     Local<Object> obj = value->ToObject();
     Binary *binary_obj = Binary::Unwrap<Binary>(obj);
     // Adjust the object_size, binary content lengt + total size int32 + binary size int32 + subtype
-    object_size += binary_obj->index + 4 + 4 + 1;
+    object_size += binary_obj->index + 4 + 1;
   } else if(Code::HasInstance(value)) {
     // printf("================================ calculate_object_size:code\n");
     // Unpack the object and encode

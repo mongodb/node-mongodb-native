@@ -43,34 +43,98 @@ var options = { error_prefix: '\u001b[31m',
   assertion_prefix: '\u001b[35m',
   assertion_suffix: '\u001b[39m' };
 
-// Boot up the test server and run the tests
-Step(
-  // Start the single server
-  function startSingleServer() {
-    serverManager.start(true, this);
-  },
-
-  // Run all the integration tests using the pure js bson parser
-  function runPureJS() {
-    runner.run(files, options, this);
-  },
-  
-  // Run all integration tests using the native bson parser
-  function runNativeJS() {
-    process.env['TEST_NATIVE'] = 'TRUE';
-    runner.run(files, options, this);      
-  },
-
-  // Execute all the replicaset tests
-  function executeReplicaSetTests() {
-    runner.run(replicasetFiles, options, this);      
-  },    
-  
-  function done() {
-    // Kill all mongod server
-    replicaSetManager.killAll(function() {
-      // Force exit
-      process.exit();
-    })
+// cleanup output directory
+exec('rm -rf ./output', function(err, stdout, stderr) {
+  // if we have a junit reporter
+  if(process.argv[process.argv.length - 1] == "--junit") {
+    // Remove directory
+    fs.mkdirSync("./output", 0777);
+    // Set up the runner for junit
+    runner = nodeunit.reporters.junit;
+    // Set up options
+    options.output = './output';
   }
-);
+
+  // Boot up the test server and run the tests
+  Step(
+    // Start the single server
+    function startSingleServer() {
+      serverManager.start(true, this);
+    },
+
+    // Run all the integration tests using the pure js bson parser
+    function runPureJS() {
+      options.suffix = 'pure';
+      runner.run(files, options, this);
+    },
+
+    // Run all integration tests using the native bson parser
+    function runNativeJS() {
+      process.env['TEST_NATIVE'] = 'TRUE';
+      options.suffix = 'native';
+      runner.run(files, options, this);      
+    },
+
+    // Execute all the replicaset tests
+    function executeReplicaSetTests() {
+      runner.run(replicasetFiles, options, this);      
+    },    
+
+    function done() {
+      // Kill all mongod server
+      replicaSetManager.killAll(function() {
+        // Force exit
+        process.exit();
+      })
+    }
+  );    
+});
+
+
+  // fs.rmdirSync("./output"); 
+// } catch(err) { debug(err)}
+
+
+// // if we have a junit reporter
+// if(process.argv[process.argv.length - 1] == "--junit") {
+//   // Remove directory
+//   fs.mkdirSync("./output", 0777);
+//   // Set up the runner for junit
+//   runner = nodeunit.reporters.junit;
+//   // Set up options
+//   options = {output:'./output'};
+// }
+// 
+// // Boot up the test server and run the tests
+// Step(
+//   // Start the single server
+//   function startSingleServer() {
+//     serverManager.start(true, this);
+//   },
+// 
+//   // Run all the integration tests using the pure js bson parser
+//   function runPureJS() {
+//     options.suffix = 'pure';
+//     runner.run(files, options, this);
+//   },
+//   
+//   // Run all integration tests using the native bson parser
+//   function runNativeJS() {
+//     process.env['TEST_NATIVE'] = 'TRUE';
+//     options.suffix = 'native';
+//     runner.run(files, options, this);      
+//   },
+// 
+//   // Execute all the replicaset tests
+//   function executeReplicaSetTests() {
+//     runner.run(replicasetFiles, options, this);      
+//   },    
+//   
+//   function done() {
+//     // Kill all mongod server
+//     replicaSetManager.killAll(function() {
+//       // Force exit
+//       process.exit();
+//     })
+//   }
+// );

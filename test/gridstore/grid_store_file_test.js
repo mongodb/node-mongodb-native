@@ -535,9 +535,9 @@ var tests = testCase({
         gridStore.close(function(err, result) {
           var gridStore2 = new GridStore(client, "new-file", "r");
           gridStore2.open(function(err, gridStore) {
-            test.equal("41ca11b48009a1cf1ce60dbddf81194a", gridStore.md5);
+            test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
             gridStore.md5 = "can't do this";
-            test.equal("41ca11b48009a1cf1ce60dbddf81194a", gridStore.md5);
+            test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
   
             var gridStore2 = new GridStore(client, "new-file", "w");
             gridStore2.open(function(err, gridStore) {
