@@ -126,7 +126,7 @@ var simple_string_serialized = BSON.serialize({doc:new ObjectID2()});
 assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.toString(), BSON.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString());
 assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.toString(), BSON.deserialize(simple_string_serialized).doc.toString());
 
-// Simple serialization and deserialization for a Binary value
+// // Simple serialization and deserialization for a Binary value
 var binary = new Binary2();
 var string = 'binstring'
 for(var index = 0; index < string.length; index++) { binary.put(string.charAt(index)); }

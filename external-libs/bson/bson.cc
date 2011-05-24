@@ -1289,18 +1289,14 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
         insert_index = atoi(string_name);
       }      
       
-      // Total number of bytes after array index
-      uint32_t total_number_of_bytes = BSON::deserialize_int32(data, index);
+      // Read the binary data size
+      uint32_t number_of_bytes = BSON::deserialize_int32(data, index);
       // Adjust the index
       index = index + 4;
       // Decode the subtype, ensure it's positive
       uint32_t sub_type = (int)*(data + index) & 0xff;
       // Adjust the index
       index = index + 1;
-      // Read the binary data size
-      uint32_t number_of_bytes = BSON::deserialize_int32(data, index);
-      // Adjust the index
-      index = index + 4;
       // Copy the binary data into a buffer
       char *buffer = (char *)malloc(number_of_bytes * sizeof(char) + 1);
       memcpy(buffer, (data + index), number_of_bytes);
