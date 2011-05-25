@@ -75,19 +75,24 @@ var tests = testCase({
                       test.equal(true, documents[0].ok);
                       test.equal(2, documents[0].nPrev);
                       test.equal("forced error", documents[0].err);
-  
+
                       error_client.resetErrorHistory(function() {
                         error_client.previousErrors(function(err, documents) {
                           test.equal(true, documents[0].ok);
                           test.equal(-1, documents[0].nPrev);
-  
+
                           error_client.error(function(err, documents) {
                             test.equal(true, documents[0].ok);
                             test.equal(0, documents[0].n);
-  
-                            // Let's close the db                            
+
+                            // Let's close the db
                             error_client.close();
-                            test.done();
+
+                            error_client.error(function(err, documents) {
+                              test.ok(err instanceof Error);
+                              test.ok('notConnected' === err.message);
+                              test.done();
+                            });
                           });
                         })
                       });
@@ -194,6 +199,51 @@ var tests = testCase({
         })                  
       });
     });    
+  },
+
+  'safe mode should pass the disconnected error to the callback': function (test) {
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+    error_client.bson_deserializer = client.bson_deserializer;
+    error_client.bson_serializer = client.bson_serializer;
+    error_client.pkFactory = client.pkFactory;
+
+    var name = 'test_safe_mode_when_disconnected';
+    error_client.open(function(err, error_client) {
+      test.ok(err == null);
+      error_client.resetErrorHistory(function() {
+        error_client.dropCollection(name, function() {
+          error_client.createCollection(name, function(err, collection) {
+            test.ok(err == null);
+            collection.insert({ inserted: true }, { safe: true }, function (err) {
+              test.ok(err == null);
+              error_client.close();
+
+              collection.insert({ works: true }, { safe: true }, function (err) {
+                test.ok(err instanceof Error);
+                test.ok('notConnected' === err.message);
+
+                collection.update({ inserted: true }, { inserted: true, x: 1 }, { safe: true }, function (err) {
+                  test.ok(err instanceof Error);
+                  test.ok('notConnected' === err.message);
+
+                  collection.remove({ inserted: true }, { safe: true }, function (err) {
+                    test.ok(err instanceof Error);
+                    test.ok('notConnected' === err.message);
+
+                    collection.findOne({ works: true }, function (err) {
+                      test.ok(err instanceof Error);
+                      test.ok('notConnected' === err.message);
+                      test.done();
+                    });
+                  });
+                });
+              });
+
+            });
+          });
+        });
+      });
+    });
   }
 })
 
