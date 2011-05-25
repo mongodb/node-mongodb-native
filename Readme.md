@@ -84,11 +84,11 @@ GridStore
 
 The GridStore class allows for storage of binary files in mongoDB using the mongoDB defined files and chunks collection definition.
 
-For more information have a look at [Gridstore](docs/gridfs.md)
+For more information have a look at [Gridstore](https://github.com/christkv/node-mongodb-native/blob/master/docs/gridfs.md)
 
 Replicasets
 ===========
-For more information about how to connect to a replicaset have a look at [Replicasets](docs/replicaset.md)
+For more information about how to connect to a replicaset have a look at [Replicasets](https://github.com/christkv/node-mongodb-native/blob/master/docs/replicaset.md)
 
 Notes
 ========
