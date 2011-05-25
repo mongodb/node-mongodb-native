@@ -13,6 +13,10 @@ clean_native:
 
 test: build_native test_nodeunit_pure test_nodeunit_native
 
+test_junit:
+	@echo "\n == Run All tests minus replicaset tests=="
+	$(NODE) tools/test_all.js --junit --noreplicaset
+
 test_nodeunit_pure:
 	@echo "\n == Execute Test Suite using Pure JS BSON Parser == "
 	@$(NODEUNIT) test/ test/gridstore test/bson
