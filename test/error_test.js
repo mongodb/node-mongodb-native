@@ -229,7 +229,12 @@ var tests = testCase({
                   collection.remove({ inserted: true }, { safe: true }, function (err) {
                     test.ok(err instanceof Error);
                     test.ok('notConnected' === err.message);
-                    test.done();
+
+                    collection.findOne({ works: true }, function (err) {
+                      test.ok(err instanceof Error);
+                      test.ok('notConnected' === err.message);
+                      test.done();
+                    });
                   });
                 });
               });
