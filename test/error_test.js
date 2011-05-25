@@ -225,7 +225,12 @@ var tests = testCase({
                 collection.update({ inserted: true }, { inserted: true, x: 1 }, { safe: true }, function (err) {
                   test.ok(err instanceof Error);
                   test.ok('notConnected' === err.message);
-                  test.done();
+
+                  collection.remove({ inserted: true }, { safe: true }, function (err) {
+                    test.ok(err instanceof Error);
+                    test.ok('notConnected' === err.message);
+                    test.done();
+                  });
                 });
               });
 
