@@ -75,19 +75,24 @@ var tests = testCase({
                       test.equal(true, documents[0].ok);
                       test.equal(2, documents[0].nPrev);
                       test.equal("forced error", documents[0].err);
-  
+
                       error_client.resetErrorHistory(function() {
                         error_client.previousErrors(function(err, documents) {
                           test.equal(true, documents[0].ok);
                           test.equal(-1, documents[0].nPrev);
-  
+
                           error_client.error(function(err, documents) {
                             test.equal(true, documents[0].ok);
                             test.equal(0, documents[0].n);
-  
-                            // Let's close the db                            
+
+                            // Let's close the db
                             error_client.close();
-                            test.done();
+
+                            error_client.error(function(err, documents) {
+                              test.ok(err instanceof Error);
+                              test.ok('notConnected' === err.message);
+                              test.done();
+                            });
                           });
                         })
                       });
