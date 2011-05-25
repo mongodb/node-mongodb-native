@@ -1,9 +1,8 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 
-var testCase = require('nodeunit').testCase,
+var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
-  nodeunit = require('nodeunit'),
   fs = require('fs'),
   BSON = mongodb.BSON,
   Code = mongodb.Code, 

@@ -6,8 +6,7 @@ var debug = require('util').debug,
   spawn = require('child_process').spawn,
   Connection = require('../../lib/mongodb').Connection,
   Db = require('../../lib/mongodb').Db,
-  Server = require('../../lib/mongodb').Server,
-  Step = require("step");
+  Server = require('../../lib/mongodb').Server;
   
 var ServerManager = exports.ServerManager = function(options) {
   options = options == null ? {} : options;

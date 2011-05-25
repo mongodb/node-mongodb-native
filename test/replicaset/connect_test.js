@@ -1,4 +1,4 @@
-var testCase = require('nodeunit').testCase,
+var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,

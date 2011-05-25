@@ -1,6 +1,6 @@
 
 NODE = node
-NODEUNIT = nodeunit
+NODEUNIT = deps/nodeunit/bin/nodeunit
 name = all
 
 total: build_native
@@ -28,6 +28,14 @@ test_nodeunit_native:
 test_nodeunit_replicaset_native:
 	@echo "\n == Execute Test Suite using Native BSON Parser == "
 	@TEST_NATIVE=TRUE $(NODEUNIT) test/replicaset
+
+test_all: build_native
+	@echo "\n == Run All tests =="
+	$(NODE) tools/test_all.js
+
+test_all_junit: build_native
+	@echo "\n == Run All tests =="
+	$(NODE) tools/test_all.js --junit
 
 clean:
 	rm ./external-libs/bson/bson.node

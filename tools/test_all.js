@@ -3,7 +3,7 @@ var nodeunit = require('../deps/nodeunit'),
   inspect = require('util').inspect,
   fs = require('fs'),
   exec = require('child_process').exec,
-  Step = require('step'),
+  Step = require('../deps/step/lib/step'),
   ServerManager = require('../test/tools/server_manager').ServerManager,
   ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
 
