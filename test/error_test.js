@@ -199,6 +199,31 @@ var tests = testCase({
         })                  
       });
     });    
+  },
+
+  'safe mode should pass the disconnected error to the callback': function (test) {
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+    error_client.bson_deserializer = client.bson_deserializer;
+    error_client.bson_serializer = client.bson_serializer;
+    error_client.pkFactory = client.pkFactory;
+
+    var name = 'test_safe_mode_when_disconnected';
+    error_client.open(function(err, error_client) {
+      test.ok(err == null);
+      error_client.resetErrorHistory(function() {
+        error_client.dropCollection(name, function() {
+          error_client.createCollection(name, function(err, collection) {
+            test.ok(err == null);
+            error_client.close();
+            collection.insert({ works: true }, { safe: true }, function (err) {
+              test.ok(err instanceof Error);
+              test.ok('notConnected' === err.message);
+              test.done();
+            });
+          });
+        });
+      });
+    });
   }
 })
 
