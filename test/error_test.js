@@ -214,11 +214,21 @@ var tests = testCase({
         error_client.dropCollection(name, function() {
           error_client.createCollection(name, function(err, collection) {
             test.ok(err == null);
-            error_client.close();
-            collection.insert({ works: true }, { safe: true }, function (err) {
-              test.ok(err instanceof Error);
-              test.ok('notConnected' === err.message);
-              test.done();
+            collection.insert({ inserted: true }, { safe: true }, function (err) {
+              test.ok(err == null);
+              error_client.close();
+
+              collection.insert({ works: true }, { safe: true }, function (err) {
+                test.ok(err instanceof Error);
+                test.ok('notConnected' === err.message);
+
+                collection.update({ inserted: true }, { inserted: true, x: 1 }, { safe: true }, function (err) {
+                  test.ok(err instanceof Error);
+                  test.ok('notConnected' === err.message);
+                  test.done();
+                });
+              });
+
             });
           });
         });
