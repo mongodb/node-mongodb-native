@@ -44,7 +44,7 @@ module.exports = testCase({
     if(!serversUp && !noReplicasetStart) {
       serversUp = true;
       RS = new ReplicaSetManager();
-      RS.startSet(function(err, result) {      
+      RS.startSet(true, function(err, result) {      
         if(err != null) throw err;
         // Finish setup
         callback();      

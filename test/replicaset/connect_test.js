@@ -42,7 +42,7 @@ module.exports = testCase({
     if(!serversUp) {
       serversUp = true;
       RS = new ReplicaSetManager();
-      RS.startSet(function(err, result) {      
+      RS.startSet(true, function(err, result) {      
         callback();      
       });      
     } else {
@@ -58,8 +58,24 @@ module.exports = testCase({
     })
   },
   
+  shouldCorrectlyPassErrorWhenWrongReplicaSet : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers([ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {rs_name:RS.name + "-wrong"}
+    );
+
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      test.notEqual(null, err);
+      test.done();
+    })    
+  },  
+  
   shouldConnectWithPrimarySteppedDown : function(test) {
-    throw new Error("1")
     // debug("=========================================== shouldConnectWithPrimarySteppedDown")
     // Step down primary server
     RS.stepDownPrimary(function(err, result) {
@@ -136,19 +152,22 @@ module.exports = testCase({
       );
     
       var db = new Db('integration_test_', replSet);
-      db.open(function(err, p_db) {
-        test.ok(err != null);
-        test.equal("No master available", err.message);
-        db.close();
+      // db.open(function(err, p_db) {
+      //   debug("================================================== shouldConnectWithPrimaryNodeKilled")
+      //   debug(inspect(err))
+      //   
+      //   test.ok(err != null);
+      //   test.equal("No master available", err.message);
+      //   db.close();
         
-        ensureConnection(test, 60, function(err, p_db) {
-          test.ok(err == null);
-          test.equal(true, p_db.serverConfig.isConnected());
-          
-          p_db.close();
-          test.done();          
-        });        
-      })            
+      ensureConnection(test, 60, function(err, p_db) {
+        test.ok(err == null);
+        test.equal(true, p_db.serverConfig.isConnected());
+        
+        p_db.close();
+        test.done();          
+      });        
+      // })            
     });    
   },
   
@@ -220,25 +239,5 @@ module.exports = testCase({
         });
       })            
     });        
-  },
-  
-  shouldCorrectlyPassErrorWhenWrongReplicaSet : function(test) {
-    // debug("=========================================== shouldCorrectlyHandleBadName")
-    // Replica configuration
-    var replSet = new ReplSetServers([ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {rs_name:RS.name + "-wrong"}
-    );
-
-    // test.done();
-  
-    var db = new Db('integration_test_', replSet);
-    db.open(function(err, p_db) {
-      test.notEqual(null, err);
-      test.done();
-    })    
   },  
 })

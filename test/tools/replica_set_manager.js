@@ -34,15 +34,15 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   var self = this;
   
   // Add a handler for errors that bubble up all the way
-  process.on('uncaughtException', function (err) {
-    debug("============================================================= uncaught Exception")
-    debug(inspect(err))
-    // Kill all mongod servers and cleanup before exiting
-    self.killAll(function() {
-      // Force exit
-      process.exit();
-    })  
-  });  
+  // process.on('uncaughtException', function (err) {
+  //   debug("============================================================= uncaught Exception")
+  //   debug(inspect(err))
+  //   // Kill all mongod servers and cleanup before exiting
+  //   self.killAll(function() {
+  //     // Force exit
+  //     process.exit();
+  //   })  
+  // });  
 }
 
 ReplicaSetManager.prototype.secondaries = function(callback) {
@@ -243,8 +243,8 @@ ReplicaSetManager.prototype.kill = function(node, signal, callback) {
       }
 
       self.mongods[node]["up"] = false;
-      // Wait for a second
-      setTimeout(callback, 1000);
+      // Wait for 5 seconds to give the server time to die a proper death
+      setTimeout(callback, 20000);
   });  
 }
 
@@ -256,7 +256,8 @@ ReplicaSetManager.prototype.killPrimary = function(signal, callback) {
   signal = args.length ? args.shift() : 2;
   
   this.getNodeWithState(1, function(err, node) {
-    if(err != null) return callback(err, null);
+    if(err != null) return callback(err, null);    
+
     // Kill process and return node reference
     self.kill(node, signal, function() {
       callback(null, node);
@@ -324,7 +325,6 @@ ReplicaSetManager.prototype.getNodeWithState = function(state, callback) {
 }
 
 ReplicaSetManager.prototype.ensureUp = function(callback) {
-  var count = 0;
   var self = this;
   
   // Write out the ensureUp
@@ -334,6 +334,16 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
   self.retriedConnects = 0;
   // Attemp to retrieve a connection
   self.getConnection(function(err, connection) {
+    // If we have an error or no connection object retry
+    if(err != null || connection == null) {
+      setTimeout(function() {
+        self.ensureUpRetries++;
+        self.ensureUp(callback);
+      }, 1000)
+      // Return
+      return;      
+    }
+    
     // Check repl set get status
     connection.admin().command({"replSetGetStatus": 1}, function(err, object) {
       /// Get documents
@@ -390,12 +400,27 @@ ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
   var nodes = Object.keys(self.mongods).filter(function(key) {
     return self.mongods[key]["up"] == false;
   });
-  
-  nodes.forEach(function(node) {
-    self.start(node, function() {});
-  });
-  
-  self.ensureUp(callback);  
+
+  Step(
+    // Start all nodes
+    function start() {
+      var group = this.group();
+      // Start all nodes
+      for(var i = 0; i < nodes.length; i++) {
+        self.start(nodes[i], group());
+      }
+    },
+    
+    function finished() {
+      self.ensureUp(callback);        
+    }
+  )
+  // 
+  // nodes.forEach(function(node) {
+  //   self.start(node, function() {});
+  // });
+  // 
+  // self.ensureUp(callback);  
 }
 
 ReplicaSetManager.prototype.getConnection = function(node, callback) {
@@ -442,6 +467,9 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
 var start = ReplicaSetManager.prototype.start = function(node, callback) {
   var self = this;
   // Start up mongod process
+  // debug("======================================================================================= starting process")
+  // debug(self.mongods[node]["start"])
+  
   var mongodb = exec(self.mongods[node]["start"],
     function (error, stdout, stderr) {
       console.log('stdout: ' + stdout);
@@ -458,7 +486,7 @@ var start = ReplicaSetManager.prototype.start = function(node, callback) {
     self.mongods[node]["pid"]= fs.readFileSync(path.join(self.mongods[node]["db_path"], "mongod.lock"), 'ascii').trim();
     // Callback
     callback();
-  }, 500);
+  }, 5000);
 }
 
 ReplicaSetManager.prototype.restart = start;

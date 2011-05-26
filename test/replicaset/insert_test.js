@@ -14,6 +14,7 @@ var serversUp = false;
 // var RS = null;
 
 var ensureConnection = function(test, numberOfTries, callback) {
+  // debug("=========================================== ensureConnection::" + numberOfTries)
   // Replica configuration
   var replSet = new ReplSetServers( [ 
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -45,8 +46,8 @@ module.exports = testCase({
     // Create instance of replicaset manager but only for the first call
     if(!serversUp && !noReplicasetStart) {
       serversUp = true;
-      RS = new ReplicaSetManager();
-      RS.startSet(function(err, result) {      
+      RS = new ReplicaSetManager({retries:120});
+      RS.startSet(true, function(err, result) {      
         if(err != null) throw err;
         // Finish setup
         callback();      
