@@ -59,6 +59,7 @@ module.exports = testCase({
   },
   
   shouldConnectWithPrimarySteppedDown : function(test) {
+    throw new Error("1")
     // debug("=========================================== shouldConnectWithPrimarySteppedDown")
     // Step down primary server
     RS.stepDownPrimary(function(err, result) {

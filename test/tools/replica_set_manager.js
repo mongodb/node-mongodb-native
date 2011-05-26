@@ -31,6 +31,18 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   }
   
   this.mongods = {};
+  var self = this;
+  
+  // Add a handler for errors that bubble up all the way
+  process.on('uncaughtException', function (err) {
+    debug("============================================================= uncaught Exception")
+    debug(inspect(err))
+    // Kill all mongod servers and cleanup before exiting
+    self.killAll(function() {
+      // Force exit
+      process.exit();
+    })  
+  });  
 }
 
 ReplicaSetManager.prototype.secondaries = function(callback) {

@@ -54,16 +54,6 @@ var options = { error_prefix: '\u001b[31m',
   assertion_prefix: '\u001b[35m',
   assertion_suffix: '\u001b[39m' };
 
-// Add a handler for errors that bubble up all the way
-process.on('uncaughtException', function (err) {
-  console.log('Caught exception: ' + err);
-  // Kill all mongod servers and cleanup before exiting
-  replicaSetManager.killAll(function() {
-    // Force exit
-    process.exit();
-  })  
-});
-
 // cleanup output directory
 exec('rm -rf ./output', function(err, stdout, stderr) {
   // if we have a junit reporter
