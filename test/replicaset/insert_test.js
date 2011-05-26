@@ -11,6 +11,7 @@ var testCase = require('../../deps/nodeunit').testCase,
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
+var retries = 120;
 // var RS = null;
 
 var ensureConnection = function(test, numberOfTries, callback) {
@@ -100,7 +101,7 @@ module.exports = testCase({
                 
                 // Ensure valid connection
                 // Do inserts
-                ensureConnection(test, 60, function(err, p_db) {
+                ensureConnection(test, retries, function(err, p_db) {
                   test.ok(err == null);
                   test.equal(true, p_db.serverConfig.isConnected());
 
@@ -127,7 +128,7 @@ module.exports = testCase({
                           setTimeout(function() {
                     
                             // Ensure the connection
-                            ensureConnection(test, 60, function(err, p_db) {
+                            ensureConnection(test, retries, function(err, p_db) {
                               
                               // Get the collection
                               p_db.collection('testsets', function(err, collection) {

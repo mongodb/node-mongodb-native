@@ -11,6 +11,7 @@ var testCase = require('../../deps/nodeunit').testCase,
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
+var retries = 120;
 // var RS = null;
 
 var ensureConnection = function(test, numberOfTries, callback) {

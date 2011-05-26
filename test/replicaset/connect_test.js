@@ -8,6 +8,7 @@ var testCase = require('../../deps/nodeunit').testCase,
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
+var retries = 120;
 
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
@@ -80,7 +81,7 @@ module.exports = testCase({
     // Step down primary server
     RS.stepDownPrimary(function(err, result) {
       // Wait for new primary to pop up
-      ensureConnection(test, 60, function(err, p_db) {
+      ensureConnection(test, retries, function(err, p_db) {
         test.ok(err == null);
         test.equal(true, p_db.serverConfig.isConnected());
         
@@ -104,7 +105,7 @@ module.exports = testCase({
         );
     
         // Wait for new primary to pop up
-        ensureConnection(test, 60, function(err, p_db) {
+        ensureConnection(test, retries, function(err, p_db) {
           test.ok(err == null);
           test.equal(true, p_db.serverConfig.isConnected());
   
@@ -160,7 +161,7 @@ module.exports = testCase({
       //   test.equal("No master available", err.message);
       //   db.close();
         
-      ensureConnection(test, 60, function(err, p_db) {
+      ensureConnection(test, retries, function(err, p_db) {
         test.ok(err == null);
         test.equal(true, p_db.serverConfig.isConnected());
         
