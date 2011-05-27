@@ -82,16 +82,22 @@ module.exports = testCase({
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
+      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
       // Drop collection on replicaset
       p_db.dropCollection('testsets', function(err, r) {
+        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Recreate collection on replicaset
         p_db.createCollection('testsets', function(err, collection) {
+          if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
           
           // Insert a dummy document
           collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+            if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
             
             // Execute a count
             collection.count(function(err, c) {
+              if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
               test.equal(1, c);
               // Close starting connection
               p_db.close();
@@ -102,10 +108,14 @@ module.exports = testCase({
                 // Ensure valid connection
                 // Do inserts
                 ensureConnection(test, retries, function(err, p_db) {
+                  if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
                   test.ok(err == null);
                   test.equal(true, p_db.serverConfig.isConnected());
 
                   p_db.collection('testsets', function(err, collection) {
+                    if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
                     // Execute a set of inserts
                     Step(
                       function inserts() {
@@ -120,6 +130,8 @@ module.exports = testCase({
                       function finishUp(err, values) {                        
                         // Restart the old master and wait for the sync to happen
                         RS.restartKilledNodes(function(err, result) {
+                          if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
                           if(err != null) throw err;
                           // Contains the results
                           var results = [];
@@ -129,10 +141,15 @@ module.exports = testCase({
                     
                             // Ensure the connection
                             ensureConnection(test, retries, function(err, p_db) {
+                              if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
                               
                               // Get the collection
                               p_db.collection('testsets', function(err, collection) {
+                                if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
                                 collection.find().each(function(err, item) {
+                                  if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
                                   if(item == null) {
                                     // Ensure we have the correct values
                                     test.equal(6, results.length);
@@ -144,7 +161,11 @@ module.exports = testCase({
                                     
                                     // Run second check
                                     collection.save({a:80}, {safe:true}, function(err, r) {
+                                      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
                                       collection.find().toArray(function(err, items) {
+                                        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
                                         // Ensure we have the correct values
                                         test.equal(7, items.length);
 

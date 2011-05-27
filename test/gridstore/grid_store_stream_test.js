@@ -20,14 +20,14 @@ var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: fal
 var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
-      if(numberOfTestsRun == 0) {
-        // client.dropDatabase(function(err, done) {
+      if(numberOfTestsRun == Object.keys(tests).length) {
+        // If first test drop the db
+        client.dropDatabase(function(err, done) {
           callback();
-        // });        
+        });                
       } else {
-        // Start tests
-        callback();        
-      }
+        return callback();        
+      }      
     });
   },
   

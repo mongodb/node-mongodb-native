@@ -79,8 +79,11 @@ module.exports = testCase({
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
+      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
       // Drop collection on replicaset
       p_db.dropCollection('testsets', function(err, r) {
+        if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+
         test.equal(false, p_db.serverConfig.isReadPrimary());
         test.equal(false, p_db.serverConfig.isPrimary());
         test.done();
@@ -100,8 +103,12 @@ module.exports = testCase({
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
+      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+
       // Drop collection on replicaset
       p_db.dropCollection('testsets', function(err, r) {
+        if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+
         test.ok(p_db.serverConfig.primary != null);
         test.ok(p_db.serverConfig.read != null);
         test.ok(p_db.serverConfig.primary.port != p_db.serverConfig.read.port);
@@ -123,7 +130,11 @@ module.exports = testCase({
     // Insert some data
     var db = new Db('ruby-test-db', replSet);
     db.open(function(err, p_db) {
+      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+
       p_db.collection("test-sets", {safe:{w:3, wtimeout:10000}}, function(err, collection) {
+        if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+
         Step(
           function inserts() {
             var group = this.group();
@@ -133,6 +144,7 @@ module.exports = testCase({
           },
           
           function done(err, values) {
+            if(err != null) debug("shouldReadPrimary :: " + inspect(err));
             var results = [];
             
             retryEnsure(60, function(done) {
@@ -154,6 +166,7 @@ module.exports = testCase({
                 }
               });
             }, function(err, result) {
+              if(err != null) debug("shouldReadPrimary :: " + inspect(err));
               test.ifError(err);
               
               // Kill the primary
@@ -165,6 +178,8 @@ module.exports = testCase({
                   results = [];
 
                   collection.find().each(function(err, item) {
+                    if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+
                     if(item == null) {
                       var correct = 0;
                       // Check all the values
