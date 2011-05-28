@@ -71,6 +71,7 @@ var tests = testCase({
           });
         });
       };
+      
       // Add listener to close event
       automatic_connect_client.on("close", closeListener);
       automatic_connect_client.close();
@@ -82,7 +83,7 @@ var tests = testCase({
     // Test error handling for single server connection
     var serverConfig = new Server("127.0.0.1", 21017, {auto_reconnect: true});
     var error_client = new Db(MONGODB, serverConfig, {native_parser: (process.env['TEST_NATIVE'] != null) ? true : false});
-  
+      
     error_client.on("error", function(err) {});
     error_client.on("close", function(connection) {
       test.ok(typeof connection == typeof serverConfig);
@@ -97,7 +98,7 @@ var tests = testCase({
     var normalServer = new Server("127.0.0.1", 27017);
     var serverPairConfig = new ServerPair(normalServer, serverConfig);
     var error_client_pair = new Db(MONGODB, serverPairConfig, {native_parser: (process.env['TEST_NATIVE'] != null) ? true : false});
-  
+      
     var closeListener = function(connection) {
       test.ok(typeof connection == typeof serverConfig);
       test.equal("127.0.0.1", connection.host);
@@ -105,10 +106,10 @@ var tests = testCase({
       test.equal(false, connection.autoReconnect);
         // Let's close the db      
       error_client_pair.removeListener("close", closeListener);
-      normalServer.close();
+      serverPairConfig.close();
       test.done();
     };
-  
+      
     error_client_pair.on("error", function(err) {});
     error_client_pair.on("close", closeListener);
     error_client_pair.open(function(err, error_client_pair) {});    
