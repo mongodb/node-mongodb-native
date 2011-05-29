@@ -9,7 +9,8 @@ var testCase = require('../deps/nodeunit').testCase,
   Script = require('vm'),
   Collection = mongodb.Collection,
   Server = mongodb.Server,
-  ServerManager = require('./tools/server_manager').ServerManager;
+  Step = require("../deps/step/lib/step"),
+  ServerManager = require('./tools/server_manager').ServerManager;  
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
@@ -48,27 +49,36 @@ var tests = testCase({
   shouldCorrectlyPerformBasicInsert : function(test) {
     client.createCollection('test_insert', function(err, r) {
       client.collection('test_insert', function(err, collection) {
-        for(var i = 1; i < 1000; i++) {
-          collection.insert({c:i}, function(err, r) {});
-        }
-  
-        collection.insert({a:2}, function(err, r) {
-          collection.insert({a:3}, function(err, r) {
-            collection.count(function(err, count) {
-              test.equal(1001, count);
-              // Locate all the entries using find
-              collection.find(function(err, cursor) {
-                cursor.toArray(function(err, results) {
-                  test.equal(1001, results.length);
-                  test.ok(results[0] != null);
-  
-                  // Let's close the db
-                  test.done();
+
+        Step(
+          function inserts() {
+            var group = this.group();
+            
+            for(var i = 1; i < 1000; i++) {
+              collection.insert({c:i}, group());
+            }            
+          },
+          
+          function done(err, result) {
+            collection.insert({a:2}, {safe:true}, function(err, r) {
+              collection.insert({a:3}, {safe:true}, function(err, r) {
+                collection.count(function(err, count) {
+                  test.equal(1001, count);
+                  // Locate all the entries using find
+                  collection.find(function(err, cursor) {
+                    cursor.toArray(function(err, results) {
+                      test.equal(1001, results.length);
+                      test.ok(results[0] != null);
+
+                      // Let's close the db
+                      test.done();
+                    });
+                  });
                 });
               });
-            });
-          });
-        });
+            });            
+          }
+        )  
       });
     });    
   },
@@ -79,7 +89,7 @@ var tests = testCase({
       var collection = client.collection('test_multiple_insert', function(err, collection) {
         var docs = [{a:1}, {a:2}];
   
-        collection.insert(docs, function(err, ids) {
+        collection.insert(docs, {safe:true}, function(err, ids) {
           ids.forEach(function(doc) {
             test.ok(((doc['_id']) instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
           });
@@ -109,12 +119,13 @@ var tests = testCase({
         'b':['tmp1', 'tmp2', 'tmp3', 'tmp4', 'tmp5', 'tmp6', 'tmp7', 'tmp8', 'tmp9', 'tmp10', 'tmp11', 'tmp12', 'tmp13', 'tmp14', 'tmp15', 'tmp16']
       };
       // Insert the collection
-      collection.insert(doc);
-      // Fetch and check the collection
-      collection.findOne({'a': 0}, function(err, result) {
-        test.deepEqual(doc.a, result.a);
-        test.deepEqual(doc.b, result.b);
-        test.done();
+      collection.insert(doc, {safe:true}, function(err, r) {
+        // Fetch and check the collection
+        collection.findOne({'a': 0}, function(err, result) {
+          test.deepEqual(doc.a, result.a);
+          test.deepEqual(doc.b, result.b);
+          test.done();
+        });        
       });
     });
   },  
@@ -145,7 +156,7 @@ var tests = testCase({
         'dbref': new client.bson_serializer.DBRef('namespace', oid, 'integration_tests_')
       }
   
-      collection.insert(motherOfAllDocuments, function(err, docs) {
+      collection.insert(motherOfAllDocuments, {safe:true}, function(err, docs) {
         collection.findOne(function(err, doc) {
           // // Assert correct deserialization of the values
           test.equal(motherOfAllDocuments.string, doc.string);
@@ -195,7 +206,7 @@ var tests = testCase({
         user_collection.remove(function(err, result) {
           //first, create a user object
           var newUser = { name : 'Test Account', settings : {} };
-          user_collection.insert([newUser],  getResult(function(users){
+          user_collection.insert([newUser], {safe:true}, getResult(function(users){
               var user = users[0];
   
               var scriptCode = "settings.block = []; settings.block.push('test');";
@@ -206,7 +217,7 @@ var tests = testCase({
               //now create update command and issue it
               var updateCommand = { $set : context };
   
-              user_collection.update({_id : user._id}, updateCommand, null,
+              user_collection.update({_id : user._id}, updateCommand, {safe:true},
                 getResult(function(updateCommand) {
                   // Fetch the object and check that the changes are persisted
                   user_collection.findOne({_id : user._id}, function(err, doc) {
@@ -256,7 +267,7 @@ var tests = testCase({
       // sys.puts(sys.inspect(context.motherOfAllDocuments))
       var motherOfAllDocuments = context.motherOfAllDocuments;
   
-      collection.insert(context.motherOfAllDocuments, function(err, docs) {
+      collection.insert(context.motherOfAllDocuments, {safe:true}, function(err, docs) {
          collection.findOne(function(err, doc) {
            // Assert correct deserialization of the values
            test.equal(motherOfAllDocuments.string, doc.string);
@@ -307,12 +318,16 @@ var tests = testCase({
       collection.insert({i:1}, {safe:true})
       // Update the record
       collection.update({i:1}, {"$set":{i:2}}, {safe:true})
-      // Locate document
-      collection.findOne({}, function(err, item) {
-        test.equal(2, item.i)
-        
-        test.done();
-      });        
+      
+      // Make sure we leave enough time for mongodb to record the data
+      setTimeout(function() {
+        // Locate document
+        collection.findOne({}, function(err, item) {
+          test.equal(2, item.i)
+
+          test.done();
+        });                
+      }, 1)
     })
   },
   
@@ -362,31 +377,39 @@ var tests = testCase({
   
   
     client.createCollection('test_safe_insert', function(err, collection) {
-      for(var i = 0; i < fixtures.length; i++) {
-        collection.insert(fixtures[i], {safe:true})          
-      }
-    
-      collection.count(function(err, count) {
-        test.equal(3, count);
-  
-        collection.find().toArray(function(err, docs) {
-          test.equal(3, docs.length)
-        });
-      });
-      
-      
-      collection.find({}, {}, function(err, cursor) {
-        var counter = 0;
-        
-        cursor.each(function(err, doc) {
-          if(doc == null) {
-            test.equal(3, counter);            
-            test.done();
-          } else {
-            counter = counter + 1;
+      Step(
+        function inserts() {
+          var group = this.group();
+          
+          for(var i = 0; i < fixtures.length; i++) {
+            collection.insert(fixtures[i], {safe:true}, group());
           }          
-        });
-      });        
+        },
+        
+        function done() {
+          collection.count(function(err, count) {
+            test.equal(3, count);
+
+            collection.find().toArray(function(err, docs) {
+              test.equal(3, docs.length)
+            });
+          });
+
+
+          collection.find({}, {}, function(err, cursor) {
+            var counter = 0;
+
+            cursor.each(function(err, doc) {
+              if(doc == null) {
+                test.equal(3, counter);            
+                test.done();
+              } else {
+                counter = counter + 1;
+              }          
+            });
+          });          
+        }
+      )          
     })
   },  
   
@@ -425,7 +448,7 @@ var tests = testCase({
               test.done();
            });
           });
-       })              
+         })              
        });     
      });
   },     
