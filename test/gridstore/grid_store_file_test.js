@@ -12,7 +12,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -358,12 +358,14 @@ var tests = testCase({
     gridStore.open(function(err, gridStore) {
       gridStore.write("hello, world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
+
           var gridStore2 = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
           gridStore2.open(function(err, gridStore) {
             gridStore.write('some text is inserted here', function(err, gridStore) {
               gridStore.rewind(function(err, gridStore) {
                 gridStore.write('abc', function(err, gridStore) {
                   gridStore.close(function(err, result) {
+
                     GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
                       test.equal("abc", data);
                       test.done();

@@ -11,7 +11,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -75,29 +75,30 @@ var tests = testCase({
       client.createCollection('test.mario', function(r) {
         // Insert test documents (creates collections)
         client.collection('test.spiderman', function(err, spiderman_collection) {
-          spiderman_collection.insert({foo:5});
-        });
-  
-        client.collection('test.mario', function(err, mario_collection) {
-          mario_collection.insert({bar:0});
-        });
-  
-        // Assert collections
-        client.collections(function(err, collections) {
-          var found_spiderman = false;
-          var found_mario = false;
-          var found_does_not_exist = false;
-  
-          collections.forEach(function(collection) {
-            if(collection.collectionName == "test.spiderman") found_spiderman = true;
-            if(collection.collectionName == "test.mario") found_mario = true;
-            if(collection.collectionName == "does_not_exist") found_does_not_exist = true;
+          spiderman_collection.insert({foo:5}, {safe:true}, function(err, r) {
+            
+            client.collection('test.mario', function(err, mario_collection) {
+              mario_collection.insert({bar:0}, {safe:true}, function(err, r) {
+                // Assert collections
+                client.collections(function(err, collections) {
+                  var found_spiderman = false;
+                  var found_mario = false;
+                  var found_does_not_exist = false;
+
+                  collections.forEach(function(collection) {
+                    if(collection.collectionName == "test.spiderman") found_spiderman = true;
+                    if(collection.collectionName == "test.mario") found_mario = true;
+                    if(collection.collectionName == "does_not_exist") found_does_not_exist = true;
+                  });
+
+                  test.ok(found_spiderman);
+                  test.ok(found_mario);
+                  test.ok(!found_does_not_exist);
+                  test.done();
+                });                
+              });
+            });
           });
-  
-          test.ok(found_spiderman);
-          test.ok(found_mario);
-          test.ok(!found_does_not_exist);
-          test.done();
         });
       });
     });    
@@ -272,46 +273,47 @@ var tests = testCase({
   shouldFailToInsertDueToIllegalKeys : function(test) {
     client.createCollection('test_invalid_key_names', function(err, collection) {
       // Legal inserts
-      collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}]);
-      // Illegal insert for key
-      collection.insert({'$hello':'world'}, function(err, doc) {
-        test.ok(err instanceof Error);
-        test.equal("key $hello must not start with '$'", err.message);
-      });
-  
-      collection.insert({'hello':{'$hello':'world'}}, function(err, doc) {
-        test.ok(err instanceof Error);
-        test.equal("key $hello must not start with '$'", err.message);
-      });
-  
-      collection.insert({'he$llo':'world'}, function(err, docs) {
-        test.ok(docs[0].constructor == Object);
-      })
-  
-      collection.insert({'hello':{'hell$o':'world'}}, function(err, docs) {
-        test.ok(err == null);
-      })
-  
-      collection.insert({'.hello':'world'}, function(err, doc) {
-        test.ok(err instanceof Error);
-        test.equal("key .hello must not contain '.'", err.message);
-      });
-  
-      collection.insert({'hello':{'.hello':'world'}}, function(err, doc) {
-        test.ok(err instanceof Error);
-        test.equal("key .hello must not contain '.'", err.message);
-      });
-  
-      collection.insert({'hello.':'world'}, function(err, doc) {
-        test.ok(err instanceof Error);
-        test.equal("key hello. must not contain '.'", err.message);
-      });
-  
-      collection.insert({'hello':{'hello.':'world'}}, function(err, doc) {
-        test.ok(err instanceof Error);
-        test.equal("key hello. must not contain '.'", err.message);
-        // Let's close the db
-        test.done();
+      collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}], {safe:true}, function(err, r) {        
+        // Illegal insert for key
+        collection.insert({'$hello':'world'}, {safe:true}, function(err, doc) {
+          test.ok(err instanceof Error);
+          test.equal("key $hello must not start with '$'", err.message);
+        });
+
+        collection.insert({'hello':{'$hello':'world'}}, {safe:true}, function(err, doc) {
+          test.ok(err instanceof Error);
+          test.equal("key $hello must not start with '$'", err.message);
+        });
+
+        collection.insert({'he$llo':'world'}, {safe:true}, function(err, docs) {
+          test.ok(docs[0].constructor == Object);
+        })
+
+        collection.insert({'hello':{'hell$o':'world'}}, {safe:true}, function(err, docs) {
+          test.ok(err == null);
+        })
+
+        collection.insert({'.hello':'world'}, {safe:true}, function(err, doc) {
+          test.ok(err instanceof Error);
+          test.equal("key .hello must not contain '.'", err.message);
+        });
+
+        collection.insert({'hello':{'.hello':'world'}}, {safe:true}, function(err, doc) {
+          test.ok(err instanceof Error);
+          test.equal("key .hello must not contain '.'", err.message);
+        });
+
+        collection.insert({'hello.':'world'}, {safe:true}, function(err, doc) {
+          test.ok(err instanceof Error);
+          test.equal("key hello. must not contain '.'", err.message);
+        });
+
+        collection.insert({'hello':{'hello.':'world'}}, {safe:true}, function(err, doc) {
+          test.ok(err instanceof Error);
+          test.equal("key hello. must not contain '.'", err.message);
+          // Let's close the db
+          test.done();
+        });
       });
     });
   },  
@@ -423,7 +425,7 @@ var tests = testCase({
             test.equal('world', doc.hello);
   
             doc.hello = 'mike';
-            collection.save(doc, function(err, doc) {
+            collection.save(doc, {safe:true}, function(err, doc) {
               collection.count(function(err, count) {
                 test.equal(1, count);
               });
@@ -535,22 +537,23 @@ var tests = testCase({
        collection.save({
          name: 'amit',
          text: 'some text'
+       }, {safe:true}, function(err, r) {
+         collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
+           user = users[0]
+           if(err) {
+             throw new Error(err)
+           } else if(user) {
+             user.pants = 'worn'
+
+             collection.save(user, {safe:true}, function(err, result){
+               test.equal(null, err);
+               test.equal(1, result);
+
+              test.done();
+             })
+           }
+         });         
        })
-       collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
-         user = users[0]
-         if(err) {
-           throw new Error(err)
-         } else if(user) {
-           user.pants = 'worn'
-           
-           collection.save(user, {safe:true}, function(err, result){
-             test.equal(null, err);
-             test.equal(1, result);
-            
-            test.done();
-           })
-         }
-       });
     });
   },
   

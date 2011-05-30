@@ -13,7 +13,7 @@ var testCase = require('../deps/nodeunit').testCase,
   ServerManager = require('./tools/server_manager').ServerManager;  
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -203,7 +203,7 @@ var tests = testCase({
       };
   
       db.collection('users', getResult(function(user_collection){
-        user_collection.remove(function(err, result) {
+        user_collection.remove({}, {safe:true}, function(err, result) {
           //first, create a user object
           var newUser = { name : 'Test Account', settings : {} };
           user_collection.insert([newUser], {safe:true}, getResult(function(users){
@@ -301,8 +301,7 @@ var tests = testCase({
     client.createCollection('test_to_json_for_long', function(err, collection) {
       test.ok(collection instanceof Collection);
   
-      // collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], function(err, ids) {
-      collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], function(err, ids) {
+      collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], {safe:true}, function(err, ids) {
         collection.findOne({}, function(err, item) {
           test.equal("32222432", item.value.toJSON())
           
@@ -313,48 +312,58 @@ var tests = testCase({
   },  
   
   shouldCorrectlyInsertAndUpdateWithNoCallback : function(test) {
-    client.createCollection('test_insert_and_update_no_callback', function(err, collection) {
-      // Insert the update
-      collection.insert({i:1}, {safe:true})
-      // Update the record
-      collection.update({i:1}, {"$set":{i:2}}, {safe:true})
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}, {}));
+    db.bson_deserializer = client.bson_deserializer;
+    db.bson_serializer = client.bson_serializer;
+    db.pkFactory = client.pkFactory;
+  
+    db.open(function(err, client) {
+      client.createCollection('test_insert_and_update_no_callback', function(err, collection) {
+        // Insert the update
+        collection.insert({i:1}, {safe:true})
+        // Update the record
+        collection.update({i:1}, {"$set":{i:2}}, {safe:true})
       
-      // Make sure we leave enough time for mongodb to record the data
-      setTimeout(function() {
-        // Locate document
-        collection.findOne({}, function(err, item) {
-          test.equal(2, item.i)
+        // Make sure we leave enough time for mongodb to record the data
+        setTimeout(function() {
+          // Locate document
+          collection.findOne({}, function(err, item) {
+            test.equal(2, item.i)
 
-          test.done();
-        });                
-      }, 1)
-    })
+            client.close();
+            test.done();            
+          });                
+        }, 100)
+      })
+    });
   },
   
   shouldInsertAndQueryTimestamp : function(test) {
     client.createCollection('test_insert_and_query_timestamp', function(err, collection) {
       // Insert the update
-      collection.insert({i:client.bson_serializer.Timestamp.fromNumber(100), j:client.bson_serializer.Long.fromNumber(200)}, {safe:true})
-      // Locate document
-      collection.findOne({}, function(err, item) {
-        test.equal(100, item.i.toNumber())
-        test.equal(200, item.j.toNumber())
-        
-        test.done();
-      });        
+      collection.insert({i:client.bson_serializer.Timestamp.fromNumber(100), j:client.bson_serializer.Long.fromNumber(200)}, {safe:true}, function(err, r) {
+        // Locate document
+        collection.findOne({}, function(err, item) {
+          test.equal(100, item.i.toNumber())
+          test.equal(200, item.j.toNumber())
+
+          test.done();
+        });                
+      })
     })
   },
   
   shouldCorrectlyInsertAndQueryUndefined : function(test) {
     client.createCollection('test_insert_and_query_undefined', function(err, collection) {
       // Insert the update
-      collection.insert({i:undefined}, {safe:true})
-      // Locate document
-      collection.findOne({}, function(err, item) {
-        test.equal(null, item.i)
-        
-        test.done();
-      });        
+      collection.insert({i:undefined}, {safe:true}, function(err, r) {
+        // Locate document
+        collection.findOne({}, function(err, item) {
+          test.equal(null, item.i)
+
+          test.done();
+        });        
+      })
     })
   },
   

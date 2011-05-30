@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -51,7 +51,7 @@ var tests = testCase({
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
-          collection.insert({'a':1}, function(err, doc) {
+          collection.insert({'a':1}, {safe:true}, function(err, doc) {
             fs_client.admin(function(err, adminDb) {
               adminDb.validateCollection('test', function(err, doc) {
                 test.ok(doc.result != null);
@@ -76,7 +76,7 @@ var tests = testCase({
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
-          collection.insert({'a':1}, function(err, doc) {
+          collection.insert({'a':1}, {safe:true}, function(err, doc) {
             fs_client.admin(function(err, adminDb) {
               adminDb.profilingLevel(function(err, level) {
                 test.equal("off", level);                
@@ -100,7 +100,7 @@ var tests = testCase({
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
-          collection.insert({'a':1}, function(err, doc) {
+          collection.insert({'a':1}, {safe:true}, function(err, doc) {
             fs_client.admin(function(err, adminDb) {
               adminDb.setProfilingLevel('slow_only', function(err, level) {
                 adminDb.profilingLevel(function(err, level) {
@@ -143,7 +143,7 @@ var tests = testCase({
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
-          collection.insert({'a':1}, function(doc) {
+          collection.insert({'a':1}, {safe:true}, function(doc) {
             fs_client.admin(function(err, adminDb) {
               adminDb.setProfilingLevel('all', function(err, level) {
                 collection.find(function(err, cursor) {

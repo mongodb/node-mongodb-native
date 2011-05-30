@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -46,8 +46,8 @@ var tests = testCase({
   shouldCorrectlyClearOutCollection : function(test) {
     client.createCollection('test_clear', function(err, r) {
       client.collection('test_clear', function(err, collection) {
-        collection.insert({i:1}, function(err, ids) {
-          collection.insert({i:2}, function(err, ids) {
+        collection.insert({i:1}, {safe:true}, function(err, ids) {
+          collection.insert({i:2}, {safe:true}, function(err, ids) {
             collection.count(function(err, count) {
               test.equal(2, count);
               // Clear the collection

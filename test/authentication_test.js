@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -42,56 +42,56 @@ var tests = testCase({
     }      
   },
 
-  // Test the authentication method for the user
-  shouldCorrectlyAuthenticate : function(test) {
-    var user_name = 'spongebob';
-    var password = 'password';
-  
-    client.authenticate('admin', 'admin', function(err, replies) {
-      test.ok(err instanceof Error);
-      test.ok(!replies);
-  
-      // Add a user
-      client.addUser(user_name, password, function(err, result) {
-        client.authenticate(user_name, password, function(err, replies) {
-          test.done();
-        });
-      });
-    });    
-  },
-  
-  shouldCorrectlyAddAndRemoveUser : function(test) {
-    var user_name = 'spongebob2';
-    var password = 'password';
-  
-    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
-    p_client.open(function(err, automatic_connect_client) {
-      p_client.authenticate('admin', 'admin', function(err, replies) {
-        test.ok(err instanceof Error);
-  
-        // Add a user
-        p_client.addUser(user_name, password, function(err, result) {
-          p_client.authenticate(user_name, password, function(err, replies) {
-            test.ok(replies);
-  
-            // Remove the user and try to authenticate again
-            p_client.removeUser(user_name, function(err, result) {
-              p_client.authenticate(user_name, password, function(err, replies) {
-                test.ok(err instanceof Error);
-  
-                test.done();
-                p_client.close();
-              });
-            });
-          });
-        });
-      });
-    });    
-  }
+  // // Test the authentication method for the user
+  // shouldCorrectlyAuthenticate : function(test) {
+  //   var user_name = 'spongebob';
+  //   var password = 'password';
+  // 
+  //   client.authenticate('admin', 'admin', function(err, replies) {
+  //     test.ok(err instanceof Error);
+  //     test.ok(!replies);
+  // 
+  //     // Add a user
+  //     client.addUser(user_name, password, function(err, result) {
+  //       client.authenticate(user_name, password, function(err, replies) {
+  //         test.done();
+  //       });
+  //     });
+  //   });    
+  // },
+  // 
+  // shouldCorrectlyAddAndRemoveUser : function(test) {
+  //   var user_name = 'spongebob2';
+  //   var password = 'password';
+  // 
+  //   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+  //   p_client.bson_deserializer = client.bson_deserializer;
+  //   p_client.bson_serializer = client.bson_serializer;
+  //   p_client.pkFactory = client.pkFactory;
+  // 
+  //   p_client.open(function(err, automatic_connect_client) {
+  //     p_client.authenticate('admin', 'admin', function(err, replies) {
+  //       test.ok(err instanceof Error);
+  // 
+  //       // Add a user
+  //       p_client.addUser(user_name, password, function(err, result) {
+  //         p_client.authenticate(user_name, password, function(err, replies) {
+  //           test.ok(replies);
+  // 
+  //           // Remove the user and try to authenticate again
+  //           p_client.removeUser(user_name, function(err, result) {
+  //             p_client.authenticate(user_name, password, function(err, replies) {
+  //               test.ok(err instanceof Error);
+  // 
+  //               test.done();
+  //               p_client.close();
+  //             });
+  //           });
+  //         });
+  //       });
+  //     });
+  //   });    
+  // }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -46,7 +46,7 @@ var tests = testCase({
     var regexp = /foobar/i;
 
     client.createCollection('test_regex', function(err, collection) {
-      collection.insert({'b':regexp}, function(err, ids) {
+      collection.insert({'b':regexp}, {safe:true}, function(err, ids) {
         collection.find({}, {'fields': ['b']}, function(err, cursor) {
           cursor.toArray(function(err, items) {
             test.equal(("" + regexp), ("" + items[0].b));
@@ -62,7 +62,7 @@ var tests = testCase({
     var regexp = /foobaré/;
   
     client.createCollection('test_utf8_regex', function(err, collection) {
-      collection.insert({'b':regexp}, function(err, ids) {
+      collection.insert({'b':regexp}, {safe:true}, function(err, ids) {
         collection.find({}, {'fields': ['b']}, function(err, cursor) {
           cursor.toArray(function(err, items) {
             test.equal(("" + regexp), ("" + items[0].b));
@@ -78,21 +78,23 @@ var tests = testCase({
     // Serialized regexes contain extra trailing chars. Sometimes these trailing chars contain / which makes
     // the original regex invalid, and leads to segmentation fault.
     client.createCollection('test_regex_serialization', function(err, collection) {
-      collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, {safe:true});      
-      var count = 20,
-          run = function(i) {
-            // search by regex            
-            collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {            
-              test.equal(6, item.keywords.length);              
-              if (i === 0) {
-               test.done()
-             }
-            });
-          };
-      // loop a few times to catch the / in trailing chars case
-      while (count--) {
-        run(count);
-      }
+      collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, {safe:true}, function(err, r) {
+        
+        var count = 20,
+            run = function(i) {
+              // search by regex            
+              collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {            
+                test.equal(6, item.keywords.length);              
+                if (i === 0) {
+                 test.done()
+               }
+              });
+            };
+        // loop a few times to catch the / in trailing chars case
+        while (count--) {
+          run(count);
+        }
+      });      
     });    
   }
 })

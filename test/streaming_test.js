@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -45,7 +45,7 @@ var tests = testCase({
   shouldStreamRecordsCallsDataTheRightNumberOfTimes : function(test) {
     client.createCollection('test_stream_records', function(err, collection) {
       test.ok(collection instanceof Collection);
-      collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], function(err, ids) {
+      collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], {safe:true}, function(err, ids) {
         collection.find({}, {'limit' : 3}, function(err, cursor) {
           var stream = cursor.streamRecords(); 
           var callsToEnd = 0;
@@ -66,7 +66,7 @@ var tests = testCase({
   shouldStreamRecordsCallsEndTheRightNumberOfTimes : function(test) {
     client.createCollection('test_stream_records', function(err, collection) {
       test.ok(collection instanceof Collection);
-      collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], function(err, ids) {
+      collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], {safe:true}, function(err, ids) {
         collection.find({}, {'limit' : 3}, function(err, cursor) {
           var stream = cursor.streamRecords(function(er,item) {}); 
           var callsToEnd = 0;
@@ -97,7 +97,7 @@ var tests = testCase({
     client.createCollection('test_streaming_function_with_limit_for_fetching', function(err, collection) {
       test.ok(collection instanceof Collection);
 
-      collection.insertAll(docs, function(err, ids) {        
+      collection.insertAll(docs, {safe:true}, function(err, ids) {        
         collection.find({}, function(err, cursor) {
           // Execute find on all the documents
           var stream = cursor.streamRecords({fetchSize:1000}); 

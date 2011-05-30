@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -48,7 +48,7 @@ var tests = testCase({
   
     client.collection('test_object_id_generation.data', function(err, collection) {
       // Insert test documents (creates collections and test fetch by query)
-      collection.insert({name:"Fred", age:42}, function(err, ids) {
+      collection.insert({name:"Fred", age:42}, {safe:true}, function(err, ids) {
         test.equal(1, ids.length);
         test.ok(ids[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
@@ -59,7 +59,7 @@ var tests = testCase({
       });
   
       // Insert another test document and collect using ObjectId
-      collection.insert({name:"Pat", age:21}, function(err, ids) {
+      collection.insert({name:"Pat", age:21}, {safe:true}, function(err, ids) {
         test.equal(1, ids.length);
         test.ok(ids[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
@@ -72,7 +72,7 @@ var tests = testCase({
       // Manually created id
       var objectId = new client.bson_serializer.ObjectID(null);
       // Insert a manually created document with generated oid
-      collection.insert({"_id":objectId, name:"Donald", age:95}, function(err, ids) {
+      collection.insert({"_id":objectId, name:"Donald", age:95}, {safe:true}, function(err, ids) {
         test.equal(1, ids.length);
         test.ok(ids[0]['_id'].toHexString().length == 24);
         test.equal(objectId.toHexString(), ids[0]['_id'].toHexString());
@@ -114,7 +114,7 @@ var tests = testCase({
       date.setUTCMinutes(0);
       date.setUTCSeconds(30);
   
-      collection.insert({'_id':date}, function(err, ids) {
+      collection.insert({'_id':date}, {safe:true}, function(err, ids) {
         collection.find({'_id':date}, function(err, cursor) {
           cursor.toArray(function(err, items) {
             test.equal(("" + date), ("" + items[0]._id));

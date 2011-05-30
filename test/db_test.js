@@ -11,7 +11,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -176,30 +176,30 @@ var tests = testCase({
   
                   client.dereference(new client.bson_serializer.DBRef("test_deref", document._id), function(err, result) {
                     test.equal('hello', document.x);
-                  });
-                });
-              });
-            });
-  
-            client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, result) {
-              var obj = {'_id':4};
-  
-              collection.insert(obj, {safe:true}, function(err, ids) {
-                client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, document) {
-  
-                  test.equal(obj['_id'], document._id);
-                  collection.remove({}, {safe:true}, function(err, result) {
-                    collection.insert({'x':'hello'}, {safe:true}, function(err, ids) {
-                      client.dereference(new client.bson_serializer.DBRef("test_deref", null), function(err, result) {
-                        test.equal(null, result);
-                        // Let's close the db
-                        test.done();
+
+                    client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, result) {
+                      var obj = {'_id':4};
+
+                      collection.insert(obj, {safe:true}, function(err, ids) {
+                        client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, document) {
+
+                          test.equal(obj['_id'], document._id);
+                          collection.remove({}, {safe:true}, function(err, result) {
+                            collection.insert({'x':'hello'}, {safe:true}, function(err, ids) {
+                              client.dereference(new client.bson_serializer.DBRef("test_deref", null), function(err, result) {
+                                test.equal(null, result);
+                                // Let's close the db
+                                test.done();
+                              });
+                            });
+                          });
+                        });
                       });
                     });
                   });
                 });
               });
-            });
+            });  
           })
         })
       })
@@ -244,7 +244,7 @@ var tests = testCase({
             collection1.count(function(err, count) {
               test.equal(0, count);
   
-              collection1.insert([{'x':1}, {'x':2}], function(err, docs) {
+              collection1.insert([{'x':1}, {'x':2}], {safe:true}, function(err, docs) {
                 collection1.count(function(err, count) {
                   test.equal(2, count);
   

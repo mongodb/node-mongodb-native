@@ -11,9 +11,11 @@ build_native:
 clean_native:
 	$(MAKE) -C ./external-libs/bson clean
 
-test: build_native test_nodeunit_pure test_nodeunit_native
+test: build_native
+	@echo "\n == Run All tests minus replicaset tests=="
+	$(NODE) tools/test_all.js --noreplicaset
 
-test_junit:
+test_junit: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
 	$(NODE) tools/test_all.js --junit --noreplicaset
 

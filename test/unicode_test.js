@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -87,7 +87,7 @@ var tests = testCase({
     client.createCollection('test_should_correctly_save_unicode_containing_document', function(err, collection) {
       doc['_id'] = 'felixge';
   
-      collection.save(doc, function(err, doc) {
+      collection.save(doc, {safe:true}, function(err, doc) {
         collection.findOne(function(err, doc) {
           test.equal('felixge', doc._id);
           test.done();
@@ -100,17 +100,17 @@ var tests = testCase({
   shouldCorrectlyInsertUnicodeCharacters : function(test) {
     client.createCollection('unicode_test_collection', function(err, collection) {
       var test_strings = ["ouooueauiOUOOUEAUI", "öüóőúéáűíÖÜÓŐÚÉÁŰÍ", "本荘由利地域に洪水警報"];
-      collection.insert({id: 0, text: test_strings[0]}, function(err, ids) {
-        collection.insert({id: 1, text: test_strings[1]}, function(err, ids) {
-          collection.insert({id: 2, text: test_strings[2]}, function(err, ids) {
+      collection.insert({id: 0, text: test_strings[0]}, {safe:true}, function(err, ids) {
+        collection.insert({id: 1, text: test_strings[1]}, {safe:true}, function(err, ids) {
+          collection.insert({id: 2, text: test_strings[2]}, {safe:true}, function(err, ids) {
             collection.find(function(err, cursor) {
               cursor.each(function(err, item) {
                 if(item !== null) {
                   test.equal(test_strings[item.id], item.text);
+                } else {
+                  test.done();                  
                 }
-              });
-  
-              test.done();
+              });  
             });
           });
         });
@@ -123,8 +123,8 @@ var tests = testCase({
     
     client.createCollection('create_object_with_chinese_object_name', function(err, r) {
       client.collection('create_object_with_chinese_object_name', function(err, collection) {        
-        collection.insert(object, {safe:false}, function(err, result) {
-
+        
+        collection.insert(object, {safe:true}, function(err, result) {
           collection.findOne(function(err, item) {
             test.equal(object['客家话'], item['客家话'])
 
@@ -140,7 +140,7 @@ var tests = testCase({
   
   shouldCorrectlyHandleUT8KeyNames : function(test) { 
     client.createCollection('test_utf8_key_name', function(err, collection) { 
-      collection.insert({'šđžčćŠĐŽČĆ':1}, function(err, ids) { 
+      collection.insert({'šđžčćŠĐŽČĆ':1}, {safe:true}, function(err, ids) { 
             // finished_test({test_utf8_key_name:'ok'}); 
         collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}, function(err, cursor) { 
           cursor.toArray(function(err, items) { 
