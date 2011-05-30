@@ -50,23 +50,27 @@ var tests = testCase({
         var doc2 = null;
   
         // Insert some test documents
-        collection.insert([{a:2}, {b:3}], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]});
-        // Ensure correct insertion testing via the cursor and the count function
-        collection.find(function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(2, documents.length);
-          })
-        });
-        collection.count(function(err, count) {
-          test.equal(2, count);
-        });
-        // Fetch values by selection
-        collection.find({'a': doc1.a}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(1, documents.length);
-            test.equal(doc1.a, documents[0].a);
-            // Let's close the db
-            test.done();
+        collection.insert([{a:2}, {b:3}], {safe:true}, function(err, docs) {
+          doc1 = docs[0]; 
+          doc2 = docs[1]
+
+          // Ensure correct insertion testing via the cursor and the count function
+          collection.find(function(err, cursor) {
+            cursor.toArray(function(err, documents) {
+              test.equal(2, documents.length);
+            })
+          });
+          collection.count(function(err, count) {
+            test.equal(2, count);
+          });
+          // Fetch values by selection
+          collection.find({'a': doc1.a}, function(err, cursor) {
+            cursor.toArray(function(err, documents) {
+              test.equal(1, documents.length);
+              test.equal(doc1.a, documents[0].a);
+              // Let's close the db
+              test.done();
+            });
           });
         });
       });
@@ -81,20 +85,24 @@ var tests = testCase({
         var doc2 = null;
   
         // Insert some test documents
-        collection.insert([{a:2}, {b:3}], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]});
-        // Ensure correct insertion testing via the cursor and the count function
-        collection.find().toArray(function(err, documents) {
-          test.equal(2, documents.length);
-        });
-        collection.count(function(err, count) {
-          test.equal(2, count);
-        });
-        // Fetch values by selection
-        collection.find({'a': doc1.a}).toArray(function(err, documents) {
-          test.equal(1, documents.length);
-          test.equal(doc1.a, documents[0].a);
-          // Let's close the db
-          test.done();
+        collection.insert([{a:2}, {b:3}], {safe:true}, function(err, docs) {
+          doc1 = docs[0]; 
+          doc2 = docs[1]
+
+          // Ensure correct insertion testing via the cursor and the count function
+          collection.find().toArray(function(err, documents) {
+            test.equal(2, documents.length);
+          });
+          collection.count(function(err, count) {
+            test.equal(2, count);
+          });
+          // Fetch values by selection
+          collection.find({'a': doc1.a}).toArray(function(err, documents) {
+            test.equal(1, documents.length);
+            test.equal(doc1.a, documents[0].a);
+            // Let's close the db
+            test.done();
+          });
         });
       });
     });    
@@ -107,7 +115,7 @@ var tests = testCase({
         var doc1 = null, doc2 = null, doc3 = null;
   
         // Insert some test documents
-        collection.insert([{a:1}, {a:2}, {b:3}], function(err, docs) {
+        collection.insert([{a:1}, {a:2}, {b:3}], {safe:true}, function(err, docs) {
           var doc1 = docs[0], doc2 = docs[1], doc3 = docs[2];
   
           // Locate by less than
@@ -206,101 +214,106 @@ var tests = testCase({
             {a:2, b:1},
             {a:3, b:2},
             {a:4, b:1}
-          ], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
-  
-        // Test sorting (ascending)
-        collection.find({'a': {'$lt':10}}, {'sort': [['a', 1]]}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-            test.equal(1, documents[0].a);
-            test.equal(2, documents[1].a);
-            test.equal(3, documents[2].a);
-            test.equal(4, documents[3].a);
-          });
-        });
-  
-        // Test sorting (descending)
-        collection.find({'a': {'$lt':10}}, {'sort': [['a', -1]]}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-            test.equal(4, documents[0].a);
-            test.equal(3, documents[1].a);
-            test.equal(2, documents[2].a);
-            test.equal(1, documents[3].a);
-          });
-        });
-  
-        // Test sorting (descending), sort is hash
-        collection.find({'a': {'$lt':10}}, {sort: {a: -1}}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-            test.equal(4, documents[0].a);
-            test.equal(3, documents[1].a);
-            test.equal(2, documents[2].a);
-            test.equal(1, documents[3].a);
-          });
-        });
-  
-        // Sorting using array of names, assumes ascending order
-        collection.find({'a': {'$lt':10}}, {'sort': ['a']}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-            test.equal(1, documents[0].a);
-            test.equal(2, documents[1].a);
-            test.equal(3, documents[2].a);
-            test.equal(4, documents[3].a);
-          });
-        });
-  
-        // Sorting using single name, assumes ascending order
-        collection.find({'a': {'$lt':10}}, {'sort': 'a'}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-            test.equal(1, documents[0].a);
-            test.equal(2, documents[1].a);
-            test.equal(3, documents[2].a);
-            test.equal(4, documents[3].a);
-          });
-        });
-  
-        // Sorting using single name, assumes ascending order, sort is hash
-        collection.find({'a': {'$lt':10}}, {sort: {'a':1}}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-            test.equal(1, documents[0].a);
-            test.equal(2, documents[1].a);
-            test.equal(3, documents[2].a);
-            test.equal(4, documents[3].a);
-          });
-        });
-  
-        collection.find({'a': {'$lt':10}}, {'sort': ['b', 'a']}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-            test.equal(2, documents[0].a);
-            test.equal(4, documents[1].a);
-            test.equal(1, documents[2].a);
-            test.equal(3, documents[3].a);
-          });
-        });
-  
-        // Sorting using empty array, no order guarantee should not blow up
-        collection.find({'a': {'$lt':10}}, {'sort': []}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-          });
-        });
-  
-        /* NONACTUAL */
-        // Sorting using ordered hash
-        collection.find({'a': {'$lt':10}}, {'sort': {a:-1}}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            // Fail test if not an error
-            test.equal(4, documents.length);
-            // Let's close the db
-            test.done();
-          });
-        });
+          ], {safe:true}, function(err, docs) {
+            doc1 = docs[0]; 
+            doc2 = docs[1]; 
+            doc3 = docs[2]; 
+            doc4 = docs[3]
+
+            // Test sorting (ascending)
+            collection.find({'a': {'$lt':10}}, {'sort': [['a', 1]]}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+                test.equal(1, documents[0].a);
+                test.equal(2, documents[1].a);
+                test.equal(3, documents[2].a);
+                test.equal(4, documents[3].a);
+              });
+            });
+
+            // Test sorting (descending)
+            collection.find({'a': {'$lt':10}}, {'sort': [['a', -1]]}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+                test.equal(4, documents[0].a);
+                test.equal(3, documents[1].a);
+                test.equal(2, documents[2].a);
+                test.equal(1, documents[3].a);
+              });
+            });
+
+            // Test sorting (descending), sort is hash
+            collection.find({'a': {'$lt':10}}, {sort: {a: -1}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+                test.equal(4, documents[0].a);
+                test.equal(3, documents[1].a);
+                test.equal(2, documents[2].a);
+                test.equal(1, documents[3].a);
+              });
+            });
+
+            // Sorting using array of names, assumes ascending order
+            collection.find({'a': {'$lt':10}}, {'sort': ['a']}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+                test.equal(1, documents[0].a);
+                test.equal(2, documents[1].a);
+                test.equal(3, documents[2].a);
+                test.equal(4, documents[3].a);
+              });
+            });
+
+            // Sorting using single name, assumes ascending order
+            collection.find({'a': {'$lt':10}}, {'sort': 'a'}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+                test.equal(1, documents[0].a);
+                test.equal(2, documents[1].a);
+                test.equal(3, documents[2].a);
+                test.equal(4, documents[3].a);
+              });
+            });
+
+            // Sorting using single name, assumes ascending order, sort is hash
+            collection.find({'a': {'$lt':10}}, {sort: {'a':1}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+                test.equal(1, documents[0].a);
+                test.equal(2, documents[1].a);
+                test.equal(3, documents[2].a);
+                test.equal(4, documents[3].a);
+              });
+            });
+
+            collection.find({'a': {'$lt':10}}, {'sort': ['b', 'a']}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+                test.equal(2, documents[0].a);
+                test.equal(4, documents[1].a);
+                test.equal(1, documents[2].a);
+                test.equal(3, documents[3].a);
+              });
+            });
+
+            // Sorting using empty array, no order guarantee should not blow up
+            collection.find({'a': {'$lt':10}}, {'sort': []}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+              });
+            });
+
+            /* NONACTUAL */
+            // Sorting using ordered hash
+            collection.find({'a': {'$lt':10}}, {'sort': {a:-1}}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                // Fail test if not an error
+                test.equal(4, documents.length);
+                // Let's close the db
+                test.done();
+              });
+            });
+        });  
       });
     });    
   },
@@ -316,46 +329,51 @@ var tests = testCase({
             {b:2},
             {c:3},
             {d:4}
-          ], function(err, docs) {doc1 = docs[0]; doc2 = docs[1]; doc3 = docs[2]; doc4 = docs[3]});
-  
-        // Test limits
-        collection.find({}, {'limit': 1}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(1, documents.length);
-          });
-        });
-  
-        collection.find({}, {'limit': 2}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(2, documents.length);
-          });
-        });
-  
-        collection.find({}, {'limit': 3}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(3, documents.length);
-          });
-        });
-  
-        collection.find({}, {'limit': 4}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-          });
-        });
-  
-        collection.find({}, {}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-          });
-        });
-  
-        collection.find({}, {'limit':99}, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(4, documents.length);
-            // Let's close the db
-            test.done();
-          });
-        });
+          ], {safe:true}, function(err, docs) {
+            doc1 = docs[0]; 
+            doc2 = docs[1]; 
+            doc3 = docs[2]; 
+            doc4 = docs[3]
+
+            // Test limits
+            collection.find({}, {'limit': 1}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(1, documents.length);
+              });
+            });
+
+            collection.find({}, {'limit': 2}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(2, documents.length);
+              });
+            });
+
+            collection.find({}, {'limit': 3}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(3, documents.length);
+              });
+            });
+
+            collection.find({}, {'limit': 4}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+              });
+            });
+
+            collection.find({}, {}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+              });
+            });
+
+            collection.find({}, {'limit':99}, function(err, cursor) {
+              cursor.toArray(function(err, documents) {
+                test.equal(4, documents.length);
+                // Let's close the db
+                test.done();
+              });
+            });
+        });  
       });
     });    
   },
@@ -366,14 +384,15 @@ var tests = testCase({
       client.collection('test_find_non_quoted_values', function(err, collection) {
         // insert test document
         collection.insert([{ a: 19, b: 'teststring', c: 59920303 },
-                           { a: "19", b: 'teststring', c: 3984929 }]);
-        
-        collection.find({ a: 19 }, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(1, documents.length);
-            test.done();
-          });
-        });
+                           { a: "19", b: 'teststring', c: 3984929 }], {safe:true} , function(err, r) {
+                             
+           collection.find({ a: 19 }, function(err, cursor) {
+             cursor.toArray(function(err, documents) {
+               test.equal(1, documents.length);
+               test.done();
+             });
+           });
+        });        
       });
     });    
   },
@@ -384,26 +403,27 @@ var tests = testCase({
       client.collection('test_find_embedded_document', function(err, collection) {
         // insert test document
         collection.insert([{ a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' }},
-                           { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}]);
-        
-        // test using integer value
-        collection.find({ 'a.id': 10 }, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(1, documents.length);
-            test.equal('bar', documents[0].b);
-          });
-        });
-        
-        // test using string value
-        collection.find({ 'a.value': 'foo' }, function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            // should yield 2 documents
-            test.equal(2, documents.length);
-            test.equal('bar', documents[0].b);
-            test.equal('bar2', documents[1].b);
-            test.done();
-          });
-        });
+                           { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}], {safe:true}, function(err, r) {
+                             
+           // test using integer value
+           collection.find({ 'a.id': 10 }, function(err, cursor) {
+             cursor.toArray(function(err, documents) {
+               test.equal(1, documents.length);
+               test.equal('bar', documents[0].b);
+             });
+           });
+
+           // test using string value
+           collection.find({ 'a.value': 'foo' }, function(err, cursor) {
+             cursor.toArray(function(err, documents) {
+               // should yield 2 documents
+               test.equal(2, documents.length);
+               test.equal('bar', documents[0].b);
+               test.equal('bar2', documents[1].b);
+               test.done();
+             });
+           });
+        });        
       });
     });    
   },
@@ -426,7 +446,7 @@ var tests = testCase({
   shouldCorrectlyPerformFindByWhere : function(test) {
     client.createCollection('test_where', function(err, collection) {
       test.ok(collection instanceof Collection);
-      collection.insert([{'a':1}, {'a':2}, {'a':3}], function(err, ids) {
+      collection.insert([{'a':1}, {'a':2}, {'a':3}], {safe:true}, function(err, ids) {
         collection.count(function(err, count) {
           test.equal(3, count);
   
@@ -452,7 +472,7 @@ var tests = testCase({
   
   shouldCorrectlyPerformFindsWithHintTurnedOn : function(test) {
     client.createCollection('test_hint', function(err, collection) {
-      collection.insert({'a':1}, function(err, ids) {
+      collection.insert({'a':1}, {safe:true}, function(err, ids) {
         client.createIndex(collection.collectionName, "a", function(err, indexName) {
           collection.find({'a':1}, {'hint':'a'}, function(err, cursor) {
             cursor.toArray(function(err, items) {
@@ -513,7 +533,7 @@ var tests = testCase({
   
   shouldCorrectlyPerformFindByObjectID : function(test) {
     client.createCollection('test_find_by_oid', function(err, collection) {
-      collection.save({'hello':'mike'}, function(err, docs) {
+      collection.save({'hello':'mike'}, {safe:true}, function(err, docs) {
         test.ok(docs._id instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
   
         collection.findOne({'_id':docs._id}, function(err, doc) {
@@ -538,15 +558,15 @@ var tests = testCase({
   
     p_client.open(function(err, p_client) {
       client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {
-        collection.insert({'a':0});
-  
-        p_client.collection('test_should_correctly_retrieve_one_record', function(err, usercollection) {
-          usercollection.findOne({'a': 0}, function(err, result) {
-            p_client.close();
-            
-            test.done();
-          });
-        });
+        collection.insert({'a':0}, {safe:true}, function(err, r) {
+          p_client.collection('test_should_correctly_retrieve_one_record', function(err, usercollection) {
+            usercollection.findOne({'a': 0}, function(err, result) {
+              p_client.close();
+
+              test.done();
+            });
+          });          
+        });  
       });
     });
   }, 
@@ -571,29 +591,31 @@ var tests = testCase({
   
         // Insert some test documents
         while(docCount--) docs.push({a:docCount, b:docCount});
-        collection.insert(docs, function(err,retDocs){ docs = retDocs; });
-  
-        collection.find({},{ 'a' : 1},{ limit : 3, sort : [['a',-1]] },function(err,cursor){
-          cursor.toArray(function(err,documents){
-            test.equal(3,documents.length);
-            documents.forEach(function(doc,idx){
-              test.equal(undefined,doc.b); // making sure field select works
-              test.equal((24-idx),doc.a); // checking limit sort object with field select
+        collection.insert(docs, {safe:true}, function(err,retDocs) { 
+          docs = retDocs; 
+
+          collection.find({},{ 'a' : 1},{ limit : 3, sort : [['a',-1]] },function(err,cursor){
+            cursor.toArray(function(err,documents){
+              test.equal(3,documents.length);
+              documents.forEach(function(doc,idx){
+                test.equal(undefined,doc.b); // making sure field select works
+                test.equal((24-idx),doc.a); // checking limit sort object with field select
+              });
             });
           });
-        });
-  
-        collection.find({},{},10,3,function(err,cursor){
-          cursor.toArray(function(err,documents){
-            test.equal(3,documents.length);
-            documents.forEach(function(doc,idx){
-              test.equal(doc.a,doc.b); // making sure empty field select returns properly
-              test.equal((14-idx),doc.a); // checking skip and limit in args
+
+          collection.find({},{},10,3,function(err,cursor){
+            cursor.toArray(function(err,documents){
+              test.equal(3,documents.length);
+              documents.forEach(function(doc,idx){
+                test.equal(doc.a,doc.b); // making sure empty field select returns properly
+                test.equal((14-idx),doc.a); // checking skip and limit in args
+              });
+
+              test.done();
             });
-            
-            test.done();
           });
-        });
+        });  
       });
     });
   },
@@ -602,7 +624,7 @@ var tests = testCase({
   shouldCorrectlyFindAndModifyDocument : function(test) {
     client.createCollection('test_find_and_modify_a_document', function(err, collection) {
       // Test return new document on change
-      collection.insert({'a':1, 'b':2}, function(err, doc) {
+      collection.insert({'a':1, 'b':2}, {safe:true}, function(err, doc) {
         // Let's modify the document in place
         collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new': true}, function(err, updated_doc) {
           test.equal(1, updated_doc.a);
@@ -611,7 +633,7 @@ var tests = testCase({
       });
   
       // Test return old document on change
-      collection.insert({'a':2, 'b':2}, function(err, doc) {
+      collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
         // Let's modify the document in place
         collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, function(err, updated_doc) {
           test.equal(2, updated_doc.a);
@@ -620,7 +642,7 @@ var tests = testCase({
       });
   
       // Test remove object on change
-      collection.insert({'a':3, 'b':2}, function(err, doc) {
+      collection.insert({'a':3, 'b':2}, {safe:true}, function(err, doc) {
         // Let's modify the document in place
         collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {'new': true, remove: true}, function(err, updated_doc) {
           test.equal(3, updated_doc.a);
@@ -635,7 +657,7 @@ var tests = testCase({
       });
 
       // Test selecting a subset of fields
-      collection.insert({a: 100, b: 101}, function (err, ids) {
+      collection.insert({a: 100, b: 101}, {safe:true}, function (err, ids) {
         collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
           test.equal(2, Object.keys(updated_doc).length);
           test.equal(ids[0]['_id'].toHexString(), updated_doc._id.toHexString());

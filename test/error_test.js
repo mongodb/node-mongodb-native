@@ -44,11 +44,13 @@ var tests = testCase({
 
   // Test the error reporting functionality
   shouldCorrectlyRetrieveErrorMessagesFromServer : function(test) {
-    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+    // Just run with one connection in the pool
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
   
+    // Open the db
     error_client.open(function(err, error_client) {
       error_client.resetErrorHistory(function() {
         error_client.error(function(err, documents) {
@@ -59,11 +61,12 @@ var tests = testCase({
           error_client.executeDbCommand({forceerror: 1}, function(err, r) {
             test.equal(0, r.documents[0].ok);
             test.ok(r.documents[0].errmsg.length > 0);
-            // // Check for previous errors
+            // Check for previous errors
             error_client.previousErrors(function(err, documents) {
               test.equal(true, documents[0].ok);
               test.equal(1, documents[0].nPrev);
               test.equal("forced error", documents[0].err);
+
               // Check for the last error
               error_client.error(function(err, documents) {
                 test.equal("forced error", documents[0].err);
@@ -109,43 +112,54 @@ var tests = testCase({
   
   // Test the last status functionality of the driver
   shouldCorrectlyExecuteLastStatus : function(test) {
-    client.createCollection('test_last_status', function(err, collection) {
-      test.ok(collection instanceof Collection);
-      test.equal('test_last_status', collection.collectionName);
+    // Just run with one connection in the pool
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+    error_client.bson_deserializer = client.bson_deserializer;
+    error_client.bson_serializer = client.bson_serializer;
+    error_client.pkFactory = client.pkFactory;
+  
+    // Open the db
+    error_client.open(function(err, client) {
+      client.createCollection('test_last_status', function(err, collection) {
+        test.ok(collection instanceof Collection);
+        test.equal('test_last_status', collection.collectionName);
 
-      // Get the collection
-      client.collection('test_last_status', function(err, collection) {
-        // Remove all the elements of the collection
-        collection.remove(function(err, result) {          
-          // Check update of a document
-          collection.insert({i:1}, function(err, ids) {
-            test.equal(1, ids.length);
-            test.ok(ids[0]._id.toHexString().length == 24);
+        // Get the collection
+        client.collection('test_last_status', function(err, collection) {
+          // Remove all the elements of the collection
+          collection.remove(function(err, result) {          
+            // Check update of a document
+            collection.insert({i:1}, function(err, ids) {
+              test.equal(1, ids.length);
+              test.ok(ids[0]._id.toHexString().length == 24);
 
-            // Update the record
-            collection.update({i:1}, {"$set":{i:2}}, function(err, result) {
-              // Check for the last message from the server
-              client.lastStatus(function(err, status) {
-                test.equal(true, status.documents[0].ok);
-                test.equal(true, status.documents[0].updatedExisting);
-                // Check for failed update of document
-                collection.update({i:1}, {"$set":{i:500}}, function(err, result) {
-                  client.lastStatus(function(err, status) {
-                    test.equal(true, status.documents[0].ok);
-                    test.equal(false, status.documents[0].updatedExisting);
+              // Update the record
+              collection.update({i:1}, {"$set":{i:2}}, function(err, result) {
+                // Check for the last message from the server
+                client.lastStatus(function(err, status) {
+                  test.equal(true, status.documents[0].ok);
+                  test.equal(true, status.documents[0].updatedExisting);
+                  // Check for failed update of document
+                  collection.update({i:1}, {"$set":{i:500}}, function(err, result) {
+                    client.lastStatus(function(err, status) {
+                      test.equal(true, status.documents[0].ok);
+                      test.equal(false, status.documents[0].updatedExisting);
 
-                    // Check safe update of a document
-                    collection.insert({x:1}, function(err, ids) {
-                      collection.update({x:1}, {"$set":{x:2}}, {'safe':true}, function(err, document) {
-                      });
+                      // Check safe update of a document
+                      collection.insert({x:1}, function(err, ids) {
+                        collection.update({x:1}, {"$set":{x:2}}, {'safe':true}, function(err, document) {
+                        });
                       
-                      collection.update({x:1}, {"$set":{x:2}}, {'safe':true});
+                        collection.update({x:1}, {"$set":{x:2}}, {'safe':true});
 
-                      collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, result) {
-                        test.equal(0, result);
+                        collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, result) {
+                          test.equal(0, result);
 
-                        // Let's close the db
-                        test.done();
+                          // Let's close the db
+                          error_client.close();
+                          // Let's close the db
+                          test.done();
+                        });
                       });
                     });
                   });
@@ -154,8 +168,8 @@ var tests = testCase({
             });
           });
         });
-      });
-    });    
+      });    
+    });
   },
   
   shouldFailInsertDueToUniqueIndex : function(test) {

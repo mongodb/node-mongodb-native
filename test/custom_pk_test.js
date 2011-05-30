@@ -57,7 +57,7 @@ var tests = testCase({
     p_client.open(function(err, p_client) {
       p_client.dropDatabase(function(err, done) {
         p_client.createCollection('test_custom_key', function(err, collection) {
-          collection.insert({'a':1}, function(err, doc) {
+          collection.insert({'a':1}, {safe:true}, function(err, doc) {
             collection.find({'_id':new client.bson_serializer.ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
               cursor.toArray(function(err, items) {
                 test.equal(1, items.length);

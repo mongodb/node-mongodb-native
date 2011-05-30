@@ -58,7 +58,7 @@ var tests = testCase({
         // Let's insert a document
         automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
           // Insert another test document and collect using ObjectId
-          collection.insert({"name":"Patty", "age":34}, function(err, ids) {
+          collection.insert({"name":"Patty", "age":34}, {safe:true}, function(err, ids) {
             test.equal(1, ids.length);
             test.ok(ids[0]._id.toHexString().length == 24);
   
@@ -121,7 +121,6 @@ var tests = testCase({
     });
   
     client.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
-      test.equal(null, result)
       // Locate the entry
       client.collection('test_eval', function(err, collection) {
         collection.findOne(function(err, item) {
@@ -164,14 +163,14 @@ var tests = testCase({
   
   shouldCorrectlyDereferenceDbRef : function(test) {
     client.createCollection('test_deref', function(err, collection) {
-      collection.insert({'a':1}, function(err, ids) {
-        collection.remove(function(err, result) {
+      collection.insert({'a':1}, {safe:true}, function(err, ids) {
+        collection.remove({}, {safe:true}, function(err, result) {
           collection.count(function(err, count) {
             test.equal(0, count);
   
             // Execute deref a db reference
             client.dereference(new client.bson_serializer.DBRef("test_deref", new client.bson_serializer.ObjectID()), function(err, result) {
-              collection.insert({'x':'hello'}, function(err, ids) {
+              collection.insert({'x':'hello'}, {safe:true}, function(err, ids) {
                 collection.findOne(function(err, document) {
                   test.equal('hello', document.x);
   
@@ -185,12 +184,12 @@ var tests = testCase({
             client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, result) {
               var obj = {'_id':4};
   
-              collection.insert(obj, function(err, ids) {
+              collection.insert(obj, {safe:true}, function(err, ids) {
                 client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, document) {
   
                   test.equal(obj['_id'], document._id);
-                  collection.remove(function(err, result) {
-                    collection.insert({'x':'hello'}, function(err, ids) {
+                  collection.remove({}, {safe:true}, function(err, result) {
+                    collection.insert({'x':'hello'}, {safe:true}, function(err, ids) {
                       client.dereference(new client.bson_serializer.DBRef("test_deref", null), function(err, result) {
                         test.equal(null, result);
                         // Let's close the db
