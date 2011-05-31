@@ -260,7 +260,8 @@ ReplicaSetManager.prototype.killPrimary = function(signal, callback) {
 
     // Kill process and return node reference
     self.kill(node, signal, function() {
-      callback(null, node);
+      // Wait for a while before passing back
+      callback(null, node);        
     })    
   });
 }

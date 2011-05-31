@@ -101,97 +101,100 @@ module.exports = testCase({
               test.equal(1, c);
               // Close starting connection
               p_db.close();
-              
-              // Kill the primary
-              RS.killPrimary(function(node) {
-                
-                // Ensure valid connection
-                // Do inserts
-                ensureConnection(test, retries, function(err, p_db) {
-                  if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
-                  test.ok(err == null);
-                  test.equal(true, p_db.serverConfig.isConnected());
+              // Ensure replication happened in time
+              setTimeout(function() {
+                // Kill the primary
+                RS.killPrimary(function(node) {
 
-                  p_db.collection('testsets', function(err, collection) {
+                  // Ensure valid connection
+                  // Do inserts
+                  ensureConnection(test, retries, function(err, p_db) {
                     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
-                    // Execute a set of inserts
-                    Step(
-                      function inserts() {
-                        var group = this.group();
-                        collection.save({a:30}, {safe:true}, group());
-                        collection.save({a:40}, {safe:true}, group());
-                        collection.save({a:50}, {safe:true}, group());
-                        collection.save({a:60}, {safe:true}, group());
-                        collection.save({a:70}, {safe:true}, group());
-                      },
-                      
-                      function finishUp(err, values) {                        
-                        // Restart the old master and wait for the sync to happen
-                        RS.restartKilledNodes(function(err, result) {
-                          if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+                    test.ok(err == null);
+                    test.equal(true, p_db.serverConfig.isConnected());
 
-                          if(err != null) throw err;
-                          // Contains the results
-                          var results = [];
-                          
-                          // Just wait for the results
-                          setTimeout(function() {
-                    
-                            // Ensure the connection
-                            ensureConnection(test, retries, function(err, p_db) {
-                              if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                              
-                              // Get the collection
-                              p_db.collection('testsets', function(err, collection) {
+                    p_db.collection('testsets', function(err, collection) {
+                      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
+                      // Execute a set of inserts
+                      Step(
+                        function inserts() {
+                          var group = this.group();
+                          collection.save({a:30}, {safe:true}, group());
+                          collection.save({a:40}, {safe:true}, group());
+                          collection.save({a:50}, {safe:true}, group());
+                          collection.save({a:60}, {safe:true}, group());
+                          collection.save({a:70}, {safe:true}, group());
+                        },
+
+                        function finishUp(err, values) {                        
+                          // Restart the old master and wait for the sync to happen
+                          RS.restartKilledNodes(function(err, result) {
+                            if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
+                            if(err != null) throw err;
+                            // Contains the results
+                            var results = [];
+
+                            // Just wait for the results
+                            setTimeout(function() {
+
+                              // Ensure the connection
+                              ensureConnection(test, retries, function(err, p_db) {
                                 if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
-                                collection.find().each(function(err, item) {
+                                // Get the collection
+                                p_db.collection('testsets', function(err, collection) {
                                   if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
-                                  if(item == null) {
-                                    // Ensure we have the correct values
-                                    test.equal(6, results.length);
-                                    [20, 30, 40, 50, 60, 70].forEach(function(a) {
-                                      test.equal(1, results.filter(function(element) {
-                                        return element.a == a;
-                                      }).length);
-                                    });                                    
-                                    
-                                    // Run second check
-                                    collection.save({a:80}, {safe:true}, function(err, r) {
-                                      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+                                  collection.find().each(function(err, item) {
+                                    if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
-                                      collection.find().toArray(function(err, items) {
+                                    if(item == null) {
+                                      // Ensure we have the correct values
+                                      test.equal(6, results.length);
+                                      [20, 30, 40, 50, 60, 70].forEach(function(a) {
+                                        test.equal(1, results.filter(function(element) {
+                                          return element.a == a;
+                                        }).length);
+                                      });                                    
+
+                                      // Run second check
+                                      collection.save({a:80}, {safe:true}, function(err, r) {
                                         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
-                                        // Ensure we have the correct values
-                                        test.equal(7, items.length);
+                                        collection.find().toArray(function(err, items) {
+                                          if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
-                                        [20, 30, 40, 50, 60, 70, 80].forEach(function(a) {
-                                          test.equal(1, items.filter(function(element) {
-                                            return element.a == a;
-                                          }).length);
-                                        });                                                                              
+                                          // Ensure we have the correct values
+                                          test.equal(7, items.length);
 
-                                        p_db.close();
-                                        test.done();                                                    
-                                      });
-                                    });                                    
-                                  } else {
-                                    results.push(item);
-                                  }
+                                          [20, 30, 40, 50, 60, 70, 80].forEach(function(a) {
+                                            test.equal(1, items.filter(function(element) {
+                                              return element.a == a;
+                                            }).length);
+                                          });                                                                              
+
+                                          p_db.close();
+                                          test.done();                                                    
+                                        });
+                                      });                                    
+                                    } else {
+                                      results.push(item);
+                                    }
+                                  });
                                 });
-                              });
-                            });                            
-                          }, 1000);                          
-                        })
-                      }                      
-                    );
-                  });
-                });        
-              });              
+                              });                            
+                            }, 1000);                          
+                          })
+                        }                      
+                      );
+                    });
+                  });        
+                });
+              }, 2000);
             })
           })
         });

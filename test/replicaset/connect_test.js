@@ -71,8 +71,6 @@ module.exports = testCase({
 
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
-      if(err != null) debug("shouldCorrectlyPassErrorWhenWrongReplicaSet :: " + inspect(err));
-
       test.notEqual(null, err);
       test.done();
     })    

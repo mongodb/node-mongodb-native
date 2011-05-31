@@ -132,7 +132,7 @@ module.exports = testCase({
     db.open(function(err, p_db) {
       if(err != null) debug("shouldReadPrimary :: " + inspect(err));
 
-      p_db.collection("test-sets", {safe:{w:3, wtimeout:10000}}, function(err, collection) {
+      p_db.createCollection("test-sets", {safe:{w:3, wtimeout:10000}}, function(err, collection) {
         if(err != null) debug("shouldReadPrimary :: " + inspect(err));
 
         Step(
@@ -169,38 +169,41 @@ module.exports = testCase({
               if(err != null) debug("shouldReadPrimary :: " + inspect(err));
               test.ifError(err);
               
-              // Kill the primary
-              RS.killPrimary(function(node) {
+              // Ensure replication happened in time
+              setTimeout(function() {
+                // Kill the primary
+                RS.killPrimary(function(node) {
 
-                //
-                //  Retry again to read the docs with primary dead
-                retryEnsure(60, function(done) {
-                  results = [];
+                  //
+                  //  Retry again to read the docs with primary dead
+                  retryEnsure(60, function(done) {
+                    results = [];
 
-                  collection.find().each(function(err, item) {
-                    if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+                    collection.find().each(function(err, item) {
+                      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
 
-                    if(item == null) {
-                      var correct = 0;
-                      // Check all the values
-                      var r = [20, 30, 40];
-                      for(var i = 0; i < r.length; i++) {
-                        correct += results.filter(function(element) {
-                          return element.a == r[i];
-                        }).length;                  
-                      }                  
-                      return correct == 3 ? done(true) : done(false);
-                    } else {
-                      results.push(item);
-                    }
-                  });
-                }, function(err, result) {
-                  test.ifError(err);
+                      if(item == null) {
+                        var correct = 0;
+                        // Check all the values
+                        var r = [20, 30, 40];
+                        for(var i = 0; i < r.length; i++) {
+                          correct += results.filter(function(element) {
+                            return element.a == r[i];
+                          }).length;                  
+                        }                  
+                        return correct == 3 ? done(true) : done(false);
+                      } else {
+                        results.push(item);
+                      }
+                    });
+                  }, function(err, result) {
+                    test.ifError(err);
 
-                  test.done();
-                  p_db.close();
-                })
-              });              
+                    test.done();
+                    p_db.close();
+                  })
+                });              
+              }, 2000);
             })
           }
         );
