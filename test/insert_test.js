@@ -53,8 +53,8 @@ var tests = testCase({
     db.bson_serializer = client.bson_serializer;
   
     db.open(function(err, client) {
-      client.createCollection('test_insert', function(err, r) {
-        client.collection('test_insert', function(err, collection) {
+      client.createCollection('test_insert2', function(err, r) {
+        client.collection('test_insert2', function(err, collection) {
     
           Step(
             function inserts() {

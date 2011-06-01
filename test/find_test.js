@@ -228,89 +228,89 @@ var tests = testCase({
                 test.equal(2, documents[1].a);
                 test.equal(3, documents[2].a);
                 test.equal(4, documents[3].a);
-              });
-            });
 
-            // Test sorting (descending)
-            collection.find({'a': {'$lt':10}}, {'sort': [['a', -1]]}, function(err, cursor) {
-              cursor.toArray(function(err, documents) {
-                test.equal(4, documents.length);
-                test.equal(4, documents[0].a);
-                test.equal(3, documents[1].a);
-                test.equal(2, documents[2].a);
-                test.equal(1, documents[3].a);
-              });
-            });
+                // Test sorting (descending)
+                collection.find({'a': {'$lt':10}}, {'sort': [['a', -1]]}, function(err, cursor) {
+                  cursor.toArray(function(err, documents) {
+                    test.equal(4, documents.length);
+                    test.equal(4, documents[0].a);
+                    test.equal(3, documents[1].a);
+                    test.equal(2, documents[2].a);
+                    test.equal(1, documents[3].a);
 
-            // Test sorting (descending), sort is hash
-            collection.find({'a': {'$lt':10}}, {sort: {a: -1}}, function(err, cursor) {
-              cursor.toArray(function(err, documents) {
-                test.equal(4, documents.length);
-                test.equal(4, documents[0].a);
-                test.equal(3, documents[1].a);
-                test.equal(2, documents[2].a);
-                test.equal(1, documents[3].a);
-              });
-            });
+                    // Test sorting (descending), sort is hash
+                    collection.find({'a': {'$lt':10}}, {sort: {a: -1}}, function(err, cursor) {
+                      cursor.toArray(function(err, documents) {
+                        test.equal(4, documents.length);
+                        test.equal(4, documents[0].a);
+                        test.equal(3, documents[1].a);
+                        test.equal(2, documents[2].a);
+                        test.equal(1, documents[3].a);
 
-            // Sorting using array of names, assumes ascending order
-            collection.find({'a': {'$lt':10}}, {'sort': ['a']}, function(err, cursor) {
-              cursor.toArray(function(err, documents) {
-                test.equal(4, documents.length);
-                test.equal(1, documents[0].a);
-                test.equal(2, documents[1].a);
-                test.equal(3, documents[2].a);
-                test.equal(4, documents[3].a);
-              });
-            });
+                        // Sorting using array of names, assumes ascending order
+                        collection.find({'a': {'$lt':10}}, {'sort': ['a']}, function(err, cursor) {
+                          cursor.toArray(function(err, documents) {
+                            test.equal(4, documents.length);
+                            test.equal(1, documents[0].a);
+                            test.equal(2, documents[1].a);
+                            test.equal(3, documents[2].a);
+                            test.equal(4, documents[3].a);
 
-            // Sorting using single name, assumes ascending order
-            collection.find({'a': {'$lt':10}}, {'sort': 'a'}, function(err, cursor) {
-              cursor.toArray(function(err, documents) {
-                test.equal(4, documents.length);
-                test.equal(1, documents[0].a);
-                test.equal(2, documents[1].a);
-                test.equal(3, documents[2].a);
-                test.equal(4, documents[3].a);
-              });
-            });
+                            // Sorting using single name, assumes ascending order
+                            collection.find({'a': {'$lt':10}}, {'sort': 'a'}, function(err, cursor) {
+                              cursor.toArray(function(err, documents) {
+                                test.equal(4, documents.length);
+                                test.equal(1, documents[0].a);
+                                test.equal(2, documents[1].a);
+                                test.equal(3, documents[2].a);
+                                test.equal(4, documents[3].a);
 
-            // Sorting using single name, assumes ascending order, sort is hash
-            collection.find({'a': {'$lt':10}}, {sort: {'a':1}}, function(err, cursor) {
-              cursor.toArray(function(err, documents) {
-                test.equal(4, documents.length);
-                test.equal(1, documents[0].a);
-                test.equal(2, documents[1].a);
-                test.equal(3, documents[2].a);
-                test.equal(4, documents[3].a);
-              });
-            });
+                                // Sorting using single name, assumes ascending order, sort is hash
+                                collection.find({'a': {'$lt':10}}, {sort: {'a':1}}, function(err, cursor) {
+                                  cursor.toArray(function(err, documents) {
+                                    test.equal(4, documents.length);
+                                    test.equal(1, documents[0].a);
+                                    test.equal(2, documents[1].a);
+                                    test.equal(3, documents[2].a);
+                                    test.equal(4, documents[3].a);
 
-            collection.find({'a': {'$lt':10}}, {'sort': ['b', 'a']}, function(err, cursor) {
-              cursor.toArray(function(err, documents) {
-                test.equal(4, documents.length);
-                test.equal(2, documents[0].a);
-                test.equal(4, documents[1].a);
-                test.equal(1, documents[2].a);
-                test.equal(3, documents[3].a);
-              });
-            });
+                                    collection.find({'a': {'$lt':10}}, {'sort': ['b', 'a']}, function(err, cursor) {
+                                      cursor.toArray(function(err, documents) {
+                                        test.equal(4, documents.length);
+                                        test.equal(2, documents[0].a);
+                                        test.equal(4, documents[1].a);
+                                        test.equal(1, documents[2].a);
+                                        test.equal(3, documents[3].a);
 
-            // Sorting using empty array, no order guarantee should not blow up
-            collection.find({'a': {'$lt':10}}, {'sort': []}, function(err, cursor) {
-              cursor.toArray(function(err, documents) {
-                test.equal(4, documents.length);
-              });
-            });
+                                        // Sorting using empty array, no order guarantee should not blow up
+                                        collection.find({'a': {'$lt':10}}, {'sort': []}, function(err, cursor) {
+                                          cursor.toArray(function(err, documents) {
+                                            test.equal(4, documents.length);
 
-            /* NONACTUAL */
-            // Sorting using ordered hash
-            collection.find({'a': {'$lt':10}}, {'sort': {a:-1}}, function(err, cursor) {
-              cursor.toArray(function(err, documents) {
-                // Fail test if not an error
-                test.equal(4, documents.length);
-                // Let's close the db
-                test.done();
+                                            /* NONACTUAL */
+                                            // Sorting using ordered hash
+                                            collection.find({'a': {'$lt':10}}, {'sort': {a:-1}}, function(err, cursor) {
+                                              cursor.toArray(function(err, documents) {
+                                                // Fail test if not an error
+                                                test.equal(4, documents.length);
+                                                // Let's close the db
+                                                test.done();
+                                              });
+                                            });
+                                          });
+                                        });
+                                      });
+                                    });
+                                  });
+                                });
+                              });
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
               });
             });
         });  

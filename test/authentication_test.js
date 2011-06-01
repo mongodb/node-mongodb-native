@@ -9,22 +9,22 @@ var testCase = require('../deps/nodeunit').testCase,
   Collection = mongodb.Collection,
   Server = mongodb.Server;
 
-var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var MONGODB = 'ruby-test-db';
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
 var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
-      if(numberOfTestsRun == Object.keys(tests).length) {
-        // If first test drop the db
-        client.dropDatabase(function(err, done) {
-          callback();
-        });                
-      } else {
+      // if(numberOfTestsRun == Object.keys(tests).length) {
+      //   // If first test drop the db
+      //   client.dropDatabase(function(err, done) {
+      //     callback();
+      //   });                
+      // } else {
         return callback();        
-      }      
+      // }      
     });
   },
   
@@ -42,24 +42,26 @@ var tests = testCase({
     }      
   },
 
-  // // Test the authentication method for the user
-  // shouldCorrectlyAuthenticate : function(test) {
-  //   var user_name = 'spongebob';
-  //   var password = 'password';
-  // 
-  //   client.authenticate('admin', 'admin', function(err, replies) {
-  //     test.ok(err instanceof Error);
-  //     test.ok(!replies);
-  // 
-  //     // Add a user
-  //     client.addUser(user_name, password, function(err, result) {
-  //       client.authenticate(user_name, password, function(err, replies) {
-  //         test.done();
-  //       });
-  //     });
-  //   });    
-  // },
-  // 
+  // Test the authentication method for the user
+  shouldCorrectlyAuthenticate : function(test) {
+    var user_name = 'spongebob';
+    var password = 'squarepants';
+  
+    client.authenticate('admin', 'admin', function(err, replies) {      
+      test.ok(err instanceof Error);
+      test.ok(!replies);
+  
+      // Add a user
+      client.addUser(user_name, password, function(err, result) {
+        client.authenticate(user_name, password, function(err, replies) {
+          test.ok(!(err instanceof Error));
+          test.ok(replies);
+          test.done();
+        });
+      });
+    });    
+  },
+  
   // shouldCorrectlyAddAndRemoveUser : function(test) {
   //   var user_name = 'spongebob2';
   //   var password = 'password';
