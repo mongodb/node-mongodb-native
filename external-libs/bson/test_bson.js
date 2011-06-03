@@ -19,7 +19,7 @@ var Long2 = require('./bson').Long,
     Code2 = require('./bson').Code,
     DBRef2 = require('./bson').DBRef;
     
-sys.puts("=== EXCEUTING TEST_BSON ===");
+sys.puts("=== EXECUTING TEST_BSON ===");
 
 // Long data type tests
 var l2_string = Long2.fromNumber(100);
