@@ -675,6 +675,25 @@ var tests = testCase({
       });
     });
   },  
+  
+  shouldNotThrowErrorOnClose : function(test) {
+    var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
+    gridStore.open(function(err, gridStore) {
+      gridStore.write('hello world\n', function(err, gridStore) {
+        gridStore.close(function(err, result) {
+  
+          var gridStore2 = new GridStore(client, "test_gs_metadata", "r");
+          gridStore2.open(function(err, gridStore) {
+            gridStore.close(function(err, fo) {
+              test.ok(err == null);
+              test.ok(fo == null);
+              test.done();
+            })
+          });
+        });
+      });
+    });    
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
