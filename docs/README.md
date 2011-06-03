@@ -1,14 +1,14 @@
 node-mongodb-native 
 ===================
 
-Select topic of interest for detailed description:
+Select a topic of interest for detailed description:
 
-  * [Database](database.md)
-  * [Collections](collections.md)
-  * [Querying documents](queries.md)
-  * [Inserting/updating documents](insert.md)
-  * [GridStore](gridfs.md)
-  * [Indexes](indexes.md)
-  * [Replicasets](replicaset.md)
+  * [Database](https://github.com/christkv/node-mongodb-native/tree/master/docs/database.md)
+  * [Collections](https://github.com/christkv/node-mongodb-native/tree/master/docs/collections.md)
+  * [Querying documents](https://github.com/christkv/node-mongodb-native/tree/master/docs/queries.md)
+  * [Inserting/updating documents](https://github.com/christkv/node-mongodb-native/tree/master/docs/insert.md)
+  * [GridStore](https://github.com/christkv/node-mongodb-native/tree/master/docs/gridfs.md)
+  * [Indexes](https://github.com/christkv/node-mongodb-native/tree/master/docs/indexes.md)
+  * [Replicasets](https://github.com/christkv/node-mongodb-native/tree/master/docs/replicaset.md)
   
-This documentation is incomplete, the best source for all possible methods are [the source fornode-mongodb-native](https://github.com/christkv/node-mongodb-native) and [MongDB manual](http://www.mongodb.org/display/DOCS/Manual).
+This documentation is incomplete, the best source for documentation on all possible methods is [the source for node-mongodb-native](https://github.com/christkv/node-mongodb-native) and [the MongoDB manual](http://www.mongodb.org/display/DOCS/Manual).
