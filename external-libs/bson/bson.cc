@@ -1445,8 +1445,16 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
   }
   
   // Check if we have a db reference
-  if(!is_array_item && return_data->Has(String::New("$ref"))) {
-    Handle<Value> dbref_value = BSON::decodeDBref(return_data->Get(String::New("$ref")), return_data->Get(String::New("$id")), return_data->Get(String::New("$db")));
+  if(!is_array_item && return_data->Has(String::New("$ref")) && return_data->Has(String::New("$id"))) {
+    Handle<Value> dbref_value;
+    
+    if(return_data->Has(String::New("$db"))) {
+      dbref_value = BSON::decodeDBref(return_data->Get(String::New("$ref")), return_data->Get(String::New("$id")), return_data->Get(String::New("$db")));
+      // return scope.Close(dbref_value);
+    } else {
+      dbref_value = BSON::decodeDBref(return_data->Get(String::New("$ref")), return_data->Get(String::New("$id")), String::New(""));
+    }
+
     return scope.Close(dbref_value);
   }
   
@@ -1464,9 +1472,8 @@ const char* BSON::ToCString(const v8::String::Utf8Value& value) {
 
 Handle<Value> BSON::decodeDBref(Local<Value> ref, Local<Value> oid, Local<Value> db) {
   HandleScope scope;
-  
   Local<Value> argv[] = {ref, oid, db};
-  Handle<Value> dbref_obj = DBRef::constructor_template->GetFunction()->NewInstance(3, argv);
+  Handle<Value> dbref_obj = DBRef::constructor_template->GetFunction()->NewInstance(3, argv);    
   return scope.Close(dbref_obj);
 }
 

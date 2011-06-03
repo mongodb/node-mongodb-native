@@ -233,6 +233,17 @@ var tests = testCase({
     test.done();        
   },
   
+  'Should Correctly Serialize and Deserialize partial DBRef' : function(test) {
+    var id = new ObjectID();
+    var doc = {'name':'something', 'user':{'$ref':'username', '$id': id}};
+    var serialized_data = BSON.serialize(doc);
+    var doc2 = BSON.deserialize(serialized_data);
+    test.equal('something', doc2.name);
+    test.equal('username', doc2.user.namespace);
+    test.equal(id.toString(), doc2.user.oid.toString());
+    test.done();                
+  },
+  
   'Should Correctly Serialize and Deserialize Long Integer' : function(test) {
     var test_int = {doc: Long.fromNumber(9223372036854775807)};
     var serialized_data = BSON.serialize(test_int);
