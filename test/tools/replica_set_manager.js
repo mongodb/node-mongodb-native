@@ -500,7 +500,7 @@ ReplicaSetManager.prototype.restart = start;
 
 ReplicaSetManager.prototype.startCmd = function(n) {
   // Create boot command
-  this.mongods[n]["start"] = "mongod --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
+  this.mongods[n]["start"] = "mongod --noprealloc --smallfiles --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
       " --dbpath " + this.mongods[n]['db_path'] + " --port " + this.mongods[n]['port'] + " --fork";
   this.mongods[n]["start"] = this.durable ? this.mongods[n]["start"] + "  --dur" : this.mongods[n]["start"];
   // debug("================================================== start server")
