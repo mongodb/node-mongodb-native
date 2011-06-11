@@ -12,9 +12,6 @@ var debug = require('util').debug,
 var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   options = options == null ? {} : options;
   
-  debug("-------------------------------------------------------------------")
-  debug(inspect(options))
-  
   this.startPort = options["start_port"] || 30000;
   this.ports = [];
   this.name = options["name"] != null ? options["name"] : "replica-set-foo";
@@ -33,8 +30,6 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   if(this.count > 7) {
     throw new Error("Cannot create a replica set with #{node_count} nodes. 7 is the max.");
   }
-  
-  debug("============================= this.count :: " + this.count)
   
   this.mongods = {};
   var self = this;

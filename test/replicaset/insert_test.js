@@ -68,6 +68,62 @@ module.exports = testCase({
       callback();        
     })
   },
+  
+  shouldCorrectlyInsertAfterPrimaryComesBackUp : function(test) {
+    // debug("=========================================== shouldWorkCorrectlyWithInserts")
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {rs_name:RS.name}
+    );
+  
+    // Insert some data
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      // Check if we got an error
+      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+
+      // Drop collection on replicaset
+      p_db.dropCollection('testsets', function(err, r) {
+        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+        // Recreate collection on replicaset
+        p_db.createCollection('testsets', function(err, collection) {
+          if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
+          // Insert a dummy document
+          collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {            
+            // Kill the primary and attemp to insert
+            // Ensure replication happened in time
+            setTimeout(function() {
+              // Kill the primary
+              RS.killPrimary(function(node) {
+                // Attempt insert (should fail)
+                collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+                  if(err != null) {
+                    collection.insert({a:30}, {safe: true}, function(err, r) {
+                      // Peform a count
+                      collection.count(function(err, count) {
+                        test.equal(2, count);
+                        test.done();
+                      });
+                    });                                          
+                  } else {
+                    // Peform a count
+                    collection.count(function(err, count) {
+                      test.equal(2, count);
+                      test.done();
+                    });                    
+                  }
+                });
+              });
+            }, 2000);            
+          });
+        });
+      });
+    });
+  },
 
   shouldWorkCorrectlyWithInserts : function(test) {
     // debug("=========================================== shouldWorkCorrectlyWithInserts")
@@ -79,7 +135,7 @@ module.exports = testCase({
       ], 
       {rs_name:RS.name}
     );
-
+  
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
@@ -98,27 +154,27 @@ module.exports = testCase({
             // Execute a count
             collection.count(function(err, c) {
               if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
               test.equal(1, c);
               // Close starting connection
               p_db.close();
-
+  
               // Ensure replication happened in time
               setTimeout(function() {
                 // Kill the primary
                 RS.killPrimary(function(node) {
-
+  
                   // Ensure valid connection
                   // Do inserts
                   ensureConnection(test, retries, function(err, p_db) {
                     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
                     test.ok(err == null);
                     test.equal(true, p_db.serverConfig.isConnected());
-
+  
                     p_db.collection('testsets', function(err, collection) {
                       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
                       // Execute a set of inserts
                       Step(
                         function inserts() {
@@ -129,30 +185,30 @@ module.exports = testCase({
                           collection.save({a:60}, {safe:true}, group());
                           collection.save({a:70}, {safe:true}, group());
                         },
-
+  
                         function finishUp(err, values) {                        
                           // Restart the old master and wait for the sync to happen
                           RS.restartKilledNodes(function(err, result) {
                             if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
                             if(err != null) throw err;
                             // Contains the results
                             var results = [];
-
+  
                             // Just wait for the results
                             setTimeout(function() {
-
+  
                               // Ensure the connection
                               ensureConnection(test, retries, function(err, p_db) {
                                 if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
                                 // Get the collection
                                 p_db.collection('testsets', function(err, collection) {
                                   if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
                                   collection.find().each(function(err, item) {
                                     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
                                     if(item == null) {
                                       // Ensure we have the correct values
                                       test.equal(6, results.length);
@@ -161,23 +217,23 @@ module.exports = testCase({
                                           return element.a == a;
                                         }).length);
                                       });                                    
-
+  
                                       // Run second check
                                       collection.save({a:80}, {safe:true}, function(err, r) {
                                         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
                                         collection.find().toArray(function(err, items) {
                                           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
                                           // Ensure we have the correct values
                                           test.equal(7, items.length);
-
+  
                                           [20, 30, 40, 50, 60, 70, 80].forEach(function(a) {
                                             test.equal(1, items.filter(function(element) {
                                               return element.a == a;
                                             }).length);
                                           });                                                                              
-
+  
                                           p_db.close();
                                           test.done();                                                    
                                         });
