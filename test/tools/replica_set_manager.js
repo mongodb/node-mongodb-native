@@ -11,24 +11,30 @@ var debug = require('util').debug,
 
 var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   options = options == null ? {} : options;
+  
+  debug("-------------------------------------------------------------------")
+  debug(inspect(options))
+  
   this.startPort = options["start_port"] || 30000;
   this.ports = [];
-  this.name = options["name"] || "replica-set-foo";
-  this.host = options["host"] || "localhost";
-  this.retries = options["retries"] || 60;
+  this.name = options["name"] != null ? options["name"] : "replica-set-foo";
+  this.host = options["host"] != null ? options["host"] : "localhost";
+  this.retries = options["retries"] != null ? options["retries"] : 60;
   this.config = {"_id": this.name, "members": []};
-  this.durable = options["durable"] || false;
+  this.durable = options["durable"] != null ? options["durable"] : false;
   this.path = path.resolve("data");
   
-  this.arbiterCount = options["arbiter_count"] || 2;
-  this.secondaryCount = options["secondary_count"] || 1;
-  this.passiveCount = options["passive_count"] || 1;
+  this.arbiterCount = options["arbiter_count"] != null ? options["arbiter_count"] : 2;
+  this.secondaryCount = options["secondary_count"] != null ? options["secondary_count"] : 1;
+  this.passiveCount = options["passive_count"] != null ? options["passive_count"] : 1;
   this.primaryCount = 1;
   
   this.count = this.primaryCount + this.passiveCount + this.arbiterCount + this.secondaryCount;
   if(this.count > 7) {
     throw new Error("Cannot create a replica set with #{node_count} nodes. 7 is the max.");
   }
+  
+  debug("============================= this.count :: " + this.count)
   
   this.mongods = {};
   var self = this;
