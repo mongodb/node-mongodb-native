@@ -11,9 +11,15 @@ The first thing to do in order to make queries to the database is to open one. T
     
   * `host` is a server hostname or IP
   * `port` is a MongoDB port, use `mongodb.Connection.DEFAULT_PORT` for default (27017)
-  * `server_options` indicates some special options, for example `{auto_reconnect: true}` to reconnect automatically
+  * `server_options` see *Server options*
   * `name` is the databse name that needs to be opened, database will be created automatically if it doesn't yet exist
   * `db_options` see *DB options*
+
+## Server options
+Several options can be passed to the `Server` constructor with `options` parameter.  
+  
+  * `auto_reconnect` - to reconnect automatically, default is false
+  * `poolSize` - specify the number of connections in the pool, default is 1
   
 ## DB options
 
@@ -22,6 +28,7 @@ Several options can be passed to the `Db` constructor with `options` parameter.
   * `native_parser` - if true, use native BSON parser 
   * `strict` - sets *strict mode*, if true then existing collections can't be "recreated" etc.
   * `pk` - custom primary key factory to generate `_id` values (see Custom primary keys).
+  * `forceServerObjectId` - generation of objectid is delegated to the mongodb server instead of the driver. default is false
 
 ## Opening a database
 
