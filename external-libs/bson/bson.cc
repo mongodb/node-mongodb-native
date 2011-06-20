@@ -56,37 +56,37 @@ static Handle<Value> VException(const char *msg) {
 
 Persistent<FunctionTemplate> BSON::constructor_template;
 
-class MyExternal : public String::ExternalAsciiStringResource {
- public:
-  MyExternal (char *d, size_t length) : ExternalAsciiStringResource() {
-    data_ = static_cast<char*>(malloc(length));
-    memcpy(data_, d, length);
-    // data_ = d;
-    length_ = length;
-    
-    // Adjust of external allocated memory
-    V8::AdjustAmountOfExternalAllocatedMemory(sizeof(MyExternal));      
-  }
-
-  virtual ~MyExternal () {
-    // Adjust the memory allocated
-    V8::AdjustAmountOfExternalAllocatedMemory(-length_);  
-    // Free the string
-    free(data_);
-  }
-
-  virtual const char * data () const {
-    return data_;
-  }
-
-  virtual size_t length () const {
-    return length_;
-  }
-
- private:
-  char *data_;
-  size_t length_;
-};
+// class MyExternal : public String::ExternalAsciiStringResource {
+//  public:
+//   MyExternal (char *d, size_t length) : ExternalAsciiStringResource() {
+//     data_ = static_cast<char*>(malloc(length));
+//     memcpy(data_, d, length);
+//     // data_ = d;
+//     length_ = length;
+//     
+//     // Adjust of external allocated memory
+//     V8::AdjustAmountOfExternalAllocatedMemory(sizeof(MyExternal));      
+//   }
+// 
+//   virtual ~MyExternal () {
+//     // Adjust the memory allocated
+//     V8::AdjustAmountOfExternalAllocatedMemory(-length_);  
+//     // Free the string
+//     free(data_);
+//   }
+// 
+//   virtual const char * data () const {
+//     return data_;
+//   }
+// 
+//   virtual size_t length () const {
+//     return length_;
+//   }
+// 
+//  private:
+//   char *data_;
+//   size_t length_;
+// };
 
 void BSON::Initialize(v8::Handle<v8::Object> target) {
   // Grab the scope of the call from Node
@@ -149,20 +149,9 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   }
   
   // Write the object size
-  BSON::write_int32((serialized_object), object_size);
-  
-  // for(int n = 0; n < object_size; n++) {
-  //   printf("C:: ============ %02x::%c\n",(unsigned char)serialized_object[n], serialized_object[n]);
-  // }
-  
-  // Try out wrapping the char* in an externalresource to avoid copying data
-  MyExternal *my_external = new MyExternal(serialized_object, object_size);
-  // Free the serialized object
-  free(serialized_object);
-  // Adjust the memory for V8
-  V8::AdjustAmountOfExternalAllocatedMemory(-object_size);
-  // Create a new external
-  Local<String> bin_value = String::NewExternal(my_external);    
+  BSON::write_int32((serialized_object), object_size);  
+  // Encode the string (string - null termiating character)
+  Local<Value> bin_value = Encode(serialized_object, object_size, BINARY)->ToString();
   // Return the serialized content
   return bin_value;
 }

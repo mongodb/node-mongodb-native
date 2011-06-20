@@ -239,18 +239,20 @@ bool ObjectID::equals(ObjectID *object_id) {
 char *ObjectID::convert_hex_oid_to_bin() {
   // Turn the oid into the binary equivalent
   char *binary_oid = (char *)malloc(12 * sizeof(char) + 1);
+  *(binary_oid + 12) = '\0';
   char n_val;
   char *nval_str = (char *)malloc(3);
   *(nval_str + 2) = '\0';  
+  uint32_t x1;
+
   // Let's convert the hex value to binary
   for(uint32_t i = 0; i < 12; i++) {
     nval_str[0] = *(this->oid + (i*2));
-    nval_str[1] = *(this->oid + (i*2) + 1);
-    // Convert the string to a char    
-    n_val = strtoul(nval_str, NULL, 16);
-    // Add to string
-    *(binary_oid + i) = n_val;
-  }  
+    nval_str[1] = *(this->oid + (i*2) + 1);    
+    sscanf(nval_str, "%x", &x1);
+    *(binary_oid + i) = (char)(x1);
+  }
+
   // release the memory for the n_val_str
   free(nval_str);
   // Return the pointer to the converted string
