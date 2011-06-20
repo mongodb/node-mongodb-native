@@ -56,38 +56,6 @@ static Handle<Value> VException(const char *msg) {
 
 Persistent<FunctionTemplate> BSON::constructor_template;
 
-// class MyExternal : public String::ExternalAsciiStringResource {
-//  public:
-//   MyExternal (char *d, size_t length) : ExternalAsciiStringResource() {
-//     data_ = static_cast<char*>(malloc(length));
-//     memcpy(data_, d, length);
-//     // data_ = d;
-//     length_ = length;
-//     
-//     // Adjust of external allocated memory
-//     V8::AdjustAmountOfExternalAllocatedMemory(sizeof(MyExternal));      
-//   }
-// 
-//   virtual ~MyExternal () {
-//     // Adjust the memory allocated
-//     V8::AdjustAmountOfExternalAllocatedMemory(-length_);  
-//     // Free the string
-//     free(data_);
-//   }
-// 
-//   virtual const char * data () const {
-//     return data_;
-//   }
-// 
-//   virtual size_t length () const {
-//     return length_;
-//   }
-// 
-//  private:
-//   char *data_;
-//   size_t length_;
-// };
-
 void BSON::Initialize(v8::Handle<v8::Object> target) {
   // Grab the scope of the call from Node
   HandleScope scope;
