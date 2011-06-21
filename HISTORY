@@ -1,3 +1,7 @@
+0.9.5-1 2011-06-21
+* Extracted Timestamp as separate class for bson js parser to avoid instanceof problems
+* Fixed driver strict mode issue
+
 0.9.5 2011-06-20
 * Replicaset support (failover and reading from secondary servers)
 * Removed ServerPair and ServerCluster
