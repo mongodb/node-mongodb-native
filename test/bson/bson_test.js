@@ -7,6 +7,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   BSON = mongodb.BSON,
   Code = mongodb.Code, 
   Binary = mongodb.Binary,
+  Timestamp = mongodb.Timestamp,
   Long = mongodb.Long,
   ObjectID = mongodb.ObjectID,
   DBRef = mongodb.DBRef,
@@ -258,6 +259,20 @@ var tests = testCase({
     test_int = {doc: Long.fromNumber(-9223372036854775809)};
     serialized_data = BSON.serialize(test_int);
     deserialized_data = BSON.deserialize(serialized_data);
+    test.deepEqual(test_int.doc, deserialized_data.doc);
+    test.done();        
+  },  
+    
+  'Should Correctly Serialize and Deserialize Long Integer and Timestamp as different types' : function(test) {
+    var long = Long.fromNumber(9223372036854775807);
+    var timestamp = Timestamp.fromNumber(9223372036854775807);
+    test.ok(long instanceof Long);
+    test.ok(!(long instanceof Timestamp));
+    test.ok(timestamp instanceof Timestamp);
+    test.ok(!(timestamp instanceof Long));
+    var test_int = {doc: long, doc2: timestamp};
+    var serialized_data = BSON.serialize(test_int);
+    var deserialized_data = BSON.deserialize(serialized_data);
     test.deepEqual(test_int.doc, deserialized_data.doc);
     test.done();        
   },
