@@ -505,7 +505,27 @@ var tests = testCase({
          })              
        });     
      });
-  },     
+  },  
+  
+  shouldCorrectlyCallCallbackWithDbDriverInStrictMode : function(test) {
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}, {strict:true}));
+    db.bson_deserializer = client.bson_deserializer;
+    db.bson_serializer = client.bson_serializer;
+    db.pkFactory = client.pkFactory;
+  
+    db.open(function(err, client) {
+      client.createCollection('test_insert_and_update_no_callback', function(err, collection) {
+        collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
+          test.equal(null, err);
+
+          collection.update({ '_id': "12345678123456781234567812345678" }, { '$set': { 'field': 0 }}, function(err) {
+            db.close();
+            test.done();
+          });                
+        });
+      });
+    });
+  }   
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
