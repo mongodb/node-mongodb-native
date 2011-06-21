@@ -1,3 +1,7 @@
+0.9.6 2011-06-21
+* Worked around npm version handling bug
+* Race condition fix for cygwin (https://github.com/vincentcr)
+
 0.9.5-1 2011-06-21
 * Extracted Timestamp as separate class for bson js parser to avoid instanceof problems
 * Fixed driver strict mode issue
