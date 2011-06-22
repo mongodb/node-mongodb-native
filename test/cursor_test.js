@@ -45,13 +45,11 @@ var tests = testCase({
     // Create a non-unique index and test inserts
     client.createCollection('test_array', function(err, collection) {
       collection.insert({'b':[1, 2, 3]}, {safe:true}, function(err, ids) {
-        collection.find(function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.deepEqual([1, 2, 3], documents[0].b);
-            // Let's close the db
-            test.done();
-          });
-        }, {});
+        collection.find().toArray(function(err, documents) {
+          test.deepEqual([1, 2, 3], documents[0].b);
+          // Let's close the db
+          test.done();
+        });
       });
     });    
   },
@@ -136,23 +134,17 @@ var tests = testCase({
             }, 
             
             function finished() {
-              collection.find(function(err, cursor) {
-                cursor.count(function(err, count) {
+              collection.find().count(function(err, count) {
                   test.equal(10, count);
                   test.ok(count.constructor == Number);
-                });
               });
 
-              collection.find({}, {'limit':5}, function(err, cursor) {
-                cursor.count(function(err, count) {
-                  test.equal(10, count);
-                });
+              collection.find({}, {'limit':5}).count(function(err, count) {
+                test.equal(10, count);
               });
 
-              collection.find({}, {'skip':5}, function(err, cursor) {
-                cursor.count(function(err, count) {
-                  test.equal(10, count);
-                });
+              collection.find({}, {'skip':5}).count(function(err, count) {
+                test.equal(10, count);
               });
 
               collection.find(function(err, cursor) {
@@ -345,10 +337,8 @@ var tests = testCase({
         }, 
         
         function finished() {
-          collection.find(function(err, cursor) {
-            cursor.count(function(err, count) {
-              test.equal(10, count);
-            });
+          collection.find().count(function(err, count) {
+            test.equal(10, count);
           });
   
           collection.find(function(err, cursor) {
@@ -929,12 +919,10 @@ var tests = testCase({
   shouldCorrectlyExecuteCursorCountWithFields : function(test) {
     client.createCollection('test_count_with_fields', function(err, collection) {
       collection.save({'x':1, 'a':2}, {safe:true}, function(err, doc) {
-        collection.find({}, {'fields':['a']}, function(err, cursor) {
-          cursor.toArray(function(err, items) {
-            test.equal(1, items.length);
-            test.equal(2, items[0].a);
-            test.equal(null, items[0].x);
-          });
+        collection.find({}, {'fields':['a']}).toArray(function(err, items) {
+          test.equal(1, items.length);
+          test.equal(2, items[0].a);
+          test.equal(null, items[0].x);
         });
   
         collection.findOne({}, {'fields':['a']}, function(err, item) {
@@ -949,13 +937,11 @@ var tests = testCase({
   shouldCorrectlyCountWithFieldsUsingExclude : function(test) {
     client.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
       collection.save({'x':1, 'a':2}, {safe:true}, function(err, doc) {
-        collection.find({}, {'fields':{'x':0}}, function(err, cursor) {
-          cursor.toArray(function(err, items) {
-            test.equal(1, items.length);
-            test.equal(2, items[0].a);
-            test.equal(null, items[0].x);            
-            test.done();
-          });
+        collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
+          test.equal(1, items.length);
+          test.equal(2, items[0].a);
+          test.equal(null, items[0].x);            
+          test.done();
         });
       });
     });

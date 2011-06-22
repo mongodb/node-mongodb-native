@@ -46,19 +46,17 @@ var tests = testCase({
     client.createCollection('test_stream_records', function(err, collection) {
       test.ok(collection instanceof Collection);
       collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], {safe:true}, function(err, ids) {
-        collection.find({}, {'limit' : 3}, function(err, cursor) {
-          var stream = cursor.streamRecords(); 
-          var callsToEnd = 0;
-          stream.on('end', function() { 
-            test.done();
-          });
-          
-          var callsToData = 0;
-          stream.on('data',function(data){ 
-            callsToData += 1;
-            test.ok(callsToData <= 3);
-          }); 
+        var stream = collection.find({}, {'limit' : 3}).streamRecords();
+        var callsToEnd = 0;
+        stream.on('end', function() { 
+          test.done();
         });
+        
+        var callsToData = 0;
+        stream.on('data',function(data){ 
+          callsToData += 1;
+          test.ok(callsToData <= 3);
+        }); 
       });
     });    
   },
