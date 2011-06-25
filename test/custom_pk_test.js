@@ -50,7 +50,7 @@ var tests = testCase({
       return new client.bson_serializer.ObjectID("aaaaaaaaaaaa");
     }
   
-    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {'pk':CustomPKFactory});
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017), {'pk':CustomPKFactory, native_parser: (process.env['TEST_NATIVE'] != null)});
     p_client.bson_deserializer = client.bson_deserializer;
     p_client.bson_serializer = client.bson_serializer;
   

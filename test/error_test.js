@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -45,7 +45,7 @@ var tests = testCase({
   // Test the error reporting functionality
   shouldCorrectlyRetrieveErrorMessagesFromServer : function(test) {    
     // Just run with one connection in the pool
-    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
@@ -113,7 +113,7 @@ var tests = testCase({
   // Test the last status functionality of the driver
   shouldCorrectlyExecuteLastStatus : function(test) {
     // Just run with one connection in the pool
-    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1,}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
@@ -190,7 +190,7 @@ var tests = testCase({
   
   // Test the error reporting functionality
   shouldFailInsertDueToUniqueIndexStrict : function(test) {
-    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {strict:true});
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
@@ -216,7 +216,7 @@ var tests = testCase({
   },
   
   'safe mode should pass the disconnected error to the callback': function (test) {
-    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;

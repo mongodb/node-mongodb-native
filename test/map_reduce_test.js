@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -89,13 +89,13 @@ var tests = testCase({
                           
                           var keyf = function(doc) { return {a: doc.a}; };
                           collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0},  function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
-                              results.sort(function(a, b) { return b.count - a.count; });
-                              test.equal(2, results[0].count);
-                              test.equal(2, results[0].a);
-                              test.equal(4, results[0].value);
-                              test.equal(1, results[1].count);
-                              test.equal(1, results[1].a);
-                              test.equal(1, results[1].value);
+                            results.sort(function(a, b) { return b.count - a.count; });
+                            test.equal(2, results[0].count);
+                            test.equal(2, results[0].a);
+                            test.equal(4, results[0].value);
+                            test.equal(1, results[1].count);
+                            test.equal(1, results[1].a);
+                            test.equal(1, results[1].value);
 
                             collection.group([], {}, {}, "5 ++ 5", true, function(err, results) {
                               test.ok(err instanceof Error);

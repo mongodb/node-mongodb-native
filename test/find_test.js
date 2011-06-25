@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -481,7 +481,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlyRetrieveSingleRecord : function(test) {
-    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     p_client.bson_deserializer = client.bson_deserializer;
     p_client.bson_serializer = client.bson_serializer;
     p_client.pkFactory = client.pkFactory;
@@ -561,7 +561,7 @@ var tests = testCase({
       // Test return old document on change
       collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
         // Let's modify the document in place
-        collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, function(err, updated_doc) {
+        collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, updated_doc) {
           test.equal(2, updated_doc.a);
           test.equal(2, updated_doc.b);
         })
