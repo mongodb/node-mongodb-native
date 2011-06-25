@@ -528,7 +528,35 @@ var tests = testCase({
         });
       });
     });
-  }   
+  },
+  
+  shouldCorrectlyInsertDBRefWithDbNotDefined : function(test) {
+    client.createCollection('shouldCorrectlyInsertDBRefWithDbNotDefined', function(err, collection) {
+      var doc = {_id: new client.bson_serializer.ObjectID()};
+      var doc2 = {_id: new client.bson_serializer.ObjectID()};
+      var doc3 = {_id: new client.bson_serializer.ObjectID()};
+      collection.insert(doc, {safe:true}, function(err, result) {
+        // Create object with dbref
+        doc2.ref = new client.bson_serializer.DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id);
+        doc3.ref = new client.bson_serializer.DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id, MONGODB);
+
+        collection.insert([doc2, doc3], {safe:true}, function(err, result) {
+          // Get all items
+          collection.find().toArray(function(err, items) {
+            test.equal("shouldCorrectlyInsertDBRefWithDbNotDefined", items[1].ref.namespace);
+            test.equal(doc._id.toString(), items[1].ref.oid.toString());
+            test.equal(null, items[1].ref.db);
+
+            test.equal("shouldCorrectlyInsertDBRefWithDbNotDefined", items[2].ref.namespace);
+            test.equal(doc._id.toString(), items[2].ref.oid.toString());
+            test.equal(MONGODB, items[2].ref.db);
+
+            test.done();          
+          })          
+        });
+      });
+    });    
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
