@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -44,7 +44,7 @@ var tests = testCase({
 
   // Test the auto connect functionality of the db
   shouldCorrectlyPerformAutomaticConnect : function(test) {
-    var automatic_connect_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {});
+    var automatic_connect_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     automatic_connect_client.bson_deserializer = client.bson_deserializer;
     automatic_connect_client.bson_serializer = client.bson_serializer;
     automatic_connect_client.pkFactory = client.pkFactory;
@@ -256,7 +256,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlyHandleFailedConnection : function(test) {
-    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27117, {auto_reconnect: false, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27117, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;  
@@ -264,7 +264,37 @@ var tests = testCase({
       test.ok(err != null)
       test.done();
     })
-  },  
+  },
+
+  shouldCorrectlyResaveDBRef :  function(test) {
+    client.dropCollection('test_resave_dbref', function() {
+        client.createCollection('test_resave_dbref', function(err, collection) {
+            test.ifError(err);
+            collection.insert({'name': 'parent'}, {safe : true}, function(err, objs) {
+                 test.ok(objs && objs.length == 1 && objs[0]._id != null);
+                 var parent = objs[0];
+                 var child = {'name' : 'child', 'parent' : new client.bson_serializer.DBRef("test_resave_dbref",  parent._id)};
+                 collection.insert(child, {safe : true}, function(err, objs) {
+                     test.ifError(err);
+                     collection.findOne({'name' : 'child'}, function(err, child) { //Child deserialized
+                          test.ifError(err);
+                          test.ok(child != null);
+                          collection.save(child, {save : true}, function(err) {
+                             test.ifError(err); //Child node with dbref resaved!
+                             collection.findOne({'parent' : new client.bson_serializer.DBRef("test_resave_dbref",  parent._id)},
+                             function(err, child) {
+                                 test.ifError(err);
+                                 test.ok(child != null);//!!!! Main test point!
+                                 test.done();
+                             })
+                          });
+                     });
+                 });
+            });
+        });
+    });
+  }
+
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
