@@ -1,3 +1,9 @@
+0.9.6-1 2011-06-25
+* Fixes for test to run properly using c++ bson parser
+* Fixes for dbref in native parser (correctly handles ref without db component)
+* Connection fixes for replicasets to avoid runtime conditions in cygwin (https://github.com/vincentcr)
+* Fixes for timestamp in js bson parser (distinct timestamp type now)
+
 0.9.6 2011-06-21
 * Worked around npm version handling bug
 * Race condition fix for cygwin (https://github.com/vincentcr)

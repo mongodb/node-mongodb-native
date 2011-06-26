@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -227,15 +227,14 @@ var tests = testCase({
       client.collection('create_and_use_sparse_index_test', function(err, collection) {
         
         collection.ensureIndex({title:1}, {sparse:true}, function(err, indexName) {
-          collection.insert({name:"Jim"});
-          collection.insert({name:"Sarah", title:"Princess"});
-          
-          collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
-            test.equal(1, items.length);
-            test.equal("Sarah", items[0].name);
-            
-            test.done();
-          })
+          collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {            
+            collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
+              test.equal(1, items.length);
+              test.equal("Sarah", items[0].name);
+
+              test.done();
+            })
+          });          
         })
       })
     })    

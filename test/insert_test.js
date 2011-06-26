@@ -13,7 +13,7 @@ var testCase = require('../deps/nodeunit').testCase,
   ServerManager = require('./tools/server_manager').ServerManager;  
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -48,7 +48,7 @@ var tests = testCase({
 
   shouldForceMongoDbServerToAssignId : function(test) {
     /// Set up server with custom pk factory
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {'forceServerObjectId':true});
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null), 'forceServerObjectId':true});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
   
@@ -157,6 +157,29 @@ var tests = testCase({
       });
     });    
   },
+
+  shouldCorrectlyExecuteSaveInsertUpdate: function(test) {
+    client.createCollection('shouldCorrectlyExecuteSaveInsertUpdate', function(err, collection) {
+      collection.save({ email : 'save' }, {safe:true}, function() {
+        collection.insert({ email : 'insert' }, {safe:true}, function() {
+          collection.update(
+            { email : 'update' },
+            { email : 'update' },
+            { upsert: true, safe:true},
+
+            function() {
+              collection.find(function(e, c) {
+                c.toArray(function(e, a) {
+                  test.equal(3, a.length)
+                  test.done();
+                });
+              });              
+            }
+          );          
+        });        
+      });
+    });    
+  },
   
   shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument : function(test) {
     client.createCollection('test_should_deserialize_large_integrated_array', function(err, collection) {
@@ -233,7 +256,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext: function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}, {}));
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -357,7 +380,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlyInsertAndUpdateWithNoCallback : function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}, {}));
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -508,7 +531,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlyCallCallbackWithDbDriverInStrictMode : function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}), {strict:true});
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -517,7 +540,7 @@ var tests = testCase({
       client.createCollection('test_insert_and_update_no_callback_strict', function(err, collection) {
         collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
           test.equal(null, err);
-
+  
           collection.update({ '_id': "12345678123456781234567812345678" }, { '$set': { 'field': 0 }}, function(err, numberOfUpdates) {
             test.equal(null, err);
             test.equal(1, numberOfUpdates);            
@@ -528,7 +551,35 @@ var tests = testCase({
         });
       });
     });
-  }   
+  },
+  
+  shouldCorrectlyInsertDBRefWithDbNotDefined : function(test) {
+    client.createCollection('shouldCorrectlyInsertDBRefWithDbNotDefined', function(err, collection) {
+      var doc = {_id: new client.bson_serializer.ObjectID()};
+      var doc2 = {_id: new client.bson_serializer.ObjectID()};
+      var doc3 = {_id: new client.bson_serializer.ObjectID()};
+      collection.insert(doc, {safe:true}, function(err, result) {
+        // Create object with dbref
+        doc2.ref = new client.bson_serializer.DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id);
+        doc3.ref = new client.bson_serializer.DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id, MONGODB);
+  
+        collection.insert([doc2, doc3], {safe:true}, function(err, result) {
+          // Get all items
+          collection.find().toArray(function(err, items) {
+            test.equal("shouldCorrectlyInsertDBRefWithDbNotDefined", items[1].ref.namespace);
+            test.equal(doc._id.toString(), items[1].ref.oid.toString());
+            test.equal(null, items[1].ref.db);
+  
+            test.equal("shouldCorrectlyInsertDBRefWithDbNotDefined", items[2].ref.namespace);
+            test.equal(doc._id.toString(), items[2].ref.oid.toString());
+            test.equal(MONGODB, items[2].ref.db);
+  
+            test.done();          
+          })          
+        });
+      });
+    });    
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
