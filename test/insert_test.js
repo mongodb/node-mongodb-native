@@ -157,7 +157,7 @@ var tests = testCase({
       });
     });    
   },
-
+  
   shouldCorrectlyExecuteSaveInsertUpdate: function(test) {
     client.createCollection('shouldCorrectlyExecuteSaveInsertUpdate', function(err, collection) {
       collection.save({ email : 'save' }, {safe:true}, function() {
@@ -166,7 +166,7 @@ var tests = testCase({
             { email : 'update' },
             { email : 'update' },
             { upsert: true, safe:true},
-
+  
             function() {
               collection.find(function(e, c) {
                 c.toArray(function(e, a) {
@@ -497,7 +497,7 @@ var tests = testCase({
         collection.findOne({_id:result[0]._id}, function(err, object) {
           test.equal(null, object.z);
           test.equal(1, object.i);
-  
+          
           test.done();
         })        
       })
@@ -505,29 +505,28 @@ var tests = testCase({
   }, 
   
   shouldCorrectlyInsertDocumentWithUUID : function(test) {
-     client.collection("insert_doc_with_uuid", function(err, collection) {
-       collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
-         test.equal(null, err);
+    client.collection("insert_doc_with_uuid", function(err, collection) {
+      collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
+        test.equal(null, err);
   
-       collection.find({_id : "12345678123456781234567812345678"}).toArray(function(err, items) {
-         test.equal(null, err);
-         test.equal(items[0]._id, "12345678123456781234567812345678")
-         test.equal(items[0].field, '1')
-          
+        collection.find({_id : "12345678123456781234567812345678"}).toArray(function(err, items) {
+          test.equal(null, err);
+          test.equal(items[0]._id, "12345678123456781234567812345678")
+          test.equal(items[0].field, '1')
+  
           // Generate a binary id
           var binaryUUID = new client.bson_serializer.Binary('00000078123456781234567812345678', client.bson_serializer.BSON.BSON_BINARY_SUBTYPE_UUID);
   
           collection.insert({_id : binaryUUID, field: '2'}, {safe:true}, function(err, result) {
-           collection.find({_id : binaryUUID}).toArray(function(err, items) {
-             test.equal(null, err);
+            collection.find({_id : binaryUUID}).toArray(function(err, items) {
+              test.equal(null, err);
               test.equal(items[0].field, '2')
-  
               test.done();
-           });
+            });
           });
-         })              
-       });     
-     });
+        })              
+      });     
+    });
   },  
   
   shouldCorrectlyCallCallbackWithDbDriverInStrictMode : function(test) {

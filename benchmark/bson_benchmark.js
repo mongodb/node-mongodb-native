@@ -1,9 +1,9 @@
-var BSON = require('../lib/mongodb').BSONNative.BSON;
-// var BSON = require('../lib/mongodb').BSONPure.BSON;
+// var BSON = require('../lib/mongodb').BSONNative.BSON;
+var BSON = require('../lib/mongodb').BSONPure.BSON;
 
 // require('util').debug(require('util').inspect(BSON))
 
-var COUNT = 100
+var COUNT = 10000
 var object = {
     string: "Strings are great",
     decimal: 3.14159265,
