@@ -61,7 +61,7 @@ var tests = testCase({
               var group = this.group();
               
               for(var i = 1; i < 1000; i++) {
-                collection.insert({c:i}, group());
+                collection.insert({c:i}, {safe:true}, group());
               }            
             },
             
@@ -91,6 +91,17 @@ var tests = testCase({
     });    
   },
   
+  shouldCorrectlyPerformSingleInsert : function(test) {
+    client.createCollection('shouldCorrectlyPerformSingleInsert', function(err, collection) {
+      collection.insert({a:1}, {safe:true}, function(err, result) {
+        collection.findOne(function(err, item) {
+          test.equal(1, item.a);
+          test.done();
+        })
+      })
+    })
+  },
+  
   shouldCorrectlyPerformBasicInsert : function(test) {
     client.createCollection('test_insert', function(err, r) {
       client.collection('test_insert', function(err, collection) {
@@ -100,7 +111,7 @@ var tests = testCase({
             var group = this.group();
             
             for(var i = 1; i < 1000; i++) {
-              collection.insert({c:i}, group());
+              collection.insert({c:i}, {safe:true}, group());
             }            
           },
           

@@ -9,6 +9,8 @@ var testCase = require('../deps/nodeunit').testCase,
   Collection = mongodb.Collection,
   Server = mongodb.Server;
 
+debug("----------------------------------------------------------- running as " + process.env['TEST_NATIVE'])
+
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
