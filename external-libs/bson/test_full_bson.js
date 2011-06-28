@@ -35,7 +35,8 @@ var serialized_data = '';
 for(var i = 0; i < bytes.length; i++) {
   serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
 }
-var object = BSONJS.deserialize(serialized_data);
+
+var object = BSONJS.deserialize(new Buffer(serialized_data, 'binary'));
 assert.equal("hello", object.string);
 assert.deepEqual([1, 2, 3], object.array);
 assert.equal(1, object.hash.a);
