@@ -1,3 +1,8 @@
+
+* Fixes for reconnect logic for server object (replays auth correctly)
+* More testcases for auth
+* Fixes in error handling for replicaset
+
 0.9.6-1 2011-06-25
 * Fixes for test to run properly using c++ bson parser
 * Fixes for dbref in native parser (correctly handles ref without db component)
