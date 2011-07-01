@@ -581,7 +581,32 @@ var tests = testCase({
         });
       })        
     });
-  }  
+  },
+  
+  shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks : function(test) {
+    var gridStore = new GridStore(client, null, 'w');
+    // Force multiple chunks to be stored
+    gridStore.chunkSize = 5000;
+    var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
+    var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png');
+    
+    gridStore.open(function(err, gridStore) {
+        
+      // Write the buffer using the .write method that should use writeBuffer correctly
+      gridStore.write(data, function(err, doc) {
+        gridStore.close(function(err, doc) {
+  
+          // Read the file using readBuffer
+          new GridStore(client, doc._id, 'r').open(function(err, gridStore) {
+            gridStore.readBuffer(function(err, data2) {
+              test.equal(data.toString('base64'), data2.toString('base64'));
+              test.done();            
+            })
+          });          
+        });
+      })        
+    });
+  },
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
