@@ -52,11 +52,47 @@ var tests = testCase({
     grid.put(originalData, {}, function(err, result) {
       // Fetch the content
       grid.get(result._id, function(err, data) {
-        // debug(inspect(data))
-        test.deepEqual(originalData.toString('base64'), data.toString('base64'));        
-        test.done();
+        test.deepEqual(originalData.toString('base64'), data.toString('base64'));
+        
+        // Should fail due to illegal objectID
+        grid.get('not an id', function(err, result) {
+          test.ok(err != null);
+          
+          test.done();
+        })        
       })
     })
+  },
+  
+  shouldFailToPutFileDueToDataObjectNotBeingBuffer : function(test) {
+    var grid = new Grid(client, 'fs');    
+    var originalData = 'Hello world';
+    // Write data to grid
+    grid.put(originalData, {}, function(err, result) {
+      test.ok(err != null);
+      test.done();
+    })    
+  },
+  
+  shouldCorrectlyWriteFileAndThenDeleteIt : function(test) {
+    var grid = new Grid(client, 'fs');    
+    var originalData = new Buffer('Hello world');
+    // Write data to grid
+    grid.put(originalData, {}, function(err, result) {
+  
+      // Delete file
+      grid.delete(result._id, function(err, result2) {
+        test.equal(null, err);
+        test.equal(true, result2);
+        
+        // Fetch the content
+        grid.get(result._id, function(err, data) {
+          test.ok(err != null);
+          test.equal(null, data);
+          test.done();
+        })
+      });
+    })    
   }
 })
 
