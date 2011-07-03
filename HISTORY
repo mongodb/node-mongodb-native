@@ -1,3 +1,6 @@
+0.9.6-4 2011-07-01
+* Added test and bug fix for insert/update/remove without callback supplied
+
 0.9.6-3 2011-07-01
 * Added simple grid class called Grid with put, get, delete methods
 * Fixed writeBuffer/readBuffer methods on GridStore so they work correctly
