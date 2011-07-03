@@ -1,11 +1,12 @@
 var BSON = require('../lib/mongodb').BSONNative.BSON,
   debug = require('util').debug,
   inspect = require('util').inspect;
-// var BSON = require('../lib/mongodb').BSONPure.BSON;
+var BSON = require('../lib/mongodb').BSONPure.BSON;
 
 // require('util').debug(require('util').inspect(BSON))
 
 var COUNT = 10000;
+var COUNT = 1;
 var object = {
     string: "Strings are great",
     decimal: 3.14159265,
@@ -34,35 +35,35 @@ console.log("bson size (bytes): ", objectBSON.length)
 console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
 
 
-console.log(COUNT + "x (objectJSON = JSON.stringify(object))")
-start = new Date
-
-for (i=COUNT; --i>=0; ) {
-    objectJSON = JSON.stringify(object)
-}
-
-end = new Date
-console.log("json size (chars): ", objectJSON.length)
-console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
-
-
-console.log(COUNT + " BSON.deserialize(objectBSON)")
-start = new Date
-
-for (i=COUNT; --i>=0; ) {
-    x = BSON.deserialize(objectBSON)
-}
-
-end = new Date
-console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
-
-
-console.log(COUNT + " JSON.parse(objectJSON)")
-start = new Date
-
-for (i=COUNT; --i>=0; ) {
-    x = JSON.parse(objectJSON)
-}
-
-end = new Date
-console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
+// console.log(COUNT + "x (objectJSON = JSON.stringify(object))")
+// start = new Date
+// 
+// for (i=COUNT; --i>=0; ) {
+//     objectJSON = JSON.stringify(object)
+// }
+// 
+// end = new Date
+// console.log("json size (chars): ", objectJSON.length)
+// console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
+// 
+// 
+// console.log(COUNT + " BSON.deserialize(objectBSON)")
+// start = new Date
+// 
+// for (i=COUNT; --i>=0; ) {
+//     x = BSON.deserialize(objectBSON)
+// }
+// 
+// end = new Date
+// console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
+// 
+// 
+// console.log(COUNT + " JSON.parse(objectJSON)")
+// start = new Date
+// 
+// for (i=COUNT; --i>=0; ) {
+//     x = JSON.parse(objectJSON)
+// }
+// 
+// end = new Date
+// console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
