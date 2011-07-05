@@ -147,10 +147,9 @@ assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), BSON.d
 // Simple serialization and deserialization for a objectId value
 var doc = {doc:new ObjectID2()};
 var simple_string_serialized = BSON.serialize(doc, false, true);
-var doc2 = {};
-doc2.doc = ObjectID.createFromHexString(doc.doc.toHexString());
+var doc2 = {doc:ObjectID.createFromHexString(doc.doc.toHexString())};
 
-assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
+assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc2, false, true));
 assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.toString(), BSON.deserialize(simple_string_serialized).doc.toString());
 
 // Simple serialization and deserialization for a Binary value
@@ -191,7 +190,8 @@ assert.deepEqual(BSONJS.deserialize(simple_string_serialized_2).doc, BSON.deseri
 
 // Simple serialization and deserialization for a DBRef
 var oid = new ObjectID2()
-var simple_string_serialized = BSONJS.serialize({doc:new DBRef('namespace', oid, 'integration_tests_')}, false, true);
+var oid2 = new ObjectID.createFromHexString(oid.toHexString())
+var simple_string_serialized = BSONJS.serialize({doc:new DBRef('namespace', oid2, 'integration_tests_')}, false, true);
 var simple_string_serialized_2 = BSON.serialize({doc:new DBRef2('namespace', oid, 'integration_tests_')}, false, true);
 
 assert.deepEqual(simple_string_serialized, simple_string_serialized_2)
