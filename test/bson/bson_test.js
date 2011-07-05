@@ -272,6 +272,14 @@ var tests = testCase({
     test.done();                
   },
   
+  'Should Correctly Serialize and Deserialize simple Int' : function(test) {
+    var doc = {doc:2147483648};
+    var serialized_data = BSONSE.serialize(doc, false, true);
+    var doc2 = BSONDE.deserialize(serialized_data);
+    test.deepEqual(doc.doc, doc2.doc.toNumber())
+    test.done();
+  },
+  
   'Should Correctly Serialize and Deserialize Long Integer' : function(test) {
     var doc = {doc: Long.fromNumber(9223372036854775807)};
     var serialized_data = BSONSE.serialize(doc, false, true);
@@ -358,6 +366,15 @@ var tests = testCase({
     test.deepEqual(doc.b, deserialized_data.b);
     test.done();        
   },  
+  
+  'Should Correctly Serialize and Deserialize UTF8' : function(test) {
+    // Serialize utf8
+    var doc = { "name" : "本荘由利地域に洪水警報", "name1" : "öüóőúéáűíÖÜÓŐÚÉÁŰÍ", "name2" : "abcdedede"};
+    var serialized_data = BSONSE.serialize(doc, false, true);
+    var deserialized_data = BSONDE.deserialize(serialized_data);
+    test.deepEqual(doc, deserialized_data);
+    test.done();
+  }
 });
 
 // Assign out tests
