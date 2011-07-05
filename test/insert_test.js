@@ -589,6 +589,28 @@ var tests = testCase({
         });
       });
     });    
+  },
+  
+  shouldCorrectlyInsertUpdateRemoveWithNoOptions : function(test) {
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    db.bson_deserializer = client.bson_deserializer;
+    db.bson_serializer = client.bson_serializer;
+    db.pkFactory = client.pkFactory;
+  
+    db.open(function(err, db) {
+      db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions', function(err, collection) {
+        collection.insert({a:1});//, function(err, result) {
+        collection.update({a:1}, {a:2});//, function(err, result) {
+        collection.remove({a:2});//, function(err, result) {
+        
+        collection.count(function(err, count) {
+          test.equal(0, count);
+        
+          db.close();
+          test.done();
+        })
+      });      
+    });
   }
 })
 
