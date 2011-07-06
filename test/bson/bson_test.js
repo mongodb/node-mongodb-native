@@ -16,7 +16,7 @@ var testCase = require('../../deps/nodeunit').testCase,
 var BSONSE = mongodb,
   BSONDE = mongodb;
   
-BSONDE = require('../../lib/mongodb').native();
+// BSONDE = require('../../lib/mongodb').native();
 
 // for tests
 BSONDE.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -63,8 +63,9 @@ var tests = testCase({
     for(var i = 0; i < bytes.length; i++) {
       serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
     }
-    
+
     var object = BSONDE.BSON.deserialize(new Buffer(serialized_data, 'binary'));//, false, true);
+    // Perform tests
     test.equal("hello", object.string);
     test.deepEqual([1,2,3], object.array);
     test.equal(1, object.hash.a);
@@ -98,8 +99,7 @@ var tests = testCase({
   
   'Should Correctly Serialize and Deserialize null value' : function(test) {
     var test_null = {doc:null};
-    var serialized_data = BSONSE.BSON.serialize(test_null);
-        
+    var serialized_data = BSONSE.BSON.serialize(test_null, false, true);
     var object = BSONDE.BSON.deserialize(serialized_data);
     test.equal(null, object.doc);
     test.done();
@@ -145,7 +145,11 @@ var tests = testCase({
     var doc = {doc: [1, 2, 'a', 'b']};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
     var deserialized = BSONDE.BSON.deserialize(serialized_data);
-    test.deepEqual(doc.doc, deserialized.doc);
+  
+    test.equal(doc.doc[0], deserialized.doc[0])
+    test.equal(doc.doc[1], deserialized.doc[1])
+    test.equal(doc.doc[2], deserialized.doc[2])
+    test.equal(doc.doc[3], deserialized.doc[3])
     test.done();        
   },
   
@@ -154,21 +158,27 @@ var tests = testCase({
     var doc = {doc: [1, 2, 'a', 'b']};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
     var deserialized = BSONDE.BSON.deserialize(serialized_data);
-    test.deepEqual(doc.doc, deserialized.doc);
+  
+    test.equal(doc.doc[0], deserialized.doc[0])
+    test.equal(doc.doc[1], deserialized.doc[1])
+    test.equal(doc.doc[2], deserialized.doc[2])
+    test.equal(doc.doc[3], deserialized.doc[3])
     test.done();        
   },
   
   'Should correctly deserialize a nested object' : function(test) {
     var doc = {doc: {doc:1}};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    test.deepEqual(doc, BSONDE.BSON.deserialize(serialized_data));
+  
+    test.deepEqual(doc.doc.doc, BSONDE.BSON.deserialize(serialized_data).doc.doc);
     test.done();            
   },
   
   'Should Correctly Serialize and Deserialize A Boolean' : function(test) {
     var doc = {doc: true};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    test.deepEqual(doc, BSONDE.BSON.deserialize(serialized_data));
+  
+    test.equal(doc.doc, BSONDE.BSON.deserialize(serialized_data).doc);    
     test.done();        
   },
   
@@ -184,7 +194,7 @@ var tests = testCase({
     var doc = {doc: date};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
   
-    test.deepEqual(doc.date, BSONDE.BSON.deserialize(serialized_data).date);
+    test.equal(doc.date, BSONDE.BSON.deserialize(serialized_data).doc.date);
     test.done();        
   },
   
@@ -275,7 +285,7 @@ var tests = testCase({
     var doc = {dbref: new DBRef('namespace', oid, null)};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
   
-    var doc2 = BSONDE.BSON.deserialize(serialized_data);
+    var doc2 = BSONDE.BSON.deserialize(serialized_data);    
     test.equal("namespace", doc2.dbref.namespace);
     test.deepEqual(doc2.dbref.oid.toHexString(), oid.toHexString());
     test.done();        
@@ -381,7 +391,7 @@ var tests = testCase({
     };
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);    
     test.deepEqual(doc.a, deserialized_data.a);
     test.deepEqual(doc.b, deserialized_data.b);
     test.done();        
@@ -399,7 +409,7 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize query object' : function(test) {
     var doc = { count: 'remove_with_no_callback_bug_test', query: {}, fields: null};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);    
     test.deepEqual(doc, deserialized_data);
     test.done();
   },
@@ -424,7 +434,7 @@ var tests = testCase({
   'Should handle Deeply nested document' : function(test) {
     var doc = {a:{b:{c:{d:2}}}};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);    
     test.deepEqual(doc, deserialized_data);
     test.done();
   },
@@ -528,14 +538,14 @@ var tests = testCase({
   'Should correctly massive doc' : function(test) {
     var oid1 = new BSONSE.ObjectID();
     var oid2 = new BSONSE.ObjectID();
-
+  
     // JS doc
     var doc = { dbref2: new BSONSE.DBRef('namespace', oid1, 'integration_tests_'),
          _id: oid2 };
-
+  
     var doc2 = { dbref2: new BSONDE.DBRef('namespace', BSONDE.ObjectID.createFromHexString(oid1.toHexString()), 'integration_tests_'),
         _id: new BSONDE.ObjectID.createFromHexString(oid2.toHexString()) };
-
+  
     // var doc = {
     //   'dbref': new BSONSE.DBRef('namespace', oid, 'integration_tests_')
     // }
@@ -543,10 +553,10 @@ var tests = testCase({
     // var doc2 = {
     //   'dbref': new BSONDE.DBRef('namespace', BSONDE.ObjectID.createFromHexString(oid.toHexString()), 'integration_tests_')
     // }
-
+  
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
     var serialized_data2 = BSONDE.BSON.serialize(doc2, false, true);
-
+  
     // for(var i = 0; i < serialized_data2.length; i++) {
     //   debug("[" + i + "] :: " + serialized_data.toString('ascii', i, i+1) + " :: [" + serialized_data[i] + "]" + " = [" + serialized_data2[i] + "] :: " + serialized_data2.toString('ascii', i, i+1) 
     //     + ((serialized_data2[i] != serialized_data[i]) ? " = false" : ""))      

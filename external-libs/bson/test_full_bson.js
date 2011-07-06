@@ -71,7 +71,7 @@ assert.deepEqual(test_null, object);
 // Should Correctly Serialize and Deserialize undefined value
 var test_undefined = {doc:undefined}
 var serialized_data = BSON.serialize(test_undefined)
-var object = BSONJS.deserialize(serialized_data);
+var object = BSONJS.deserialize(new Buffer(serialized_data, 'binary'));
 assert.equal(null, object.doc)
 
 // Should Correctly Serialize and Deserialize Number

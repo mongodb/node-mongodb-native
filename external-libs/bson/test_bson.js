@@ -67,82 +67,82 @@ var doc = {doc:'Serialize'};
 var simple_string_serialized = BSON.serialize(doc, true, false);
 
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 // Nested doc
 var doc = {a:{b:{c:1}}};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 // Simple integer serialization/deserialization test, including testing boundary conditions
 var doc = {doc:-1};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 var doc = {doc:2147483648};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 var doc = {doc:-2147483648};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 // Simple serialization and deserialization test for a Long value
 var doc = {doc:Long2.fromNumber(9223372036854775807)};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize({doc:Long.fromNumber(9223372036854775807)}, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 var doc = {doc:Long2.fromNumber(-9223372036854775807)};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize({doc:Long.fromNumber(-9223372036854775807)}, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 // Simple serialization and deserialization for a Float value
 var doc = {doc:2222.3333};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 var doc = {doc:-2222.3333};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 // Simple serialization and deserialization for a null value
 var doc = {doc:null};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 // Simple serialization and deserialization for a boolean value
 var doc = {doc:true};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 // Simple serialization and deserialization for a date value
 var date = new Date();
 var doc = {doc:date};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized), BSON.deserialize(simple_string_serialized));
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 // Simple serialization and deserialization for a boolean value
 var doc = {doc:/abcd/mi};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), BSON.deserialize(simple_string_serialized).doc.toString());
+assert.equal(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString(), BSON.deserialize(simple_string_serialized).doc.toString());
 
 var doc = {doc:/abcd/};
 var simple_string_serialized = BSON.serialize(doc, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
-assert.equal(BSONJS.deserialize(simple_string_serialized).doc.toString(), BSON.deserialize(simple_string_serialized).doc.toString());
+assert.equal(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString(), BSON.deserialize(simple_string_serialized).doc.toString());
 
 // Simple serialization and deserialization for a objectId value
 var doc = {doc:new ObjectID2()};
@@ -150,7 +150,7 @@ var simple_string_serialized = BSON.serialize(doc, false, true);
 var doc2 = {doc:ObjectID.createFromHexString(doc.doc.toHexString())};
 
 assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc2, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.toString(), BSON.deserialize(simple_string_serialized).doc.toString());
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.toString(), BSON.deserialize(simple_string_serialized).doc.toString());
 
 // Simple serialization and deserialization for a Binary value
 var binary = new Binary2();
@@ -163,7 +163,7 @@ for(var index = 0; index < string.length; index++) { binary2.put(string.charAt(i
 
 var simple_string_serialized = BSON.serialize({doc:binary}, false, true);
 assert.deepEqual(simple_string_serialized, BSONJS.serialize({doc:binary2}, false, true));
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized).doc.value(), BSON.deserialize(simple_string_serialized).doc.value());
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.value(), BSON.deserialize(simple_string_serialized).doc.value());
 
 // Simple serialization and deserialization for a Code value
 var code = new Code2('this.a > i', {'i': 1});
@@ -172,21 +172,20 @@ var simple_string_serialized_2 = BSONJS.serialize({doc:code2}, false, true);
 var simple_string_serialized = BSON.serialize({doc:code}, false, true);
 
 assert.deepEqual(simple_string_serialized, simple_string_serialized_2);
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized_2).doc.scope, BSON.deserialize(simple_string_serialized).doc.scope);
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized_2, 'binary')).doc.scope, BSON.deserialize(simple_string_serialized).doc.scope);
 
 // Simple serialization and deserialization for an Object
 var simple_string_serialized = BSON.serialize({doc:{a:1, b:{c:2}}}, false, true);
 var simple_string_serialized_2 = BSONJS.serialize({doc:{a:1, b:{c:2}}}, false, true);
 assert.deepEqual(simple_string_serialized, simple_string_serialized_2)
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized_2).doc, BSON.deserialize(simple_string_serialized).doc);
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized_2, 'binary')).doc, BSON.deserialize(simple_string_serialized).doc);
 
 // Simple serialization and deserialization for an Array
 var simple_string_serialized = BSON.serialize({doc:[9, 9, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1]}, false, true);
 var simple_string_serialized_2 = BSONJS.serialize({doc:[9, 9, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1]}, false, true);
 
 assert.deepEqual(simple_string_serialized, simple_string_serialized_2)
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized_2).doc, BSON.deserialize(simple_string_serialized).doc);
-assert.deepEqual(BSONJS.deserialize(simple_string_serialized_2).doc, BSON.deserialize(simple_string_serialized).doc);
+assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized_2, 'binary')).doc, BSON.deserialize(simple_string_serialized).doc);
 
 // Simple serialization and deserialization for a DBRef
 var oid = new ObjectID2()
@@ -196,8 +195,9 @@ var simple_string_serialized_2 = BSON.serialize({doc:new DBRef2('namespace', oid
 
 assert.deepEqual(simple_string_serialized, simple_string_serialized_2)
 // Ensure we have the same values for the dbref
-var object_js = BSONJS.deserialize(simple_string_serialized_2);
+var object_js = BSONJS.deserialize(new Buffer(simple_string_serialized_2, 'binary'));
 var object_c = BSON.deserialize(simple_string_serialized);
+
 assert.equal(object_js.doc.namespace, object_c.doc.namespace);
 assert.equal(object_js.doc.oid.toHexString(), object_c.doc.oid.toHexString());
 assert.equal(object_js.doc.db, object_c.doc.db);
@@ -248,7 +248,7 @@ var simple_string_serialized_2 = BSON.serialize({doc:object_id2}, false, true);
 
 assert.equal(simple_string_serialized_2.length, simple_string_serialized.length);
 assert.deepEqual(simple_string_serialized, simple_string_serialized_2)
-var object = BSONJS.deserialize(simple_string_serialized_2);
+var object = BSONJS.deserialize(new Buffer(simple_string_serialized_2, 'binary'));
 var object2 = BSON.deserialize(simple_string_serialized);
 assert.deepEqual(object, object2);
 
