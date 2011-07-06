@@ -419,6 +419,14 @@ var tests = testCase({
     test.deepEqual(doc.b, deserialized_data.b)
     test.deepEqual(doc, deserialized_data);
     test.done();
+  },
+  
+  'Should handle Deeply nested document' : function(test) {
+    var doc = {a:{b:{c:{d:2}}}};
+    var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+    test.deepEqual(doc, deserialized_data);
+    test.done();
   }
 });
 
