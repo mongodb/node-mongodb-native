@@ -619,12 +619,12 @@ var tests = testCase({
       // Write the file using writeBuffer
       gridStore.writeBuffer(data, function(err, doc) {
         gridStore.close(function(err, doc) {
-
+  
           // Read the file using readBuffer
           GridStore.exist(client, doc._id, function(err, result) {
             test.equal(null, err);
             test.equal(true, result);
-
+  
             client.close();
             test.done();
           });          
@@ -632,6 +632,26 @@ var tests = testCase({
       })        
     });
   },  
+  
+  shouldCorrectlySaveDataByObjectID : function(test) {
+    var id = new client.bson_serializer.ObjectID();
+    var gridStore = new GridStore(client, id, 'w');
+
+    gridStore.open(function(err, gridStore) {
+      gridStore.write('bar', function(err, gridStore) {
+        gridStore.close(function(err, result) {
+
+          GridStore.exist(client, id, function(err, result) {
+            test.equal(null, err);
+            test.equal(true, result);
+
+            client.close();
+            test.done();
+          });
+        });
+      });
+    });    
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
