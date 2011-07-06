@@ -1,7 +1,7 @@
 var BSON = require('../lib/mongodb').BSONNative.BSON,
   debug = require('util').debug,
   inspect = require('util').inspect;
-// var BSON = require('../lib/mongodb').BSONPure.BSON;
+var BSON = require('../lib/mongodb').BSONPure.BSON;
 
 // require('util').debug(require('util').inspect(BSON))
 
