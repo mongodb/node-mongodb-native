@@ -427,6 +427,133 @@ var tests = testCase({
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     test.deepEqual(doc, deserialized_data);
     test.done();
+  },
+  
+  'Should handle complicated all typed object' : function(test) {
+    // First doc
+    var date = new Date();
+    var oid = new BSONSE.ObjectID();
+    var string = 'binstring'
+    var bin = new BSONSE.Binary()
+    for(var index = 0; index < string.length; index++) {
+      bin.put(string.charAt(index))
+    }
+  
+    var doc = {
+      'string': 'hello',
+      'array': [1,2,3],
+      'hash': {'a':1, 'b':2},
+      'date': date,
+      'oid': oid,
+      'binary': bin,
+      'int': 42,
+      'float': 33.3333,
+      'regexp': /regexp/,
+      'boolean': true,
+      'long': date.getTime(),
+      'where': new BSONSE.Code('this.a > i', {i:1}),
+      'dbref': new BSONSE.DBRef('namespace', oid, 'integration_tests_')
+    }
+  
+    // Second doc
+    var oid = new BSONDE.ObjectID.createFromHexString(oid.toHexString());
+    var string = 'binstring'
+    var bin = new BSONDE.Binary()
+    for(var index = 0; index < string.length; index++) {
+      bin.put(string.charAt(index))
+    }
+  
+    var doc2 = {
+      'string': 'hello',
+      'array': [1,2,3],
+      'hash': {'a':1, 'b':2},
+      'date': date,
+      'oid': oid,
+      'binary': bin,
+      'int': 42,
+      'float': 33.3333,
+      'regexp': /regexp/,
+      'boolean': true,
+      'long': date.getTime(),
+      'where': new BSONDE.Code('this.a > i', {i:1}),
+      'dbref': new BSONDE.DBRef('namespace', oid, 'integration_tests_')
+    }
+  
+    var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+    var serialized_data2 = BSONDE.BSON.serialize(doc2, false, true);
+  
+    for(var i = 0; i < serialized_data2.length; i++) {
+    //   debug("[" + i + "] :: " + serialized_data.toString('ascii', i, i+1) + " :: [" + serialized_data[i] + "]" + " = [" + serialized_data2[i] + "] :: " + serialized_data2.toString('ascii', i, i+1))      
+      require('assert').equal(serialized_data2[i], serialized_data[i])      
+    }
+    // 
+    // var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+    // 
+    // debug("----------------------------------------------------------------- 1")
+    // debug(inspect(JSON.stringify(doc)))
+    // debug("----------------------------------------------------------------- 2")
+    // debug(inspect(JSON.stringify(deserialized_data)))
+    // 
+    // test.deepEqual(JSON.stringify(doc), JSON.stringify(deserialized_data));
+    test.done();    
+  },
+  
+  'Should Correctly Serialize Complex Nested Object' : function(test) {
+    var doc = { email: 'email@email.com',
+          encrypted_password: 'password',
+          friends: [ '4db96b973d01205364000006',
+             '4dc77b24c5ba38be14000002' ],
+          location: [ 72.4930088, 23.0431957 ],
+          name: 'Amit Kumar',
+          password_salt: 'salty',
+          profile_fields: [],
+          username: 'amit',
+          _id: new BSONSE.ObjectID() }
+          
+    var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+    
+    var doc2 = doc;
+    doc2._id = BSONDE.ObjectID.createFromHexString(doc2._id.toHexString());
+    var serialized_data2 = BSONDE.BSON.serialize(doc2, false, true);
+  
+    for(var i = 0; i < serialized_data2.length; i++) {
+      // debug("[" + i + "] :: " + serialized_data.toString('ascii', i, i+1) + " :: [" + serialized_data[i] + "]" + " = [" + serialized_data2[i] + "] :: " + serialized_data2.toString('ascii', i, i+1) 
+      //   + ((serialized_data2[i] != serialized_data[i]) ? " = false" : ""))      
+      require('assert').equal(serialized_data2[i], serialized_data[i])      
+    }
+  
+    test.done();
+  },
+  
+  'Should correctly massive doc' : function(test) {
+    var oid1 = new BSONSE.ObjectID();
+    var oid2 = new BSONSE.ObjectID();
+
+    // JS doc
+    var doc = { dbref2: new BSONSE.DBRef('namespace', oid1, 'integration_tests_'),
+         _id: oid2 };
+
+    var doc2 = { dbref2: new BSONDE.DBRef('namespace', BSONDE.ObjectID.createFromHexString(oid1.toHexString()), 'integration_tests_'),
+        _id: new BSONDE.ObjectID.createFromHexString(oid2.toHexString()) };
+
+    // var doc = {
+    //   'dbref': new BSONSE.DBRef('namespace', oid, 'integration_tests_')
+    // }
+    // 
+    // var doc2 = {
+    //   'dbref': new BSONDE.DBRef('namespace', BSONDE.ObjectID.createFromHexString(oid.toHexString()), 'integration_tests_')
+    // }
+
+    var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+    var serialized_data2 = BSONDE.BSON.serialize(doc2, false, true);
+
+    // for(var i = 0; i < serialized_data2.length; i++) {
+    //   debug("[" + i + "] :: " + serialized_data.toString('ascii', i, i+1) + " :: [" + serialized_data[i] + "]" + " = [" + serialized_data2[i] + "] :: " + serialized_data2.toString('ascii', i, i+1) 
+    //     + ((serialized_data2[i] != serialized_data[i]) ? " = false" : ""))      
+    //   // require('assert').equal(serialized_data2[i], serialized_data[i])      
+    // }
+    
+    test.done();
   }
 });
 

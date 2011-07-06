@@ -231,13 +231,14 @@ var tests = testCase({
         'regexp': /regexp/,
         'boolean': true,
         'long': date.getTime(),
-        'where': new client.bson_serializer.Code('this.a > i', {i:1}),
+        'where': new client.bson_serializer.Code('this.a > i', {i:1}),        
         'dbref': new client.bson_serializer.DBRef('namespace', oid, 'integration_tests_')
       }
   
       collection.insert(motherOfAllDocuments, {safe:true}, function(err, docs) {
-        collection.findOne(function(err, doc) {
-          // // Assert correct deserialization of the values
+        
+        collection.findOne(function(err, doc) {          
+          // Assert correct deserialization of the values
           test.equal(motherOfAllDocuments.string, doc.string);
           test.deepEqual(motherOfAllDocuments.array, doc.array);
           test.equal(motherOfAllDocuments.hash.a, doc.hash.a);
@@ -258,13 +259,12 @@ var tests = testCase({
   
           test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
           test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
-          
+          test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);          
           test.done();
         })
       });
     });
-  },  
+  }, 
   
   shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext: function(test) {
     var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
@@ -357,7 +357,7 @@ var tests = testCase({
            test.equal(date.toString(), doc.date.toString());
            test.equal(date.getTime(), doc.date.getTime());
            test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-           test.equal(motherOfAllDocuments.binary.value, doc.binary.value);
+           test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
   
            test.equal(motherOfAllDocuments.int, doc.int);
            test.equal(motherOfAllDocuments.long, doc.long);
