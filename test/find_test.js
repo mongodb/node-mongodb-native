@@ -558,7 +558,7 @@ var tests = testCase({
           test.equal(3, updated_doc.b);
         })
       });
-  
+        
       // Test return old document on change
       collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
         // Let's modify the document in place
@@ -567,7 +567,7 @@ var tests = testCase({
           test.equal(2, updated_doc.b);
         })
       });
-  
+        
       // Test remove object on change
       collection.insert({'a':3, 'b':2}, {safe:true}, function(err, doc) {
         // Let's modify the document in place
@@ -576,13 +576,13 @@ var tests = testCase({
           test.equal(2, updated_doc.b);
         })
       });
-  
+        
       // Let's upsert!
       collection.findAndModify({'a':4}, [], {'$set':{'b':3}}, {'new': true, upsert: true}, function(err, updated_doc) {
         test.equal(4, updated_doc.a);
         test.equal(3, updated_doc.b);
       });
-  
+        
       // Test selecting a subset of fields
       collection.insert({a: 100, b: 101}, {safe:true}, function (err, ids) {
         collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
