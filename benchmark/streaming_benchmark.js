@@ -9,12 +9,12 @@ var Db = require('mongodb').Db,
   debug = require('util').debug,
   inspect = require('util').inspect;  
 
-var BSON = require('bson');
+// var BSON = require('bson');
 
-// var parser = require('mongodb').BSONPure;
-// var objectID = require('mongodb').ObjectID;
-var parser = BSON;
-var objectID = BSON.ObjectID;
+var parser = require('mongodb').BSONPure;
+var objectID = require('mongodb').ObjectID;
+// var parser = BSON;
+// var objectID = BSON.ObjectID;
 
 var db = new Db('streaming_benchmark', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:4}), {})
 // Set native deserializer
