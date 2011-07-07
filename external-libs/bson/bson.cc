@@ -67,10 +67,12 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "serialize", BSONSerialize);  
+  NODE_SET_METHOD(constructor_template->GetFunction(), "serializeWithBufferAndIndex", SerializeWithBufferAndIndex);
   NODE_SET_METHOD(constructor_template->GetFunction(), "deserialize", BSONDeserialize);  
   NODE_SET_METHOD(constructor_template->GetFunction(), "encodeLong", EncodeLong);  
   NODE_SET_METHOD(constructor_template->GetFunction(), "toLong", ToLong);
   NODE_SET_METHOD(constructor_template->GetFunction(), "toInt", ToInt);
+  NODE_SET_METHOD(constructor_template->GetFunction(), "calculateObjectSize", CalculateObjectSize);
 
   target->Set(String::NewSymbol("BSON"), constructor_template->GetFunction());
 }
@@ -82,6 +84,92 @@ Handle<Value> BSON::New(const Arguments &args) {
   BSON *bson = new BSON();
   bson->Wrap(args.This());
   return args.This();
+}
+
+Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
+  HandleScope scope;  
+
+  //BSON.serializeWithBufferAndIndex = function serializeWithBufferAndIndex(object, checkKeys, buffer, index) {
+  // Ensure we have the correct values
+  if(args.Length() != 4) return VException("Four parameters required [object, boolean, Buffer, int]");
+  if(args.Length() == 4 && !args[0]->IsObject() && !args[1]->IsBoolean() && !Buffer::HasInstance(args[2]) && !args[3]->IsUint32()) return VException("Four parameters required [object, boolean, Buffer, int]");
+
+  // Define pointer to data
+  char *data;
+  uint32_t length;      
+  // Unpack the object
+  Local<Object> obj = args[2]->ToObject();
+
+  // Unpack the buffer object and get pointers to structures
+  #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+    Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+    data = buffer->data();
+    length = buffer->length();
+  #else
+    data = Buffer::Data(obj);
+    length = Buffer::Length(obj);
+  #endif
+
+  // Calculate the total size of the document in binary form to ensure we only allocate memory once
+  uint32_t object_size = BSON::calculate_object_size(args[0]);
+  // Unpack the index variable
+  Local<Uint32> indexObject = args[3]->ToUint32();
+  uint32_t index = indexObject->Value();
+
+  // Allocate the memory needed for the serializtion
+  char *serialized_object = (char *)malloc(object_size * sizeof(char));  
+    
+  // printf("=================================== length :: %u\n", length);
+  // printf("=================================== index :: %u\n", index);
+  // printf("=================================== size :: %u\n", object_size);
+
+  // Catch any errors
+  try {
+    // Check if we have a boolean value
+    bool check_key = false;
+    if(args.Length() == 4 && args[1]->IsBoolean()) {
+      check_key = args[1]->BooleanValue();
+    }
+    
+    // Serialize the object
+    BSON::serialize(serialized_object, 0, Null(), args[0], check_key);      
+  } catch(char *err_msg) {
+    // Free up serialized object space
+    free(serialized_object);
+    V8::AdjustAmountOfExternalAllocatedMemory(-object_size);
+    // Throw exception with the string
+    Handle<Value> error = VException(err_msg);
+    // free error message
+    free(err_msg);
+    // Return error
+    return error;
+  }
+
+  // // Write the object size
+  // BSON::write_int32(serialized_object, object_size);  
+
+  // memcopy to data
+  // memcpy((data + index), &serialized_object, object_size - 1);
+  
+  for(int i = 0; i < object_size; i++) {
+    *(data + index + i) = *(serialized_object + i);
+  }
+  
+
+  // printf("=============================================== 2\n");
+
+
+  // printf("=============================================== 3\n");
+  // Unwrap object
+  // Buffer *outputBuffer = ObjectWrap::Unwrap<Buffer>(obj);
+
+  // printf("=============================================== 4\n");
+
+  // printf("=================================== size :: %u\n", object_size);
+
+  // Buffer *buffer = Buffer::New(0);
+  // return scope.Close(outputBuffer->handle_);
+  return scope.Close(Uint32::New(index + object_size - 1));
 }
 
 Handle<Value> BSON::BSONSerialize(const Arguments &args) {
@@ -134,6 +222,18 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
     return bin_value;    
   }  
 }
+
+Handle<Value> BSON::CalculateObjectSize(const Arguments &args) {
+  HandleScope scope;
+  // Ensure we have a valid object
+  if(args.Length() == 1 && !args[0]->IsObject()) return VException("One argument required - [object]");
+  if(args.Length() > 1) return VException("One argument required - [object]");
+  // Calculate size of the object
+  uint32_t object_size = BSON::calculate_object_size(args[0]);
+  // Return the object size
+  return scope.Close(Uint32::New(object_size));
+}
+
 
 Handle<Value> BSON::ToLong(const Arguments &args) {
   HandleScope scope;
