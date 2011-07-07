@@ -1,3 +1,6 @@
+* FindAndModify not returning error message as other methods
+* Added test coverage for $push, $pushAll and $inc atomic operations
+
 0.9.6-5 2011-07-06
 * Rewritten BSON js parser now faster than the C parser on my core2duo laptop
 * Added option full to indexInformation to get all index info Issue #265

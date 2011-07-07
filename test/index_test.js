@@ -119,7 +119,7 @@ var tests = testCase({
             client.createCollection('test_unique_index2', function(err, collection) {
               client.createIndex(collection.collectionName, 'hello', {unique:true}, function(err, indexName) {
                 // Insert some docs
-                collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, ids) {          
+                collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, ids) {                            
                   test.ok(err != null);
                   test.done();
                 });

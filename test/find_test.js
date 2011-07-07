@@ -631,7 +631,7 @@ var tests = testCase({
               collection.update({_id:id}, {'$push':{comments:{title:'2'}}}, {safe:true}, self);
             })
           },
-
+  
           function findThird(err, result) {
             var self = this;
             test.equal(1, result);
@@ -660,12 +660,12 @@ var tests = testCase({
               collection.update({_id:id}, {'$pushAll':{comments:[{title:'4'}, {title:'5'}]}}, {safe:true}, self);
             })
           },
-
+  
           function findFourth(err, result) {
             var self = this;
             test.equal(1, result);
             test.equal(null, err);
-
+  
             collection.findOne({_id:id}, function(err, doc) {
               test.equal(null, err)
               test.ok(doc != null);
@@ -698,6 +698,24 @@ var tests = testCase({
         });
       });
     });
+  },
+  
+  // Test findAndModify a document
+  'Should Correctly Handle FindAndModify Duplicate Key Error' : function(test) {
+    client.createCollection('FindAndModifyDuplicateKey Error', function(err, collection) {
+      collection.ensureIndex(['name', 1], {unique:true}, function(err, index) {
+        // Test return new document on change
+        collection.insert([{name:'test1'}, {name:'test2'}], {safe:true}, function(err, doc) {
+          // Let's modify the document in place
+          collection.findAndModify({name: 'test1'}, [], {$set: {name: 'test2'}}, {}, function(err, updated_doc) {
+            test.equal(null, updated_doc);
+            test.ok(err != null);
+            test.done();
+          });
+        });        
+      });
+      
+    });  
   }
 })
 
