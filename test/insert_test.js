@@ -145,7 +145,11 @@ var tests = testCase({
       var collection = client.collection('test_multiple_insert', function(err, collection) {
         var docs = [{a:1}, {a:2}];
   
+  
+        // debug("============================================================== 0")
         collection.insert(docs, {safe:true}, function(err, ids) {
+          // debug("============================================================== 1")
+
           ids.forEach(function(doc) {
             test.ok(((doc['_id']) instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
           });

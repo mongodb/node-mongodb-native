@@ -493,7 +493,7 @@ var tests = testCase({
     var serialized_data2 = BSONDE.BSON.serialize(doc2, false, true);
   
     for(var i = 0; i < serialized_data2.length; i++) {
-    //   debug("[" + i + "] :: " + serialized_data.toString('ascii', i, i+1) + " :: [" + serialized_data[i] + "]" + " = [" + serialized_data2[i] + "] :: " + serialized_data2.toString('ascii', i, i+1))      
+      // debug("[" + i + "] :: " + serialized_data.toString('ascii', i, i+1) + " :: [" + serialized_data[i] + "]" + " = [" + serialized_data2[i] + "] :: " + serialized_data2.toString('ascii', i, i+1))      
       require('assert').equal(serialized_data2[i], serialized_data[i])      
     }
     // 
@@ -563,6 +563,21 @@ var tests = testCase({
     //   // require('assert').equal(serialized_data2[i], serialized_data[i])      
     // }
     
+    test.done();
+  },
+  
+  'Should Correctly Serialize/Deserialize regexp object' : function(test) {
+    var doc = {'b':/foobaré/};
+
+    var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+    var serialized_data2 = BSONDE.BSON.serialize(doc, false, true);
+
+    for(var i = 0; i < serialized_data2.length; i++) {
+      // debug("[" + i + "] :: " + serialized_data.toString('ascii', i, i+1) + " :: [" + serialized_data[i] + "]" + " = [" + serialized_data2[i] + "] :: " + serialized_data2.toString('ascii', i, i+1) 
+      //   + ((serialized_data2[i] != serialized_data[i]) ? " = false" : ""))      
+      require('assert').equal(serialized_data2[i], serialized_data[i])      
+    }
+
     test.done();
   }
 });
