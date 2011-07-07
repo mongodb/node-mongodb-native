@@ -23,6 +23,10 @@ var Long2 = require('./bson').Long,
     
 sys.puts("=== EXECUTING TEST_BSON ===");
 
+// Should fail due to illegal key
+assert.throws(function() { new ObjectID('foo'); })
+assert.throws(function() { new ObjectID2('foo'); })
+
 // Long data type tests
 var l2_string = Long2.fromNumber(100);
 var l_string = Long.fromNumber(100);

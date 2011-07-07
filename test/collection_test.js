@@ -555,11 +555,11 @@ var tests = testCase({
          collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
            user = users[0]
   
-           // REMOVE REMOVE
-           // HACK HACK DUE TO MIXXING NATIVE AND PURE JS BSON PARSER
-           // REMOVE REMOVE
-           // REMOVE REMOVE
-           user._id = doc._id;
+           // // REMOVE REMOVE
+           // // HACK HACK DUE TO MIXXING NATIVE AND PURE JS BSON PARSER
+           // // REMOVE REMOVE
+           // // REMOVE REMOVE
+           // user._id = doc._id;
   
            if(err) {
              throw new Error(err)
