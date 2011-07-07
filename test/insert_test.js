@@ -101,44 +101,44 @@ var tests = testCase({
   //     })
   //   })
   // },
-  
-  shouldCorrectlyPerformBasicInsert : function(test) {
-    client.createCollection('test_insert', function(err, r) {
-      client.collection('test_insert', function(err, collection) {
-  
-        Step(
-          function inserts() {
-            var group = this.group();
-            
-            for(var i = 1; i < 1000; i++) {
-              collection.insert({c:i}, {safe:true}, group());
-            }            
-          },
-          
-          function done(err, result) {
-            collection.insert({a:2}, {safe:true}, function(err, r) {
-              collection.insert({a:3}, {safe:true}, function(err, r) {
-                collection.count(function(err, count) {
-                  test.equal(1001, count);
-                  // Locate all the entries using find
-                  collection.find(function(err, cursor) {
-                    cursor.toArray(function(err, results) {
-                      test.equal(1001, results.length);
-                      test.ok(results[0] != null);
-  
-                      // Let's close the db
-                      test.done();
-                    });
-                  });
-                });
-              });
-            });            
-          }
-        )  
-      });
-    });    
-  },
-  
+  // 
+  // shouldCorrectlyPerformBasicInsert : function(test) {
+  //   client.createCollection('test_insert', function(err, r) {
+  //     client.collection('test_insert', function(err, collection) {
+  // 
+  //       Step(
+  //         function inserts() {
+  //           var group = this.group();
+  //           
+  //           for(var i = 1; i < 1000; i++) {
+  //             collection.insert({c:i}, {safe:true}, group());
+  //           }            
+  //         },
+  //         
+  //         function done(err, result) {
+  //           collection.insert({a:2}, {safe:true}, function(err, r) {
+  //             collection.insert({a:3}, {safe:true}, function(err, r) {
+  //               collection.count(function(err, count) {
+  //                 test.equal(1001, count);
+  //                 // Locate all the entries using find
+  //                 collection.find(function(err, cursor) {
+  //                   cursor.toArray(function(err, results) {
+  //                     test.equal(1001, results.length);
+  //                     test.ok(results[0] != null);
+  // 
+  //                     // Let's close the db
+  //                     test.done();
+  //                   });
+  //                 });
+  //               });
+  //             });
+  //           });            
+  //         }
+  //       )  
+  //     });
+  //   });    
+  // },
+  // 
   // // Test multiple document insert
   // shouldCorrectlyHandleMultipleDocumentInsert : function(test) {
   //   client.createCollection('test_multiple_insert', function(err, r) {
@@ -615,7 +615,46 @@ var tests = testCase({
   //       })
   //     });      
   //   });
-  // }
+  // },
+
+  shouldCorrectlyExecuteMultipleFetches : function(test) {
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    db.bson_deserializer = client.bson_deserializer;
+    db.bson_serializer = client.bson_serializer;
+    db.pkFactory = client.pkFactory;
+  
+    // Search parameter
+    var to = 'ralph'
+    // Execute query
+    db.open(function(err, db) {
+      db.collection('shouldCorrectlyExecuteMultipleFetches', function(err, collection) {
+        collection.insert({addresses:{localPart:'ralph'}}, {safe:true}, function(err, result) {          
+          // Let's find our user
+          collection.findOne({"addresses.localPart" : to}, function( err, doc ) {
+            if(err)  {
+              console.log( "collection.findOne: " + err );
+            }
+
+            // console.log( "doc: " + doc );
+            // db.close();
+            // test.done();
+        	});                
+
+          collection.findOne({"addresses.localPart" : to}, function( err, doc ) {
+            if(err)  {
+              console.log( "collection.findOne: " + err );
+            }
+
+            debug(inspect(doc))
+            // console.log( "doc: " + doc );
+            db.close();
+            test.done();
+          });                
+        });
+      });      
+    });
+  }
+
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
