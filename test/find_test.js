@@ -491,11 +491,9 @@ var tests = testCase({
         , comments: [c1, c2]
         , _id: new client.bson_serializer.ObjectID
       };
-      //console.error('inserting: %j', doc);
       collection.insert(doc, {safe:true}, function(err, docs) {
         collection.findOne({'_id':doc._id}, {safe:true,fields: undefined}, function(err, doc) {
           if (err) console.error('error', err);
-          console.error(doc);
           test.equal(2, doc.comments.length);
           test.equal('number 1', doc.comments[0].title);
           test.equal('number 2', doc.comments[1].title);
