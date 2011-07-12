@@ -479,8 +479,33 @@ var tests = testCase({
         });
       });
     });
-  },  
-  
+  },
+
+  shouldCorrectlyReturnDocumentWithOriginalStructure: function(test) {
+    client.createCollection('test_find_by_oid_with_subdocs', function(err, collection) {
+      var c1 = { _id: new client.bson_serializer.ObjectID, comments: [], title: 'number 1' };
+      var c2 = { _id: new client.bson_serializer.ObjectID, comments: [], title: 'number 2' };
+      var doc = {
+          numbers: []
+        , owners: []
+        , comments: [c1, c2]
+        , _id: new client.bson_serializer.ObjectID
+      };
+      //console.error('inserting: %j', doc);
+      collection.insert(doc, {safe:true}, function(err, docs) {
+        collection.findOne({'_id':doc._id}, {safe:true,fields: undefined}, function(err, doc) {
+          if (err) console.error('error', err);
+          console.error(doc);
+          test.equal(2, doc.comments.length);
+          test.equal('number 1', doc.comments[0].title);
+          test.equal('number 2', doc.comments[1].title);
+
+          test.done();
+        });
+      });
+    });
+  },
+
   shouldCorrectlyRetrieveSingleRecord : function(test) {
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     p_client.bson_deserializer = client.bson_deserializer;
