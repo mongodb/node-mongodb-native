@@ -491,6 +491,7 @@ var tests = testCase({
         , comments: [c1, c2]
         , _id: new client.bson_serializer.ObjectID
       };
+      
       collection.insert(doc, {safe:true}, function(err, docs) {
         collection.findOne({'_id':doc._id}, {safe:true,fields: undefined}, function(err, doc) {
           if (err) console.error('error', err);

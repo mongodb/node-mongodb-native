@@ -579,6 +579,16 @@ var tests = testCase({
     }
 
     test.done();
+  },
+
+  'Should Correctly Serialize/Deserialize complicated object' : function(test) {
+    var doc = {a:{b:{c:[new BSONSE.ObjectID(), new BSONSE.ObjectID()]}}, d:{f:1332.3323}};
+
+    var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+    var doc2 = BSONSE.BSON.deserialize(serialized_data);
+
+    test.deepEqual(doc, doc2)
+    test.done();
   }
 });
 
