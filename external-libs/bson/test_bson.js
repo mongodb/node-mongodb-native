@@ -290,6 +290,25 @@ var doc1 = BSONJS.deserialize(new Buffer(simple_string_serialized_2));
 var doc2 = BSON.deserialize(new Buffer(simple_string_serialized_2));
 assert.deepEqual(doc2, doc1)
 
+var doc = {
+ _id: 'testid',
+  key1: { code: 'test1', time: {start:1309323402727,end:1309323402727}, x:10, y:5 },
+  key2: { code: 'test1', time: {start:1309323402727,end:1309323402727}, x:10, y:5 }
+};
+
+var simple_string_serialized = BSONJS.serialize(doc, false, true);
+var simple_string_serialized_2 = BSON.serialize(doc, false, true);
+
+for(var i = 0; i < simple_string_serialized_2.length; i++) {
+  // debug(i + "[" + simple_string_serialized_2[i] + "] = [" + simple_string_serialized[i] + "]")
+  assert.equal(simple_string_serialized_2[i], simple_string_serialized[i]);
+}
+
+// Deserialize the string
+var doc1 = BSONJS.deserialize(new Buffer(simple_string_serialized_2));
+var doc2 = BSON.deserialize(new Buffer(simple_string_serialized_2));
+assert.deepEqual(doc2, doc1)
+
 // Force garbage collect
 global.gc();
 
