@@ -1,3 +1,6 @@
+0.9.6-7 2011-07-13
+* JS Bson deserialization bug #287
+
 0.9.6-6 2011-07-12
 * FindAndModify not returning error message as other methods Issue #277
 * Added test coverage for $push, $pushAll and $inc atomic operations
