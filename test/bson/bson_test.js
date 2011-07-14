@@ -269,6 +269,16 @@ var tests = testCase({
     test.done();        
   },
   
+  'Should Correctly Serialize and Deserialize a Buffer object' : function(test) {
+    var buf = new Buffer([109,0,15,255,254,133,100,84,23,20,21,98]);
+    var doc = {doc: buf};
+    var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+    test.equal(doc.doc.length, deserialized_data.doc.length);
+    test.deepEqual(doc.doc, deserialized_data.doc);
+    test.done();
+  },
+  
   'Should Correctly Serialize and Deserialize a big Binary object' : function(test) {
     var data = fs.readFileSync("test/gridstore/test_gs_weird_bug.png", 'binary');
     var bin = new Binary();
