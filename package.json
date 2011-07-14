@@ -17,6 +17,7 @@
 , "os" :            [ "linux"
                     , "darwin"
                     , "freebsd" ]
+, "config":         { "native" : false }                    
 , "main":             "./lib/mongodb/index"
 , "directories" :   { "lib" : "./lib/mongodb" }
 , "engines" :       { "node" : ">=0.4.0" }
