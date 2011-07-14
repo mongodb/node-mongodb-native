@@ -230,6 +230,7 @@ var tests = testCase({
         'date': date,
         'oid': oid,
         'binary': bin,
+        'buffer': new Buffer("aä", "utf8"),
         'int': 42,
         'float': 33.3333,
         'regexp': /regexp/,
@@ -252,6 +253,7 @@ var tests = testCase({
           test.equal(date.getTime(), doc.date.getTime());
           test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
           test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
+          test.equal(motherOfAllDocuments.buffer.toString('utf8'), "aä");
   
           test.equal(motherOfAllDocuments.int, doc.int);
           test.equal(motherOfAllDocuments.long, doc.long);
@@ -324,6 +326,7 @@ var tests = testCase({
   shouldCorrectlySerializeDocumentWithAllTypesInNewContext : function(test) {
     client.createCollection('test_all_serialization_types_new_context', function(err, collection) {
       var date = new Date();
+      var buf = new Buffer('aä', 'utf8');
       var scriptCode =
         "var string = 'binstring'\n" +
         "var bin = new mongo.Binary()\n" +
@@ -336,6 +339,7 @@ var tests = testCase({
         "motherOfAllDocuments['date'] = date;" +
         "motherOfAllDocuments['oid'] = new mongo.ObjectID();" +
         "motherOfAllDocuments['binary'] = bin;" +
+        "motherOfAllDocuments['buffer'] = buf;" +
         "motherOfAllDocuments['int'] = 42;" +
         "motherOfAllDocuments['float'] = 33.3333;" +
         "motherOfAllDocuments['regexp'] = /regexp/;" +
@@ -344,7 +348,7 @@ var tests = testCase({
         "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
         "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
   
-      var context = { motherOfAllDocuments : {}, mongo:client.bson_serializer, date:date};
+      var context = { motherOfAllDocuments : {}, mongo:client.bson_serializer, date:date, buf:buf};
       // Execute function in context
       Script.runInNewContext(scriptCode, context, "testScript");
       // sys.puts(sys.inspect(context.motherOfAllDocuments))
@@ -362,6 +366,7 @@ var tests = testCase({
            test.equal(date.getTime(), doc.date.getTime());
            test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
            test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
+           test.equal(motherOfAllDocuments.buffer.toString('utf8'), 'aä');
   
            test.equal(motherOfAllDocuments.int, doc.int);
            test.equal(motherOfAllDocuments.long, doc.long);
