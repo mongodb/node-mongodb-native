@@ -77,21 +77,21 @@ console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/
 // end = new Date
 // console.log("json size (chars): ", objectJSON.length)
 // console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
-
-
-console.log(COUNT + " BSON.deserialize(objectBSON)")
-start = new Date
-
-for (i=COUNT; --i>=0; ) {
-  x = BSON.deserialize(objectBSON)
-  // debug("=====================================================================")
-  // debug(inspect(x))
-  // x = BSON.deserialize2(objectBSON)
-  // debug(inspect(x))
-}
-
-end = new Date
-console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
+// 
+// 
+// console.log(COUNT + " BSON.deserialize(objectBSON)")
+// start = new Date
+// 
+// for (i=COUNT; --i>=0; ) {
+//   x = BSON.deserialize(objectBSON)
+//   // debug("=====================================================================")
+//   // debug(inspect(x))
+//   // x = BSON.deserialize2(objectBSON)
+//   // debug(inspect(x))
+// }
+// 
+// end = new Date
+// console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
 
 
 // console.log(COUNT + " JSON.parse(objectJSON)")
