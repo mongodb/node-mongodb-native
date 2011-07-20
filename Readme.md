@@ -365,8 +365,8 @@ Credits
 Contributors
 =============
 
-  Aaron Heckmann
-  Christoph Pojer
+1.  Aaron Heckmann
+2.  Christoph Pojer
   Pau Ramon Revilla
   Nathan White
   Emmerman
@@ -411,7 +411,7 @@ Contributors
   Rob Holland
   Senmiao Liu
   heroic
-  gitfy]
+  gitfy
 
 License
 ========
