@@ -259,7 +259,7 @@ var tests = testCase({
             cursor.sort('a', 25, function(err, cursor) {
               cursor.nextObject(function(err, doc) {
                 test.ok(err instanceof Error);
-                test.equal("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+                test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
               });
             });
           });
@@ -268,7 +268,7 @@ var tests = testCase({
             cursor.sort(25, function(err, cursor) {
               cursor.nextObject(function(err, doc) {
                 test.ok(err instanceof Error);
-                test.equal("Error: Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+                test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
                 // Let's close the db
                 test.done();
               });
@@ -945,7 +945,7 @@ var tests = testCase({
         });
       });
     });
-  },    
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
