@@ -319,42 +319,30 @@ var tests = testCase({
   },  
   
   shouldFailDueToIllegalCollectionNames : function(test) {
-    try {
-      client.collection(5, function(err, collection) {});      
-    } catch (err) {
+    client.collection(5, function(err, collection) {
       test.equal("collection name must be a String", err.message);
-    }
-  
-    try {
-      client.collection("", function(err, collection) {});
-    } catch (err) {
+    });
+    
+    client.collection("", function(err, collection) {
       test.equal("collection names cannot be empty", err.message);
-    }
+    });
+    
+    client.collection("te$t", function(err, collection) {
+      test.equal("collection names must not contain '$'", err.message);        
+    });
   
-    try {
-      client.collection("te$t", function(err, collection) {});
-    } catch (err) {
-      test.equal("collection names must not contain '$'", err.message);
-    }
+    client.collection(".test", function(err, collection) {
+      test.equal("collection names must not start or end with '.'", err.message);        
+    });
   
-    try {
-      client.collection(".test", function(err, collection) {});
-    } catch (err) {
-      test.equal("collection names must not start or end with '.'", err.message);
-    }
+    client.collection("test.", function(err, collection) {
+      test.equal("collection names must not start or end with '.'", err.message);        
+    });
   
-    try {
-      client.collection("test.", function(err, collection) {});
-    } catch (err) {
-      test.equal("collection names must not start or end with '.'", err.message);
-    }
-  
-    try {
-      client.collection("test..t", function(err, collection) {});  
-    } catch (err) {
+    client.collection("test..t", function(err, collection) {
       test.equal("collection names cannot be empty", err.message);
-      test.done();
-    }
+      test.done();        
+    });  
   },  
   
   // Test the count result on a collection that does not exist
