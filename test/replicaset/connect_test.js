@@ -75,6 +75,59 @@ module.exports = testCase({
       test.done();
     })    
   },  
+
+  shouldEmitCloseNoCallback : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers([ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], {}
+    );
+
+    new Db('integration_test_', replSet).open(function(err, db) {
+      test.equal(null, err);
+      var dbCloseCount = 0, serverCloseCount = 0;
+      db.on('close', function() { ++dbCloseCount; });
+      db.serverConfig.servers.forEach(function(server) {
+        server.connection.on('close', function() { ++serverCloseCount; });
+      });
+      db.close();
+      setTimeout(function() {
+        test.equal(dbCloseCount, 1);
+        test.equal(serverCloseCount, db.serverConfig.servers.length);
+        test.done();
+      }, 250);
+    })
+  },
+
+  shouldEmitCloseWithCallback : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers([ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], {}
+    );
+
+    new Db('integration_test_', replSet).open(function(err, db) {
+      test.equal(null, err);
+      var dbCloseCount = 0, serverCloseCount = 0;
+      db.on('close', function() { ++dbCloseCount; });
+      var connection = db.serverConfig.connection;
+      db.serverConfig.servers.forEach(function(server) {
+        server.connection.on('close', function() { ++serverCloseCount; });
+      });
+      db.close(function() {
+        // Let all events fire.
+        process.nextTick(function() {
+          test.equal(dbCloseCount, 1);
+          test.equal(serverCloseCount, db.serverConfig.servers.length);
+          test.done();
+        });
+      });
+    })
+  },
   
   shouldCorrectlyPassErrorWhenWrongReplicaSet : function(test) {
     // Replica configuration
