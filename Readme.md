@@ -365,53 +365,7 @@ Credits
 Contributors
 =============
 
-1.  Aaron Heckmann
-2.  Christoph Pojer
-3.  Pau Ramon Revilla
-4.  Nathan White
-5.  Emmerman
-6.  Seth LaForge
-7.  Boris Filipov
-8.  Stefan Schärmeli
-9.  Tedde Lundgren
-10.  renctan
-11.  Sergey Ukustov
-12.  Ciaran Jessup
-13.  kuno
-14.  srimonti
-15.  Erik Abele
-16.  Pratik Daga
-17.  Slobodan Utvic
-18.  Kristina Chodorow
-19.  Yonathan Randolph
-20.  Brian Noguchi
-21.  Sam Epstein
-22.  James Harrison Fisher
-23.  Vladimir Dronnikov
-24.  Ben Hockey
-25.  Henrik Johansson
-26.  Simon Weare
-27.  Alex Gorbatchev
-28.  Shimon Doodkin
-29.  Kyle Mueller
-30.  Eran Hammer-Lahav
-31.  Marcin Ciszak
-32.  François de Metz
-33.  Vinay Pulim
-34.  nstielau
-35.  Adam Wiggins
-36.  entrinzikyl
-37.  Jeremy Selier
-38.  Ian Millington
-39.  Public Keating
-40.  andrewjstone
-41.  Christopher Stott
-42.  Corey Jewett
-43.  brettkiefer
-44.  Rob Holland
-45.  Senmiao Liu
-46.  heroic
-47  gitfy
+Aaron Heckmann, Christoph Pojer, Pau Ramon Revilla, Nathan White, Emmerman, Seth LaForge, Boris Filipov, Stefan Schärmeli, Tedde Lundgren, renctan, Sergey Ukustov, Ciaran Jessup, kuno, srimonti, Erik Abele, Pratik Daga, Slobodan Utvic, Kristina Chodorow, Yonathan Randolph, Brian Noguchi, Sam Epstein, James Harrison Fisher, Vladimir Dronnikov, Ben Hockey, Henrik Johansson, Simon Weare, Alex Gorbatchev, Shimon Doodkin, Kyle Mueller, Eran Hammer-Lahav, Marcin Ciszak, François de Metz, Vinay Pulim, nstielau, Adam Wiggins, entrinzikyl, Jeremy Selier, Ian Millington, Public Keating, andrewjstone, Christopher Stott, Corey Jewett, brettkiefer, Rob Holland, Senmiao Liu, heroic, gitfy
 
 License
 ========
