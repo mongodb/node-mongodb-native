@@ -1,3 +1,6 @@
+0.9.6-8 
+* Changed to using node.js crypto library MD5 digest
+
 0.9.6-7 2011-07-13
 * JS Bson deserialization bug #287
 

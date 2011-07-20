@@ -351,7 +351,7 @@ If your company could benefit from a even better-engineered node.js mongodb driv
 And I'm very thankful for code contributions. If you are interested in working on features please contact me so we can discuss API design and testing.
 
 Release Notes
-========
+=============
 
 See HISTORY
 
@@ -361,6 +361,11 @@ Credits
 1. [10gen](http://github.com/mongodb/mongo-ruby-driver/)
 2. [Google Closure Library](http://code.google.com/closure/library/)
 3. [Jonas Raoni Soares Silva](http://jsfromhell.com/classes/binary-parser)
+
+Contributors
+=============
+
+Aaron Heckmann, Christoph Pojer, Pau Ramon Revilla, Nathan White, Emmerman, Seth LaForge, Boris Filipov, Stefan Schärmeli, Tedde Lundgren, renctan, Sergey Ukustov, Ciaran Jessup, kuno, srimonti, Erik Abele, Pratik Daga, Slobodan Utvic, Kristina Chodorow, Yonathan Randolph, Brian Noguchi, Sam Epstein, James Harrison Fisher, Vladimir Dronnikov, Ben Hockey, Henrik Johansson, Simon Weare, Alex Gorbatchev, Shimon Doodkin, Kyle Mueller, Eran Hammer-Lahav, Marcin Ciszak, François de Metz, Vinay Pulim, nstielau, Adam Wiggins, entrinzikyl, Jeremy Selier, Ian Millington, Public Keating, andrewjstone, Christopher Stott, Corey Jewett, brettkiefer, Rob Holland, Senmiao Liu, heroic, gitfy
 
 License
 ========
