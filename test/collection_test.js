@@ -319,32 +319,42 @@ var tests = testCase({
   },  
   
   shouldFailDueToIllegalCollectionNames : function(test) {
-    client.collection(5, function(err, collection) {
+    try {
+      client.collection(5, function(err, collection) {});      
+    } catch (err) {
       test.equal("collection name must be a String", err.message);
-    });
+    }
   
-    client.collection("", function(err, collection) {
+    try {
+      client.collection("", function(err, collection) {});
+    } catch (err) {
       test.equal("collection names cannot be empty", err.message);
-    });
+    }
   
-    client.collection("te$t", function(err, collection) {
+    try {
+      client.collection("te$t", function(err, collection) {});
+    } catch (err) {
       test.equal("collection names must not contain '$'", err.message);
-    });
+    }
   
-    client.collection(".test", function(err, collection) {
+    try {
+      client.collection(".test", function(err, collection) {});
+    } catch (err) {
       test.equal("collection names must not start or end with '.'", err.message);
-    });
+    }
   
-    client.collection("test.", function(err, collection) {
+    try {
+      client.collection("test.", function(err, collection) {});
+    } catch (err) {
       test.equal("collection names must not start or end with '.'", err.message);
-    });
+    }
   
-    client.collection("test..t", function(err, collection) {
+    try {
+      client.collection("test..t", function(err, collection) {});  
+    } catch (err) {
       test.equal("collection names cannot be empty", err.message);
-  
-      // Let's close the db
       test.done();
-    });
+    }
   },  
   
   // Test the count result on a collection that does not exist
