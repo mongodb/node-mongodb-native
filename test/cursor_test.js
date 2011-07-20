@@ -945,27 +945,6 @@ var tests = testCase({
         });
       });
     });
-  },
-
-  shouldHandleThrowingNextObjectCallback : function(test) {
-    client.createCollection('test_throwing_in_nextObject_callback', function(err, collection) {
-      collection.insert({'x':1}, {safe:true}, function(err, doc) {
-        test.equal(err, null);
-        collection.find(function(err, cursor) {
-          test.equal(err, null);
-
-          var times = 0;
-          cursor.nextObject(function(err, doc) {
-            ++times;
-            test.equal(times, 1);
-            if (times > 1) return test.done();
-            //test.equal(err, null);
-            //test.equal(1, doc.x);
-            throw new Error("KaBoom!");
-          });
-        });
-      });
-    });
   }
 })
 
