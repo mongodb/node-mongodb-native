@@ -10,6 +10,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   Timestamp = mongodb.Timestamp,
   Long = mongodb.Long,
   ObjectID = mongodb.ObjectID,
+  Symbol = mongodb.Symbol,
   DBRef = mongodb.DBRef,
   BinaryParser = mongodb.BinaryParser;
 
@@ -430,6 +431,15 @@ var tests = testCase({
     test.deepEqual(doc, deserialized_data);
     test.done();
   },
+
+  'Should Correctly Serialize and Deserialize Symbol' : function(test) {
+    var doc = { b: [ new Symbol('test') ], _id: new BSONSE.ObjectID() };
+    var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+    test.deepEqual(doc.b, deserialized_data.b)
+    test.deepEqual(doc, deserialized_data);
+    test.done();
+  },
   
   'Should handle Deeply nested document' : function(test) {
     var doc = {a:{b:{c:{d:2}}}};
@@ -493,18 +503,9 @@ var tests = testCase({
     var serialized_data2 = BSONDE.BSON.serialize(doc2, false, true);
   
     for(var i = 0; i < serialized_data2.length; i++) {
-      // debug("[" + i + "] :: " + serialized_data.toString('ascii', i, i+1) + " :: [" + serialized_data[i] + "]" + " = [" + serialized_data2[i] + "] :: " + serialized_data2.toString('ascii', i, i+1))      
       require('assert').equal(serialized_data2[i], serialized_data[i])      
     }
-    // 
-    // var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
-    // 
-    // debug("----------------------------------------------------------------- 1")
-    // debug(inspect(JSON.stringify(doc)))
-    // debug("----------------------------------------------------------------- 2")
-    // debug(inspect(JSON.stringify(deserialized_data)))
-    // 
-    // test.deepEqual(JSON.stringify(doc), JSON.stringify(deserialized_data));
+
     test.done();    
   },
   

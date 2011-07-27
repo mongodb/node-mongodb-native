@@ -9,7 +9,7 @@ var ObjectID = require('../lib/mongodb').BSONPure.ObjectID;
 // require('util').debug(require('util').inspect(BSON))
 
 var COUNT = 10000;
-var COUNT = 1;
+// var COUNT = 1;
 // var object = {
 //     string: "Strings are great",
 //     decimal: 3.14159265,

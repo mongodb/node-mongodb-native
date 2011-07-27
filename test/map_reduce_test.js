@@ -88,7 +88,7 @@ var tests = testCase({
                           test.ok(err.message != null);
                           
                           var keyf = function(doc) { return {a: doc.a}; };
-                          collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0},  function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
+                          collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
                             results.sort(function(a, b) { return b.count - a.count; });
                             test.equal(2, results[0].count);
                             test.equal(2, results[0].a);
@@ -96,7 +96,7 @@ var tests = testCase({
                             test.equal(1, results[1].count);
                             test.equal(1, results[1].a);
                             test.equal(1, results[1].value);
-  
+                              
                             collection.group([], {}, {}, "5 ++ 5", true, function(err, results) {
                               test.ok(err instanceof Error);
                               test.ok(err.message != null);
