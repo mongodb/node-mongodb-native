@@ -1,5 +1,9 @@
 0.9.6-8 
 * Changed to using node.js crypto library MD5 digest
+* Connect method support documented mongodb: syntax by (https://github.com/sethml)
+* Support Symbol type for BSON, serializes to it's own type Symbol, Issue #302, #288
+* Code object without scope serializing to correct BSON type
+* Lot's of fixes to avoid double callbacks (https://github.com/aheckmann) Issue #304
 
 0.9.6-7 2011-07-13
 * JS Bson deserialization bug #287
