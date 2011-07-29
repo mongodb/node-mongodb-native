@@ -4,6 +4,9 @@
 * Support Symbol type for BSON, serializes to it's own type Symbol, Issue #302, #288
 * Code object without scope serializing to correct BSON type
 * Lot's of fixes to avoid double callbacks (https://github.com/aheckmann) Issue #304
+* Long deserializes as Number for values in the range -2^53 to 2^53, Issue #305 (https://github.com/sethml)
+* Fixed C++ parser to reflect JS parser handling of long deserialization
+* Bson small optimizations
 
 0.9.6-7 2011-07-13
 * JS Bson deserialization bug #287
