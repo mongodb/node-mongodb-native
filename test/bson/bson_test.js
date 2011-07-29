@@ -307,7 +307,7 @@ var tests = testCase({
     var doc = {doc:2147483648};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
     var doc2 = BSONDE.BSON.deserialize(serialized_data);
-    test.deepEqual(doc.doc, doc2.doc.toNumber())
+    test.deepEqual(doc.doc, doc2.doc)
     test.done();
   },
   
@@ -327,6 +327,40 @@ var tests = testCase({
     deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     test.deepEqual(doc.doc, deserialized_data.doc);
     test.done();        
+  },  
+  
+  'Should Deserialize Large Integers as Number not Long' : function(test) {
+    function roundTrip(val) {
+      var doc = {doc: val};
+      var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+      var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+      test.deepEqual(doc.doc, deserialized_data.doc);
+    };
+
+    roundTrip(Math.pow(2,52));
+    roundTrip(Math.pow(2,53) - 1);
+    roundTrip(Math.pow(2,53));
+    roundTrip(-Math.pow(2,52));
+    roundTrip(-Math.pow(2,53) + 1);
+    roundTrip(-Math.pow(2,53));
+    roundTrip(Math.pow(2,65));  // Too big for Long.
+    roundTrip(-Math.pow(2,65));
+    roundTrip(1234567890123456800);  // Bigger than 2^53, stays a double.
+    roundTrip(-1234567890123456800);
+    test.done();
+  },  
+  
+  'Should Deserialize Larger Integers as Long not Number' : function(test) {
+    function roundTrip(val) {
+      var doc = {doc: val};
+      var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+      var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+      test.deepEqual(doc.doc, deserialized_data.doc);
+    };
+
+    roundTrip(Long.fromNumber(Math.pow(2,53)).add(Long.ONE));
+    roundTrip(Long.fromNumber(-Math.pow(2,53)).subtract(Long.ONE));
+    test.done();
   },  
     
   'Should Correctly Serialize and Deserialize Long Integer and Timestamp as different types' : function(test) {
