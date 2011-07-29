@@ -145,11 +145,7 @@ var tests = testCase({
       var collection = client.collection('test_multiple_insert', function(err, collection) {
         var docs = [{a:1}, {a:2}];
   
-  
-        // debug("============================================================== 0")
         collection.insert(docs, {safe:true}, function(err, ids) {
-          // debug("============================================================== 1")
-  
           ids.forEach(function(doc) {
             test.ok(((doc['_id']) instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
           });
@@ -386,8 +382,7 @@ var tests = testCase({
   
       collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], {safe:true}, function(err, ids) {
         collection.findOne({}, function(err, item) {
-          test.equal("32222432", item.value.toJSON())
-          
+          test.equal(32222432, item.value);          
           test.done();
         });
       });
@@ -427,8 +422,10 @@ var tests = testCase({
       collection.insert({i:client.bson_serializer.Timestamp.fromNumber(100), j:client.bson_serializer.Long.fromNumber(200)}, {safe:true}, function(err, r) {
         // Locate document
         collection.findOne({}, function(err, item) {
-          test.equal(100, item.i.toNumber())
-          test.equal(200, item.j.toNumber())
+          test.ok(item.i instanceof client.bson_serializer.Timestamp);
+          test.equal(100, item.i);
+          test.ok(typeof item.j == "number");
+          test.equal(200, item.j);
   
           test.done();
         });                
