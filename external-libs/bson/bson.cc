@@ -1566,6 +1566,11 @@ Handle<Value> BSON::decodeOid(char *oid) {
 Handle<Value> BSON::decodeLong(int64_t value) {
   HandleScope scope;
   
+  // If precise return number
+  if(value < 0x20000000000000 && value >= -0x20000000000000) {
+    return scope.Close(Number::New(value));
+  }
+  // Otherwise return long value
   Local<Value> argv[] = {Number::New(value)};
   Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(1, argv);    
   return scope.Close(long_obj);      
