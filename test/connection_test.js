@@ -10,8 +10,10 @@ var testCase = require('../deps/nodeunit').testCase,
   Script = require('vm'),
   Collection = mongodb.Collection,
   Server = mongodb.Server,
+  ServerManager = require('../test/tools/server_manager').ServerManager,
   Step = require("../deps/step/lib/step");
 
+// Test db
 var MONGODB = 'integration_tests';
 
 function connectionTester(test, testName, callback) {
