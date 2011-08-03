@@ -480,7 +480,7 @@ var tests = testCase({
       });
     });
   },
-
+  
   shouldCorrectlyReturnDocumentWithOriginalStructure: function(test) {
     client.createCollection('test_find_by_oid_with_subdocs', function(err, collection) {
       var c1 = { _id: new client.bson_serializer.ObjectID, comments: [], title: 'number 1' };
@@ -498,13 +498,13 @@ var tests = testCase({
           test.equal(2, doc.comments.length);
           test.equal('number 1', doc.comments[0].title);
           test.equal('number 2', doc.comments[1].title);
-
+  
           test.done();
         });
       });
     });
   },
-
+  
   shouldCorrectlyRetrieveSingleRecord : function(test) {
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     p_client.bson_deserializer = client.bson_deserializer;
@@ -753,7 +753,7 @@ var tests = testCase({
         })        
       });      
     });      
-  }
+  }  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
