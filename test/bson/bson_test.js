@@ -13,6 +13,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   ObjectID = mongodb.ObjectID,
   Symbol = mongodb.Symbol,
   DBRef = mongodb.DBRef,
+  Double = mongodb.Double,
   BinaryParser = mongodb.BinaryParser;
 
 var BSONSE = mongodb,
@@ -478,11 +479,14 @@ var tests = testCase({
   },
   
   'Should Correctly Serialize and Deserialize Symbol' : function(test) {
-    var doc = { b: [ new Symbol('test') ], _id: new BSONSE.ObjectID() };
-    var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
-    test.deepEqual(doc.b, deserialized_data.b)
-    test.deepEqual(doc, deserialized_data);
+    if(Symbol != null) {
+      var doc = { b: [ new Symbol('test') ], _id: new BSONSE.ObjectID() };
+      var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+      var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+      test.deepEqual(doc.b, deserialized_data.b)
+      test.deepEqual(doc, deserialized_data);      
+    }
+    
     test.done();
   },
   
@@ -646,13 +650,7 @@ var tests = testCase({
       }
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    // var serialized_data2 = BSONDEN.BSON.serialize(doc, false, true);
     var doc2 = BSONSE.BSON.deserialize(serialized_data);
-    // debug(inspect(doc2))
-  
-    // var doc2 = BSONSE.BSON.deserialize(new Buffer(serialized_data2, 'binary'));
-    // debug(inspect(doc2))
-  
     test.deepEqual(doc, doc2)
     test.done();
   },
@@ -678,6 +676,20 @@ var tests = testCase({
     var doc2 = BSONSE.BSON.deserialize(binaryData);
     test.equal('4bc1ae64e5d6fa0c', doc2._id);
     test.done()    
+  },
+  
+  'Should Correctly handle Forced Doubles to ensure we allocate enough space for cap collections' : function(test) {
+    if(Double != null) {
+      var doubleValue = new Double(100);
+      var doc = {value:doubleValue};
+
+      // Serialize
+      var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+      var doc2 = BSONSE.BSON.deserialize(serialized_data);
+      test.deepEqual({value:100}, doc2);
+    }    
+
+    test.done();      
   }
 });
 

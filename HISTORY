@@ -1,5 +1,9 @@
+
+* Specific type Double for capped collections (https://github.com/mbostock), Issue #312
+
 0.9.6-9
 * Bug fix for bson parsing the key '':'' correctly without crashing
+
 0.9.6-8 
 * Changed to using node.js crypto library MD5 digest
 * Connect method support documented mongodb: syntax by (https://github.com/sethml)
