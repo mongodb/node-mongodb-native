@@ -3,6 +3,7 @@
 * Decorating Errors with all all object info from Mongo (https://github.com/laurie71), Issue #308
 * Implementing fixes for mongodb 1.9.1 and higher to make tests pass
 * Admin validateCollection now takes an options argument for you to pass in full option
+* Implemented keepGoing parameter for mongodb 1.9.1 or higher, Issue #310
 
 0.9.6-9
 * Bug fix for bson parsing the key '':'' correctly without crashing
