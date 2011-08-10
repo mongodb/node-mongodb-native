@@ -55,8 +55,13 @@ var tests = testCase({
             fs_client.admin(function(err, adminDb) {
               adminDb.authenticate('admin', 'admin', function(err, replies) {
                 adminDb.validateCollection('test', function(err, doc) {
-                  test.ok(doc.result != null);
-                  test.ok(doc.result.match(/firstExtent/) != null);
+                  // Pre 1.9.1 servers
+                  if(doc.result != null) {
+                    test.ok(doc.result != null);
+                    test.ok(doc.result.match(/firstExtent/) != null);                    
+                  } else {
+                    test.ok(doc.firstExtent != null);
+                  }
   
                   fs_client.close();
                   test.done();
@@ -160,7 +165,6 @@ var tests = testCase({
                           test.ok(infos.constructor == Array);
                           test.ok(infos.length >= 1);
                           test.ok(infos[0].ts.constructor == Date);
-                          test.ok(infos[0].info.constructor == String);
                           test.ok(infos[0].millis.constructor == Number);
                           
                           fs_client.close();

@@ -740,13 +740,19 @@ var tests = testCase({
       });      
     });  
   },
-
+  
   'Should correctly return null when attempting to modify a non-existing document' : function(test) {
     client.createCollection('AttemptToFindAndModifyNonExistingDocument', function(err, collection) {
       // Let's modify the document in place
       collection.findAndModify({name: 'test1'}, [], {$set: {name: 'test2'}}, {}, function(err, updated_doc) {
-        test.equal(null, updated_doc);
-        test.ok(err != null);
+        if(parseInt(client.version.replace(/./, '')) < 191) {
+          test.equal(null, updated_doc);
+          test.ok(err != null);          
+        } else {
+          test.equal(null, updated_doc);
+          test.equal(null, err);
+        }
+        
         test.done();
       });
     });  
