@@ -232,7 +232,7 @@ var tests = testCase({
             collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
               test.equal(1, items.length);
               test.equal("Sarah", items[0].name);
-
+  
               // Fetch the info for the indexes
               collection.indexInformation({full:true}, function(err, indexInfo) {
                 test.equal(null, err);
@@ -245,6 +245,26 @@ var tests = testCase({
       })
     })    
   },  
+    
+  "Should correctly execute insert with keepGoing option on mongod >= 1.9.1" : function(test) {
+    if(parseInt((client.version.replace(/\./g, ''))) >= 191) {
+      client.createCollection('shouldCorrectlyExecuteKeepGoingWithMongodb191OrHigher', function(err, collection) {
+        collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
+          collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
+            // Force keep going flag, ignoring unique index issue
+            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {safe:true, keepGoing:true}, function(err, result) {
+              collection.count(function(err, count) {
+                test.equal(3, count);
+                test.done();        
+              })
+            });
+          });
+        });
+      });      
+    } else {
+      test.done();      
+    }
+  }  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

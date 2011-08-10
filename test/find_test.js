@@ -745,7 +745,7 @@ var tests = testCase({
     client.createCollection('AttemptToFindAndModifyNonExistingDocument', function(err, collection) {
       // Let's modify the document in place
       collection.findAndModify({name: 'test1'}, [], {$set: {name: 'test2'}}, {}, function(err, updated_doc) {
-        if(parseInt(client.version.replace(/./, '')) < 191) {
+        if(parseInt(client.version.replace(/\./g, '')) < 191) {
           test.equal(null, updated_doc);
           test.ok(err != null);          
         } else {
