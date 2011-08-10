@@ -726,7 +726,7 @@ var tests = testCase({
   
   // Test findAndModify a document
   'Should Correctly Handle FindAndModify Duplicate Key Error' : function(test) {
-    client.createCollection('FindAndModifyDuplicateKey Error', function(err, collection) {
+    client.createCollection('FindAndModifyDuplicateKeyError', function(err, collection) {
       collection.ensureIndex(['name', 1], {unique:true}, function(err, index) {
         // Test return new document on change
         collection.insert([{name:'test1'}, {name:'test2'}], {safe:true}, function(err, doc) {
@@ -738,6 +738,17 @@ var tests = testCase({
           });
         });        
       });      
+    });  
+  },
+
+  'Should correctly return null when attempting to modify a non-existing document' : function(test) {
+    client.createCollection('AttemptToFindAndModifyNonExistingDocument', function(err, collection) {
+      // Let's modify the document in place
+      collection.findAndModify({name: 'test1'}, [], {$set: {name: 'test2'}}, {}, function(err, updated_doc) {
+        test.equal(null, updated_doc);
+        test.ok(err != null);
+        test.done();
+      });
     });  
   },
   
