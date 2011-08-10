@@ -121,6 +121,7 @@ var tests = testCase({
                 // Insert some docs
                 collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, ids) {                            
                   test.ok(err != null);
+                  test.equal(11000, err.code);
                   test.done();
                 });
               });

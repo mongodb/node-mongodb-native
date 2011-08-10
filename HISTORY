@@ -1,5 +1,6 @@
 
 * Specific type Double for capped collections (https://github.com/mbostock), Issue #312
+* Decorating Errors with all all object info from Mongo (https://github.com/laurie71), Issue #308
 
 0.9.6-9
 * Bug fix for bson parsing the key '':'' correctly without crashing
