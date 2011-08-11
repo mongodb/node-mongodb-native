@@ -80,11 +80,11 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
         runner.run(files, options, this);
       },
       // Run all integration tests using the native bson parser
-      function runNativeJS() {
-        process.env['TEST_NATIVE'] = 'TRUE';
-        options.suffix = 'native';
-        runner.run(files, options, this);      
-      },
+      // function runNativeJS() {
+      //   process.env['TEST_NATIVE'] = 'TRUE';
+      //   options.suffix = 'native';
+      //   runner.run(files, options, this);      
+      // },
       // Execute all the replicaset tests
       function executeReplicaSetTests() {
         runner.run(replicasetFiles, options, this);                
