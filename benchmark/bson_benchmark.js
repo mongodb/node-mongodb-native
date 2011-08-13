@@ -8,7 +8,7 @@ var BSON = require('../lib/mongodb').BSONNative.BSON,
 
 // require('util').debug(require('util').inspect(BSON))
 
-var COUNT = 1000000;
+var COUNT = 100000;
 // var COUNT = 1;
 // var object = {
 //     string: "Strings are great",
