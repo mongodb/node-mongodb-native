@@ -3,12 +3,12 @@ var BSON = require('../lib/mongodb').BSONNative.BSON,
   debug = require('util').debug,
   inspect = require('util').inspect;
 
-var BSON = require('../lib/mongodb').BSONPure.BSON;
-var ObjectID = require('../lib/mongodb').BSONPure.ObjectID;
+// var BSON = require('../lib/mongodb').BSONPure.BSON;
+// var ObjectID = require('../lib/mongodb').BSONPure.ObjectID;
 
 // require('util').debug(require('util').inspect(BSON))
 
-var COUNT = 10000;
+var COUNT = 1000000;
 // var COUNT = 1;
 // var object = {
 //     string: "Strings are great",
@@ -52,7 +52,7 @@ end = new Date
 console.log("bson size (bytes): ", objectBSON.length)
 console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
 
-var COUNT = 10000;
+// var COUNT = 1000000;
 
 // console.log(COUNT + "x (objectJSON = JSON.stringify(object))")
 // start = new Date

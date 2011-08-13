@@ -214,6 +214,8 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   if(args.Length() == 3) {
     // Local<Boolean> asBuffer = args[2]->ToBoolean();    
     Buffer *buffer = Buffer::New(serialized_object, object_size);
+    // Release the serialized string
+    free(serialized_object);
     return scope.Close(buffer->handle_);
   } else {
     // Encode the string (string - null termiating character)
@@ -1435,6 +1437,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
         return_data->Set(String::New(string_name), obj);
       }      
       // Clean up memory allocation
+      free(code);
       free(bson_buffer);      
       free(string_name);
     } else if(type == BSON_DATA_OBJECT) {
