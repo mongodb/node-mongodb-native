@@ -3,6 +3,7 @@ var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').
 var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
+  Buffer = require('buffer').Buffer,
   fs = require('fs'),
   BSON = mongodb.BSON,
   Code = mongodb.Code, 
@@ -18,8 +19,6 @@ var testCase = require('../../deps/nodeunit').testCase,
 
 var BSONSE = mongodb,
   BSONDE = mongodb;
-  
-// BSONDEN = require('../../lib/mongodb').native();
 
 // for tests
 BSONDE.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -44,6 +43,14 @@ var hexStringToBinary = exports.hexStringToBinary = function(string) {
     array += String.fromCharCode(parseInt(string[i*2] + string[i*2 + 1], 16));
   }  
   return array;
+}
+
+var assertBuffersEqual = function(test, buffer1, buffer2) {  
+  if(buffer1.length != buffer2.length) test.fail("Buffers do not have the same length", buffer1, buffer2);
+  
+  for(var i = 0; i < buffer1.length; i++) {
+    test.equal(buffer1[i], buffer2[i]);
+  }
 }
 
 var tests = testCase({
@@ -99,6 +106,10 @@ var tests = testCase({
   'Should Serialize and Deserialize String' : function(test) {
     var test_string = {hello: 'world'};
     var serialized_data = BSONSE.BSON.serialize(test_string, false, true);
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_string));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_string, false, serialized_data2);    
+
+    assertBuffersEqual(test, serialized_data, serialized_data2);
     test.deepEqual(test_string, BSONDE.BSON.deserialize(serialized_data));
     test.done();
   },
@@ -106,6 +117,11 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize Integer' : function(test) {    
     var test_number = {doc: 5};
     var serialized_data = BSONSE.BSON.serialize(test_number, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_number));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_number, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     test.deepEqual(test_number, BSONDE.BSON.deserialize(serialized_data));
     test.done();
   },
@@ -113,6 +129,11 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize null value' : function(test) {
     var test_null = {doc:null};
     var serialized_data = BSONSE.BSON.serialize(test_null, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_null));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_null, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var object = BSONDE.BSON.deserialize(serialized_data);
     test.equal(null, object.doc);
     test.done();
@@ -121,6 +142,11 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize Number' : function(test) {
     var test_number = {doc: 5.5};
     var serialized_data = BSONSE.BSON.serialize(test_number, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_number));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_number, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     test.deepEqual(test_number, BSONDE.BSON.deserialize(serialized_data));
     test.done();    
   },
@@ -128,18 +154,34 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize Integer' : function(test) {
     var test_int = {doc: 42};
     var serialized_data = BSONSE.BSON.serialize(test_int, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_int));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_int, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
     test.deepEqual(test_int.doc, BSONDE.BSON.deserialize(serialized_data).doc);
   
     test_int = {doc: -5600};
     serialized_data = BSONSE.BSON.serialize(test_int, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_int));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_int, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
     test.deepEqual(test_int.doc, BSONDE.BSON.deserialize(serialized_data).doc);
   
     test_int = {doc: 2147483647};
     serialized_data = BSONSE.BSON.serialize(test_int, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_int));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_int, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
     test.deepEqual(test_int.doc, BSONDE.BSON.deserialize(serialized_data).doc);
         
     test_int = {doc: -2147483648};
     serialized_data = BSONSE.BSON.serialize(test_int, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_int));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_int, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
     test.deepEqual(test_int.doc, BSONDE.BSON.deserialize(serialized_data).doc);
     test.done();        
   },
@@ -147,6 +189,10 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize Object' : function(test) {
     var doc = {doc: {age: 42, name: 'Spongebob', shoe_size: 9.5}};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+  
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
   
     test.deepEqual(doc.doc.age, BSONDE.BSON.deserialize(serialized_data).doc.age);
     test.deepEqual(doc.doc.name, BSONDE.BSON.deserialize(serialized_data).doc.name);
@@ -157,8 +203,12 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize Array' : function(test) {
     var doc = {doc: [1, 2, 'a', 'b']};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    var deserialized = BSONDE.BSON.deserialize(serialized_data);
-  
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
+    var deserialized = BSONDE.BSON.deserialize(serialized_data);  
     test.equal(doc.doc[0], deserialized.doc[0])
     test.equal(doc.doc[1], deserialized.doc[1])
     test.equal(doc.doc[2], deserialized.doc[2])
@@ -170,8 +220,12 @@ var tests = testCase({
     Array.prototype.toXml = function() {};
     var doc = {doc: [1, 2, 'a', 'b']};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    var deserialized = BSONDE.BSON.deserialize(serialized_data);
-  
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
+    var deserialized = BSONDE.BSON.deserialize(serialized_data);  
     test.equal(doc.doc[0], deserialized.doc[0])
     test.equal(doc.doc[1], deserialized.doc[1])
     test.equal(doc.doc[2], deserialized.doc[2])
@@ -182,6 +236,10 @@ var tests = testCase({
   'Should correctly deserialize a nested object' : function(test) {
     var doc = {doc: {doc:1}};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
   
     test.deepEqual(doc.doc.doc, BSONDE.BSON.deserialize(serialized_data).doc.doc);
     test.done();            
@@ -190,6 +248,10 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize A Boolean' : function(test) {
     var doc = {doc: true};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
   
     test.equal(doc.doc, BSONDE.BSON.deserialize(serialized_data).doc);    
     test.done();        
@@ -206,6 +268,10 @@ var tests = testCase({
     date.setUTCSeconds(30);
     var doc = {doc: date};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
   
     test.equal(doc.date, BSONDE.BSON.deserialize(serialized_data).doc.date);
     test.done();        
@@ -228,6 +294,11 @@ var tests = testCase({
     }
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     test.done();
   },
        
@@ -235,6 +306,10 @@ var tests = testCase({
     var doc = {doc: new BSONSE.ObjectID()};
     var doc2 = {doc: BSONDE.ObjectID.createFromHexString(doc.doc.toHexString())};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
   
     test.deepEqual(doc, BSONDE.BSON.deserialize(serialized_data));
     test.done();        
@@ -243,6 +318,10 @@ var tests = testCase({
   'Should Correctly encode Empty Hash' : function(test) {
     var doc = {};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
   
     test.deepEqual(doc, BSONDE.BSON.deserialize(serialized_data));
     test.done();        
@@ -251,6 +330,11 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize Ordered Hash' : function(test) {
     var doc = {doc: {b:1, a:2, c:3, d:4}};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var decoded_hash = BSONDE.BSON.deserialize(serialized_data).doc;
     var keys = [];
   
@@ -263,6 +347,11 @@ var tests = testCase({
     // Serialize the regular expression
     var doc = {doc: /foobar/mi};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var doc2 = BSONDE.BSON.deserialize(serialized_data);
   
     test.deepEqual(doc.doc.toString(), doc2.doc.toString());
@@ -277,6 +366,11 @@ var tests = testCase({
     }
     var doc = {doc: bin};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     test.deepEqual(doc.doc.value(), deserialized_data.doc.value());
     test.done();        
@@ -288,6 +382,11 @@ var tests = testCase({
     bin.write(data);
     var doc = {doc: bin};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     test.deepEqual(doc.doc.value(), deserialized_data.doc.value());
     test.done();        
@@ -297,6 +396,10 @@ var tests = testCase({
     var oid = new ObjectID();
     var doc = {dbref: new DBRef('namespace', oid, null)};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
   
     var doc2 = BSONDE.BSON.deserialize(serialized_data);    
     test.equal("namespace", doc2.dbref.namespace);
@@ -308,6 +411,11 @@ var tests = testCase({
     var id = new ObjectID();
     var doc = {'name':'something', 'user':{'$ref':'username', '$id': id}};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var doc2 = BSONDE.BSON.deserialize(serialized_data);
     test.equal('something', doc2.name);
     test.equal('username', doc2.user.namespace);
@@ -318,6 +426,11 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize simple Int' : function(test) {
     var doc = {doc:2147483648};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var doc2 = BSONDE.BSON.deserialize(serialized_data);
     test.deepEqual(doc.doc, doc2.doc)
     test.done();
@@ -326,6 +439,11 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize Long Integer' : function(test) {
     var doc = {doc: Long.fromNumber(9223372036854775807)};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     test.deepEqual(doc.doc, deserialized_data.doc);
     
@@ -345,6 +463,11 @@ var tests = testCase({
     function roundTrip(val) {
       var doc = {doc: val};
       var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+      var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+      BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+      assertBuffersEqual(test, serialized_data, serialized_data2);
+
       var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
       test.deepEqual(doc.doc, deserialized_data.doc);
     };
@@ -366,6 +489,11 @@ var tests = testCase({
     function roundTrip(val) {
       var doc = {doc: val};
       var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+      var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+      BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+      assertBuffersEqual(test, serialized_data, serialized_data2);
+
       var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
       test.deepEqual(doc.doc, deserialized_data.doc);
     };
@@ -385,8 +513,12 @@ var tests = testCase({
     
     var test_int = {doc: long, doc2: timestamp};
     var serialized_data = BSONSE.BSON.serialize(test_int, false, true);
-    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
-  
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_int));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_int, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
+    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);  
     test.deepEqual(test_int.doc, deserialized_data.doc);
     test.done();        
   },
@@ -394,6 +526,11 @@ var tests = testCase({
   'Should Always put the id as the first item in a hash' : function(test) {
     var hash = {doc: {not_id:1, '_id':2}};
     var serialized_data = BSONSE.BSON.serialize(hash, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(hash));
+    BSONSE.BSON.serializeWithBufferAndIndex(hash, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     var keys = [];
   
@@ -415,6 +552,10 @@ var tests = testCase({
   
     var doc = {doc: bin};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     
     test.deepEqual(deserialized_data.doc.sub_type, BSON.BSON_BINARY_SUBTYPE_USER_DEFINED);
@@ -425,8 +566,12 @@ var tests = testCase({
   'Should Correclty Serialize and Deserialize a Code object'  : function(test) {
     var doc = {'doc': {'doc2': new BSONSE.Code('this.a > i', {i:1})}};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
-    
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
+    var deserialized_data = BSONDE.BSON.deserialize(serialized_data);    
     test.deepEqual(doc.doc.doc2.code, deserialized_data.doc.doc2.code);
     test.deepEqual(doc.doc.doc2.scope.i, deserialized_data.doc.doc2.scope.i);
     test.done();        
@@ -438,6 +583,11 @@ var tests = testCase({
     };
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);    
     test.deepEqual(doc.a, deserialized_data.a);
     test.deepEqual(doc.b, deserialized_data.b);
@@ -448,6 +598,11 @@ var tests = testCase({
     // Serialize utf8
     var doc = { "name" : "本荘由利地域に洪水警報", "name1" : "öüóőúéáűíÖÜÓŐÚÉÁŰÍ", "name2" : "abcdedede"};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     test.deepEqual(doc, deserialized_data);
     test.done();
@@ -456,6 +611,11 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize query object' : function(test) {
     var doc = { count: 'remove_with_no_callback_bug_test', query: {}, fields: null};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);    
     test.deepEqual(doc, deserialized_data);
     test.done();
@@ -464,6 +624,11 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize empty query object' : function(test) {
     var doc = {};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     test.deepEqual(doc, deserialized_data);
     test.done();
@@ -472,6 +637,11 @@ var tests = testCase({
   'Should Correctly Serialize and Deserialize array based doc' : function(test) {
     var doc = { b: [ 1, 2, 3 ], _id: new BSONSE.ObjectID() };
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     test.deepEqual(doc.b, deserialized_data.b)
     test.deepEqual(doc, deserialized_data);
@@ -482,6 +652,11 @@ var tests = testCase({
     if(Symbol != null) {
       var doc = { b: [ new Symbol('test') ], _id: new BSONSE.ObjectID() };
       var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+      var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+      BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+      assertBuffersEqual(test, serialized_data, serialized_data2);
+
       var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
       test.deepEqual(doc.b, deserialized_data.b)
       test.deepEqual(doc, deserialized_data);      
@@ -493,6 +668,11 @@ var tests = testCase({
   'Should handle Deeply nested document' : function(test) {
     var doc = {a:{b:{c:{d:2}}}};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);    
     test.deepEqual(doc, deserialized_data);
     test.done();
@@ -549,6 +729,11 @@ var tests = testCase({
     }
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var serialized_data2 = BSONDE.BSON.serialize(doc2, false, true);
   
     for(var i = 0; i < serialized_data2.length; i++) {
@@ -571,6 +756,10 @@ var tests = testCase({
           _id: new BSONSE.ObjectID() }
           
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
     
     var doc2 = doc;
     doc2._id = BSONDE.ObjectID.createFromHexString(doc2._id.toHexString());
@@ -595,6 +784,11 @@ var tests = testCase({
         _id: new BSONDE.ObjectID.createFromHexString(oid2.toHexString()) };
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var serialized_data2 = BSONDE.BSON.serialize(doc2, false, true);
     test.done();
   },
@@ -603,6 +797,11 @@ var tests = testCase({
     var doc = {'b':/foobaré/};
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var serialized_data2 = BSONDE.BSON.serialize(doc, false, true);
   
     for(var i = 0; i < serialized_data2.length; i++) {
@@ -616,6 +815,11 @@ var tests = testCase({
     var doc = {a:{b:{c:[new BSONSE.ObjectID(), new BSONSE.ObjectID()]}}, d:{f:1332.3323}};
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var doc2 = BSONSE.BSON.deserialize(serialized_data);
   
     test.deepEqual(doc, doc2)
@@ -633,6 +837,11 @@ var tests = testCase({
       }
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var doc2 = BSONSE.BSON.deserialize(serialized_data);
   
     test.deepEqual(doc, doc2)
@@ -650,6 +859,11 @@ var tests = testCase({
       }
   
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+
     var doc2 = BSONSE.BSON.deserialize(serialized_data);
     test.deepEqual(doc, doc2)
     test.done();
@@ -685,6 +899,11 @@ var tests = testCase({
 
       // Serialize
       var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+
+      var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+      BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2);    
+      assertBuffersEqual(test, serialized_data, serialized_data2);
+
       var doc2 = BSONSE.BSON.deserialize(serialized_data);
       test.deepEqual({value:100}, doc2);
     }    
