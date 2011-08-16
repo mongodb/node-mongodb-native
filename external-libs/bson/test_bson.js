@@ -1,18 +1,16 @@
-require.paths.unshift("../../lib");
-
 var sys = require('util'),
   debug = require('util').debug,
   inspect = require('util').inspect,
   Buffer = require('buffer').Buffer,
   BSON = require('./bson').BSON,
   Buffer = require('buffer').Buffer,
-  BSONJS = require('mongodb/bson/bson').BSON,
-  BinaryParser = require('mongodb/bson/binary_parser').BinaryParser,
-  Long = require('mongodb/goog/math/long').Long,
-  ObjectID = require('mongodb/bson/bson').ObjectID,
-  Binary = require('mongodb/bson/bson').Binary,
-  Code = require('mongodb/bson/bson').Code,  
-  DBRef = require('mongodb/bson/bson').DBRef,  
+  BSONJS = require('../../lib/mongodb/bson/bson').BSON,
+  BinaryParser = require('../../lib/mongodb/bson/binary_parser').BinaryParser,
+  Long = require('../../lib/mongodb/goog/math/long').Long,
+  ObjectID = require('../../lib/mongodb/bson/bson').ObjectID,
+  Binary = require('../../lib/mongodb/bson/bson').Binary,
+  Code = require('../../lib/mongodb/bson/bson').Code,  
+  DBRef = require('../../lib/mongodb/bson/bson').DBRef,  
   assert = require('assert');
   
 var Long2 = require('./bson').Long,
