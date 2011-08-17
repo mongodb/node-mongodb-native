@@ -770,7 +770,16 @@ var tests = testCase({
         })        
       });      
     });      
-  }  
+  },
+
+  'Should correctly pass false timeout option to cursor' : function(test) {
+    client.createCollection('timeoutFalse', function(err, collection) {
+      collection.find({},{timeout:false},function(err, cursor) {
+        test.equal(false, cursor.timeout);
+        test.done();
+      })
+    });
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
