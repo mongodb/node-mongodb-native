@@ -6,9 +6,7 @@ test = require("assert");
 var Db = require('../lib/mongodb').Db,
   Connection = require('../lib/mongodb').Connection,
   Server = require('../lib/mongodb').Server,
-  GridStore = require('../lib/mongodb').GridStore,
-  // BSON = require('../lib/mongodb').BSONPure;
-  BSON = require('../lib/mongodb').BSONNative;
+  GridStore = require('../lib/mongodb').GridStore;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;

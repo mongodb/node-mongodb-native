@@ -8,10 +8,8 @@ var Db = require('../lib/mongodb').Db,
   DbCommand = require('../lib/mongodb/commands/db_command').DbCommand,
   Connection = require('../lib/mongodb').Connection,
   Server = require('../lib/mongodb').Server,
-  // BSON = require('../lib/mongodb').BSONPure;
   ReplSetServers = require('../lib/mongodb').ReplSetServers,
-   CheckMaster = require('../lib/mongodb').CheckMaster,
-    BSON = require('../lib/mongodb').BSONNative;
+  CheckMaster = require('../lib/mongodb').CheckMaster;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;

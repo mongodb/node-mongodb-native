@@ -6,11 +6,7 @@ test = require("assert");
 var Db = require('../lib/mongodb').Db,
   Connection = require('../lib/mongodb').Connection,
   Server = require('../lib/mongodb').Server,
-  // BSON = require('../lib/mongodb').BSONPure;
-  BSON = require('../lib/mongodb').BSONNative;
-
-var mongo = require('../lib/mongodb'),
-  Integer = require('../lib/mongodb/goog/math/integer').Integer;
+  mongo = require('../lib/mongodb');
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
@@ -32,7 +28,7 @@ db.open(function(err, db) {
     var messages = ["hola", "hello", "aloha", "ciao"];
     sys.puts(">> Generate test data");
     for(var i = 0; i < objectCount; i++) {
-      objects.push({'number':i, 'rndm':((5*Math.random()) + 1), 'msg':messages[Integer.fromNumber((4*Math.random())).toInt()]})
+      objects.push({'number':i, 'rndm':((5*Math.random()) + 1), 'msg':messages[parseInt(4*Math.random())]})
     }
     sys.puts("generated");
 
