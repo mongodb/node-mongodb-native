@@ -8,9 +8,9 @@
 using namespace v8;
 using namespace node;
 
-class BSON : public EventEmitter {
+class BSON : public ObjectWrap {
   public:    
-    BSON() : EventEmitter() {}
+    BSON() : ObjectWrap() {}
     ~BSON() {}
     
     static void Initialize(Handle<Object> target);

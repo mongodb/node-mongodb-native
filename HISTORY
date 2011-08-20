@@ -1,3 +1,8 @@
+* Timeout option not correctly making it to the cursor, Issue #320, Fix from (https://github.com/year2013)
+* Fixes for memory leaks when using buffers and C++ parser
+* Fixes to make tests pass on 0.5.X
+* Cleanup of bson.js to remove duplicated code paths
+
 0.9.6-10 2011-08-11
 * Specific type Double for capped collections (https://github.com/mbostock), Issue #312
 * Decorating Errors with all all object info from Mongo (https://github.com/laurie71), Issue #308

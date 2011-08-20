@@ -637,7 +637,18 @@ var tests = testCase({
         });
       });      
     });
-  }
+  },
+  
+  shouldCorrectlyFailWhenNoObjectToUpdate: function(test) {
+    client.createCollection('shouldCorrectlyExecuteSaveInsertUpdate', function(err, collection) {
+      collection.update({_id : new client.bson_serializer.ObjectID()}, { email : 'update' }, {safe:true},
+        function(err, result) {
+          test.equal(0, result);
+          test.done();
+        }
+      );          
+    });    
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
