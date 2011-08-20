@@ -1,20 +1,13 @@
-require.paths.unshift('../lib');
-require.paths.unshift('../external-libs/bson');
-
-var Db = require('mongodb').Db,
-  Server = require('mongodb').Server,
-  Cursor = require('mongodb').Cursor,
-  Collection = require('mongodb').Collection,
+var Db = require('../lib/mongodb').Db,
+  Server = require('../lib/mongodb').Server,
+  Cursor = require('../lib/mongodb').Cursor,
+  Collection = require('../lib/mongodb').Collection,
   sys = require('util'),
   debug = require('util').debug,
   inspect = require('util').inspect;  
 
-// var BSON = require('bson');
-
-var parser = require('mongodb').BSONPure;
-var objectID = require('mongodb').ObjectID;
-// var parser = BSON;
-// var objectID = BSON.ObjectID;
+var parser = require('../lib/mongodb').BSONPure;
+var objectID = require('../lib/mongodb').ObjectID;
 
 var db = new Db('streaming_benchmark', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:4}), {})
 // Set native deserializer
