@@ -1,13 +1,17 @@
 Install
 ========
 
-Run:
+To install the most recent release from npm, run:
 
-    make
+    npm install mongodb
+
+To install from the latest from the repository, run::
+
+    npm install path/to/node-mongodb-native
 
 Community
 ========
-Check out the google group http://groups.google.com/group/node-mongodb-native for questions/answers from users of the driver.
+Check out the google group [node-mongodb-native](http://groups.google.com/group/node-mongodb-native) for questions/answers from users of the driver.
 
 Introduction
 ========
@@ -39,35 +43,50 @@ A simple example of inserting a document.
       client.collection('test_insert', test);
     });
 
-Important
+Data types
 ========
 
-To enable the driver to use the C/C++ bson parser pass it the option native_parser:true like below
+To store and retrieve the non-JSON MongoDb primitives ([ObjectID](http://www.mongodb.org/display/DOCS/Object+IDs), Long, Binary, [Timestamp](http://www.mongodb.org/display/DOCS/Timestamp+data+type), [DBRef](http://www.mongodb.org/display/DOCS/Database+References#DatabaseReferences-DBRef), Code), you have to use one of the types from the bson_serializer.
 
+In particular, every document has a unique `_id` which can be almost any type, and by default a 12-byte ObjectID is created. ObjectIDs can be represented as 24-digit hexadecimal strings, but you must convert the string back into an ObjectID before you can use it in the database. For example:
+
+    var idString = '4e4e1638c85e808431000003';
+    collection.findOne({_id: new client.bson_serializer.ObjectId(idString)}, console.log)  // ok
+    collection.findOne({_id: idString}, console.log)  // wrong! callback gets undefined
+
+Here are the constructors the non-Javascript BSON primitive types:
+
+    var client = new Db(...);
+    new client.bson_serializer.Long(numberString)
+    new client.bson_serializer.ObjectID(hexString)
+    new client.bson_serializer.Timestamp()  // the actual unique number is generated on insert.
+    new client.bson_serializer.DBRef(collectionName, id, dbName)
+    new client.bson_serializer.Binary(buffer)  // takes a string or Buffer
+    new client.bson_serializer.Code(code, [context])
+
+The C/C++ bson parser/serializer
+--------
+
+From V0.8.0 to V0.9.6.9, the Javascript bson parser was slower than an optional C/C++ bson parser. As of V0.9.6.9+, due to performance improvements in the Javascript parser, the C/C++ perser is deprecated and is not installed by default anymore.
+
+If you are running a version of this library has the C/C++ parser compiled, to enable the driver to use the C/C++ bson parser pass it the option native_parser:true like below
+
+    // using Deprecated native_parser:
     var client = new Db('integration_tests_20',
                         new Server("127.0.0.1", 27017),
                         {native_parser:true});
 
-The version V0.8.0 > contains a C/C++ native BSON parser, this leads to some small changes in the way you need to access the BSON classes as you need to use the right versions of the classes with the right driver.
-
-To access the correct version of BSON objects for your instance do the following
-
-    client.bson_serializer.Long
-    client.bson_serializer.ObjectID
-    client.bson_serializer.Timestamp
-    client.bson_serializer.DBRef
-    client.bson_serializer.Binary
-    client.bson_serializer.Code
+Since objects created using the C/C++ bson parser are incompatible with a client configured to use the Javascript bson parser and vice versa, you should call constructors using `client.bson_serializer` as described above (don't use `mongodb.BSONNative` and `mongodb.BSONPure` directly).
 
 GitHub information
---------
+========
 
 The source code is available at http://github.com/christkv/node-mongodb-native.
 You can either clone the repository or download a tarball of the latest release.
 
 Once you have the source you can test the driver by running
 
-  $ make test
+    $ make test
 
 in the main directory. You will need to have a mongo instance running on localhost for the integration tests to pass.
 
@@ -76,8 +95,8 @@ Examples
 
 For examples look in the examples/ directory. You can execute the examples using node.
 
-  $ cd examples
-  $ node queries.js
+    $ cd examples
+    $ node queries.js
 
 GridStore
 =========
@@ -170,12 +189,13 @@ Cursor objects. A Cursor lazily uses the connection the first time
 you call `nextObject`, `each`, or `toArray`.
 
 The basic operation on a cursor is the `nextObject` method
-that fetches the next object from the database. The convenience methods
-`each` and `toArray` call `nextObject` until the cursor is exhausted.
+that fetches the next matching document from the database. The convenience
+methods `each` and `toArray` call `nextObject` until the cursor is exhausted.
 
 Signatures:
 
-    collection.find(query, [fields], options);
+    var cursor = collection.find(query, [fields], options);
+    cursor.sort(fields).limit(n).skip(m).
 
     cursor.nextObject(function(err, doc) {});
     cursor.each(function(err, doc) {});
@@ -183,27 +203,30 @@ Signatures:
 
     cursor.rewind()  // reset the cursor to its initial state.
 
-Useful options of `find`:
+Useful chainable methods of cursor. These can optionally be options of `find` instead of method calls:
 
-* **`limit`** and **`skip`** numbers used to control paging. 
-* **`sort`** an array of sort preferences like this:
-`[['field1','asc'], ['field2','desc']]`. As a shorthand, ascending fields can
-be written as simply the field name instead of `['field','asc']`. Furthermore,
-if you are sorting by a single ascending field, you can smply enter the field
-name as a string without the surrounding array.
-* **`fields`** the fields to fetch (to avoid transferring the entire document)
-* **`tailable`** if true, makes the cursor [tailable](http://www.mongodb.org/display/DOCS/Tailable+Cursors).
-* **`batchSize`** The number of the subset of results to request the database
+* `.limit(n).skip(m)` to control paging.
+* `.sort(fields)` Order by the given fields. There are several equivalent syntaxes:
+  * `.sort({field1: -1, field2: 1})` descending by field1, then ascending by field2.
+  * `.sort([['field1', 'desc'], ['field2', 'asc']])` same as above
+  * `.sort([['field1', 'desc'], 'field2'])` same as above
+  * `.sort('field1')` ascending by field1
+
+Other options of `find`:
+
+* `fields` the fields to fetch (to avoid transferring the entire document)
+* `tailable` if true, makes the cursor [tailable](http://www.mongodb.org/display/DOCS/Tailable+Cursors).
+* `batchSize` The number of the subset of results to request the database
 to return for every request. This should initially be greater than 1 otherwise
 the database will automatically close the cursor. The batch size can be set to 1
 with `batchSize(n, function(err){})` after performing the initial query to the database.
-* **`hint`** See [Optimization: hint](http://www.mongodb.org/display/DOCS/Optimization#Optimization-Hint).
-* **`explain`** turns this into an explain query. You can also call
+* `hint` See [Optimization: hint](http://www.mongodb.org/display/DOCS/Optimization#Optimization-Hint).
+* `explain` turns this into an explain query. You can also call
 `explain()` on any cursor to fetch the explanation.
-* **`snapshot`** prevents documents that are updated while the query is active
+* `snapshot` prevents documents that are updated while the query is active
 from being returned multiple times. See more
 [details about query snapshots](http://www.mongodb.org/display/DOCS/How+to+do+Snapshotted+Queries+in+the+Mongo+Database).
-* **`timeout`** if false, asks MongoDb not to time out this cursor after an
+* `timeout` if false, asks MongoDb not to time out this cursor after an
 inactivity period.
 
 
@@ -227,9 +250,11 @@ Signature:
 
     collection.insert(docs, options, [callback]);
 
+where `docs` can be a single document or an array of documents.
+
 Useful options:
 
-* **`safe:true`** Should always set if you have a callback.
+* `safe:true` Should always set if you have a callback.
 
 See also: [MongoDB docs for insert](http://www.mongodb.org/display/DOCS/Inserting).
 
@@ -249,8 +274,7 @@ See also: [MongoDB docs for insert](http://www.mongodb.org/display/DOCS/Insertin
 
 Note that there's no reason to pass a callback to the insert or update commands
 unless you use the `safe:true` option. If you don't specify `safe:true`, then
-your callback will be called immediately. (fine for collecting some statistics,
-bad for most use cases (see "MongoDB is Web Scale")).
+your callback will be called immediately.
 
 Update; update and insert (upsert)
 --------
@@ -261,7 +285,7 @@ If `safe:true`, `upsert` is not set, and no documents match, your callback
 will be given an error.
 
 See the [MongoDB docs](http://www.mongodb.org/display/DOCS/Updating) for
-the modifier (`$inc`, etc.) formats.
+the modifier (`$inc`, `$set`, `$push`, etc.) formats.
 
 Signature:
 
@@ -269,9 +293,9 @@ Signature:
 
 Useful options:
 
-* **`safe:true`** Should always set if you have a callback.
-* **`multi:true`** If set, all matching documents are updated, not just the first.
-* **`upsert:true`** Atomically inserts the document if no documents matched.
+* `safe:true` Should always set if you have a callback.
+* `multi:true` If set, all matching documents are updated, not just the first.
+* `upsert:true` Atomically inserts the document if no documents matched.
 
 Example for `update`:
 
@@ -313,9 +337,9 @@ for more details.
 
 Useful options:
 
-* **`remove:true`** set to a true to remove the object before returning
-* **`new:true`** set to true if you want to return the modified object rather than the original. Ignored for remove.
-* **`upsert:true`** Atomically inserts the document if no documents matched.
+* `remove:true` set to a true to remove the object before returning
+* `new:true` set to true if you want to return the modified object rather than the original. Ignored for remove.
+* `upsert:true` Atomically inserts the document if no documents matched.
 
 Example for `findAndModify`:
 
@@ -330,11 +354,6 @@ Example for `findAndModify`:
         else console.dir(object);  // undefined if no matching object exists.
       });
     });
-
-Find or insert
---------
-
-TODO
 
 Save
 --------
