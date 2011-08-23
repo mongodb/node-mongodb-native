@@ -382,8 +382,7 @@ var tests = testCase({
   
       collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], {safe:true}, function(err, ids) {
         collection.findOne({}, function(err, item) {
-          test.equal("32222432", item.value.toJSON())
-          
+          test.equal(32222432, item.value);          
           test.done();
         });
       });
@@ -423,8 +422,10 @@ var tests = testCase({
       collection.insert({i:client.bson_serializer.Timestamp.fromNumber(100), j:client.bson_serializer.Long.fromNumber(200)}, {safe:true}, function(err, r) {
         // Locate document
         collection.findOne({}, function(err, item) {
-          test.equal(100, item.i.toNumber())
-          test.equal(200, item.j.toNumber())
+          test.ok(item.i instanceof client.bson_serializer.Timestamp);
+          test.equal(100, item.i);
+          test.ok(typeof item.j == "number");
+          test.equal(200, item.j);
   
           test.done();
         });                
@@ -611,7 +612,43 @@ var tests = testCase({
         })
       });      
     });
-  }
+  },
+
+  shouldCorrectlyExecuteMultipleFetches : function(test) {
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    db.bson_deserializer = client.bson_deserializer;
+    db.bson_serializer = client.bson_serializer;
+    db.pkFactory = client.pkFactory;
+  
+    // Search parameter
+    var to = 'ralph'
+    // Execute query
+    db.open(function(err, db) {
+      db.collection('shouldCorrectlyExecuteMultipleFetches', function(err, collection) {
+        collection.insert({addresses:{localPart:'ralph'}}, {safe:true}, function(err, result) {          
+          // Let's find our user
+          collection.findOne({"addresses.localPart" : to}, function( err, doc ) {
+            test.equal(null, err);
+            test.equal(to, doc.addresses.localPart);
+
+            db.close();
+            test.done();
+        	});                
+        });
+      });      
+    });
+  },
+  
+  shouldCorrectlyFailWhenNoObjectToUpdate: function(test) {
+    client.createCollection('shouldCorrectlyExecuteSaveInsertUpdate', function(err, collection) {
+      collection.update({_id : new client.bson_serializer.ObjectID()}, { email : 'update' }, {safe:true},
+        function(err, result) {
+          test.equal(0, result);
+          test.done();
+        }
+      );          
+    });    
+  },  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

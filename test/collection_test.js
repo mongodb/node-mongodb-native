@@ -322,29 +322,27 @@ var tests = testCase({
     client.collection(5, function(err, collection) {
       test.equal("collection name must be a String", err.message);
     });
-  
+    
     client.collection("", function(err, collection) {
       test.equal("collection names cannot be empty", err.message);
     });
-  
+    
     client.collection("te$t", function(err, collection) {
-      test.equal("collection names must not contain '$'", err.message);
+      test.equal("collection names must not contain '$'", err.message);        
     });
   
     client.collection(".test", function(err, collection) {
-      test.equal("collection names must not start or end with '.'", err.message);
+      test.equal("collection names must not start or end with '.'", err.message);        
     });
   
     client.collection("test.", function(err, collection) {
-      test.equal("collection names must not start or end with '.'", err.message);
+      test.equal("collection names must not start or end with '.'", err.message);        
     });
   
     client.collection("test..t", function(err, collection) {
       test.equal("collection names cannot be empty", err.message);
-  
-      // Let's close the db
-      test.done();
-    });
+      test.done();        
+    });  
   },  
   
   // Test the count result on a collection that does not exist
@@ -376,11 +374,6 @@ var tests = testCase({
               collection.findOne(function(err, doc3) {
                 test.equal('world', doc3.hello);
                 
-                // REMOVE REMOVE
-                // HACK HACK DUE TO MIXXING NATIVE AND PURE JS BSON PARSER
-                // REMOVE REMOVE
-                // REMOVE REMOVE
-                doc3._id = doc._id;
                 doc3.hello = 'mike';
             
                 collection.save(doc3, {safe:true}, function(err, doc4) {
@@ -485,12 +478,6 @@ var tests = testCase({
           var self = this;
           test.equal(2, doc2.a);
 
-          // REMOVE REMOVE
-          // HACK HACK DUE TO MIXXING NATIVE AND PURE JS BSON PARSER
-          // REMOVE REMOVE
-          // REMOVE REMOVE
-          doc2._id = id;
-
           collection.update({"_id":id}, doc2, {safe:true, upsert:true}, function(err, result) {
             test.equal(null, err);
             test.equal(1, result);
@@ -555,12 +542,6 @@ var tests = testCase({
          collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
            user = users[0]
   
-           // REMOVE REMOVE
-           // HACK HACK DUE TO MIXXING NATIVE AND PURE JS BSON PARSER
-           // REMOVE REMOVE
-           // REMOVE REMOVE
-           user._id = doc._id;
-  
            if(err) {
              throw new Error(err)
            } else if(user) {
@@ -606,11 +587,6 @@ var tests = testCase({
               collection.find({}).limit(1).toArray(function(err, users) {
                 test.equal(null, err);        
                 user = users[0]
-                // REMOVE REMOVE
-                // HACK HACK DUE TO MIXXING NATIVE AND PURE JS BSON PARSER
-                // REMOVE REMOVE
-                // REMOVE REMOVE
-                user._id = doc._id 
                 user.friends.splice(1,1)
   
                 collection.save(user, function(err, doc) {

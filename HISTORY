@@ -1,3 +1,44 @@
+* Timeout option not correctly making it to the cursor, Issue #320, Fix from (https://github.com/year2013)
+* Fixes for memory leaks when using buffers and C++ parser
+* Fixes to make tests pass on 0.5.X
+* Cleanup of bson.js to remove duplicated code paths
+
+0.9.6-10 2011-08-11
+* Specific type Double for capped collections (https://github.com/mbostock), Issue #312
+* Decorating Errors with all all object info from Mongo (https://github.com/laurie71), Issue #308
+* Implementing fixes for mongodb 1.9.1 and higher to make tests pass
+* Admin validateCollection now takes an options argument for you to pass in full option
+* Implemented keepGoing parameter for mongodb 1.9.1 or higher, Issue #310
+* Added test for read_secondary count issue, merged in fix from (https://github.com/year2013), Issue #317
+
+0.9.6-9
+* Bug fix for bson parsing the key '':'' correctly without crashing
+
+0.9.6-8 
+* Changed to using node.js crypto library MD5 digest
+* Connect method support documented mongodb: syntax by (https://github.com/sethml)
+* Support Symbol type for BSON, serializes to it's own type Symbol, Issue #302, #288
+* Code object without scope serializing to correct BSON type
+* Lot's of fixes to avoid double callbacks (https://github.com/aheckmann) Issue #304
+* Long deserializes as Number for values in the range -2^53 to 2^53, Issue #305 (https://github.com/sethml)
+* Fixed C++ parser to reflect JS parser handling of long deserialization
+* Bson small optimizations
+
+0.9.6-7 2011-07-13
+* JS Bson deserialization bug #287
+
+0.9.6-6 2011-07-12
+* FindAndModify not returning error message as other methods Issue #277
+* Added test coverage for $push, $pushAll and $inc atomic operations
+* Correct Error handling for non 12/24 bit ids on Pure JS ObjectID class Issue #276
+* Fixed terrible deserialization bug in js bson code #285
+* Fix by andrewjstone to avoid throwing errors when this.primary not defined
+
+0.9.6-5 2011-07-06
+* Rewritten BSON js parser now faster than the C parser on my core2duo laptop
+* Added option full to indexInformation to get all index info Issue #265
+* Passing in ObjectID for new Gridstore works correctly Issue #272
+
 0.9.6-4 2011-07-01
 * Added test and bug fix for insert/update/remove without callback supplied
 

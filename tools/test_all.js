@@ -19,7 +19,7 @@ var directories = [{dir: __dirname + "/../test", path: "/test/"},
 directories.forEach(function(dirEntry) {
   // Add the files
   files = files.concat(fs.readdirSync(dirEntry.dir).filter(function(item) {
-    return item.indexOf('_test.js') != -1;
+    return /_test\.js$/i.test(item);
   }).map(function(file) {
     return dirEntry.path + file; 
   }));
@@ -27,7 +27,7 @@ directories.forEach(function(dirEntry) {
 
 // Replicasetfiles
 var replicasetFiles = fs.readdirSync(__dirname + "/../test/replicaset").filter(function(item) {
-  return item.indexOf('_test.js') != -1;
+  return /_test\.js$/i.test(item);
 }).map(function(file) {
   return "/test/replicaset/" + file; 
 });
@@ -80,11 +80,11 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
         runner.run(files, options, this);
       },
       // Run all integration tests using the native bson parser
-      function runNativeJS() {
-        process.env['TEST_NATIVE'] = 'TRUE';
-        options.suffix = 'native';
-        runner.run(files, options, this);      
-      },
+      // function runNativeJS() {
+      //   process.env['TEST_NATIVE'] = 'TRUE';
+      //   options.suffix = 'native';
+      //   runner.run(files, options, this);      
+      // },
       // Execute all the replicaset tests
       function executeReplicaSetTests() {
         runner.run(replicasetFiles, options, this);                

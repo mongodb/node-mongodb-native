@@ -1,12 +1,10 @@
-require.paths.unshift('../lib');
-
-var Db = require('mongodb').Db,
-  Server = require('mongodb').Server,
-  ObjectID = require('mongodb').ObjectID,
-  Cursor = require('mongodb').Cursor,
-  Collection = require('mongodb').Collection,
+var Db = require('../lib/mongodb').Db,
+  Server = require('../lib/mongodb').Server,
+  ObjectID = require('../lib/mongodb').ObjectID,
+  Cursor = require('../lib/mongodb').Cursor,
+  Collection = require('../lib/mongodb').Collection,
   Buffer = require('buffer').Buffer,
-  GridStore = require('mongodb').GridStore,
+  GridStore = require('../lib/mongodb').GridStore,
   sys = require('util');
 
 var simulated_buffer = new Buffer(1024*1000*10).toString();

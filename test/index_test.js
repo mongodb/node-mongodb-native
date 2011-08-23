@@ -119,8 +119,9 @@ var tests = testCase({
             client.createCollection('test_unique_index2', function(err, collection) {
               client.createIndex(collection.collectionName, 'hello', {unique:true}, function(err, indexName) {
                 // Insert some docs
-                collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, ids) {          
+                collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, ids) {                            
                   test.ok(err != null);
+                  test.equal(11000, err.code);
                   test.done();
                 });
               });
@@ -139,7 +140,7 @@ var tests = testCase({
         client.error(function(err, errors) {
           test.equal(1, errors.length);
           test.ok(errors[0].err == null);
-
+  
           // Create a unique subfield index and test that insert fails
           client.createCollection('test_index_on_subfield2', function(err, collection) {
             client.createIndex(collection.collectionName, 'hello.a', true, function(err, indexName) {
@@ -231,14 +232,39 @@ var tests = testCase({
             collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
               test.equal(1, items.length);
               test.equal("Sarah", items[0].name);
-
-              test.done();
+  
+              // Fetch the info for the indexes
+              collection.indexInformation({full:true}, function(err, indexInfo) {
+                test.equal(null, err);
+                test.equal(2, indexInfo.length);
+                test.done();
+              })
             })
           });          
         })
       })
     })    
   },  
+    
+  "Should correctly execute insert with keepGoing option on mongod >= 1.9.1" : function(test) {
+    if(parseInt((client.version.replace(/\./g, ''))) >= 191) {
+      client.createCollection('shouldCorrectlyExecuteKeepGoingWithMongodb191OrHigher', function(err, collection) {
+        collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
+          collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
+            // Force keep going flag, ignoring unique index issue
+            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {safe:true, keepGoing:true}, function(err, result) {
+              collection.count(function(err, count) {
+                test.equal(3, count);
+                test.done();        
+              })
+            });
+          });
+        });
+      });      
+    } else {
+      test.done();      
+    }
+  }  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

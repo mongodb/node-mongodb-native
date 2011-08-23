@@ -116,9 +116,9 @@ Options object can be used for the following options:
             {}, // options
             function(err, object) {
                 if (err){
-                    console.warn(err.message);
+                    console.warn(err.message);  // returns error if no matching object found
                 }else{
-                    console.dir(object);  // undefined if no matching object exists.
+                    console.dir(object);
                 }
             });
         });

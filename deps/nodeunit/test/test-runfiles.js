@@ -8,7 +8,7 @@ var assert = require('assert'),
 var setup = function (fn) {
     return function (test) {
         process.chdir(__dirname);
-        require.paths.push(__dirname);
+        //require.paths.push(__dirname);
         var env = {
             mock_module1: require('./fixtures/mock_module1'),
             mock_module2: require('./fixtures/mock_module2'),
@@ -148,7 +148,7 @@ try {
 if (CoffeeScript) {
     exports.testCoffeeScript = function (test) {
         process.chdir(__dirname);
-        require.paths.push(__dirname);
+        //require.paths.push(__dirname);
         var env = {
             mock_coffee_module: require('./fixtures/coffee/mock_coffee_module')
         };

@@ -62,10 +62,6 @@ var tests = testCase({
                 test.ok(item._id instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
   
                 client.collection('fs.chunks', function(err, collection) {
-                  // REMOVE REMOVE
-                  // HACK HACK DUE TO MIXXING NATIVE AND PURE JS BSON PARSER
-                  // REMOVE REMOVE
-                  // REMOVE REMOVE
                   var id = client.bson_serializer.ObjectID.createFromHexString(item._id.toHexString());
   
                   collection.find({'files_id':id}, function(err, cursor) {
@@ -98,14 +94,7 @@ var tests = testCase({
                 test.ok(item._id instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
   
                 client.collection('fs.chunks', function(err, collection) {
-  
-                  // REMOVE REMOVE
-                  // HACK HACK DUE TO MIXXING NATIVE AND PURE JS BSON PARSER
-                  // REMOVE REMOVE
-                  // REMOVE REMOVE
-                  var id = client.bson_serializer.ObjectID.createFromHexString(item._id.toHexString());
-  
-                  collection.find({'files_id':id}, function(err, cursor) {
+                  collection.find({'files_id':item._id}, function(err, cursor) {
                     cursor.toArray(function(err, items) {
                       test.equal(1, items.length);
                       test.done();

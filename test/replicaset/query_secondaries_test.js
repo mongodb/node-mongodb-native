@@ -67,55 +67,55 @@ module.exports = testCase({
     })
   },
 
-  // shouldReadPrimary : function(test) {
-  //   // debug("=========================================== shouldReadPrimary")
-  //   // Replica configuration
-  //   var replSet = new ReplSetServers( [ 
-  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-  //     ], 
-  //     {rs_name:RS.name, read_secondary:true}
-  //   );
-  // 
-  //   // Insert some data
-  //   var db = new Db('integration_test_', replSet);
-  //   db.open(function(err, p_db) {
-  //     if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-  //     // Drop collection on replicaset
-  //     p_db.dropCollection('testsets', function(err, r) {
-  //       if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-  // 
-  //       test.equal(false, p_db.serverConfig.isReadPrimary());
-  //       test.equal(false, p_db.serverConfig.isPrimary());
-  //       test.done();
-  //     });
-  //   })                
-  // },
-  // 
-  // shouldCorrectlyTestConnection : function(test) {
-  //   // debug("=========================================== shouldCorrectlyTestConnection")
-  //   // Replica configuration
-  //   var replSet = new ReplSetServers( [ 
-  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-  //     ], 
-  //     {rs_name:RS.name, read_secondary:true}
-  //   );
-  // 
-  //   // Insert some data
-  //   var db = new Db('integration_test_', replSet);
-  //   db.open(function(err, p_db) {
-  //     if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-  // 
-  //     // Drop collection on replicaset
-  //     p_db.dropCollection('testsets', function(err, r) {
-  //       if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-  // 
-  //       test.ok(p_db.serverConfig.primary != null);
-  //       test.ok(p_db.serverConfig.read != null);
-  //       test.ok(p_db.serverConfig.primary.port != p_db.serverConfig.read.port);
-  //       test.done();
-  //     });
-  //   })
-  // },
+  shouldReadPrimary : function(test) {
+    // debug("=========================================== shouldReadPrimary")
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      ], 
+      {rs_name:RS.name, read_secondary:true}
+    );
+  
+    // Insert some data
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+      // Drop collection on replicaset
+      p_db.dropCollection('testsets', function(err, r) {
+        if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  
+        test.equal(false, p_db.serverConfig.isReadPrimary());
+        test.equal(false, p_db.serverConfig.isPrimary());
+        test.done();
+      });
+    })                
+  },
+  
+  shouldCorrectlyTestConnection : function(test) {
+    // debug("=========================================== shouldCorrectlyTestConnection")
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      ], 
+      {rs_name:RS.name, read_secondary:true}
+    );
+  
+    // Insert some data
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  
+      // Drop collection on replicaset
+      p_db.dropCollection('testsets', function(err, r) {
+        if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  
+        test.ok(p_db.serverConfig.primary != null);
+        test.ok(p_db.serverConfig.read != null);
+        test.ok(p_db.serverConfig.primary.port != p_db.serverConfig.read.port);
+        test.done();
+      });
+    })
+  },
   
   shouldCorrectlyQuerySecondaries : function(test) {
     // debug("=========================================== shouldCorrectlyQuerySecondaries")
@@ -197,10 +197,13 @@ module.exports = testCase({
                       }
                     });
                   }, function(err, result) {
-                    test.ifError(err);
-
-                    test.done();
-                    p_db.close();
+                    // Check if we get a correct count
+                    collection.count(function(err, count) {                      
+                      test.ifError(err);
+                      test.equal(3, count)
+                      test.done();
+                      p_db.close();
+                    });
                   })
                 });              
               }, 2000);

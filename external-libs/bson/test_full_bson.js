@@ -1,5 +1,3 @@
-require.paths.unshift("../../lib");
-
 var sys = require('util'),
   fs = require('fs'),
   Buffer = require('buffer').Buffer,
@@ -10,9 +8,9 @@ var sys = require('util'),
   ObjectID = require('./bson').ObjectID,
   Binary = require('./bson').Binary,
   Code = require('./bson').Code,
-  BinaryParser = require('mongodb/bson/binary_parser').BinaryParser,
-  BSONJS = require('mongodb/bson/bson').BSON,
-  Binary2 = require('mongodb/bson/bson').Binary;
+  BinaryParser = require('../../lib/mongodb/bson/binary_parser').BinaryParser,
+  BSONJS = require('../../lib/mongodb/bson/bson').BSON,
+  Binary2 = require('../../lib/mongodb/bson/bson').Binary;
 
 sys.puts("=== EXECUTING TEST_FULL_BSON ===");
 

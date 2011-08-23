@@ -1,18 +1,16 @@
-require.paths.unshift("../../lib");
-
 var sys = require('util'),
   debug = require('util').debug,
   inspect = require('util').inspect,
   Buffer = require('buffer').Buffer,
   BSON = require('./bson').BSON,
   Buffer = require('buffer').Buffer,
-  BSONJS = require('mongodb/bson/bson').BSON,
-  BinaryParser = require('mongodb/bson/binary_parser').BinaryParser,
-  Long = require('mongodb/goog/math/long').Long,
-  ObjectID = require('mongodb/bson/bson').ObjectID,
-  Binary = require('mongodb/bson/bson').Binary,
-  Code = require('mongodb/bson/bson').Code,  
-  DBRef = require('mongodb/bson/bson').DBRef,  
+  BSONJS = require('../../lib/mongodb/bson/bson').BSON,
+  BinaryParser = require('../../lib/mongodb/bson/binary_parser').BinaryParser,
+  Long = require('../../lib/mongodb/goog/math/long').Long,
+  ObjectID = require('../../lib/mongodb/bson/bson').ObjectID,
+  Binary = require('../../lib/mongodb/bson/bson').Binary,
+  Code = require('../../lib/mongodb/bson/bson').Code,  
+  DBRef = require('../../lib/mongodb/bson/bson').DBRef,  
   assert = require('assert');
   
 var Long2 = require('./bson').Long,
@@ -22,6 +20,10 @@ var Long2 = require('./bson').Long,
     DBRef2 = require('./bson').DBRef;
     
 sys.puts("=== EXECUTING TEST_BSON ===");
+
+// Should fail due to illegal key
+assert.throws(function() { new ObjectID('foo'); })
+assert.throws(function() { new ObjectID2('foo'); })
 
 // Long data type tests
 var l2_string = Long2.fromNumber(100);
@@ -251,6 +253,59 @@ assert.deepEqual(simple_string_serialized, simple_string_serialized_2)
 var object = BSONJS.deserialize(new Buffer(simple_string_serialized_2, 'binary'));
 var object2 = BSON.deserialize(simple_string_serialized);
 assert.deepEqual(object, object2);
+
+// JS Object
+var c1 = { _id: new ObjectID, comments: [], title: 'number 1' };
+var c2 = { _id: new ObjectID, comments: [], title: 'number 2' };
+var doc = {
+    numbers: []
+  , owners: []
+  , comments: [c1, c2]
+  , _id: new ObjectID
+};
+
+var simple_string_serialized = BSONJS.serialize(doc, false, true);
+
+// C++ Object
+var c1 = { _id: ObjectID2.createFromHexString(c1._id.toHexString()), comments: [], title: 'number 1' };
+var c2 = { _id: ObjectID2.createFromHexString(c2._id.toHexString()), comments: [], title: 'number 2' };
+var doc = {
+    numbers: []
+  , owners: []
+  , comments: [c1, c2]
+  , _id: ObjectID2.createFromHexString(doc._id.toHexString())
+};
+
+var simple_string_serialized_2 = BSON.serialize(doc, false, true);
+
+for(var i = 0; i < simple_string_serialized_2.length; i++) {
+  // debug(i + "[" + simple_string_serialized_2[i] + "] = [" + simple_string_serialized[i] + "]")
+  assert.equal(simple_string_serialized_2[i], simple_string_serialized[i]);
+}
+
+// Deserialize the string
+var doc1 = BSONJS.deserialize(new Buffer(simple_string_serialized_2));
+var doc2 = BSON.deserialize(new Buffer(simple_string_serialized_2));
+assert.deepEqual(doc2, doc1)
+
+var doc = {
+ _id: 'testid',
+  key1: { code: 'test1', time: {start:1309323402727,end:1309323402727}, x:10, y:5 },
+  key2: { code: 'test1', time: {start:1309323402727,end:1309323402727}, x:10, y:5 }
+};
+
+var simple_string_serialized = BSONJS.serialize(doc, false, true);
+var simple_string_serialized_2 = BSON.serialize(doc, false, true);
+
+for(var i = 0; i < simple_string_serialized_2.length; i++) {
+  // debug(i + "[" + simple_string_serialized_2[i] + "] = [" + simple_string_serialized[i] + "]")
+  assert.equal(simple_string_serialized_2[i], simple_string_serialized[i]);
+}
+
+// Deserialize the string
+var doc1 = BSONJS.deserialize(new Buffer(simple_string_serialized_2));
+var doc2 = BSON.deserialize(new Buffer(simple_string_serialized_2));
+assert.deepEqual(doc2, doc1)
 
 // Force garbage collect
 global.gc();
