@@ -5,7 +5,7 @@ var
     sys = require('sys'),
     path = require('path');
 
-require.paths.push(process.cwd());
+// require.paths.push(process.cwd());
 var args = process.ARGV.slice(2);
 
 var files = [];
