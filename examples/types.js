@@ -1,7 +1,5 @@
 GLOBAL.DEBUG = true;
 
-// require.paths.unshift("../external-libs/bson");
-
 sys = require("sys");
 test = require("assert");
 
