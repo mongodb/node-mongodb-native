@@ -1,3 +1,7 @@
+0.9.6-12 2011-08-24
+* Nasty bug in GridFS if you changed the default chunk size
+* Fixed error handling bug in findOne
+
 0.9.6-11 2011-08-23
 * Timeout option not correctly making it to the cursor, Issue #320, Fix from (https://github.com/year2013)
 * Fixes for memory leaks when using buffers and C++ parser

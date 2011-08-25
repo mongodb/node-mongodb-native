@@ -107,20 +107,20 @@ var tests = testCase({
 
     gridStore.open(function(err, gridStore) {
       Step(
-       function writeData() {
-         var group = this.group();
-         var d = new Buffer(5000);
-         for(var j = 0; j < 5000;j++) {
-           d[j] = 43;
-         }         
+        function writeData() {
+          var group = this.group();
+          var d = new Buffer(5000);
+          for(var j = 0; j < 5000;j++) {
+            d[j] = 43;
+          }         
 
-         for(var i = 0; i < 15000; i += 5000) {
-           gridStore.write(d, false, group());
-         }   
-       },
+          for(var i = 0; i < 15000; i += 5000) {
+            gridStore.write(d, false, group());
+          }   
+        },
 
-       function readAsStream() {
-         gridStore.close(function(err, result) {
+        function readAsStream() {
+          gridStore.close(function(err, result) {
            var gotEnd = false;           
            var endLen = 0;
 
@@ -146,8 +146,8 @@ var tests = testCase({
                test.done();
              });
            });           
-         });
-       }
+          });
+        }
       )
     });    
   },
