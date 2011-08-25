@@ -1,7 +1,7 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
 var testCase = require('../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
   Db = mongodb.Db,
@@ -258,6 +258,38 @@ var tests = testCase({
         });
       });
     });
+  },
+  
+  shouldHandleAssertionError : function(test) {
+    client.createCollection('test_handle_assertion_error', function(err, r) {
+      client.collection('test_handle_assertion_error', function(err, collection) {
+        collection.insert({a:{lat:50, lng:10}}, {safe: true}, function(err, docs) {
+          test.ok(err == null);
+
+          var query = {a:{$within:{$box:[[1,-10],[80,120]]}}};
+
+          // We don't have a geospatial index at this point
+          collection.findOne(query, function(err, docs) {
+            test.ok(err instanceof Error);
+            
+            collection.ensureIndex([['a', '2d' ]], true, function(err, indexName) {
+              test.ok(err == null);
+              
+              collection.findOne(query, function(err, doc) {
+                test.ok(err == null);
+                
+                var invalidQuery = {a:{$within:{$box:[[-10,-180],[10,180]]}}};
+
+                collection.findOne(invalidQuery, function(err, doc) {
+                  test.ok(err instanceof Error);
+                  test.done();
+                });	
+              });
+            });
+          });          
+        });
+      });
+    }); 
   }
 })
 
