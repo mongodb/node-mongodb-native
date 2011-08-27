@@ -109,12 +109,6 @@ Replicasets
 ===========
 For more information about how to connect to a replicaset have a look at [Replicasets](https://github.com/christkv/node-mongodb-native/blob/master/docs/replicaset.md)
 
-Notes
-========
-
-The current version does not support connection pooling, but it will be implemented
-soon.
-
 Primary Key Factories
 --------
 
