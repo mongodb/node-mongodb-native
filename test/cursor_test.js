@@ -945,6 +945,35 @@ var tests = testCase({
         });
       });
     });
+  },
+  
+  shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex : function(test) {
+    var docs = [];
+    
+    for(var i = 0; i < 5000; i++) {
+      var d = new Date().getTime() + i*1000;
+      docs[i] = {createdAt:new Date(d)};
+    }
+
+    // Create collection
+    client.createCollection('shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex', function(err, collection) {
+      // ensure index of createdAt index
+      collection.ensureIndex({createdAt:1}, function(err, indexName) {
+        test.equal(null, err);
+        
+        // insert all docs
+        collection.insert(docs, {safe:true}, function(err, result) {
+          test.equal(null, err);
+
+          // Find with sort
+          collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
+            if (err) logger.error("error in collection_info.find: " + err);            
+            test.equal(5000, items.length);            
+            test.done();
+          })                    
+        })        
+      });      
+    });    
   }
 })
 
