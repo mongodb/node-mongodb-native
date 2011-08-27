@@ -51,7 +51,7 @@ To store and retrieve the non-JSON MongoDb primitives ([ObjectID](http://www.mon
 In particular, every document has a unique `_id` which can be almost any type, and by default a 12-byte ObjectID is created. ObjectIDs can be represented as 24-digit hexadecimal strings, but you must convert the string back into an ObjectID before you can use it in the database. For example:
 
     var idString = '4e4e1638c85e808431000003';
-    collection.findOne({_id: new client.bson_serializer.ObjectId(idString)}, console.log)  // ok
+    collection.findOne({_id: new client.bson_serializer.ObjectID(idString)}, console.log)  // ok
     collection.findOne({_id: idString}, console.log)  // wrong! callback gets undefined
 
 Here are the constructors the non-Javascript BSON primitive types:
