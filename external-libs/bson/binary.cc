@@ -4,7 +4,6 @@
 #include <v8.h>
 #include <node.h>
 #include <node_version.h>
-#include <node_events.h>
 #include <node_buffer.h>
 #include <cstring>
 #include <cmath>
