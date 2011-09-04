@@ -38,3 +38,14 @@ Where
   * `options` can contain the following options
     * `rs_name` is the name of the replicaset you configured when you started the server, you can have multiple replicasets running on your servers.
     * `read_secondary` set's the driver to read from secondary servers (slaves) instead of only from the primary(master) server.
+
+The Db object can accept write concern options such as w:2, wtimeout: 5000. See [getLastError](http://www.mongodb.org/display/DOCS/Verifying+Propagation+of+Writes+with+getLastError) for a description.
+
+To set these values you pass the options in as part of strict mode. The following configuration ensures all writes are replicated to 2 dbs within 5 seconds before success is returned. If the replication does not occur a timeout error will be returned instead. Note that the data may or may not be on 1 or both servers when that occurs. 
+
+    options = {strict: {w:2, wtimeout: 5000}}
+    var db = new Db('integration_test', replSet, options);
+
+All options for getLastError are described here: [getLastError options](http://www.mongodb.org/display/DOCS/Verifying+Propagation+of+Writes+with+getLastError). They can be passed in via the strict options object.
+    
+
