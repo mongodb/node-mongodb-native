@@ -1,6 +1,11 @@
+0.9.6-14 2011-09-05
 * Minor fixes for error handling in cursor streaming (https://github.com/sethml), Issue #332
 * Minor doc fixes
 * Some more cursor sort tests added, Issue #333
+* Fixes to work with 0.5.X branch
+* Fix Db not removing reconnect listener from serverConfig, (https://github.com/sbrekken), Issue #337
+* Removed node_events.h includes (https://github.com/jannehietamaki), Issue #339
+* Implement correct safe/strict mode for findAndModify.
 
 0.9.6-13 2011-08-24
 * Db names correctly error checked for illegal characters

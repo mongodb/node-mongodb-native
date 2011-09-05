@@ -586,9 +586,8 @@ var tests = testCase({
       // Test return old document on change
       collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
         // Let's modify the document in place
-        collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, updated_doc) {
-          test.equal(2, updated_doc.a);
-          test.equal(2, updated_doc.b);
+        collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result) {
+          test.equal(1, result);
         })
       });
         
@@ -771,7 +770,7 @@ var tests = testCase({
       });      
     });      
   },
-
+  
   'Should correctly pass timeout options to cursor' : function(test) {
     client.createCollection('timeoutFalse', function(err, collection) {
       collection.find({},{timeout:false},function(err, cursor) {
@@ -783,10 +782,32 @@ var tests = testCase({
       collection.find({},{},function(err, cursor) {
         test.equal(true, cursor.timeout);
       });
-
+  
       test.done();
     });
-  }
+  },
+  
+  // Test findAndModify a document
+  shouldCorrectlyFindAndModifyDocumentWithDBStrict : function(test) {
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+    p_client.bson_deserializer = client.bson_deserializer;
+    p_client.bson_serializer = client.bson_serializer;
+    p_client.pkFactory = client.pkFactory;
+  
+    p_client.open(function(err, p_client) {
+      p_client.createCollection('shouldCorrectlyFindAndModifyDocumentWithDBStrict', function(err, collection) {
+        // Test return old document on change
+        collection.insert({'a':2, 'b':2}, function(err, doc) {
+          // Let's modify the document in place
+          collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, function(err, result) {
+            test.equal(1, result);
+            p_client.close();
+            test.done();
+          })
+        });
+      });
+    });
+  },    
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
