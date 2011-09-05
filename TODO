@@ -1,0 +1,9 @@
+* Fix authentication issue with replicasets
+* Allow secondary read with no master 
+* Add replicaset test and bug fix
+* Add lowest response time selection of read server for replicaset using a selectable strategy. First one being using the ping command response time
+* Allow execution of multiple commands against the same server connection when having a connection pool
+* Implement tag support for replicasets
+* Change bson c++ parser to use js objects instead of native c++ objects
+* Whole stack benchmark with profiling to locate where the driver spends time
+* Change bson c++ parser to be stackless to look at performance difference
