@@ -449,7 +449,7 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
     
   // Fire up the connection to check if we are running
   // var db = new Db('node-mongo-blog', new Server(host, port, {}), {native_parser:true});
-  var connection = new Db("", new Server(this.host, this.mongods[node]["port"], {}));
+  var connection = new Db("replicaset_test", new Server(this.host, this.mongods[node]["port"], {}));
   connection.open(function(err, connection) {
     // We need to retry if we have not finished up the number of retries
     if(err != null && self.retriedConnects < self.retries) {
