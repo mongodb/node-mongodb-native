@@ -6,6 +6,7 @@ JOBS = 1
 all:
 	rm -rf build .lock-wscript bson.node
 	node-waf configure build
+	cp ./build/Release/bson.node .
 	@$(NODE) --expose-gc test_bson.js
 	@$(NODE) --expose-gc test_full_bson.js
 
