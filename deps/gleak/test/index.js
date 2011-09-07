@@ -136,6 +136,21 @@ exports['formats are seperate from other instances'] = function () {
   assert.ok(~g1.format !== g1.format);
 }
 
+exports['#detectNew'] = function () {
+  var g = gleak();
+  assert.equal('function', typeof g.detectNew);
+  var found = g.detectNew();
+  assert.equal(true, Array.isArray(found));
+  assert.equal(found.length, 1);
+  assert.equal(g.detectNew().length, 0);
+  zombocom = 'welcome';
+  found = g.detectNew();
+  assert.equal(found.length, 1);
+  assert.equal(found[0], 'zombocom');
+  assert.equal(g.detectNew().length, 0);
+  delete global.zombocom;
+}
+
 exports['test middleware'] = function (beforeExit) {
   var called = false;
   var req = {};

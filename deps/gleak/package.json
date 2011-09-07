@@ -2,7 +2,7 @@
   "author": "Aaron Heckmann <aaron.heckmann+github@gmail.com>",
   "name": "gleak",
   "description": "Node global variable leak detector",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
       "type": "git"
     , "url": "git://github.com/aheckmann/gleak.git"

@@ -13,7 +13,7 @@ module.exports = exports = function gleak () {
  * @api public
  */
 
-exports.version = '0.1.0';
+exports.version = '0.1.1';
 
 /**
  * Express middleware.
@@ -124,6 +124,25 @@ Gleak.prototype.detect = function detect () {
 
   return ret;
 };
+
+/**
+ * Return only new leaks since the last time `detectNew`
+ * was run.
+ * @api public
+ */
+
+Gleak.prototype.detectNew = function detectNew () {
+  var found = this.found || (this.found = []);
+  var ret = [];
+
+  this.detect().forEach(function (leak) {
+    if (~found.indexOf(leak)) return;
+    found.push(leak);
+    ret.push(leak);
+  });
+
+  return ret;
+}
 
 /**
  * Prints all gleaks to stderr.

@@ -4,7 +4,7 @@ var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
-  gleak = require('../deps/gleak')(),
+  gleak = require('../tools/gleak'),
   Step = require('../deps/step/lib/step'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
@@ -13,8 +13,6 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-
-gleak.ignore('AssertionError');
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -810,10 +808,10 @@ var tests = testCase({
         });
       });
     });
-  },    
+  },
 
   noGlobalsLeaked : function(test) {
-    var leaks = gleak.detect();
+    var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
     test.done();
   }

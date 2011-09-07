@@ -4,7 +4,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   Buffer = require('buffer').Buffer,
-  gleak = require('../../deps/gleak')(),
+  gleak = require('../../tools/gleak'),
   fs = require('fs'),
   BSON = mongodb.BSON,
   Code = mongodb.Code, 
@@ -17,8 +17,6 @@ var testCase = require('../../deps/nodeunit').testCase,
   DBRef = mongodb.DBRef,
   Double = mongodb.Double,
   BinaryParser = mongodb.BinaryParser;
-
-gleak.ignore('AssertionError');
 
 var BSONSE = mongodb,
   BSONDE = mongodb;
@@ -925,7 +923,7 @@ var tests = testCase({
   },
 
   noGlobalsLeaked : function(test) {
-    var leaks = gleak.detect();
+    var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
     test.done();
   }

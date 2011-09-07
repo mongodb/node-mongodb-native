@@ -3,7 +3,7 @@ var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').
 var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  gleak = require('../../deps/gleak')(),
+  gleak = require('../../tools/gleak'),
   fs = require('fs'),
   BSON = mongodb.BSON,
   Code = mongodb.Code, 
@@ -20,8 +20,6 @@ var testCase = require('../../deps/nodeunit').testCase,
   QueryCommand = mongodb.QueryCommand,
   MongoReply = mongodb.MongoReply,
   BinaryParser = mongodb.BinaryParser;
-
-gleak.ignore('AssertionError');
 
 var tests = testCase({
   setUp: function(callback) {
@@ -102,7 +100,7 @@ var tests = testCase({
 
   // run this last
   noGlobalsLeaked : function(test) {
-    var leaks = gleak.detect();
+    var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
     test.done();
   }
