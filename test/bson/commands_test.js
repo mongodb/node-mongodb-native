@@ -1,8 +1,9 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 
 var testCase = require('../../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
+  gleak = require('../../tools/gleak'),
   fs = require('fs'),
   BSON = mongodb.BSON,
   Code = mongodb.Code, 
@@ -96,6 +97,13 @@ var tests = testCase({
     test.equal(88, query_command.toBinary().length);
     test.done();
   },
+
+  // run this last
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }
   
   // 'Should Correctly Generate and parse a Reply Object' : function(test) {
   //   var reply_message = BinaryParser.fromInt(0) + BSON.encodeLong(Long.fromNumber(1222)) + BinaryParser.fromInt(100) + BinaryParser.fromInt(2);

@@ -1,9 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
 var testCase = require('../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
+  gleak = require('../tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -44,7 +45,7 @@ var tests = testCase({
 
   shouldCreateRecordsWithCustomPKFactory : function(test) {
     // Custom factory (need to provide a 12 byte array);
-    CustomPKFactory = function() {}
+    var CustomPKFactory = function() {}
     CustomPKFactory.prototype = new Object();
     CustomPKFactory.createPk = function() {
       return new client.bson_serializer.ObjectID("aaaaaaaaaaaa");
@@ -71,6 +72,22 @@ var tests = testCase({
       });
     });
   },
+
+  testConnectBadUrl: function(test) {
+    test.throws(function() {
+      connect('mango://localhost:27017/' + MONGODB, function(err, db) {
+        test.ok(false, 'Bad URL!');
+      });
+    });
+    test.done();
+  },
+
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }
+
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

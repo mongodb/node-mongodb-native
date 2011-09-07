@@ -1,9 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
 var testCase = require('../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
+  gleak = require('../tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -98,7 +99,7 @@ var tests = testCase({
     var originalHex= objectId.toHexString();
 
     var newObjectId= new client.bson_serializer.ObjectID.createFromHexString(originalHex)
-    newHex= newObjectId.toHexString();
+    var newHex= newObjectId.toHexString();
     test.equal(originalHex, newHex);
     test.done();
   },
@@ -125,7 +126,13 @@ var tests = testCase({
         });
       });
     });
-  },  
+  },
+
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
