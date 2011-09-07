@@ -583,6 +583,15 @@ var tests = testCase({
         })
       });
         
+      // Test return new document on change with both operations being safe
+      collection.insert({'a':5, 'b':6}, {safe:true}, function(err, doc) {
+        // Let's modify the document in place
+        collection.findAndModify({'a':5}, [['a', 1]], {'$set':{'b':7}}, {'new': true, safe: true}, function(err, updated_doc) {
+          test.equal(5, updated_doc.a);
+          test.equal(7, updated_doc.b);
+        })
+      });
+        
       // Test return old document on change
       collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
         // Let's modify the document in place
