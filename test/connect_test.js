@@ -1,12 +1,13 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
 var testCase = require('../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   connect = mongodb.connect,
+  gleak = require('../deps/gleak')(),
   Script = require('vm'),
   Collection = mongodb.Collection,
   Server = mongodb.Server,
@@ -14,6 +15,8 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var clientUrl = 'mongo://localhost:27017/' + MONGODB;
+
+gleak.ignore('AssertionError');
 
 function connectionTester(test, testName) {
   return function(err, db) {
@@ -90,3 +93,10 @@ exports.testConnectBadUrl = function(test) {
   });
   test.done();
 };
+
+// run this last
+exports.noGlobalsLeaked = function(test) {
+  var leaks = gleak.detect();
+  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+  test.done();
+}

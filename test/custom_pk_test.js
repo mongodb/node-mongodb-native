@@ -1,9 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
 var testCase = require('../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
+  gleak = require('../deps/gleak')(),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -11,6 +12,8 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+
+gleak.ignore('AssertionError');
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -44,7 +47,7 @@ var tests = testCase({
 
   shouldCreateRecordsWithCustomPKFactory : function(test) {
     // Custom factory (need to provide a 12 byte array);
-    CustomPKFactory = function() {}
+    var CustomPKFactory = function() {}
     CustomPKFactory.prototype = new Object();
     CustomPKFactory.createPk = function() {
       return new client.bson_serializer.ObjectID("aaaaaaaaaaaa");
@@ -71,6 +74,22 @@ var tests = testCase({
       });
     });
   },
+
+  testConnectBadUrl: function(test) {
+    test.throws(function() {
+      connect('mango://localhost:27017/' + MONGODB, function(err, db) {
+        test.ok(false, 'Bad URL!');
+      });
+    });
+    test.done();
+  },
+
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detect();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }
+
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

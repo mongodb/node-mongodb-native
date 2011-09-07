@@ -1,9 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 
 var testCase = require('../../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../../deps/nodeunit'),
+  gleak = require('../../deps/gleak')(),
   fs = require('fs'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
@@ -15,6 +16,8 @@ var testCase = require('../../deps/nodeunit').testCase,
 var MONGODB = 'integration_tests';
 // var MONGODB = 'ruby-test-db';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+
+gleak.ignore('AssertionError');
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -651,7 +654,15 @@ var tests = testCase({
         });
       });
     });    
+  },
+
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detect();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
   }
+
+
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
