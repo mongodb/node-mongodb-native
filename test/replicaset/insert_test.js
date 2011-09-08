@@ -69,6 +69,42 @@ module.exports = testCase({
     })
   },
   
+  shouldCorrectlyExecuteSafeFindAndModify : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {rs_name:RS.name}
+    );
+  
+    // Insert some data
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      // Check if we got an error
+      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+  
+      // Drop collection on replicaset
+      p_db.dropCollection('testsets', function(err, r) {
+        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+        // Recreate collection on replicaset
+        p_db.createCollection('testsets', function(err, collection) {
+          if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
+          // Insert a dummy document
+          collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {            
+            // Execute a safe insert with replication to two servers
+            collection.findAndModify({'a':20}, [['a', 1]], {'$set':{'b':3}}, {new:true, safe: {w:2, wtimeout: 10000}}, function(err, result) {
+              test.equal(20, result.a);
+              test.equal(3, result.b);
+              test.done();
+            })
+          });
+        });
+      });
+    });
+  },  
+  
   shouldCorrectlyInsertAfterPrimaryComesBackUp : function(test) {
     // debug("=========================================== shouldWorkCorrectlyWithInserts")
     // Replica configuration
@@ -118,7 +154,7 @@ module.exports = testCase({
       });
     });
   },
-
+  
   shouldCorrectlyQueryAfterPrimaryComesBackUp : function(test) {
     // debug("=========================================== shouldWorkCorrectlyWithInserts")
     // Replica configuration
@@ -135,7 +171,7 @@ module.exports = testCase({
     db.open(function(err, p_db) {
       // Check if we got an error
       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
+  
       // Drop collection on replicaset
       p_db.dropCollection('testsets', function(err, r) {
         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
@@ -155,18 +191,18 @@ module.exports = testCase({
                   
                   // debug(" 1 =============================== err :: " + inspect(err))
                   // debug(inspect(items))
-
+  
                   collection.find({}).toArray(function(err, items) {
                     // debug(" 2 =============================== err :: " + inspect(err))
                     // debug(inspect(items))
-
+  
                     test.ok(err == null);
                     test.equal(1, items.length);
-
+  
                     collection.find({}).toArray(function(err, items) {
                       // debug(" 2 =============================== err :: " + inspect(err))
                       // debug(inspect(items))
-
+  
                       test.ok(err == null);
                       test.equal(1, items.length);
                   
@@ -181,7 +217,7 @@ module.exports = testCase({
       });
     });
   },
-
+  
   shouldWorkCorrectlyWithInserts : function(test) {
     // debug("=========================================== shouldWorkCorrectlyWithInserts")
     // Replica configuration
