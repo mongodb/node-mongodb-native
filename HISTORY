@@ -1,3 +1,7 @@
+* Duplicate replica-set servers when omitting port, Issue #341
+* Fixing findAndModify to correctly work with Replicasets ensuring proper error handling, Issue #336
+* Merged in code from (https://github.com/aheckmann) that checks for global variable leaks
+
 0.9.6-14 2011-09-05
 * Minor fixes for error handling in cursor streaming (https://github.com/sethml), Issue #332
 * Minor doc fixes
