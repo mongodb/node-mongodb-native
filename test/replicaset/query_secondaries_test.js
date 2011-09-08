@@ -66,7 +66,7 @@ module.exports = testCase({
       callback();        
     })
   },
-
+  
   shouldReadPrimary : function(test) {
     // debug("=========================================== shouldReadPrimary")
     // Replica configuration
@@ -89,130 +89,154 @@ module.exports = testCase({
         test.done();
       });
     })                
-  },
-  
-  shouldCorrectlyTestConnection : function(test) {
-    // debug("=========================================== shouldCorrectlyTestConnection")
-    // Replica configuration
-    var replSet = new ReplSetServers( [ 
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      ], 
-      {rs_name:RS.name, read_secondary:true}
-    );
-  
-    // Insert some data
-    var db = new Db('integration_test_', replSet);
-    db.open(function(err, p_db) {
-      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-  
-      // Drop collection on replicaset
-      p_db.dropCollection('testsets', function(err, r) {
-        if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-  
-        test.ok(p_db.serverConfig.primary != null);
-        test.ok(p_db.serverConfig.read != null);
-        test.ok(p_db.serverConfig.primary.port != p_db.serverConfig.read.port);
-        test.done();
-      });
-    })
-  },
-  
-  shouldCorrectlyQuerySecondaries : function(test) {
-    // debug("=========================================== shouldCorrectlyQuerySecondaries")
-    var self = this;
-    // Replica configuration
-    var replSet = new ReplSetServers( [ 
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      ], 
-      {rs_name:RS.name, read_secondary:true}
-    );
+  },  
 
-    // Insert some data
-    var db = new Db('ruby-test-db', replSet);
-    db.open(function(err, p_db) {
-      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-
-      p_db.createCollection("test-sets", {safe:{w:3, wtimeout:10000}}, function(err, collection) {
-        if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-
-        Step(
-          function inserts() {
-            var group = this.group();
-            collection.save({a:20}, group());
-            collection.save({a:30}, group());
-            collection.save({a:40}, group());
-          },
-          
-          function done(err, values) {
-            if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-            var results = [];
-            
-            retryEnsure(60, function(done) {
-              results = [];
-              
-              collection.find().each(function(err, item) {                
-                if(item == null) {
-                  var correct = 0;
-                  // Check all the values
-                  var r = [20, 30, 40];
-                  for(var i = 0; i < r.length; i++) {
-                    correct += results.filter(function(element) {
-                      return element.a == r[i];
-                    }).length;                  
-                  }                  
-                  return correct == 3 ? done(true) : done(false);
-                } else {
-                  results.push(item);
-                }
-              });
-            }, function(err, result) {
-              if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-              test.ifError(err);
-              
-              // Ensure replication happened in time
-              setTimeout(function() {
-                // Kill the primary
-                RS.killPrimary(function(node) {
-
-                  //
-                  //  Retry again to read the docs with primary dead
-                  retryEnsure(60, function(done) {
-                    results = [];
-
-                    collection.find().each(function(err, item) {
-                      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-
-                      if(item == null) {
-                        var correct = 0;
-                        // Check all the values
-                        var r = [20, 30, 40];
-                        for(var i = 0; i < r.length; i++) {
-                          correct += results.filter(function(element) {
-                            return element.a == r[i];
-                          }).length;                  
-                        }                  
-                        return correct == 3 ? done(true) : done(false);
-                      } else {
-                        results.push(item);
-                      }
-                    });
-                  }, function(err, result) {
-                    // Check if we get a correct count
-                    collection.count(function(err, count) {                      
-                      test.ifError(err);
-                      test.equal(3, count)
-                      test.done();
-                      p_db.close();
-                    });
-                  })
-                });              
-              }, 2000);
-            })
-          }
-        );
-      });      
-    })    
-  }
+  // shouldReadPrimary : function(test) {
+  //   // debug("=========================================== shouldReadPrimary")
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers( [ 
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //     ], 
+  //     {rs_name:RS.name, read_secondary:true}
+  //   );
+  // 
+  //   // Insert some data
+  //   var db = new Db('integration_test_', replSet);
+  //   db.open(function(err, p_db) {
+  //     if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  //     // Drop collection on replicaset
+  //     p_db.dropCollection('testsets', function(err, r) {
+  //       if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  // 
+  //       test.equal(false, p_db.serverConfig.isReadPrimary());
+  //       test.equal(false, p_db.serverConfig.isPrimary());
+  //       test.done();
+  //     });
+  //   })                
+  // },
+  // 
+  // shouldCorrectlyTestConnection : function(test) {
+  //   // debug("=========================================== shouldCorrectlyTestConnection")
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers( [ 
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //     ], 
+  //     {rs_name:RS.name, read_secondary:true}
+  //   );
+  // 
+  //   // Insert some data
+  //   var db = new Db('integration_test_', replSet);
+  //   db.open(function(err, p_db) {
+  //     if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  // 
+  //     // Drop collection on replicaset
+  //     p_db.dropCollection('testsets', function(err, r) {
+  //       if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  // 
+  //       test.ok(p_db.serverConfig.primary != null);
+  //       test.ok(p_db.serverConfig.read != null);
+  //       test.ok(p_db.serverConfig.primary.port != p_db.serverConfig.read.port);
+  //       test.done();
+  //     });
+  //   })
+  // },
+  // 
+  // shouldCorrectlyQuerySecondaries : function(test) {
+  //   // debug("=========================================== shouldCorrectlyQuerySecondaries")
+  //   var self = this;
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers( [ 
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //     ], 
+  //     {rs_name:RS.name, read_secondary:true}
+  //   );
+  // 
+  //   // Insert some data
+  //   var db = new Db('ruby-test-db', replSet);
+  //   db.open(function(err, p_db) {
+  //     if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  // 
+  //     p_db.createCollection("test-sets", {safe:{w:3, wtimeout:10000}}, function(err, collection) {
+  //       if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  // 
+  //       Step(
+  //         function inserts() {
+  //           var group = this.group();
+  //           collection.save({a:20}, group());
+  //           collection.save({a:30}, group());
+  //           collection.save({a:40}, group());
+  //         },
+  //         
+  //         function done(err, values) {
+  //           if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  //           var results = [];
+  //           
+  //           retryEnsure(60, function(done) {
+  //             results = [];
+  //             
+  //             collection.find().each(function(err, item) {                
+  //               if(item == null) {
+  //                 var correct = 0;
+  //                 // Check all the values
+  //                 var r = [20, 30, 40];
+  //                 for(var i = 0; i < r.length; i++) {
+  //                   correct += results.filter(function(element) {
+  //                     return element.a == r[i];
+  //                   }).length;                  
+  //                 }                  
+  //                 return correct == 3 ? done(true) : done(false);
+  //               } else {
+  //                 results.push(item);
+  //               }
+  //             });
+  //           }, function(err, result) {
+  //             if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  //             test.ifError(err);
+  //             
+  //             // Ensure replication happened in time
+  //             setTimeout(function() {
+  //               // Kill the primary
+  //               RS.killPrimary(function(node) {
+  // 
+  //                 //
+  //                 //  Retry again to read the docs with primary dead
+  //                 retryEnsure(60, function(done) {
+  //                   results = [];
+  // 
+  //                   collection.find().each(function(err, item) {
+  //                     if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+  // 
+  //                     if(item == null) {
+  //                       var correct = 0;
+  //                       // Check all the values
+  //                       var r = [20, 30, 40];
+  //                       for(var i = 0; i < r.length; i++) {
+  //                         correct += results.filter(function(element) {
+  //                           return element.a == r[i];
+  //                         }).length;                  
+  //                       }                  
+  //                       return correct == 3 ? done(true) : done(false);
+  //                     } else {
+  //                       results.push(item);
+  //                     }
+  //                   });
+  //                 }, function(err, result) {
+  //                   // Check if we get a correct count
+  //                   collection.count(function(err, count) {                      
+  //                     test.ifError(err);
+  //                     test.equal(3, count)
+  //                     test.done();
+  //                     p_db.close();
+  //                   });
+  //                 })
+  //               });              
+  //             }, 2000);
+  //           })
+  //         }
+  //       );
+  //     });      
+  //   })    
+  // }
 })
 
 var retryEnsure = function(numberOfRetries, execute, callback) {

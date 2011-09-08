@@ -564,7 +564,7 @@ var tests = testCase({
               test.equal(doc.a,doc.b); // making sure empty field select returns properly
               test.equal((14-idx),doc.a); // checking skip and limit in args
             });
-  
+            
             test.done();
           });
         });  
@@ -578,45 +578,45 @@ var tests = testCase({
       // Test return new document on change
       collection.insert({'a':1, 'b':2}, {safe:true}, function(err, doc) {
         // Let's modify the document in place
-        collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new': true}, function(err, updated_doc) {
+        collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true}, function(err, updated_doc) {
           test.equal(1, updated_doc.a);
           test.equal(3, updated_doc.b);
+
+          // Test return old document on change
+          collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
+            // Let's modify the document in place
+            collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result) {
+              test.equal(2, result.a);
+              test.equal(2, result.b);
+
+              // Test remove object on change
+              collection.insert({'a':3, 'b':2}, {safe:true}, function(err, doc) {
+                // Let's modify the document in place
+                collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {'new': true, remove: true}, function(err, updated_doc) {
+                  test.equal(3, updated_doc.a);
+                  test.equal(2, updated_doc.b);
+
+                  // // Let's upsert!
+                  collection.findAndModify({'a':4}, [], {'$set':{'b':3}}, {'new': true, upsert: true}, function(err, updated_doc) {
+                    test.equal(4, updated_doc.a);
+                    test.equal(3, updated_doc.b);
+
+                    // Test selecting a subset of fields
+                    collection.insert({a: 100, b: 101}, {safe:true}, function (err, ids) {
+                      collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
+                        test.equal(2, Object.keys(updated_doc).length);
+                        test.equal(ids[0]['_id'].toHexString(), updated_doc._id.toHexString());
+                        test.equal(5, updated_doc.b);
+                        test.equal("undefined", typeof updated_doc.a);
+                        test.done();
+                      });
+                    });
+                  });                    
+                })
+              });                
+            })
+          });
         })
-      });
-        
-      // Test return old document on change
-      collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
-        // Let's modify the document in place
-        collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result) {
-          test.equal(1, result);
-        })
-      });
-        
-      // Test remove object on change
-      collection.insert({'a':3, 'b':2}, {safe:true}, function(err, doc) {
-        // Let's modify the document in place
-        collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {'new': true, remove: true}, function(err, updated_doc) {
-          test.equal(3, updated_doc.a);
-          test.equal(2, updated_doc.b);
-        })
-      });
-        
-      // Let's upsert!
-      collection.findAndModify({'a':4}, [], {'$set':{'b':3}}, {'new': true, upsert: true}, function(err, updated_doc) {
-        test.equal(4, updated_doc.a);
-        test.equal(3, updated_doc.b);
-      });
-        
-      // Test selecting a subset of fields
-      collection.insert({a: 100, b: 101}, {safe:true}, function (err, ids) {
-        collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
-          test.equal(2, Object.keys(updated_doc).length);
-          test.equal(ids[0]['_id'].toHexString(), updated_doc._id.toHexString());
-          test.equal(5, updated_doc.b);
-          test.equal("undefined", typeof updated_doc.a);
-          
-          test.done();
-        });
       });
     });
   },  
@@ -788,7 +788,7 @@ var tests = testCase({
     });
   },
   
-  // Test findAndModify a document
+  // Test findAndModify a document with strict mode enabled
   shouldCorrectlyFindAndModifyDocumentWithDBStrict : function(test) {
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
     p_client.bson_deserializer = client.bson_deserializer;
@@ -798,10 +798,11 @@ var tests = testCase({
     p_client.open(function(err, p_client) {
       p_client.createCollection('shouldCorrectlyFindAndModifyDocumentWithDBStrict', function(err, collection) {
         // Test return old document on change
-        collection.insert({'a':2, 'b':2}, function(err, doc) {
+        collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
           // Let's modify the document in place
-          collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, function(err, result) {
-            test.equal(1, result);
+          collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {new:true}, function(err, result) {
+            test.equal(2, result.a)
+            test.equal(3, result.b)
             p_client.close();
             test.done();
           })
@@ -809,7 +810,30 @@ var tests = testCase({
       });
     });
   },
-
+  
+  // Test findAndModify a document that fails in first step before safe
+  shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep : function(test) {
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+    p_client.bson_deserializer = client.bson_deserializer;
+    p_client.bson_serializer = client.bson_serializer;
+    p_client.pkFactory = client.pkFactory;
+  
+    p_client.open(function(err, p_client) {
+      p_client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function(err, collection) {
+        // Test return old document on change
+        collection.insert({'a':2, 'b':2}, function(err, doc) {
+          // Let's modify the document in place
+          collection.findAndModify({'c':2}, [['a', 1]], {'$set':{'b':3}}, function(err, result) {
+            test.ok(err != null);
+            test.equal(null, result);
+            p_client.close();
+            test.done();
+          })
+        });
+      });
+    });
+  },
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
