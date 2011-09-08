@@ -1,9 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 
 var testCase = require('../../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   Buffer = require('buffer').Buffer,
+  gleak = require('../../tools/gleak'),
   fs = require('fs'),
   BSON = mongodb.BSON,
   Code = mongodb.Code, 
@@ -338,7 +339,7 @@ var tests = testCase({
     var decoded_hash = BSONDE.BSON.deserialize(serialized_data).doc;
     var keys = [];
   
-    for(name in decoded_hash) keys.push(name);
+    for(var name in decoded_hash) keys.push(name);
     test.deepEqual(['b', 'a', 'c', 'd'], keys);
     test.done();        
   },
@@ -534,7 +535,7 @@ var tests = testCase({
     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
     var keys = [];
   
-    for(name in deserialized_data.doc) {
+    for(var name in deserialized_data.doc) {
       keys.push(name);
     }
     
@@ -918,6 +919,12 @@ var tests = testCase({
 
     var doc2 = new MongoReply(parent, binaryData);   
     test.deepEqual([], doc2.documents);
+    test.done();
+  },
+
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
     test.done();
   }
 });

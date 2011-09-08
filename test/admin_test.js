@@ -1,9 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
 var testCase = require('../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
+  gleak = require('../tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -21,25 +22,26 @@ var tests = testCase({
         // If first test drop the db
         client.dropDatabase(function(err, done) {
           callback();
-        });                
+        });
       } else {
-        return callback();        
-      }      
+        return callback();
+      }
     });
   },
-  
+
   tearDown: function(callback) {
     numberOfTestsRun = numberOfTestsRun - 1;
     // Drop the database and close it
     if(numberOfTestsRun <= 0) {
+
       // client.dropDatabase(function(err, done) {
         client.close();
         callback();
-      // });        
+      // });
     } else {
       client.close();
-      callback();        
-    }      
+      callback();
+    }
   },
 
   shouldCorrectlyCallValidateCollection : function(test) {
@@ -180,7 +182,14 @@ var tests = testCase({
         });
       });
     });
-  },  
+  },
+
+  // run this last
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

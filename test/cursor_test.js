@@ -1,7 +1,8 @@
 var testCase = require('../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
+  gleak = require('../tools/gleak'),
   Db = require('../lib/mongodb').Db,
   Cursor = require('../lib/mongodb').Cursor,
   Step = require("../deps/step/lib/step"),
@@ -974,6 +975,13 @@ var tests = testCase({
         })        
       });      
     });    
+  },
+
+  // run this last
+  noGlobalsLeaked: function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
   }
 })
 

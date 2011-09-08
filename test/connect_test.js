@@ -1,12 +1,13 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
 var testCase = require('../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   connect = mongodb.connect,
+  gleak = require('../tools/gleak'),
   Script = require('vm'),
   Collection = mongodb.Collection,
   Server = mongodb.Server,
@@ -90,3 +91,10 @@ exports.testConnectBadUrl = function(test) {
   });
   test.done();
 };
+
+// run this last
+exports.noGlobalsLeaked = function(test) {
+  var leaks = gleak.detectNew();
+  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+  test.done();
+}

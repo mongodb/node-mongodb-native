@@ -1,9 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 
 var testCase = require('../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
+  gleak = require('../tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -540,7 +541,7 @@ var tests = testCase({
        //insert new user
        collection.save(doc, {safe:true}, function(err, r) {
          collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
-           user = users[0]
+           var user = users[0]
   
            if(err) {
              throw new Error(err)
@@ -586,7 +587,7 @@ var tests = testCase({
           
               collection.find({}).limit(1).toArray(function(err, users) {
                 test.equal(null, err);        
-                user = users[0]
+                var user = users[0]
                 user.friends.splice(1,1)
   
                 collection.save(user, function(err, doc) {
@@ -626,6 +627,13 @@ var tests = testCase({
       });
     });
   },    
+
+  // run this last
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

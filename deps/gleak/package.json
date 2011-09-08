@@ -1,0 +1,22 @@
+{
+  "author": "Aaron Heckmann <aaron.heckmann+github@gmail.com>",
+  "name": "gleak",
+  "description": "Node global variable leak detector",
+  "version": "0.1.1",
+  "repository": {
+      "type": "git"
+    , "url": "git://github.com/aheckmann/gleak.git"
+  },
+  "main": "./index.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "engines": {
+    "node": "~v0.4.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+      "express": "~v2.0.0"
+    , "expresso": "v0.7.5"
+  }
+}
