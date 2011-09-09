@@ -420,12 +420,6 @@ ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
       self.ensureUp(callback);        
     }
   )
-  // 
-  // nodes.forEach(function(node) {
-  //   self.start(node, function() {});
-  // });
-  // 
-  // self.ensureUp(callback);  
 }
 
 ReplicaSetManager.prototype.getConnection = function(node, callback) {
