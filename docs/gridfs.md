@@ -2,7 +2,7 @@ GridStore
 ======
 
 GridFS is a scalable MongoDB *filesystem* for storing and retrieving large files. The default limit for a MongoDB record is
-4 MB, so to store data that is larger than this limit, GridFS can be used. GridFS shards the data into smaller chunks automatically. 
+16MB, so to store data that is larger than this limit, GridFS can be used. GridFS shards the data into smaller chunks automatically. 
 See [MongoDB documentation](http://www.mongodb.org/display/DOCS/GridFS+Specification) for details.
 
 GridStore is a single file inside GridFS that can be managed by the script.
