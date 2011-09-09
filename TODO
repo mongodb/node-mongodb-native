@@ -1,5 +1,4 @@
 * Allow secondary read with no master 
-* Add replicaset test and bug fix
 * Add lowest response time selection of read server for replicaset using a selectable strategy. First one being using the ping command response time
 * Allow execution of multiple commands against the same server connection when having a connection pool
 * Implement tag support for replicasets

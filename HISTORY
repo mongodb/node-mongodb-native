@@ -1,3 +1,5 @@
+0.9.6-15 2011-09-09
+* Fixed issue where pools would not be correctly cleaned up after an error, Issue #345
 * Fixed authentication issue with secondary servers in Replicaset, Issue #334
 * Duplicate replica-set servers when omitting port, Issue #341
 * Fixing findAndModify to correctly work with Replicasets ensuring proper error handling, Issue #336

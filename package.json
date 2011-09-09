@@ -1,7 +1,7 @@
 { "name" :            "mongodb"
 , "description" :     "A node.js driver for MongoDB"
 , "keywords" :        ["mongodb", "mongo", "driver", "db"]
-, "version" :         "0.9.6-14"
+, "version" :         "0.9.6-15"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  [ "Aaron Heckmann",
                       "Christoph Pojer",
@@ -49,7 +49,8 @@
                       "Rob Holland",
                       "Senmiao Liu",
                       "heroic",
-                      "gitfy"]
+                      "gitfy",
+                      "Andrew Stone"]
 
 , "repository" :    { "type" :  "git"
                     , "url" :   "http://github.com/christkv/node-mongodb-native.git" }

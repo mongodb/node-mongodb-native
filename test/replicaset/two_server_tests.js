@@ -99,18 +99,18 @@ module.exports = testCase({
             RS.killSecondary(function(node) {
 
               collection.findOne(function(err, item) {
-                // debug("----------------------------------------------------------- 0")
-                // debug(inspect(err))
-                // debug(inspect(item))
+                debug("----------------------------------------------------------- 0")
+                debug(inspect(err))
+                debug(inspect(item))
                 
                 test.ok(err != null);
 
                 collection.findOne(function(err, item) {
                   test.ok(err != null);
-                  // debug("----------------------------------------------------------- 1")
-                  // debug(inspect(err))
-                  // debug(inspect(item))
-                  // 
+                  debug("----------------------------------------------------------- 1")
+                  debug(inspect(err))
+                  debug(inspect(item))
+                  
                   // test.equal(20, item.a)                
                   test.done();                
                 });
