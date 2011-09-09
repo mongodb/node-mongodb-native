@@ -42,7 +42,7 @@ module.exports = testCase({
     // Create instance of replicaset manager but only for the first call
     if(!serversUp) {
       serversUp = true;
-      RS = new ReplicaSetManager();
+      RS = new ReplicaSetManager({retries:120});
       RS.startSet(true, function(err, result) {      
         callback();      
       });      

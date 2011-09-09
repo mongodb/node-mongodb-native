@@ -21,6 +21,7 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.durable = options["durable"] != null ? options["durable"] : false;
   this.auth = options['auth'] != null ? options['auth'] : false; 
   this.path = path.resolve("data");
+  this.killNodeWaitTime = options['kill_node_wait_time'] != null ? options['kill_node_wait_time'] : 20000;
   
   this.arbiterCount = options["arbiter_count"] != null ? options["arbiter_count"] : 2;
   this.secondaryCount = options["secondary_count"] != null ? options["secondary_count"] : 1;
@@ -248,7 +249,7 @@ ReplicaSetManager.prototype.kill = function(node, signal, callback) {
 
       self.mongods[node]["up"] = false;
       // Wait for 5 seconds to give the server time to die a proper death
-      setTimeout(callback, 20000);
+      setTimeout(callback, self.killNodeWaitTime);
   });  
 }
 

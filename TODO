@@ -1,4 +1,3 @@
-* Fix authentication issue with replicasets
 * Allow secondary read with no master 
 * Add replicaset test and bug fix
 * Add lowest response time selection of read server for replicaset using a selectable strategy. First one being using the ping command response time

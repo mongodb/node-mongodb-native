@@ -45,7 +45,11 @@ module.exports = testCase({
     // Create instance of replicaset manager but only for the first call
     if(!serversUp && !noReplicasetStart) {
       serversUp = true;
-      RS = new ReplicaSetManager({retries:120, arbiter_count:0, secondary_count:1, passive_count:0});
+      RS = new ReplicaSetManager({retries:120, 
+          arbiter_count:0, 
+          secondary_count:1, 
+          passive_count:0,
+          kill_node_wait_time:50000});
       RS.startSet(true, function(err, result) {      
         if(err != null) throw err;
         // Finish setup
@@ -73,7 +77,7 @@ module.exports = testCase({
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
         new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
       ], 
-      {rs_name:RS.name}
+      {rs_name:RS.name, read_secondary:false}
     );
   
     // Insert some data
@@ -95,18 +99,19 @@ module.exports = testCase({
             RS.killSecondary(function(node) {
 
               collection.findOne(function(err, item) {
-                debug("----------------------------------------------------------- 0")
-                debug(inspect(err))
-                debug(inspect(item))
+                // debug("----------------------------------------------------------- 0")
+                // debug(inspect(err))
+                // debug(inspect(item))
                 
                 test.ok(err != null);
 
                 collection.findOne(function(err, item) {
-                  debug("----------------------------------------------------------- 1")
-                  debug(inspect(err))
-                  debug(inspect(item))
-
-                  test.equal(20, item.a)                
+                  test.ok(err != null);
+                  // debug("----------------------------------------------------------- 1")
+                  // debug(inspect(err))
+                  // debug(inspect(item))
+                  // 
+                  // test.equal(20, item.a)                
                   test.done();                
                 });
               });              

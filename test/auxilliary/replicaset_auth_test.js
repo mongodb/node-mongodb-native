@@ -20,7 +20,11 @@ var serverManager = null;
 // db connection once
 var tests = testCase({
   setUp: function(callback) {
-    RS = new ReplicaSetManager({retries:120, auth:true});
+    RS = new ReplicaSetManager({retries:120, 
+      auth:true, 
+      arbiter_count:0,
+      secondary_count:1,
+      passive_count:0});
     RS.startSet(true, function(err, result) {      
       if(err != null) throw err;
       // Finish setup
@@ -56,7 +60,7 @@ var tests = testCase({
           var self = this;
           test.equal(null, err);
           test.ok(result != null);
-
+  
           db.collection("stuff", function(err, collection) {
             collection.insert({a:2}, {safe: {w: 3}}, self);
           });                  
@@ -72,7 +76,7 @@ var tests = testCase({
           var self = this;
           test.equal(null, err);
           test.ok(result);
-
+  
           db.collection("stuff", function(err, collection) {
             collection.insert({a:2}, {safe: {w: 3}}, self);
           });                            
@@ -140,7 +144,69 @@ var tests = testCase({
         }
       )      
     });
-  }
+  },
+  
+  shouldCorrectlyAuthenticate : function(test) {
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {rs_name:RS.name, read_secondary:true}
+    );
+    
+    // Connect to the replicaset
+    var slaveDb = null;
+    var db = new Db('foo', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+    db.open(function(err, p_db) {
+      Step(
+        function addUser() {
+          db.admin().addUser("me", "secret", this);
+        },
+        
+        function ensureFailingInsert(err, result) {
+          var self = this;
+          test.equal(null, err);
+          test.ok(result != null);
+
+          db.collection("stuff", function(err, collection) {
+            collection.insert({a:2}, {safe: {w: 3}}, self);
+          });                  
+        },
+        
+        function authenticate(err, result) {
+          test.ok(err != null);
+          
+          db.admin().authenticate("me", "secret", this);
+        },
+        
+        function insertShouldSuccedNow(err, result) {
+          var self = this;
+          test.equal(null, err);
+          test.ok(result);
+
+          db.collection("stuff", function(err, collection) {
+            collection.insert({a:2}, {safe: {w: 3}}, self);
+          });                            
+        }, 
+        
+        function queryShouldExecuteCorrectly(err, result) {
+          var self = this;
+          test.equal(null, err);
+          
+          db.collection("stuff", function(err, collection) {
+            collection.findOne(self);
+          });                            
+        },
+        
+        function finishUp(err, item) {
+          test.ok(err == null);
+          test.equal(2, item.a);
+          test.done();
+        }      
+      )      
+    });
+  }  
 })
 
 // Assign out tests

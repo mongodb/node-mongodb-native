@@ -1,3 +1,4 @@
+* Fixed authentication issue with secondary servers in Replicaset, Issue #334
 * Duplicate replica-set servers when omitting port, Issue #341
 * Fixing findAndModify to correctly work with Replicasets ensuring proper error handling, Issue #336
 * Merged in code from (https://github.com/aheckmann) that checks for global variable leaks
