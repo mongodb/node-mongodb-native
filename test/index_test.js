@@ -248,23 +248,25 @@ var tests = testCase({
   },  
     
   "Should correctly execute insert with keepGoing option on mongod >= 1.9.1" : function(test) {
-    if(parseInt((client.version.replace(/\./g, ''))) >= 191) {
-      client.createCollection('shouldCorrectlyExecuteKeepGoingWithMongodb191OrHigher', function(err, collection) {
-        collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
-          collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
-            // Force keep going flag, ignoring unique index issue
-            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {safe:true, keepGoing:true}, function(err, result) {
-              collection.count(function(err, count) {
-                test.equal(3, count);
-                test.done();        
-              })
+    client.admin().serverInfo(function(err, result){
+      if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
+        client.createCollection('shouldCorrectlyExecuteKeepGoingWithMongodb191OrHigher', function(err, collection) {
+          collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
+            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
+              // Force keep going flag, ignoring unique index issue
+              collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {safe:true, keepGoing:true}, function(err, result) {
+                collection.count(function(err, count) {
+                  test.equal(3, count);
+                  test.done();        
+                })
+              });
             });
           });
-        });
-      });      
-    } else {
-      test.done();      
-    }
+        });      
+      } else {
+        test.done();      
+      }      
+    });
   },
 
   noGlobalsLeaked : function(test) {

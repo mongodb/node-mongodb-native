@@ -279,42 +279,42 @@ var tests = testCase({
         collection.insert({'$hello':'world'}, {safe:true}, function(err, doc) {
           test.ok(err instanceof Error);
           test.equal("key $hello must not start with '$'", err.message);
-        });
   
-        collection.insert({'hello':{'$hello':'world'}}, {safe:true}, function(err, doc) {
-          test.ok(err instanceof Error);
-          test.equal("key $hello must not start with '$'", err.message);
-        });
-  
-        collection.insert({'he$llo':'world'}, {safe:true}, function(err, docs) {
-          test.ok(docs[0].constructor == Object);
-        })
-  
-        collection.insert({'hello':{'hell$o':'world'}}, {safe:true}, function(err, docs) {
-          test.ok(err == null);
-        })
-  
-        collection.insert({'.hello':'world'}, {safe:true}, function(err, doc) {
-          test.ok(err instanceof Error);
-          test.equal("key .hello must not contain '.'", err.message);
-        });
-  
-        collection.insert({'hello':{'.hello':'world'}}, {safe:true}, function(err, doc) {
-          test.ok(err instanceof Error);
-          test.equal("key .hello must not contain '.'", err.message);
-        });
-  
-        collection.insert({'hello.':'world'}, {safe:true}, function(err, doc) {
-          test.ok(err instanceof Error);
-          test.equal("key hello. must not contain '.'", err.message);
-        });
-  
-        collection.insert({'hello':{'hello.':'world'}}, {safe:true}, function(err, doc) {
-          test.ok(err instanceof Error);
-          test.equal("key hello. must not contain '.'", err.message);
-          // Let's close the db
-          test.done();
-        });
+          collection.insert({'hello':{'$hello':'world'}}, {safe:true}, function(err, doc) {
+            test.ok(err instanceof Error);
+            test.equal("key $hello must not start with '$'", err.message);
+
+            collection.insert({'he$llo':'world'}, {safe:true}, function(err, docs) {
+              test.ok(docs[0].constructor == Object);
+
+              collection.insert({'hello':{'hell$o':'world'}}, {safe:true}, function(err, docs) {
+                test.ok(err == null);
+
+                collection.insert({'.hello':'world'}, {safe:true}, function(err, doc) {
+                  test.ok(err instanceof Error);
+                  test.equal("key .hello must not contain '.'", err.message);
+
+                  collection.insert({'hello':{'.hello':'world'}}, {safe:true}, function(err, doc) {
+                    test.ok(err instanceof Error);
+                    test.equal("key .hello must not contain '.'", err.message);
+
+                    collection.insert({'hello.':'world'}, {safe:true}, function(err, doc) {
+                      test.ok(err instanceof Error);
+                      test.equal("key hello. must not contain '.'", err.message);
+
+                      collection.insert({'hello':{'hello.':'world'}}, {safe:true}, function(err, doc) {
+                        test.ok(err instanceof Error);
+                        test.equal("key hello. must not contain '.'", err.message);
+                        // Let's close the db
+                        test.done();
+                      });
+                    });
+                  });
+                });
+              })
+            })
+          });
+        });          
       });
     });
   },  

@@ -281,10 +281,18 @@ var tests = testCase({
                 
                 var invalidQuery = {a:{$within:{$box:[[-10,-180],[10,180]]}}};
 
-                collection.findOne(invalidQuery, function(err, doc) {
-                  test.ok(err instanceof Error);
-                  test.done();
-                });	
+                client.admin().serverInfo(function(err, result){
+                  collection.findOne(invalidQuery, function(err, doc) {
+                    if(parseInt((result.version.replace(/\./g, ''))) < 200) {
+                      test.ok(err instanceof Error);
+                    } else {                        
+                      test.equal(null, err);
+                      test.equal(null, doc);
+                    }
+
+                    test.done();
+                  });	
+                });
               });
             });
           });          

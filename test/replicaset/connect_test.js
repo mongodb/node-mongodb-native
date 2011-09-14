@@ -75,7 +75,7 @@ module.exports = testCase({
       test.done();
     })    
   },  
-
+  
   shouldEmitCloseNoCallback : function(test) {
     // Replica configuration
     var replSet = new ReplSetServers([ 
@@ -84,7 +84,7 @@ module.exports = testCase({
         new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
       ], {}
     );
-
+  
     new Db('integration_test_', replSet).open(function(err, db) {
       test.equal(null, err);
       var dbCloseCount = 0, serverCloseCount = 0;
@@ -100,7 +100,7 @@ module.exports = testCase({
       }, 250);
     })
   },
-
+  
   shouldEmitCloseWithCallback : function(test) {
     // Replica configuration
     var replSet = new ReplSetServers([ 
@@ -109,7 +109,7 @@ module.exports = testCase({
         new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
       ], {}
     );
-
+  
     new Db('integration_test_', replSet).open(function(err, db) {
       test.equal(null, err);
       var dbCloseCount = 0, serverCloseCount = 0;

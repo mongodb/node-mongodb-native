@@ -581,26 +581,26 @@ var tests = testCase({
         collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true}, function(err, updated_doc) {
           test.equal(1, updated_doc.a);
           test.equal(3, updated_doc.b);
-
+  
           // Test return old document on change
           collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
             // Let's modify the document in place
             collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result) {
               test.equal(2, result.a);
               test.equal(2, result.b);
-
+  
               // Test remove object on change
               collection.insert({'a':3, 'b':2}, {safe:true}, function(err, doc) {
                 // Let's modify the document in place
                 collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {'new': true, remove: true}, function(err, updated_doc) {
                   test.equal(3, updated_doc.a);
                   test.equal(2, updated_doc.b);
-
+  
                   // // Let's upsert!
                   collection.findAndModify({'a':4}, [], {'$set':{'b':3}}, {'new': true, upsert: true}, function(err, updated_doc) {
                     test.equal(4, updated_doc.a);
                     test.equal(3, updated_doc.b);
-
+  
                     // Test selecting a subset of fields
                     collection.insert({a: 100, b: 101}, {safe:true}, function (err, ids) {
                       collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
@@ -745,14 +745,8 @@ var tests = testCase({
     client.createCollection('AttemptToFindAndModifyNonExistingDocument', function(err, collection) {
       // Let's modify the document in place
       collection.findAndModify({name: 'test1'}, [], {$set: {name: 'test2'}}, {}, function(err, updated_doc) {
-        if(parseInt(client.version.replace(/\./g, '')) < 191) {
-          test.equal(null, updated_doc);
-          test.ok(err != null);          
-        } else {
-          test.equal(null, updated_doc);
-          test.equal(null, err);
-        }
-        
+        test.equal(null, updated_doc);
+        test.ok(err == null || err.errmsg.match("No matching object found"))
         test.done();
       });
     });  
@@ -822,10 +816,11 @@ var tests = testCase({
       p_client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function(err, collection) {
         // Test return old document on change
         collection.insert({'a':2, 'b':2}, function(err, doc) {
+
           // Let's modify the document in place
-          collection.findAndModify({'c':2}, [['a', 1]], {'$set':{'b':3}}, function(err, result) {
-            test.ok(err != null);
+          collection.findAndModify({'c':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result) {
             test.equal(null, result);
+            test.ok(err == null || err.errmsg.match("No matching object found"));
             p_client.close();
             test.done();
           })

@@ -1,3 +1,6 @@
+* Fixing a bunch of issues with compatibility with MongoDB 2.0.X branch. Some fairly big changes in behavior from 1.8.X to 2.0.X on the server.
+* Error Connection MongoDB V2.0.0 with Auth=true, Issue #348
+
 0.9.6-15 2011-09-09
 * Fixed issue where pools would not be correctly cleaned up after an error, Issue #345
 * Fixed authentication issue with secondary servers in Replicaset, Issue #334
