@@ -63,7 +63,7 @@ var tests = testCase({
     }
     
     // Register handler
-    process.on("uncaughtException", exceptionCatcher);
+    process.once("uncaughtException", exceptionCatcher);
     // Execute code
     client.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {      
       client.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
