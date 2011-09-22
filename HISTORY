@@ -1,6 +1,9 @@
+0.9.6-17 2011-09-22
+* Fixed bug in waitForConnection that would lead to 100% cpu usage, Issue #352
+
 0.9.6-17 2011-09-21
 * Fixed broken exception test causing bamboo to hang
-* Handling correctly command+lastError when both return results as in findAndModify
+* Handling correctly command+lastError when both return results as in findAndModify, Issue #351
 
 0.9.6-16 2011-09-14
 * Fixing a bunch of issues with compatibility with MongoDB 2.0.X branch. Some fairly big changes in behavior from 1.8.X to 2.0.X on the server.
