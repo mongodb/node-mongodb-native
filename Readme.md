@@ -314,8 +314,6 @@ update:
 
   1. The signatures differ.
   2. You can only findAndModify a single item, not multiple items.
-  3. The callback does not get an error when the item doesn't exist, just
-     an `undefined` object.
 
 Signature:
 

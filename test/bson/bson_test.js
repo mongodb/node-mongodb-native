@@ -114,6 +114,17 @@ var tests = testCase({
     test.deepEqual(test_string, BSONDE.BSON.deserialize(serialized_data));
     test.done();
   },
+
+  'Should Serialize and Deserialize Empty String' : function(test) {
+    var test_string = {hello: ''};
+    var serialized_data = BSONSE.BSON.serialize(test_string, false, true);
+    var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(test_string));
+    BSONSE.BSON.serializeWithBufferAndIndex(test_string, false, serialized_data2);    
+  
+    assertBuffersEqual(test, serialized_data, serialized_data2);
+    test.deepEqual(test_string, BSONDE.BSON.deserialize(serialized_data));
+    test.done();
+  },
   
   'Should Correctly Serialize and Deserialize Integer' : function(test) {    
     var test_number = {doc: 5};
