@@ -17,7 +17,10 @@ Where
 
   * `db` is the database object
   * `filename` is the name of the file in GridFS that needs to be accessed/created
-  * `mode` indicates if this is a read (value `"r"`), write (`"w"`) or append (`"w+"`) operation
+  * `mode` indicated the operaion, can be one of:
+    * "r" (Read): Looks for the file information in fs.files collection, or creates a new id for this object. 
+    * "w" (Write): Erases all chunks if the file already exist. 
+    * "w+" (Append): Finds the last chunk, and keeps writing after it. 
   * `options` can be used to specify some metadata for the file, for example `content_type`, `metadata` and `chunk_size`
 
 Example:
@@ -30,7 +33,7 @@ Example:
         "chunk_size": 1024*4
     });
 
-When GridStore object is created, it needs to be opened
+When GridStore object is created, it needs to be opened.
 
     gs.open(callback);
     
@@ -60,6 +63,18 @@ where `data` is a `Buffer` or a string, callback gets two parameters - an error 
 
 While the GridStore is not closed,  every write is appended to the opened GridStore.
 
+## Writing a file to GridStore
+
+This functions opens the gridstore, streams the contents of the file into gridstore, and closes the gridstore.
+
+    gs.writeFile( file, callback )
+    
+where
+
+  * `file` is a file descriptior, or a string file path
+  * `callback` is a function with two parameters - error object (if error occured) and the GridStore object.
+
+
 ## Reading from GridStore
 
 Reading from GridStore can be done with `read`
@@ -71,6 +86,18 @@ where
   * `size` is the length of the data to be read
   * `offset` is the position to start reading
   * `callback` is a callback function with two parameters - error object (if an error occured) and data (binary string)
+
+## Streaming from GridStore
+
+You can stream data as it comes from the database using `stream`
+
+    gs.stream([autoclose=false])
+    
+where
+    
+  * `autoclose` If true current GridStore will be closed when EOF and 'close' event will be fired
+ 
+The function returns [read stream](http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream) based on this GridStore file. It supports the events 'read', 'error', 'close' and 'end'.
 
 ## Delete a GridStore
 
