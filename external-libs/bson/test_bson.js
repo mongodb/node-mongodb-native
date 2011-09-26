@@ -86,7 +86,6 @@ assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary
 
 var doc = {doc:2147483648};
 var simple_string_serialized = BSON.serialize(doc, false, true);
-assert.deepEqual(simple_string_serialized, BSONJS.serialize(doc, false, true));
 assert.deepEqual(BSONJS.deserialize(new Buffer(simple_string_serialized, 'binary')), BSON.deserialize(simple_string_serialized));
 
 var doc = {doc:-2147483648};

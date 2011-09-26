@@ -117,10 +117,6 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
 
   // Allocate the memory needed for the serializtion
   char *serialized_object = (char *)malloc(object_size * sizeof(char));  
-    
-  // printf("=================================== length :: %u\n", length);
-  // printf("=================================== index :: %u\n", index);
-  // printf("=================================== size :: %u\n", object_size);
 
   // Catch any errors
   try {
@@ -144,30 +140,10 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
     return error;
   }
 
-  // // Write the object size
-  // BSON::write_int32(serialized_object, object_size);  
-
-  // memcopy to data
-  // memcpy((data + index), &serialized_object, object_size - 1);
-  
   for(int i = 0; i < object_size; i++) {
     *(data + index + i) = *(serialized_object + i);
   }
   
-
-  // printf("=============================================== 2\n");
-
-
-  // printf("=============================================== 3\n");
-  // Unwrap object
-  // Buffer *outputBuffer = ObjectWrap::Unwrap<Buffer>(obj);
-
-  // printf("=============================================== 4\n");
-
-  // printf("=================================== size :: %u\n", object_size);
-
-  // Buffer *buffer = Buffer::New(0);
-  // return scope.Close(outputBuffer->handle_);
   return scope.Close(Uint32::New(index + object_size - 1));
 }
 
@@ -355,27 +331,27 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + 8;
   } else if(Timestamp::HasInstance(value)) {
-      // printf("============================================= -- serialized::::long\n");    
-      // Save the string at the offset provided
-      *(serialized_object + index) = BSON_DATA_TIMESTAMP;
-      // Adjust writing position for the first byte
-      index = index + 1;
-      // Convert name to char*
-      ssize_t len = DecodeBytes(name, UTF8);
-      ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-      // Add null termiation for the string
-      *(serialized_object + index + len) = '\0';    
-      // Adjust the index
-      index = index + len + 1;
+    // printf("============================================= -- serialized::::long\n");    
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_TIMESTAMP;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;
 
-      // Unpack the object and encode
-      Local<Object> obj = value->ToObject();
-      Timestamp *timestamp_obj = Timestamp::Unwrap<Timestamp>(obj);
-      // Write the content to the char array
-      BSON::write_int32((serialized_object + index), timestamp_obj->low_bits);
-      BSON::write_int32((serialized_object + index + 4), timestamp_obj->high_bits);
-      // Adjust the index
-      index = index + 8;
+    // Unpack the object and encode
+    Local<Object> obj = value->ToObject();
+    Timestamp *timestamp_obj = Timestamp::Unwrap<Timestamp>(obj);
+    // Write the content to the char array
+    BSON::write_int32((serialized_object + index), timestamp_obj->low_bits);
+    BSON::write_int32((serialized_object + index + 4), timestamp_obj->high_bits);
+    // Adjust the index
+    index = index + 8;
   } else if(ObjectID::HasInstance(value) || (value->IsObject() && value->ToObject()->HasRealNamedProperty(String::New("toHexString")))) {
     // printf("============================================= -- serialized::::object_id\n");    
     // Save the string at the offset provided
@@ -533,25 +509,25 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust the index
       index = index + str->Length() + 1;      
     }       
-  } else if(value->IsInt32()) {
-    // printf("============================================= -- serialized::::int32\n");        
-    // Save the string at the offset provided
-    *(serialized_object + index) = BSON_DATA_INT;
-    // Adjust writing position for the first byte
-    index = index + 1;
-    // Convert name to char*
-    ssize_t len = DecodeBytes(name, UTF8);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-    // Add null termiation for the string
-    *(serialized_object + index + len) = '\0';    
-    // Adjust the index
-    index = index + len + 1;
-    
-    // Write the integer to the char *
-    int32_t int_value = value->Int32Value();
-    BSON::write_int32((serialized_object + index), int_value);
-    // Adjust the index
-    index = index + 4;
+  // } else if(value->IsInt32()) {
+  //   // printf("============================================= -- serialized::::int32\n");        
+  //   // Save the string at the offset provided
+  //   *(serialized_object + index) = BSON_DATA_INT;
+  //   // Adjust writing position for the first byte
+  //   index = index + 1;
+  //   // Convert name to char*
+  //   ssize_t len = DecodeBytes(name, UTF8);
+  //   ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+  //   // Add null termiation for the string
+  //   *(serialized_object + index + len) = '\0';    
+  //   // Adjust the index
+  //   index = index + len + 1;
+  //   
+  //   // Write the integer to the char *
+  //   int32_t int_value = value->Int32Value();
+  //   BSON::write_int32((serialized_object + index), int_value);
+  //   // Adjust the index
+  //   index = index + 4;
   } else if(value->IsNull() || value->IsUndefined()) {
     // printf("============================================= -- serialized::::null\n");
     // Save the string at the offset provided
@@ -597,19 +573,21 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust index for double
       index = index + 8;
     } else if(l_number <= BSON_INT32_MAX && l_number >= BSON_INT32_MIN) {
-      // printf("============================================= -- serialized::::int32\n");
-      if(l_number == BSON_INT32_MAX) {
-        BSON::write_int32((serialized_object + index), BSON_INT32_MAX);
-      } else {
-        BSON::write_int32((serialized_object + index), BSON_INT32_MIN);        
-      }
+      // Smaller than 32 bit, write as 32 bit value
+      BSON::write_int32(serialized_object + index, value->ToInt32()->Value());
       // Adjust the size of the index
       index = index + 4;
+    // } else if(l_number <= 0x20000000000000 && l_number >= -0x20000000000000) {
+    //   // Write the double to the char array
+    //   BSON::write_double((serialized_object + index), d_number);
+    //   // Adjust type to be double
+    //   *(serialized_object + first_pointer) = BSON_DATA_NUMBER;
+    //   // Adjust index for double
+    //   index = index + 8;      
     } else {
-      // Fetch the double value
       BSON::write_int64((serialized_object + index), l_number);
       // Adjust type to be double
-      *(serialized_object + first_pointer) = BSON_DATA_LONG;
+      *(serialized_object + first_pointer) = BSON_DATA_LONG;              
       // Adjust the size of the index
       index = index + 8;
     }     
@@ -845,9 +823,9 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     } else {
       object_size += str->Length() + 1 + 4;        
     }
-  } else if(value->IsInt32()) {
-    // printf("================================ calculate_object_size:int32\n");
-    object_size += 4;
+  // } else if(value->IsInt32()) {
+  //   // printf("================================ calculate_object_size:int32\n");
+  //   object_size += 4;
   } else if(value->IsNull()) {
     // printf("================================ calculate_object_size:null\n");    
   } else if(value->IsNumber()) {
@@ -1128,19 +1106,17 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       if(is_array_item) {
         insert_index = atoi(string_name);
       }      
-      
-      // Decode the integer value
-      int64_t value = 0;
-      memcpy(&value, (data + index), 8);      
-      // Adjust the index for the size of the value
-      index = index + 8;
             
       // Add the element to the object
       if(is_array_item) {
-        return_array->Set(Number::New(insert_index), BSON::decodeLong(value));
+        return_array->Set(Number::New(insert_index), BSON::decodeLong(data, index));
       } else {
-        return_data->Set(String::New(string_name), BSON::decodeLong(value));
-      }
+        return_data->Set(String::New(string_name), BSON::decodeLong(data, index));
+      }        
+
+      // Adjust the index for the size of the value
+      index = index + 8;
+
       // Free up the memory
       free(string_name);      
     } else if(type == BSON_DATA_NUMBER) {
@@ -1565,16 +1541,25 @@ Handle<Value> BSON::decodeOid(char *oid) {
   return scope.Close(oid_obj);
 }
 
-Handle<Value> BSON::decodeLong(int64_t value) {
+Handle<Value> BSON::decodeLong(char *data, uint32_t index) {
   HandleScope scope;
   
-  // If precise return number
-  if(value < 0x20000000000000 && value >= -0x20000000000000) {
-    return scope.Close(Number::New(value));
+  // Decode the integer value
+  int32_t lowBits = 0;
+  int32_t highBits = 0;
+  memcpy(&lowBits, (data + index), 4);        
+  memcpy(&highBits, (data + index + 4), 4);        
+  
+  // If value is < 2^53 and >-2^53
+  if((highBits < 0x200000 || (highBits == 0x200000 && lowBits == 0)) && highBits >= -0x200000) {
+    int64_t finalValue = 0;
+    memcpy(&finalValue, (data + index), 8);        
+    return scope.Close(Number::New(finalValue));
   }
+
   // Otherwise return long value
-  Local<Value> argv[] = {Number::New(value)};
-  Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(1, argv);    
+  Local<Value> argv[] = {Number::New(lowBits), Number::New(highBits)};
+  Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(2, argv);
   return scope.Close(long_obj);      
 }
 
