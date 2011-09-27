@@ -69,6 +69,9 @@ exports.runFiles = function (paths, opt) {
         if (err) throw err;
         async.concatSeries(files, function (file, cb) {
             var name = path.basename(file);
+            // Ensure no caching
+            delete require.cache[file];
+            // Run module
             exports.runModule(name, require(file), options, cb);
         },
         function (err, all_assertions) {

@@ -560,7 +560,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Get the values
     double d_number = number->NumberValue();
     int64_t l_number = number->IntegerValue();
-    // printf("===================================================== l_number:%lli\n", l_number);
+    
     // Check if we have a double value and not a int64
     double d_result = d_number - l_number;    
     // If we have a value after subtracting the integer value we have a float
@@ -577,15 +577,16 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       BSON::write_int32(serialized_object + index, value->ToInt32()->Value());
       // Adjust the size of the index
       index = index + 4;
-    // } else if(l_number <= 0x20000000000000 && l_number >= -0x20000000000000) {
-    //   // Write the double to the char array
-    //   BSON::write_double((serialized_object + index), d_number);
-    //   // Adjust type to be double
-    //   *(serialized_object + first_pointer) = BSON_DATA_NUMBER;
-    //   // Adjust index for double
-    //   index = index + 8;      
+    } else if(l_number <= 2^53 && l_number >= -2^53) {
+      // Write the double to the char array
+      BSON::write_double((serialized_object + index), d_number);
+      // Adjust type to be double
+      *(serialized_object + first_pointer) = BSON_DATA_NUMBER;
+      // Adjust index for double
+      index = index + 8;      
     } else {
-      BSON::write_int64((serialized_object + index), l_number);
+      BSON::write_int64((serialized_object + index), d_number);
+      // BSON::write_int64((serialized_object + index), l_number);
       // Adjust type to be double
       *(serialized_object + first_pointer) = BSON_DATA_LONG;              
       // Adjust the size of the index
@@ -1550,16 +1551,23 @@ Handle<Value> BSON::decodeLong(char *data, uint32_t index) {
   memcpy(&lowBits, (data + index), 4);        
   memcpy(&highBits, (data + index + 4), 4);        
   
+  // Decode 64bit value
+  int64_t value = 0;
+  memcpy(&value, (data + index), 8);        
+  
   // If value is < 2^53 and >-2^53
   if((highBits < 0x200000 || (highBits == 0x200000 && lowBits == 0)) && highBits >= -0x200000) {
-    int64_t finalValue = 0;
-    memcpy(&finalValue, (data + index), 8);        
-    return scope.Close(Number::New(finalValue));
+    // printf("================================================== yo\n");
+    return scope.Close(Number::New(value));
   }
 
   // Otherwise return long value
-  Local<Value> argv[] = {Number::New(lowBits), Number::New(highBits)};
-  Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(2, argv);
+  // Local<Value> argv[] = {Number::New(lowBits), Number::New(highBits)};
+  // Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(2, argv);
+  // printf("============== value :: %lld\n", value);
+  
+  Local<Value> argv[] = {Number::New(value)};
+  Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(1, argv);
   return scope.Close(long_obj);      
 }
 

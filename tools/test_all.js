@@ -13,7 +13,11 @@ var replicaSetManager = new ReplicaSetManager();
 // test directories
 var files = [];
 var directories = [{dir: __dirname + "/../test", path: "/test/"}, 
-      {dir: __dirname + "/../test/gridstore", path: "/test/gridstore/"}];
+      {dir: __dirname + "/../test/gridstore", path: "/test/gridstore/"},
+      {dir: __dirname + "/../test/bson", path: "/test/bson/"}];
+
+// var directories = [
+//       {dir: __dirname + "/../test/bson", path: "/test/bson/"}];
 
 // Generate a list of tests
 directories.forEach(function(dirEntry) {
@@ -42,7 +46,6 @@ var specifedParameter = function(arguments, param) {
 // Different options
 var junit = specifedParameter(process.argv, '--junit', false);
 var noReplicaSet = specifedParameter(process.argv, '--noreplicaset', false);
-
 // Basic default test runner
 var runner = nodeunit.reporters.default;
 var options = { error_prefix: '\u001b[31m',
