@@ -669,16 +669,17 @@ var tests = testCase({
     
     'Should Correctly Serialize and Deserialize Symbol' : function(test) {
       if(Symbol != null) {
-        var doc = { b: [ new Symbol('test') ], _id: new BSONSE.ObjectID() };
+        var doc = { b: [ new Symbol('test') ]};
         var serialized_data = BSONSE.BSON.serialize(doc, false, true);
     
         var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
         BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2, 0);    
         assertBuffersEqual(test, serialized_data, serialized_data2, 0);
-    
+            
         var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
         test.deepEqual(doc.b, deserialized_data.b)
-        test.deepEqual(doc, deserialized_data);      
+        test.deepEqual(doc, deserialized_data);
+        test.ok(deserialized_data.b[0] instanceof Symbol);
       }
       
       test.done();
@@ -910,6 +911,10 @@ var tests = testCase({
       test.equal('4bc1ae64e5d6fa0c', doc2._id);
       test.done()    
     },
+    
+    // 'Should correctly parse data' : function(test) {
+    //   var data = ""
+    // },
     
     'Should Correctly handle Forced Doubles to ensure we allocate enough space for cap collections' : function(test) {
       if(Double != null) {

@@ -18,6 +18,7 @@
 #include "binary.h"
 #include "code.h"
 #include "dbref.h"
+#include "symbol.h"
 
 using namespace v8;
 using namespace node;
@@ -33,10 +34,12 @@ const uint32_t BSON_DATA_BOOLEAN = 8;
 const uint32_t BSON_DATA_DATE = 9;
 const uint32_t BSON_DATA_NULL = 10;
 const uint32_t BSON_DATA_REGEXP = 11;
+const uint32_t BSON_DATA_SYMBOL = 14;
 const uint32_t BSON_DATA_CODE_W_SCOPE = 15;
 const uint32_t BSON_DATA_INT = 16;
 const uint32_t BSON_DATA_TIMESTAMP = 17;
 const uint32_t BSON_DATA_LONG = 18;
+
 
 const int32_t BSON_INT32_MAX = (int32_t)2147483647L;
 const int32_t BSON_INT32_MIN = (int32_t)(-1) * 2147483648L;
@@ -465,6 +468,56 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     index = index + scope_object_size;
     // Encode the total size of the object
     BSON::write_int32((serialized_object + first_pointer), (index - first_pointer));
+  } else if(Symbol::HasInstance(value)) {
+    // printf("============================================= -- serialized::::symbol\n");    
+    // Unpack the dbref
+    Local<Object> dbref = value->ToObject();
+    // unpack dbref to get to the bin
+    Symbol *symbol_obj = Symbol::Unwrap<Symbol>(dbref);
+    // Let's get the length
+    value = symbol_obj->value->ToString();    
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_SYMBOL;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;        
+    
+    // Write the actual string into the char array
+    Local<String> str = value->ToString();
+    // Let's fetch the int value
+    uint32_t utf8_length = str->Utf8Length();
+
+    // If the Utf8 length is different from the string length then we
+    // have a UTF8 encoded string, otherwise write it as ascii
+    if(utf8_length != str->Length()) {
+      // Write the integer to the char *
+      BSON::write_int32((serialized_object + index), utf8_length + 1);
+      // Adjust the index
+      index = index + 4;
+      // Write string to char in utf8 format
+      str->WriteUtf8((serialized_object + index), utf8_length);
+      // Add the null termination
+      *(serialized_object + index + utf8_length) = '\0';    
+      // Adjust the index
+      index = index + utf8_length + 1;      
+    } else {
+      // Write the integer to the char *
+      BSON::write_int32((serialized_object + index), str->Length() + 1);
+      // Adjust the index
+      index = index + 4;
+      // Write string to char in utf8 format
+      written = DecodeWrite((serialized_object + index), str->Length(), str, BINARY);
+      // Add the null termination
+      *(serialized_object + index + str->Length()) = '\0';    
+      // Adjust the index
+      index = index + str->Length() + 1;      
+    }       
   } else if(value->IsString()) {
     // printf("============================================= -- serialized::::string\n");    
     // Save the string at the offset provided
@@ -509,25 +562,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust the index
       index = index + str->Length() + 1;      
     }       
-  // } else if(value->IsInt32()) {
-  //   // printf("============================================= -- serialized::::int32\n");        
-  //   // Save the string at the offset provided
-  //   *(serialized_object + index) = BSON_DATA_INT;
-  //   // Adjust writing position for the first byte
-  //   index = index + 1;
-  //   // Convert name to char*
-  //   ssize_t len = DecodeBytes(name, UTF8);
-  //   ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-  //   // Add null termiation for the string
-  //   *(serialized_object + index + len) = '\0';    
-  //   // Adjust the index
-  //   index = index + len + 1;
-  //   
-  //   // Write the integer to the char *
-  //   int32_t int_value = value->Int32Value();
-  //   BSON::write_int32((serialized_object + index), int_value);
-  //   // Adjust the index
-  //   index = index + 4;
   } else if(value->IsNull() || value->IsUndefined()) {
     // printf("============================================= -- serialized::::null\n");
     // Save the string at the offset provided
@@ -813,6 +847,21 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     // printf("================================ calculate_object_size:dbref:[%d]\n", BSON::calculate_object_size(obj));
     // Calculate size
     object_size += BSON::calculate_object_size(obj);
+  } else if(Symbol::HasInstance(value)) {
+    // Unpack the dbref
+    Local<Object> dbref = value->ToObject();
+    // unpack dbref to get to the bin
+    Symbol *symbol_obj = Symbol::Unwrap<Symbol>(dbref);
+    // Let's get the length
+    Local<String> str = symbol_obj->value->ToString();
+    uint32_t utf8_length = str->Utf8Length();
+    
+    if(utf8_length != str->Length()) {
+      // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
+      object_size += str->Utf8Length() + 1 + 4;  
+    } else {
+      object_size += str->Length() + 1 + 4;        
+    }    
   } else if(value->IsString()) {
     // printf("================================ calculate_object_size:string\n");
     Local<String> str = value->ToString();
@@ -1358,6 +1407,45 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Free memory
       free(buffer);                             
       free(string_name);
+    } else if(type == BSON_DATA_SYMBOL) {
+      // printf("=================================================== unpacking symbol\n");
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+
+      // Read the length of the string (next 4 bytes)
+      uint32_t string_size = BSON::deserialize_int32(data, index);
+      // Adjust index to point to start of string
+      index = index + 4;
+      // Decode the string and add zero terminating value at the end of the string
+      char *value = (char *)malloc((string_size * sizeof(char)));
+      strncpy(value, (data + index), string_size);
+      // Encode the string (string - null termiating character)
+      Local<Value> utf8_encoded_str = Encode(value, string_size - 1, UTF8)->ToString();
+      
+      // Wrap up the string in a Symbol Object
+      Local<Value> argv[] = {utf8_encoded_str};
+      Handle<Value> symbol_obj = Symbol::constructor_template->GetFunction()->NewInstance(1, argv);
+      
+      // Add the value to the data
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), symbol_obj);
+      } else {
+        return_data->Set(String::New(string_name), symbol_obj);
+      }
+      
+      // Adjust index
+      index = index + string_size;
+      // Free up the memory
+      free(value);
+      free(string_name);
     } else if(type == BSON_DATA_CODE_W_SCOPE) {
       // printf("=================================================== unpacking code\n");
       // Read the null terminated index String
@@ -1557,15 +1645,9 @@ Handle<Value> BSON::decodeLong(char *data, uint32_t index) {
   
   // If value is < 2^53 and >-2^53
   if((highBits < 0x200000 || (highBits == 0x200000 && lowBits == 0)) && highBits >= -0x200000) {
-    // printf("================================================== yo\n");
     return scope.Close(Number::New(value));
   }
 
-  // Otherwise return long value
-  // Local<Value> argv[] = {Number::New(lowBits), Number::New(highBits)};
-  // Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(2, argv);
-  // printf("============== value :: %lld\n", value);
-  
   Local<Value> argv[] = {Number::New(value)};
   Handle<Value> long_obj = Long::constructor_template->GetFunction()->NewInstance(1, argv);
   return scope.Close(long_obj);      
@@ -1686,6 +1768,7 @@ extern "C" void init(Handle<Object> target) {
   Code::Initialize(target);
   DBRef::Initialize(target);
   Timestamp::Initialize(target);
+  Symbol::Initialize(target);
 }
 
 // NODE_MODULE(bson, BSON::Initialize);
