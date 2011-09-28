@@ -21,9 +21,6 @@ var testCase = require('../../deps/nodeunit').testCase,
 var BSONSE = mongodb,
   BSONDE = mongodb;
 
-  // debug("------------------------------------------------------------------- bson_test")
-  // debug(inspect(process.env))
-
 // for tests
 BSONDE.BSON_BINARY_SUBTYPE_DEFAULT = 0;
 BSONDE.BSON_BINARY_SUBTYPE_FUNCTION = 1;
@@ -912,16 +909,6 @@ roundTrip(require('../../lib/mongodb').pure().Long.fromNumber(-Math.pow(2,53))
     test.done()    
   },
     
-  // 'Should correctly parse data' : function(test) {
-  //   var parent = {bson_deserializer:{"Long":Long, "BSON":BSONSE.BSON}}
-  //   var data = fs.readFileSync("./test/data/payload.txt").toString()
-  //   var binaryData = new Buffer(hexStringToBinary(data));    
-  // 
-  //   var doc2 = new MongoReply(parent, binaryData);   
-  // 
-  //   test.done()
-  // },
-  
   'Should Correctly handle Forced Doubles to ensure we allocate enough space for cap collections' : function(test) {
     if(Double != null) {
       var doubleValue = new Double(100);
