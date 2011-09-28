@@ -1,7 +1,7 @@
 * Fixing compatibility issues between C++ bson parser and js parser
 * Added Symbol support to C++ parser
 
-0.9.6-17 2011-09-22
+0.9.6-18 2011-09-22
 * Fixed bug in waitForConnection that would lead to 100% cpu usage, Issue #352
 
 0.9.6-17 2011-09-21
