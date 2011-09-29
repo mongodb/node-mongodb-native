@@ -505,12 +505,12 @@ var tests = testCase({
   
   shouldThrowErrorIfSerializingFunction : function(test) {
     client.createCollection('test_should_throw_error_if_serializing_function', function(err, collection) {
+      var func = function() { return 1};
       // Insert the update
-      collection.insert({i:1, z:function() { return 1} }, {safe:true}, function(err, result) {
+      collection.insert({i:1, z:func }, {safe:true}, function(err, result) {
         collection.findOne({_id:result[0]._id}, function(err, object) {
-          test.equal(null, object.z);
-          test.equal(1, object.i);
-          
+          test.equal(func.toString(), object.z.code);
+          test.equal(1, object.i);          
           test.done();
         })        
       })
@@ -614,7 +614,7 @@ var tests = testCase({
       });      
     });
   },
-
+  
   shouldCorrectlyExecuteMultipleFetches : function(test) {
     var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
@@ -631,10 +631,10 @@ var tests = testCase({
           collection.findOne({"addresses.localPart" : to}, function( err, doc ) {
             test.equal(null, err);
             test.equal(to, doc.addresses.localPart);
-
+  
             db.close();
             test.done();
-        	});                
+         });                
         });
       });      
     });
@@ -650,7 +650,7 @@ var tests = testCase({
       );          
     });    
   },  
-
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));

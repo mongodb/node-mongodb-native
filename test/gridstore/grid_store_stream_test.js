@@ -99,13 +99,13 @@ var tests = testCase({
      )
     });    
   },
-
+  
   shouldCorrectlyWriteLargeFileBufferAndReadBack : function(test) {
     var db = client;
     var fileId = new client.bson_serializer.ObjectID();
     var gridStore = new GridStore(db, fileId, "w", {root:'fs'});
     gridStore.chunkSize = 5000;
-
+  
     gridStore.open(function(err, gridStore) {
       Step(
         function writeData() {
@@ -114,21 +114,21 @@ var tests = testCase({
           for(var j = 0; j < 5000;j++) {
             d[j] = 43;
           }         
-
+  
           for(var i = 0; i < 15000; i += 5000) {
             gridStore.write(d, false, group());
           }   
         },
-
+  
         function readAsStream() {
           gridStore.close(function(err, result) {
            var gotEnd = false;           
            var endLen = 0;
-
+  
            var gridStore = new GridStore(db, fileId, "r");
            gridStore.open(function(err, gridStore) {
              var stream = gridStore.stream(true);
-
+  
              stream.on("data", function(chunk) {
                endLen += chunk.length
                // Test length of chunk
@@ -136,11 +136,11 @@ var tests = testCase({
                // Check each chunk's data
                for(var i = 0; i < 5000; i++) test.equal('+', String.fromCharCode(chunk[i]));
              });
-
+  
              stream.on("end", function() {
                gotEnd = true;
              });
-
+  
              stream.on("close", function() {
                test.equal(15000, endLen);
                test.equal(true, gotEnd);
@@ -152,7 +152,7 @@ var tests = testCase({
       )
     });    
   },
-
+  
   shouldCorrectlyReadFileUsingStream : function(test) {
     var gridStoreR = new GridStore(client, "test_gs_read_stream", "r");
     var gridStoreW = new GridStore(client, "test_gs_read_stream", "w");
@@ -181,6 +181,65 @@ var tests = testCase({
         });
       });
     });
+  },
+    
+  'Should return same data for streaming as for direct read' : function(test) {
+    var gridStoreR = new GridStore(client, "test_gs_read_stream", "r");
+    var gridStoreW = new GridStore(client, "test_gs_read_stream", "w", {chunkSize:56});
+    // var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
+    var data = new Buffer(100);
+    for(var i = 0; i < 100; i++) {
+      data[i] = i;
+    }
+
+    var readLen = 0;
+    var gotEnd = 0;
+  
+    gridStoreW.open(function(err, gs) {
+      gs.write(data, function(err, gs) {
+        gs.close(function(err, result) {
+          gridStoreR.open(function(err, gs) {
+            var chunks = [];
+            
+            var stream = gs.stream(true);
+            stream.on("data", function(chunk) {
+              readLen += chunk.length;
+              chunks.push(chunk);
+            });
+            stream.on("end", function() {
+              ++gotEnd;
+            });
+            stream.on("close", function() {
+              test.equal(data.length, readLen);
+              test.equal(1, gotEnd);
+
+              // Read entire file in one go and compare
+              var gridStoreRead = new GridStore(client, "test_gs_read_stream", "r");
+              gridStoreRead.open(function(err, gs) {
+                gridStoreRead.readBuffer(function(err, data2) {
+                  // Put together all the chunks
+                  var streamData = new Buffer(data.length);
+                  var index = 0;
+                  for(var i = 0; i < chunks.length; i++) {
+                    chunks[i].copy(streamData, index, 0);
+                    index = index + chunks[i].length;
+                  }
+                  
+                  // Compare data
+                  for(var i = 0; i < data.length; i++) {
+                    // debug(" i = " + i)
+                    test.equal(data2[i], data[i])
+                    test.equal(streamData[i], data[i])
+                  }
+                  
+                  test.done();
+                })                
+              })
+            });
+          });
+        });
+      });
+    });    
   },
 
   noGlobalsLeaked : function(test) {
