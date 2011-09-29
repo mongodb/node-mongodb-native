@@ -65,7 +65,7 @@ var tests = testCase({
       callback();        
     }      
   },
-
+  
   testCloseNoCallback : function(test) {
     var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}),
                     {native_parser: (process.env['TEST_NATIVE'] != null)});
