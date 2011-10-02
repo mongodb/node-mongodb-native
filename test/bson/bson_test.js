@@ -984,13 +984,13 @@ var tests = testCase({
   
   'Should deserialize correctly' : function(test) {
     var doc = {
-    	"_id" : new ObjectID("4e886e687ff7ef5e00000162"),
-    	"str" : "foreign",
-    	"type" : 2,
-    	"timestamp" : ISODate("2011-10-02T14:00:08.383Z"),
-    	"links" : [
-    		"http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
-    	]
+     "_id" : new ObjectID("4e886e687ff7ef5e00000162"),
+     "str" : "foreign",
+     "type" : 2,
+     "timestamp" : ISODate("2011-10-02T14:00:08.383Z"),
+     "links" : [
+       "http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
+     ]
     }    
     
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);  
@@ -1066,11 +1066,11 @@ var tests = testCase({
   //   
   // },
   
-  // noGlobalsLeaked : function(test) {
-  //   var leaks = gleak.detectNew();
-  //   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-  //   test.done();
-  // }  
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }  
 });
 
 // Assign out tests
