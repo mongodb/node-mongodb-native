@@ -16,6 +16,43 @@ var testCase = require('../deps/nodeunit').testCase,
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
+/**
+ * Module for parsing an ISO 8601 formatted string into a Date object.
+ */
+var ISODate = function (string) {
+  var match;
+  
+	if (typeof string.getTime === "function")
+		return string;
+	else if (match = string.match(/^(\d{4})(-(\d{2})(-(\d{2})(T(\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|((\+|-)(\d{2}):(\d{2}))))?)?)?$/)) {
+		var date = new Date();
+		date.setUTCFullYear(Number(match[1]));
+		date.setUTCMonth(Number(match[3]) - 1 || 0);
+		date.setUTCDate(Number(match[5]) || 0);
+		date.setUTCHours(Number(match[7]) || 0);
+		date.setUTCMinutes(Number(match[8]) || 0);
+		date.setUTCSeconds(Number(match[10]) || 0);
+		date.setUTCMilliseconds(Number("." + match[12]) * 1000 || 0);
+
+		if (match[13] && match[13] !== "Z") {
+			var h = Number(match[16]) || 0,
+			    m = Number(match[17]) || 0;
+
+			h *= 3600000;
+			m *= 60000;
+
+			var offset = h + m;
+			if (match[15] == "+")
+				offset = -offset;
+
+			new Date(date.valueOf() + offset);
+		}
+
+		return date;
+	} else
+		throw new Error("Invalid ISO 8601 date given.", __filename);
+};
+
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
 var tests = testCase({
@@ -650,6 +687,30 @@ var tests = testCase({
       );          
     });    
   },  
+  
+  'Should correctly insert object and retrieve it when containing array and IsoDate' : function(test) {
+    var doc = {
+    	"_id" : new client.bson_serializer.ObjectID("4e886e687ff7ef5e00000162"),
+    	"str" : "foreign",
+    	"type" : 2,
+    	"timestamp" : ISODate("2011-10-02T14:00:08.383Z"),
+    	"links" : [
+    		"http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
+    	]
+    }    
+
+    client.createCollection('Should_correctly_insert_object_and_retrieve_it_when_containing_array_and_IsoDate', function(err, collection) {
+      collection.insert(doc, {safe:true}, function(err, result) {
+        test.ok(err == null);
+        
+        collection.findOne(function(err, item) {
+          test.ok(err == null);
+          test.deepEqual(doc, item);
+          test.done();
+        });        
+      });
+    });
+  },
   
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
