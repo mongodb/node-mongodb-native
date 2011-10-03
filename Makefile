@@ -6,7 +6,16 @@ name = all
 total: build_native
 
 build_native:
-	$(MAKE) -C ./external-libs/bson
+	$(MAKE) -C ./external-libs/bson all
+
+build_native_debug:
+	$(MAKE) -C ./external-libs/bson all_debug
+
+build_native_clang:
+	$(MAKE) -C ./external-libs/bson clang
+
+build_native_clang_debug:
+	$(MAKE) -C ./external-libs/bson clang_debug
 
 clean_native:
 	$(MAKE) -C ./external-libs/bson clean

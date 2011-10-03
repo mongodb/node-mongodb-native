@@ -154,7 +154,6 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
 Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   HandleScope scope;
 
-  // printf("= BSONSerialize ===================================== USING Native BSON Parser\n");  
   if(args.Length() == 1 && !args[0]->IsObject()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
   if(args.Length() == 2 && !args[0]->IsObject() && !args[1]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
   if(args.Length() == 3 && !args[0]->IsObject() && !args[1]->IsBoolean() && !args[2]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
@@ -311,28 +310,16 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     if(BSON::check_key(name->ToString()) != NULL) return -1;
   }  
   
-// Local<String> constructorName = value->ToObject()->GetConstructorName();
-// ssize_t objlen = DecodeBytes(constructorName, UTF8);
-// char *cName = (char *)malloc(objlen * sizeof(char));
-// ssize_t written = DecodeWrite(cName, objlen, constructorName, UTF8);
-// 
-// printf("=========================== serialize :: [%s]\n", cName);
-// 
-// if(constructorName->Equals(String::New("Long"))) {
-//   printf("============================== Long\n");
-// } else if(constructorName->Equals(String::New("DBRef"))) {
-//   printf("============================== DBRef\n");      
-//   -  //   } else if(constructorName->Equals(String::New("ObjectID"))) {
-//   -  //     printf("============================== DBRef\n");      
-//   -  //   } else if(constructorName->Equals(String::New("Symbol"))) {
-//   -  //     printf("============================== DBRef\n");      
-//   -  //   } else {
-//   -  //     printf("============================== Unknow::%s\n", cName);            
-//   -  //   }  
-  
+  // Handle holder
+  Local<String> constructorString;
+  // Just check if we have an object
+  bool isObject = value->IsObject();
+  if(isObject) {
+    constructorString = value->ToObject()->GetConstructorName();
+  }
+    
   // If we have an object let's serialize it  
-  if(Long::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Long")))) {    
-    // printf("============================================= -- serialized::::long\n");    
+  if(Long::HasInstance(value)) {
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_LONG;
     // Adjust writing position for the first byte
@@ -345,30 +332,15 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + len + 1;
 
-    // C++ class instance
-    if(Long::HasInstance(value)) {
-      // Unpack the object and encode
-      Local<Object> obj = value->ToObject();
-      Long *long_obj = Long::Unwrap<Long>(obj);
-      // Write the content to the char array
-      BSON::write_int32((serialized_object + index), long_obj->low_bits);
-      BSON::write_int32((serialized_object + index + 4), long_obj->high_bits);
-      // Adjust the index
-      index = index + 8;      
-    } else {
-      // Unpack the object and encode
-      Local<Object> obj = value->ToObject();
-      // Decode the low_bits and high_bits
-      Local<Int32> low_bits = obj->Get(String::New("low_"))->ToInt32();
-      Local<Int32> high_bits = obj->Get(String::New("high_"))->ToInt32();
-      // Write the content to the char array
-      BSON::write_int32((serialized_object + index), low_bits->Value());
-      BSON::write_int32((serialized_object + index + 4), high_bits->Value());
-      // Adjust the index
-      index = index + 8;      
-    }
-  } else if(Timestamp::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Timestamp")))) {    
-    // printf("============================================= -- serialized::::timestamp\n");    
+    // Unpack the object and encode
+    Local<Object> obj = value->ToObject();
+    Long *long_obj = Long::Unwrap<Long>(obj);
+    // Write the content to the char array
+    BSON::write_int32((serialized_object + index), long_obj->low_bits);
+    BSON::write_int32((serialized_object + index + 4), long_obj->high_bits);
+    // Adjust the index
+    index = index + 8;      
+  } else if(Timestamp::HasInstance(value)) {
     // Point to start of data string
     uint32_t startIndex = index;
     // Adjust writing position for the first byte
@@ -381,34 +353,17 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + len + 1;
     
-    // C++ class instance
-    if(Long::HasInstance(value)) {
-      // Save the string at the offset provided
-      *(serialized_object + startIndex) = BSON_DATA_TIMESTAMP;
-      // Unpack the object and encode
-      Local<Object> obj = value->ToObject();
-      Timestamp *timestamp_obj = Timestamp::Unwrap<Timestamp>(obj);
-      // Write the content to the char array
-      BSON::write_int32((serialized_object + index), timestamp_obj->low_bits);
-      BSON::write_int32((serialized_object + index + 4), timestamp_obj->high_bits);
-      // Adjust the index
-      index = index + 8;
-    } else {
-      // Save the string at the offset provided
-      *(serialized_object + startIndex) = BSON_DATA_TIMESTAMP;
-      // Unpack the object and encode
-      Local<Object> obj = value->ToObject();
-      // Decode the low_bits and high_bits
-      Local<Int32> low_bits = obj->Get(String::New("low_"))->ToInt32();
-      Local<Int32> high_bits = obj->Get(String::New("high_"))->ToInt32();
-      // Write the content to the char array
-      BSON::write_int32((serialized_object + index), low_bits->Value());
-      BSON::write_int32((serialized_object + index + 4), high_bits->Value());
-      // Adjust the index
-      index = index + 8;      
-    }
-  } else if(ObjectID::HasInstance(value) || (value->IsObject() && value->ToObject()->HasRealNamedProperty(String::New("toHexString"))) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("ObjectID")))) {
-    printf("============================================= -- serialized::::object_id\n");    
+    // Save the string at the offset provided
+    *(serialized_object + startIndex) = BSON_DATA_TIMESTAMP;
+    // Unpack the object and encode
+    Local<Object> obj = value->ToObject();
+    Timestamp *timestamp_obj = Timestamp::Unwrap<Timestamp>(obj);
+    // Write the content to the char array
+    BSON::write_int32((serialized_object + index), timestamp_obj->low_bits);
+    BSON::write_int32((serialized_object + index + 4), timestamp_obj->high_bits);
+    // Adjust the index
+    index = index + 8;
+  } else if(ObjectID::HasInstance(value)) {
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_OID;
     // Adjust writing position for the first byte
@@ -421,28 +376,18 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + len + 1;    
 
-    if(ObjectID::HasInstance(value) || (value->IsObject() && value->ToObject()->HasRealNamedProperty(String::New("toHexString")))) {
-      // Unpack the object and encode
-      Local<Object> obj = value->ToObject();
-      ObjectID *object_id_obj = ObjectID::Unwrap<ObjectID>(obj);
-      // Fetch the converted oid
-      char *binary_oid = object_id_obj->convert_hex_oid_to_bin();
-      // Write the oid to the char array
-      memcpy((serialized_object + index), binary_oid, 12);
-      // Free memory
-      free(binary_oid);
-      // Adjust the index
-      index = index + 12;          
-    } else {
-      // Fetch id byte parameter
-      Local<String> idStringObj = value->ToObject()->Get(String::New("id"))->ToString();
-      ssize_t len = DecodeBytes(idStringObj, BINARY);
-      ssize_t written = DecodeWrite((serialized_object + index), len, idStringObj, BINARY);
-      // Adjust the index
-      index = index + 12;          
-    }
-  } else if(Binary::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("Binary")))) {
-    printf("============================================= -- serialized::::binary\n");    
+    // Unpack the object and encode
+    Local<Object> obj = value->ToObject();
+    ObjectID *object_id_obj = ObjectID::Unwrap<ObjectID>(obj);
+    // Fetch the converted oid
+    char *binary_oid = object_id_obj->convert_hex_oid_to_bin();
+    // Write the oid to the char array
+    memcpy((serialized_object + index), binary_oid, 12);
+    // Free memory
+    free(binary_oid);
+    // Adjust the index
+    index = index + 12;          
+  } else if(Binary::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("Binary")))) {
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_BINARY;
     // Adjust writing position for the first byte
@@ -455,36 +400,22 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + len + 1;    
 
-    if(Binary::HasInstance(value)) {
-      // Unpack the object and encode
-      Local<Object> obj = value->ToObject();
-      Binary *binary_obj = Binary::Unwrap<Binary>(obj);
-      // Let's write the content to the char* array
-      BSON::write_int32((serialized_object + index), binary_obj->index);
-      // Adjust index
-      index = index + 4;
-      // Write subtype
-      *(serialized_object + index)  = (char)binary_obj->sub_type;
-      // Adjust index
-      index = index + 1;
-      // Write binary content
-      memcpy((serialized_object + index), binary_obj->data, binary_obj->index);
-      // Adjust index.rar">_</a>
-      index = index + binary_obj->index;      
-    } else {
-      printf("============================================= -- serialized::::binary2\n");    
-      // Unpack the object and encode
-      Local<Value> valueObj = value->ToObject()->Get(String::New("buffer"));
-      
-      if(Buffer::HasInstance(valueObj)) {
-        printf("============================================= -- serialized::::binary3\n");    
-        Buffer *buffer_obj = Buffer::Unwrap<Buffer>(valueObj->ToObject());        
-      } else {
-        
-      }      
-    }
-  } else if(DBRef::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.DBRef")))) {
-    // printf("============================================= -- serialized::::dbref\n");    
+    // Unpack the object and encode
+    Local<Object> obj = value->ToObject();
+    Binary *binary_obj = Binary::Unwrap<Binary>(obj);
+    // Let's write the content to the char* array
+    BSON::write_int32((serialized_object + index), binary_obj->index);
+    // Adjust index
+    index = index + 4;
+    // Write subtype
+    *(serialized_object + index)  = (char)binary_obj->sub_type;
+    // Adjust index
+    index = index + 1;
+    // Write binary content
+    memcpy((serialized_object + index), binary_obj->data, binary_obj->index);
+    // Adjust index.rar">_</a>
+    index = index + binary_obj->index;      
+  } else if(DBRef::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.DBRef")))) {
     // Unpack the dbref
     Local<Object> dbref = value->ToObject();
     // Create an object containing the right namespace variables
@@ -500,8 +431,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     if(db_ref_obj->db != NULL) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
     // Encode the variable
     index = BSON::serialize(serialized_object, index, name, obj, false);
-  } else if(Code::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Code")))) {
-    // printf("============================================= -- serialized::::code\n");    
+  } else if(Code::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Code")))) {
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_CODE_W_SCOPE;
     // Adjust writing position for the first byte
@@ -538,8 +468,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     index = index + scope_object_size;
     // Encode the total size of the object
     BSON::write_int32((serialized_object + first_pointer), (index - first_pointer));
-  } else if(Symbol::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Symbol")))) {
-    // printf("============================================= -- serialized::::symbol\n");    
+  } else if(Symbol::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Symbol")))) {
     // Unpack the dbref
     Local<Object> dbref = value->ToObject();
     // unpack dbref to get to the bin
@@ -589,7 +518,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       index = index + str->Length() + 1;      
     }       
   } else if(value->IsString()) {
-    // printf("============================================= -- serialized::::string\n");    
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_STRING;
     // Adjust writing position for the first byte
@@ -633,7 +561,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       index = index + str->Length() + 1;      
     }       
   } else if(value->IsNull() || value->IsUndefined()) {
-    // printf("============================================= -- serialized::::null\n");
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_NULL;
     // Adjust writing position for the first byte
@@ -646,7 +573,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + len + 1;    
   } else if(value->IsNumber()) {
-    // printf("============================================= -- serialized::::number\n");
     uint32_t first_pointer = index;
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_INT;
@@ -669,7 +595,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     double d_result = d_number - l_number;    
     // If we have a value after subtracting the integer value we have a float
     if(d_result > 0 || d_result < 0) {
-      // printf("============================================= -- serialized::::double\n");
       // Write the double to the char array
       BSON::write_double((serialized_object + index), d_number);
       // Adjust type to be double
@@ -697,7 +622,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       index = index + 8;
     }     
   } else if(value->IsBoolean()) {
-    // printf("============================================= -- serialized::::boolean\n");
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_BOOLEAN;
     // Adjust writing position for the first byte
@@ -715,7 +639,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + 1;
   } else if(value->IsDate()) {
-    // printf("============================================= -- serialized::::date\n");    
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_DATE;
     // Adjust writing position for the first byte
@@ -735,7 +658,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     index = index + 8;
   // } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
   } else if(value->IsRegExp()) {
-    // printf("============================================= -- serialized::::regexp\n");    
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_REGEXP;
     // Adjust writing position for the first byte
@@ -775,7 +697,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + 1;
   } else if(value->IsArray()) {
-    // printf("============================================= -- serialized::::array\n");
     // Cast to array
     Local<Array> array = Local<Array>::Cast(value->ToObject());
     // Turn length into string to calculate the size of all the strings needed
@@ -793,7 +714,6 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     index = index + len + 1;        
     // Object size
     uint32_t object_size = BSON::calculate_object_size(value);
-    // printf("C++ =================================== array_size: %d\n", object_size);
     // Write the size of the object
     BSON::write_int32((serialized_object + index), object_size);
     // Adjust the index
@@ -856,8 +776,31 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust the index
       index = index + str->Length() + 1;      
     }       
+  } else if(value->IsObject() && 
+     (constructorString->Equals(String::New("exports.Long"))
+     || constructorString->Equals(String::New("exports.Timestamp"))
+     || (value->ToObject()->HasRealNamedProperty(String::New("toHexString")) || constructorString->Equals(String::New("ObjectID")))
+     || constructorString->Equals(String::New("Binary"))
+     || constructorString->Equals(String::New("exports.DBRef"))
+     || constructorString->Equals(String::New("exports.Code"))
+     || constructorString->Equals(String::New("exports.Symbol")))) {
+    
+    // Throw an error due to wrong class
+    char *error_str = (char *)malloc(256 * sizeof(char));
+    // Unpack the string for the type
+    Local<String> constructorName = value->ToObject()->GetConstructorName();
+    ssize_t objlen = DecodeBytes(constructorName, UTF8);
+    char *cName = (char *)malloc(objlen * sizeof(char));
+    ssize_t written = DecodeWrite(cName, objlen, constructorName, UTF8);
+    *(cName + objlen) = '\0';
+    
+    // Create the error string    
+    sprintf(error_str, "BSON Specific classes must be instances of the C++ versions not the JS versions when using the native bson parser, [%s]", cName);
+    // free memory
+    free(cName);
+    // Throw exception with string
+    throw error_str;
   } else if(value->IsObject()) {
-    // printf("============================================= -- serialized::::object\n");
     if(!name->IsNull()) {
       // Save the string at the offset provided
       *(serialized_object + index) = BSON_DATA_OBJECT;
@@ -918,29 +861,34 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
 uint32_t BSON::calculate_object_size(Handle<Value> value) {
   uint32_t object_size = 0;
 
+  // Handle holder
+  Local<String> constructorString;
+  // Just check if we have an object
+  bool isObject = value->IsObject();
+  if(isObject) {
+    constructorString = value->ToObject()->GetConstructorName();
+  }
+
   // If we have an object let's unwrap it and calculate the sub sections
-  if(Long::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Long")))) {
+  if(Long::HasInstance(value)) {
     object_size = object_size + 8;
-  } else if(Timestamp::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Timestamp")))) {
+  } else if(Timestamp::HasInstance(value)) {
     object_size = object_size + 8;
-  } else if(ObjectID::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.ObjectID")))) {
-    // printf("================================ calculate_object_size:objectid\n");
+  } else if(ObjectID::HasInstance(value)) {
     object_size = object_size + 12;
-  } else if(Binary::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Binary")))) {
-    // printf("================================ calculate_object_size:binary\n");
+  } else if(Binary::HasInstance(value)) {
     // Unpack the object and encode
     Local<Object> obj = value->ToObject();
     Binary *binary_obj = Binary::Unwrap<Binary>(obj);
     // Adjust the object_size, binary content lengt + total size int32 + binary size int32 + subtype
     object_size += binary_obj->index + 4 + 1;
-  } else if(Code::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Code")))) {
-    // printf("================================ calculate_object_size:code\n");
+  } else if(Code::HasInstance(value)) {
     // Unpack the object and encode
     Local<Object> obj = value->ToObject();
     Code *code_obj = Code::Unwrap<Code>(obj);
     // Let's calculate the size the code object adds adds
     object_size += strlen(code_obj->code) + 4 + BSON::calculate_object_size(code_obj->scope_object) + 4 + 1;
-  } else if(DBRef::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.DBRef")))) {
+  } else if(DBRef::HasInstance(value)) {
     // Unpack the dbref
     Local<Object> dbref = value->ToObject();
     // Create an object containing the right namespace variables
@@ -952,10 +900,9 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     obj->Set(String::New("$id"), db_ref_obj->oid);
     // obj->Set(String::New("$db"), dbref->Get(String::New("db")));
     if(db_ref_obj->db != NULL) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
-    // printf("================================ calculate_object_size:dbref:[%d]\n", BSON::calculate_object_size(obj));
     // Calculate size
     object_size += BSON::calculate_object_size(obj);
-  } else if(Symbol::HasInstance(value) || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Symbol")))) {
+  } else if(Symbol::HasInstance(value)) {
     // Unpack the dbref
     Local<Object> dbref = value->ToObject();
     // unpack dbref to get to the bin
@@ -971,7 +918,6 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       object_size += str->Length() + 1 + 4;        
     }    
   } else if(value->IsString()) {
-    // printf("================================ calculate_object_size:string\n");
     Local<String> str = value->ToString();
     uint32_t utf8_length = str->Utf8Length();
     
@@ -982,7 +928,6 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       object_size += str->Length() + 1 + 4;        
     }
   } else if(value->IsNull()) {
-    // printf("================================ calculate_object_size:null\n");    
   } else if(value->IsNumber()) {
     // Check if we have a float value or a long value
     Local<Number> number = value->ToNumber();
@@ -999,12 +944,9 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       object_size = object_size + 8;
     }
   } else if(value->IsBoolean()) {
-    // printf("================================ calculate_object_size:boolean\n");
     object_size = object_size + 1;
   } else if(value->IsDate()) {
-    // printf("================================ calculate_object_size:date\n");
     object_size = object_size + 8;
-  // } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
   } else if(value->IsRegExp()) {
     // Fetch the string for the regexp
     Handle<RegExp> regExp = Handle<RegExp>::Cast(value);    
@@ -1018,7 +960,6 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
     object_size = object_size + len + 2;
   } else if(value->IsArray()) {
-    // printf("================================ calculate_object_size:array\n");
     // Cast to array
     Local<Array> array = Local<Array>::Cast(value->ToObject());
     // Turn length into string to calculate the size of all the strings needed
@@ -1040,15 +981,37 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     // Free up memory
     free(length_str);
   } else if(value->IsFunction()) {
-    // printf("-------------------------------------------------- function\n");
     // Need to convert function into string
     Local<String> functionString = value->ToString();
     // Length of string
     ssize_t len = DecodeBytes(functionString, UTF8);
     // Adjust size of binary
     object_size += len + 1 + 4 + 1;  
+  } else if(value->IsObject() && 
+     (constructorString->Equals(String::New("exports.Long"))
+     || constructorString->Equals(String::New("exports.Timestamp"))
+     || (value->ToObject()->HasRealNamedProperty(String::New("toHexString")) || constructorString->Equals(String::New("ObjectID")))
+     || constructorString->Equals(String::New("Binary"))
+     || constructorString->Equals(String::New("exports.DBRef"))
+     || constructorString->Equals(String::New("exports.Code"))
+     || constructorString->Equals(String::New("exports.Symbol")))) {
+
+    // Throw an error due to wrong class
+    char *error_str = (char *)malloc(256 * sizeof(char));
+    // Unpack the string for the type
+    Local<String> constructorName = value->ToObject()->GetConstructorName();
+    ssize_t objlen = DecodeBytes(constructorName, UTF8);
+    char *cName = (char *)malloc(objlen * sizeof(char));
+    ssize_t written = DecodeWrite(cName, objlen, constructorName, UTF8);
+    *(cName + objlen) = '\0';
+
+    // Create the error string    
+    sprintf(error_str, "BSON Specific classes must be instances of the C++ versions not the JS versions when using the native bson parser, [%s]", cName);
+    // free memory
+    free(cName);
+    // Throw exception with string
+    throw error_str;
   } else if(value->IsObject()) {
-    // printf("================================ calculate_object_size:object\n");
     // Unwrap the object
     Local<Object> object = value->ToObject();
     Local<Array> property_names = object->GetPropertyNames();
@@ -1075,7 +1038,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
 
 Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
   HandleScope scope;
-  // printf("= BSONDeserialize ===================================== USING Native BSON Parser\n");
+
   // Ensure that we have an parameter
   if(Buffer::HasInstance(args[0]) && args.Length() > 1) return VException("One argument required - buffer1.");
   if(args[0]->IsString() && args.Length() > 1) return VException("One argument required - string1.");
@@ -1123,7 +1086,6 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
 
 // Deserialize the stream
 Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
-  // printf("----------------------------------------------------------------- deserialize\n");
   HandleScope scope;
   // Holds references to the objects that are going to be returned
   Local<Object> return_data = Object::New();
@@ -1135,14 +1097,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
   // Adjust the index to point to next piece
   index = index + 4;      
 
-  // for(int n = 0; n < size; n++) {
-  //   printf("C:: ============ %02x\n",(unsigned char)data[n]);
-  // }
-  // 
-  // for(int n = 0; s_value[n] != '\0'; n++) {
-  //   printf("C:: ============ %02x\n",(unsigned char)s_value[n]);                      
-  // }
-  
   // While we have data left let's decode
   while(index < size) {
     // Read the first to bytes to indicate the type of object we are decoding
@@ -1186,11 +1140,9 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       free(value);
       free(string_name);
     } else if(type == BSON_DATA_INT) {
-      // printf("===================================== decoding int\n");      
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
-      // printf("================== label: %s\n", string_name);
       // Let's create a new string
       index = index + strlen(string_name) + 1;
       // Handle array value if applicable
@@ -1207,7 +1159,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       index = index + 4;
       // Add the element to the object
       if(is_array_item) {
-        // printf("=================== wow\n");
         return_array->Set(Integer::New(insert_index), Integer::New(value));
       } else {
         return_data->Set(String::New(string_name), Integer::New(value));
@@ -1265,7 +1216,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Free up the memory
       free(string_name);      
     } else if(type == BSON_DATA_NUMBER) {
-      // printf("===================================== decoding float/double\n");      
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1292,7 +1242,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Free up the memory
       free(string_name);      
     } else if(type == BSON_DATA_NULL) {
-      // printf("===================================== decoding float/double\n");      
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1431,7 +1380,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       free(options);          
       free(string_name);
     } else if(type == BSON_DATA_OID) {
-      // printf("=================================================== unpacking oid\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1467,7 +1415,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       free(oid_string);                       
       free(string_name);
     } else if(type == BSON_DATA_BINARY) {
-      // printf("=================================================== unpacking binary\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1503,7 +1450,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       free(buffer);                             
       free(string_name);
     } else if(type == BSON_DATA_SYMBOL) {
-      // printf("=================================================== unpacking symbol\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1542,7 +1488,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       free(value);
       free(string_name);
     } else if(type == BSON_DATA_CODE) {
-      // printf("=================================================== unpacking code\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1588,7 +1533,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       free(code);
       free(string_name);
     } else if(type == BSON_DATA_CODE_W_SCOPE) {
-      // printf("=================================================== unpacking code\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1648,7 +1592,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       free(bson_buffer);      
       free(string_name);
     } else if(type == BSON_DATA_OBJECT) {
-      // printf("=================================================== unpacking object\n");
       // If this is the top level object we need to skip the undecoding
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
@@ -1685,7 +1628,6 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Clean up memory allocation
       free(string_name);
     } else if(type == BSON_DATA_ARRAY) {
-      // printf("=================================================== unpacking array\n");
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
