@@ -18,11 +18,11 @@ var testCase = require('../../deps/nodeunit').testCase,
   Double = mongodb.Double,
   BinaryParser = mongodb.BinaryParser;
 
-var m = require('../../lib/mongodb').pure();
-Long = m.Long;
-Timestamp = m.Timestamp;
-ObjectID = m.ObjectID;
-Binary = m.Binary;
+// var m = require('../../lib/mongodb').pure();
+// Long = m.Long;
+// Timestamp = m.Timestamp;
+// ObjectID = m.ObjectID;
+// Binary = m.Binary;
 
 var BSONSE = mongodb,
   BSONDE = mongodb;
@@ -540,28 +540,28 @@ var tests = testCase({
     test.done();
   },  
   
-  'Should Deserialize Larger Integers as Long not Number' : function(test) {
-    function roundTrip(val) {
-      var doc = {doc: val};
-      var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-      
-      var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
-      BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2, 0);    
-      assertBuffersEqual(test, serialized_data, serialized_data2, 0);
-        
-      var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
-      test.deepEqual(doc.doc, deserialized_data.doc);
-    };
-    
-    var long1 = require('../../lib/mongodb').pure().Long.fromNumber(Math.pow(2,53))
-      .add(require('../../lib/mongodb').pure().Long.ONE);
-    var long2 = require('../../lib/mongodb').pure().Long.fromNumber(-Math.pow(2,53))
-      .subtract(require('../../lib/mongodb').pure().Long.ONE);
-  
-    roundTrip(long1);
-    roundTrip(long2);
-    test.done();
-  },  
+  // 'Should Deserialize Larger Integers as Long not Number' : function(test) {
+  //   function roundTrip(val) {
+  //     var doc = {doc: val};
+  //     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
+  //     
+  //     var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
+  //     BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2, 0);    
+  //     assertBuffersEqual(test, serialized_data, serialized_data2, 0);
+  //       
+  //     var deserialized_data = BSONDE.BSON.deserialize(serialized_data);
+  //     test.deepEqual(doc.doc, deserialized_data.doc);
+  //   };
+  //   
+  //   var long1 = require('../../lib/mongodb').pure().Long.fromNumber(Math.pow(2,53))
+  //     .add(require('../../lib/mongodb').pure().Long.ONE);
+  //   var long2 = require('../../lib/mongodb').pure().Long.fromNumber(-Math.pow(2,53))
+  //     .subtract(require('../../lib/mongodb').pure().Long.ONE);
+  // 
+  //   roundTrip(long1);
+  //   roundTrip(long2);
+  //   test.done();
+  // },  
     
   'Should Correctly Serialize and Deserialize Long Integer and Timestamp as different types' : function(test) {
     var long = Long.fromNumber(9223372036854775807);
@@ -1075,3 +1075,5 @@ var tests = testCase({
 
 // Assign out tests
 module.exports = tests;
+
+// Crazy docs

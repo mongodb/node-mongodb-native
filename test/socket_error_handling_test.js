@@ -33,6 +33,7 @@ var hexStringToBinary = exports.hexStringToBinary = function(string) {
   for(var i = 0; i < numberofValues; i++) {
     array += String.fromCharCode(parseInt(string[i*2] + string[i*2 + 1], 16));
   }  
+  
   return array;
 }
 
@@ -50,7 +51,7 @@ var tests = testCase({
   },
   
   tearDown: function(callback) {
-    callback();        
+    callback();
   },
 
   'Should connect to dummy socket delivering garbage messages that should force error to be emitted' : function(test) {
@@ -91,6 +92,9 @@ var tests = testCase({
           test.equal("unparsable", err.err)
           test.equal(-1222, err.parseState.sizeOfMessage)
           
+          // Close server
+          server.close();
+          // Test is done
           test.done();
         })
       });        
