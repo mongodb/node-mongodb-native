@@ -406,6 +406,35 @@ var tests = testCase({
     // Sequential execution :)
     test.done();      
   },
+  
+  'Corrupt the message baby' : function(test) {
+    // Connection dummy object
+    var connectionObject = {"connection": {}, "sizeOfMessage": 0, "bytesRead": 0, "buffer": new Buffer(0), "stubBuffer": new Buffer(0)}
+    // Data object
+    var index = 0;
+    var buffer = new Buffer(40);
+    var value = -40;
+    // Encode length at start according to wire protocol
+    buffer[index + 3] = (value >> 24) & 0xff;      
+    buffer[index + 2] = (value >> 16) & 0xff;
+    buffer[index + 1] = (value >> 8) & 0xff;
+    buffer[index] = value & 0xff;                
+
+    // Self environment dummy
+    var self = {poolByReference:{1:connectionObject}, 'emit':function(type, data) {
+      test.equal('unparsable',data.err);
+      test.equal(-40, data.parseState.sizeOfMessage);
+      test.equal(0, data.parseState.bytesRead);
+      test.equal(0, data.parseState.buffer.length);
+      test.equal(0, data.parseState.stubBuffer.length);
+      test.equal('error', type);      
+      test.done();
+    }};
+
+    // Trigger the connection listener
+    var connectionListener = Connection._receiveListenerCreator(self);
+    connectionListener(buffer.slice(0, 40), 1);
+  },
 
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();

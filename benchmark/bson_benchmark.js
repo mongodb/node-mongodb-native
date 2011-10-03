@@ -4,10 +4,12 @@ var BSON = require('../lib/mongodb').BSONNative.BSON,
   debug = require('util').debug,
   inspect = require('util').inspect;
 
-var BSON = require('../lib/mongodb').BSONPure.BSON;
-var ObjectID = require('../lib/mongodb').BSONPure.ObjectID;
-var Code = require('../lib/mongodb').BSONPure.Code;
+var BSON = require('../lib/mongodb').BSONPure.BSON,
+  ObjectID = require('../lib/mongodb').BSONPure.ObjectID,
+  Code = require('../lib/mongodb').BSONPure.Code;
+
 var COUNT = 100000;
+var COUNT = 1;
 
 var object = {
   string: "Strings are great",
@@ -23,6 +25,22 @@ var object = {
   subArray: [1,2,3,4,5,6,7,8,9,10],
   anotherString: "another string",
   code: new Code("function() {}", {i:1})
+}
+
+var object = {
+  string: "Strings are great",
+  // decimal: 3.14159265,
+  // bool: true,
+  // integer: 5,
+  // 
+  // subObject: {
+  //   moreText: "Bacon ipsum dolor sit amet cow pork belly rump ribeye pastrami andouille. Tail hamburger pork belly, drumstick flank salami t-bone sirloin pork chop ribeye ham chuck pork loin shankle. Ham fatback pork swine, sirloin shankle short loin andouille shank sausage meatloaf drumstick. Pig chicken cow bresaola, pork loin jerky meatball tenderloin brisket strip steak jowl spare ribs. Biltong sirloin pork belly boudin, bacon pastrami rump chicken. Jowl rump fatback, biltong bacon t-bone turkey. Turkey pork loin boudin, tenderloin jerky beef ribs pastrami spare ribs biltong pork chop beef.",
+  //   longKeylongKeylongKeylongKeylongKeylongKey: "Pork belly boudin shoulder ribeye pork chop brisket biltong short ribs. Salami beef pork belly, t-bone sirloin meatloaf tail jowl spare ribs. Sirloin biltong bresaola cow turkey. Biltong fatback meatball, bresaola tail shankle turkey pancetta ham ribeye flank bacon jerky pork chop. Boudin sirloin shoulder, salami swine flank jerky t-bone pork chop pork beef tongue. Bresaola ribeye jerky andouille. Ribeye ground round sausage biltong beef ribs chuck, shank hamburger chicken short ribs spare ribs tenderloin meatloaf pork loin."
+  // },
+  // 
+  subArray: [1,2,3,4,5,6,7,8,9,10],
+  // anotherString: "another string",
+  // code: new Code("function() {}", {i:1})
 }
 
 for (i=10000; --i>=0; ) {  
@@ -83,45 +101,51 @@ end = new Date
 // console.log("bson size (bytes): ", objectBSON.length)
 console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
 
-// console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
-// start = new Date
+var COUNT = 1000000;
+
+console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
+start = new Date
+
+// // var object = {
+// //   '_id': new ObjectID(),
+// //   'x': 1,
+// //   'integer':5,
+// //   'number':5.05,
+// //   'boolean':false,
+// //   'array':['test', 'benchmark']
+// // }
+
+for (i=COUNT; --i>=0; ) {  
+  // var object = {
+  //   string: "Strings are great",
+  //   decimal: 3.14159265,
+  //   bool: true,
+  //   integer: 5,
+  //   subObject: {
+  //       moreText: "Bacon ipsum dolor sit amet cow pork belly rump ribeye pastrami andouille. Tail hamburger pork belly, drumstick flank salami t-bone sirloin pork chop ribeye ham chuck pork loin shankle. Ham fatback pork swine, sirloin shankle short loin andouille shank sausage meatloaf drumstick. Pig chicken cow bresaola, pork loin jerky meatball tenderloin brisket strip steak jowl spare ribs. Biltong sirloin pork belly boudin, bacon pastrami rump chicken. Jowl rump fatback, biltong bacon t-bone turkey. Turkey pork loin boudin, tenderloin jerky beef ribs pastrami spare ribs biltong pork chop beef.",
+  //       longKeylongKeylongKeylongKeylongKeylongKey: "Pork belly boudin shoulder ribeye pork chop brisket biltong short ribs. Salami beef pork belly, t-bone sirloin meatloaf tail jowl spare ribs. Sirloin biltong bresaola cow turkey. Biltong fatback meatball, bresaola tail shankle turkey pancetta ham ribeye flank bacon jerky pork chop. Boudin sirloin shoulder, salami swine flank jerky t-bone pork chop pork beef tongue. Bresaola ribeye jerky andouille. Ribeye ground round sausage biltong beef ribs chuck, shank hamburger chicken short ribs spare ribs tenderloin meatloaf pork loin."
+  //   },
+  //   subArray: [1,2,3,4,5,6,7,8,9,10],
+  //   anotherString: "another string"
+  // }
+
+  // debug("============== calculateObjectSize :: " + BSON.calculateObjectSize(object))
+  // debug("============== _calculateObjectSize :: " + BSON._calculateObjectSize(object))
+  // BSON._calculateObjectSize(object);
+  // BSON._calculateObjectSize(object);
+  
+  // objectBSON = BSON.serialize(object, null, true)
+  object = BSON.deserialize(objectBSON);
+}
+
+// // debug(inspect(objectBSON))
 // 
-// // // var object = {
-// // //   '_id': new ObjectID(),
-// // //   'x': 1,
-// // //   'integer':5,
-// // //   'number':5.05,
-// // //   'boolean':false,
-// // //   'array':['test', 'benchmark']
-// // // }
-// 
-// for (i=COUNT; --i>=0; ) {  
-//   // var object = {
-//   //   string: "Strings are great",
-//   //   decimal: 3.14159265,
-//   //   bool: true,
-//   //   integer: 5,
-//   //   subObject: {
-//   //       moreText: "Bacon ipsum dolor sit amet cow pork belly rump ribeye pastrami andouille. Tail hamburger pork belly, drumstick flank salami t-bone sirloin pork chop ribeye ham chuck pork loin shankle. Ham fatback pork swine, sirloin shankle short loin andouille shank sausage meatloaf drumstick. Pig chicken cow bresaola, pork loin jerky meatball tenderloin brisket strip steak jowl spare ribs. Biltong sirloin pork belly boudin, bacon pastrami rump chicken. Jowl rump fatback, biltong bacon t-bone turkey. Turkey pork loin boudin, tenderloin jerky beef ribs pastrami spare ribs biltong pork chop beef.",
-//   //       longKeylongKeylongKeylongKeylongKeylongKey: "Pork belly boudin shoulder ribeye pork chop brisket biltong short ribs. Salami beef pork belly, t-bone sirloin meatloaf tail jowl spare ribs. Sirloin biltong bresaola cow turkey. Biltong fatback meatball, bresaola tail shankle turkey pancetta ham ribeye flank bacon jerky pork chop. Boudin sirloin shoulder, salami swine flank jerky t-bone pork chop pork beef tongue. Bresaola ribeye jerky andouille. Ribeye ground round sausage biltong beef ribs chuck, shank hamburger chicken short ribs spare ribs tenderloin meatloaf pork loin."
-//   //   },
-//   //   subArray: [1,2,3,4,5,6,7,8,9,10],
-//   //   anotherString: "another string"
-//   // }
-// 
-//   // debug("============== calculateObjectSize :: " + BSON.calculateObjectSize(object))
-//   // debug("============== _calculateObjectSize :: " + BSON._calculateObjectSize(object))
-//   // BSON._calculateObjectSize(object);
-//   // BSON._calculateObjectSize(object);
-//   
-//   objectBSON = BSON.serialize(object, null, true)
-// }
-// 
-// // // debug(inspect(objectBSON))
-// // 
-// end = new Date
-// // console.log("bson size (bytes): ", objectBSON.length)
-// console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
+end = new Date
+// console.log("bson size (bytes): ", objectBSON.length)
+console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
+
+debug("-------------------------------------------------------------")
+debug(object)
 
 
 // // var COUNT = 1000000;
