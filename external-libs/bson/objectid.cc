@@ -93,8 +93,7 @@ Handle<Value> ObjectID::New(const Arguments &args) {
     }
 
     // Contains the final oid string
-    char oid_string_c[OBJECTID_SIZE];
-    
+    char oid_string_c[OBJECTID_SIZE];    
 
     // If we have a null generate a new oid
     if(args[0]->IsNull()) {
@@ -218,8 +217,7 @@ bool ObjectID::equals(ObjectID *object_id) {
   char *compare_id = object_id->oid;
   
   for(uint32_t i = 0; i < 24; i++) {
-    if(*(current_id + i) != *(compare_id + i))
-    {
+    if(*(current_id + i) != *(compare_id + i)) {
       return false;
     }
   }
@@ -231,7 +229,6 @@ char *ObjectID::convert_hex_oid_to_bin() {
   // Turn the oid into the binary equivalent
   char *binary_oid = (char *)malloc(12 * sizeof(char) + 1);
   *(binary_oid + 12) = '\0';
-  char n_val;
   char *nval_str = (char *)malloc(3);
   *(nval_str + 2) = '\0';  
   uint32_t x1;

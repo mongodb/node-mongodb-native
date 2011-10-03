@@ -19,8 +19,8 @@ def configure(conf):
   conf.check_tool("compiler_cxx")
   conf.check_tool("node_addon")
   conf.env.append_value('CXXFLAGS', ['-O3', '-funroll-loops'])
-  # conf.env.append_value('CXXFLAGS', ['-DDEBUG', '-g', '-O0', '-Wall', '-Wextra'])
 
+  # conf.env.append_value('CXXFLAGS', ['-DDEBUG', '-g', '-O0', '-Wall', '-Wextra'])
   # conf.check(lib='node', libpath=['/usr/lib', '/usr/local/lib'], uselib_store='NODE')
 
 def build(bld):

@@ -24,7 +24,6 @@ Symbol::Symbol(Persistent<Object> value) : ObjectWrap() {
 }
 
 Symbol::~Symbol() {
-  // if(this->value != NULL) free(this->value);
 }
 
 Handle<Value> Symbol::New(const Arguments &args) {

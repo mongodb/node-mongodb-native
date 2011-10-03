@@ -681,7 +681,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       BSON::write_int32(serialized_object + index, value->ToInt32()->Value());
       // Adjust the size of the index
       index = index + 4;
-    } else if(l_number <= 2^53 && l_number >= -2^53) {
+    } else if(l_number <= (2^53) && l_number >= (-2^53)) {
       // Write the double to the char array
       BSON::write_double((serialized_object + index), d_number);
       // Adjust type to be double
