@@ -16,6 +16,8 @@ var testCase = require('../../deps/nodeunit').testCase,
   Symbol = mongodb.Symbol,
   DBRef = mongodb.DBRef,
   Double = mongodb.Double,
+  MinKey = mongodb.MinKey,
+  MaxKey = mongodb.MaxKey,
   BinaryParser = mongodb.BinaryParser;
 
 // var m = require('../../lib/mongodb').pure();
@@ -1002,6 +1004,21 @@ var tests = testCase({
   
     test.deepEqual(doc, doc2)
     test.done();    
+  },
+  
+  'Should correctly serialize and deserialize MinKey and MaxKey values' : function(test) {
+    var doc = {
+        _id : new ObjectID("4e886e687ff7ef5e00000162"),
+        minKey : new MinKey(),
+        maxKey : new MaxKey()
+      }
+    
+    var serialized_data = BSONSE.BSON.serialize(doc, false, true);  
+    var doc2 = BSONSE.BSON.deserialize(serialized_data);
+    test.deepEqual(doc, doc2)
+    test.ok(doc2.minKey instanceof MinKey);
+    test.ok(doc2.maxKey instanceof MaxKey);
+    test.done();
   },
   
   // 'Should Correctly Function' : function(test) {

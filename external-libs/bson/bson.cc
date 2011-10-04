@@ -19,6 +19,8 @@
 #include "code.h"
 #include "dbref.h"
 #include "symbol.h"
+#include "minkey.h"
+#include "maxkey.h"
 
 using namespace v8;
 using namespace node;
@@ -40,7 +42,8 @@ const uint32_t BSON_DATA_CODE_W_SCOPE = 15;
 const uint32_t BSON_DATA_INT = 16;
 const uint32_t BSON_DATA_TIMESTAMP = 17;
 const uint32_t BSON_DATA_LONG = 18;
-
+const uint32_t BSON_DATA_MIN_KEY = 0xff;
+const uint32_t BSON_DATA_MAX_KEY = 0x7f;
 
 const int32_t BSON_INT32_MAX = (int32_t)2147483647L;
 const int32_t BSON_INT32_MIN = (int32_t)(-1) * 2147483648L;
@@ -559,7 +562,31 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       *(serialized_object + index + str->Length()) = '\0';    
       // Adjust the index
       index = index + str->Length() + 1;      
-    }       
+    }   
+  } else if(MinKey::HasInstance(value)) {
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_MIN_KEY;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;    
+  } else if(MaxKey::HasInstance(value)) {
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_MAX_KEY;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;    
   } else if(value->IsNull() || value->IsUndefined()) {
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_NULL;
@@ -787,6 +814,9 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
      || constructorString->Equals(String::New("Binary"))
      || constructorString->Equals(String::New("exports.DBRef"))
      || constructorString->Equals(String::New("exports.Code"))
+     || constructorString->Equals(String::New("exports.Double"))
+     || constructorString->Equals(String::New("exports.MinKey"))
+     || constructorString->Equals(String::New("exports.MaxKey"))
      || constructorString->Equals(String::New("exports.Symbol")))) {
     
     // Throw an error due to wrong class
@@ -906,6 +936,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     if(db_ref_obj->db != NULL) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
     // Calculate size
     object_size += BSON::calculate_object_size(obj);
+  } else if(MinKey::HasInstance(value) || MaxKey::HasInstance(value)) {    
   } else if(Symbol::HasInstance(value)) {
     // Unpack the dbref
     Local<Object> dbref = value->ToObject();
@@ -998,6 +1029,9 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
      || constructorString->Equals(String::New("Binary"))
      || constructorString->Equals(String::New("exports.DBRef"))
      || constructorString->Equals(String::New("exports.Code"))
+     || constructorString->Equals(String::New("exports.Double"))
+     || constructorString->Equals(String::New("exports.MinKey"))
+     || constructorString->Equals(String::New("exports.MaxKey"))
      || constructorString->Equals(String::New("exports.Symbol")))) {
 
     // Throw an error due to wrong class
@@ -1104,7 +1138,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
   // While we have data left let's decode
   while(index < size) {
     // Read the first to bytes to indicate the type of object we are decoding
-    uint16_t type = BSON::deserialize_int8(data, index);
+    uint8_t type = BSON::deserialize_int8(data, index);    
     // Handles the internal size of the object
     uint32_t insert_index = 0;
     // Adjust index to skip type byte
@@ -1244,6 +1278,50 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       } else {
         return_data->Set(String::New(string_name), Number::New(value));
       }
+      // Free up the memory
+      free(string_name);      
+    } else if(type == BSON_DATA_MIN_KEY) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+
+      // Create new MinKey
+      MinKey *minKey = MinKey::New();      
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), minKey->handle_);
+      } else {
+        return_data->Set(String::New(string_name), minKey->handle_);
+      }      
+      // Free up the memory
+      free(string_name);      
+    } else if(type == BSON_DATA_MAX_KEY) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Create new MinKey
+      MaxKey *maxKey = MaxKey::New();      
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), maxKey->handle_);
+      } else {
+        return_data->Set(String::New(string_name), maxKey->handle_);
+      }      
       // Free up the memory
       free(string_name);      
     } else if(type == BSON_DATA_NULL) {
@@ -1870,6 +1948,8 @@ extern "C" void init(Handle<Object> target) {
   DBRef::Initialize(target);
   Timestamp::Initialize(target);
   Symbol::Initialize(target);
+  MinKey::Initialize(target);
+  MaxKey::Initialize(target);
 }
 
 // NODE_MODULE(bson, BSON::Initialize);
