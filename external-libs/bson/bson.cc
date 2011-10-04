@@ -602,11 +602,13 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust index for double
       index = index + 8;
     } else if(l_number <= BSON_INT32_MAX && l_number >= BSON_INT32_MIN) {
+      printf("--------------------------------------------------------------- 2\n");
       // Smaller than 32 bit, write as 32 bit value
       BSON::write_int32(serialized_object + index, value->ToInt32()->Value());
       // Adjust the size of the index
       index = index + 4;
     } else if(l_number <= (2^53) && l_number >= (-2^53)) {
+      printf("--------------------------------------------------------------- 3\n");
       // Write the double to the char array
       BSON::write_double((serialized_object + index), d_number);
       // Adjust type to be double
@@ -614,10 +616,12 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Adjust index for double
       index = index + 8;      
     } else {
-      BSON::write_int64((serialized_object + index), d_number);
+      printf("--------------------------------------------------------------- 4\n");
+      BSON::write_double((serialized_object + index), d_number);
+      // BSON::write_int64((serialized_object + index), d_number);
       // BSON::write_int64((serialized_object + index), l_number);
       // Adjust type to be double
-      *(serialized_object + first_pointer) = BSON_DATA_LONG;              
+      *(serialized_object + first_pointer) = BSON_DATA_NUMBER;
       // Adjust the size of the index
       index = index + 8;
     }     
@@ -1192,6 +1196,8 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Free up the memory
       free(string_name);            
     } else if(type == BSON_DATA_LONG) {
+      printf("=================================================== 1\n");
+      
       // Read the null terminated index String
       char *string_name = BSON::extract_string(data, index);
       if(string_name == NULL) return VException("Invalid C String found.");
@@ -1725,11 +1731,19 @@ Handle<Value> BSON::decodeLong(char *data, uint32_t index) {
   memcpy(&highBits, (data + index + 4), 4);        
   
   // Decode 64bit value
-  // double value = 0;
-  // memcpy(&value, (data + index), 8);        
+  int64_t value = 0;
+  memcpy(&value, (data + index), 8);        
+  
+  printf("==================================== %llu\n", value);
+  
+  if(value >= (-2^53) && value <= (2^53)) {
+    printf("----------------------------------------------- 2\n");
+    
+  }
   
   // If value is < 2^53 and >-2^53
   if((highBits < 0x200000 || (highBits == 0x200000 && lowBits == 0)) && highBits >= -0x200000) {
+    printf("----------------------------------------------- 1\n");
     int64_t finalValue = 0;
     memcpy(&finalValue, (data + index), 8);        
     return scope.Close(Number::New(finalValue));
