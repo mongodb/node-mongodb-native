@@ -10,7 +10,7 @@
 #include <iostream>
 #include <limits>
 
-#include "MinKey.h"
+#include "minkey.h"
 
 static Handle<Value> VException(const char *msg) {
   HandleScope scope;

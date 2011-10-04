@@ -10,7 +10,7 @@
 #include <iostream>
 #include <limits>
 
-#include "Double.h"
+#include "double.h"
 
 static Handle<Value> VException(const char *msg) {
   HandleScope scope;
