@@ -21,6 +21,7 @@
 #include "symbol.h"
 #include "minkey.h"
 #include "maxkey.h"
+#include "double.h"
 
 using namespace v8;
 using namespace node;
@@ -471,11 +472,37 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     index = index + scope_object_size;
     // Encode the total size of the object
     BSON::write_int32((serialized_object + first_pointer), (index - first_pointer));
+  } else if(Double::HasInstance(value)) {
+    // printf("=================================================================== serialize double\n");
+    // Save the string at the offset provided
+    *(serialized_object + index) = BSON_DATA_NUMBER;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;    
+
+    // Unpack the double
+    Local<Object> doubleHObject = value->ToObject();
+    Double *double_obj = Double::Unwrap<Double>(doubleHObject);
+    
+    // Write the value out
+    Local<Number> number = double_obj->value->ToNumber();
+    // Get the values
+    double d_number = number->NumberValue();
+    
+    // Write the double to the char array
+    BSON::write_double((serialized_object + index), d_number);
+    // Adjust index for double
+    index = index + 8;    
   } else if(Symbol::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Symbol")))) {
-    // Unpack the dbref
-    Local<Object> dbref = value->ToObject();
-    // unpack dbref to get to the bin
-    Symbol *symbol_obj = Symbol::Unwrap<Symbol>(dbref);
+    // Unpack the symbol
+    Local<Object> symbol = value->ToObject();
+    Symbol *symbol_obj = Symbol::Unwrap<Symbol>(symbol);
     // Let's get the length
     value = symbol_obj->value->ToString();    
     // Save the string at the offset provided
@@ -963,6 +990,8 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       object_size += str->Length() + 1 + 4;        
     }
   } else if(value->IsNull()) {
+  } else if(Double::HasInstance(value)) {
+    object_size = object_size + 8;
   } else if(value->IsNumber()) {
     // Check if we have a float value or a long value
     Local<Number> number = value->ToNumber();
@@ -1950,6 +1979,7 @@ extern "C" void init(Handle<Object> target) {
   Symbol::Initialize(target);
   MinKey::Initialize(target);
   MaxKey::Initialize(target);
+  Double::Initialize(target);
 }
 
 // NODE_MODULE(bson, BSON::Initialize);
