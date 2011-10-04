@@ -10,7 +10,7 @@
 #include <iostream>
 #include <limits>
 
-#include "MaxKey.h"
+#include "maxkey.h"
 
 static Handle<Value> VException(const char *msg) {
   HandleScope scope;
