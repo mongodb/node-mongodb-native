@@ -63,7 +63,11 @@ new Db('hammer_db', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSi
           })
         });
       } else if(command == 4) {
-
+        db.collection('hammer_collection', function(err, collection) {
+          collection.find().toArray(function(items) {            
+            debug("---------------------------------------- QUERY")
+          })
+        })
       }      
     // } 
     // setInterval(function() {
