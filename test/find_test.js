@@ -12,7 +12,8 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var POOL_SIZE = 4;
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: POOL_SIZE}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -42,6 +43,45 @@ var tests = testCase({
       client.close();
       callback();        
     }      
+  },
+
+    'Error thrown in handler test': function(test){
+      var exceptionHandler = function(exception) {
+        console.log('Exception caught: ' + exception.message);
+      };
+
+      process.on('uncaughtException', exceptionHandler)
+
+      client.createCollection('error_test', function(err, collection) {
+
+      var testObject = {};
+      for(var i = 0; i < 5000; i++){
+          testObject['setting_' + i] = i;
+      }
+
+      testObject.name = 'test1';
+
+      var counter = 0;
+      collection.insert([testObject, {name:'test2'}], {safe:true}, function(err, doc) {
+            var findOne = function(){
+                collection.findOne({name: 'test1'}, function(err, doc) {
+                    counter++;
+                    process.nextTick(findOne);
+
+                    if(counter > POOL_SIZE){
+                        process.removeListener('uncaughtException', exceptionHandler);
+                        test.done();
+                    } else {
+                        throw new Error('Some error');
+                    }
+                });
+            };
+
+            findOne();
+        });
+      });
+
+
   },
 
   // Test a simple find
@@ -828,8 +868,8 @@ var tests = testCase({
       });
     });
   },
-  
-  noGlobalsLeaked : function(test) {
+
+    noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
     test.done();
