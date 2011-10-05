@@ -45,43 +45,58 @@ var tests = testCase({
     }      
   },
 
-    'Error thrown in handler test': function(test){
-      var exceptionHandler = function(exception) {
-        console.log('Exception caught: ' + exception.message);
-      };
+  'Error thrown in handler test': function(test){
+    // Should not be called
+    var exceptionHandler = function(exception) {
+      test.ok(false);
+      console.log('Exception caught: ' + exception.message);
+      console.log(inspect(exception.stack.toString()))
+    };
+    
+    // Number of times we should fail
+    var numberOfFailsCounter = 0;
+    
+    // Error handler
+    client.on("error", function(err) {
+      numberOfFailsCounter = numberOfFailsCounter + 1;
+    });
 
-      process.on('uncaughtException', exceptionHandler)
+    process.on('uncaughtException', exceptionHandler)
 
-      client.createCollection('error_test', function(err, collection) {
+    client.createCollection('error_test', function(err, collection) {
 
-      var testObject = {};
-      for(var i = 0; i < 5000; i++){
-          testObject['setting_' + i] = i;
-      }
+    var testObject = {};
+    for(var i = 0; i < 5000; i++){
+        testObject['setting_' + i] = i;
+    }
 
-      testObject.name = 'test1';
+    testObject.name = 'test1';
+    var c = 0;
 
-      var counter = 0;
-      collection.insert([testObject, {name:'test2'}], {safe:true}, function(err, doc) {
-            var findOne = function(){
-                collection.findOne({name: 'test1'}, function(err, doc) {
-                    counter++;
-                    process.nextTick(findOne);
+    var counter = 0;
+    collection.insert([testObject, {name:'test2'}], {safe:true}, function(err, doc) {
+        var findOne = function(){
+          collection.findOne({name: 'test1'}, function(err, doc) {
+            counter++;
+            process.nextTick(findOne);
 
-                    if(counter > POOL_SIZE){
-                        process.removeListener('uncaughtException', exceptionHandler);
-                        test.done();
-                    } else {
-                        throw new Error('Some error');
-                    }
-                });
-            };
+            if(counter > POOL_SIZE){
+              process.removeListener('uncaughtException', exceptionHandler);
+              
+              collection.findOne({name: 'test1'}, function(err, doc) {
+                test.equal(5002, Object.keys(doc).length)
+                test.equal(4, numberOfFailsCounter);
+                test.done();
+              });                        
+            } else {
+              throw new Error('Some error');
+            }
+          });
+        };
 
-            findOne();
-        });
+        findOne();
       });
-
-
+    });
   },
 
   // Test a simple find
@@ -856,7 +871,7 @@ var tests = testCase({
       p_client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function(err, collection) {
         // Test return old document on change
         collection.insert({'a':2, 'b':2}, function(err, doc) {
-
+  
           // Let's modify the document in place
           collection.findAndModify({'c':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result) {
             test.equal(null, result);

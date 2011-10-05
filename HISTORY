@@ -1,11 +1,13 @@
+0.9.6-20 2011-10-04
 * Reworked bson.js parser to get rid off Array.shift() due to it allocating new memory for each call. Speedup varies between 5-15% depending on doc
 * Reworked bson.cc to throw error when trying to serialize js bson types
+* Added MinKey, MaxKey and Double support for JS and C++ parser
 * Reworked socket handling code to emit errors on unparsable messages
 * Added logger option for Db class, lets you pass in a function in the shape 
 	{
 		log : function(message, object) {},
 		error : function(errorMessage, errorObject) {},
-		debug : function(debug, object) {},
+		debug : function(debugMessage, object) {},
 	}
 
   Usage is new Db(new Server(..), {logger: loggerInstance})
