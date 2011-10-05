@@ -120,6 +120,7 @@ var tests = testCase({
           collection.count(function(err, count) {
             test.equal(2, count);
           });
+          
           // Fetch values by selection
           collection.find({'a': doc1.a}, function(err, cursor) {
             cursor.toArray(function(err, documents) {

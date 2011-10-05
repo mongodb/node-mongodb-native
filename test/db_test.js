@@ -52,7 +52,7 @@ var tests = testCase({
       test.ok(err instanceof Error);
       test.equal("database name must be a string", err.message);
     }
-
+  
     try {
       new Db("");
     } catch(err) {
@@ -65,25 +65,25 @@ var tests = testCase({
     } catch(err) {
       test.equal("database names cannot contain the character '$'", err.message);
     }
-
+  
     try {
       new Db(".test", function(err, collection) {});
     } catch(err) {
       test.equal("database names cannot contain the character '.'", err.message);
     }
-
+  
     try {
       new Db("\\test", function(err, collection) {});
     } catch(err) {
       test.equal("database names cannot contain the character '\\'", err.message);
     }
-
+  
     try {
       new Db("\\test", function(err, collection) {});
     } catch(err) {
       test.equal("database names cannot contain the character '\\'", err.message);
     }
-
+  
     try {
       new Db("test test", function(err, collection) {});
     } catch(err) {
@@ -93,41 +93,41 @@ var tests = testCase({
     test.done();
   },
     
-  // // Test the auto connect functionality of the db
-  // shouldCorrectlyPerformAutomaticConnect : function(test) {
-  //   var automatic_connect_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-  //   automatic_connect_client.bson_deserializer = client.bson_deserializer;
-  //   automatic_connect_client.bson_serializer = client.bson_serializer;
-  //   automatic_connect_client.pkFactory = client.pkFactory;
-  // 
-  //   automatic_connect_client.open(function(err, automatic_connect_client) {
-  //     
-  //     // Listener for closing event
-  //     var closeListener = function(has_error) {
-  //       // Remove the listener for the close to avoid loop
-  //       automatic_connect_client.removeListener("close", closeListener);
-  //       // Let's insert a document
-  //       automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
-  //         // Insert another test document and collect using ObjectId
-  //         collection.insert({"name":"Patty", "age":34}, {safe:true}, function(err, ids) {
-  //           test.equal(1, ids.length);
-  //           test.ok(ids[0]._id.toHexString().length == 24);
-  // 
-  //           collection.findOne({"name":"Patty"}, function(err, document) {
-  //             test.equal(ids[0]._id.toHexString(), document._id.toHexString());
-  //             // Let's close the db
-  //             automatic_connect_client.close();
-  //             test.done();
-  //           });
-  //         });
-  //       });
-  //     };
-  //     
-  //     // Add listener to close event
-  //     automatic_connect_client.on("close", closeListener);
-  //     automatic_connect_client.close();
-  //   });    
-  // },
+  // Test the auto connect functionality of the db
+  shouldCorrectlyPerformAutomaticConnect : function(test) {
+    var automatic_connect_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    automatic_connect_client.bson_deserializer = client.bson_deserializer;
+    automatic_connect_client.bson_serializer = client.bson_serializer;
+    automatic_connect_client.pkFactory = client.pkFactory;
+  
+    automatic_connect_client.open(function(err, automatic_connect_client) {
+      
+      // Listener for closing event
+      var closeListener = function(has_error) {
+        // Remove the listener for the close to avoid loop
+        automatic_connect_client.removeListener("close", closeListener);
+        // Let's insert a document
+        automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
+          // Insert another test document and collect using ObjectId
+          collection.insert({"name":"Patty", "age":34}, {safe:true}, function(err, ids) {
+            test.equal(1, ids.length);
+            test.ok(ids[0]._id.toHexString().length == 24);
+  
+            collection.findOne({"name":"Patty"}, function(err, document) {
+              test.equal(ids[0]._id.toHexString(), document._id.toHexString());
+              // Let's close the db
+              automatic_connect_client.close();
+              test.done();
+            });
+          });
+        });
+      };
+      
+      // Add listener to close event
+      automatic_connect_client.on("close", closeListener);
+      automatic_connect_client.close();
+    });    
+  },
   
   // Test that error conditions are handled correctly
   shouldCorrectlyHandleConnectionErrors : function(test) {
