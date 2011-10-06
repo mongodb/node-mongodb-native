@@ -1036,6 +1036,17 @@ var tests = testCase({
     test.done();    
   },
   
+  'ObjectID should correctly create objects' : function(test) {
+    var object1 = ObjectID.createFromHexString('000000000000000000000001')
+    var object2 = ObjectID.createFromHexString('00000000000000000000001')
+    
+    debug("--------------------------------------------------------------------")
+    debug(inspect(object1))
+    debug(inspect(object2))
+    
+    test.done();
+  },
+  
   // 'Should Correctly Function' : function(test) {
   //   var doc = {b:1, func:function() {
   //     this.b = 2;
