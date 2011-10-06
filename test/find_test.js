@@ -115,21 +115,22 @@ var tests = testCase({
           collection.find(function(err, cursor) {
             cursor.toArray(function(err, documents) {
               test.equal(2, documents.length);
+
+              collection.count(function(err, count) {
+                test.equal(2, count);
+
+                // Fetch values by selection
+                collection.find({'a': doc1.a}, function(err, cursor) {
+                  cursor.toArray(function(err, documents) {
+                    test.equal(1, documents.length);
+                    test.equal(doc1.a, documents[0].a);
+                    // Let's close the db
+                    test.done();
+                  });
+                });
+              });
             })
-          });
-          collection.count(function(err, count) {
-            test.equal(2, count);
-          });
-          
-          // Fetch values by selection
-          collection.find({'a': doc1.a}, function(err, cursor) {
-            cursor.toArray(function(err, documents) {
-              test.equal(1, documents.length);
-              test.equal(doc1.a, documents[0].a);
-              // Let's close the db
-              test.done();
-            });
-          });
+          });          
         });
       });
     });    
