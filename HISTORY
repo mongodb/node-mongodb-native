@@ -1,6 +1,7 @@
 0.9.6-21 2011-10-05
 * Reworked reconnect code to work correctly
 * Handling errors in different parts of the code to ensure that it does not lock the connection
+* Consistent error handling for Object.createFromHexString for JS and C++
 
 0.9.6-20 2011-10-04
 * Reworked bson.js parser to get rid off Array.shift() due to it allocating new memory for each call. Speedup varies between 5-15% depending on doc
