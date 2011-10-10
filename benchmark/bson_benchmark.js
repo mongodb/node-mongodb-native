@@ -53,7 +53,7 @@ var object = {
 //   objectBSON = BSON.serialize(object, null, true)
 // }
 // 
-var x, start, end, i
+var x, start, end, j
 var objectBSON, objectJSON
 
 console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
@@ -68,7 +68,7 @@ start = new Date
 // //   'array':['test', 'benchmark']
 // // }
 // 
-for (i=COUNT; --i>=0; ) {  
+for (j=COUNT; --j>=0; ) {  
 //   // var object = {
 //   //   string: "Strings are great",
 //   //   decimal: 3.14159265,
@@ -94,7 +94,22 @@ for (i=COUNT; --i>=0; ) {
 // 
 //   // debug(inspect(b))
 // 
-  objectBSON = BSON.serialize(object, null, true)
+
+var doc = {};
+for(var i = 0; i < 1; i++) {
+    doc['timestamp' + i] = Date.now();
+}
+var docs = [];
+for(var i = 0; i < 1; i++) {
+    docs.push(doc);
+}
+
+var object = {'doc':docs}
+debug(inspect(object))
+
+BSON.calculateObjectSize(object);
+
+  // objectBSON = BSON.serialize(object, null, true)
 // 
 //   // var b = BSON.deserialize(objectBSON);
 // 

@@ -1037,12 +1037,13 @@ var tests = testCase({
   },
   
   'ObjectID should correctly create objects' : function(test) {
-    var object1 = ObjectID.createFromHexString('000000000000000000000001')
-    var object2 = ObjectID.createFromHexString('00000000000000000000001')
-    
-    debug("--------------------------------------------------------------------")
-    debug(inspect(object1))
-    debug(inspect(object2))
+    try {
+      var object1 = ObjectID.createFromHexString('000000000000000000000001')
+      var object2 = ObjectID.createFromHexString('00000000000000000000001')      
+      test.ok(false);
+    } catch(err) {
+      test.ok(err != null);
+    }
     
     test.done();
   },
