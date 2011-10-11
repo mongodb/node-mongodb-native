@@ -711,6 +711,31 @@ var tests = testCase({
       });
     });
   },
+
+  'Should correctly insert object with timestamps' : function(test) {
+    var doc = {
+    	"_id" : new client.bson_serializer.ObjectID("4e886e687ff7ef5e00000162"),
+    	"str" : "foreign",
+    	"type" : 2,
+    	"timestamp" : new client.bson_serializer.Timestamp(10000),
+    	"links" : [
+    		"http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
+    	],
+    	"timestamp2" : new client.bson_serializer.Timestamp(33333),
+    }    
+
+    client.createCollection('Should_correctly_insert_object_with_timestamps', function(err, collection) {
+      collection.insert(doc, {safe:true}, function(err, result) {
+        test.ok(err == null);
+        
+        collection.findOne(function(err, item) {
+          test.ok(err == null);
+          test.deepEqual(doc, item);
+          test.done();
+        });        
+      });
+    });
+  },
   
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
