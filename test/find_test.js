@@ -60,26 +60,26 @@ var tests = testCase({
     client.on("error", function(err) {
       numberOfFailsCounter = numberOfFailsCounter + 1;
     });
-
+  
     process.on('uncaughtException', exceptionHandler)
-
+  
     client.createCollection('error_test', function(err, collection) {
-
+  
     var testObject = {};
     for(var i = 0; i < 5000; i++){
         testObject['setting_' + i] = i;
     }
-
+  
     testObject.name = 'test1';
     var c = 0;
-
+  
     var counter = 0;
     collection.insert([testObject, {name:'test2'}], {safe:true}, function(err, doc) {
         var findOne = function(){
           collection.findOne({name: 'test1'}, function(err, doc) {
             counter++;
             process.nextTick(findOne);
-
+  
             if(counter > POOL_SIZE){
               process.removeListener('uncaughtException', exceptionHandler);
               
@@ -93,12 +93,12 @@ var tests = testCase({
             }
           });
         };
-
+  
         findOne();
       });
     });
   },
-
+  
   // Test a simple find
   shouldCorrectlyPerformSimpleFind : function(test) {
     client.createCollection('test_find_simple', function(err, r) {
@@ -115,10 +115,10 @@ var tests = testCase({
           collection.find(function(err, cursor) {
             cursor.toArray(function(err, documents) {
               test.equal(2, documents.length);
-
+  
               collection.count(function(err, count) {
                 test.equal(2, count);
-
+  
                 // Fetch values by selection
                 collection.find({'a': doc1.a}, function(err, cursor) {
                   cursor.toArray(function(err, documents) {
@@ -885,8 +885,47 @@ var tests = testCase({
       });
     });
   },
+  
+  'Should correctly return new modified document' : function(test) {
+    client.createCollection('Should_correctly_return_new_modified_document', function(err, collection) {
+      var id = new client.bson_serializer.ObjectID();
+      var doc = {_id:id, a:1, b:1, c:{a:1, b:1}};
+      
+      collection.insert(doc, {safe:true}, function(err, result) {
+        test.ok(err == null);
+        
+        // Find and modify returning the new object
+        collection.findAndModify({_id:id}, [], {$set : {'c.c': 100}}, {new:true}, function(err, item) {
+          test.equal(doc._id.toString(), item._id.toString());
+          test.equal(doc.a, item.a);
+          test.equal(doc.b, item.b);
+          test.equal(doc.c.a, item.c.a);
+          test.equal(doc.c.b, item.c.b);
+          test.equal(100, item.c.c);          
+          test.done();
+        })
+      });
+    });
+  },
+  
+  // Should correctly execute findAndModify that is breaking in prod
+  // shouldCorrectlyExecuteFindAndModify : function(test) {
+  //   client.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
+  //     var self = {_id : new client.bson_serializer.ObjectID()}
+  //     var _uuid = 'sddffdss'
+  //     
+  //     collection.findAndModify(
+  //          {_id: self._id, 'plays.uuid': _uuid},
+  //          [],
+  //          {$set : {'plays.$.active': true}},
+  //          {new: true, fields: {plays: 0, results: 0}, safe: true},
+  //        function(err, contest) {
+  //          test.done();           
+  //        })  
+  //   });    
+  // },
 
-    noGlobalsLeaked : function(test) {
+  noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
     test.done();
