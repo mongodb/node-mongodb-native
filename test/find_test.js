@@ -151,16 +151,18 @@ var tests = testCase({
           // Ensure correct insertion testing via the cursor and the count function
           collection.find().toArray(function(err, documents) {
             test.equal(2, documents.length);
-          });
-          collection.count(function(err, count) {
-            test.equal(2, count);
-          });
-          // Fetch values by selection
-          collection.find({'a': doc1.a}).toArray(function(err, documents) {
-            test.equal(1, documents.length);
-            test.equal(doc1.a, documents[0].a);
-            // Let's close the db
-            test.done();
+
+            collection.count(function(err, count) {
+              test.equal(2, count);
+
+              // Fetch values by selection
+              collection.find({'a': doc1.a}).toArray(function(err, documents) {
+                test.equal(1, documents.length);
+                test.equal(doc1.a, documents[0].a);
+                // Let's close the db
+                test.done();
+              });
+            });
           });
         });
       });

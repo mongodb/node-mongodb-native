@@ -68,6 +68,39 @@ module.exports = testCase({
       callback();        
     })
   },
+    
+  shouldCorrectlyWaitForReplicationToServersOnInserts : function(test) {
+    // debug("=========================================== shouldWorkCorrectlyWithInserts")
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {rs_name:RS.name}
+    );
+  
+    // Insert some data
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      // Check if we got an error
+      if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
+  
+      // Drop collection on replicaset
+      p_db.dropCollection('testsets', function(err, r) {
+        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
+        // Recreate collection on replicaset
+        p_db.createCollection('testsets', function(err, collection) {
+          if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
+          // Insert a dummy document
+          collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {            
+            test.equal(null, err);
+            test.done();
+          });
+        });
+      });
+    });
+  },
   
   shouldCorrectlyExecuteSafeFindAndModify : function(test) {
     // Replica configuration

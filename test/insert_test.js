@@ -273,9 +273,8 @@ var tests = testCase({
         'dbref': new client.bson_serializer.DBRef('namespace', oid, 'integration_tests_')
       }
   
-      collection.insert(motherOfAllDocuments, {safe:true}, function(err, docs) {
-        
-        collection.findOne(function(err, doc) {          
+      collection.insert(motherOfAllDocuments, {safe:true}, function(err, docs) {      
+        collection.findOne(function(err, doc) {
           // Assert correct deserialization of the values
           test.equal(motherOfAllDocuments.string, doc.string);
           test.deepEqual(motherOfAllDocuments.array, doc.array);
@@ -286,7 +285,7 @@ var tests = testCase({
           test.equal(date.getTime(), doc.date.getTime());
           test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
           test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
-  
+            
           test.equal(motherOfAllDocuments.int, doc.int);
           test.equal(motherOfAllDocuments.long, doc.long);
           test.equal(motherOfAllDocuments.float, doc.float);
@@ -294,7 +293,7 @@ var tests = testCase({
           test.equal(motherOfAllDocuments.boolean, doc.boolean);
           test.equal(motherOfAllDocuments.where.code, doc.where.code);
           test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-  
+            
           test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
           test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
           test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);          
@@ -690,15 +689,15 @@ var tests = testCase({
   
   'Should correctly insert object and retrieve it when containing array and IsoDate' : function(test) {
     var doc = {
-    	"_id" : new client.bson_serializer.ObjectID("4e886e687ff7ef5e00000162"),
-    	"str" : "foreign",
-    	"type" : 2,
-    	"timestamp" : ISODate("2011-10-02T14:00:08.383Z"),
-    	"links" : [
-    		"http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
-    	]
+     "_id" : new client.bson_serializer.ObjectID("4e886e687ff7ef5e00000162"),
+     "str" : "foreign",
+     "type" : 2,
+     "timestamp" : ISODate("2011-10-02T14:00:08.383Z"),
+     "links" : [
+       "http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
+     ]
     }    
-
+  
     client.createCollection('Should_correctly_insert_object_and_retrieve_it_when_containing_array_and_IsoDate', function(err, collection) {
       collection.insert(doc, {safe:true}, function(err, result) {
         test.ok(err == null);
@@ -711,19 +710,19 @@ var tests = testCase({
       });
     });
   },
-
+  
   'Should correctly insert object with timestamps' : function(test) {
     var doc = {
-    	"_id" : new client.bson_serializer.ObjectID("4e886e687ff7ef5e00000162"),
-    	"str" : "foreign",
-    	"type" : 2,
-    	"timestamp" : new client.bson_serializer.Timestamp(10000),
-    	"links" : [
-    		"http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
-    	],
-    	"timestamp2" : new client.bson_serializer.Timestamp(33333),
+     "_id" : new client.bson_serializer.ObjectID("4e886e687ff7ef5e00000162"),
+     "str" : "foreign",
+     "type" : 2,
+     "timestamp" : new client.bson_serializer.Timestamp(10000),
+     "links" : [
+       "http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
+     ],
+     "timestamp2" : new client.bson_serializer.Timestamp(33333),
     }    
-
+  
     client.createCollection('Should_correctly_insert_object_with_timestamps', function(err, collection) {
       collection.insert(doc, {safe:true}, function(err, result) {
         test.ok(err == null);
