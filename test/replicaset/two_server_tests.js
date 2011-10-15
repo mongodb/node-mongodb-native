@@ -94,28 +94,13 @@ module.exports = testCase({
           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
           // Insert a dummy document
           collection.insert({a:20}, {safe: {w:1, wtimeout: 10000}}, function(err, r) {            
-
-            // Kill the secondary server, the primary steps down to secondary
-            RS.killSecondary(function(node) {
-
-              collection.findOne(function(err, item) {
-                debug("----------------------------------------------------------- 0")
-                debug(inspect(err))
-                debug(inspect(item))
-                
-                test.ok(err != null);
-
-                collection.findOne(function(err, item) {
-                  test.ok(err != null);
-                  debug("----------------------------------------------------------- 1")
-                  debug(inspect(err))
-                  debug(inspect(item))
-                  
-                  // test.equal(20, item.a)                
-                  test.done();                
-                });
-              });              
-            });
+            
+            // Execute a findAndModify
+            collection.findAndModify({'a':20}, [['a', 1]], {'$set':{'b':3}}, {'new':true, safe: {w:7, wtimeout: 10000}}, function(err, updated_doc) {
+              test.equal('timeout', err.err)
+              test.equal(true, err.wtimeout)
+              test.done();
+            });              
           });
         });
       });

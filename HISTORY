@@ -1,3 +1,7 @@
+0.9.6-22 2011-10-15
+* Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370
+* Fixed bug in findAndModify that did not throw error on replicaset timeout, Issue #373
+
 0.9.6-21 2011-10-05
 * Reworked reconnect code to work correctly
 * Handling errors in different parts of the code to ensure that it does not lock the connection
