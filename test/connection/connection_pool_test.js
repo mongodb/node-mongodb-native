@@ -28,11 +28,11 @@ var tests = testCase({
   
   'Should correctly fail due to no server' : function(test) {
     var connectionPool = new ConnectionPool('localhost', 2000, 1, {timeout:100, noDelay:true});
-
-    // Add event handler that will fire once the pool is ready
-    connectionPool.on("poolReady", function(err, result) {
+  
+    // // Add event handler that will fire once the pool is ready
+    connectionPool.on("poolReady", function(err, result) {      
     })
-
+  
     // Add event handler that will fire when it fails
     connectionPool.on("error", function(err, connection) {
       test.equal(0, Object.keys(connectionPool.waitingToOpen).length);
@@ -44,10 +44,10 @@ var tests = testCase({
     // Start the pool
     connectionPool.start();    
   },
-
+  
   'Should Correctly create a pool of connections and receive an ok when all connections are active' : function(test) {
     var connectionPool = new ConnectionPool('localhost', 27017, 4, {timeout:100, noDelay:true});
-
+  
     // Add event handler that will fire once the pool is ready
     connectionPool.on("poolReady", function() {
       test.done();
