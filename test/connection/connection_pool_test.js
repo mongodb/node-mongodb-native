@@ -27,7 +27,7 @@ var tests = testCase({
   },
   
   'Should correctly fail due to no server' : function(test) {
-    var connectionPool = new ConnectionPool('localhost', 2000, 1, {timeout:100, noDelay:true});
+    var connectionPool = new ConnectionPool('localhost', 2000, 4, {timeout:100, noDelay:true});
   
     // // Add event handler that will fire once the pool is ready
     connectionPool.on("poolReady", function(err, result) {      
@@ -35,8 +35,13 @@ var tests = testCase({
   
     // Add event handler that will fire when it fails
     connectionPool.on("error", function(err, connection) {
+      // console.log("--------------------------------------------- FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+      // console.dir(connectionPool.waitingToOpen)
+      // console.dir(connectionPool.connectionsWithErrors)
+      // console.dir(connectionPool.openConnections)
+      
       test.equal(0, Object.keys(connectionPool.waitingToOpen).length);
-      test.equal(1, Object.keys(connectionPool.connectionsWithErrors).length);
+      test.equal(4, Object.keys(connectionPool.connectionsWithErrors).length);
       test.equal(0, Object.keys(connectionPool.openConnections).length);      
       test.done();
     });
@@ -56,6 +61,8 @@ var tests = testCase({
     // Start the pool
     connectionPool.start();    
   },
+  
+  // 'Should Correctly '
   
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
