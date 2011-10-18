@@ -17,52 +17,68 @@ var tests = testCase({
     callback();        
   },
 
-  'Should Correctly create a pool instance with the expected values' : function(test) {
-    var connectionPool = new ConnectionPool('localhost', 2000, 1, {timeout:100, noDelay:true});
-    test.equal(100, connectionPool.socketOptions.timeout);
-    test.equal(true, connectionPool.socketOptions.noDelay);
-    test.equal(null, connectionPool.socketOptions.encoding);
-    test.equal(0, connectionPool.socketOptions.bufferSize);    
-    test.done();
-  },
+  // 'Should Correctly create a pool instance with the expected values' : function(test) {
+  //   var connectionPool = new ConnectionPool('localhost', 2000, 1, {timeout:100, noDelay:true});
+  //   test.equal(100, connectionPool.socketOptions.timeout);
+  //   test.equal(true, connectionPool.socketOptions.noDelay);
+  //   test.equal(null, connectionPool.socketOptions.encoding);
+  //   test.equal(0, connectionPool.socketOptions.bufferSize);    
+  //   test.done();
+  // },
+  // 
+  // 'Should correctly fail due to no server' : function(test) {
+  //   var connectionPool = new ConnectionPool('localhost', 2000, 4, {timeout:100, noDelay:true});
+  // 
+  //   // // Add event handler that will fire once the pool is ready
+  //   connectionPool.on("poolReady", function(err, result) {      
+  //   })
+  // 
+  //   // Add event handler that will fire when it fails
+  //   connectionPool.on("error", function(err, connection) {
+  //     test.equal(0, Object.keys(connectionPool.waitingToOpen).length);
+  //     test.equal(4, Object.keys(connectionPool.connectionsWithErrors).length);
+  //     test.equal(0, Object.keys(connectionPool.openConnections).length);      
+  //     test.done();
+  //   });
+  //   
+  //   // Start the pool
+  //   connectionPool.start();    
+  // },
+  // 
+  // 'Should Correctly create a pool of connections and receive an ok when all connections are active' : function(test) {
+  //   var connectionPool = new ConnectionPool('localhost', 27017, 4, {timeout:100, noDelay:true});
+  // 
+  //   // Add event handler that will fire once the pool is ready
+  //   connectionPool.on("poolReady", function() {
+  //     test.done();
+  //   })
+  //   
+  //   // Start the pool
+  //   connectionPool.start();    
+  // },
   
-  'Should correctly fail due to no server' : function(test) {
-    var connectionPool = new ConnectionPool('localhost', 2000, 4, {timeout:100, noDelay:true});
-  
-    // // Add event handler that will fire once the pool is ready
-    connectionPool.on("poolReady", function(err, result) {      
-    })
-  
-    // Add event handler that will fire when it fails
-    connectionPool.on("error", function(err, connection) {
-      // console.log("--------------------------------------------- FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
-      // console.dir(connectionPool.waitingToOpen)
-      // console.dir(connectionPool.connectionsWithErrors)
-      // console.dir(connectionPool.openConnections)
-      
-      test.equal(0, Object.keys(connectionPool.waitingToOpen).length);
-      test.equal(4, Object.keys(connectionPool.connectionsWithErrors).length);
-      test.equal(0, Object.keys(connectionPool.openConnections).length);      
-      test.done();
-    });
-    
-    // Start the pool
-    connectionPool.start();    
-  },
-  
-  'Should Correctly create a pool of connections and receive an ok when all connections are active' : function(test) {
+  'Should Correctly connect and then force a restart creating new connections' : function(test) {
     var connectionPool = new ConnectionPool('localhost', 27017, 4, {timeout:100, noDelay:true});
+    var done = false;
   
     // Add event handler that will fire once the pool is ready
-    connectionPool.on("poolReady", function() {
-      test.done();
+    connectionPool.on("poolReady", function() {      
+      debug("---------------------------------------------------------------------------- 0")
+      debug("---------------------------------------------------------------------------- 0")
+      debug("---------------------------------------------------------------------------- 0")
+      // Restart      
+      if(done) {
+        test.done();        
+      } else {
+        // Trigger stop
+        connectionPool.restart();
+        done = true;
+      }
     })
     
     // Start the pool
-    connectionPool.start();    
+    connectionPool.start();        
   },
-  
-  // 'Should Correctly '
   
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
