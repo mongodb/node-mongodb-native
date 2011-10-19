@@ -63,9 +63,6 @@ var tests = testCase({
   
     // Add event handler that will fire once the pool is ready
     connectionPool.on("poolReady", function() {      
-      // debug("---------------------------------------------------------------------------- 0")
-      // debug("---------------------------------------------------------------------------- 0")
-      // debug("---------------------------------------------------------------------------- 0")
       // Restart      
       if(done) {
         test.done();        
