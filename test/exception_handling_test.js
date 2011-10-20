@@ -47,7 +47,8 @@ var tests = testCase({
     client.createCollection('shouldCorrectlyHandleThrownError', function(err, r) {
       try {
         client.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
-          debug(someUndefinedVariable);
+          test.done();
+          //debug(someUndefinedVariable);
         });        
       } catch (err) {
         test.ok(err != null);
@@ -66,7 +67,8 @@ var tests = testCase({
     client.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {      
       client.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
         collection.rename("shouldCorrectlyHandleThrownErrorInRename2", function(err, result) {
-          debug(someUndefinedVariable);            
+          test.done();
+          //debug(someUndefinedVariable);
         })
       });        
     });

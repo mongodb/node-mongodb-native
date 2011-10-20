@@ -48,19 +48,14 @@ var tests = testCase({
   'Error thrown in handler test': function(test){
     // Should not be called
     var exceptionHandler = function(exception) {
-      test.ok(false);
-      console.log('Exception caught: ' + exception.message);
-      console.log(inspect(exception.stack.toString()))
+      numberOfFailsCounter++;
+      //console.log('Exception caught: ' + exception.message);
+      //console.log(inspect(exception.stack.toString()))
     };
     
     // Number of times we should fail
     var numberOfFailsCounter = 0;
     
-    // Error handler
-    client.on("error", function(err) {
-      numberOfFailsCounter = numberOfFailsCounter + 1;
-    });
-  
     process.on('uncaughtException', exceptionHandler)
   
     client.createCollection('error_test', function(err, collection) {
@@ -78,8 +73,7 @@ var tests = testCase({
         var findOne = function(){
           collection.findOne({name: 'test1'}, function(err, doc) {
             counter++;
-            process.nextTick(findOne);
-  
+
             if(counter > POOL_SIZE){
               process.removeListener('uncaughtException', exceptionHandler);
               
@@ -89,6 +83,7 @@ var tests = testCase({
                 test.done();
               });                        
             } else {
+              process.nextTick(findOne);
               throw new Error('Some error');
             }
           });
