@@ -1,3 +1,6 @@
+0.9.6-23 2011-10-22
+* Included fix for MongoDB driver shouldn't try to catch errors from user code, Issue #379
+
 0.9.6-22 2011-10-15
 * Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370
 * Fixed bug in findAndModify that did not throw error on replicaset timeout, Issue #373
