@@ -79,12 +79,11 @@ where
 
 Reading from GridStore can be done with `read`
 
-    gs.read([size[, offset]], callback)
+    gs.read([size], callback)
     
 where
 
   * `size` is the length of the data to be read
-  * `offset` is the position to start reading
   * `callback` is a callback function with two parameters - error object (if an error occured) and data (binary string)
 
 ## Streaming from GridStore
