@@ -83,8 +83,8 @@ var tests = testCase({
             test.ok(replies);
   
             // Kill a connection to force a reconnect
-            p_client.serverConfig.connection.pool[0].connection.end();
-            
+            p_client.serverConfig.connectionPool.stop();
+
             p_client.createCollection('shouldCorrectlyReAuthorizeReconnectedConnections', function(err, collection) {
               collection.insert({a:1}, {safe:true}, function(err, r) {
                 collection.insert({a:2}, {safe:true}, function(err, r) {
