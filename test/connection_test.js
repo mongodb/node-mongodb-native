@@ -67,46 +67,49 @@ var tests = testCase({
   },
   
   testCloseNoCallback : function(test) {
-    var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}),
-                    {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.open(connectionTester(test, 'testCloseNoCallback', function() {
       var dbCloseCount = 0, connectionCloseCount = 0, poolCloseCount = 0;
-      db.on('close', function() { ++dbCloseCount; });
-      var connection = db.serverConfig.connection;
-      connection.on('close', function() { ++connectionCloseCount; });
-      connection.pool.forEach(function(poolMember) {
-        poolMember.connection.on('close', function() { ++poolCloseCount; });
-      });
+      // Ensure no close events are fired as we are closing the connection specifically
+      db.on('close', function() { dbCloseCount++; });
+
+      var connectionPool = db.serverConfig.connectionPool;
+      var connections = connectionPool.getAllConnections();
+      var keys = Object.keys(connections);
+        
+      // Ensure no close events are fired as we are closing the connection specifically
+      for(var i = 0; i < keys.length; i++) {
+        connections[keys[i]].on("close", function() { test.ok(false); });
+      }
+      
+      // Force the connection cose
       db.close();
-      setTimeout(function() {
-        test.equal(dbCloseCount, 1);
-        test.equal(connectionCloseCount, 1);
-        test.equal(poolCloseCount, 4);
-        test.done();
-      }, 250);
+      // Test done
+      test.equal(1, dbCloseCount);
+      test.done();
     }));
   },
   
   testCloseWithCallback : function(test) {
-    var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}),
-                    {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}),{native_parser: (process.env['TEST_NATIVE'] != null)});
     db.open(connectionTester(test, 'testCloseWithCallback', function() {
       var dbCloseCount = 0, connectionCloseCount = 0, poolCloseCount = 0;
-      db.on('close', function() { ++dbCloseCount; });
-      var connection = db.serverConfig.connection;
-      connection.on('close', function() { ++connectionCloseCount; });
-      connection.pool.forEach(function(poolMember) {
-        poolMember.connection.on('close', function() { ++poolCloseCount; });
-      });
+      // Ensure no close events are fired as we are closing the connection specifically
+      db.on('close', function() { dbCloseCount++; });
 
+      var connectionPool = db.serverConfig.connectionPool;
+      var connections = connectionPool.getAllConnections();
+      var keys = Object.keys(connections);
+        
+      // Ensure no close events are fired as we are closing the connection specifically
+      for(var i = 0; i < keys.length; i++) {
+        connections[keys[i]].on("close", function() { test.ok(false); });
+      }
+  
       db.close(function() {
-        // Let all events fire.
-        process.nextTick(function() {
-          test.equal(dbCloseCount, 1);
-          test.equal(connectionCloseCount, 1);
-          test.equal(poolCloseCount, 4);
-          test.done();
-        });
+        // Test done
+        test.equal(1, dbCloseCount);
+        test.done();
       });
     }));
   },  

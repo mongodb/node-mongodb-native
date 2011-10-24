@@ -101,7 +101,6 @@ var tests = testCase({
     automatic_connect_client.pkFactory = client.pkFactory;
   
     automatic_connect_client.open(function(err, automatic_connect_client) {
-      
       // Listener for closing event
       var closeListener = function(has_error) {
         // Remove the listener for the close to avoid loop
@@ -135,14 +134,13 @@ var tests = testCase({
     var serverConfig = new Server("127.0.0.1", 21017, {auto_reconnect: true});
     var error_client = new Db(MONGODB, serverConfig, {native_parser: (process.env['TEST_NATIVE'] != null) ? true : false});
       
-    error_client.on("error", function(err) {});
+    error_client.on("error", function(err) {
+      test.ok(err != null);
+    });
     error_client.on("close", function(connection) {
-      test.ok(typeof connection == typeof serverConfig);
-      test.equal("127.0.0.1", connection.host);
-      test.equal(21017, connection.port);
-      test.equal(true, connection.autoReconnect);
       test.done();
     });
+  
     error_client.open(function(err, error_client) {});
   },
   
