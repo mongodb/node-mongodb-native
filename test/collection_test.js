@@ -221,15 +221,15 @@ var tests = testCase({
     var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
-    error_client.pkFactory = client.pkFactory;
-  
+    error_client.pkFactory = client.pkFactory;  
     test.equal(true, error_client.strict);
+    
     error_client.open(function(err, error_client) {
       error_client.collection('does-not-exist', function(err, collection) {
         test.ok(err instanceof Error);
         test.equal("Collection does-not-exist does not exist. Currently in strict mode.", err.message);
       });
-  
+        
       error_client.createCollection('test_strict_access_collection', function(err, collection) {
         error_client.collection('test_strict_access_collection', function(err, collection) {
           test.ok(collection instanceof Collection);
@@ -627,7 +627,7 @@ var tests = testCase({
       });
     });
   },    
-
+  
   // run this last
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
