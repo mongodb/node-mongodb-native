@@ -80,11 +80,10 @@ var tests = testCase({
           // Execute authentication
           p_client.authenticate(user_name, password, function(err, replies) {
             test.ok(err == null);
-            test.ok(replies);
-  
+                    
             // Kill a connection to force a reconnect
-            p_client.serverConfig.connectionPool.stop();
-
+            p_client.serverConfig.close();
+                  
             p_client.createCollection('shouldCorrectlyReAuthorizeReconnectedConnections', function(err, collection) {
               collection.insert({a:1}, {safe:true}, function(err, r) {
                 collection.insert({a:2}, {safe:true}, function(err, r) {
@@ -137,7 +136,7 @@ var tests = testCase({
       });
     });    
   },
-
+  
   // run this last
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();

@@ -19,6 +19,7 @@ var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
       if(numberOfTestsRun == Object.keys(tests).length) {
+        // console.log("----------------------------------------------------------------------- 0")
         // If first test drop the db
         client.dropDatabase(function(err, done) {
           callback();
@@ -51,6 +52,9 @@ var tests = testCase({
     fs_client.pkFactory = client.pkFactory;
   
     fs_client.open(function(err, fs_client) {
+      // console.log("----------------------------------------------------------------------- 0")
+      // console.dir(err)
+      
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
           collection.insert({'a':1}, {safe:true}, function(err, doc) {
@@ -187,7 +191,7 @@ var tests = testCase({
       });
     });
   },
-
+  
   // run this last
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();

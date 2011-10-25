@@ -103,8 +103,6 @@ var tests = testCase({
     automatic_connect_client.open(function(err, automatic_connect_client) {
       // Listener for closing event
       var closeListener = function(has_error) {
-        // Remove the listener for the close to avoid loop
-        automatic_connect_client.removeListener("close", closeListener);
         // Let's insert a document
         automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
           // Insert another test document and collect using ObjectId
@@ -126,22 +124,6 @@ var tests = testCase({
       automatic_connect_client.on("close", closeListener);
       automatic_connect_client.close();
     });    
-  },
-  
-  // Test that error conditions are handled correctly
-  shouldCorrectlyHandleConnectionErrors : function(test) {
-    // Test error handling for single server connection
-    var serverConfig = new Server("127.0.0.1", 21017, {auto_reconnect: true});
-    var error_client = new Db(MONGODB, serverConfig, {native_parser: (process.env['TEST_NATIVE'] != null) ? true : false});
-      
-    error_client.on("error", function(err) {
-      test.ok(err != null);
-    });
-    error_client.on("close", function(connection) {
-      test.done();
-    });
-  
-    error_client.open(function(err, error_client) {});
   },
   
   shouldCorrectlyExecuteEvalFunctions : function(test) {
