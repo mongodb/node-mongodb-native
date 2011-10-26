@@ -18,7 +18,7 @@ var tests = testCase({
   },
 
   'Should Correctly create a pool instance with the expected values' : function(test) {
-    var connectionPool = new ConnectionPool('localhost', 2000, 1, {timeout:100, noDelay:true});
+    var connectionPool = new ConnectionPool('localhost', 2000, 1, null, {timeout:100, noDelay:true});
     test.equal(100, connectionPool.socketOptions.timeout);
     test.equal(true, connectionPool.socketOptions.noDelay);
     test.equal(null, connectionPool.socketOptions.encoding);
@@ -27,7 +27,7 @@ var tests = testCase({
   },
   
   'Should correctly fail due to no server' : function(test) {
-    var connectionPool = new ConnectionPool('localhost', 2000, 4, {timeout:100, noDelay:true});
+    var connectionPool = new ConnectionPool('localhost', 2000, 4, null, {timeout:100, noDelay:true});
   
     // // Add event handler that will fire once the pool is ready
     connectionPool.on("poolReady", function(err, result) {      

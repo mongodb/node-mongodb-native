@@ -118,7 +118,7 @@ var getPath = function(self, name) {
 // Generate start command
 var generateStartCmd = function(options) {
   // Create boot command
-  var startCmd = "mongod --logpath '" + options['log_path'] + "' " +
+  var startCmd = "mongod --noprealloc --logpath '" + options['log_path'] + "' " +
       " --dbpath " + options['db_path'] + " --port " + options['port'] + " --fork";
   startCmd = options['durable'] ? startCmd + "  --dur" : startCmd;
   startCmd = options['auth'] ? startCmd + "  --auth" : startCmd;
