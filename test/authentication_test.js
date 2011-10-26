@@ -87,8 +87,7 @@ var tests = testCase({
             p_client.createCollection('shouldCorrectlyReAuthorizeReconnectedConnections', function(err, collection) {
               collection.insert({a:1}, {safe:true}, function(err, r) {
                 collection.insert({a:2}, {safe:true}, function(err, r) {
-                  collection.insert({a:3}, {safe:true}, function(err, r) {                    
-                    
+                  collection.insert({a:3}, {safe:true}, function(err, r) {                                        
                     collection.count(function(err, count) {
                       test.equal(3, count);
                       p_client.close();

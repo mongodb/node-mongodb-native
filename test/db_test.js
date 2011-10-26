@@ -103,10 +103,13 @@ var tests = testCase({
     automatic_connect_client.open(function(err, automatic_connect_client) {
       // Listener for closing event
       var closeListener = function(has_error) {
+        // console.log("================================ to")
         // Let's insert a document
         automatic_connect_client.collection('test_object_id_generation.data2', function(err, collection) {
+          // console.log("================================ to :: 1")
           // Insert another test document and collect using ObjectId
           collection.insert({"name":"Patty", "age":34}, {safe:true}, function(err, ids) {
+            // console.log("================================ to :: 2")
             test.equal(1, ids.length);
             test.ok(ids[0]._id.toHexString().length == 24);
   
