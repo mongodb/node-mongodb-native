@@ -186,6 +186,9 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
   this.mongods[n]["log_path"] = getPath(this, "log-" + port);
   this.up = false;
   
+  // Set priority off server in config
+  var priority = typeof fields === 'object' ? fields.priority : null;
+  
   // Add extra fields provided
   for(var name in fields) {
     this.mongods[n][name] = fields[name];
@@ -212,9 +215,15 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
       self.start(n, function() {
         // Add instance to list of members
         var member = {"_id": n, "host": self.host + ":" + self.mongods[n]["port"]};   
+        // Set it to arbiter if it's been passed
         if(self.mongods[n]['arbiterOnly']) {
           member['arbiterOnly'] = true;
         }
+        // Set priority level if it's defined
+        if(priority != null) {
+          member['priority'] = priority;
+        }
+        // Push member to config
         self.config["members"].push(member);
         // Return
         return callback();
@@ -249,6 +258,8 @@ ReplicaSetManager.prototype.kill = function(node, signal, callback) {
 
       self.mongods[node]["up"] = false;
       // Wait for 5 seconds to give the server time to die a proper death
+      // console.log("------------------------------------------ self.killNodeWaitTime :: " + self.killNodeWaitTime)
+      
       setTimeout(callback, self.killNodeWaitTime);
   });  
 }
@@ -448,13 +459,17 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
   connection.open(function(err, connection) {
     // We need to retry if we have not finished up the number of retries
     if(err != null && self.retriedConnects < self.retries) {
-      // Sleep for a second then retry
-      setTimeout(function() {
-        // Update retries
-        self.retriedConnects++;        
-        // Perform anothe reconnect
-        self.getConnection(node, callback);              
-      }, 1000)      
+      process.nextTick(function() {
+        // Close connection to server
+        if(connection != null) connection.close();
+        // Sleep for a second then retry
+        setTimeout(function() {
+          // Update retries
+          self.retriedConnects++;        
+          // Perform anothe reconnect
+          self.getConnection(node, callback);              
+        }, 1000)        
+      })
     } else if(err != null && self.retriedConnects >= self.retries){
       callback(new Error("Failed to reconnect"), null);
     } else {
