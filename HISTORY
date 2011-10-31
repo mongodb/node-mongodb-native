@@ -3,6 +3,10 @@
 * Reworked socket code for simpler clearer handling
 * Added master_not_needed option to replicaset server configuration when connecting to a read only set
 * Correct handling of connections in test helpers
+* Added control of retries on failure
+    * control with parameters retryMiliSeconds and numberOfRetries when creating a db instance
+* Added reaper that will timeout and cleanup queries that never return
+	* control with parameters reaperInterval and reaperTimeout when creating a db instance
 
 0.9.6-22 2011-10-15
 * Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370

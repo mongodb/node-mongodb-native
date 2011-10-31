@@ -239,12 +239,16 @@ ReplicaSetManager.prototype.killAll = function(callback) {
   });  
 }
 
-ReplicaSetManager.prototype.kill = function(node, signal, callback) {
+ReplicaSetManager.prototype.kill = function(node, signal, options, callback) {
   var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 1);
   callback = args.pop();
   signal = args.length ? args.shift() : 2;
+  options = args.length ? args.shift() : {};
+  // kill node wait time
+  var killNodeWaitTime = options.killNodeWaitTime == null ? self.killNodeWaitTime : options.killNodeWaitTime;
+  // console.log("===================================== ReplicaSetManager.prototype.kill ::" + killNodeWaitTime);
 
   debug("** Killing node with pid " + this.mongods[node]["pid"] + " at port " + this.mongods[node]['port']);
   var command = "kill -" + signal + " " + this.mongods[node]["pid"];
@@ -259,22 +263,25 @@ ReplicaSetManager.prototype.kill = function(node, signal, callback) {
 
       self.mongods[node]["up"] = false;
       // Wait for 5 seconds to give the server time to die a proper death
-      setTimeout(callback, self.killNodeWaitTime);
+      setTimeout(callback, killNodeWaitTime);
   });  
 }
 
-ReplicaSetManager.prototype.killPrimary = function(signal, callback) {
+ReplicaSetManager.prototype.killPrimary = function(signal, options, callback) {
   var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
   callback = args.pop();  
   signal = args.length ? args.shift() : 2;
+  options = args.length ? args.shift() : {};
   
   this.getNodeWithState(1, function(err, node) {
+    // console.log("------------------------------------------------------ killPrimary :: 0")
     if(err != null) return callback(err, null);    
 
     // Kill process and return node reference
-    self.kill(node, signal, function() {
+    self.kill(node, signal, options, function() {
+      // console.log("------------------------------------------------------ killPrimary :: 1")
       // Wait for a while before passing back
       callback(null, node);        
     })    
