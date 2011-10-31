@@ -73,6 +73,7 @@ ReplicaSetManager.prototype.allHostPairsWithState = function(state, callback) {
     if(err != null) return callback(err, null);
 
     var members = status["members"];
+
     // Get the correct state memebers
     var nodes = members.filter(function(value) {
       return value["state"] == state;
@@ -258,8 +259,6 @@ ReplicaSetManager.prototype.kill = function(node, signal, callback) {
 
       self.mongods[node]["up"] = false;
       // Wait for 5 seconds to give the server time to die a proper death
-      // console.log("------------------------------------------ self.killNodeWaitTime :: " + self.killNodeWaitTime)
-      
       setTimeout(callback, self.killNodeWaitTime);
   });  
 }
@@ -441,7 +440,7 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
   callback = args.pop();  
   node = args.length ? args.shift() : null;
   
-  if(node == null) {
+  if(node == null) {    
     var keys = Object.keys(this.mongods);
     for(var i = 0; i < keys.length; i++) {
       var key = keys[i];
@@ -452,16 +451,39 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
       }
     }
   }
-    
+
   // Fire up the connection to check if we are running
   // var db = new Db('node-mongo-blog', new Server(host, port, {}), {native_parser:true});
-  var connection = new Db("replicaset_test", new Server(this.host, this.mongods[node]["port"], {}));
-  connection.open(function(err, connection) {
-    // We need to retry if we have not finished up the number of retries
-    if(err != null && self.retriedConnects < self.retries) {
+  // if(this.mongods[node] == null) {
+  //   console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% :: " + node)
+  //   debug(inspect(this.mongods))
+  // }
+  
+  if(this.mongods[node] != null) {
+    var connection = new Db("replicaset_test", new Server(this.host, this.mongods[node]["port"], {}));
+    connection.open(function(err, connection) {
+      // We need to retry if we have not finished up the number of retries
+      if(err != null && self.retriedConnects < self.retries) {
+        process.nextTick(function() {
+          // Close connection to server
+          if(connection != null) connection.close();
+          // Sleep for a second then retry
+          setTimeout(function() {
+            // Update retries
+            self.retriedConnects++;        
+            // Perform anothe reconnect
+            self.getConnection(node, callback);              
+          }, 1000)        
+        })
+      } else if(err != null && self.retriedConnects >= self.retries){
+        callback(new Error("Failed to reconnect"), null);
+      } else {
+        callback(null, connection);
+      }
+    })    
+  } else {
+    if(self.retriedConnects < self.retries) {
       process.nextTick(function() {
-        // Close connection to server
-        if(connection != null) connection.close();
         // Sleep for a second then retry
         setTimeout(function() {
           // Update retries
@@ -470,12 +492,12 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
           self.getConnection(node, callback);              
         }, 1000)        
       })
-    } else if(err != null && self.retriedConnects >= self.retries){
+    } else if(self.retriedConnects >= self.retries){
       callback(new Error("Failed to reconnect"), null);
     } else {
       callback(null, connection);
-    }
-  })
+    }    
+  }
 }
 
 // Fire up the mongodb instance

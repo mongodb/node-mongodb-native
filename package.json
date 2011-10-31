@@ -55,7 +55,7 @@
 , "repository" :    { "type" :  "git"
                     , "url" :   "http://github.com/christkv/node-mongodb-native.git" }
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
-                    , "web" :   "http://github.com/christkv/node-mongodb-native/issues" }
+                    , "url" :   "http://github.com/christkv/node-mongodb-native/issues" }
 , "os" :            [ "linux"
                     , "darwin"
                     , "freebsd" ]
