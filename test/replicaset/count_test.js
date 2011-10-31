@@ -25,6 +25,15 @@ var ensureConnection = function(test, numberOfTries, callback) {
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
   var db = new Db('integration_test_', replSet);
+  // Print any errors
+  db.on("error", function(err) {
+    console.log("============================= ensureConnection caught error")
+    console.dir(err)
+    if(err != null && err.stack != null) console.log(err.stack)
+    db.close();
+  })
+
+  // Open the db
   db.open(function(err, p_db) {
     if(err != null) {
       db.close();
@@ -79,8 +88,19 @@ module.exports = testCase({
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
-      // debug("====================================================== 1")
-      if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
+      // debug("====================================================================================================== 1")
+      // if(err != null) {
+      //   debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 0")
+      //   debug(inspect(p_db.serverConfig.primary))
+      //   debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 1")
+      //   debug(inspect(p_db.serverConfig.secondaries))
+      //   debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 2")
+      //   debug(inspect(p_db.serverConfig.arbiters))
+      //   debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 3")
+      //   debug(inspect(p_db.serverConfig.passives))
+      // }      
+      
+      // if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
       // Drop collection on replicaset
       p_db.dropCollection('testsets', function(err, r) {
         // debug("====================================================== 2")

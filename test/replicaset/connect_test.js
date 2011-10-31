@@ -65,7 +65,6 @@ module.exports = testCase({
   },
   
   tearDown: function(callback) {
-    // callback();                
     RS.restartKilledNodes(function(err, result) {
       callback();                
     })

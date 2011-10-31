@@ -2,6 +2,7 @@
 * Added correct handling of passive servers in replicaset
 * Reworked socket code for simpler clearer handling
 * Added master_not_needed option to replicaset server configuration when connecting to a read only set
+* Correct handling of connections in test helpers
 
 0.9.6-22 2011-10-15
 * Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370
