@@ -352,6 +352,9 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
   self.getConnection(function(err, connection) {
     // If we have an error or no connection object retry
     if(err != null || connection == null) {
+      // if we have a connection force close it
+      if(connection != null) connection.close();
+      // Retry the connection
       setTimeout(function() {
         self.ensureUpRetries++;
         self.ensureUp(callback);
@@ -369,6 +372,8 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
 
       // If no members set
       if(status["members"] == null || err != null) {
+        // if we have a connection force close it
+        if(connection != null) connection.close();
         // Ensure we perform enough retries
         if(self.ensureUpRetries <  self.retries) {
           setTimeout(function() {
@@ -376,6 +381,9 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
             self.ensureUp(callback);
           }, 1000)
         } else {
+          // if we have a connection force close it
+          if(connection != null) connection.close();
+          // Return error
           return callback(new Error("Operation Failure"), null);          
         }                
       } else {
@@ -389,11 +397,15 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
         });
 
         if(healthyMembers.length == status.members.length && stateCheck.length > 0) {
+          // if we have a connection force close it
+          if(connection != null) connection.close();
           // process.stdout.write("all members up! \n\n");  
           if(!self.up) process.stdout.write("all members up!\n\n")
           self.up = true;
           return callback(null, status);
         } else {
+          // if we have a connection force close it
+          if(connection != null) connection.close();
           // Ensure we perform enough retries
           if(self.ensureUpRetries <  self.retries) {
             setTimeout(function() {
