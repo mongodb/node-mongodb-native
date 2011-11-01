@@ -82,7 +82,7 @@ var tests = testCase({
         connections[keys[i]].on("close", function() { test.ok(false); });
       }
 
-      // Force the connection cose
+      // Force the connection close
       db.serverConfig.connectionPool.stop();
       // Test done
       test.equal(1, dbCloseCount);
@@ -108,7 +108,7 @@ var tests = testCase({
   
       db.close(function() {
         // Test done
-        test.equal(0, dbCloseCount);
+        test.equal(1, dbCloseCount);
         test.done();
       });
     }));

@@ -90,6 +90,7 @@ ReplicaSetManager.prototype.allHostPairsWithState = function(state, callback) {
 }
 
 ReplicaSetManager.prototype.startSet = function(killall, callback) {
+  console.log("----------------------------------- START SET")
   var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
@@ -127,11 +128,11 @@ ReplicaSetManager.prototype.startSet = function(killall, callback) {
           self.numberOfInitiateRetries = 0;
           // Initiate
           self.initiate(function(err, result) {
+            console.log("-------------------------------------------------- FFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUCCCCCCCCCK")
             if(err != null) return callback(err, null);
             self.ensureUpRetries = 0;
 
             // Ensure all the members are up
-            // process.stdout.write("** Ensuring members are up...");
             debug("** Ensuring members are up...");
             // Let's ensure everything is up
             self.ensureUp(function(err, result) {
@@ -147,6 +148,7 @@ ReplicaSetManager.prototype.startSet = function(killall, callback) {
 
 ReplicaSetManager.prototype.initiate = function(callback) {
   var self = this;
+  var done = false;
   // Get master connection
   self.getConnection(function(err, connection) {    
     if(err != null) return callback(err, null);   
@@ -165,8 +167,12 @@ ReplicaSetManager.prototype.initiate = function(callback) {
           }, 1000);          
         }
       } else {
-        self.numberOfInitiateRetries = 0;
-        callback(null, null);        
+        // Make sure we only do this once, even if some messages are late
+        if(!done) {
+          done = true;
+          self.numberOfInitiateRetries = 0;
+          callback(null, null);                  
+        }
       }      
     });    
   });
@@ -255,10 +261,10 @@ ReplicaSetManager.prototype.kill = function(node, signal, options, callback) {
   // Kill process
   exec(command,
     function (error, stdout, stderr) {
-      console.log('stdout: ' + stdout);
-      console.log('stderr: ' + stderr);
+      debug('stdout: ' + stdout);
+      debug('stderr: ' + stderr);
       if (error !== null) {
-        console.log('exec error: ' + error);
+        debug('exec error: ' + error);
       }
 
       self.mongods[node]["up"] = false;
@@ -431,25 +437,35 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
 // Restart 
 ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
   var self = this;
+  // console.log("------------------------------------------------------ ReplicaSetManager.prototype.restartKilledNodes :: 0")
 
   var nodes = Object.keys(self.mongods).filter(function(key) {
     return self.mongods[key]["up"] == false;
   });
 
-  Step(
-    // Start all nodes
-    function start() {
-      var group = this.group();
-      // Start all nodes
-      for(var i = 0; i < nodes.length; i++) {
-        self.start(nodes[i], group());
+  // console.log("------------------------------------------------------ ReplicaSetManager.prototype.restartKilledNodes :: 1")
+  // console.dir(nodes)
+
+  var numberOfNodes = nodes.length;
+  if(numberOfNodes == 0) return self.ensureUp(callback);
+  // console.log("------------------------------------------------------ ReplicaSetManager.prototype.restartKilledNodes :: 2 :: " + numberOfNodes)
+  // Restart all the number of nodes
+  for(var i = 0; i < numberOfNodes; i++) {
+    // console.log("------------------------------------------------------ ReplicaSetManager.prototype.restartKilledNodes :: 3")
+    // Start the process
+    self.start(nodes[i], function(err, result) {
+      // Adjust the number of nodes we are starting
+      numberOfNodes = numberOfNodes - 1;
+      
+      // console.log("-------------------------------------------------------------------- restartKilledNodes.start :: " + numberOfNodes)
+      // console.dir(err)
+      // console.dir(result)
+      
+      if(numberOfNodes === 0) {
+        self.ensureUp(callback);
       }
-    },
-    
-    function finished() {
-      self.ensureUp(callback);        
-    }
-  )
+    });
+  }
 }
 
 ReplicaSetManager.prototype.getConnection = function(node, callback) {
@@ -480,10 +496,15 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
   
   if(this.mongods[node] != null) {
     var connection = new Db("replicaset_test", new Server(this.host, this.mongods[node]["port"], {}));
+    connection.on("error", function(err) {
+      console.log("------------------------------------------------------------------------ db error")
+      console.dir(err)
+    });
+
     connection.open(function(err, connection) {
-      // We need to retry if we have not finished up the number of retries
-      if(err != null && self.retriedConnects < self.retries) {
-        process.nextTick(function() {
+      process.nextTick(function() {
+        // We need to retry if we have not finished up the number of retries
+        if(err != null && self.retriedConnects < self.retries) {
           // Close connection to server
           if(connection != null) connection.close();
           // Sleep for a second then retry
@@ -493,12 +514,15 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
             // Perform anothe reconnect
             self.getConnection(node, callback);              
           }, 1000)        
-        })
-      } else if(err != null && self.retriedConnects >= self.retries){
-        callback(new Error("Failed to reconnect"), null);
-      } else {
-        callback(null, connection);
-      }
+        } else if(err != null && self.retriedConnects >= self.retries){
+          // Close connection to server
+          if(connection != null) connection.close();
+          // Return error
+          callback(new Error("Failed to reconnect"), null);
+        } else {
+          callback(null, connection);
+        }
+      });
     })    
   } else {
     if(self.retriedConnects < self.retries) {
@@ -525,21 +549,28 @@ var start = ReplicaSetManager.prototype.start = function(node, callback) {
   // Start up mongod process
   // debug("======================================================================================= starting process")
   // debug(self.mongods[node]["start"])
-  
+
+  // Start up the process
   var mongodb = exec(self.mongods[node]["start"],
     function (error, stdout, stderr) {
-      console.log('stdout: ' + stdout);
-      console.log('stderr: ' + stderr);
+      // debug("======================================================================================= starting process :: 0")
+      debug('stdout: ' + stdout);
+      debug('stderr: ' + stderr);
       if (error !== null) {
-        console.log('exec error: ' + error);
+        debug('exec error: ' + error);
       }
-  });
+      // debug("======================================================================================= starting process :: 1")
+    });
       
+  // debug("======================================================================================= starting process :: 2")
   // Wait for a half a second then save the pids
   setTimeout(function() {
+    // debug("======================================================================================= starting process :: 3")
     // Mark server as running
     self.mongods[node]["up"] = true;
+    // debug("======================================================================================= starting process :: 4")
     self.mongods[node]["pid"]= fs.readFileSync(path.join(self.mongods[node]["db_path"], "mongod.lock"), 'ascii').trim();
+    // debug("======================================================================================= starting process :: 5")
     // Callback
     callback();
   }, 5000);

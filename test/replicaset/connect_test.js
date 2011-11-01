@@ -33,7 +33,6 @@ var ensureConnection = function(test, numberOfTries, callback) {
   
   // Open the db
   db.open(function(err, p_db) {    
-    debug("----------------------------------------- ensureConnection :: " + numberOfTries)
     db.close();
 
     if(err != null) {
@@ -88,7 +87,6 @@ module.exports = testCase({
   },  
   
   shouldEmitCloseNoCallback : function(test) {
-    debug("=========================================== shouldEmitCloseNoCallback")
     // Replica configuration
     var replSet = new ReplSetServers([ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -104,15 +102,13 @@ module.exports = testCase({
       db.close();
   
       setTimeout(function() {
-        debug("=========================================== shouldEmitCloseNoCallback : 1")
         test.equal(dbCloseCount, 1);
         test.done();
-      }, 250);
+      }, 2000);
     })
   },
   
   shouldEmitCloseWithCallback : function(test) {
-    debug("=========================================== shouldEmitCloseWithCallback")
     // Replica configuration
     var replSet = new ReplSetServers([ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -122,16 +118,14 @@ module.exports = testCase({
     );
   
     new Db('integration_test_', replSet).open(function(err, db) {
-      debug("=========================================== shouldEmitCloseWithCallback :: 1")
       test.equal(null, err);
       var dbCloseCount = 0;//, serverCloseCount = 0;
       db.on('close', function() { ++dbCloseCount; });
   
       db.close(function() {
-        debug("=========================================== shouldEmitCloseWithCallback :: 2")
         // Let all events fire.
         process.nextTick(function() {
-          test.equal(dbCloseCount, 1);
+          test.equal(dbCloseCount, 0);
           // test.equal(serverCloseCount, db.serverConfig.servers.length);
           test.done();
         });
@@ -140,7 +134,6 @@ module.exports = testCase({
   },
   
   shouldCorrectlyPassErrorWhenWrongReplicaSet : function(test) {
-    debug("=========================================== shouldCorrectlyPassErrorWhenWrongReplicaSet")
     // Replica configuration
     var replSet = new ReplSetServers([ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -152,14 +145,12 @@ module.exports = testCase({
   
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
-      debug("=========================================== shouldCorrectlyPassErrorWhenWrongReplicaSet : 1")
       test.notEqual(null, err);
       test.done();
     })    
   },  
   
   shouldConnectWithPrimarySteppedDown : function(test) {
-    debug("=========================================== shouldConnectWithPrimarySteppedDown")
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
@@ -170,12 +161,9 @@ module.exports = testCase({
   
     // Step down primary server
     RS.stepDownPrimary(function(err, result) {
-      debug("=========================================== shouldConnectWithPrimarySteppedDown : 1")
       // Wait for new primary to pop up
       ensureConnection(test, retries, function(err, p_db) {
-        debug("=========================================== shouldConnectWithPrimarySteppedDown : 2")
         new Db('integration_test_', replSet).open(function(err, p_db) {    
-          debug("=========================================== shouldConnectWithPrimarySteppedDown : 3")
           test.ok(err == null);
           test.equal(true, p_db.serverConfig.isConnected());
   
@@ -187,13 +175,10 @@ module.exports = testCase({
   },
   
   shouldConnectWithThirdNodeKilled : function(test) {
-    debug("=========================================== shouldConnectWithThirdNodeKilled")
     RS.getNodeFromPort(RS.ports[2], function(err, node) {
-      debug("=========================================== shouldConnectWithThirdNodeKilled :: 1")
       if(err != null) debug("shouldConnectWithThirdNodeKilled :: " + inspect(err));
   
       RS.kill(node, function(err, result) {
-        debug("=========================================== shouldConnectWithThirdNodeKilled :: 2")
         if(err != null) debug("shouldConnectWithThirdNodeKilled :: " + inspect(err));
         // Replica configuration
         var replSet = new ReplSetServers( [ 
@@ -207,7 +192,6 @@ module.exports = testCase({
         // Wait for new primary to pop up
         ensureConnection(test, retries, function(err, p_db) {
           new Db('integration_test_', replSet).open(function(err, p_db) {    
-            debug("=========================================== shouldConnectWithThirdNodeKilled : 3")
             test.ok(err == null);
             test.equal(true, p_db.serverConfig.isConnected());
   
@@ -220,10 +204,7 @@ module.exports = testCase({
   },
   
   shouldConnectWithSecondaryNodeKilled : function(test) {
-    debug("=========================================== shouldConnectWithSecondaryNodeKilled")
     RS.killSecondary(function(node) {
-      debug("=========================================== shouldConnectWithSecondaryNodeKilled : 1")
-      // debug("------------------------------------------------------------------- killed secondary")
       
       // Replica configuration
       var replSet = new ReplSetServers( [ 
@@ -244,15 +225,8 @@ module.exports = testCase({
       })
   
       db.open(function(err, p_db) {
-        debug("=========================================== shouldConnectWithSecondaryNodeKilled : 2")
-        // // debug("-------------------------------------------------------- shouldConnectWithSecondaryNodeKilled :: 0")        
-        // 
-        // if(err != null) debug("shouldConnectWithSecondaryNodeKilled :: " + inspect(err));
         test.ok(err == null);
         test.equal(true, p_db.serverConfig.isConnected());
-  
-        // throw "error"
-        // db.fuck();
   
         // Close and cleanup
         p_db.close();        
@@ -262,7 +236,6 @@ module.exports = testCase({
   },
   
   shouldConnectWithPrimaryNodeKilled : function(test) {
-    // debug("=========================================== shouldConnectWithPrimaryNodeKilled")
     RS.killPrimary(function(node) {
       // Replica configuration
       var replSet = new ReplSetServers( [ 
@@ -275,14 +248,7 @@ module.exports = testCase({
           
       var db = new Db('integration_test_', replSet);
       ensureConnection(test, retries, function(err, p_db) {
-        // if(err != null) debug("shouldConnectWithPrimaryNodeKilled :: " + inspect(err));
-        // test.ok(err == null);
-        // test.equal(true, p_db.serverConfig.isConnected());
-        console.log("================================================================================== finishing up")
-        console.dir(err)
         if(err != null && err.stack != null) console.log(err.stack)
-        console.dir(p_db)
-      
         // p_db.close();
         test.done();          
       });
@@ -290,7 +256,6 @@ module.exports = testCase({
   },
   
   shouldCorrectlyBeAbleToUsePortAccessors : function(test) {
-    // debug("=========================================== shouldCorrectlyBeAbleToUsePortAccessors")
     // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -312,7 +277,6 @@ module.exports = testCase({
   },
     
   shouldCorrectlyConnect: function(test) {
-    // debug("=========================================== shouldCorrectlyConnect")
     // Replica configuration
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
