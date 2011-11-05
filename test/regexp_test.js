@@ -43,21 +43,21 @@ var tests = testCase({
     }      
   },
   
-  // shouldCorrectlyInsertSimpleRegExpDocument : function(test) {
-  //   var regexp = /foobar/i;
-  // 
-  //   client.createCollection('test_regex', function(err, collection) {
-  //     collection.insert({'b':regexp}, {safe:true}, function(err, ids) {
-  //       collection.find({}, {'fields': ['b']}, function(err, cursor) {
-  //         cursor.toArray(function(err, items) {
-  //           test.equal(("" + regexp), ("" + items[0].b));
-  //           // Let's close the db
-  //           test.done();
-  //         });
-  //       });
-  //     });
-  //   });
-  // },
+  shouldCorrectlyInsertSimpleRegExpDocument : function(test) {
+    var regexp = /foobar/i;
+  
+    client.createCollection('test_regex', function(err, collection) {
+      collection.insert({'b':regexp}, {safe:true}, function(err, ids) {
+        collection.find({}, {'fields': ['b']}, function(err, cursor) {
+          cursor.toArray(function(err, items) {
+            test.equal(("" + regexp), ("" + items[0].b));
+            // Let's close the db
+            test.done();
+          });
+        });
+      });
+    });
+  },
   
   shouldCorrectlyInsertSimpleUTF8Regexp : function(test) {
     var regexp = /foobaré/;

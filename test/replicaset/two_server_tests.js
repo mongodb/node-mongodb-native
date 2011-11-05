@@ -75,7 +75,7 @@ module.exports = testCase({
     var replSet = new ReplSetServers( [ 
         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+        // new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
       ], 
       {rs_name:RS.name, read_secondary:false}
     );
@@ -94,7 +94,6 @@ module.exports = testCase({
           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
           // Insert a dummy document
           collection.insert({a:20}, {safe: {w:1, wtimeout: 10000}}, function(err, r) {            
-            
             // Execute a findAndModify
             collection.findAndModify({'a':20}, [['a', 1]], {'$set':{'b':3}}, {'new':true, safe: {w:7, wtimeout: 10000}}, function(err, updated_doc) {
               test.equal('timeout', err.err)

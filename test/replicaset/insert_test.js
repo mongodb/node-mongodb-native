@@ -50,44 +50,26 @@ var ensureConnection = function(test, numberOfTries, callback) {
   })            
 }
 
-
 module.exports = testCase({
   setUp: function(callback) {
-    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-    // 
-    // RS = new ReplicaSetManager({retries:120, passive_count:1, arbiter_count:1});
-    // RS.startSet(true, function(err, result) {      
-    //   callback();      
-    // });      
-    // 
     // Create instance of replicaset manager but only for the first call
-    if(!serversUp) {
+    if(!serversUp && !noReplicasetStart) {
       serversUp = true;
       RS = new ReplicaSetManager({retries:120, passive_count:1, arbiter_count:1});
       RS.startSet(true, function(err, result) {      
         callback();      
       });      
     } else {
-      // setTimeout(function() {
-        console.log("######################################################################################### 0")
-        RS.restartKilledNodes(function(err, result) {
-          console.log("######################################################################################### 1")
-          callback();        
-        })        
-      // }, 10000)
+      RS.restartKilledNodes(function(err, result) {
+        callback();        
+      })        
     }
   },
   
   tearDown: function(callback) {
-    // RS.killAll(function() {
-      callback();
-    // })
-    // callback();
-    // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 0")
-    // RS.restartKilledNodes(function(err, result) {
-    //   console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 1")
-    //   callback();                
-    // })      
+    RS.restartKilledNodes(function(err, result) {
+      callback();                
+    });
   },
 
   shouldCorrectlyWaitForReplicationToServersOnInserts : function(test) {

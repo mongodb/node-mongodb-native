@@ -1,3 +1,5 @@
+var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
+
 var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug
   inspect = require('util').inspect,
@@ -50,7 +52,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 module.exports = testCase({
   setUp: function(callback) {
     // Create instance of replicaset manager but only for the first call
-    if(!serversUp) {
+    if(!serversUp && !noReplicasetStart) {
       serversUp = true;
       RS = new ReplicaSetManager({retries:120, passive_count:0});
       RS.startSet(true, function(err, result) {      
@@ -66,7 +68,7 @@ module.exports = testCase({
   tearDown: function(callback) {
     RS.restartKilledNodes(function(err, result) {
       callback();                
-    })
+    });
   },
 
   shouldCorrectlyConnectWithDefaultReplicaset : function(test) {

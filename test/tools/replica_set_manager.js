@@ -90,7 +90,6 @@ ReplicaSetManager.prototype.allHostPairsWithState = function(state, callback) {
 }
 
 ReplicaSetManager.prototype.startSet = function(killall, callback) {
-  console.log("----------------------------------- START SET")
   var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
@@ -128,7 +127,6 @@ ReplicaSetManager.prototype.startSet = function(killall, callback) {
           self.numberOfInitiateRetries = 0;
           // Initiate
           self.initiate(function(err, result) {
-            console.log("-------------------------------------------------- FFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUCCCCCCCCCK")
             if(err != null) return callback(err, null);
             self.ensureUpRetries = 0;
 

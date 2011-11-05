@@ -69,9 +69,8 @@ module.exports = testCase({
   
   tearDown: function(callback) {
     RS.restartKilledNodes(function(err, result) {
-      if(err != null) throw err;
-      callback();        
-    })
+      callback();                
+    });
   },
 
   shouldRetrieveCorrectCountAfterInsertionReconnect : function(test) {
@@ -88,37 +87,21 @@ module.exports = testCase({
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
-      // debug("====================================================================================================== 1")
-      // if(err != null) {
-      //   debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 0")
-      //   debug(inspect(p_db.serverConfig.primary))
-      //   debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 1")
-      //   debug(inspect(p_db.serverConfig.secondaries))
-      //   debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 2")
-      //   debug(inspect(p_db.serverConfig.arbiters))
-      //   debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 3")
-      //   debug(inspect(p_db.serverConfig.passives))
-      // }      
-      
       // if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
       // Drop collection on replicaset
       p_db.dropCollection('testsets', function(err, r) {
-        // debug("====================================================== 2")
         if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
         // Recreate collection on replicaset
         p_db.createCollection('testsets', function(err, collection) {
-          // debug("====================================================== 3")
           if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
           
           // Insert a dummy document
           collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-            // debug("====================================================== 4")
             if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
             
             // Execute a count
             collection.count(function(err, c) {
-              // debug("====================================================== 5")
               if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
               test.equal(1, c);
@@ -129,32 +112,26 @@ module.exports = testCase({
               setTimeout(function() {
                 // Kill the primary
                 RS.killPrimary(function(node) {
-                  // debug("====================================================== 6")
 
                   // Ensure valid connection
                   // Do inserts
                   ensureConnection(test, retries, function(err, p_db) {
-                    // debug("====================================================== 7")
                     if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
                     test.ok(err == null);
                     test.equal(true, p_db.serverConfig.isConnected());
 
                     p_db.collection('testsets', function(err, collection) {
-                      // debug("====================================================== 8")
                       if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
                       collection.insert({a:30}, {safe:true}, function(err, r) {  
-                        // debug("====================================================== 9")
                         if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
                         collection.insert({a:40}, {safe:true}, function(err, r) {
-                          // debug("====================================================== 10")
                           if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
                           // Execute count
                           collection.count(function(err, c) {
-                            // debug("====================================================== 11")
                             if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
                             test.equal(3, c);
