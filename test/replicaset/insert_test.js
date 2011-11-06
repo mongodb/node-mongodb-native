@@ -97,8 +97,9 @@ module.exports = testCase({
           if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
           // Insert a dummy document
           collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {            
-            test.equal(null, err);
+            test.equal(null, err);            
             test.done();
+            p_db.close();
           });
         });
       });
@@ -133,6 +134,7 @@ module.exports = testCase({
             test.equal('timeout', err.err);
             test.equal(true, err.wtimeout);
             test.done();
+            p_db.close();
           });
         });
       });
@@ -168,6 +170,7 @@ module.exports = testCase({
               test.equal(20, result.a);
               test.equal(3, result.b);
               test.done();
+              p_db.close();
             })
           });
         });
@@ -349,16 +352,19 @@ module.exports = testCase({
               setTimeout(function() {
                 // Kill the primary
                 RS.killPrimary(function(node) {
+                  // console.log("----------------------------------------------------------------------- ::0")
   
                   // Ensure valid connection
                   // Do inserts
                   ensureConnection(test, retries, function(err, p_db) {
+                    // console.log("----------------------------------------------------------------------- ::1")
                     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
   
                     test.ok(err == null);
                     test.equal(true, p_db.serverConfig.isConnected());
   
                     p_db.collection('testsets', function(err, collection) {
+                      // console.log("----------------------------------------------------------------------- ::2")
                       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
   
                       // Execute a set of inserts
@@ -373,32 +379,32 @@ module.exports = testCase({
                         },
   
                         function finishUp(err, values) {   
+                          // console.log("----------------------------------------------------------------------- ::3")
                           // setTimeout(function() {
-                            // Restart the old master and wait for the sync to happen
-                            RS.restartKilledNodes(function(err, result) {
-                              if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                              test.done();                     
-                            // })                            
-                          // }, 30000)
-                            
-                            if(err != null) throw err;
+                          // Restart the old master and wait for the sync to happen
+                          RS.restartKilledNodes(function(err, result) {
+                            // console.log("----------------------------------------------------------------------- ::4")
+                            if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));                            
                             // Contains the results
                             var results = [];
-                            
+                          
                             // Just wait for the results
                             setTimeout(function() {
-                            
+                              // console.log("----------------------------------------------------------------------- 0")
+                          
                               // Ensure the connection
                               ensureConnection(test, retries, function(err, p_db) {
+                                // console.log("----------------------------------------------------------------------- 1")
                                 if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                            
+                          
                                 // Get the collection
                                 p_db.collection('testsets', function(err, collection) {
+                                  // console.log("----------------------------------------------------------------------- 2")
                                   if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                            
+                          
                                   collection.find().each(function(err, item) {
                                     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                            
+                          
                                     if(item == null) {
                                       // Ensure we have the correct values
                                       test.equal(6, results.length);
@@ -407,23 +413,23 @@ module.exports = testCase({
                                           return element.a == a;
                                         }).length);
                                       });                                    
-                            
+                          
                                       // Run second check
                                       collection.save({a:80}, {safe:true}, function(err, r) {
                                         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                            
+                          
                                         collection.find().toArray(function(err, items) {
                                           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                            
+                          
                                           // Ensure we have the correct values
                                           test.equal(7, items.length);
-                            
+                          
                                           [20, 30, 40, 50, 60, 70, 80].forEach(function(a) {
                                             test.equal(1, items.filter(function(element) {
                                               return element.a == a;
                                             }).length);
                                           });                                                                              
-                            
+                          
                                           p_db.close();
                                           test.done();                                                    
                                         });
@@ -434,7 +440,7 @@ module.exports = testCase({
                                   });
                                 });
                               });                            
-                            }, 1000);                          
+                            }, 5000);                          
                           })
                         }                      
                       );

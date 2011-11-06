@@ -278,44 +278,68 @@ ReplicaSetManager.prototype.killPrimary = function(signal, options, callback) {
   callback = args.pop();  
   signal = args.length ? args.shift() : 2;
   options = args.length ? args.shift() : {};
+  var done = false;
   
   this.getNodeWithState(1, function(err, node) {
-    // console.log("------------------------------------------------------ killPrimary :: 0")
-    if(err != null) return callback(err, null);    
+    if(!done) {
+      // Ensure no double callbacks due to later scheduled connections returning
+      done = true;    
+      // console.log("------------------------------------------------------ killPrimary :: 0")
+      if(err != null) return callback(err, null);    
 
-    // Kill process and return node reference
-    self.kill(node, signal, options, function() {
-      // console.log("------------------------------------------------------ killPrimary :: 1")
-      // Wait for a while before passing back
-      callback(null, node);        
-    })    
+      // Kill process and return node reference
+      self.kill(node, signal, options, function() {
+        // console.log("------------------------------------------------------ killPrimary :: 1")
+        // Wait for a while before passing back
+        callback(null, node);        
+      })    
+    }
   });
 }
 
 ReplicaSetManager.prototype.killSecondary = function(callback) {
   var self = this;
+  var done = false;
   
   this.getNodeWithState(2, function(err, node) {
-    if(err != null) return callback(err, null);
-    // Kill process and return node reference
-    self.kill(node, function() {
-      callback(null, node);
-    })    
+    if(!done) {
+      // Ensure no double callbacks due to later scheduled connections returning
+      done = true;    
+      if(err != null) return callback(err, null);
+      // Kill process and return node reference
+      self.kill(node, function() {
+        callback(null, node);
+      })
+    }    
   });  
 }
 
 ReplicaSetManager.prototype.stepDownPrimary = function(callback) {
   var self = this;
+  var done = false;
+  var done2 = false;
 
   this.getNodeWithState(1, function(err, primary) {
-    self.getConnection(primary, function(err, connection) {
-      if(err) return callback(err, null);
+    console.log("+++++++++++++++++++++++++++++++++++++++ ReplicaSetManager.prototype.stepDownPrimary :: 0")
+    if(!done) {
+      // Ensure no double callbacks due to later scheduled connections returning
+      done = true;
+      // Execute get connection
+      self.getConnection(primary, function(err, connection) {      
+        console.log("+++++++++++++++++++++++++++++++++++++++ ReplicaSetManager.prototype.stepDownPrimary :: 1 :: " + done)
+        console.log("+++++++++++++++++++++++++++++++++++++++ ReplicaSetManager.prototype.stepDownPrimary :: 2 :: " + done2)
+        if(!done2) {
+          done2 = true;
+          // Return error
+          if(err && !done) return callback(err, null);
 
-      // Closes the connection so never gets a response
-      connection.admin().command({"replSetStepDown": 90});
-      // Call back
-      return callback(null, null);
-    });
+          // Closes the connection so never gets a response
+          connection.admin().command({"replSetStepDown": 90});
+          // Call back
+          return callback(null, null);                  
+        }
+      });      
+    }
   });
 }
 
@@ -485,13 +509,6 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
     }
   }
 
-  // Fire up the connection to check if we are running
-  // var db = new Db('node-mongo-blog', new Server(host, port, {}), {native_parser:true});
-  // if(this.mongods[node] == null) {
-  //   console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% :: " + node)
-  //   debug(inspect(this.mongods))
-  // }
-  
   if(this.mongods[node] != null) {
     var connection = new Db("replicaset_test", new Server(this.host, this.mongods[node]["port"], {}));
     connection.on("error", function(err) {
