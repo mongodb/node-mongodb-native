@@ -34,6 +34,9 @@ ServerManager.prototype.start = function(killall, callback) {
   // Create start command
   var startCmd = generateStartCmd({log_path: self.log_path, 
     db_path: self.db_path, port: self.port, durable: self.durable, auth:self.auth});
+    
+  // console.log("----------------------------------------------------------------------- start")
+  // console.log(startCmd)
   
   exec(killall ? 'killall mongod' : '', function(err, stdout, stderr) {
     if(self.purgedirectories) {

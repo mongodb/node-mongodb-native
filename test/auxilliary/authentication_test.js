@@ -143,7 +143,6 @@ var tests = testCase({
         db1.collection('stuff', function(err, collection) {
           
           collection.find().toArray(function(err, items) {
-            test.done();
             test.ok(err == null);
             test.equal(1, items.length);
             
@@ -174,8 +173,7 @@ var tests = testCase({
       },
       
       function logoutDb2(err, result) {
-        test.ok(err != null);
-      
+        test.ok(err != null);      
         db2.logout(this);
       },
       
@@ -185,6 +183,10 @@ var tests = testCase({
           collection.insert({a:2}, {safe:true}, function(err, result) {
             test.ok(err != null);
             test.done();
+            // Close all connections
+            db1.close();
+            db2.close();
+            admin.close();
           });
         });                      
       }
