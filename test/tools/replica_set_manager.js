@@ -35,19 +35,8 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
     throw new Error("Cannot create a replica set with #{node_count} nodes. 7 is the max.");
   }
   
+  // Keeps all the mongod instances
   this.mongods = {};
-  var self = this;
-  
-  // Add a handler for errors that bubble up all the way
-  // process.on('uncaughtException', function (err) {
-  //   debug("============================================================= uncaught Exception")
-  //   debug(inspect(err))
-  //   // Kill all mongod servers and cleanup before exiting
-  //   self.killAll(function() {
-  //     // Force exit
-  //     process.exit();
-  //   })  
-  // });  
 }
 
 ReplicaSetManager.prototype.secondaries = function(callback) {
@@ -199,23 +188,13 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
     this.mongods[n][name] = fields[name];
   }
   
-  // debug("================================================== initNode")
-  // debug(inspect(this.mongods[n]));
-  
   // Perform cleanup of directories
   exec("rm -rf " + self.mongods[n]["db_path"], function(err, stdout, stderr) {
-    // debug("======================================== err1::" + err)
-    
     if(err != null) return callback(err, null);
     
     // Create directory
     exec("mkdir -p " + self.mongods[n]["db_path"], function(err, stdout, stderr) {
-      // debug("======================================== err2::" + err)
-
       if(err != null) return callback(err, null);
-
-      // debug("= ======================================= start1::" + self.mongods[n]["start"])
-
       self.mongods[n]["start"] = self.startCmd(n);
       self.start(n, function() {
         // Add instance to list of members
@@ -252,7 +231,6 @@ ReplicaSetManager.prototype.kill = function(node, signal, options, callback) {
   options = args.length ? args.shift() : {};
   // kill node wait time
   var killNodeWaitTime = options.killNodeWaitTime == null ? self.killNodeWaitTime : options.killNodeWaitTime;
-  // console.log("===================================== ReplicaSetManager.prototype.kill ::" + killNodeWaitTime);
 
   debug("** Killing node with pid " + this.mongods[node]["pid"] + " at port " + this.mongods[node]['port']);
   var command = "kill -" + signal + " " + this.mongods[node]["pid"];
@@ -284,12 +262,10 @@ ReplicaSetManager.prototype.killPrimary = function(signal, options, callback) {
     if(!done) {
       // Ensure no double callbacks due to later scheduled connections returning
       done = true;    
-      // console.log("------------------------------------------------------ killPrimary :: 0")
       if(err != null) return callback(err, null);    
 
       // Kill process and return node reference
       self.kill(node, signal, options, function() {
-        // console.log("------------------------------------------------------ killPrimary :: 1")
         // Wait for a while before passing back
         callback(null, node);        
       })    
@@ -316,30 +292,20 @@ ReplicaSetManager.prototype.killSecondary = function(callback) {
 
 ReplicaSetManager.prototype.stepDownPrimary = function(callback) {
   var self = this;
-  var done = false;
-  var done2 = false;
-
+  // Get the primary node
   this.getNodeWithState(1, function(err, primary) {
-    console.log("+++++++++++++++++++++++++++++++++++++++ ReplicaSetManager.prototype.stepDownPrimary :: 0")
-    if(!done) {
-      // Ensure no double callbacks due to later scheduled connections returning
-      done = true;
-      // Execute get connection
-      self.getConnection(primary, function(err, connection) {      
-        console.log("+++++++++++++++++++++++++++++++++++++++ ReplicaSetManager.prototype.stepDownPrimary :: 1 :: " + done)
-        console.log("+++++++++++++++++++++++++++++++++++++++ ReplicaSetManager.prototype.stepDownPrimary :: 2 :: " + done2)
-        if(!done2) {
-          done2 = true;
-          // Return error
-          if(err && !done) return callback(err, null);
-
-          // Closes the connection so never gets a response
-          connection.admin().command({"replSetStepDown": 90});
-          // Call back
-          return callback(null, null);                  
-        }
-      });      
-    }
+    // Return error
+    if(err) return callback(err, null);
+    if(primary == null) return callback(new Error("No primary found"), null);
+    // Get the connection for the primary
+    self.getConnection(primary, function(err, connection) {
+      // Return any errors
+      if(err) return callback(err, null);
+      // Execute stepdown process
+      connection.admin().command({"replSetStepDown": 90});
+      // Return the callback
+      return callback(null, connection);
+    });
   });
 }
 
@@ -377,111 +343,189 @@ ReplicaSetManager.prototype.getNodeWithState = function(state, callback) {
 
 ReplicaSetManager.prototype.ensureUp = function(callback) {
   var self = this;
+  var numberOfInitiateRetries = this.retries;
+  var done = false;
   
-  // Write out the ensureUp
-  // process.stdout.write(".");  
-  if(!self.up) process.stdout.write(".");
-  // Retry check for server up sleeping inbetween
-  self.retriedConnects = 0;
-  // Attemp to retrieve a connection
-  self.getConnection(function(err, connection) {
-    // If we have an error or no connection object retry
-    if(err != null || connection == null) {
-      // if we have a connection force close it
-      if(connection != null) connection.close();
-      // Retry the connection
-      setTimeout(function() {
-        self.ensureUpRetries++;
-        self.ensureUp(callback);
-      }, 1000)
-      // Return
-      return;      
+  // Actual function doing testing
+  var ensureUpFunction = function() {
+    if(!done) {
+      if(!self.up) process.stdout.write(".");
+      // Attemp to retrieve a connection
+      self.getConnection(function(err, connection) {
+        // Adjust the number of retries
+        numberOfInitiateRetries = numberOfInitiateRetries - 1
+        // If have no more retries stop
+        if(numberOfInitiateRetries == 0) {
+          // Set that we are done
+          done = true;
+          // perform callback
+          return callback(new Er=ror("Servers did not come up again"), null);
+        }
+
+        // We have a connection, execute command and update server object
+        if(err == null && connection != null) {
+          // Check repl set get status
+          connection.admin().command({"replSetGetStatus": 1}, function(err, object) {
+            /// Get documents
+            var documents = object.documents;
+            // Get status object
+            var status = documents[0];
+
+            // If no members set
+            if(status["members"] == null || err != null) {
+              // if we have a connection force close it
+              if(connection != null) connection.close();
+              // Ensure we perform enough retries
+              if(self.ensureUpRetries >=  self.retries) {
+                // Set that we are done
+                done = true;
+                // if we have a connection force close it
+                if(connection != null) connection.close();
+                // Return error
+                return callback(new Error("Operation Failure"), null);          
+              } else {
+                // Execute function again
+                setTimeout(ensureUpFunction, 1000);
+              }              
+            } else {
+              // Establish all health member
+              var healthyMembers = status.members.filter(function(element) {
+                return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1             
+              });
+
+              var stateCheck = status["members"].filter(function(element, indexOf, array) {
+                return element["state"] == 1;
+              });
+
+              if(healthyMembers.length == status.members.length && stateCheck.length > 0) {
+                // Set that we are done
+                done = true;
+                // if we have a connection force close it
+                if(connection != null) connection.close();
+                // process.stdout.write("all members up! \n\n");  
+                if(!self.up) process.stdout.write("all members up!\n\n")
+                self.up = true;
+                return callback(null, status);
+              } else {
+                // if we have a connection force close it
+                if(connection != null) connection.close();
+                // Ensure we perform enough retries
+                if(self.ensureUpRetries >=  self.retries) {
+                  // Set that we are done
+                  done = true;
+                  // if we have a connection force close it
+                  if(connection != null) connection.close();
+                  // Return error
+                  return callback(new Error("Operation Failure"), null);          
+                } else {
+                  // Execute function again
+                  setTimeout(ensureUpFunction, 1000);                  
+                }    
+              }        
+            }
+          });
+        }
+      });      
     }
-    
-    // Check repl set get status
-    connection.admin().command({"replSetGetStatus": 1}, function(err, object) {
-      /// Get documents
-      var documents = object.documents;
-      // Get status object
-      var status = documents[0];
+  }
 
-      // If no members set
-      if(status["members"] == null || err != null) {
-        // if we have a connection force close it
-        if(connection != null) connection.close();
-        // Ensure we perform enough retries
-        if(self.ensureUpRetries <  self.retries) {
-          setTimeout(function() {
-            self.ensureUpRetries++;
-            self.ensureUp(callback);
-          }, 1000)
-        } else {
-          // if we have a connection force close it
-          if(connection != null) connection.close();
-          // Return error
-          return callback(new Error("Operation Failure"), null);          
-        }                
-      } else {
-        // Establish all health member
-        var healthyMembers = status.members.filter(function(element) {
-          return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1             
-        });
-        
-        var stateCheck = status["members"].filter(function(element, indexOf, array) {
-          return element["state"] == 1;
-        });
-
-        if(healthyMembers.length == status.members.length && stateCheck.length > 0) {
-          // if we have a connection force close it
-          if(connection != null) connection.close();
-          // process.stdout.write("all members up! \n\n");  
-          if(!self.up) process.stdout.write("all members up!\n\n")
-          self.up = true;
-          return callback(null, status);
-        } else {
-          // if we have a connection force close it
-          if(connection != null) connection.close();
-          // Ensure we perform enough retries
-          if(self.ensureUpRetries <  self.retries) {
-            setTimeout(function() {
-              self.ensureUpRetries++;
-              self.ensureUp(callback);
-            }, 1000)
-          } else {
-            return callback(new Error("Operation Failure"), null);          
-          }        
-        }        
-      }      
-    });
-  });
+  // Execute the first function call
+  ensureUpFunction();  
+  // // Write out the ensureUp
+  // // process.stdout.write(".");  
+  // if(!self.up) process.stdout.write(".");
+  // // Retry check for server up sleeping inbetween
+  // self.retriedConnects = 0;
+  // // Attemp to retrieve a connection
+  // self.getConnection(function(err, connection) {
+  //   // If we have an error or no connection object retry
+  //   if(err != null || connection == null) {
+  //     // if we have a connection force close it
+  //     if(connection != null) connection.close();
+  //     // Retry the connection
+  //     setTimeout(function() {
+  //       self.ensureUpRetries++;
+  //       self.ensureUp(callback);
+  //     }, 1000)
+  //     // Return
+  //     return;      
+  //   }
+  //   
+  //   // Check repl set get status
+  //   connection.admin().command({"replSetGetStatus": 1}, function(err, object) {
+  //     /// Get documents
+  //     var documents = object.documents;
+  //     // Get status object
+  //     var status = documents[0];
+  // 
+  //     // If no members set
+  //     if(status["members"] == null || err != null) {
+  //       // if we have a connection force close it
+  //       if(connection != null) connection.close();
+  //       // Ensure we perform enough retries
+  //       if(self.ensureUpRetries <  self.retries) {
+  //         setTimeout(function() {
+  //           self.ensureUpRetries++;
+  //           self.ensureUp(callback);
+  //         }, 1000)
+  //       } else {
+  //         // if we have a connection force close it
+  //         if(connection != null) connection.close();
+  //         // Return error
+  //         return callback(new Error("Operation Failure"), null);          
+  //       }                
+  //     } else {
+  //       // Establish all health member
+  //       var healthyMembers = status.members.filter(function(element) {
+  //         return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1             
+  //       });
+  //       
+  //       var stateCheck = status["members"].filter(function(element, indexOf, array) {
+  //         return element["state"] == 1;
+  //       });
+  // 
+  //       if(healthyMembers.length == status.members.length && stateCheck.length > 0) {
+  //         // if we have a connection force close it
+  //         if(connection != null) connection.close();
+  //         // process.stdout.write("all members up! \n\n");  
+  //         if(!self.up) process.stdout.write("all members up!\n\n")
+  //         self.up = true;
+  //         return callback(null, status);
+  //       } else {
+  //         // if we have a connection force close it
+  //         if(connection != null) connection.close();
+  //         // Ensure we perform enough retries
+  //         if(self.ensureUpRetries <  self.retries) {
+  //           setTimeout(function() {
+  //             self.ensureUpRetries++;
+  //             self.ensureUp(callback);
+  //           }, 1000)
+  //         } else {
+  //           return callback(new Error("Operation Failure"), null);          
+  //         }        
+  //       }        
+  //     }      
+  //   });
+  // });
 }
 
 // Restart 
 ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
   var self = this;
-  // console.log("------------------------------------------------------ ReplicaSetManager.prototype.restartKilledNodes :: 0")
 
   var nodes = Object.keys(self.mongods).filter(function(key) {
     return self.mongods[key]["up"] == false;
   });
 
-  // console.log("------------------------------------------------------ ReplicaSetManager.prototype.restartKilledNodes :: 1")
-  // console.dir(nodes)
-
   var numberOfNodes = nodes.length;
   if(numberOfNodes == 0) return self.ensureUp(callback);
-  // console.log("------------------------------------------------------ ReplicaSetManager.prototype.restartKilledNodes :: 2 :: " + numberOfNodes)
+
   // Restart all the number of nodes
   for(var i = 0; i < numberOfNodes; i++) {
-    // console.log("------------------------------------------------------ ReplicaSetManager.prototype.restartKilledNodes :: 3")
     // Start the process
     self.start(nodes[i], function(err, result) {
       // Adjust the number of nodes we are starting
       numberOfNodes = numberOfNodes - 1;
-      
-      // console.log("-------------------------------------------------------------------- restartKilledNodes.start :: " + numberOfNodes)
-      // console.dir(err)
-      // console.dir(result)
       
       if(numberOfNodes === 0) {
         self.ensureUp(callback);
@@ -492,6 +536,10 @@ ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
 
 ReplicaSetManager.prototype.getConnection = function(node, callback) {
   var self = this;
+  // Function done
+  var done = false;
+  // Number of retries
+  var numberOfRetries = self.retries;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
   callback = args.pop();  
@@ -508,84 +556,60 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
       }
     }
   }
-
-  if(this.mongods[node] != null) {
-    var connection = new Db("replicaset_test", new Server(this.host, this.mongods[node]["port"], {}));
-    connection.on("error", function(err) {
-      console.log("------------------------------------------------------------------------ db error")
-      console.dir(err)
-    });
-
-    connection.open(function(err, connection) {
-      process.nextTick(function() {
-        // We need to retry if we have not finished up the number of retries
-        if(err != null && self.retriedConnects < self.retries) {
-          // Close connection to server
+  
+  // Get the node
+  if(self.mongods[node] != null) {
+    var intervalId = setInterval(function() {
+      var connection = new Db("replicaset_test", new Server(self.host, self.mongods[node]["port"], {}));
+      connection.open(function(err, db) {
+        if(err == null && !done) {
+          // Set done
+          done = true;
+          // Clear interval
+          clearInterval(intervalId);
+          // Callback as done
+          return callback(null, connection);
+        } else {          
+          // Close the connection
           if(connection != null) connection.close();
-          // Sleep for a second then retry
-          setTimeout(function() {
-            // Update retries
-            self.retriedConnects++;        
-            // Perform anothe reconnect
-            self.getConnection(node, callback);              
-          }, 1000)        
-        } else if(err != null && self.retriedConnects >= self.retries){
-          // Close connection to server
-          if(connection != null) connection.close();
-          // Return error
-          callback(new Error("Failed to reconnect"), null);
-        } else {
-          callback(null, connection);
+          // Adjust the number of retries
+          numberOfRetries = numberOfRetries - 1;            
+          // If we have no more retries fail
+          if(numberOfRetries == 0) {
+            // Set done
+            done = true;
+            // Clear interval
+            clearInterval(intervalId);
+            // Callback as done
+            return callback(new Error("Timed out connecting to primary"), null);              
+          }
         }
-      });
-    })    
+      });        
+    }, 1000);
   } else {
-    if(self.retriedConnects < self.retries) {
-      process.nextTick(function() {
-        // Sleep for a second then retry
-        setTimeout(function() {
-          // Update retries
-          self.retriedConnects++;        
-          // Perform anothe reconnect
-          self.getConnection(node, callback);              
-        }, 1000)        
-      })
-    } else if(self.retriedConnects >= self.retries){
-      callback(new Error("Failed to reconnect"), null);
-    } else {
-      callback(null, connection);
-    }    
+    callback(new Error("no primary node found to do stepDownPrimary"), null);
   }
 }
 
 // Fire up the mongodb instance
 var start = ReplicaSetManager.prototype.start = function(node, callback) {
   var self = this;
-  // Start up mongod process
-  // debug("======================================================================================= starting process")
-  // debug(self.mongods[node]["start"])
 
-  // Start up the process
+  // Start up mongod process
   var mongodb = exec(self.mongods[node]["start"],
     function (error, stdout, stderr) {
-      // debug("======================================================================================= starting process :: 0")
       debug('stdout: ' + stdout);
       debug('stderr: ' + stderr);
       if (error !== null) {
         debug('exec error: ' + error);
       }
-      // debug("======================================================================================= starting process :: 1")
     });
-      
-  // debug("======================================================================================= starting process :: 2")
+
   // Wait for a half a second then save the pids
   setTimeout(function() {
-    // debug("======================================================================================= starting process :: 3")
     // Mark server as running
     self.mongods[node]["up"] = true;
-    // debug("======================================================================================= starting process :: 4")
     self.mongods[node]["pid"]= fs.readFileSync(path.join(self.mongods[node]["db_path"], "mongod.lock"), 'ascii').trim();
-    // debug("======================================================================================= starting process :: 5")
     // Callback
     callback();
   }, 5000);
