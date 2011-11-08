@@ -139,18 +139,12 @@ module.exports = testCase({
     // Insert some data
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
-      // console.log("-------------------------------------------------------------------------------------- 0")
       if(err != null) debug("shouldReadPrimary :: " + inspect(err));
   
       p_db.createCollection("testsets", {safe:{w:2, wtimeout:10000}}, function(err, collection) {
-        // console.log("-------------------------------------------------------------------------------------- 1")
         if(err != null) debug("shouldReadPrimary :: " + inspect(err));
         
         collection.insert([{a:20}, {a:30}, {a:40}], {safe:{w:2, wtimeout:10000}}, function(err, result) {
-          // console.log("--------------------------------------------------------------------------------------- 2")
-          // console.dir(err)
-          // console.dir(result)
-
           // Ensure replication happened in time
           setTimeout(function() {
             // Kill the primary
@@ -158,117 +152,12 @@ module.exports = testCase({
               // Do a collection find
               collection.find().toArray(function(err, items) {                
                 test.equal(null, err);
-                test.equal(3, items.length);
-                
-                // console.log("-------------------------------------------------------------------------------------- 3")
-                // console.dir(err)
-                // console.dir(items)
+                test.equal(3, items.length);                
                 test.done();
-
-                // if(item == null) {
-                //   var correct = 0;
-                //   // Check all the values
-                //   var r = [20, 30, 40];
-                //   for(var i = 0; i < r.length; i++) {
-                //     correct += results.filter(function(element) {
-                //       return element.a == r[i];
-                //     }).length;                  
-                //   }                  
-                //   return correct == 3 ? done(true) : done(false);
-                // } else {
-                //   results.push(item);
-                // }
               });            
             });
           }, 2000);
         })
-  
-        // Step(
-        //   function inserts() {
-        //     var group = this.group();
-        //     collection.save({a:20}, group());
-        //     collection.save({a:30}, group());
-        //     collection.save({a:40}, group());
-        //   },
-        //   
-        //   function done(err, values) {
-        //     console.log("-------------------------------------------------------------------------------------- 2")
-        //     if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-        //     var results = [];
-        //     
-        //     retryEnsure(60, function(done) {
-        //       console.log("-------------------------------------------------------------------------------------- 3")
-        //       results = [];
-        //       
-        //       collection.find().each(function(err, item) {                
-        //         console.log("-------------------------------------------------------------------------------------- 4")
-        //         if(item == null) {
-        //           var correct = 0;
-        //           // Check all the values
-        //           var r = [20, 30, 40];
-        //           for(var i = 0; i < r.length; i++) {
-        //             correct += results.filter(function(element) {
-        //               return element.a == r[i];
-        //             }).length;                  
-        //           }                  
-        //           return correct == 3 ? done(true) : done(false);
-        //         } else {
-        //           results.push(item);
-        //         }
-        //       });
-        //     }, function(err, result) {
-        //       console.log("-------------------------------------------------------------------------------------- 5")
-        //       if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-        //       test.ifError(err);
-        //       
-        //       // Ensure replication happened in time
-        //       setTimeout(function() {
-        //         console.log("-------------------------------------------------------------------------------------- 6")
-        //         // Kill the primary
-        //         RS.killPrimary(function(node) {
-        //           console.log("-------------------------------------------------------------------------------------- 7")
-        //   
-        //           //
-        //           //  Retry again to read the docs with primary dead
-        //           retryEnsure(60, function(done) {
-        //             console.log("-------------------------------------------------------------------------------------- 8 :: done = " + done)
-        //             results = [];
-        //   
-        //             collection.find().each(function(err, item) {
-        //               console.log("-------------------------------------------------------------------------------------- 9")
-        //               console.dir(err)
-        //               console.dir(item)
-        //               if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-        //   
-        //               if(item == null) {
-        //                 var correct = 0;
-        //                 // Check all the values
-        //                 var r = [20, 30, 40];
-        //                 for(var i = 0; i < r.length; i++) {
-        //                   correct += results.filter(function(element) {
-        //                     return element.a == r[i];
-        //                   }).length;                  
-        //                 }                  
-        //                 return correct == 3 ? done(true) : done(false);
-        //               } else {
-        //                 results.push(item);
-        //               }
-        //             });
-        //           }, function(err, result) {
-        //             console.log("-------------------------------------------------------------------------------------- 10")
-        //             // Check if we get a correct count
-        //             collection.count(function(err, count) {                      
-        //               test.ifError(err);
-        //               test.equal(3, count)
-        //               test.done();
-        //               p_db.close();
-        //             });
-        //           })
-        //         });              
-        //       }, 2000);
-        //     })
-        //   }
-        // );
       });      
     })    
   }

@@ -11,7 +11,7 @@
 var nodeunit = require('../nodeunit'),
     utils = require('../utils'),
     fs = require('fs'),
-    sys = require('sys'),
+    sys = require('util'),
     track = require('../track'),
     path = require('path');
     AssertionError = require('../assert').AssertionError;

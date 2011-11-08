@@ -2,11 +2,11 @@
 
 var
     fs = require('fs'),
-    sys = require('sys'),
+    sys = require('util'),
     path = require('path');
 
 // require.paths.push(process.cwd());
-var args = process.ARGV.slice(2);
+var args = Array.isArray(process.ARGV) ? process.ARGV.slice(2) : process.argv.slice(2);
 
 var files = [];
 

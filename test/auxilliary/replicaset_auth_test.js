@@ -50,73 +50,47 @@ var tests = testCase({
     var slaveDb = null;
     var db = new Db('foo', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.open(function(err, p_db) {
-      // console.log("-------------------------------------------------------------------------------- -1")
-      // console.dir(err)      
-      
       Step(
         function addUser() {
-          // console.log("-------------------------------------------------------------------------------- 0")
           db.admin().addUser("me", "secret", this);
         },
         
         function ensureFailingInsert(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 1")
-          // console.dir(err)
-          // console.dir(result)
           var self = this;
           test.equal(null, err);
           test.ok(result != null);
   
           db.collection("stuff", function(err, collection) {
-            // console.log("-------------------------------------------------------------------------------- 2")
-            // console.dir(err)
             collection.insert({a:2}, {safe: {w: 3}}, self);
           });                  
         },
         
         function authenticate(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 3")
-          // console.dir(err)
-          // console.dir(result)
           test.ok(err != null);
           
           db.admin().authenticate("me", "secret", this);
         },
         
         function insertShouldSuccedNow(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 4")
-          // console.dir(err)
-          // console.log(err != null ? err.stack : '')
-          // console.dir(result)
           var self = this;
           test.equal(null, err);
           test.ok(result);
   
           db.collection("stuff", function(err, collection) {
-            // console.log("-------------------------------------------------------------------------------- 5")
-            // console.dir(err)
             collection.insert({a:3}, {safe: true}, self);
           });                            
         }, 
         
         function queryShouldExecuteCorrectly(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 6")
-          // console.dir(err)
-          // console.dir(result)
           var self = this;
           test.equal(null, err);
           
           db.collection("stuff", function(err, collection) {
-            // console.log("-------------------------------------------------------------------------------- 7")
-            // console.dir(err)
             collection.findOne(self);
           });                            
         },
         
         function logout(err, item) {
-          // console.log("-------------------------------------------------------------------------------- 8")
-          // console.dir(err)
-          // console.dir(item)
           test.ok(err == null);
           test.equal(3, item.a);
           
@@ -124,67 +98,43 @@ var tests = testCase({
         },
         
         function findShouldFailDueToLoggedOut(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 9")
-          // console.dir(err)
-          // console.dir(result)
-  
           var self = this;
           test.equal(null, err);
           
           db.collection("stuff", function(err, collection) {
-            // console.log("-------------------------------------------------------------------------------- 10")
-            // console.dir(err)
             collection.findOne(self);
           });
         },
         
         function sameShouldApplyToRandomSecondaryServer(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 11")
-          // console.dir(err)
-          // console.dir(result)
           var self = this;
           test.ok(err != null);
           
           slaveDb = new Db('foo', new Server(db.serverConfig.secondaries[0].host
                     , db.serverConfig.secondaries[0].port, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null), slave_ok:true});
           slaveDb.open(function(err, slaveDb) {            
-            // console.log("-------------------------------------------------------------------------------- 12")
-            // console.dir(err)
             slaveDb.collection('stuff', function(err, collection) {
-              // console.log("-------------------------------------------------------------------------------- 13")
-              // console.dir(err)
               collection.findOne(self)
             })            
           });
         },
         
         function shouldCorrectlyAuthenticateAgainstSecondary(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 14")
-          // console.dir(err)
-          // console.dir(result)
           test.ok(err != null)          
           slaveDb.admin().authenticate('me', 'secret', this);
         },
         
         function shouldCorrectlyInsertItem(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 15")
-          // console.dir(err)
-          // console.dir(result)
           var self = this;          
           test.equal(null, err);
           test.ok(result);
           
           slaveDb.collection('stuff', function(err, collection) {
-            // console.log("-------------------------------------------------------------------------------- 16")
-            // console.dir(err)
             collection.findOne(self)
           })                      
         },
         
         function finishUp(err, item) {
-          // console.log("-------------------------------------------------------------------------------- 17")
-          // console.dir(err)
-          // console.dir(item)
           test.ok(err == null);
           test.equal(3, item.a);          
           
@@ -208,18 +158,12 @@ var tests = testCase({
     var slaveDb = null;
     var db = new Db('foo', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.open(function(err, p_db) {
-      // console.log("-------------------------------------------------------------------------------- 0")
-      // console.dir(err)
-  
       Step(
         function addUser() {
           db.admin().addUser("me", "secret", this);
         },
         
         function ensureFailingInsert(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 1")
-          // console.dir(err)
-          // console.dir(result)
           var self = this;
           test.equal(null, err);
           test.ok(result != null);
@@ -230,18 +174,12 @@ var tests = testCase({
         },
         
         function authenticate(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 2")
-          // console.dir(err)
-          // console.dir(result)
           test.ok(err != null);
           
           db.admin().authenticate("me", "secret", this);
         },
         
         function insertShouldSuccedNow(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 3")
-          // console.dir(err)
-          // console.dir(result)
           var self = this;
           test.equal(null, err);
           test.ok(result);
@@ -252,9 +190,6 @@ var tests = testCase({
         }, 
         
         function queryShouldExecuteCorrectly(err, result) {
-          // console.log("-------------------------------------------------------------------------------- 4")
-          // console.dir(err)
-          // console.dir(result)
           var self = this;
           test.equal(null, err);
           
@@ -264,9 +199,6 @@ var tests = testCase({
         },
         
         function finishUp(err, item) {
-          // console.log("-------------------------------------------------------------------------------- 5")
-          // console.dir(err)
-          // console.dir(item)
           test.ok(err == null);
           test.equal(2, item.a);
           test.done();
@@ -275,6 +207,12 @@ var tests = testCase({
       )      
     });
   }  
+  
+  // noGlobalsLeaked : function(test) {
+  //   var leaks = gleak.detectNew();
+  //   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+  //   test.done();
+  // }    
 })
 
 // Assign out tests

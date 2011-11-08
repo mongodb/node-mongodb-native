@@ -9,7 +9,7 @@
  * Module dependencies.
  */
 
-var sys = require('sys');
+var sys = require('util');
 
 /**
  * Library version.

@@ -352,19 +352,15 @@ module.exports = testCase({
               setTimeout(function() {
                 // Kill the primary
                 RS.killPrimary(function(node) {
-                  // console.log("----------------------------------------------------------------------- ::0")
-  
                   // Ensure valid connection
                   // Do inserts
                   ensureConnection(test, retries, function(err, p_db) {
-                    // console.log("----------------------------------------------------------------------- ::1")
                     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
   
                     test.ok(err == null);
                     test.equal(true, p_db.serverConfig.isConnected());
   
                     p_db.collection('testsets', function(err, collection) {
-                      // console.log("----------------------------------------------------------------------- ::2")
                       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
   
                       // Execute a set of inserts
@@ -379,27 +375,20 @@ module.exports = testCase({
                         },
   
                         function finishUp(err, values) {   
-                          // console.log("----------------------------------------------------------------------- ::3")
-                          // setTimeout(function() {
                           // Restart the old master and wait for the sync to happen
                           RS.restartKilledNodes(function(err, result) {
-                            // console.log("----------------------------------------------------------------------- ::4")
                             if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));                            
                             // Contains the results
                             var results = [];
                           
                             // Just wait for the results
                             setTimeout(function() {
-                              // console.log("----------------------------------------------------------------------- 0")
-                          
                               // Ensure the connection
                               ensureConnection(test, retries, function(err, p_db) {
-                                // console.log("----------------------------------------------------------------------- 1")
                                 if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
                           
                                 // Get the collection
                                 p_db.collection('testsets', function(err, collection) {
-                                  // console.log("----------------------------------------------------------------------- 2")
                                   if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
                           
                                   collection.find().each(function(err, item) {
