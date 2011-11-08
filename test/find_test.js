@@ -44,60 +44,6 @@ var tests = testCase({
       callback();        
     }      
   },
-
-  'Error thrown in handler test': function(test) {
-    // Should not be called
-    var exceptionHandler = function(exception) {
-      test.ok(false);
-      console.log('Exception caught: ' + exception.message);
-      console.log(inspect(exception.stack.toString()))
-    };
-    
-    // Number of times we should fail
-    var numberOfFailsCounter = 0;
-    
-    // Error handler
-    client.on("error", function(err) {
-      numberOfFailsCounter = numberOfFailsCounter + 1;
-    });
-  
-    process.on('uncaughtException', exceptionHandler)
-  
-    client.createCollection('error_test', function(err, collection) {
-  
-    var testObject = {};
-    for(var i = 0; i < 5000; i++){
-        testObject['setting_' + i] = i;
-    }
-  
-    testObject.name = 'test1';
-    var c = 0;
-  
-    var counter = 0;
-    collection.insert([testObject, {name:'test2'}], {safe:true}, function(err, doc) {
-        var findOne = function(){
-          collection.findOne({name: 'test1'}, function(err, doc) {
-            counter++;
-            process.nextTick(findOne);
-  
-            if(counter > POOL_SIZE){
-              process.removeListener('uncaughtException', exceptionHandler);
-              
-              collection.findOne({name: 'test1'}, function(err, doc) {
-                test.equal(5002, Object.keys(doc).length)
-                test.equal(4, numberOfFailsCounter);
-                test.done();
-              });                        
-            } else {
-              throw new Error('Some error');
-            }
-          });
-        };
-  
-        findOne();
-      });
-    });
-  },
   
   // Test a simple find
   shouldCorrectlyPerformSimpleFind : function(test) {
