@@ -13,7 +13,7 @@ module.exports = exports = function gleak () {
  * @api public
  */
 
-exports.version = '0.1.1';
+exports.version = '0.2.1';
 
 /**
  * Express middleware.
@@ -38,13 +38,10 @@ exports.middleware = function gleakMiddleware (stream, format) {
     }
   }
 
-  var known = [];
   setTimeout(print, 1000);
 
   function print () {
-    g.detect().forEach(function (leak) {
-      if (~known.indexOf(leak)) return;
-      known.push(leak);
+    g.detectNew().forEach(function (leak) {
       stream.write(format.replace(/%s/, leak) + '\n');
     });
   }
@@ -79,6 +76,7 @@ function Gleak () {
  * @api public
  */
 
+// v0.4.x
 Gleak.prototype.whitelist = [
     setTimeout
   , setInterval
@@ -88,7 +86,27 @@ Gleak.prototype.whitelist = [
   , Buffer
   , process
   , global
+  , GLOBAL
+  , root
 ];
+
+// check for new globals in >= v0.5x
+var version = process.version.replace(/^v/, '').split('.');
+if ('0' === version[0] && version[1] > 4) {
+  Gleak.prototype.whitelist.push(
+    ArrayBuffer
+  , Int8Array
+  , Uint8Array
+  , Int16Array
+  , Uint16Array
+  , Int32Array
+  , Uint32Array
+  , Float32Array
+  , Float64Array
+  , DataView
+  , 'errno' // node >= v0.5.x hack
+  )
+}
 
 /**
  * Default format.

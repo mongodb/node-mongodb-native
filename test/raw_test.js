@@ -94,39 +94,34 @@ var tests = testCase({
     });
   },  
 
-  // shouldCorrectlyUpdateDocumentAndReturnRaw : function(test) {
-  //   client.createCollection('shouldCorrectlyUpdateDocumentAndReturnRaw', function(err, collection) {
-  //     // Insert some documents
-  //     collection.insert([{a:1}, {b:2000}, {c:2.3}], {safe:true}, function(err, result) {
-  //       // Let's create a raw delete command
-  //       var selectorObject = {b:2000};
-  //       // Create raw bson buffer
-  //       var rawSelectorObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(selectorObject));
-  //       client.bson_deserializer.BSON.serializeWithBufferAndIndex(queryObject, false, rawSelectorObject, 0);    
-  // 
-  //       // Let's create a raw delete command
-  //       var updateObject = {"$set":{c:2}};
-  //       // Create raw bson buffer
-  //       var rawUpdateObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(updateObject));
-  //       client.bson_deserializer.BSON.serializeWithBufferAndIndex(queryObject, false, rawUpdateObject, 0);    
-  //       
-  //       // Update the document and return the raw new document
-  //       collection.update({b:2000}, rawQueryObject, {safe:true}, function(err, numberOfUpdated) {
-  //         console.log("------------------------------------------------------------------------------")
-  //         console.dir(err)
-  //         console.dir(numberOfUpdated)
-  //         
-  //         test.done();
-  //       });        
-  //     });
-  //   });
-  // },  
+  shouldCorrectlyUpdateDocumentAndReturnRaw : function(test) {
+    client.createCollection('shouldCorrectlyUpdateDocumentAndReturnRaw', function(err, collection) {
+      // Insert some documents
+      collection.insert([{a:1}, {b:2000}, {c:2.3}], {safe:true}, function(err, result) {
+        // Let's create a raw delete command
+        var selectorObject = {b:2000};
+        // Create raw bson buffer
+        var rawSelectorObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(selectorObject));
+        client.bson_deserializer.BSON.serializeWithBufferAndIndex(selectorObject, false, rawSelectorObject, 0);    
+        // Let's create a raw delete command
+        var updateObject = {"$set":{c:2}};
+        // Create raw bson buffer
+        var rawUpdateObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(updateObject));
+        client.bson_deserializer.BSON.serializeWithBufferAndIndex(updateObject, false, rawUpdateObject, 0);    
+        // Update the document and return the raw new document
+        collection.update(rawSelectorObject, rawUpdateObject, {safe:true}, function(err, numberOfUpdated) {
+          test.equal(1, numberOfUpdated);
+          test.done();
+        });        
+      });
+    });
+  },  
 
-  // noGlobalsLeaked : function(test) {
-  //   var leaks = gleak.detectNew();
-  //   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-  //   test.done();
-  // }
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

@@ -98,12 +98,12 @@ var tests = testCase({
     test.done();
   },
 
-  // // run this last
-  // noGlobalsLeaked : function(test) {
-  //   var leaks = gleak.detectNew();
-  //   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-  //   test.done();
-  // }
+  // run this last
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }
   
   // 'Should Correctly Generate and parse a Reply Object' : function(test) {
   //   var reply_message = BinaryParser.fromInt(0) + BSON.encodeLong(Long.fromNumber(1222)) + BinaryParser.fromInt(100) + BinaryParser.fromInt(2);

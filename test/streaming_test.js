@@ -113,12 +113,6 @@ var tests = testCase({
       });
     });    
   },   
-  
-  // noGlobalsLeaked : function(test) {
-  //   var leaks = gleak.detectNew();
-  //   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-  //   test.done();
-  // }  
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite
