@@ -1,3 +1,4 @@
+0.9.7
 * Added priority setting to replicaset manager
 * Added correct handling of passive servers in replicaset
 * Reworked socket code for simpler clearer handling
@@ -11,6 +12,9 @@
 * Allows raw (no bson parser mode for insert, update, remove, find and findOne)
 	* control raw mode passing in option raw:true on the commands
 	* will return buffers with the binary bson objects
+* Fixed memory leak in cursor.toArray
+* Fixed bug in command creation for mongodb server with wrong scope of call
+* Added db(dbName) method to db.js to allow for reuse of connections against other databases
 
 0.9.6-22 2011-10-15
 * Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370

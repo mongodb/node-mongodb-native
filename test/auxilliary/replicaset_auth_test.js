@@ -1,9 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 
 var testCase = require('../../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../../deps/nodeunit'),
+  gleak = require('../../tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -15,6 +16,7 @@ var testCase = require('../../deps/nodeunit').testCase,
 var MONGODB = 'integration_tests';
 // var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 var serverManager = null;
+var RS = RS == null ? null : RS;
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -206,7 +208,7 @@ var tests = testCase({
         }      
       )      
     });
-  }  
+  },
   
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
