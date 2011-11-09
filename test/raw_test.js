@@ -80,7 +80,7 @@ var tests = testCase({
         // Create raw bson buffer
         var rawQueryObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(queryObject));
         client.bson_deserializer.BSON.serializeWithBufferAndIndex(queryObject, false, rawQueryObject, 0);    
-
+  
         // Update the document and return the raw new document
         collection.remove(rawQueryObject, {safe:true}, function(err, numberOfDeleted) {
           test.equal(1, numberOfDeleted);
@@ -93,7 +93,7 @@ var tests = testCase({
       });
     });
   },  
-
+  
   shouldCorrectlyUpdateDocumentAndReturnRaw : function(test) {
     client.createCollection('shouldCorrectlyUpdateDocumentAndReturnRaw', function(err, collection) {
       // Insert some documents
@@ -111,11 +111,149 @@ var tests = testCase({
         // Update the document and return the raw new document
         collection.update(rawSelectorObject, rawUpdateObject, {safe:true}, function(err, numberOfUpdated) {
           test.equal(1, numberOfUpdated);
-          test.done();
+          
+          // Query the document
+          collection.find({}, {}, {raw:true}).toArray(function(err, items) {
+            var objects = [];
+            for(var i = 0; i < items.length; i++) {
+              test.ok(items[i] instanceof Buffer);
+              objects.push(client.bson_deserializer.BSON.deserialize(items[i]));
+            }
+            
+            test.equal(1, objects[0].a);
+            test.equal(2.3, objects[1].c);
+            test.equal(2000, objects[2].b);
+            test.equal(2, objects[2].c);
+            test.done();
+          })
         });        
       });
     });
-  },  
+  },
+  
+  shouldCorreclyInsertRawDocumentAndRetrieveThem : function(test) {
+    client.createCollection('shouldCorreclyInsertRawDocumentAndRetrieveThem', function(err, collection) {
+      // Create serialized insert objects
+      var id = new client.bson_deserializer.ObjectID();
+      var inputObjects = [{_id:id}, {a:1}, {b:2}, {c:4}]
+      var serializedObjects = [];
+      
+      // Serialize all object
+      for(var i = 0; i < inputObjects.length; i++) {
+        // Create raw bson buffer
+        var rawObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(inputObjects[i]));
+        client.bson_deserializer.BSON.serializeWithBufferAndIndex(inputObjects[i], false, rawObject, 0);
+        serializedObjects.push(rawObject);
+      }
+      
+      // Insert all raw objects
+      collection.insert(serializedObjects, {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Query the document
+        collection.find({}, {}, {raw:true}).toArray(function(err, items) {
+          var objects = [];
+          for(var i = 0; i < items.length; i++) {
+            test.ok(items[i] instanceof Buffer);
+            objects.push(client.bson_deserializer.BSON.deserialize(items[i]));
+          }
+  
+          test.equal(id.toHexString(), objects[0]._id.toHexString());
+          test.equal(1, objects[1].a);
+          test.equal(2, objects[2].b);
+          test.equal(4, objects[3].c);
+          test.done();
+        })
+      });      
+    });
+  },
+  
+  shouldCorrectlyPeformQueryUsingRaw : function(test) {
+    client.createCollection('shouldCorrectlyPeformQueryUsingRaw', function(err, collection) {
+      collection.insert([{a:1}, {b:2}, {b:3}], function(err, result) {
+        test.equal(null, err);
+  
+        // Let's create a raw query object
+        var queryObject = {b:3};
+        // Create raw bson buffer
+        var rawQueryObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(queryObject));
+        client.bson_deserializer.BSON.serializeWithBufferAndIndex(queryObject, false, rawQueryObject, 0);    
+  
+        // Let's create a raw fields object
+        var fieldsObject = {};
+        // Create raw bson buffer
+        var rawFieldsObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(fieldsObject));
+        client.bson_deserializer.BSON.serializeWithBufferAndIndex(fieldsObject, false, rawFieldsObject, 0);    
+  
+        collection.find(rawQueryObject, rawFieldsObject, {raw:true}).toArray(function(err, items) {
+          test.equal(1, items.length);
+          test.ok(items[0] instanceof Buffer);
+          var object = client.bson_deserializer.BSON.deserialize(items[0]);
+          test.equal(3, object.b)            
+  
+          collection.findOne(rawQueryObject, {fields:rawFieldsObject, raw:true}, function(err, item) {
+            var object = client.bson_deserializer.BSON.deserialize(item);
+            test.equal(3, object.b)                        
+            test.done();
+          });
+        });
+      })
+    });
+  },
+  
+  shouldCorrectlyThrowErrorsWhenIllegalySizedMessages : function(test) {
+    client.createCollection('shouldCorrectlyThrowErrorsWhenIllegalySizedMessages', function(err, collection) {
+      var illegalBuffer = new Buffer(20);
+      try {
+        collection.insert(illegalBuffer, {safe:true}, function(err, result) {});        
+      } catch (err) {
+        test.ok(err.toString().indexOf("insert") != -1);        
+      }
+      
+      try {
+        collection.update(illegalBuffer, {}, function(){})          
+      } catch(err) {
+        test.ok(err.toString().indexOf("update spec") != -1);
+      }        
+
+      try {
+        collection.update({}, illegalBuffer, function(){})          
+      } catch(err) {
+        test.ok(err.toString().indexOf("update document") != -1);
+      }              
+
+      try {
+        collection.remove(illegalBuffer, function(){})          
+      } catch(err) {
+        test.ok(err.toString().indexOf("delete") != -1);
+      }              
+
+      try {
+        collection.find(illegalBuffer).toArray(function() {})
+      } catch(err) {
+        test.ok(err.toString().indexOf("query selector") != -1);
+      }              
+
+      try {
+        collection.find({}, illegalBuffer).toArray(function() {})
+      } catch(err) {
+        test.ok(err.toString().indexOf("query fields") != -1);
+      }              
+
+      try {
+        collection.findOne(illegalBuffer).toArray(function() {})
+      } catch(err) {
+        test.ok(err.toString().indexOf("query selector") != -1);
+      }              
+
+      try {
+        collection.findOne({}, {fields:illegalBuffer}).toArray(function() {})
+      } catch(err) {
+        test.ok(err.toString().indexOf("query fields") != -1);
+        test.done();
+      }              
+    });
+  },
 
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();

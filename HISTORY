@@ -8,6 +8,9 @@
 * Added reaper that will timeout and cleanup queries that never return
 	* control with parameters reaperInterval and reaperTimeout when creating a db instance
 * Refactored test helper classes for replicaset tests
+* Allows raw (no bson parser mode for insert, update, remove, find and findOne)
+	* control raw mode passing in option raw:true on the commands
+	* will return buffers with the binary bson objects
 
 0.9.6-22 2011-10-15
 * Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370

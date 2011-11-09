@@ -1,8 +1,9 @@
 var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
 var testCase = require('../../deps/nodeunit').testCase,
-  debug = require('util').debug
+  debug = require('util').debug,
   inspect = require('util').inspect,
+  gleak = require('../../tools/gleak'),
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = require('../../lib/mongodb').Db,
   ReplSetServers = require('../../lib/mongodb').ReplSetServers,
@@ -12,6 +13,7 @@ var testCase = require('../../deps/nodeunit').testCase,
 // Keep instance of ReplicaSetManager
 var serversUp = false;
 var retries = 120;
+var RS = RS == null ? null : RS;
 
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration

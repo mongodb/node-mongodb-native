@@ -4,6 +4,7 @@ var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
+  gleak = require('../tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -112,7 +113,13 @@ var tests = testCase({
         });        
       });
     });    
-  },   
+  },  
+  
+  noGlobalsLeaked : function(test) {
+    var leaks = gleak.detectNew();
+    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+    test.done();
+  }   
 })
 
 // Stupid freaking workaround due to there being no way to run setup once for each suite

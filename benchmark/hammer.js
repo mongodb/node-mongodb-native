@@ -17,11 +17,10 @@ new Db('hammer_db', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSi
     var i = 0;
     // Fire random command
     setInterval(function() {
-    // while(true) {
       var command = Math.round(Math.random() * 4);
       // command = 1;
 
-      debug("================= execute :: " + i++ + " = " + command)
+      // debug("================= execute :: " + i++ + " = " + command)
 
       // Execute the command
       if(command == 1) {
@@ -64,14 +63,11 @@ new Db('hammer_db', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSi
         });
       } else if(command == 4) {
         db.collection('hammer_collection', function(err, collection) {
-          collection.find().toArray(function(items) {            
-            debug("---------------------------------------- QUERY")
+          collection.find().limit(100).toArray(function(err, items) {                        
+            debug("---------------------------------------- QUERY :: " + items.length)
           })
         })
       }      
-    // } 
-    // setInterval(function() {
-      // Select a random command
     }, 0);    
   });
 });
