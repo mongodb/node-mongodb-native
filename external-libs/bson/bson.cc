@@ -915,7 +915,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
         
     // Unwrap the object
     Local<Object> object = value->ToObject();
-    Local<Array> property_names = object->GetPropertyNames();
+    Local<Array> property_names = object->GetOwnPropertyNames();
 
     // Calculate size of the total object
     uint32_t object_size = BSON::calculate_object_size(value, serializeFunctions);
@@ -1125,7 +1125,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value, bool serializeFunction
   } else if(value->IsObject()) {
     // Unwrap the object
     Local<Object> object = value->ToObject();
-    Local<Array> property_names = object->GetPropertyNames();
+    Local<Array> property_names = object->GetOwnPropertyNames();
     
     // Process all the properties on the object
     for(uint32_t index = 0; index < property_names->Length(); index++) {
