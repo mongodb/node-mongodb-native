@@ -98,8 +98,9 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
 
   //BSON.serializeWithBufferAndIndex = function serializeWithBufferAndIndex(object, checkKeys, buffer, index) {
   // Ensure we have the correct values
-  if(args.Length() != 4) return VException("Four parameters required [object, boolean, Buffer, int]");
+  if(args.Length() > 5) return VException("Four or five parameters required [object, boolean, Buffer, int] or [object, boolean, Buffer, int, boolean]");
   if(args.Length() == 4 && !args[0]->IsObject() && !args[1]->IsBoolean() && !Buffer::HasInstance(args[2]) && !args[3]->IsUint32()) return VException("Four parameters required [object, boolean, Buffer, int]");
+  if(args.Length() == 5 && !args[0]->IsObject() && !args[1]->IsBoolean() && !Buffer::HasInstance(args[2]) && !args[3]->IsUint32() && !args[4]->IsBoolean()) return VException("Four parameters required [object, boolean, Buffer, int, boolean]");
 
   // Define pointer to data
   char *data;
@@ -117,8 +118,14 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
     length = Buffer::Length(obj);
   #endif
 
+  uint32_t object_size = 0;
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
-  uint32_t object_size = BSON::calculate_object_size(args[0]);
+  if(args.Length() == 5) {
+    object_size = BSON::calculate_object_size(args[0], args[4]->BooleanValue());    
+  } else {
+    object_size = BSON::calculate_object_size(args[0], false);    
+  }
+  
   // Unpack the index variable
   Local<Uint32> indexObject = args[3]->ToUint32();
   uint32_t index = indexObject->Value();
@@ -130,12 +137,17 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
   try {
     // Check if we have a boolean value
     bool check_key = false;
-    if(args.Length() == 4 && args[1]->IsBoolean()) {
+    if(args.Length() >= 4 && args[1]->IsBoolean()) {
       check_key = args[1]->BooleanValue();
     }
     
+    bool serializeFunctions = false;
+    if(args.Length() == 5) {
+      serializeFunctions = args[4]->BooleanValue();
+    }
+    
     // Serialize the object
-    BSON::serialize(serialized_object, 0, Null(), args[0], check_key);      
+    BSON::serialize(serialized_object, 0, Null(), args[0], check_key, serializeFunctions);
   } catch(char *err_msg) {
     // Free up serialized object space
     free(serialized_object);
@@ -161,22 +173,36 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   if(args.Length() == 1 && !args[0]->IsObject()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
   if(args.Length() == 2 && !args[0]->IsObject() && !args[1]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
   if(args.Length() == 3 && !args[0]->IsObject() && !args[1]->IsBoolean() && !args[2]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
-  if(args.Length() > 3) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
+  if(args.Length() == 4 && !args[0]->IsObject() && !args[1]->IsBoolean() && !args[2]->IsBoolean() && !args[3]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean] or [object, boolean, boolean, boolean]");
+  if(args.Length() > 4) return VException("One, two, tree or four arguments required - [object] or [object, boolean] or [object, boolean, boolean] or [object, boolean, boolean, boolean]");
 
+  uint32_t object_size = 0;
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
-  uint32_t object_size = BSON::calculate_object_size(args[0]);
+  // With serialize function
+  if(args.Length() == 4) {
+    object_size = BSON::calculate_object_size(args[0], args[3]->BooleanValue());    
+  } else {
+    object_size = BSON::calculate_object_size(args[0], false);        
+  }
+
   // Allocate the memory needed for the serializtion
   char *serialized_object = (char *)malloc(object_size * sizeof(char));  
   // Catch any errors
   try {
     // Check if we have a boolean value
     bool check_key = false;
-    if(args.Length() == 3 && args[1]->IsBoolean()) {
+    if(args.Length() >= 3 && args[1]->IsBoolean()) {
       check_key = args[1]->BooleanValue();
+    }
+
+    // Check if we have a boolean value
+    bool serializeFunctions = false;
+    if(args.Length() == 4 && args[1]->IsBoolean()) {
+      serializeFunctions = args[3]->BooleanValue();
     }
     
     // Serialize the object
-    BSON::serialize(serialized_object, 0, Null(), args[0], check_key);      
+    BSON::serialize(serialized_object, 0, Null(), args[0], check_key, serializeFunctions);      
   } catch(char *err_msg) {
     // Free up serialized object space
     free(serialized_object);
@@ -193,7 +219,7 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   BSON::write_int32((serialized_object), object_size);  
 
   // If we have 3 arguments
-  if(args.Length() == 3) {
+  if(args.Length() == 3 || args.Length() == 4) {
     // Local<Boolean> asBuffer = args[2]->ToBoolean();    
     Buffer *buffer = Buffer::New(serialized_object, object_size);
     // Release the serialized string
@@ -211,9 +237,18 @@ Handle<Value> BSON::CalculateObjectSize(const Arguments &args) {
   HandleScope scope;
   // Ensure we have a valid object
   if(args.Length() == 1 && !args[0]->IsObject()) return VException("One argument required - [object]");
-  if(args.Length() > 1) return VException("One argument required - [object]");
-  // Calculate size of the object
-  uint32_t object_size = BSON::calculate_object_size(args[0]);
+  if(args.Length() == 2 && !args[0]->IsObject() && !args[1]->IsBoolean())  return VException("Two arguments required - [object, boolean]");
+  if(args.Length() > 3) return VException("One or two arguments required - [object] or [object, boolean]");
+  
+  // Object size
+  uint32_t object_size = 0;
+  // Check if we have our argument, calculate size of the object  
+  if(args.Length() == 2) {
+    object_size = BSON::calculate_object_size(args[0], args[1]->BooleanValue());
+  } else {
+    object_size = BSON::calculate_object_size(args[0], false);
+  }
+
   // Return the object size
   return scope.Close(Uint32::New(object_size));
 }
@@ -305,10 +340,10 @@ char *BSON::check_key(Local<String> key) {
   return NULL;
 }
 
-uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key) {
+uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key, bool serializeFunctions) {
   // Scope for method execution
   HandleScope scope;
-  
+
   // If we have a name check that key is valid
   if(!name->IsNull() && check_key) {
     if(BSON::check_key(name->ToString()) != NULL) return -1;
@@ -434,7 +469,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // obj->Set(String::New("$db"), dbref->Get(String::New("db")));
     if(db_ref_obj->db != NULL) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
     // Encode the variable
-    index = BSON::serialize(serialized_object, index, name, obj, false);
+    index = BSON::serialize(serialized_object, index, name, obj, false, serializeFunctions);
   } else if(Code::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Code")))) {
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_CODE_W_SCOPE;
@@ -465,9 +500,9 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust index
     index = index + strlen(code_obj->code) + 1;
     // Encode the scope
-    uint32_t scope_object_size = BSON::calculate_object_size(code_obj->scope_object);
+    uint32_t scope_object_size = BSON::calculate_object_size(code_obj->scope_object, serializeFunctions);
     // Serialize the scope object
-    BSON::serialize((serialized_object + index), 0, Null(), code_obj->scope_object, check_key);
+    BSON::serialize((serialized_object + index), 0, Null(), code_obj->scope_object, check_key, serializeFunctions);
     // Adjust the index
     index = index + scope_object_size;
     // Encode the total size of the object
@@ -771,7 +806,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Adjust the index
     index = index + len + 1;        
     // Object size
-    uint32_t object_size = BSON::calculate_object_size(value);
+    uint32_t object_size = BSON::calculate_object_size(value, serializeFunctions);
     // Write the size of the object
     BSON::write_int32((serialized_object + index), object_size);
     // Adjust the index
@@ -781,7 +816,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
       // Add "index" string size for each element
       sprintf(length_str, "%d", i);
       // Encode the values      
-      index = BSON::serialize(serialized_object, index, String::New(length_str), array->Get(Integer::New(i)), check_key);
+      index = BSON::serialize(serialized_object, index, String::New(length_str), array->Get(Integer::New(i)), check_key, serializeFunctions);
       // Write trailing '\0' for object
       *(serialized_object + index) = '\0';
     }
@@ -792,48 +827,50 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     // Free up memory
     free(length_str);
   } else if(value->IsFunction()) {
-    // Save the string at the offset provided
-    *(serialized_object + index) = BSON_DATA_CODE;
-    
-    // Adjust writing position for the first byte
-    index = index + 1;
-    // Convert name to char*
-    ssize_t len = DecodeBytes(name, UTF8);
-    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-    // Add null termiation for the string
-    *(serialized_object + index + len) = '\0';    
-    // Adjust the index
-    index = index + len + 1;    
-    
-    // Need to convert function into string
-    Local<String> str = value->ToString();
-    uint32_t utf8_length = str->Utf8Length();
-    
-    // If the Utf8 length is different from the string length then we
-    // have a UTF8 encoded string, otherwise write it as ascii
-    if(utf8_length != str->Length()) {
-      // Write the integer to the char *
-      BSON::write_int32((serialized_object + index), utf8_length + 1);
+    if(serializeFunctions) {
+      // Save the string at the offset provided
+      *(serialized_object + index) = BSON_DATA_CODE;
+  
+      // Adjust writing position for the first byte
+      index = index + 1;
+      // Convert name to char*
+      ssize_t len = DecodeBytes(name, UTF8);
+      ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+      // Add null termiation for the string
+      *(serialized_object + index + len) = '\0';    
       // Adjust the index
-      index = index + 4;
-      // Write string to char in utf8 format
-      str->WriteUtf8((serialized_object + index), utf8_length);
-      // Add the null termination
-      *(serialized_object + index + utf8_length) = '\0';    
-      // Adjust the index
-      index = index + utf8_length + 1;      
-    } else {
-      // Write the integer to the char *
-      BSON::write_int32((serialized_object + index), str->Length() + 1);
-      // Adjust the index
-      index = index + 4;
-      // Write string to char in utf8 format
-      written = DecodeWrite((serialized_object + index), str->Length(), str, BINARY);
-      // Add the null termination
-      *(serialized_object + index + str->Length()) = '\0';    
-      // Adjust the index
-      index = index + str->Length() + 1;      
-    }       
+      index = index + len + 1;    
+  
+      // Need to convert function into string
+      Local<String> str = value->ToString();
+      uint32_t utf8_length = str->Utf8Length();
+  
+      // If the Utf8 length is different from the string length then we
+      // have a UTF8 encoded string, otherwise write it as ascii
+      if(utf8_length != str->Length()) {
+        // Write the integer to the char *
+        BSON::write_int32((serialized_object + index), utf8_length + 1);
+        // Adjust the index
+        index = index + 4;
+        // Write string to char in utf8 format
+        str->WriteUtf8((serialized_object + index), utf8_length);
+        // Add the null termination
+        *(serialized_object + index + utf8_length) = '\0';    
+        // Adjust the index
+        index = index + utf8_length + 1;      
+      } else {
+        // Write the integer to the char *
+        BSON::write_int32((serialized_object + index), str->Length() + 1);
+        // Adjust the index
+        index = index + 4;
+        // Write string to char in utf8 format
+        written = DecodeWrite((serialized_object + index), str->Length(), str, BINARY);
+        // Add the null termination
+        *(serialized_object + index + str->Length()) = '\0';    
+        // Adjust the index
+        index = index + str->Length() + 1;      
+      }             
+    }
   } else if(value->IsObject() && 
      (constructorString->Equals(String::New("exports.Long"))
      || constructorString->Equals(String::New("exports.Timestamp"))
@@ -881,7 +918,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     Local<Array> property_names = object->GetPropertyNames();
 
     // Calculate size of the total object
-    uint32_t object_size = BSON::calculate_object_size(value);
+    uint32_t object_size = BSON::calculate_object_size(value, serializeFunctions);
     // Write the size
     BSON::write_int32((serialized_object + index), object_size);
     // Adjust size
@@ -891,18 +928,22 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
     for(uint32_t i = 0; i < property_names->Length(); i++) {
       // Fetch the property name
       Local<String> property_name = property_names->Get(i)->ToString();      
-      // Convert name to char*
-      ssize_t len = DecodeBytes(property_name, UTF8);
-      // char *data = new char[len];
-      char *data = (char *)malloc(len + 1);
-      *(data + len) = '\0';
-      ssize_t written = DecodeWrite(data, len, property_name, UTF8);      
       // Fetch the object for the property
       Local<Value> property = object->Get(property_name);
       // Write the next serialized object
-      index = BSON::serialize(serialized_object, index, property_name, property, check_key);      
-      // Free up memory of data
-      free(data);
+      // printf("========== !property->IsFunction() || (property->IsFunction() && serializeFunctions) = %d\n", !property->IsFunction() || (property->IsFunction() && serializeFunctions) == true ? 1 : 0);
+      if(!property->IsFunction() || (property->IsFunction() && serializeFunctions)) {
+        // Convert name to char*
+        ssize_t len = DecodeBytes(property_name, UTF8);
+        // char *data = new char[len];
+        char *data = (char *)malloc(len + 1);
+        *(data + len) = '\0';
+        ssize_t written = DecodeWrite(data, len, property_name, UTF8);      
+        // Serialize the content
+        index = BSON::serialize(serialized_object, index, property_name, property, check_key, serializeFunctions);      
+        // Free up memory of data
+        free(data);
+      }
     }
     // Pad the last item
     *(serialized_object + index) = '\0';
@@ -919,7 +960,7 @@ uint32_t BSON::serialize(char *serialized_object, uint32_t index, Handle<Value> 
   return index;
 }
 
-uint32_t BSON::calculate_object_size(Handle<Value> value) {
+uint32_t BSON::calculate_object_size(Handle<Value> value, bool serializeFunctions) {
   uint32_t object_size = 0;
 
   // Handle holder
@@ -948,7 +989,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     Local<Object> obj = value->ToObject();
     Code *code_obj = Code::Unwrap<Code>(obj);
     // Let's calculate the size the code object adds adds
-    object_size += strlen(code_obj->code) + 4 + BSON::calculate_object_size(code_obj->scope_object) + 4 + 1;
+    object_size += strlen(code_obj->code) + 4 + BSON::calculate_object_size(code_obj->scope_object, serializeFunctions) + 4 + 1;
   } else if(DBRef::HasInstance(value)) {
     // Unpack the dbref
     Local<Object> dbref = value->ToObject();
@@ -962,7 +1003,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     // obj->Set(String::New("$db"), dbref->Get(String::New("db")));
     if(db_ref_obj->db != NULL) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
     // Calculate size
-    object_size += BSON::calculate_object_size(obj);
+    object_size += BSON::calculate_object_size(obj, serializeFunctions);
   } else if(MinKey::HasInstance(value) || MaxKey::HasInstance(value)) {    
   } else if(Symbol::HasInstance(value)) {
     // Unpack the dbref
@@ -1037,7 +1078,7 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       // Add the type definition size for each item
       object_size = object_size + label_length + 1;
       // Add size of the object
-      uint32_t object_length = BSON::calculate_object_size(array->Get(Integer::New(i)));
+      uint32_t object_length = BSON::calculate_object_size(array->Get(Integer::New(i)), serializeFunctions);
       object_size = object_size + object_length;
     }
     // Add the object size
@@ -1045,12 +1086,15 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
     // Free up memory
     free(length_str);
   } else if(value->IsFunction()) {
-    // Need to convert function into string
-    Local<String> functionString = value->ToString();
-    // Length of string
-    ssize_t len = DecodeBytes(functionString, UTF8);
-    // Adjust size of binary
-    object_size += len + 1 + 4 + 1;  
+    // printf("========== value->IsFunction() && serializeFunctions :: %d\n", value->IsFunction() && serializeFunctions == true ? 1 : 0);
+    if(serializeFunctions) {
+      // Need to convert function into string
+      Local<String> functionString = value->ToString();
+      // Length of string
+      ssize_t len = DecodeBytes(functionString, UTF8);
+      // Adjust size of binary
+      object_size += len + 1 + 4;
+    }
   } else if(value->IsObject() && 
      (constructorString->Equals(String::New("exports.Long"))
      || constructorString->Equals(String::New("exports.Timestamp"))
@@ -1088,13 +1132,15 @@ uint32_t BSON::calculate_object_size(Handle<Value> value) {
       // Fetch the property name
       Local<String> property_name = property_names->Get(index)->ToString();
       
-      // Convert name to char*
-      ssize_t len = DecodeBytes(property_name, UTF8);
-
       // Fetch the object for the property
       Local<Value> property = object->Get(property_name);
       // Get size of property (property + property name length + 1 for terminating 0)
-      object_size += BSON::calculate_object_size(property) + len + 1 + 1;
+      // printf("========== 1111111111111 !property->IsFunction() || (property->IsFunction() && serializeFunctions) = %d\n", !property->IsFunction() || (property->IsFunction() && serializeFunctions) == true ? 1 : 0);
+      if(!property->IsFunction() || (property->IsFunction() && serializeFunctions)) {
+        // Convert name to char*
+        ssize_t len = DecodeBytes(property_name, UTF8);
+        object_size += BSON::calculate_object_size(property, serializeFunctions) + len + 1 + 1;
+      }
     }      
     
     object_size = object_size + 4 + 1;

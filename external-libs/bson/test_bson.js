@@ -316,6 +316,20 @@ assert.deepEqual(doc2, doc1)
 assert.deepEqual(doc, doc2)
 assert.deepEqual(doc, doc1)
 
+// Serialize function
+var doc = {
+ _id: 'testid',
+  key1: function() {}
+}
+
+var simple_string_serialized = BSONJS.serialize(doc, false, true, true);
+var simple_string_serialized_2 = BSON.serialize(doc, false, true, true);
+
+// Deserialize the string
+var doc1 = BSONJS.deserialize(new Buffer(simple_string_serialized_2));
+var doc2 = BSON.deserialize(new Buffer(simple_string_serialized_2));
+assert.equal(doc1.key1.code.toString(), doc2.key1.code.toString())
+
 // Force garbage collect
 global.gc();
 

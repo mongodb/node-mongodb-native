@@ -543,7 +543,7 @@ var tests = testCase({
     client.createCollection('test_should_throw_error_if_serializing_function', function(err, collection) {
       var func = function() { return 1};
       // Insert the update
-      collection.insert({i:1, z:func }, {safe:true}, function(err, result) {
+      collection.insert({i:1, z:func }, {safe:true, serializeFunctions:true}, function(err, result) {
         collection.findOne({_id:result[0]._id}, function(err, object) {
           test.equal(func.toString(), object.z.code);
           test.equal(1, object.i);          
@@ -732,6 +732,54 @@ var tests = testCase({
           test.deepEqual(doc, item);
           test.done();
         });        
+      });
+    });
+  },
+  
+  'Should Correctly allow for control of serialization of functions on command level' : function(test) {
+    var doc = {
+      str : "String",
+      func : function() {}
+    }
+    
+    client.createCollection("Should_Correctly_allow_for_control_of_serialization_of_functions_on_command_level", function(err, collection) {
+      test.ok(err == null);
+      
+      collection.insert(doc, {safe:true}, function(err, result) {
+        
+        collection.update({str:"String"}, {$set:{c:1, d:function(){}}}, {safe:true, serializeFunctions:false}, function(err, result) {
+          test.equal(1, result);
+
+          collection.findOne({str:"String"}, function(err, item) {
+            test.equal(null, item.d);
+
+            // Execute a safe insert with replication to two servers
+            collection.findAndModify({str:"String"}, [['a', 1]], {'$set':{'f':function() {}}}, {new:true, safe: true, serializeFunctions:true}, function(err, result) {
+              test.ok(result.f instanceof client.bson_deserializer.Code)
+              test.done();
+            })
+          })
+        })
+      });
+    });
+  },
+
+  'Should Correctly allow for control of serialization of functions on collection level' : function(test) {
+    var doc = {
+      str : "String",
+      func : function() {}
+    }
+    
+    client.createCollection("Should_Correctly_allow_for_control_of_serialization_of_functions_on_collection_level", {serializeFunctions:true}, function(err, collection) {
+      test.ok(err == null);
+      
+      collection.insert(doc, {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        collection.findOne({str : "String"}, function(err, item) {
+          test.ok(item.func instanceof client.bson_deserializer.Code);
+          test.done();
+        });
       });
     });
   },

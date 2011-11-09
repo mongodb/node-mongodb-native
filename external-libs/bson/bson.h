@@ -32,11 +32,11 @@ class BSON : public ObjectWrap {
   private:
     static Handle<Value> New(const Arguments &args);
     static Handle<Value> deserialize(char *data, bool is_array_item);
-    static uint32_t serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key);
+    static uint32_t serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key, bool serializeFunctions);
 
     static char* extract_string(char *data, uint32_t offset);
     static const char* ToCString(const v8::String::Utf8Value& value);
-    static uint32_t calculate_object_size(Handle<Value> object);
+    static uint32_t calculate_object_size(Handle<Value> object, bool serializeFunctions);
 
     static void write_int32(char *data, uint32_t value);
     static void write_int64(char *data, int64_t value);
