@@ -784,6 +784,26 @@ var tests = testCase({
     });
   },
   
+  'Should Correctly allow for using a Date object as _id' : function(test) {
+    var doc = {
+      _id : new Date(),
+      str : 'hello'
+    }
+    
+    client.createCollection("Should_Correctly_allow_for_using_a_Date_object_as__id", {serializeFunctions:true}, function(err, collection) {
+      test.ok(err == null);
+
+      collection.insert(doc, {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        collection.findOne({str : "hello"}, function(err, item) {
+          test.ok(item._id instanceof Date);
+          test.done();
+        });
+      });
+    });
+  },
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
