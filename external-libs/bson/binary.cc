@@ -52,6 +52,29 @@ Handle<Value> Binary::New(const Arguments &args) {
     char *oid_string_bytes = (char *)malloc(256);
     *(oid_string_bytes) = '\0';
     binary = new Binary(BSON_BINARY_SUBTYPE_DEFAULT, 256, 0, oid_string_bytes);
+  } else if(args.Length() == 1 && Buffer::HasInstance(args[0])) {
+    // Define pointer to data
+    char *data;
+    uint32_t length;      
+    // Unpack the object
+    Local<Object> obj = args[0]->ToObject();
+
+    // Unpack the buffer object and get pointers to structures
+    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+      Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+      data = buffer->data();
+      length = buffer->length();
+    #else
+      data = Buffer::Data(obj);
+      length = Buffer::Length(obj);
+    #endif
+
+    // Allocate the memory for the object
+    char *storedData = (char *)malloc(length * sizeof(char));
+    // Copy from one to the other
+    memcpy(storedData, data, length);
+    // Create a binary object
+    binary = new Binary(BSON_BINARY_SUBTYPE_DEFAULT, length, 0, storedData);
   } else if(args.Length() == 1 && args[0]->IsString()) {
     Local<String> str = args[0]->ToString();
     // Contains the bytes for the data
@@ -61,6 +84,32 @@ Handle<Value> Binary::New(const Arguments &args) {
     node::DecodeWrite(oid_string_bytes, str->Length(), str, node::BINARY);    
     // Create a binary object
     binary = new Binary(BSON_BINARY_SUBTYPE_DEFAULT, str->Length(), str->Length(), oid_string_bytes);
+  } else if(args.Length() == 2 && args[1]->IsNumber() && Buffer::HasInstance(args[0])) {    
+    // Define pointer to data
+    char *data;
+    uint32_t length;      
+    // Unpack the object
+    Local<Object> obj = args[0]->ToObject();
+    Local<Integer> intr = args[1]->ToInteger();
+
+    // Unpack the buffer object and get pointers to structures
+    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+      Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+      data = buffer->data();
+      length = buffer->length();
+    #else
+      data = Buffer::Data(obj);
+      length = Buffer::Length(obj);
+    #endif
+
+    // Allocate the memory for the object
+    char *storedData = (char *)malloc(length * sizeof(char));
+    // Copy from one to the other
+    memcpy(storedData, data, length);
+    // Decode the subtype
+    uint32_t sub_type = intr->Uint32Value();
+    // Create a binary object
+    binary = new Binary(sub_type, length, 0, storedData);
   } else if(args.Length() == 2 && args[1]->IsNumber() && args[0]->IsString()) {    
     Local<String> str = args[0]->ToString();
     Local<Integer> intr = args[1]->ToInteger();
@@ -73,7 +122,7 @@ Handle<Value> Binary::New(const Arguments &args) {
     uint32_t sub_type = intr->Uint32Value();
     binary = new Binary(sub_type, str->Length(), str->Length(), oid_string_bytes);
   } else {
-    return VException("Argument must be either none, a string or a string and a sub_type");        
+    return VException("Argument must be either none, a string or a string and a int, a buffer or a buffer and a int");        
   }
   
   // Wrap it
@@ -105,6 +154,7 @@ void Binary::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "write", Write);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "read", Read);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "readInto", ReadInto);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "toJSON", ToJSON);
 
   // Getters for correct serialization of the object  
   constructor_template->InstanceTemplate()->SetAccessor(subtype_symbol, SubtypeGetter, SubtypeSetter);
@@ -315,6 +365,110 @@ Handle<Value> Binary::ToString(const Arguments &args) {
   Local<Value> bin_value = Encode(binary->data, binary->number_of_bytes, BINARY);
   return scope.Close(bin_value);
 }
+
+/*
+ * ToJSON returns a BASE64 ENCODED String for the binary object
+ *
+*/
+
+static const char *base64_table = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                  "abcdefghijklmnopqrstuvwxyz"
+                                  "0123456789+/";
+static const int unbase64_table[] =
+  {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,-1,-1,-2,-1,-1
+  ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  ,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,62,-1,-1,-1,63
+  ,52,53,54,55,56,57,58,59,60,61,-1,-1,-1,-1,-1,-1
+  ,-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14
+  ,15,16,17,18,19,20,21,22,23,24,25,-1,-1,-1,-1,-1
+  ,-1,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40
+  ,41,42,43,44,45,46,47,48,49,50,51,-1,-1,-1,-1,-1
+  ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  ,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+  };
+#define unbase64(x) unbase64_table[(uint8_t)(x)]
+
+Handle<Value> Binary::ToJSON(const Arguments &args) {
+  HandleScope scope;
+
+  // Unpack the Binary object
+  Binary *binary = ObjectWrap::Unwrap<Binary>(args.This());
+  
+  char *data = binary->data;
+  int32_t end = binary->number_of_bytes;
+  int32_t start = 0;
+  int n = end - start;
+  int out_len = (n + 2 - ((n + 2) % 3)) / 3 * 4;
+  char *out = new char[out_len];
+
+  uint8_t bitbuf[3];
+  int i = start; // data() index
+  int j = 0; // out index
+  char c;
+  bool b1_oob, b2_oob;
+
+  while (i < end) {
+    bitbuf[0] = data[i++];
+
+    if (i < end) {
+      bitbuf[1] = data[i];
+      b1_oob = false;
+    }  else {
+      bitbuf[1] = 0;
+      b1_oob = true;
+    }
+    i++;
+
+    if (i < end) {
+      bitbuf[2] = data[i];
+      b2_oob = false;
+    }  else {
+      bitbuf[2] = 0;
+      b2_oob = true;
+    }
+    i++;
+
+
+    c = bitbuf[0] >> 2;
+    assert(c < 64);
+    out[j++] = base64_table[(int)c];
+    assert(j < out_len);
+
+    c = ((bitbuf[0] & 0x03) << 4) | (bitbuf[1] >> 4);
+    assert(c < 64);
+    out[j++] = base64_table[(int)c];
+    assert(j < out_len);
+
+    if (b1_oob) {
+      out[j++] = '=';
+    } else {
+      c = ((bitbuf[1] & 0x0F) << 2) | (bitbuf[2] >> 6);
+      assert(c < 64);
+      out[j++] = base64_table[(int)c];
+    }
+    assert(j < out_len);
+
+    if (b2_oob) {
+      out[j++] = '=';
+    } else {
+      c = bitbuf[2] & 0x3F;
+      assert(c < 64);
+      out[j++]  = base64_table[(int)c];
+    }
+    assert(j <= out_len);
+  }
+
+  Local<String> string = String::New(out, out_len);
+  delete [] out;
+  return scope.Close(string);
+}
+
 
 
 

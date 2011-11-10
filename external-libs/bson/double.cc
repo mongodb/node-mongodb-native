@@ -64,6 +64,7 @@ void Double::Initialize(Handle<Object> target) {
   // Instance methods
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "toJSON", ToJSON);
 
   target->Set(String::NewSymbol("Double"), constructor_template->GetFunction());
 }
@@ -79,23 +80,7 @@ Handle<Value> Double::ValueGetter(Local<String> property, const AccessorInfo& in
   return scope.Close(Double_obj->value);
 }
 
-void Double::ValueSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
-  // if(value->IsString()) {
-  //   // Unpack the long object
-  //   Double *Double_obj = ObjectWrap::Unwrap<Double>(info.Holder());
-  //   // Convert the value to a string
-  //   Local<String> str = value->ToString();
-  //   // Set up the string
-  //   char *Double = (char *)malloc(str->Length() * sizeof(char) + 1);
-  //   *(Double + str->Length()) = '\0';
-  //   // Copy over
-  //   node::DecodeWrite(Double, str->Length(), str, node::BINARY);  
-  //   // Free existing pointer if any
-  //   if(Double_obj->value != NULL) free(Double_obj->value);
-  //   // Return the code
-  //   Double_obj->value = Double;
-  // }
-}
+void Double::ValueSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {}
 
 Handle<Value> Double::Inspect(const Arguments &args) {
   return Double::ToString(args);
@@ -107,9 +92,18 @@ Handle<Value> Double::ToString(const Arguments &args) {
   // Unpack the Binary object
   Double *double_obj = ObjectWrap::Unwrap<Double>(args.This());
   // Return the raw data  
-  // return String::New(Double_obj->value);
   return double_obj->value->ToString();
 }
+
+Handle<Value> Double::ToJSON(const Arguments &args) {
+  HandleScope scope;
+
+  // Unpack the Binary object
+  Double *double_obj = ObjectWrap::Unwrap<Double>(args.This());
+  // Return the double number
+  return scope.Close(double_obj->value);
+}
+
 
 
 

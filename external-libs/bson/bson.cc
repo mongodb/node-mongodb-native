@@ -117,7 +117,7 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
     data = Buffer::Data(obj);
     length = Buffer::Length(obj);
   #endif
-
+  
   uint32_t object_size = 0;
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
   if(args.Length() == 5) {

@@ -11,12 +11,18 @@ var sys = require('util'),
   Binary = require('../../lib/mongodb/bson/bson').Binary,
   Code = require('../../lib/mongodb/bson/bson').Code,  
   DBRef = require('../../lib/mongodb/bson/bson').DBRef,  
+  Symbol = require('../../lib/mongodb/bson/bson').Symbol,  
+  Double = require('../../lib/mongodb/bson/bson').Double,  
+  Timestamp = require('../../lib/mongodb/bson/bson').Timestamp,  
   assert = require('assert');
-  
+ 
 var Long2 = require('./bson').Long,
     ObjectID2 = require('./bson').ObjectID,
     Binary2 = require('./bson').Binary,
     Code2 = require('./bson').Code,
+    Symbol2 = require('./bson').Symbol,
+    Double2 = require('./bson').Double,
+    Timestamp2 = require('./bson').Timestamp,
     DBRef2 = require('./bson').DBRef;
     
 sys.puts("=== EXECUTING TEST_BSON ===");
@@ -24,6 +30,38 @@ sys.puts("=== EXECUTING TEST_BSON ===");
 // Should fail due to illegal key
 assert.throws(function() { new ObjectID('foo'); })
 assert.throws(function() { new ObjectID2('foo'); })
+
+//
+// Assert correct toJSON
+//
+var binary1 = new Binary(new Buffer('00000000000000000000000000000000'));
+var binary2 = new Binary2(new Buffer('00000000000000000000000000000000'));
+assert.equal(JSON.stringify(binary1), JSON.stringify(binary2));
+
+var objectId = new ObjectID();
+var dbref1 = new DBRef('test', objectId, 'db');
+var dbref2 = new DBRef2('test', ObjectID2.createFromHexString(objectId.toHexString()), 'db');
+assert.equal(JSON.stringify(dbref1), JSON.stringify(dbref2));
+
+var symbol1 = new Symbol('hello');
+var symbol2 = new Symbol2('hello');
+assert.equal(JSON.stringify(symbol1), JSON.stringify(symbol2));
+
+var double1 = new Double(3.232);
+var double2 = new Double2(3.232);
+assert.equal(JSON.stringify(double1), JSON.stringify(double2));
+
+var code1 = new Code('hello', {a:1})
+var code2 = new Code2('hello', {a:1})
+assert.equal(JSON.stringify(code1), JSON.stringify(code2));
+
+var long1 = Long.fromNumber(1000);
+var long2 = Long2.fromNumber(1000);
+assert.equal(JSON.stringify(long1), JSON.stringify(long2));
+
+var timestamp1 = Timestamp.fromNumber(1000);
+var timestamp2 = Timestamp2.fromNumber(1000);
+assert.equal(JSON.stringify(timestamp1), JSON.stringify(timestamp2));
 
 // Long data type tests
 var l2_string = Long2.fromNumber(100);

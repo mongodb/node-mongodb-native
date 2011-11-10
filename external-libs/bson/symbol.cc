@@ -64,6 +64,7 @@ void Symbol::Initialize(Handle<Object> target) {
   // Instance methods
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "toJSON", ToJSON);
 
   target->Set(String::NewSymbol("Symbol"), constructor_template->GetFunction());
 }
@@ -110,6 +111,11 @@ Handle<Value> Symbol::ToString(const Arguments &args) {
   // return String::New(symbol_obj->value);
   return symbol_obj->value;
 }
+
+Handle<Value> Symbol::ToJSON(const Arguments &args) {
+  return Symbol::ToString(args);
+}
+
 
 
 

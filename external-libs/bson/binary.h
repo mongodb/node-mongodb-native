@@ -34,6 +34,7 @@ class Binary : public ObjectWrap {
     static Handle<Value> Put(const Arguments &args);
     static Handle<Value> Write(const Arguments &args);
     static Handle<Value> Read(const Arguments &args);
+    static Handle<Value> ToJSON(const Arguments &args);
     
     /**
      * Writes this binary data into node Buffer passed as first js arg. 

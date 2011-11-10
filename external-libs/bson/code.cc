@@ -92,8 +92,8 @@ void Code::Initialize(Handle<Object> target) {
   scope_symbol = NODE_PSYMBOL("scope");
 
   // Getters for correct serialization of the object  
-  constructor_template->InstanceTemplate()->SetAccessor(code_symbol, CodeGetter, CodeSetter);
   constructor_template->InstanceTemplate()->SetAccessor(scope_symbol, ScopeGetter, ScopeSetter);
+  constructor_template->InstanceTemplate()->SetAccessor(code_symbol, CodeGetter, CodeSetter);
   
   // Instance methods
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);

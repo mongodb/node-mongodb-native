@@ -22,6 +22,7 @@
 * Fix for Cursor rewind broken, Issue #389
 * Allow Gridstore.exist to query using regexp, Issue #387, fix by (https://github.com/kaij)
 * Updated documentation on https://github.com/christkv/node-mongodb-native
+* Fixed toJSON methods across all objects for BSON, Binary return Base64 Encoded data
 
 0.9.6-22 2011-10-15
 * Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370
