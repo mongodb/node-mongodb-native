@@ -654,6 +654,25 @@ var tests = testCase({
     });    
   },
 
+  shouldCheckExistsByUsingRegexp : function(test) {
+    var gridStore = new GridStore(client, 'shouldCheckExistsByUsingRegexp.txt', 'w');
+  
+    gridStore.open(function(err, gridStore) {
+      gridStore.write('bar', function(err, gridStore) {
+        gridStore.close(function(err, result) {
+  
+          GridStore.exist(client, /shouldCheck/, function(err, result) {
+            test.equal(null, err);
+            test.equal(true, result);
+  
+            client.close();
+            test.done();
+          });
+        });
+      });
+    });    
+  },
+
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
