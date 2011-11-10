@@ -911,7 +911,7 @@ var tests = testCase({
           test.equal(null, item._id);
           test.equal(1, item.a);
           test.equal(2, item.c);          
-
+  
           collection.find({a:1}, {fields:{'_id':0}}).toArray(function(err, items) {
             var item = items[0]
             test.equal(null, item._id);
@@ -921,7 +921,25 @@ var tests = testCase({
           })
         })
       });
-    });        
+    });
+  },
+  
+  'Should correctly execute find and findOne queries in the same way' : function(test) {
+    client.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {      
+      var doc = {_id : new client.bson_serializer.ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
+      // insert doc
+      collection.insert(doc, {safe:true}, function(err, result) {
+        
+        collection.find({_id: doc._id}, {comments: {$slice: -5}}).toArray(function(err, docs) {
+          test.equal(5, docs[0].comments.length)
+
+          collection.findOne({_id: doc._id}, {comments: {$slice: -5}}, function(err, item) {
+            test.equal(5, item.comments.length)
+            test.done();
+          });
+        });
+      });
+    });
   },
 
   noGlobalsLeaked : function(test) {

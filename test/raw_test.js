@@ -191,7 +191,7 @@ var tests = testCase({
           var object = client.bson_deserializer.BSON.deserialize(items[0]);
           test.equal(3, object.b)            
   
-          collection.findOne(rawQueryObject, {fields:rawFieldsObject, raw:true}, function(err, item) {
+          collection.findOne(rawQueryObject, rawFieldsObject, {raw:true}, function(err, item) {
             var object = client.bson_deserializer.BSON.deserialize(item);
             test.equal(3, object.b)                        
             test.done();
@@ -247,7 +247,7 @@ var tests = testCase({
       }              
 
       try {
-        collection.findOne({}, {fields:illegalBuffer}).toArray(function() {})
+        collection.findOne({}, illegalBuffer).toArray(function() {})
       } catch(err) {
         test.ok(err.toString().indexOf("query fields") != -1);
         test.done();
