@@ -976,6 +976,38 @@ var tests = testCase({
       });      
     });    
   },
+  
+  'Should correctly rewind and restart cursor' : function(test) {
+    var docs = [];
+    
+    for(var i = 0; i < 100; i++) {
+      var d = new Date().getTime() + i*1000;
+      docs[i] = {'a':i, createdAt:new Date(d)};
+    }
+
+    // Create collection
+    client.createCollection('Should_correctly_rewind_and_restart_cursor', function(err, collection) {
+      test.equal(null, err);
+      
+      // insert all docs
+      collection.insert(docs, {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        var cursor = collection.find({});
+        cursor.nextObject(function(err, item) {
+          test.equal(0, item.a)
+          // Rewind the cursor
+          cursor.rewind();
+            
+          // Grab the first object
+          cursor.nextObject(function(err, item) {
+            test.equal(0, item.a)
+            test.done();
+          })
+        })
+      })        
+    });        
+  },
 
   // run this last
   noGlobalsLeaked: function(test) {
