@@ -61,6 +61,7 @@ class Long : public ObjectWrap {
     static Handle<Value> GetHighBits(const Arguments &args);
     static Handle<Value> GreatherThan(const Arguments &args);
     static Handle<Value> FromInt(const Arguments &args);
+    static Handle<Value> FromString(const Arguments &args);
     static Handle<Value> ToInt(const Arguments &args);
     static Handle<Value> ToNumber(const Arguments &args);
     static Handle<Value> ToJSON(const Arguments &args);

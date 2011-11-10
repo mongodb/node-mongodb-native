@@ -128,6 +128,7 @@ void Long::Initialize(Handle<Object> target) {
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "fromNumber", FromNumber);
   NODE_SET_METHOD(constructor_template->GetFunction(), "fromInt", FromInt);
+  NODE_SET_METHOD(constructor_template->GetFunction(), "fromString", FromString);
   
   // Add class to scope
   target->Set(String::NewSymbol("Long"), constructor_template->GetFunction());
@@ -534,6 +535,46 @@ Handle<Value> Long::FromInt(const Arguments &args) {
   // Instantiate Long object and return
   Local<Value> argv[] = {number};
   Local<Object> long_obj = constructor_template->GetFunction()->NewInstance(1, argv);
+  return scope.Close(long_obj);  
+}
+
+Handle<Value> Long::FromString(const Arguments &args) {
+  HandleScope scope;
+
+  // Validate the arguments
+  if(args.Length() == 1 && !args[0]->IsString()) return VException("If we have one argument it must be of type [string]");
+	if(args.Length() == 2 && !args[0]->IsString() && !args[1]->IsUint32()) return VException("If we have two arguments it must be of type [string, int]");
+  // Unwrap Number variable
+  Local<String> numberString = args[0]->ToString();
+
+	// Unpack base
+	uint32_t base = 10;
+	if(args.Length() == 2) {
+		base = args[1]->ToUint32()->Value();
+	}
+	
+	// Let's unpack the string to it's cstring form
+  // Allocate space for they key string
+  char *number_str = (char *)malloc(numberString->Utf8Length() * sizeof(char) + 1);
+  // Decode the key
+  ssize_t len = DecodeBytes(numberString, ASCII);
+  ssize_t written = DecodeWrite(number_str, len, numberString, ASCII);
+  *(number_str + numberString->Utf8Length()) = '\0';
+
+	// Contains the address of the end pointer of the parsing
+	char *endPointer;
+	// Convert to a value
+	int64_t value = strtol(number_str, &endPointer, base);
+	// Free up string
+	free(number_str);
+
+	// Split value into parts
+	int32_t low_bits = (value % BSON_INT32_) | 0;
+	int32_t high_bits = (value / BSON_INT32_) | 0;
+
+  // Instantiate Long object and return
+  Local<Value> argv[] = {Int32::New(low_bits), Int32::New(high_bits)};
+  Local<Object> long_obj = constructor_template->GetFunction()->NewInstance(2, argv);
   return scope.Close(long_obj);  
 }
 

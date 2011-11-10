@@ -872,6 +872,34 @@ var tests = testCase({
          })  
     });    
   },
+  
+  'Should correctly return record with 64-bit id' : function(test) {
+    client.createCollection('should_correctly_return_record_with_64bit_id', function(err, collection) {
+      var _lowerId = new client.bson_serializer.ObjectID();
+      var _higherId = new client.bson_serializer.ObjectID();
+      var lowerId = new client.bson_serializer.Long.fromString('133118461172916224', 10);
+      var higherId = new client.bson_serializer.Long.fromString('133118461172916225', 10);
+
+      var lowerDoc = {_id:_lowerId, id: lowerId};
+      var higherDoc = {_id:_higherId, id: higherId};
+
+      collection.insert([lowerDoc, higherDoc], {safe:true}, function(err, result) {
+        test.ok(err == null);
+
+        // Select record with id of 133118461172916225 using $gt directive
+        collection.find({id: {$gt:  lowerId}}, {}, function(err, cur) {
+          test.ok(err == null);
+
+          cur.toArray(function(err, arr) {
+            test.ok(err == null);
+            test.equal(arr.length, 1, 'Selecting record via $gt directive on 64-bit integer should return a record with higher Id')
+            test.equal(arr[0].id.toString(), '133118461172916225', 'Returned Id should be equal to 133118461172916225')
+            test.done()
+          });
+        });
+      });
+    });
+  },  
 
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();

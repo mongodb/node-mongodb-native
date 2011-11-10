@@ -310,22 +310,22 @@ void BSON::write_int64(char *data, int64_t value) {
 
 char *BSON::check_key(Local<String> key) {
   // Allocate space for they key string
-  char *key_str = (char *)malloc(key->Length() * sizeof(char) + 1);
+  char *key_str = (char *)malloc(key->Utf8Length() * sizeof(char) + 1);
   // Error string
   char *error_str = (char *)malloc(256 * sizeof(char));
   // Decode the key
   ssize_t len = DecodeBytes(key, BINARY);
   ssize_t written = DecodeWrite(key_str, len, key, BINARY);
-  *(key_str + key->Length()) = '\0';
+  *(key_str + key->Utf8Length()) = '\0';
   // Check if we have a valid key
-  if(key->Length() > 0 && *(key_str) == '$') {
+  if(key->Utf8Length() > 0 && *(key_str) == '$') {
     // Create the string
     sprintf(error_str, "key %s must not start with '$'", key_str);
     // Free up memory
     free(key_str);
     // Throw exception with string
     throw error_str;
-  } else if(key->Length() > 0 && strchr(key_str, '.') != NULL) {
+  } else if(key->Utf8Length() > 0 && strchr(key_str, '.') != NULL) {
     // Create the string
     sprintf(error_str, "key %s must not contain '.'", key_str);
     // Free up memory
