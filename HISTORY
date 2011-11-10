@@ -20,6 +20,7 @@
 * Added Long.fromString to c++ class and fixed minor bug in the code (Test case for $gt operator on 64-bit integers, Issue #394)
 * findOne and find now share same code execution and will work in the same manner, Issue #399
 * fix for tailable cursors, Issue #384
+* fix for Cursor rewind broken, Issue #389
 
 0.9.6-22 2011-10-15
 * Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370
