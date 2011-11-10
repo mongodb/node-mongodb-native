@@ -63,6 +63,7 @@ There are several option values that can be used with an update
   * `safe` - run callback only after the update is done, defaults to false
   * `multi` - update all records that match the query object, default is false (only the first one found is updated)
   * `upsert` - if true and no records match the query, insert `update` as a new record 
+  * `raw` - driver returns updated document as bson binary Buffer, `default:false`
 
 ### Replacement object
 

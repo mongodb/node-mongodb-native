@@ -17,9 +17,10 @@ Collection obejct is a pointer to a specific collection in the [database](databa
 
 Collections can be created with `createCollection`
 
-    db.createCollection(name, callback)
+    db.createCollection([[name[, options]], callback)
 
-where `name` is the name of the collection and `callback` is a callback function. `db` is the database object. 
+where `name` is the name of the collection, options a set of configuration parameters and `callback` is a callback function. `db` is the database object. 
+
 
 The first parameter for
 the callback is the error object (null if no error) and the second one is the pointer to the newly created
@@ -29,6 +30,11 @@ the function simple returns the pointer to the existing collection and does not 
     db.createCollection("test", function(err, collection){
         collection.insert({"test":"value"});
     });
+
+## Creating collections options
+Several options can be passed to the `createCollection` function with `options` parameter.  
+
+	* `raw` - driver returns documents as bson binary Buffer objects, `default:false`
 
 ### Collection properties
 
@@ -79,9 +85,14 @@ Where `callback` gets two parameters - an error object (if an error occured) and
 
 Existing collections can be opened with `collection`
 
-    db.collection("name", callback);
+    db.collection([[name[, options]], callback);
 
 If strict mode is off, then a new collection is created if not already present.
+
+## Selecting collections options
+Several options can be passed to the `collection` function with `options` parameter.  
+
+	* `raw` - driver returns documents as bson binary Buffer objects, `default:false`
 
 ## Renaming collections
 

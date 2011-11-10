@@ -1,8 +1,7 @@
-0.9.7
+0.9.7 2011-11-10
 * Added priority setting to replicaset manager
 * Added correct handling of passive servers in replicaset
 * Reworked socket code for simpler clearer handling
-* Added master_not_needed option to replicaset server configuration when connecting to a read only set
 * Correct handling of connections in test helpers
 * Added control of retries on failure
     * control with parameters retryMiliSeconds and numberOfRetries when creating a db instance
@@ -22,6 +21,7 @@
 * Fix for tailable cursors, Issue #384
 * Fix for Cursor rewind broken, Issue #389
 * Allow Gridstore.exist to query using regexp, Issue #387, fix by (https://github.com/kaij)
+* Updated documentation on https://github.com/christkv/node-mongodb-native
 
 0.9.6-22 2011-10-15
 * Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370

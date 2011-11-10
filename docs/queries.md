@@ -17,6 +17,7 @@ Where
   * `query` - is a query object, defining the conditions the documents need to apply 
   * `fields` - indicates which fields should be included in the response (default is all)
   * `options` - defines extra logic (sorting options, paging etc.)
+  * `raw` - driver returns documents as bson binary Buffer objects, `default:false`
   
 The result for the query is actually a cursor object. This can be used directly or converted to an array.
 

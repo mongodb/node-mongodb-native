@@ -18,9 +18,15 @@ The first thing to do in order to make queries to the database is to open one. T
 ## Server options
 Several options can be passed to the `Server` constructor with `options` parameter.  
   
-  * `auto_reconnect` - to reconnect automatically, default is false
-  * `poolSize` - specify the number of connections in the pool, default is 1
-  
+  * `auto_reconnect` - to reconnect automatically, `default:false`
+  * `poolSize` - specify the number of connections in the pool `default:1`
+  * `retryMiliSeconds` - specify the number of milliseconds between connection attempts `default:5000`
+  * `numberOfRetries` - specify the number of retries for connection attempts `default:3`
+  * `reaperInterval` - specify the number of milliseconds between each reaper attempt `default:1000`
+  * `reaperTimeout` - specify the number of milliseconds for timing out callbacks that don't return `default:30000`
+  * `raw` - driver expects Buffer raw bson document, `default:false`
+
+
 ## DB options
 
 Several options can be passed to the `Db` constructor with `options` parameter.
@@ -65,6 +71,14 @@ For example
     });
     
 NB! If `auto_reconnect` was set to true when creating the server, then the connection will be automatically reopened on next database operation. Nevertheless the `close` event will be fired.
+
+## Sharing the connections over multiple dbs
+
+To share the connection pool across multiple databases you database instance has method `db`
+
+	db_connector.db(name)
+	
+this returns a new `db` instance that shares the connections off the previous instance but will send all commands to the database `name`. This allows for better control of resource usage in a multiple database scenario.
 
 ## Deleting a database
 

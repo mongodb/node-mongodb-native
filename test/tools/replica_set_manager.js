@@ -26,7 +26,7 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.arbiterCount = options["arbiter_count"] != null ? options["arbiter_count"] : 2;
   this.secondaryCount = options["secondary_count"] != null ? options["secondary_count"] : 1;
   this.passiveCount = options["passive_count"] != null ? options["passive_count"] : 1;
-  this.primaryCount = 1;
+  this.primaryCount = options["primary_count"] != null ? options["primary_count"] : 1;
   this.keyPath = [process.cwd(), "test", "tools", "keyfile.txt"].join("/");
   fs.chmodSync(this.keyPath, 0600);
   

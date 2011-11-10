@@ -804,6 +804,17 @@ var tests = testCase({
     });
   },
   
+  'Should Correctly fail to update returning 0 results' : function(test) {
+    client.createCollection("Should_Correctly_fail_to_update_returning_0_results", {serializeFunctions:true}, function(err, collection) {
+      test.ok(err == null);
+      
+      collection.update({a:1}, {$set: {a:1}}, {safe:true}, function(err, numberOfUpdated) {
+        test.equal(0, numberOfUpdated);
+        test.done();
+      });
+    });    
+  },
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));

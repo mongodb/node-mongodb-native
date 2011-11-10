@@ -125,7 +125,7 @@ Checking if a file exists in GridFS can be done with `exist`
 Where
 
   * `db` is the database object
-  * `filename` is the name of the file to be checked
+  * `filename` is the name of the file to be checked or a regular expression
   * `callback` is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not
   
 ## Seeking in a GridStore
