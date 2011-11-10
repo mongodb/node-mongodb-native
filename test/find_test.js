@@ -879,17 +879,17 @@ var tests = testCase({
       var _higherId = new client.bson_serializer.ObjectID();
       var lowerId = new client.bson_serializer.Long.fromString('133118461172916224', 10);
       var higherId = new client.bson_serializer.Long.fromString('133118461172916225', 10);
-
+  
       var lowerDoc = {_id:_lowerId, id: lowerId};
       var higherDoc = {_id:_higherId, id: higherId};
-
+  
       collection.insert([lowerDoc, higherDoc], {safe:true}, function(err, result) {
         test.ok(err == null);
-
+  
         // Select record with id of 133118461172916225 using $gt directive
         collection.find({id: {$gt:  lowerId}}, {}, function(err, cur) {
           test.ok(err == null);
-
+  
           cur.toArray(function(err, arr) {
             test.ok(err == null);
             test.equal(arr.length, 1, 'Selecting record via $gt directive on 64-bit integer should return a record with higher Id')
@@ -900,6 +900,29 @@ var tests = testCase({
       });
     });
   },  
+  
+  'Should Correctly find a Document using findOne excluding _id field' : function(test) {
+    client.createCollection('Should_Correctly_find_a_Document_using_findOne_excluding__id_field', function(err, collection) {
+      var doc = {_id : new client.bson_serializer.ObjectID(), a:1, c:2}
+      // insert doc
+      collection.insert(doc, {safe:true}, function(err, result) {
+        // Get one document, excluding the _id field
+        collection.findOne({a:1}, {fields:{'_id': 0}}, function(err, item) {
+          test.equal(null, item._id);
+          test.equal(1, item.a);
+          test.equal(2, item.c);          
+
+          collection.find({a:1}, {fields:{'_id':0}}).toArray(function(err, items) {
+            var item = items[0]
+            test.equal(null, item._id);
+            test.equal(1, item.a);
+            test.equal(2, item.c);          
+            test.done();
+          })
+        })
+      });
+    });        
+  },
 
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
