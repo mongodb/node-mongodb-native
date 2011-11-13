@@ -97,7 +97,7 @@ var tests = testCase({
   shouldCorrectlyTransformObjectIDToAndFromHexString : function(test) {
     var objectId = new client.bson_serializer.ObjectID(null);
     var originalHex= objectId.toHexString();
-
+  
     var newObjectId= new client.bson_serializer.ObjectID.createFromHexString(originalHex)
     var newHex= newObjectId.toHexString();
     test.equal(originalHex, newHex);
@@ -126,6 +126,14 @@ var tests = testCase({
         });
       });
     });
+  },
+  
+  shouldCorrectlyGenerateObjectIDFromTimestamp : function(test) {
+    var timestamp = Math.floor(new Date().getTime()/1000);
+    var objectID = new client.bson_serializer.ObjectID(timestamp);
+    var time2 = objectID.generationTime;
+    test.equal(timestamp, time2);
+    test.done();
   },
 
   noGlobalsLeaked : function(test) {

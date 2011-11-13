@@ -38,6 +38,9 @@ class ObjectID : public ObjectWrap {
     static Handle<Value> IdGetter(Local<String> property, const AccessorInfo& info);
     static void IdSetter(Local<String> property, Local<Value> value, const AccessorInfo& info);
 
+    static Handle<Value> GenerationTimeGetter(Local<String> property, const AccessorInfo& info);
+    static void GenerationTimeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info);
+
     // Constructor used for creating new Long objects from C++
     static Persistent<FunctionTemplate> constructor_template;
     // Instance methods

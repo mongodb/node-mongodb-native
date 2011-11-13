@@ -27,7 +27,6 @@ ObjectID::~ObjectID() {
 }
 
 char *ObjectID::uint32_to_char(uint32_t value, char *buf, bool forceBigEndian) {
-
   if (forceBigEndian) {
     *(buf) = (char)((value >> 24) & 0xff);
     *(buf + 1) = (char)((value >> 16) & 0xff);
@@ -41,7 +40,6 @@ char *ObjectID::uint32_to_char(uint32_t value, char *buf, bool forceBigEndian) {
   }
   
   *(buf + 4) = '\0';
-  
   return buf;
 }
 
@@ -52,10 +50,8 @@ char *ObjectID::oid_id_generator(char *oid_string) {
   static int incr = 0;
   int fuzz = 0;
   // Fetch a new counter ()
-  int i = incr++; /*TODO make atomic*/
-  
+  int i = incr++; /*TODO make atomic*/  
   int t = time(NULL);
-
   
   /* TODO rand sucks. find something better */
   if (!fuzz){
@@ -87,11 +83,8 @@ char *ObjectID::oid_id_generator(char *oid_string) {
 
 // Generates a new oid from timestamp (in seconds)
 char *ObjectID::oid_id_from_time(uint32_t t, char *oid_string) {
-
-  
   // Build a 12 byte char string based on the address of the current object, the rand number and the current time
   char oid_string_c[12 * sizeof(char) + 1];
-  
   *(oid_string_c + 12) = '\0';
   
   ObjectID::uint32_to_char(t,oid_string_c, true);// timestamp must be stored bigEndian
@@ -99,7 +92,6 @@ char *ObjectID::oid_id_from_time(uint32_t t, char *oid_string) {
   ObjectID::uint32_to_char(0,oid_string_c + 8, true);// counter must be stored bigEndian
 
   // Allocate storage for a 24 character hex oid   
-
   char *pbuffer = oid_string;
   // Terminate the string
   *(pbuffer + 24) = '\0';      
@@ -178,6 +170,7 @@ Handle<Value> ObjectID::New(const Arguments &args) {
 }
 
 static Persistent<String> id_symbol;
+static Persistent<String> generationTime_symbol;
 
 void ObjectID::Initialize(Handle<Object> target) {
   // Grab the scope of the call from Node
@@ -190,9 +183,11 @@ void ObjectID::Initialize(Handle<Object> target) {
 
   // Propertry symbols
   id_symbol = NODE_PSYMBOL("id");
+  generationTime_symbol = NODE_PSYMBOL("generationTime");
 
   // Getters for correct serialization of the object  
   constructor_template->InstanceTemplate()->SetAccessor(id_symbol, IdGetter, IdSetter);
+  constructor_template->InstanceTemplate()->SetAccessor(generationTime_symbol, GenerationTimeGetter, GenerationTimeSetter);
   
   // Instance methods
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
@@ -254,6 +249,30 @@ Handle<Value> ObjectID::IdGetter(Local<String> property, const AccessorInfo& inf
   return scope.Close(final_str);
 }
 
+Handle<Value> ObjectID::GenerationTimeGetter(Local<String> property, const AccessorInfo& info) {
+  HandleScope scope;
+  
+  // Unpack the long object
+  ObjectID *objectid_obj = ObjectWrap::Unwrap<ObjectID>(info.Holder());
+  // Convert the hex oid to bin
+  char *binary_oid = objectid_obj->convert_hex_oid_to_bin();
+  // Decode the timestamp as bigendian integer
+  int32_t value;
+  // Get pointer to int value and write the big-endian value to it
+  char *intmemory = (char *)&value;
+  *(intmemory) = *(binary_oid + 3);
+  *(intmemory + 1) = *(binary_oid + 2);;
+  *(intmemory + 2) = *(binary_oid + 1);
+  *(intmemory + 3) = *(binary_oid);
+  // Free the memory for binary_oid
+  free(binary_oid);
+  // Close the scope
+  return scope.Close(Int32::New(value));
+}
+
+void ObjectID::GenerationTimeSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
+}
+
 bool ObjectID::equals(ObjectID *object_id) {
   char *current_id = this->oid;
   char *compare_id = object_id->oid;
@@ -291,7 +310,6 @@ char *ObjectID::convert_hex_oid_to_bin() {
 
 void ObjectID::IdSetter(Local<String> property, Local<Value> value, const AccessorInfo& info) {
 }
-
 
 Handle<Value> ObjectID::CreateFromHexString(const Arguments &args) {
   HandleScope scope;

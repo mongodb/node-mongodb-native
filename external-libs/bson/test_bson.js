@@ -289,7 +289,7 @@ assert.equal(simple_string_serialized_2.length, simple_string_serialized.length)
 assert.deepEqual(simple_string_serialized, simple_string_serialized_2)
 var object = BSONJS.deserialize(new Buffer(simple_string_serialized_2, 'binary'));
 var object2 = BSON.deserialize(simple_string_serialized);
-assert.deepEqual(object, object2);
+assert.equal(object.doc.id, object2.doc.id)
 
 // JS Object
 var c1 = { _id: new ObjectID, comments: [], title: 'number 1' };
@@ -323,7 +323,9 @@ for(var i = 0; i < simple_string_serialized_2.length; i++) {
 // Deserialize the string
 var doc1 = BSONJS.deserialize(new Buffer(simple_string_serialized_2));
 var doc2 = BSON.deserialize(new Buffer(simple_string_serialized_2));
-assert.deepEqual(doc2, doc1)
+assert.equal(doc._id.id, doc1._id.id)
+assert.equal(doc._id.id, doc2._id.id)
+assert.equal(doc1._id.id, doc2._id.id)
 
 var doc = {
  _id: 'testid',
