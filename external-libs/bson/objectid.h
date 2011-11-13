@@ -46,9 +46,12 @@ class ObjectID : public ObjectWrap {
   private:
     static Handle<Value> New(const Arguments &args);
     
+    // generates an oid from a given timestamp in seconds
+    static char *oid_id_from_time(uint32_t value, char* buffer);
+    
     // Generates oid's (Based on BSON C lib)
     static char *oid_id_generator(char* buffer);
-    static char *uint32_to_char(uint32_t value, char* buffer);    
+    static char *uint32_to_char(uint32_t value, char* buffer, bool forceBigEndian);    
 };
 
 #endif  // OBJECTID_H_

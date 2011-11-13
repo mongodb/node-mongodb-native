@@ -26,23 +26,36 @@ ObjectID::ObjectID(char *o) : ObjectWrap() {
 ObjectID::~ObjectID() {
 }
 
-char *ObjectID::uint32_to_char(uint32_t value, char *buf) {
-  *(buf) = (char)(value & 0xff);
-  *(buf + 1) = (char)((value >> 8) & 0xff);
-  *(buf + 2) = (char)((value >> 16) & 0xff);
-  *(buf + 3) = (char)((value >> 24) & 0xff);
+char *ObjectID::uint32_to_char(uint32_t value, char *buf, bool forceBigEndian) {
+
+  if (forceBigEndian) {
+    *(buf) = (char)((value >> 24) & 0xff);
+    *(buf + 1) = (char)((value >> 16) & 0xff);
+    *(buf + 2) = (char)((value >> 8) & 0xff);
+    *(buf + 3) = (char)((value) & 0xff);
+  } else {
+    *(buf) = (char)(value & 0xff);
+    *(buf + 1) = (char)((value >> 8) & 0xff);
+    *(buf + 2) = (char)((value >> 16) & 0xff);
+    *(buf + 3) = (char)((value >> 24) & 0xff);
+  }
+  
   *(buf + 4) = '\0';
+  
   return buf;
 }
 
 // Generates a new oid
 char *ObjectID::oid_id_generator(char *oid_string) {
+
   // Blatant copy of the code from mongodb-c driver
   static int incr = 0;
   int fuzz = 0;
   // Fetch a new counter ()
   int i = incr++; /*TODO make atomic*/
+  
   int t = time(NULL);
+
   
   /* TODO rand sucks. find something better */
   if (!fuzz){
@@ -55,11 +68,38 @@ char *ObjectID::oid_id_generator(char *oid_string) {
   
   *(oid_string_c + 12) = '\0';
   
-  ObjectID::uint32_to_char(t,oid_string_c);
-  ObjectID::uint32_to_char(fuzz,oid_string_c + 4);
-  ObjectID::uint32_to_char(i,oid_string_c + 8);
+  ObjectID::uint32_to_char(t,oid_string_c,true); // timestamp must be stored bigEndian
+  ObjectID::uint32_to_char(fuzz,oid_string_c + 4,false);
+  ObjectID::uint32_to_char(i,oid_string_c + 8,true);// counter must be stored bigEndian
 
   // Allocate storage for a 24 character hex oid    
+  char *pbuffer = oid_string;
+  // Terminate the string
+  *(pbuffer + 24) = '\0';      
+  // Unpack the oid in hex form
+  for(int32_t i = 0; i < 12; i++) {
+    sprintf(pbuffer, "%02x", (unsigned char)*(oid_string_c + i));
+    pbuffer += 2;
+  }        
+  
+  return oid_string;
+}
+
+// Generates a new oid from timestamp (in seconds)
+char *ObjectID::oid_id_from_time(uint32_t t, char *oid_string) {
+
+  
+  // Build a 12 byte char string based on the address of the current object, the rand number and the current time
+  char oid_string_c[12 * sizeof(char) + 1];
+  
+  *(oid_string_c + 12) = '\0';
+  
+  ObjectID::uint32_to_char(t,oid_string_c, true);// timestamp must be stored bigEndian
+  ObjectID::uint32_to_char(0,oid_string_c + 4, false);
+  ObjectID::uint32_to_char(0,oid_string_c + 8, true);// counter must be stored bigEndian
+
+  // Allocate storage for a 24 character hex oid   
+
   char *pbuffer = oid_string;
   // Terminate the string
   *(pbuffer + 24) = '\0';      
@@ -88,7 +128,7 @@ Handle<Value> ObjectID::New(const Arguments &args) {
     return args.This();        
   } else {
     // Ensure we have correct parameters passed in
-    if(args.Length() != 1 && (!args[0]->IsString() || !args[0]->IsNull())) {
+    if(args.Length() != 1 && (!args[0]->IsNumber() || !args[0]->IsString() || !args[0]->IsNull())) {
       return VException("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters in hex format");
     }
 
@@ -98,13 +138,15 @@ Handle<Value> ObjectID::New(const Arguments &args) {
     // If we have a null generate a new oid
     if(args[0]->IsNull()) {
       ObjectID::oid_id_generator(oid_string_c);
+    } else if (args[0]->IsNumber()) {
+      ObjectID::oid_id_from_time(args[0]->Uint32Value(), oid_string_c);
     } else {
       *(oid_string_c + 24) = '\0';      
       
       // Convert the argument to a String
       Local<String> oid_string = args[0]->ToString();  
       if(oid_string->Length() != 12 && oid_string->Length() != 24) {
-        return VException("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters in hex format");
+        return VException("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters in hex format ");
       }
   
       if(oid_string->Length() == 12) {            
@@ -281,11 +323,3 @@ Handle<Value> ObjectID::ToString(const Arguments &args) {
 Handle<Value> ObjectID::ToJSON(const Arguments &args) {
   return ToString(args);
 }
-
-
-
-
-
-
-
-
