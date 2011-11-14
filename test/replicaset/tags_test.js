@@ -56,7 +56,7 @@ module.exports = testCase({
     // Create instance of replicaset manager but only for the first call
     if(!serversUp && !noReplicasetStart) {
       serversUp = true;
-      RS = new ReplicaSetManager({retries:120, passive_count:0, tags:[{"dc":"ny"}, {"dc":"ny"}, {"dc":"ny"}, {"dc":"ny"}, {"dc":"ny"}]});
+      RS = new ReplicaSetManager({retries:120, passive_count:0, secondary_count:2, tags:[{"dc":"ny"}, {"dc":"ny"}, {"dc":"ny"}]});
       RS.startSet(true, function(err, result) {    
         callback();      
       });      
@@ -90,7 +90,7 @@ module.exports = testCase({
         if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
         
         // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:'majority', wtimeout: 30000}}, function(err, r) {            
+        collection.insert({a:20}, {safe: {w:'majority'}}, function(err, r) {            
           console.log("===================================================== hey")
           console.dir(err)
           console.dir(r)

@@ -211,7 +211,7 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
         }
         
         // Check if we have tags
-        if(typeof self.mongods[n]['tags'] === 'object') {
+        if(self.mongods[n]['tags'] != null) {
           member["tags"] = self.mongods[n]['tags'];
         }
         
