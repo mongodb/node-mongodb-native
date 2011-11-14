@@ -942,6 +942,24 @@ var tests = testCase({
     });
   },
 
+  'Should correctly execute find and findOne queries with selector set to null' : function(test) {
+    client.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {      
+      var doc = {_id : new client.bson_serializer.ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
+      // insert doc
+      collection.insert(doc, {safe:true}, function(err, result) {
+        
+        collection.find(null, {comments: {$slice: -5}}).toArray(function(err, docs) {
+          test.equal(5, docs[0].comments.length)
+
+          collection.findOne(null, {comments: {$slice: -5}}, function(err, item) {
+            test.equal(5, item.comments.length)
+            test.done();
+          });
+        });
+      });
+    });
+  },
+
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));

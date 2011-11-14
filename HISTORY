@@ -1,3 +1,6 @@
+* Better handling of dead server for single server instances
+* findOne and find treats selector == null as {}, Issue #403
+
 0.9.7 2011-11-10
 * Added priority setting to replicaset manager
 * Added correct handling of passive servers in replicaset
