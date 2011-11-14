@@ -15,7 +15,7 @@ var ServerManager = exports.ServerManager = function(options) {
   this.port = options["start_port"] != null ? options["start_port"] : 27017;  
   this.db_path = getPath(this, "data-" + this.port);
   this.log_path = getPath(this, "log-" + this.port);
-  this.durable = options["durable"] != null ? options["durable"] : false;   
+  this.journal = options["journal"] != null ? options["journal"] : false;   
   this.auth = options['auth'] != null ? options['auth'] : false; 
   this.purgedirectories = options['purgedirectories'] != null ? options['purgedirectories'] : true;
 
@@ -33,7 +33,7 @@ ServerManager.prototype.start = function(killall, callback) {
   killall = args.length ? args.shift() : true;  
   // Create start command
   var startCmd = generateStartCmd({log_path: self.log_path, 
-    db_path: self.db_path, port: self.port, durable: self.durable, auth:self.auth});
+    db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth});
     
   // console.log("----------------------------------------------------------------------- start")
   // console.log(startCmd)
@@ -123,7 +123,7 @@ var generateStartCmd = function(options) {
   // Create boot command
   var startCmd = "mongod --noprealloc --logpath '" + options['log_path'] + "' " +
       " --dbpath " + options['db_path'] + " --port " + options['port'] + " --fork";
-  startCmd = options['durable'] ? startCmd + "  --dur" : startCmd;
+  startCmd = options['journal'] ? startCmd + "  --journal" : startCmd;
   startCmd = options['auth'] ? startCmd + "  --auth" : startCmd;
   return startCmd;
 }

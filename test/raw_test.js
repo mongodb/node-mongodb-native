@@ -13,6 +13,12 @@ var testCase = require('../deps/nodeunit').testCase,
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
+// process.on('uncaughtException', function(err) {
+//   console.log("-------------------------------------------------------------------------")
+//   console.dir(err)
+//   console.log(err.stack)
+// })
+
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
 var tests = testCase({
@@ -170,7 +176,7 @@ var tests = testCase({
   
   shouldCorrectlyPeformQueryUsingRaw : function(test) {
     client.createCollection('shouldCorrectlyPeformQueryUsingRaw', function(err, collection) {
-      collection.insert([{a:1}, {b:2}, {b:3}], function(err, result) {
+      collection.insert([{a:1}, {b:2}, {b:3}], {safe:true}, function(err, result) {
         test.equal(null, err);
   
         // Let's create a raw query object
@@ -184,14 +190,17 @@ var tests = testCase({
         // Create raw bson buffer
         var rawFieldsObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(fieldsObject));
         client.bson_deserializer.BSON.serializeWithBufferAndIndex(fieldsObject, false, rawFieldsObject, 0);    
-  
+
         collection.find(rawQueryObject, rawFieldsObject, {raw:true}).toArray(function(err, items) {
           test.equal(1, items.length);
           test.ok(items[0] instanceof Buffer);
+          if(items[0] == null) console.dir(items)
           var object = client.bson_deserializer.BSON.deserialize(items[0]);
           test.equal(3, object.b)            
   
           collection.findOne(rawQueryObject, rawFieldsObject, {raw:true}, function(err, item) {
+            test.equal(null, err);
+            test.ok(item != null);
             var object = client.bson_deserializer.BSON.deserialize(item);
             test.equal(3, object.b)                        
             test.done();
@@ -257,7 +266,7 @@ var tests = testCase({
   
   shouldCorrectlyPeformQueryUsingRawSettingRawAtCollectionLevel : function(test) {
     client.createCollection('shouldCorrectlyPeformQueryUsingRawSettingRawAtCollectionLevel', function(err, collection) {
-      collection.insert([{a:1}, {b:2}, {b:3}], function(err, result) {
+      collection.insert([{a:1}, {b:2}, {b:3}], {safe:true}, function(err, result) {
         test.equal(null, err);
   
         // Let's create a raw query object
@@ -280,6 +289,8 @@ var tests = testCase({
             test.equal(3, object.b)            
 
             collection.findOne(rawQueryObject, rawFieldsObject, {raw:true}, function(err, item) {
+              test.equal(null, err);
+              test.ok(item != null);
               var object = client.bson_deserializer.BSON.deserialize(item);
               test.equal(3, object.b)                        
               test.done();
