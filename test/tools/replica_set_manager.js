@@ -22,6 +22,7 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.auth = options['auth'] != null ? options['auth'] : false; 
   this.path = path.resolve("data");
   this.killNodeWaitTime = options['kill_node_wait_time'] != null ? options['kill_node_wait_time'] : 20000;
+  this.tags = options['tags'] != null ? options['tags'] : [];
   
   this.arbiterCount = options["arbiter_count"] != null ? options["arbiter_count"] : 2;
   this.secondaryCount = options["secondary_count"] != null ? options["secondary_count"] : 1;
@@ -84,30 +85,30 @@ ReplicaSetManager.prototype.startSet = function(killall, callback) {
   var args = Array.prototype.slice.call(arguments, 0);
   callback = args.pop();
   killall = args.length ? args.shift() : true;  
-
   debug("** Starting a replica set with " + this.count + " nodes");
 
   // Kill all existing mongod instances
   exec(killall ? 'killall mongod' : '', function(err, stdout, stderr) {
     var n = 0;
+    var tagsIndex = 0;
 
     Step(
-        function startPrimaries() {
+        function startAllServers() {
           var group = this.group();
           // Start primary instances
           for(n = 0; n < (self.primaryCount + self.secondaryCount); n++) {
-            self.initNode(n, {}, group());
+            self.initNode(n, {tags:self.tags[tagsIndex] != null ? self.tags[tagsIndex++] : null}, group());
           }  
           
           // Start passive instances
           for(var i = 0; i < self.passiveCount; i++) {
-            self.initNode(n, {priority:0}, group())
+            self.initNode(n, {priority:0, tags:self.tags[tagsIndex] != null ? self.tags[tagsIndex++] : null}, group())
             n = n + 1;
           }
           
           // Start arbiter instances
           for(var i = 0; i < self.arbiterCount; i++) {
-            self.initNode(n, {arbiterOnly:true}, group());
+            self.initNode(n, {arbiterOnly:true, tags:self.tags[tagsIndex] != null ? self.tags[tagsIndex++] : null}, group());
             n = n + 1;
           }          
         },
@@ -139,8 +140,8 @@ ReplicaSetManager.prototype.initiate = function(callback) {
   // Get master connection
   self.getConnection(function(err, connection) {    
     if(err != null) return callback(err, null);   
-    // debug("=================================================== replicaset config")
-    // debug(inspect(self.config))
+    debug("=================================================== replicaset config")
+    debug(inspect(self.config))
      
     // Set replica configuration
     connection.admin().command({replSetInitiate:self.config}, function(err, result) {
@@ -171,6 +172,7 @@ var getPath = function(self, name) {
 }
 
 ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
+  console.dir(fields)
   var self = this;
   this.mongods[n] = this.mongods[n] == null ? {} : this.mongods[n];
   var port = this.startPort + n;
@@ -207,6 +209,12 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
         if(priority != null) {
           member['priority'] = priority;
         }
+        
+        // Check if we have tags
+        if(typeof self.mongods[n]['tags'] === 'object') {
+          member["tags"] = self.mongods[n]['tags'];
+        }
+        
         // Push member to config
         self.config["members"].push(member);
         // Return
