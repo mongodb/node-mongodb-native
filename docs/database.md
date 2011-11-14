@@ -20,12 +20,7 @@ Several options can be passed to the `Server` constructor with `options` paramet
   
   * `auto_reconnect` - to reconnect automatically, `default:false`
   * `poolSize` - specify the number of connections in the pool `default:1`
-  * `retryMiliSeconds` - specify the number of milliseconds between connection attempts `default:5000`
-  * `numberOfRetries` - specify the number of retries for connection attempts `default:3`
-  * `reaperInterval` - specify the number of milliseconds between each reaper attempt `default:1000`
-  * `reaperTimeout` - specify the number of milliseconds for timing out callbacks that don't return `default:30000`
-  * `raw` - driver expects Buffer raw bson document, `default:false`
-
+ 
 
 ## DB options
 
@@ -35,6 +30,12 @@ Several options can be passed to the `Db` constructor with `options` parameter.
   * `strict` - sets *strict mode*, if true then existing collections can't be "recreated" etc.
   * `pk` - custom primary key factory to generate `_id` values (see Custom primary keys).
   * `forceServerObjectId` - generation of objectid is delegated to the mongodb server instead of the driver. default is false
+  * `retryMiliSeconds` - specify the number of milliseconds between connection attempts `default:5000`
+  * `numberOfRetries` - specify the number of retries for connection attempts `default:3`
+  * `reaperInterval` - specify the number of milliseconds between each reaper attempt `default:1000`
+  * `reaperTimeout` - specify the number of milliseconds for timing out callbacks that don't return `default:30000`
+  * `raw` - driver expects Buffer raw bson document, `default:false`
+
 
 ## Opening a database
 
