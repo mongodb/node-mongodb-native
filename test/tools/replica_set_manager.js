@@ -140,8 +140,8 @@ ReplicaSetManager.prototype.initiate = function(callback) {
   // Get master connection
   self.getConnection(function(err, connection) {    
     if(err != null) return callback(err, null);   
-    debug("=================================================== replicaset config")
-    debug(inspect(self.config))
+    // debug("=================================================== replicaset config")
+    // debug(inspect(self.config))
      
     // Set replica configuration
     connection.admin().command({replSetInitiate:self.config}, function(err, result) {
@@ -172,7 +172,6 @@ var getPath = function(self, name) {
 }
 
 ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
-  console.dir(fields)
   var self = this;
   this.mongods[n] = this.mongods[n] == null ? {} : this.mongods[n];
   var port = this.startPort + n;
@@ -439,82 +438,6 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
 
   // Execute the first function call
   ensureUpFunction();  
-  // // Write out the ensureUp
-  // // process.stdout.write(".");  
-  // if(!self.up) process.stdout.write(".");
-  // // Retry check for server up sleeping inbetween
-  // self.retriedConnects = 0;
-  // // Attemp to retrieve a connection
-  // self.getConnection(function(err, connection) {
-  //   // If we have an error or no connection object retry
-  //   if(err != null || connection == null) {
-  //     // if we have a connection force close it
-  //     if(connection != null) connection.close();
-  //     // Retry the connection
-  //     setTimeout(function() {
-  //       self.ensureUpRetries++;
-  //       self.ensureUp(callback);
-  //     }, 1000)
-  //     // Return
-  //     return;      
-  //   }
-  //   
-  //   // Check repl set get status
-  //   connection.admin().command({"replSetGetStatus": 1}, function(err, object) {
-  //     /// Get documents
-  //     var documents = object.documents;
-  //     // Get status object
-  //     var status = documents[0];
-  // 
-  //     // If no members set
-  //     if(status["members"] == null || err != null) {
-  //       // if we have a connection force close it
-  //       if(connection != null) connection.close();
-  //       // Ensure we perform enough retries
-  //       if(self.ensureUpRetries <  self.retries) {
-  //         setTimeout(function() {
-  //           self.ensureUpRetries++;
-  //           self.ensureUp(callback);
-  //         }, 1000)
-  //       } else {
-  //         // if we have a connection force close it
-  //         if(connection != null) connection.close();
-  //         // Return error
-  //         return callback(new Error("Operation Failure"), null);          
-  //       }                
-  //     } else {
-  //       // Establish all health member
-  //       var healthyMembers = status.members.filter(function(element) {
-  //         return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1             
-  //       });
-  //       
-  //       var stateCheck = status["members"].filter(function(element, indexOf, array) {
-  //         return element["state"] == 1;
-  //       });
-  // 
-  //       if(healthyMembers.length == status.members.length && stateCheck.length > 0) {
-  //         // if we have a connection force close it
-  //         if(connection != null) connection.close();
-  //         // process.stdout.write("all members up! \n\n");  
-  //         if(!self.up) process.stdout.write("all members up!\n\n")
-  //         self.up = true;
-  //         return callback(null, status);
-  //       } else {
-  //         // if we have a connection force close it
-  //         if(connection != null) connection.close();
-  //         // Ensure we perform enough retries
-  //         if(self.ensureUpRetries <  self.retries) {
-  //           setTimeout(function() {
-  //             self.ensureUpRetries++;
-  //             self.ensureUp(callback);
-  //           }, 1000)
-  //         } else {
-  //           return callback(new Error("Operation Failure"), null);          
-  //         }        
-  //       }        
-  //     }      
-  //   });
-  // });
 }
 
 // Restart 
