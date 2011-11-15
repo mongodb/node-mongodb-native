@@ -75,11 +75,10 @@ var tests = testCase({
 
       var connectionPool = db.serverConfig.connectionPool;
       var connections = connectionPool.getAllConnections();
-      var keys = Object.keys(connections);
-        
+      
       // Ensure no close events are fired as we are closing the connection specifically
-      for(var i = 0; i < keys.length; i++) {
-        connections[keys[i]].on("close", function() { test.ok(false); });
+      for(var i = 0; i < connections.length; i++) {
+        connections[i].on("close", function() { test.ok(false); });
       }
 
       // Force the connection close
@@ -99,11 +98,10 @@ var tests = testCase({
   
       var connectionPool = db.serverConfig.connectionPool;
       var connections = connectionPool.getAllConnections();
-      var keys = Object.keys(connections);
-        
+      
       // Ensure no close events are fired as we are closing the connection specifically
-      for(var i = 0; i < keys.length; i++) {
-        connections[keys[i]].on("close", function() { test.ok(false); });
+      for(var i = 0; i < connections.length; i++) {
+        connections[i].on("close", function() { test.ok(false); });
       }
   
       db.close(function() {
