@@ -239,6 +239,9 @@ module.exports = testCase({
     var db = new Db('integration_test_', replSet);
     db.open(function(err, p_db) {
       setTimeout(function() {
+        console.log("------------------------------------------------------- runtimeStats")
+        console.dir(replSet._state.runtimeStats)
+        
         test.done();
         p_db.close();        
       }, 5000)

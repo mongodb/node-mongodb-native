@@ -815,6 +815,38 @@ var tests = testCase({
     });    
   },
   
+  'Should Correctly update two fields including a sub field' : function(test) {
+    var doc = { 
+      _id: new client.bson_serializer.ObjectID(),
+      Prop1: 'p1', 
+      Prop2: 'p2', 
+      More: { 
+        Sub1: 's1', 
+        Sub2: 's2', 
+        Sub3: 's3' 
+      } 
+    }
+    
+    client.createCollection("Should_Correctly_update_two_fields_including_a_sub_field", {}, function(err, collection) {
+      collection.insert(doc, {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Update two fields
+        collection.update({_id:doc._id}, {$set:{Prop1:'p1_2', 'More.Sub2':'s2_2'}}, {safe:true}, function(err, numberOfUpdatedDocs) {
+          test.equal(null, err);
+          test.equal(1, numberOfUpdatedDocs);
+          
+          collection.findOne({_id:doc._id}, function(err, item) {
+            test.equal(null, err);
+            test.equal('p1_2', item.Prop1);
+            test.equal('s2_2', item.More.Sub2);
+            test.done();
+          })
+        });
+      })
+    });    
+  },
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));

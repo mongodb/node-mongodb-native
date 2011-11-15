@@ -36,7 +36,7 @@ var tests = testCase({
     // Add event handler that will fire when it fails
     connectionPool.on("error", function(err, connection) {
       test.equal(0, Object.keys(connectionPool.waitingToOpen).length);
-      test.equal(4, Object.keys(connectionPool.connectionsWithErrors).length);
+      test.equal(5, Object.keys(connectionPool.connectionsWithErrors).length);
       test.equal(0, Object.keys(connectionPool.openConnections).length);      
       test.done();
     });
