@@ -112,6 +112,12 @@ var tests = testCase({
     }));
   },  
   
+  testShouldCorrectlyCloseOnUnopedConnection : function(test) {
+    var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}),{native_parser: (process.env['TEST_NATIVE'] != null)});
+    db.close();
+    test.done();
+  },
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));

@@ -1,13 +1,15 @@
 * Better handling of dead server for single server instances
-* findOne and find treats selector == null as {}, Issue #403
-* possible to pass in a strategy for the replicaset to pick secondary reader node 
+* FindOne and find treats selector == null as {}, Issue #403
+* Possible to pass in a strategy for the replicaset to pick secondary reader node 
 	* parameter strategy
 		* ping (default), pings the servers and picks the one with the lowest ping time
 		* statistical, measures each request and pick the one with the lowest mean and std deviation
-* set replicaset read preference replicaset.setReadPreference()
+* Set replicaset read preference replicaset.setReadPreference()
 	* Server.READ_PRIMARY (use primary server for reads)
 	* Server.READ_SECONDARY (from a secondary server (uses the strategy set))
 	* tags, {object of tags}
+* Added replay of commands issued to a closed connection when the connection is re-established
+* Fix isConnected and close on unopened connections. Issue #409, fix by (https://github.com/sethml)
 
 0.9.7 2011-11-10
 * Added priority setting to replicaset manager
