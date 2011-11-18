@@ -236,11 +236,25 @@ module.exports = testCase({
     // Set read preference
     replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
     // Open the database
-    var db = new Db('integration_test_', replSet);
+    var db = new Db('integration_test_', replSet, {recordQueryStats:true});
     db.open(function(err, p_db) {
       setTimeout(function() {
-        console.log("------------------------------------------------------- runtimeStats")
-        console.dir(replSet._state.runtimeStats)
+        var keys = Object.keys(replSet._state.addresses);
+        for(var i = 0; i < keys.length; i++) {
+          var server = replSet._state.addresses[keys[i]];
+          test.ok(server.queryStats.numDataValues >= 0);
+          test.ok(server.queryStats.mean >= 0);
+          test.ok(server.queryStats.variance >= 0);
+          test.ok(server.queryStats.standardDeviation >= 0);
+          
+          console.log("------------------------------------------------------- server object :: " + i)
+          console.dir(server.runtimeStats);
+          console.log("------------------------------------------------------- server stats :: " + i)
+          console.log("numDataValues = " + server.queryStats.numDataValues);
+          console.log("mean = " + server.queryStats.mean);
+          console.log("variance = " + server.queryStats.variance);
+          console.log("standardDeviation = " + server.queryStats.standardDeviation);
+        }
         
         test.done();
         p_db.close();        
