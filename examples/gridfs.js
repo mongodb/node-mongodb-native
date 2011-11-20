@@ -9,9 +9,9 @@ var Db = require('../lib/mongodb').Db,
   GridStore = require('../lib/mongodb').GridStore;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'];
 
-sys.puts(">> Connecting to " + host + ":" + port);
+sys.puts("Connecting to " + host + (port != null ? ":" + port : ''));
 var db1 = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
 db1.open(function(err, db) {
   // Write a new file

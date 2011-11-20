@@ -8,11 +8,11 @@ var Db = require('../lib/mongodb').Db,
   Server = require('../lib/mongodb').Server;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'];
 
 var LINE_SIZE = 120;
 
-sys.puts("Connecting to " + host + ":" + port);
+sys.puts("Connecting to " + host + (port != null ? ":" + port : ''));
 var db = new Db('node-mongo-blog', new Server(host, port, {}), {native_parser:true});
 db.open(function(err, db) {
   db.dropDatabase(function(err, result) {
