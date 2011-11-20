@@ -9,9 +9,9 @@ var Db = require('../lib/mongodb').Db,
   BSON = require('../lib/mongodb').BSONPure;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'];
 
-sys.puts("Connecting to " + host + ":" + port);
+sys.puts("Connecting to " + host + (port != null ? ":" + port : ''));
 var db = new Db('node-mongo-examples', new Server(host, port, {}), {});
 db.open(function(err, db) {
   db.collection('test', function(err, collection) {        

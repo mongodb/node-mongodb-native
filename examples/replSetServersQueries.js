@@ -9,7 +9,7 @@ var Db = require('../lib/mongodb').Db,
   ReplSetServers = require('../lib/mongodb').ReplSetServers;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'];
 
 var port1 = 27018;
 var port2 = 27019;
@@ -22,7 +22,7 @@ servers[1] = server1;
 servers[2] = server;
 
 var replStat = new ReplSetServers(servers);
-sys.puts("Connecting to " + host + ":" + port);
+sys.puts("Connecting to " + host + (port != null ? ":" + port : ''));
 sys.puts("Connecting to " + host1 + ":" + port1);
 sys.puts("Connecting to " + host2 + ":" + port2);
 var db = new Db('node-mongo-examples', replStat, {native_parser:true});

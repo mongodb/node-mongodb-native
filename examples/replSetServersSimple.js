@@ -12,13 +12,13 @@ var Db = require('../lib/mongodb').Db,
   CheckMaster = require('../lib/mongodb').CheckMaster;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'];
 
 var port1 = 27018;
 var port2 = 27019;
 
 
-sys.puts("Connecting to " + host + ":" + port);
+sys.puts("Connecting to " + host + (port != null ? ":" + port : ''));
 sys.puts("Connecting to " + host + ":" + port1);
 sys.puts("Connecting to " + host + ":" + port2);
 

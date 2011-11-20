@@ -10,7 +10,7 @@ The first thing to do in order to make queries to the database is to open one. T
     db_connector.open(callback);
     
   * `host` is a server hostname or IP
-  * `port` is a MongoDB port, use `mongodb.Connection.DEFAULT_PORT` for default (27017)
+  * `port` is a MongoDB port, use `null` for the default port (27017)
   * `server_options` see *Server options*
   * `name` is the databse name that needs to be opened, database will be created automatically if it doesn't yet exist
   * `db_options` see *DB options*

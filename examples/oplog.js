@@ -9,7 +9,7 @@ var Db = require('../lib/mongodb').Db,
   Cursor = require('../lib/mongodb').Cursor;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'];
 
 Slave = function() {
   this.running = false;
@@ -17,7 +17,7 @@ Slave = function() {
   //no native_parser right now (because timestamps)
   //no strict mode (because system db signed with $  db.js line 189)
   //connect without dbName for querying not only "local" db
-  sys.puts("Connecting to " + host + ":" + port);
+  sys.puts("Connecting to " + host + (port != null ? ":" + port : ''));
   this.db = new Db('', new Server(host, port, {}), {});
 }
 
