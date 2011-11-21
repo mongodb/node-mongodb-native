@@ -206,7 +206,6 @@ module.exports = testCase({
     
     // Open db
     db.open(function(err, p_db) {
-      console.log("------------------------------------------------------------------- 0")
       if(first) return
       first = true
       // Check if we got an error
@@ -214,48 +213,47 @@ module.exports = testCase({
   
       // Drop collection on replicaset
       p_db.dropCollection('testsets', function(err, r) {
-        console.log("------------------------------------------------------------------- 1")
         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Recreate collection on replicaset
         p_db.createCollection('testsets', function(err, collection) {
-          console.log("------------------------------------------------------------------- 2")
           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
           // Insert a dummy document
           collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {            
-            console.log("------------------------------------------------------------------- 3")
             // Kill the primary and attemp to insert
             // Ensure replication happened in time
             setTimeout(function() {
-              console.log("------------------------------------------------------------------- 4")
               // Kill the primary
               RS.killPrimary(2, {killNodeWaitTime:10}, function(node) {
-                console.log("------------------------------------------------------------------- 5")
-  
+                console.log("--------------------------------------------------------------------- 0")
                 // Attempt insert (should fail)
-                collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-                  console.log("------------------------------------------------------------------- 6")
-                  console.dir(err)
+                collection.insert({a:30}, {safe: true}, function(err, r) {
+                  console.log("--------------------------------------------------------------------- 1")
                   test.ok(err != null)
                   
                   // test.done();
                   if(err != null) {
-                    console.log("------------------------------------------------------------------- 7")
+                    console.log("--------------------------------------------------------------------- 2")
                     collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {  
-                      console.log("------------------------------------------------------------------- 8")
-                      console.dir(err)
-                      console.dir(r)
                       // Peform a count
                       collection.count(function(err, count) {
-                        console.log("------------------------------------------------------------------- 9")
                         test.equal(2, count);
-                        p_db.close();
-                        test.done();
+                        
+                        console.log("===================================================================== START")
+                        console.log("===================================================================== START")
+                        console.log("===================================================================== START")
+
+                        setTimeout(function() {
+                          console.log("===================================================================== DONE")
+                          p_db.close();
+                          test.done();                          
+                        }, 5000)
                       });
                     });                                          
                   } else {
-                    console.log("+++++++++++++++++++++++++++++++++++++++++++ FAILURE")
+                    console.log("--------------------------------------------------------------------- 3")
                     p_db.close();
                     test.ok(false)
+                    test.done();                          
                   }
                 });
               });
