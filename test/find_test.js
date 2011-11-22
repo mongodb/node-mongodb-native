@@ -625,7 +625,7 @@ var tests = testCase({
       });
     });
   },  
-  
+    
   shouldCorrectlyExecuteFindOneWithAnInSearchTag : function(test) {
     client.createCollection('shouldCorrectlyExecuteFindOneWithAnInSearchTag', function(err, collection) {
       // Test return new document on change
@@ -956,6 +956,16 @@ var tests = testCase({
             test.done();
           });
         });
+      });
+    });
+  },
+
+  shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists : function(test) {
+    client.createCollection('shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists', function(err, collection) {
+      collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, function(err, updated_doc) {
+        test.equal(null, err)
+        test.equal(null, updated_doc);
+        test.done();
       });
     });
   },

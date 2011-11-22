@@ -128,6 +128,16 @@ var tests = testCase({
     })
   },
   
+  testConnectUsingSocketOptions : function(test) {
+    var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}}),{native_parser: (process.env['TEST_NATIVE'] != null)});
+    db.open(function(err, db) {      
+      test.equal(null, err);
+      test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
+      test.done();
+      db.close();
+    })    
+  },
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));

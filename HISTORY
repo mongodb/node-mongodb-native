@@ -1,3 +1,4 @@
+0.9.7.1
 * Better handling of dead server for single server instances
 * FindOne and find treats selector == null as {}, Issue #403
 * Possible to pass in a strategy for the replicaset to pick secondary reader node 
@@ -10,6 +11,12 @@
 	* tags, {object of tags}
 * Added replay of commands issued to a closed connection when the connection is re-established
 * Fix isConnected and close on unopened connections. Issue #409, fix by (https://github.com/sethml)
+* Moved reaper to db.open instead of constructor (Issue #406)
+* Allows passing through of socket connection settings to Server or ReplSetServer under the option socketOptions
+  	* timeout = set seconds before connection times out (default 0)
+	* noDelay = Disables the Nagle algorithm (default true)
+	* keepAlive = Set if keepAlive is used (default 0, which means no keepAlive, set higher than 0 for keepAlive)
+	* encoding = ['ascii', 'utf8', or 'base64'] (default null)
 
 0.9.7 2011-11-10
 * Added priority setting to replicaset manager
