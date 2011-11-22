@@ -1,6 +1,5 @@
 GLOBAL.DEBUG = true;
 
-sys = require("sys");
 test = require("assert");
 
 var Db = require('../lib/mongodb').Db,
@@ -22,9 +21,9 @@ servers[1] = server1;
 servers[2] = server;
 
 var replStat = new ReplSetServers(servers);
-sys.puts("Connecting to " + host + ":" + port);
-sys.puts("Connecting to " + host1 + ":" + port1);
-sys.puts("Connecting to " + host2 + ":" + port2);
+console.log("Connecting to " + host + ":" + port);
+console.log("Connecting to " + host1 + ":" + port1);
+console.log("Connecting to " + host2 + ":" + port2);
 var db = new Db('node-mongo-examples', replStat, {native_parser:true});
 db.open(function(err, db) {
   db.dropDatabase(function() {
@@ -36,7 +35,7 @@ db.open(function(err, db) {
         collection.insert([{'a':1}, {'a':2}, {'b':3}], function(docs) {
           // Count the number of records
           collection.count(function(err, count) {
-            sys.puts("There are " + count + " records.");
+            console.log("There are " + count + " records.");
           });
           
           // Find all records. find() returns a cursor
@@ -44,17 +43,19 @@ db.open(function(err, db) {
             // Print each row, each document has an _id field added on insert
             // to override the basic behaviour implement a primary key factory
             // that provides a 12 byte value
-            sys.puts("Printing docs from Cursor Each")
+            console.log("Printing docs from Cursor Each")
             cursor.each(function(err, doc) {
-              if(doc != null) sys.puts("Doc from Each " + sys.inspect(doc));
+              if(doc != null) console.log("Doc from Each ");
+              console.dir(doc);
             })                    
           });
           // Cursor has an to array method that reads in all the records to memory
           collection.find(function(err, cursor) {
             cursor.toArray(function(err, docs) {
-              sys.puts("Printing docs from Array")
+              console.log("Printing docs from Array")
               docs.forEach(function(doc) {
-                sys.puts("Doc from Array " + sys.inspect(doc));
+                console.log("Doc from Array ");
+                console.dir(doc);
               });
             });
           });
@@ -64,7 +65,7 @@ db.open(function(err, db) {
           // Locate specific document by key
           collection.find({'a':1}, function(err, cursor) {
             cursor.nextObject(function(err, doc) {            
-              sys.puts("Returned #1 documents");
+              console.log("Returned #1 documents");
             });
           });
           
@@ -72,42 +73,42 @@ db.open(function(err, db) {
           // Sort can be a single name, array, associate array or ordered hash
           collection.find({}, {'skip':1, 'limit':1, 'sort':'a'}, function(err, cursor) {
             cursor.toArray(function(err, docs) {            
-              sys.puts("Returned #" + docs.length + " documents");
+              console.log("Returned #" + docs.length + " documents");
             })          
           });
           
           // Find all records with 'a' > 1, you can also use $lt, $gte or $lte
           collection.find({'a':{'$gt':1}}, function(err, cursor) {
             cursor.toArray(function(err, docs) {
-              sys.puts("Returned #" + docs.length + " documents");
+              console.log("Returned #" + docs.length + " documents");
             });
           });
           
           collection.find({'a':{'$gt':1, '$lte':3}}, function(err, cursor) {
             cursor.toArray(function(err, docs) {
-              sys.puts("Returned #" + docs.length + " documents");
+              console.log("Returned #" + docs.length + " documents");
             });          
           });
           
           // Find all records with 'a' in a set of values
           collection.find({'a':{'$in':[1,2]}}, function(err, cursor) {
             cursor.toArray(function(err, docs) {
-              sys.puts("Returned #" + docs.length + " documents");
+              console.log("Returned #" + docs.length + " documents");
             });          
           });
           
           // Find by regexp
           collection.find({'a':/[1|2]/}, function(err, cursor) {
             cursor.toArray(function(err, docs) {
-              sys.puts("Returned #" + docs.length + " documents");
+              console.log("Returned #" + docs.length + " documents");
             });          
           });
 
           // Print Query explanation
           collection.find({'a':/[1|2]/}, function(err, cursor) {
             cursor.explain(function(err, doc) {
-              sys.puts("-------------------------- Explanation");
-              sys.puts(sys.inspect(doc));
+              console.log("-------------------------- Explanation");
+              console.dir(doc);
             })
           });
 
@@ -121,15 +122,15 @@ db.open(function(err, db) {
             // You will see a different explanation now that the hint was set
             collection.find({'a':/[1|2]/}, function(err, cursor) {
               cursor.explain(function(err, doc) {
-                sys.puts("-------------------------- Explanation");
-                sys.puts(sys.inspect(doc));
+                console.log("-------------------------- Explanation");
+                console.dir(doc);
               })
             });
 
             collection.find({'a':/[1|2]/}, {'hint':'a'}, function(err, cursor) {
               cursor.explain(function(err, doc) {
-                sys.puts("-------------------------- Explanation");
-                sys.puts(sys.inspect(doc));
+                console.log("-------------------------- Explanation");
+                console.dir(doc);
                 db.close();
               })
             });

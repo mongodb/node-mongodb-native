@@ -1,6 +1,5 @@
 GLOBAL.DEBUG = true;
 
-sys = require("sys");
 test = require("assert");
 
 var Db = require('../lib/mongodb').Db,
@@ -11,7 +10,7 @@ var Db = require('../lib/mongodb').Db,
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
-sys.puts(">> Connecting to " + host + ":" + port);
+console.log(">> Connecting to " + host + ":" + port);
 var db1 = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
 db1.open(function(err, db) {
   // Write a new file
@@ -58,16 +57,16 @@ db2.open(function(err, db) {
     gridStore.write( 'hello sailor', function(err, gridStore) {
       gridStore.close(function(err, result) {
         GridStore.exist(db, 'foobar2', function(err, result) {
-          sys.puts("File 'foobar2' exists: " + result);
+          console.log("File 'foobar2' exists: " + result);
         });
         
         GridStore.exist(db, 'does-not-exist', function(err, result) {
-          sys.puts("File 'does-not-exist' exists: " + result);
+          console.log("File 'does-not-exist' exists: " + result);
         });
         
         // Read with offset(uses seek)
         GridStore.read(db, 'foobar2', 6, 7, function(err, data) {
-          sys.puts(data);
+          console.log(data);
         });
 
         // Rewind/seek/tell
@@ -77,7 +76,7 @@ db2.open(function(err, db) {
           gridStore.rewind(function(){});
           gridStore.write('xyzzz', function(err, gridStore){});
           gridStore.tell(function(tell) {
-            sys.puts("tell: " + tell);       // Should be 5
+            console.log("tell: " + tell);       // Should be 5
           });
           gridStore.seek(4, function(err, gridStore){});
           gridStore.write('y', function(){});
@@ -87,7 +86,7 @@ db2.open(function(err, db) {
             // Unlink file (delete)
             GridStore.unlink(db, 'foobar2', function(err, gridStore) {
               GridStore.exist(db, 'foobar2', function(err, result) {
-                sys.puts("File 'foobar2' exists: " + result);
+                console.log("File 'foobar2' exists: " + result);
                 db.close();
               });
             });
@@ -107,10 +106,10 @@ db3.open(function(err, db) {
     gridStore.close(function(err, gridStore) {
       gridStore = new GridStore(db, 'foobar3', "r");
       gridStore.open(function(err, gridStore) {
-        sys.puts("contentType: " + gridStore.contentType);
-        sys.puts("uploadDate: " + gridStore.uploadDate);
-        sys.puts("chunkSize: " + gridStore.chunkSize);
-        sys.puts("metadata: " + gridStore.metadata);          
+        console.log("contentType: " + gridStore.contentType);
+        console.log("uploadDate: " + gridStore.uploadDate);
+        console.log("chunkSize: " + gridStore.chunkSize);
+        console.log("metadata: " + gridStore.metadata);          
       });
       
       // Add some metadata
@@ -122,10 +121,10 @@ db3.open(function(err, db) {
           // Print the metadata
           gridStore = new GridStore(db, 'foobar3', "r");
           gridStore.open(function(err, gridStore) {
-            sys.puts("contentType: " + gridStore.contentType);
-            sys.puts("uploadDate: " + gridStore.uploadDate);
-            sys.puts("chunkSize: " + gridStore.chunkSize);
-            sys.puts("metadata: " + gridStore.metadata);          
+            console.log("contentType: " + gridStore.contentType);
+            console.log("uploadDate: " + gridStore.uploadDate);
+            console.log("chunkSize: " + gridStore.chunkSize);
+            console.log("metadata: " + gridStore.metadata);          
             db.close();
           });            
         });
@@ -148,7 +147,7 @@ db3.open(function(err, db) {
 
 function dump(db, filename, callback) {
   GridStore.read(db, filename, function(err, data) {
-    sys.puts(data);
+    console.log(data);
     if(callback != null) callback();
   }); 
 }

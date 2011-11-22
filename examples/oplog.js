@@ -1,6 +1,5 @@
 GLOBAL.DEBUG = true;
 
-sys = require("sys");
 test = require("assert");
 
 var Db = require('../lib/mongodb').Db,
@@ -17,8 +16,8 @@ Slave = function() {
   //no native_parser right now (because timestamps)
   //no strict mode (because system db signed with $  db.js line 189)
   //connect without dbName for querying not only "local" db
-  sys.puts("Connecting to " + host + ":" + port);
-  this.db = new Db('', new Server(host, port, {}), {});
+  console.log("Connecting to " + host + ":" + port);
+  this.db = new Db('testing', new Server(host, port, {}), {});
 }
 
 //start watching
@@ -28,13 +27,13 @@ Slave.prototype.start = function() {
   
   this.db.open(function(err, db) {
     if (err) {
-      sys.puts('> MongoSlave error' + err);
+      console.log('> MongoSlave error' + err);
       process.exit(1);
     }
 
     db.collection('local.oplog.$main', function(err, collection) {
       if (! collection) {
-        sys.puts('> MongoSlave - local.oplog.$main not found');
+        console.log('> MongoSlave - local.oplog.$main not found');
         self.stop();
         return false;
       }
@@ -47,11 +46,11 @@ Slave.prototype.start = function() {
       collection.find({}, {'limit': 1, 'sort': [['$natural', -1]]}, function(err, cursor) {
         cursor.toArray(function(err, items) {
           if (items.length) {
-            sys.puts('> MongoSlave started');
+            console.log('> MongoSlave started');
             self.running = true;
             self._runSlave(collection, items[0]['ts']);
           } else if (err) {
-            sys.puts(err);
+            console.log(err);
             self.stop();
           }
         });
@@ -63,7 +62,7 @@ Slave.prototype.start = function() {
 //stop watching
 Slave.prototype.stop = function() {
   if (!this.running) return;
-  sys.puts('> MongoSlave stopped');
+  console.log('> MongoSlave stopped');
   this.running = false;
   this.db.close();
 }
@@ -113,7 +112,7 @@ Slave.prototype.onObject = function(callback) {
 var watcher = new Slave();
 
 watcher.onObject(function(obj) {
-  sys.puts(sys.inspect(obj));
+  console.dir(obj);
 });
 
 watcher.start();

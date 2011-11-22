@@ -1,6 +1,5 @@
 GLOBAL.DEBUG = true;
 
-sys = require("sys");
 test = require("assert");
 
 var Db = require('../lib/mongodb').Db,
@@ -11,7 +10,7 @@ var Db = require('../lib/mongodb').Db,
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
-sys.puts("Connecting to " + host + ":" + port);
+console.log("Connecting to " + host + ":" + port);
 var db = new Db('node-mongo-examples', new Server(host, port, {}), {});
 db.open(function(err, db) {
   db.collection('test', function(err, collection) {        
@@ -36,7 +35,7 @@ db.open(function(err, db) {
         }, function(err, doc) {
           // Locate the first document
           collection.findOne(function(err, document) {
-            sys.puts(sys.inspect(document));            
+            console.dir(document);
             collection.remove(function(err, collection) {
               db.close();
             });

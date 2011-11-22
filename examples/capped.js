@@ -1,6 +1,5 @@
 GLOBAL.DEBUG = true;
 
-sys = require("sys");
 test = require("assert");
 
 var Db = require('../lib/mongodb').Db,
@@ -10,7 +9,7 @@ var Db = require('../lib/mongodb').Db,
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
-sys.puts("Connecting to " + host + ":" + port);
+console.log("Connecting to " + host + ":" + port);
 var db = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
 db.open(function(err, db) {
   db.dropCollection('test', function(err, result) {
@@ -23,7 +22,7 @@ db.open(function(err, db) {
       // We will only see the last 12 records
       collection.find(function(err, cursor) {
         cursor.toArray(function(err, items) {
-          sys.puts("The number of records: " + items.length);
+          console.log("The number of records: " + items.length);
           db.close();
         })
       })

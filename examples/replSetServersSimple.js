@@ -1,6 +1,5 @@
 GLOBAL.DEBUG = true;
 
-sys = require("sys");
 test = require("assert");
 
 var Db = require('../lib/mongodb').Db,
@@ -18,9 +17,9 @@ var port1 = 27018;
 var port2 = 27019;
 
 
-sys.puts("Connecting to " + host + ":" + port);
-sys.puts("Connecting to " + host + ":" + port1);
-sys.puts("Connecting to " + host + ":" + port2);
+console.log("Connecting to " + host + ":" + port);
+console.log("Connecting to " + host + ":" + port1);
+console.log("Connecting to " + host + ":" + port2);
 
 var server = new Server(host, port, {});
 var server1 = new Server(host, port1, {});
@@ -32,9 +31,7 @@ servers[2] = server;
 
 var replStat = new ReplSetServers(servers);
 
-
- var db = new Db('mongo-example', replStat, {native_parser:true});
-
+var db = new Db('mongo-example', replStat, {native_parser:true});
 db.open(function(err, db) {
 
   db.dropDatabase(function(err, result) {
@@ -46,13 +43,13 @@ db.open(function(err, db) {
         }
         
         collection.count(function(err, count) {
-          sys.puts("There are " + count + " records in the test collection. Here they are:");
+          console.log("There are " + count + " records in the test collection. Here they are:");
 
           collection.find(function(err, cursor) {
             cursor.each(function(err, item) {
               if(item != null) {
-                sys.puts(sys.inspect(item));
-                sys.puts("created at " + new Date(item._id.generationTime) + "\n")
+                console.dir(item);
+                console.log("created at " + new Date(item._id.generationTime) + "\n")
               }
               // Null signifies end of iterator
               if(item == null) {                

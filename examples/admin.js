@@ -1,8 +1,5 @@
 GLOBAL.DEBUG = true;
 
-sys = require("sys");
-debug = require('util').debug,
-inspect = require('util').inspect,
 test = require("assert");
 
 var Db = require('../lib/mongodb').Db,
@@ -12,7 +9,7 @@ var Db = require('../lib/mongodb').Db,
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
-sys.puts("Connecting to " + host + ":" + port);
+console.log("Connecting to " + host + ":" + port);
 var db = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
 db.open(function(err, db) {
   db.dropDatabase(function(err, result){
@@ -25,12 +22,12 @@ db.open(function(err, db) {
 
             // Profiling level set/get
             admin.profilingLevel(function(err, profilingLevel) {
-              sys.puts("Profiling level: " + profilingLevel);
+              console.log("Profiling level: " + profilingLevel);
             });
 
             // Start profiling everything
             admin.setProfilingLevel('all', function(err, level) {
-              sys.puts("Profiling level: " + level);            
+              console.log("Profiling level: " + level);            
 
               // Read records, creating a profiling event
               collection.find(function(err, cursor) {
@@ -39,12 +36,12 @@ db.open(function(err, db) {
                   admin.setProfilingLevel('off', function(err, level) {
                     // Print all profiling info
                     admin.profilingInfo(function(err, info) {
-                      sys.puts(sys.inspect(info));
+                      console.dir(info);
 
                       // Validate returns a hash if all is well or return an error hash if there is a
                       // problem.
                       admin.validateCollection(collection.collectionName, function(err, result) {
-                        sys.puts(result.result);
+                        console.dir(result);
                         db.close();
                       });
                     });

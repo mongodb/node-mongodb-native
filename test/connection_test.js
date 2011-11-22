@@ -12,7 +12,8 @@ var testCase = require('../deps/nodeunit').testCase,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
   ServerManager = require('../test/tools/server_manager').ServerManager,
-  Step = require("../deps/step/lib/step");
+  Step = require("../deps/step/lib/step"),
+  mongodb = require('../lib/mongodb');
 
 // Test db
 var MONGODB = 'integration_tests';
@@ -116,6 +117,15 @@ var tests = testCase({
     var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}),{native_parser: (process.env['TEST_NATIVE'] != null)});
     db.close();
     test.done();
+  },
+  
+  testConnectUsingDefaultHostAndPort : function(test) {
+    var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4}),{native_parser: (process.env['TEST_NATIVE'] != null)});
+    db.open(function(err, db) {
+      test.equal(null, err);
+      test.done();
+      db.close();
+    })
   },
   
   noGlobalsLeaked : function(test) {

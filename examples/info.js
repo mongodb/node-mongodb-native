@@ -10,7 +10,7 @@ var Db = require('../lib/mongodb').Db,
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
-sys.puts("Connecting to " + host + ":" + port);
+console.log("Connecting to " + host + ":" + port);
 var db = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
 db.open(function(err, db) {
   db.collection('test', function(err, collection) {
@@ -26,7 +26,7 @@ db.open(function(err, db) {
       // Show collection names in the database
       db.collectionNames(function(err, names) {
         names.forEach(function(name) {
-          sys.puts(sys.inspect(name));          
+          console.dir(name);          
         });
       });
       
@@ -34,7 +34,7 @@ db.open(function(err, db) {
       db.collectionsInfo(function(err, cursor) {
         cursor.toArray(function(err, items) {
           items.forEach(function(item) {
-            sys.puts(sys.inspect(item));          
+            console.dir(item);
           });        
         });
       })  
@@ -42,7 +42,7 @@ db.open(function(err, db) {
       // Index information
       db.createIndex('test', 'a', function(err, indexName) {
         db.indexInformation('test', function(err, doc) {
-          sys.puts(sys.inspect(doc));                    
+          console.dir(doc);
           collection.drop(function(err, result) {
             db.close();
           });

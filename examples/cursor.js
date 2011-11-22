@@ -1,6 +1,5 @@
 GLOBAL.DEBUG = true;
 
-sys = require("sys");
 test = require("assert");
 
 var Db = require('../lib/mongodb').Db,
@@ -10,7 +9,7 @@ var Db = require('../lib/mongodb').Db,
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
-sys.puts("Connecting to " + host + ":" + port);
+console.log("Connecting to " + host + ":" + port);
 var db = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
 db.open(function(err, db) {
   db.collection('test', function(err, collection) {
@@ -28,14 +27,14 @@ db.open(function(err, db) {
       // Find returns a Cursor, which is Enumerable. You can iterate:
       collection.find(function(err, cursor) {
         cursor.each(function(err, item) {
-          if(item != null) sys.puts(sys.inspect(item));
+          if(item != null) console.dir(item);
         });
       });
       
       // You can turn it into an array
       collection.find(function(err, cursor) {
         cursor.toArray(function(err, items) {          
-          sys.puts("count: " + items.length);
+          console.log("count: " + items.length);
         });
       });
       
@@ -44,7 +43,7 @@ db.open(function(err, db) {
       collection.find(function(err, cursor) {
         cursor.toArray(function(err, items) {          
           cursor.each(function(err, item) {
-            if(item != null) sys.puts(sys.inspect(item));            
+            if(item != null) console.dir(item);
           });
         });
       });  
@@ -52,7 +51,7 @@ db.open(function(err, db) {
       // You can get the next object    
       collection.find(function(err, cursor) {
         cursor.nextObject(function(err, item) {
-          if(item != null) sys.puts(sys.inspect(item));                      
+          if(item != null) console.dir(item);
         });
       });
       
@@ -62,7 +61,8 @@ db.open(function(err, db) {
           cursor.nextObject(function(err, item) {
             cursor.nextObject(function(err, item) {
               cursor.nextObject(function(err, item) {
-                sys.puts("nextObject returned: " + sys.inspect(item));
+                console.log("nextObject returned: ");
+                console.dir(item);
                 db.close();
               });
             });
