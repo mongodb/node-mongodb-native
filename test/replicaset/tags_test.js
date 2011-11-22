@@ -75,37 +75,37 @@ module.exports = testCase({
     });
   },
 
-  'Should Correctly Connect With Default Replicaset And Insert Document For Tag Dc:NY' : function(test) {
-    // Replica configuration
-    var replSet = new ReplSetServers([ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {}
-    );
-  
-    var db = new Db('integration_test_', replSet);
-    db.open(function(err, p_db) {
-      // Recreate collection on replicaset
-      p_db.createCollection('testsets', function(err, collection) {
-        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
-        
-        // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:'majority'}}, function(err, r) {            
-          // Should have no error
-          test.equal(null, err);
-          
-          // Do a read for the value
-          collection.findOne({a:20}, function(err, item) {
-            test.equal(20, item.a);
-            test.done();
-            p_db.close();
-          })
-        });
-      });      
-    })    
-  }, 
+  // 'Should Correctly Connect With Default Replicaset And Insert Document For Tag Dc:NY' : function(test) {
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers([ 
+  //       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+  //     ], 
+  //     {}
+  //   );
+  // 
+  //   var db = new Db('integration_test_', replSet);
+  //   db.open(function(err, p_db) {
+  //     // Recreate collection on replicaset
+  //     p_db.createCollection('testsets', function(err, collection) {
+  //       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
+  //       
+  //       // Insert a dummy document
+  //       collection.insert({a:20}, {safe: {w:'majority'}}, function(err, r) {            
+  //         // Should have no error
+  //         test.equal(null, err);
+  //         
+  //         // Do a read for the value
+  //         collection.findOne({a:20}, function(err, item) {
+  //           test.equal(20, item.a);
+  //           test.done();
+  //           p_db.close();
+  //         })
+  //       });
+  //     });      
+  //   })    
+  // }, 
   
   'Should Honor setReadPreference primary' : function(test) {
     // Replica configuration
@@ -124,6 +124,9 @@ module.exports = testCase({
     db.open(function(err, p_db) {
       // Checkout a reader and make sure it's the primary
       var reader = replSet.checkoutReader();
+      console.log("=========================================================== reader")
+      console.dir(reader)
+      
       var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
       // Locate server instance associated with this id
       var serverInstance = replSet._state.addresses[readerAddress];      
@@ -138,207 +141,206 @@ module.exports = testCase({
     })    
   }, 
   
-  'Should Honor setReadPreference secondary' : function(test) {
-    // Replica configuration
-    var replSet = new ReplSetServers([ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {}
-    );
-    
-    // Set read preference
-    replSet.setReadPreference(Server.READ_SECONDARY);
-    // Open the database
-    var db = new Db('integration_test_', replSet);
-    db.open(function(err, p_db) {
-      // Checkout a reader and make sure it's the primary
-      var reader = replSet.checkoutReader();
-      var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
-      // Locate server instance associated with this id
-      var serverInstance = replSet._state.addresses[readerAddress];      
-      // Check that it's the primary instance
-      test.equal(false, serverInstance.master);
-      // Check that it's in the list of primary servers
-      test.ok(replSet._state.secondaries[readerAddress] != null);
-      // End test and close db
-      test.done();
-      p_db.close();
-    })    
-  }, 
-  
-  'Should correctly cleanup connection with tags' : function(test) {
-    // Replica configuration
-    var replSet = new ReplSetServers([ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {}
-    );
-    
-    // Set read preference
-    replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
-    // Open the database
-    var db = new Db('integration_test_', replSet);
-    db.open(function(err, p_db) {
-      // Checkout a reader and make sure it's the primary
-      var reader = replSet.checkoutWriter();
-      var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
-      // Locate server instance associated with this id
-      var serverInstance = replSet._state.addresses[readerAddress];      
-      // Force cleanup of byTags
-      ReplSetServers._cleanupTags(serverInstance, replSet._state.byTags);
-      // Check cleanup successful 
-      test.equal(1, replSet._state.byTags['dc1']['ny'].length);
-      test.equal(1, replSet._state.byTags['dc2']['sf'].length);
-      // End test and close db
-      test.done();
-      p_db.close();
-    })        
-  },
-  
-  'Should Honor setReadPreference tag' : function(test) {
-    // Replica configuration
-    var replSet = new ReplSetServers([ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {}
-    );
-    
-    // Set read preference
-    replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
-    // Open the database
-    var db = new Db('integration_test_', replSet);
-    db.open(function(err, p_db) {
-      // Checkout a reader and make sure it's the primary
-      var reader = replSet.checkoutReader();
-      var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
-      // Locate server instance associated with this id
-      var serverInstance = replSet._state.addresses[readerAddress];      
-      test.deepEqual({ dc2: 'sf' }, serverInstance.tags)
-      test.done();
-      p_db.close();
-    })    
-  },
-  
-  'Should Correctly Collect ping information from servers' : function(test) {
-    // Replica configuration
-    var replSet = new ReplSetServers([ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {}
-    );
-    
-    // Set read preference
-    replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
-    // Open the database
-    var db = new Db('integration_test_', replSet, {recordQueryStats:true});
-    db.open(function(err, p_db) {
-      setTimeout(function() {
-        var keys = Object.keys(replSet._state.addresses);
-        for(var i = 0; i < keys.length; i++) {
-          var server = replSet._state.addresses[keys[i]];
-          test.ok(server.queryStats.numDataValues >= 0);
-          test.ok(server.queryStats.mean >= 0);
-          test.ok(server.queryStats.variance >= 0);
-          test.ok(server.queryStats.standardDeviation >= 0);
-        }
-        
-        test.done();
-        p_db.close();        
-      }, 5000)
-    })    
-  },
-  
-  'Should correctly pick a ping strategy for secondary' : function(test) {
-    // Replica configuration
-    var replSet = new ReplSetServers([ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {}
-    );
-    
-    // Set read preference
-    replSet.setReadPreference(Server.READ_SECONDARY);
-    // Open the database
-    var db = new Db('integration_test_', replSet, {recordQueryStats:true});
-    db.open(function(err, p_db) {
-      p_db.createCollection('testsets3', function(err, collection) {
-        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
-        
-        // Insert a bunch of documents
-        collection.insert([{a:20}, {b:30}, {c:40}, {d:50}], {safe: {w:'majority'}}, function(err, r) {            
-          
-          // Select all documents
-          collection.find().toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal(4, items.length);
-            test.done();
-          });
-        });
-      });
-    })    
-  },
-
-  'Should correctly pick a statistics strategy for secondary' : function(test) {
-    // Replica configuration
-    var replSet = new ReplSetServers([ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {strategy:'statistical'}
-    );
-    
-    // Ensure we have the right strategy
-    test.ok(replSet.strategyInstance instanceof StatisticsStrategy);
-    
-    // Set read preference
-    replSet.setReadPreference(Server.READ_SECONDARY);
-    // Open the database
-    var db = new Db('integration_test_', replSet);
-    db.open(function(err, p_db) {
-      p_db.createCollection('testsets2', function(err, collection) {
-        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
-        
-        // Insert a bunch of documents
-        collection.insert([{a:20}, {b:30}, {c:40}, {d:50}], {safe: {w:'majority'}}, function(err, r) {            
-          
-          // Select all documents
-          collection.find().toArray(function(err, items) {
-            collection.find().toArray(function(err, items) {
-              collection.find().toArray(function(err, items) {
-                test.equal(null, err);
-                test.equal(4, items.length);
-                
-                // Total number of entries done
-                var totalNumberOfStrategyEntries = 0;
-            
-                // Check that we have correct strategy objects
-                var keys = Object.keys(replSet._state.secondaries);
-                for(var i = 0; i < keys.length; i++) {
-                  var server = replSet._state.secondaries[keys[i]];
-                  totalNumberOfStrategyEntries += server.queryStats.numDataValues;
-                }
-            
-                test.equal(4, totalNumberOfStrategyEntries);
-                test.done();
-              });
-            });
-          });
-        });
-      });
-    })    
-  },
-
+  // 'Should Honor setReadPreference secondary' : function(test) {
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers([ 
+  //       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+  //     ], 
+  //     {}
+  //   );
+  //   
+  //   // Set read preference
+  //   replSet.setReadPreference(Server.READ_SECONDARY);
+  //   // Open the database
+  //   var db = new Db('integration_test_', replSet);
+  //   db.open(function(err, p_db) {
+  //     // Checkout a reader and make sure it's the primary
+  //     var reader = replSet.checkoutReader();
+  //     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
+  //     // Locate server instance associated with this id
+  //     var serverInstance = replSet._state.addresses[readerAddress];      
+  //     // Check that it's the primary instance
+  //     test.equal(false, serverInstance.master);
+  //     // Check that it's in the list of primary servers
+  //     test.ok(replSet._state.secondaries[readerAddress] != null);
+  //     // End test and close db
+  //     test.done();
+  //     p_db.close();
+  //   })    
+  // }, 
+  // 
+  // 'Should correctly cleanup connection with tags' : function(test) {
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers([ 
+  //       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+  //     ], 
+  //     {}
+  //   );
+  //   
+  //   // Set read preference
+  //   replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
+  //   // Open the database
+  //   var db = new Db('integration_test_', replSet);
+  //   db.open(function(err, p_db) {
+  //     // Checkout a reader and make sure it's the primary
+  //     var reader = replSet.checkoutWriter();
+  //     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
+  //     // Locate server instance associated with this id
+  //     var serverInstance = replSet._state.addresses[readerAddress];      
+  //     // Force cleanup of byTags
+  //     ReplSetServers._cleanupTags(serverInstance, replSet._state.byTags);
+  //     // Check cleanup successful 
+  //     test.equal(1, replSet._state.byTags['dc1']['ny'].length);
+  //     test.equal(1, replSet._state.byTags['dc2']['sf'].length);
+  //     // End test and close db
+  //     test.done();
+  //     p_db.close();
+  //   })        
+  // },
+  // 
+  // 'Should Honor setReadPreference tag' : function(test) {
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers([ 
+  //       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+  //     ], 
+  //     {}
+  //   );
+  //   
+  //   // Set read preference
+  //   replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
+  //   // Open the database
+  //   var db = new Db('integration_test_', replSet);
+  //   db.open(function(err, p_db) {
+  //     // Checkout a reader and make sure it's the primary
+  //     var reader = replSet.checkoutReader();
+  //     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
+  //     // Locate server instance associated with this id
+  //     var serverInstance = replSet._state.addresses[readerAddress];      
+  //     test.deepEqual({ dc2: 'sf' }, serverInstance.tags)
+  //     test.done();
+  //     p_db.close();
+  //   })    
+  // },
+  // 
+  // 'Should Correctly Collect ping information from servers' : function(test) {
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers([ 
+  //       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+  //     ], 
+  //     {}
+  //   );
+  //   
+  //   // Set read preference
+  //   replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
+  //   // Open the database
+  //   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
+  //   db.open(function(err, p_db) {
+  //     setTimeout(function() {
+  //       var keys = Object.keys(replSet._state.addresses);
+  //       for(var i = 0; i < keys.length; i++) {
+  //         var server = replSet._state.addresses[keys[i]];
+  //         test.ok(server.queryStats.numDataValues >= 0);
+  //         test.ok(server.queryStats.mean >= 0);
+  //         test.ok(server.queryStats.variance >= 0);
+  //         test.ok(server.queryStats.standardDeviation >= 0);
+  //       }
+  //       
+  //       test.done();
+  //       p_db.close();        
+  //     }, 5000)
+  //   })    
+  // },
+  // 
+  // 'Should correctly pick a ping strategy for secondary' : function(test) {
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers([ 
+  //       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+  //     ], 
+  //     {}
+  //   );
+  //   
+  //   // Set read preference
+  //   replSet.setReadPreference(Server.READ_SECONDARY);
+  //   // Open the database
+  //   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
+  //   db.open(function(err, p_db) {
+  //     p_db.createCollection('testsets3', function(err, collection) {
+  //       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
+  //       
+  //       // Insert a bunch of documents
+  //       collection.insert([{a:20}, {b:30}, {c:40}, {d:50}], {safe: {w:'majority'}}, function(err, r) {            
+  //         
+  //         // Select all documents
+  //         collection.find().toArray(function(err, items) {
+  //           test.equal(null, err);
+  //           test.equal(4, items.length);
+  //           test.done();
+  //         });
+  //       });
+  //     });
+  //   })    
+  // },
+  // 
+  // 'Should correctly pick a statistics strategy for secondary' : function(test) {
+  //   // Replica configuration
+  //   var replSet = new ReplSetServers([ 
+  //       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+  //     ], 
+  //     {strategy:'statistical'}
+  //   );
+  //   
+  //   // Ensure we have the right strategy
+  //   test.ok(replSet.strategyInstance instanceof StatisticsStrategy);
+  //   
+  //   // Set read preference
+  //   replSet.setReadPreference(Server.READ_SECONDARY);
+  //   // Open the database
+  //   var db = new Db('integration_test_', replSet);
+  //   db.open(function(err, p_db) {
+  //     p_db.createCollection('testsets2', function(err, collection) {
+  //       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
+  //       
+  //       // Insert a bunch of documents
+  //       collection.insert([{a:20}, {b:30}, {c:40}, {d:50}], {safe: {w:'majority'}}, function(err, r) {            
+  //         
+  //         // Select all documents
+  //         collection.find().toArray(function(err, items) {
+  //           collection.find().toArray(function(err, items) {
+  //             collection.find().toArray(function(err, items) {
+  //               test.equal(null, err);
+  //               test.equal(4, items.length);
+  //               
+  //               // Total number of entries done
+  //               var totalNumberOfStrategyEntries = 0;
+  //           
+  //               // Check that we have correct strategy objects
+  //               var keys = Object.keys(replSet._state.secondaries);
+  //               for(var i = 0; i < keys.length; i++) {
+  //                 var server = replSet._state.secondaries[keys[i]];
+  //                 totalNumberOfStrategyEntries += server.queryStats.numDataValues;
+  //               }
+  //           
+  //               test.equal(4, totalNumberOfStrategyEntries);
+  //               test.done();
+  //             });
+  //           });
+  //         });
+  //       });
+  //     });
+  //   })    
+  // },
   
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();

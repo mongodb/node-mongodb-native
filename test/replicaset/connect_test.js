@@ -90,6 +90,25 @@ module.exports = testCase({
       p_db.close();
     })    
   },  
+
+  shouldCorrectlyConnectWithDefaultReplicasetAndSocketOptionsSet : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers([ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {socketOptions:{keepAlive:100}}}
+    );
+  
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      test.equal(null, err);
+      test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
+      test.done();
+      p_db.close();
+    })    
+  },  
   
   shouldEmitCloseNoCallback : function(test) {
     // Replica configuration
