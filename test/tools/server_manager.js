@@ -113,6 +113,12 @@ ServerManager.prototype.stop = function(signal, callback) {
   });    
 }
 
+ServerManager.prototype.killAll = function(callback) {
+  exec('killall mongod', function(err, stdout, stderr) {
+    callback(null, null);
+  });
+}
+
 // Get absolute path
 var getPath = function(self, name) {
   return path.join(self.path, name);

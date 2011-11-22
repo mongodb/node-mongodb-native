@@ -24,7 +24,7 @@ var tests = testCase({
   },
   
   tearDown: function(callback) {
-    serverManager.stop(9, function(err, result) {
+    serverManager.killAll(function(err, result) {
       callback();
     });
   },
