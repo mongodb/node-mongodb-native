@@ -58,6 +58,8 @@ var ISODate = function (string) {
 var tests = testCase({
   setUp: function(callback) {
     client.open(function(err, db_p) {
+      if(err != null) throw err;
+      
       if(numberOfTestsRun == Object.keys(tests).length) {
         // If first test drop the db
         client.dropDatabase(function(err, done) {

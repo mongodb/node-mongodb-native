@@ -76,9 +76,9 @@ module.exports = testCase({
   },
   
   tearDown: function(callback) {
-    RS.restartKilledNodes(function(err, result) {
+    // RS.restartKilledNodes(function(err, result) {
       callback();                
-    });
+    // });
   },
 
   shouldCorrectlyWaitForReplicationToServersOnInserts : function(test) {
@@ -232,7 +232,7 @@ module.exports = testCase({
             setTimeout(function() {
               // console.log("--------------------------------------------------------------------- -1")
               // Kill the primary
-              RS.killPrimary(2, {killNodeWaitTime:10}, function(node) {
+              RS.killPrimary(2, {killNodeWaitTime:1}, function(node) {
                 // console.log("--------------------------------------------------------------------- 0")
                 // Attempt insert (should fail)
                 collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {

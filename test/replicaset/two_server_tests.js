@@ -29,8 +29,8 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   var db = new Db('integration_test_', replSet);
   db.open(function(err, p_db) {
+    db.close();
     if(err != null) {
-      db.close();
       // Wait for a sec and retry
       setTimeout(function() {
         numberOfTries = numberOfTries - 1;
@@ -66,10 +66,10 @@ module.exports = testCase({
   },
   
   tearDown: function(callback) {
-    RS.restartKilledNodes(function(err, result) {
-      if(err != null) throw err;
+    // RS.restartKilledNodes(function(err, result) {
+    //   if(err != null) throw err;
       callback();        
-    })
+    // })
   },
   
   shouldCorrectlyExecuteSafeFindAndModify : function(test) {
@@ -100,6 +100,7 @@ module.exports = testCase({
             collection.findAndModify({'a':20}, [['a', 1]], {'$set':{'b':3}}, {'new':true, safe: {w:7, wtimeout: 10000}}, function(err, updated_doc) {
               test.equal('timeout', err.err)
               test.equal(true, err.wtimeout)
+              p_db.close();        
               test.done();
             });              
           });

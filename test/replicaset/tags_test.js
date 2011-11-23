@@ -70,9 +70,9 @@ module.exports = testCase({
   },
   
   tearDown: function(callback) {
-    RS.restartKilledNodes(function(err, result) {
+    // RS.restartKilledNodes(function(err, result) {
       callback();                
-    });
+    // });
   },
 
   'Should Correctly Connect With Default Replicaset And Insert Document For Tag Dc:NY' : function(test) {
@@ -98,9 +98,9 @@ module.exports = testCase({
           
           // Do a read for the value
           collection.findOne({a:20}, function(err, item) {
+            p_db.close();
             test.equal(20, item.a);
             test.done();
-            p_db.close();
           })
         });
       });      
@@ -133,8 +133,8 @@ module.exports = testCase({
       var primaryAddress = replSet._state.master.host + ":" + replSet._state.master.port;
       test.equal(primaryAddress, readerAddress);
       // End test and close db
-      test.done();
       p_db.close();
+      test.done();
     })    
   }, 
   
@@ -163,8 +163,8 @@ module.exports = testCase({
       // Check that it's in the list of primary servers
       test.ok(replSet._state.secondaries[readerAddress] != null);
       // End test and close db
-      test.done();
       p_db.close();
+      test.done();
     })    
   }, 
   
@@ -194,8 +194,8 @@ module.exports = testCase({
       test.equal(1, replSet._state.byTags['dc1']['ny'].length);
       test.equal(1, replSet._state.byTags['dc2']['sf'].length);
       // End test and close db
-      test.done();
       p_db.close();
+      test.done();
     })        
   },
   
@@ -220,8 +220,8 @@ module.exports = testCase({
       // Locate server instance associated with this id
       var serverInstance = replSet._state.addresses[readerAddress];      
       test.deepEqual({ dc2: 'sf' }, serverInstance.tags)
-      test.done();
       p_db.close();
+      test.done();
     })    
   },
   
@@ -250,8 +250,8 @@ module.exports = testCase({
           test.ok(server.queryStats.standardDeviation >= 0);
         }
         
-        test.done();
         p_db.close();        
+        test.done();
       }, 5000)
     })    
   },
@@ -281,6 +281,7 @@ module.exports = testCase({
           collection.find().toArray(function(err, items) {
             test.equal(null, err);
             test.equal(4, items.length);
+            p_db.close();        
             test.done();
           });
         });
@@ -329,6 +330,7 @@ module.exports = testCase({
                   totalNumberOfStrategyEntries += server.queryStats.numDataValues;
                 }
             
+                p_db.close();        
                 test.equal(4, totalNumberOfStrategyEntries);
                 test.done();
               });

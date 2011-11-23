@@ -68,9 +68,9 @@ module.exports = testCase({
   },
   
   tearDown: function(callback) {
-    RS.restartKilledNodes(function(err, result) {
+    // RS.restartKilledNodes(function(err, result) {
       callback();                
-    });
+    // });
   },
 
   shouldCorrectlyConnectWithDefaultReplicaset : function(test) {

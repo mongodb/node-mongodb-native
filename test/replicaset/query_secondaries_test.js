@@ -18,9 +18,9 @@ var RS = RS == null ? null : RS;
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
   var replSet = new ReplSetServers( [ 
-      // new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      // new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ], 
     {rs_name:RS.name}
   );
@@ -38,8 +38,8 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   // Open the db
   db.open(function(err, p_db) {
+    db.close();
     if(err != null) {
-      db.close();
       // Wait for a sec and retry
       setTimeout(function() {
         numberOfTries = numberOfTries - 1;
@@ -71,10 +71,10 @@ module.exports = testCase({
   },
   
   tearDown: function(callback) {
-    RS.restartKilledNodes(function(err, result) {
-      if(err != null) throw err;
+    // RS.restartKilledNodes(function(err, result) {
+    //   if(err != null) throw err;
       callback();        
-    })
+    // })
   },
 
   shouldReadPrimary : function(test) {
@@ -93,9 +93,9 @@ module.exports = testCase({
       // Drop collection on replicaset
       p_db.dropCollection('testsets', function(err, r) {
         if(err != null) debug("shouldReadPrimary :: " + inspect(err));
-  
         test.equal(false, p_db.serverConfig.isReadPrimary());
         test.equal(false, p_db.serverConfig.isPrimary());
+        p_db.close();
         test.done();
       });
     })                
@@ -122,6 +122,7 @@ module.exports = testCase({
         test.ok(p_db.serverConfig.primary != null);
         test.ok(p_db.serverConfig.read != null);
         test.ok(p_db.serverConfig.primary.port != p_db.serverConfig.read.port);
+        p_db.close();
         test.done();
       });
     })
@@ -156,6 +157,7 @@ module.exports = testCase({
               collection.find().toArray(function(err, items) {                
                 test.equal(null, err);
                 test.equal(3, items.length);                
+                p_db.close();
                 test.done();
               });            
             });
@@ -171,25 +173,6 @@ module.exports = testCase({
     test.done();
   }  
 })
-
-var retryEnsure = function(numberOfRetries, execute, callback) {
-  execute(function(done) {
-    if(done) {
-      return callback(null, null);              
-    } else {
-      numberOfRetries = numberOfRetries - 1;
-
-      if(numberOfRetries <= 0) {
-        return callback(new Error("Failed to execute command"), null);
-      } else {
-        setTimeout(function() {
-          retryEnsure(numberOfRetries, execute, callback);
-        }, 1000);
-      }        
-    }
-  });
-}
-
 
 
 
