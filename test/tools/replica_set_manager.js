@@ -373,7 +373,9 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
         if(err == null && connection != null) {
           // Check repl set get status
           connection.admin().command({"replSetGetStatus": 1}, function(err, object) {
-            /// Get documents
+            // Close connection
+            if(connection != null) connection.close();
+            // Get documents
             var documents = object.documents;
             // Get status object
             var status = documents[0];
@@ -386,8 +388,6 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
               if(self.ensureUpRetries >=  self.retries) {
                 // Set that we are done
                 done = true;
-                // if we have a connection force close it
-                if(connection != null) connection.close();
                 // Return error
                 return callback(new Error("Operation Failure"), null);          
               } else {
@@ -420,8 +420,6 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
                 if(self.ensureUpRetries >=  self.retries) {
                   // Set that we are done
                   done = true;
-                  // if we have a connection force close it
-                  if(connection != null) connection.close();
                   // Return error
                   return callback(new Error("Operation Failure"), null);          
                 } else {
@@ -431,6 +429,8 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
               }        
             }
           });
+        } else if(err != null && connection != null) {
+          if(connection != null) connection.close();
         }
       });      
     }
@@ -550,7 +550,7 @@ ReplicaSetManager.prototype.restart = start;
 
 ReplicaSetManager.prototype.startCmd = function(n) {
   // Create boot command
-  this.mongods[n]["start"] = "mongod --noprealloc --smallfiles --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
+  this.mongods[n]["start"] = "mongod --rest --noprealloc --smallfiles --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
       " --dbpath " + this.mongods[n]['db_path'] + " --port " + this.mongods[n]['port'] + " --fork";
   this.mongods[n]["start"] = this.durable ? this.mongods[n]["start"] + " --dur" : this.mongods[n]["start"];
   

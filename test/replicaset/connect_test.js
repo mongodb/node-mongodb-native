@@ -98,7 +98,7 @@ module.exports = testCase({
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
         new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
       ], 
-      {socketOptions:{keepAlive:100}}}
+      {socketOptions:{keepAlive:100}}
     );
   
     var db = new Db('integration_test_', replSet);

@@ -15,6 +15,11 @@ var serversUp = false;
 var retries = 120;
 var RS = RS == null ? null : RS;
 
+// process.on("uncaughtException", function(err) {
+//   console.log("================================================================ uncaughtException")
+//   console.dir(err)
+// })
+
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
   var replSet = new ReplSetServers( [ 
@@ -38,8 +43,11 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   // Open the db
   db.open(function(err, p_db) {
+    // Close connections
+    db.close();    
+    // Process result
     if(err != null) {
-      db.close();
+      // db.close();
       // Wait for a sec and retry
       setTimeout(function() {
         numberOfTries = numberOfTries - 1;
@@ -222,6 +230,7 @@ module.exports = testCase({
             // Kill the primary and attemp to insert
             // Ensure replication happened in time
             setTimeout(function() {
+              // console.log("--------------------------------------------------------------------- -1")
               // Kill the primary
               RS.killPrimary(2, {killNodeWaitTime:10}, function(node) {
                 // console.log("--------------------------------------------------------------------- 0")
@@ -300,17 +309,22 @@ module.exports = testCase({
             // Kill the primary and attemp to insert
             // Ensure replication happened in time
             setTimeout(function() {
+              // console.log("--------------------------------------------------------------------- -1")
               // Kill the primary
               RS.killPrimary(2, {killNodeWaitTime:1}, function(node) {
+                // console.log("--------------------------------------------------------------------- 0")
                 // Ok let's execute same query a couple of times
                 collection.find({}).toArray(function(err, items) {
+                  // console.log("--------------------------------------------------------------------- 1")
                   test.ok(err != null);
                   
                   collection.find({}).toArray(function(err, items) {
+                    // console.log("--------------------------------------------------------------------- 2")
                     test.ok(err == null);
                     test.equal(1, items.length);
   
                     collection.find({}).toArray(function(err, items) {
+                      // console.log("--------------------------------------------------------------------- 3")
                       test.ok(err == null);
                       test.equal(1, items.length);
                       p_db.close();
