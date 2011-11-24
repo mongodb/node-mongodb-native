@@ -1,4 +1,4 @@
-0.9.7.1
+0.9.7.1 2011-11-24
 * Better handling of dead server for single server instances
 * FindOne and find treats selector == null as {}, Issue #403
 * Possible to pass in a strategy for the replicaset to pick secondary reader node 
@@ -21,6 +21,7 @@
 * Correctly applies socket options including timeout
 * Cleanup of test management code to close connections correctly
 * Handle parser errors better, closing down the connection and emitting an error
+* Correctly emit errors from server.js only wrapping errors that are strings
 
 0.9.7 2011-11-10
 * Added priority setting to replicaset manager
