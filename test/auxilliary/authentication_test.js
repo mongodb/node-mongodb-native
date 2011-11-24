@@ -143,7 +143,7 @@ var tests = testCase({
         var self = this;
         db1.collection('stuff', function(err, collection) {
           
-          collection.find().toArray(function(err, items) {
+          collection.find({}).toArray(function(err, items) {
             test.ok(err == null);
             test.equal(1, items.length);
             

@@ -85,7 +85,7 @@ ServerManager.prototype.start = function(killall, callback) {
         self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
         // Callback
         callback();
-      }, 500);      
+      }, 5000);      
     }
   });
 }
