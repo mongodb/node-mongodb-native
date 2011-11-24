@@ -20,7 +20,11 @@ Several options can be passed to the `Server` constructor with `options` paramet
   
   * `auto_reconnect` - to reconnect automatically, `default:false`
   * `poolSize` - specify the number of connections in the pool `default:1`
- 
+  * `socketOptions` - a collection of pr socket settings
+	* `timeout` = set seconds before connection times out `default:0`
+	* `noDelay` = Disables the Nagle algorithm `default:true`
+	* `keepAlive` = Set if keepAlive is used `default:0`, which means no keepAlive, set higher than 0 for keepAlive
+	* `encoding` = ['ascii', 'utf8', or 'base64'] `default:null`
 
 ## DB options
 
