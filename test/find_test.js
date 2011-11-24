@@ -962,7 +962,7 @@ var tests = testCase({
 
   shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists : function(test) {
     client.createCollection('shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists', function(err, collection) {
-      collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, function(err, updated_doc) {
+      collection.findAndModify({'a':1}, [], {'$set':{'b':3}}, {'new': true}, function(err, updated_doc) {
         test.equal(null, err)
         test.equal(null, updated_doc);
         test.done();
