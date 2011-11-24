@@ -143,14 +143,13 @@ module.exports = testCase({
   
     new Db('integration_test_', replSet).open(function(err, db) {
       test.equal(null, err);
-      var dbCloseCount = 0;//, serverCloseCount = 0;
+      var dbCloseCount = 0;
       db.on('close', function() { ++dbCloseCount; });
   
       db.close(function() {
         // Let all events fire.
         process.nextTick(function() {
           test.equal(dbCloseCount, 0);
-          // test.equal(serverCloseCount, db.serverConfig.servers.length);
           test.done();
         });
       });

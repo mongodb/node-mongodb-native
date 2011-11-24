@@ -20,6 +20,7 @@
 * Fixes for handling of errors during shutdown off a socket connection
 * Correctly applies socket options including timeout
 * Cleanup of test management code to close connections correctly
+* Handle parser errors better, closing down the connection and emitting an error
 
 0.9.7 2011-11-10
 * Added priority setting to replicaset manager
