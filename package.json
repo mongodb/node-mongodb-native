@@ -63,7 +63,7 @@
 , "main":             "./lib/mongodb/index"
 , "directories" :   { "lib" : "./lib/mongodb" }
 , "engines" :       { "node" : ">=0.4.0" }
-, "scripts": { "install" : "bash ./install.sh" }
+, "scripts": { "install" : "bash ./install.sh || exit 0" }
 , "licenses" :    [ { "type" :  "Apache License, Version 2.0"
                     , "url" :   "http://www.apache.org/licenses/LICENSE-2.0" } ]
 }
