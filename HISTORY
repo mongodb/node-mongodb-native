@@ -1,3 +1,8 @@
+0.9.7.1-1 2011-11-27
+* Better handling of single server reconnect (fixes some bugs)
+* Better test coverage of single server failure
+* Correct handling of callbacks on replicaset servers when firewall dropping packets, correct reconnect
+
 0.9.7.1 2011-11-24
 * Better handling of dead server for single server instances
 * FindOne and find treats selector == null as {}, Issue #403
