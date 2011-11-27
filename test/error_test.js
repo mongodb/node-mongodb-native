@@ -211,9 +211,9 @@ var tests = testCase({
               })
             })
           })
-        })                  
+        })
       });
-    });    
+    });
   },
   
   'safe mode should pass the disconnected error to the callback': function (test) {
@@ -252,7 +252,7 @@ var tests = testCase({
                     });
                   });
                 });
-              });  
+              });
             });
           });
         });
