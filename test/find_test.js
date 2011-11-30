@@ -932,7 +932,7 @@ var tests = testCase({
         
         collection.find({_id: doc._id}, {comments: {$slice: -5}}).toArray(function(err, docs) {
           test.equal(5, docs[0].comments.length)
-
+  
           collection.findOne({_id: doc._id}, {comments: {$slice: -5}}, function(err, item) {
             test.equal(5, item.comments.length)
             test.done();
@@ -941,7 +941,7 @@ var tests = testCase({
       });
     });
   },
-
+  
   'Should correctly execute find and findOne queries with selector set to null' : function(test) {
     client.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {      
       var doc = {_id : new client.bson_serializer.ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
@@ -950,7 +950,7 @@ var tests = testCase({
         
         collection.find(null, {comments: {$slice: -5}}).toArray(function(err, docs) {
           test.equal(5, docs[0].comments.length)
-
+  
           collection.findOne(null, {comments: {$slice: -5}}, function(err, item) {
             test.equal(5, item.comments.length)
             test.done();
@@ -959,13 +959,51 @@ var tests = testCase({
       });
     });
   },
-
+  
   shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists : function(test) {
     client.createCollection('shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists', function(err, collection) {
       collection.findAndModify({'a':1}, [], {'$set':{'b':3}}, {'new': true}, function(err, updated_doc) {
         test.equal(null, err)
         test.equal(null, updated_doc);
         test.done();
+      });
+    });
+  },
+
+  shouldCorrectlyExecuteMultipleFindsInParallel : function(test) {
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    p_client.bson_deserializer = client.bson_deserializer;
+    p_client.bson_serializer = client.bson_serializer;
+    p_client.pkFactory = client.pkFactory;
+  
+    p_client.open(function(err, p_client) {
+      p_client.createCollection('tasks', function(err, collection) {
+        var numberOfOperations = 0;
+        
+        // Test return old document on change
+        collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
+          collection.find({"user_id":"4e9fc8d55883d90100000003","lc_status":{"$ne":"deleted"},"owner_rating":{"$exists":false}}, 
+            {"skip":0,"limit":10,"sort":{"updated":-1}}, function(err, cursor) {
+            cursor.count(function(err, count) {
+              numberOfOperations = numberOfOperations + 1;
+              if(numberOfOperations == 2) {
+                test.done();
+                p_client.close();
+              }
+            })  
+          });
+
+          collection.find({"user_id":"4e9fc8d55883d90100000003","lc_status":{"$ne":"deleted"},"owner_rating":{"$exists":false}}, 
+            {"skip":0,"limit":10,"sort":{"updated":-1}}, function(err, cursor) {
+            cursor.count(function(err, count) {
+              numberOfOperations = numberOfOperations + 1;
+              if(numberOfOperations == 2) {
+                test.done();
+                p_client.close();
+              }
+            })  
+          });
+        });
       });
     });
   },
