@@ -135,6 +135,43 @@ var tests = testCase({
     test.equal(timestamp, time2);
     test.done();
   },
+  
+  shouldCorrectlyInsertWithObjectId : function(test) {
+    client.createCollection('shouldCorrectlyInsertWithObjectId', function(err, collection) {
+      collection.insert({}, {safe:true}, function(err, ids) {
+        setTimeout(function() {
+          collection.insert({}, {safe:true}, function(err, ids) {
+            collection.find().toArray(function(err, items) {
+              var compareDate = new Date();
+              
+              // Date 1
+              var date1 = new Date();
+              date1.setTime(items[0]._id.generationTime * 1000);
+              // Date 2
+              var date2 = new Date();
+              date2.setTime(items[1]._id.generationTime * 1000);
+
+              // Compare
+              test.equal(compareDate.getFullYear(), date1.getFullYear());
+              test.equal(compareDate.getDate(), date1.getDate());
+              test.equal(compareDate.getMonth(), date1.getMonth());
+              test.equal(compareDate.getHours(), date1.getHours());
+              test.equal(compareDate.getMinutes(), date1.getMinutes());
+
+              test.equal(compareDate.getFullYear(), date2.getFullYear());
+              test.equal(compareDate.getDate(), date2.getDate());
+              test.equal(compareDate.getMonth(), date2.getMonth());
+              test.equal(compareDate.getHours(), date2.getHours());
+              test.equal(compareDate.getMinutes(), date2.getMinutes());
+              test.ok(date2.getSeconds() >= date1.getSeconds());
+              // Let's close the db
+              test.done();
+            });
+          });
+        }, 2000);        
+      });
+    });    
+  },
 
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
