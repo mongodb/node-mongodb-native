@@ -26,7 +26,7 @@ new Db('hammer_db', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSi
       if(command == 1) {
         // Execute an insert
         db.collection('hammer_collection', function(err, collection) {
-          collection.insert(randomDoc(), {safe:true}, function(err, result) {
+          collection.insert(randomDoc(), {safe:false}, function(err, result) {
             debug("---------------------------------------- INSERT")
           });
         });
@@ -43,7 +43,7 @@ new Db('hammer_db', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSi
               // Show a random doc in
               item[keys[pickRandomItem]] = randomDoc();
               // Update doc
-              collection.update({'_id':_id}, item, {safe:true}, function(err, result) {
+              collection.update({'_id':_id}, item, {safe:false}, function(err, result) {
                 debug("---------------------------------------- UPDATE")                
               });
             }
@@ -55,7 +55,7 @@ new Db('hammer_db', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSi
           collection.findOne({}, function(err, item) {
             if(!err && item != null) {
               // Update doc
-              collection.remove({'_id':item._id}, {safe:true}, function(err, result) {
+              collection.remove({'_id':item._id}, {safe:false}, function(err, result) {
                 debug("---------------------------------------- REMOVE")
               });
             }

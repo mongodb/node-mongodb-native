@@ -373,6 +373,53 @@ var tests = testCase({
     test.done();
   },
 
+  'Corrupt the message baby but catch the log error' : function(test) {
+    // Data object
+    var index = 0;
+    var buffer = new Buffer(40);
+    var value = -40;
+    // Encode length at start according to wire protocol
+    buffer[index + 3] = (value >> 24) & 0xff;      
+    buffer[index + 2] = (value >> 16) & 0xff;
+    buffer[index + 1] = (value >> 8) & 0xff;
+    buffer[index] = value & 0xff;                
+  
+    // Dummy object for receiving message
+    var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+      test.equal('parseError', message)
+    }};
+    
+    // Count the number of errors
+    var totalCountOfErrors = 0;
+    
+    // Add a logger object
+    self.logger = {
+      doDebug:true,
+      doError:true,
+      doLog:true,
+      
+      error:function(message, object) {
+        totalCountOfErrors = totalCountOfErrors + 1;
+      }, 
+      
+      log:function(message, object) {        
+      }, 
+      
+      debug:function(message, object) {
+      }
+    }
+    
+    // Create a connection object
+    var dataHandler = Connection.createDataHandler(self);
+  
+    // Execute parsing of message
+    dataHandler(buffer.slice(0, 6));
+    dataHandler(buffer.slice(6, 15));
+    dataHandler(buffer.slice(15, 27));
+    test.equal(3, totalCountOfErrors);
+    test.done();
+  },
+
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
