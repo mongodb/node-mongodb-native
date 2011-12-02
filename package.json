@@ -1,7 +1,7 @@
 { "name" :            "mongodb"
 , "description" :     "A node.js driver for MongoDB"
 , "keywords" :        ["mongodb", "mongo", "driver", "db"]
-, "version" :         "0.9.7-1.3"
+, "version" :         "0.9.7-1.4"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  [ "Aaron Heckmann",
                       "Christoph Pojer",
@@ -63,7 +63,7 @@
 , "main":             "./lib/mongodb/index"
 , "directories" :   { "lib" : "./lib/mongodb" }
 , "engines" :       { "node" : ">=0.4.0" }
-, "scripts": { "install" : "bash ./install.sh || exit 0" }
+, "scripts": { "install" : "node install.js" }
 , "licenses" :    [ { "type" :  "Apache License, Version 2.0"
                     , "url" :   "http://www.apache.org/licenses/LICENSE-2.0" } ]
 }
