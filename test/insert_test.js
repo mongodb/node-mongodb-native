@@ -1,4 +1,5 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+var useSSL = process.env['USE_SSL'] != null ? true : false;
 
 var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug,
@@ -14,7 +15,7 @@ var testCase = require('../deps/nodeunit').testCase,
   ServerManager = require('./tools/server_manager').ServerManager;  
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -88,7 +89,7 @@ var tests = testCase({
 
   shouldForceMongoDbServerToAssignId : function(test) {
     /// Set up server with custom pk factory
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null), 'forceServerObjectId':true});
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), 'forceServerObjectId':true});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
   
@@ -306,7 +307,7 @@ var tests = testCase({
   }, 
   
   shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext: function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -429,7 +430,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlyInsertAndUpdateWithNoCallback : function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -581,7 +582,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlyCallCallbackWithDbDriverInStrictMode : function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -632,7 +633,7 @@ var tests = testCase({
   },
   
   shouldCorrectlyInsertUpdateRemoveWithNoOptions : function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;
@@ -654,7 +655,7 @@ var tests = testCase({
   },
   
   shouldCorrectlyExecuteMultipleFetches : function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;

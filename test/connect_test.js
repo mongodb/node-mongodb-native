@@ -1,4 +1,5 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+var useSSL = process.env['USE_SSL'] != null ? true : false;
 
 var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug,
@@ -14,7 +15,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Step = require("../deps/step/lib/step");
 
 var MONGODB = 'integration_tests';
-var clientUrl = 'mongo://localhost:27017/' + MONGODB;
+var clientUrl = 'mongo://localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
 
 function connectionTester(test, testName) {
   return function(err, db) {
@@ -69,13 +70,13 @@ exports.testConnectGoodAuth = function(test) {
     });
   });
   function restOfTest() {
-    var url = 'mongo://' + user + ':' + password + '@localhost:27017/' + MONGODB;
+    var url = 'mongo://' + user + ':' + password + '@localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
     connect(url, connectionTester(test, 'testConnectGoodAuth'));
   }
 };
 
 exports.testConnectBadAuth = function(test) {
-  var url = 'mongo://slithy:toves@localhost:27017/' + MONGODB;
+  var url = 'mongo://slithy:toves@localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
   connect(url, function(err, db) {
     test.ok(err);
     test.equal(db, null);

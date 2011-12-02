@@ -29,7 +29,11 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.passiveCount = options["passive_count"] != null ? options["passive_count"] : 1;
   this.primaryCount = options["primary_count"] != null ? options["primary_count"] : 1;
   this.keyPath = [process.cwd(), "test", "tools", "keyfile.txt"].join("/");
-  fs.chmodSync(this.keyPath, 0600);
+  try {
+    fs.chmodSync(this.keyPath, 0600);    
+  } catch(err) {
+    console.dir(err);
+  }
   
   this.count = this.primaryCount + this.passiveCount + this.arbiterCount + this.secondaryCount;
   if(this.count > 7) {

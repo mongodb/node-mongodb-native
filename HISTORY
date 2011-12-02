@@ -1,3 +1,8 @@
+0.9.7.2
+* Added ssl support for future version of mongodb (EXPERIMENTAL)
+	* pass in the ssl:true option to the server or replicaset server config to enable
+	* a bug either in mongodb or node.js does not allow for more than 1 connection pr server.
+
 0.9.7.1-2 2011-11-27
 * Set statistical selection strategy as default for secondary choice.
 

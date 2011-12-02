@@ -1,4 +1,5 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+var useSSL = process.env['USE_SSL'] != null ? true : false;
 
 var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug,
@@ -11,13 +12,13 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
 var tests = testCase({
   setUp: function(callback) {
-    client.open(function(err, db_p) {
+    client.open(function(err, db_p) {      
       if(numberOfTestsRun == Object.keys(tests).length) {
         // If first test drop the db
         client.dropDatabase(function(err, done) {
@@ -45,7 +46,7 @@ var tests = testCase({
   },
 
   shouldCorrectlyCallValidateCollection : function(test) {
-    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
@@ -79,7 +80,7 @@ var tests = testCase({
   },
   
   shouldCorrectlySetDefaultProfilingLevel : function(test) {
-    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
@@ -107,7 +108,7 @@ var tests = testCase({
   },
   
   shouldCorrectlyChangeProfilingLevel : function(test) {
-    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;
@@ -152,7 +153,7 @@ var tests = testCase({
   },
   
   shouldCorrectlySetAndExtractProfilingInfo : function(test) {
-    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     fs_client.bson_deserializer = client.bson_deserializer;
     fs_client.bson_serializer = client.bson_serializer;
     fs_client.pkFactory = client.pkFactory;

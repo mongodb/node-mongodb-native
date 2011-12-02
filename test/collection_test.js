@@ -1,4 +1,5 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+var useSSL = process.env['USE_SSL'] != null ? true : false;
 
 var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug,
@@ -12,7 +13,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -218,7 +219,7 @@ var tests = testCase({
   },
   
   shouldEnsureStrictAccessCollection : function(test) {
-    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;  
@@ -242,7 +243,7 @@ var tests = testCase({
   },  
   
   shouldPerformStrictCreateCollection : function(test) {
-    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
     error_client.bson_deserializer = client.bson_deserializer;
     error_client.bson_serializer = client.bson_serializer;
     error_client.pkFactory = client.pkFactory;
@@ -561,7 +562,7 @@ var tests = testCase({
   },
     
   shouldCorrectlySaveDocumentWithNestedArray : function(test) {
-    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     db.bson_deserializer = client.bson_deserializer;
     db.bson_serializer = client.bson_serializer;
     db.pkFactory = client.pkFactory;

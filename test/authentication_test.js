@@ -1,4 +1,5 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+var useSSL = process.env['USE_SSL'] != null ? true : false;
 
 var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug,
@@ -11,7 +12,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 
 // Define the tests, we want them to run as a nested test so we only clean up the 
 // db connection once
@@ -67,7 +68,7 @@ var tests = testCase({
     var user_name = 'spongebob2';
     var password = 'password';
   
-    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:3}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:3, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     p_client.bson_deserializer = client.bson_deserializer;
     p_client.bson_serializer = client.bson_serializer;
     p_client.pkFactory = client.pkFactory;
@@ -107,7 +108,7 @@ var tests = testCase({
     var user_name = 'spongebob2';
     var password = 'password';
   
-    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     p_client.bson_deserializer = client.bson_deserializer;
     p_client.bson_serializer = client.bson_serializer;
     p_client.pkFactory = client.pkFactory;

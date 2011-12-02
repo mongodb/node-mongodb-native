@@ -17,6 +17,7 @@ var ServerManager = exports.ServerManager = function(options) {
   this.log_path = getPath(this, "log-" + this.port);
   this.journal = options["journal"] != null ? options["journal"] : false;   
   this.auth = options['auth'] != null ? options['auth'] : false; 
+  this.ssl = options['ssl'] != null ? options['ssl'] : false; 
   this.purgedirectories = options['purgedirectories'] != null ? options['purgedirectories'] : true;
 
   // Server status values
@@ -32,8 +33,8 @@ ServerManager.prototype.start = function(killall, callback) {
   callback = args.pop();
   killall = args.length ? args.shift() : true;  
   // Create start command
-  var startCmd = generateStartCmd({log_path: self.log_path, 
-    db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth});
+  var startCmd = generateStartCmd(this, {log_path: self.log_path, 
+    db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl});
     
   // console.log("----------------------------------------------------------------------- start")
   // console.log(startCmd)
@@ -101,8 +102,8 @@ ServerManager.prototype.stop = function(signal, callback) {
   // Kill process
   exec(command,
     function (error, stdout, stderr) {
-      // console.log('stdout: ' + stdout);
-      // console.log('stderr: ' + stderr);
+      console.log('stdout: ' + stdout);
+      console.log('stderr: ' + stderr);
       if (error !== null) {
         console.log('exec error: ' + error);
       }
@@ -125,11 +126,17 @@ var getPath = function(self, name) {
 }
 
 // Generate start command
-var generateStartCmd = function(options) {
+var generateStartCmd = function(self, options) {
   // Create boot command
   var startCmd = "mongod --noprealloc --logpath '" + options['log_path'] + "' " +
       " --dbpath " + options['db_path'] + " --port " + options['port'] + " --fork";
   startCmd = options['journal'] ? startCmd + "  --journal" : startCmd;
   startCmd = options['auth'] ? startCmd + "  --auth" : startCmd;
+  // If we have ssl defined set up with test certificate
+  if(options['ssl']) {
+    var path = getPath(self, '../test/certificates');
+    startCmd = startCmd + " --sslOnNormalPorts --sslPEMKeyFile=" + path + "/mycert.pem --sslPEMKeyPassword=10gen";
+  }
+  // Return start command
   return startCmd;
 }

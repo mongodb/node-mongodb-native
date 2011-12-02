@@ -377,6 +377,7 @@ var tests = testCase({
     // Data object
     var index = 0;
     var buffer = new Buffer(40);
+    for(var i = 0; i < buffer.length; i++) buffer[i] = 0;
     var value = -40;
     // Encode length at start according to wire protocol
     buffer[index + 3] = (value >> 24) & 0xff;      
@@ -400,6 +401,9 @@ var tests = testCase({
       
       error:function(message, object) {
         totalCountOfErrors = totalCountOfErrors + 1;
+        if(totalCountOfErrors == 3) {
+          test.done();
+        }
       }, 
       
       log:function(message, object) {        
@@ -416,8 +420,6 @@ var tests = testCase({
     dataHandler(buffer.slice(0, 6));
     dataHandler(buffer.slice(6, 15));
     dataHandler(buffer.slice(15, 27));
-    test.equal(3, totalCountOfErrors);
-    test.done();
   },
 
   noGlobalsLeaked : function(test) {
