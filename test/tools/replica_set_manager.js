@@ -366,7 +366,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
           // Set that we are done
           done = true;
           // perform callback
-          return callback(new Er=ror("Servers did not come up again"), null);
+          return callback(new Error("Servers did not come up again"), null);
         }
 
         // We have a connection, execute command and update server object
