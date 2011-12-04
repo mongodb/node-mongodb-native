@@ -33,6 +33,7 @@ class ObjectID : public ObjectWrap {
     static Handle<Value> CreatePk(const Arguments &args);
     static Handle<Value> CreateFromHexString(const Arguments &args);
 		static Handle<Value> Equals(const Arguments &args);
+    static Handle<Value> GetTimestamp(const Arguments &args);
 
     // Properties
     static Handle<Value> IdGetter(Local<String> property, const AccessorInfo& info);

@@ -1047,6 +1047,13 @@ var tests = testCase({
     
     test.done();
   },
+
+  'ObjectID should correctly retrieve timestamp' : function(test) {
+    var testDate = new Date();
+    var object1 = new ObjectID();
+    test.equal(Math.floor(testDate.getTime()/1000), Math.floor(object1.getTimestamp().getTime()/1000));
+    test.done();
+  },
   
   // 'Should Correctly Function' : function(test) {
   //   var doc = {b:1, func:function() {

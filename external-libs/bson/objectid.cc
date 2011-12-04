@@ -195,6 +195,7 @@ void ObjectID::Initialize(Handle<Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "equals", Equals);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "toJSON", ToJSON);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "getTimestamp", GetTimestamp);  
 
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "createPk", CreatePk);
@@ -319,6 +320,31 @@ Handle<Value> ObjectID::CreateFromHexString(const Arguments &args) {
   Local<Value> argv[] = {args[0]};
   Handle<Value> oid_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);
   return scope.Close(oid_obj);
+}
+
+Handle<Value> ObjectID::GetTimestamp(const Arguments &args) {
+  HandleScope scope;
+
+  // Unpack the ObjectID instance
+  ObjectID *objectid_obj = ObjectWrap::Unwrap<ObjectID>(args.This());  
+  
+  // Convert the hex oid to bin
+  char *binary_oid = objectid_obj->convert_hex_oid_to_bin();
+  // Decode the timestamp as bigendian integer
+  int32_t value;
+  // Get pointer to int value and write the big-endian value to it
+  char *intmemory = (char *)&value;
+  *(intmemory) = *(binary_oid + 3);
+  *(intmemory + 1) = *(binary_oid + 2);;
+  *(intmemory + 2) = *(binary_oid + 1);
+  *(intmemory + 3) = *(binary_oid);  
+  // Free the memory for binary_oid
+  free(binary_oid);  
+  // Convert to double
+  long dataInMiliseconds = (long)(value) * 1000;
+  // Create a new Date
+  Handle<Value> date = Date::New(dataInMiliseconds);
+  return scope.Close(date);
 }
 
 Handle<Value> ObjectID::ToHexString(const Arguments &args) {
