@@ -118,6 +118,30 @@ var tests = testCase({
       });
     });
   },  
+
+  shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction : function(test) {
+    client.createCollection('test_group2', function(err, collection) {
+      collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
+        test.deepEqual([], results);
+  
+        // Trigger some inserts
+        collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], {safe:true}, function(err, ids) {
+          collection.group([], {}, {count: 0, running_average: 0}
+            , function (doc, out) { 
+                out.count++;
+                out.running_average += doc.a;
+              }
+            , function(out) {
+                out.average = out.running_average / out.count;                
+              }, true, function(err, results) {
+                test.equal(3, results[0].running_average)
+                test.equal(0.75, results[0].average)
+                test.done();
+          });
+        });
+      });
+    });
+  },  
   
   // Mapreduce tests functions
   shouldPerformSimpleMapReduceFunctions : function(test) {

@@ -3,6 +3,8 @@
 	* pass in the ssl:true option to the server or replicaset server config to enable
 	* a bug either in mongodb or node.js does not allow for more than 1 connection pr server.
 * Added getTimestamp() method to objectID that returns a date object
+* Added finalize function to collection.group
+	* function group (keys, condition, initial, reduce, finalize, command, callback)
 
 0.9.7.1-2 2011-11-27
 * Set statistical selection strategy as default for secondary choice.
