@@ -1,10 +1,14 @@
 0.9.7.2
-* Added ssl support for future version of mongodb (EXPERIMENTAL)
+* Added SSL support for future version of mongodb (EXPERIMENTAL)
 	* pass in the ssl:true option to the server or replicaset server config to enable
 	* a bug either in mongodb or node.js does not allow for more than 1 connection pr server.
 * Added getTimestamp() method to objectID that returns a date object
 * Added finalize function to collection.group
 	* function group (keys, condition, initial, reduce, finalize, command, callback)
+* Reaper no longer using setTimeout to handle reaping. Triggering is done in the general flow leading to predictable behavior.
+	* reaperInterval, set interval for reaper (default 10000 miliseconds)
+	* reaperTimeout, set timeout for calls (default 30000 miliseconds)
+	* reaper, enable/disable reaper (default false)
 
 0.9.7.1-2 2011-11-27
 * Set statistical selection strategy as default for secondary choice.

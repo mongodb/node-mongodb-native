@@ -23,6 +23,7 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.path = path.resolve("data");
   this.killNodeWaitTime = options['kill_node_wait_time'] != null ? options['kill_node_wait_time'] : 20000;
   this.tags = options['tags'] != null ? options['tags'] : [];
+  this.ssl = options['ssl'] != null ? options['ssl'] : false; 
   
   this.arbiterCount = options["arbiter_count"] != null ? options["arbiter_count"] : 2;
   this.secondaryCount = options["secondary_count"] != null ? options["secondary_count"] : 1;
@@ -144,6 +145,7 @@ ReplicaSetManager.prototype.initiate = function(callback) {
   // Get master connection
   self.getConnection(function(err, connection) {    
     if(err != null) return callback(err, null);   
+
     // debug("=================================================== replicaset config")
     // debug(inspect(self.config))
      
@@ -180,6 +182,7 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
   this.mongods[n] = this.mongods[n] == null ? {} : this.mongods[n];
   var port = this.startPort + n;
   this.ports.push(port);
+  this.mongods[n]["ssl"] = this.ssl;
   this.mongods[n]["port"] = port;
   this.mongods[n]["db_path"] = getPath(this, "rs-" + port);
   this.mongods[n]["log_path"] = getPath(this, "log-" + port);
@@ -201,6 +204,10 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
     exec("mkdir -p " + self.mongods[n]["db_path"], function(err, stdout, stderr) {
       if(err != null) return callback(err, null);
       self.mongods[n]["start"] = self.startCmd(n);
+      
+      // console.log("----------------------------------------------------- node start command")
+      // console.log(self.mongods[n]["start"])
+      
       self.start(n, function() {
         // Add instance to list of members
         var member = {"_id": n, "host": self.host + ":" + self.mongods[n]["port"]};   
@@ -495,7 +502,7 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
   // Get the node
   if(self.mongods[node] != null) {
     var intervalId = setInterval(function() {
-      var connection = new Db("replicaset_test", new Server(self.host, self.mongods[node]["port"], {}));
+      var connection = new Db("replicaset_test", new Server(self.host, self.mongods[node]["port"], {ssl:self.ssl}));
       connection.open(function(err, db) {
         if(err == null && !done) {
           // Set done
@@ -561,6 +568,13 @@ ReplicaSetManager.prototype.startCmd = function(n) {
   if(this.auth) {
     this.mongods[n]["start"] = this.auth ? this.mongods[n]["start"] + " --keyFile " + this.keyPath : this.mongods[n]["start"];
   }
+  
+  // If we have ssl defined set up with test certificate
+  if(this.ssl) {
+    var path = getPath(this, '../test/certificates');
+    this.mongods[n]["start"] = this.mongods[n]["start"] + " --sslOnNormalPorts --sslPEMKeyFile=" + path + "/mycert.pem --sslPEMKeyPassword=10gen";
+  }
+  
   return this.mongods[n]["start"];
 }
 

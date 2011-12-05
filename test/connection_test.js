@@ -77,16 +77,11 @@ var tests = testCase({
 
       var connectionPool = db.serverConfig.connectionPool;
       var connections = connectionPool.getAllConnections();
-      
-      // Ensure no close events are fired as we are closing the connection specifically
-      for(var i = 0; i < connections.length; i++) {
-        connections[i].on("close", function() { test.ok(false); });
-      }
 
-      // Force the connection close
+      // Force the connection close, should not trigger close command
       db.serverConfig.connectionPool.stop();
       // Test done
-      test.equal(1, dbCloseCount);
+      test.equal(0, dbCloseCount);
       test.done();
     }));
   },

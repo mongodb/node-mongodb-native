@@ -36,7 +36,8 @@ Several options can be passed to the `Db` constructor with `options` parameter.
   * `forceServerObjectId` - generation of objectid is delegated to the mongodb server instead of the driver. default is false
   * `retryMiliSeconds` - specify the number of milliseconds between connection attempts `default:5000`
   * `numberOfRetries` - specify the number of retries for connection attempts `default:3`
-  * `reaperInterval` - specify the number of milliseconds between each reaper attempt `default:1000`
+  * `reaper` - enable/disable reaper (true/false) `default:false`
+  * `reaperInterval` - specify the number of milliseconds between each reaper attempt `default:10000`
   * `reaperTimeout` - specify the number of milliseconds for timing out callbacks that don't return `default:30000`
   * `raw` - driver expects Buffer raw bson document, `default:false`
 

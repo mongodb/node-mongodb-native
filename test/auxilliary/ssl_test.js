@@ -29,7 +29,7 @@ var tests = testCase({
   },
 
   shouldCorrectlyCommunicateUsingSSLSocket : function(test) {
-    var db1 = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:2, ssl:true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db1 = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:4, ssl:true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     // All inserted docs
     var docs = [];
     var errs = [];
@@ -41,6 +41,9 @@ var tests = testCase({
       db1.open(function(err, db) {        
         // Create a collection
         db.createCollection('shouldCorrectlyCommunicateUsingSSLSocket', function(err, collection) {
+          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
           collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
           collection.insert([{a:1}, {b:2}, {c:'hello world'}], {safe:true}, function(err, result) {
             collection.find({}).toArray(function(err, items) {

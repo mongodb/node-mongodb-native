@@ -58,10 +58,12 @@ var tests = testCase({
   },  
 
   shouldCorrectlyHandleThrownErrorInRename : function(test) {
-    // Register handler to receive error
-    client.on("error", function(err) {
-      test.done();
-    });
+    // Catch unhandled exception
+    process.on("uncaughtException", function(err) {
+      // Remove listener
+      process.removeAllListeners("uncaughtException");
+      test.done()
+    })
     
     // Execute code
     client.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {      
