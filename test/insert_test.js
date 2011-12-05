@@ -752,10 +752,10 @@ var tests = testCase({
         
         collection.update({str:"String"}, {$set:{c:1, d:function(){}}}, {safe:true, serializeFunctions:false}, function(err, result) {
           test.equal(1, result);
-
+  
           collection.findOne({str:"String"}, function(err, item) {
             test.equal(null, item.d);
-
+  
             // Execute a safe insert with replication to two servers
             collection.findAndModify({str:"String"}, [['a', 1]], {'$set':{'f':function() {}}}, {new:true, safe: true, serializeFunctions:true}, function(err, result) {
               test.ok(result.f instanceof client.bson_deserializer.Code)
@@ -766,7 +766,7 @@ var tests = testCase({
       });
     });
   },
-
+  
   'Should Correctly allow for control of serialization of functions on collection level' : function(test) {
     var doc = {
       str : "String",
@@ -795,7 +795,7 @@ var tests = testCase({
     
     client.createCollection("Should_Correctly_allow_for_using_a_Date_object_as__id", {serializeFunctions:true}, function(err, collection) {
       test.ok(err == null);
-
+  
       collection.insert(doc, {safe:true}, function(err, result) {
         test.equal(null, err);
         
