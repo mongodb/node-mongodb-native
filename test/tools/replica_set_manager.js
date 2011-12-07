@@ -151,6 +151,8 @@ ReplicaSetManager.prototype.initiate = function(callback) {
      
     // Set replica configuration
     connection.admin().command({replSetInitiate:self.config}, function(err, result) {
+      // Close connection
+      connection.close();
       // If we have an error let's 
       if(err != null) {
         // Retry a number of times
