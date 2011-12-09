@@ -813,20 +813,42 @@ var tests = testCase({
   
   // Test findAndModify a document that fails in first step before safe
   shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep : function(test) {
-    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+    client.open(function(err, p_client) {
+      client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function(err, collection) {
+        // Set up an index to force duplicate index erro
+        collection.ensureIndex([['failIndex', 1]], {unique:true}, function(err, index) {
+          // Setup a new document
+          collection.insert({'a':2, 'b':2, 'failIndex':1}, function(err, doc) {
+  
+            // Let's attempt to upsert with a duplicate key error
+            collection.findAndModify({'c':2}, [['a', 1]], {'a':10, 'b':10, 'failIndex':1}, {safe:true, upsert:true}, function(err, result) {
+              test.equal(null, result);
+              test.ok(err.errmsg.match("duplicate key error index"));
+              p_client.close();
+              test.done();
+            })
+          });
+        });        
+      });
+    });
+  },
+    
+  // Test findAndModify a document that fails in first step before safe
+  shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments : function(test) {
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
     p_client.bson_deserializer = client.bson_deserializer;
     p_client.bson_serializer = client.bson_serializer;
     p_client.pkFactory = client.pkFactory;
   
     p_client.open(function(err, p_client) {
-      p_client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function(err, collection) {
+      p_client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments', function(err, collection) {
         // Test return old document on change
         collection.insert({'a':2, 'b':2}, function(err, doc) {
   
           // Let's modify the document in place
-          collection.findAndModify({'c':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result) {
+          collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:{w:200, wtimeout:1000}}, function(err, result) {
             test.equal(null, result);
-            test.ok(err == null || err.errmsg.match("No matching object found"));
+            test.ok(err != null);
             p_client.close();
             test.done();
           })
@@ -964,13 +986,47 @@ var tests = testCase({
   shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists : function(test) {
     client.createCollection('shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists', function(err, collection) {
       collection.findAndModify({'a':1}, [], {'$set':{'b':3}}, {'new': true}, function(err, updated_doc) {
-        test.equal(null, err)
+        test.equal(null, err);
         test.equal(null, updated_doc);
         test.done();
       });
     });
   },
-
+  
+  shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON : function(test) {
+    var transaction = {};
+    transaction.document = {};
+    transaction.document.type = "documentType";
+    transaction.document.id = new client.bson_serializer.ObjectID();    
+    transaction.transactionId = new client.bson_serializer.ObjectID();
+    transaction.amount = 12.3333
+  
+    var transactions = [];
+    transactions.push(transaction);
+    // Wrapping object
+    var wrapingObject = {
+      funds : {
+        remaining : 100.5
+      },
+      
+      transactions:transactions
+    }
+    
+    client.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
+      collection.insert(wrapingObject, {safe:true}, function(err, doc) {
+        test.equal(null, err);
+    
+        collection.findOne({_id:doc[0]._id, 'funds.remaining': {$gte: 3.0}, 'transactions.id': {$ne: transaction.transactionId}}, function(err, item) {
+          test.ok(item != null)
+          
+          collection.findAndModify({_id:doc[0]._id, 'funds.remaining': {$gte: 3.0}, 'transactions.id': {$ne: transaction.transactionId}}, [], {$push: {transactions: transaction}}, {new: true, safe: true}, function(err, result) {
+            test.done();
+          });
+        })        
+      });
+    });
+  },
+  
   shouldCorrectlyExecuteMultipleFindsInParallel : function(test) {
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     p_client.bson_deserializer = client.bson_deserializer;
@@ -993,7 +1049,7 @@ var tests = testCase({
               }
             })  
           });
-
+  
           collection.find({"user_id":"4e9fc8d55883d90100000003","lc_status":{"$ne":"deleted"},"owner_rating":{"$exists":false}}, 
             {"skip":0,"limit":10,"sort":{"updated":-1}}, function(err, cursor) {
             cursor.count(function(err, count) {
@@ -1008,6 +1064,50 @@ var tests = testCase({
       });
     });
   },
+  
+  // shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad : function(test) {
+  //   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  //   p_client.bson_deserializer = client.bson_deserializer;
+  //   p_client.bson_serializer = client.bson_serializer;
+  //   p_client.pkFactory = client.pkFactory;
+  //   var running = true;
+  // 
+  //   p_client.open(function(err, p_client) {
+  //     // Create a collection
+  //     p_client.collection("collection1", function(err, collection) {
+  //       // Wait a bit and then execute something that will throw a duplicate error
+  //       setTimeout(function() {          
+  //         var id = new p_client.bson_serializer.ObjectID();
+  //         
+  //         collection.insert({_id:id, a:1}, {safe:true}, function(err, result) {
+  //           test.equal(null, err);
+  //           
+  //           collection.insert({_id:id, a:1}, {safe:true}, function(err, result) {
+  //             running = false;
+  //             test.done();
+  //             p_client.close();
+  //           });                      
+  //         });          
+  //       }, 200);
+  //     });
+  //     
+  //     p_client.collection("collection2", function(err, collection) {
+  //       // Keep hammering in inserts
+  //       var insert = function() {
+  //         process.nextTick(function() {
+  //           collection.insert({a:1});
+  //           if(running) process.nextTick(insert);
+  //         });
+  //       }
+  //       
+  //       // while(running) {
+  //       //   process.nextTick(function() {
+  //       //     collection.insert({a:1});
+  //       //   })
+  //       // }
+  //     });      
+  //   });
+  // },  
 
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();

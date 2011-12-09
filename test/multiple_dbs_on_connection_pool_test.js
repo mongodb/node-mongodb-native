@@ -9,6 +9,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
+  ServerManager = require('../test/tools/server_manager').ServerManager,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
@@ -89,6 +90,29 @@ var tests = testCase({
         });
       });
     });    
+  },
+  
+  shouldCorrectlyErrorOnAllDbs : function(test) {
+    var db = new Db('tests', new Server("127.0.0.1", 27027, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    // All inserted docs
+    var docs = [];
+    var errs = [];
+    var insertDocs = [];
+
+    // Start server
+    var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true, start_port:27027})
+    serverManager.start(false, function() {
+      db.open(function(err, db) {
+        test.equal(null, err);
+                
+        db.close();
+        
+        // Kill server and end test
+        serverManager.stop(9, function() {
+          test.done();          
+        });
+      });
+    });
   },
   
   // run this last

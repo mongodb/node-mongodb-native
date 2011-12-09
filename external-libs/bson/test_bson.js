@@ -366,6 +366,15 @@ assert.equal(simple_string_serialized_2.toString('hex'), simple_string_serialize
 var doc1 = BSONJS.deserialize(simple_string_serialized_2);
 var doc2 = BSON.deserialize(simple_string_serialized);
 assert.deepEqual(doc1, doc2)
+
+// Hex Id
+var hexId = new ObjectID().toString();
+var docJS = {_id: ObjectID.createFromHexString(hexId), 'funds.remaining': {$gte: 1.222}, 'transactions.id': {$ne: ObjectID.createFromHexString(hexId)}};
+var docC = {_id: ObjectID2.createFromHexString(hexId), 'funds.remaining': {$gte: 1.222}, 'transactions.id': {$ne: ObjectID2.createFromHexString(hexId)}};
+var docJSBin = BSONJS.serialize(docJS, false, true, true);
+var docCBin = BSON.serialize(docC, false, true, true);
+assert.equal(docCBin.toString('hex'), docJSBin.toString('hex'));
+
 // Force garbage collect
 global.gc();
 

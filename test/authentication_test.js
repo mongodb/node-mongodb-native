@@ -44,98 +44,98 @@ var tests = testCase({
     }      
   },
 
-  // Test the authentication method for the user
-  shouldCorrectlyAuthenticate : function(test) {
-    var user_name = 'spongebob';
-    var password = 'squarepants';
-  
-    client.authenticate('admin', 'admin', function(err, replies) {      
-      test.ok(err instanceof Error);
-      test.ok(!replies);
-  
-      // Add a user
-      client.addUser(user_name, password, function(err, result) {
-        client.authenticate(user_name, password, function(err, replies) {
-          test.ok(!(err instanceof Error));
-          test.ok(replies);
-          test.done();
-        });
-      });
-    });    
-  },
-  
-  shouldCorrectlyReAuthorizeReconnectedConnections : function(test) {
-    var user_name = 'spongebob2';
-    var password = 'password';
-  
-    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:3, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
-    p_client.open(function(err, automatic_connect_client) {
-      p_client.authenticate('admin', 'admin', function(err, replies) {
-        test.ok(err instanceof Error);
-        // Add a user
-        p_client.addUser(user_name, password, function(err, result) {
-          // Execute authentication
-          p_client.authenticate(user_name, password, function(err, replies) {
-            test.ok(err == null);
-                    
-            // Kill a connection to force a reconnect
-            p_client.serverConfig.close();
-                  
-            p_client.createCollection('shouldCorrectlyReAuthorizeReconnectedConnections', function(err, collection) {
-              collection.insert({a:1}, {safe:true}, function(err, r) {
-                collection.insert({a:2}, {safe:true}, function(err, r) {
-                  collection.insert({a:3}, {safe:true}, function(err, r) {                                        
-                    collection.count(function(err, count) {
-                      test.equal(3, count);
-                      p_client.close();
-                      test.done();
-                    })
-                  })
-                })
-              })
-            });
-          });            
-        });
-      });
-    });    
-  },
-  
-  shouldCorrectlyAddAndRemoveUser : function(test) {
-    var user_name = 'spongebob2';
-    var password = 'password';
-  
-    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
-    p_client.open(function(err, automatic_connect_client) {
-      p_client.authenticate('admin', 'admin', function(err, replies) {
-        test.ok(err instanceof Error);
-  
-        // Add a user
-        p_client.addUser(user_name, password, function(err, result) {
-          p_client.authenticate(user_name, password, function(err, replies) {
-            test.ok(replies);
-  
-            // Remove the user and try to authenticate again
-            p_client.removeUser(user_name, function(err, result) {
-              p_client.authenticate(user_name, password, function(err, replies) {
-                test.ok(err instanceof Error);
-  
-                test.done();
-                p_client.close();
-              });
-            });
-          });
-        });
-      });
-    });    
-  },
+  // // Test the authentication method for the user
+  // shouldCorrectlyAuthenticate : function(test) {
+  //   var user_name = 'spongebob';
+  //   var password = 'squarepants';
+  // 
+  //   client.authenticate('admin', 'admin', function(err, replies) {      
+  //     test.ok(err instanceof Error);
+  //     test.ok(!replies);
+  // 
+  //     // Add a user
+  //     client.addUser(user_name, password, function(err, result) {
+  //       client.authenticate(user_name, password, function(err, replies) {
+  //         test.ok(!(err instanceof Error));
+  //         test.ok(replies);
+  //         test.done();
+  //       });
+  //     });
+  //   });    
+  // },
+  // 
+  // shouldCorrectlyReAuthorizeReconnectedConnections : function(test) {
+  //   var user_name = 'spongebob2';
+  //   var password = 'password';
+  // 
+  //   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:3, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  //   p_client.bson_deserializer = client.bson_deserializer;
+  //   p_client.bson_serializer = client.bson_serializer;
+  //   p_client.pkFactory = client.pkFactory;
+  // 
+  //   p_client.open(function(err, automatic_connect_client) {
+  //     p_client.authenticate('admin', 'admin', function(err, replies) {
+  //       test.ok(err instanceof Error);
+  //       // Add a user
+  //       p_client.addUser(user_name, password, function(err, result) {
+  //         // Execute authentication
+  //         p_client.authenticate(user_name, password, function(err, replies) {
+  //           test.ok(err == null);
+  //                   
+  //           // Kill a connection to force a reconnect
+  //           p_client.serverConfig.close();
+  //                 
+  //           p_client.createCollection('shouldCorrectlyReAuthorizeReconnectedConnections', function(err, collection) {
+  //             collection.insert({a:1}, {safe:true}, function(err, r) {
+  //               collection.insert({a:2}, {safe:true}, function(err, r) {
+  //                 collection.insert({a:3}, {safe:true}, function(err, r) {                                        
+  //                   collection.count(function(err, count) {
+  //                     test.equal(3, count);
+  //                     p_client.close();
+  //                     test.done();
+  //                   })
+  //                 })
+  //               })
+  //             })
+  //           });
+  //         });            
+  //       });
+  //     });
+  //   });    
+  // },
+  // 
+  // shouldCorrectlyAddAndRemoveUser : function(test) {
+  //   var user_name = 'spongebob2';
+  //   var password = 'password';
+  // 
+  //   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  //   p_client.bson_deserializer = client.bson_deserializer;
+  //   p_client.bson_serializer = client.bson_serializer;
+  //   p_client.pkFactory = client.pkFactory;
+  // 
+  //   p_client.open(function(err, automatic_connect_client) {
+  //     p_client.authenticate('admin', 'admin', function(err, replies) {
+  //       test.ok(err instanceof Error);
+  // 
+  //       // Add a user
+  //       p_client.addUser(user_name, password, function(err, result) {
+  //         p_client.authenticate(user_name, password, function(err, replies) {
+  //           test.ok(replies);
+  // 
+  //           // Remove the user and try to authenticate again
+  //           p_client.removeUser(user_name, function(err, result) {
+  //             p_client.authenticate(user_name, password, function(err, replies) {
+  //               test.ok(err instanceof Error);
+  // 
+  //               test.done();
+  //               p_client.close();
+  //             });
+  //           });
+  //         });
+  //       });
+  //     });
+  //   });    
+  // },
   
   // run this last
   noGlobalsLeaked : function(test) {

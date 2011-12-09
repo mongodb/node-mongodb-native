@@ -9,6 +9,7 @@
 	* reaperInterval, set interval for reaper (default 10000 miliseconds)
 	* reaperTimeout, set timeout for calls (default 30000 miliseconds)
 	* reaper, enable/disable reaper (default false)
+* Work around for issues with findAndModify during high concurrency load, insure that the behavior is the same across the 1.8.X branch and 2.X branch of MongoDb
 
 0.9.7.1-2 2011-11-27
 * Set statistical selection strategy as default for secondary choice.
