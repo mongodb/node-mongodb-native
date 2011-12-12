@@ -12,8 +12,8 @@ var BSON = require('../lib/mongodb').BSONPure.BSON,
   Long = require('../lib/mongodb').BSONPure.Long,
   Binary = require('../lib/mongodb').BSONPure.Binary;
 
-var COUNT = 100000;
-var COUNT = 100;
+var COUNT = 10000;
+// var COUNT = 100;
 
 var object = {
   string: "Strings are great",
@@ -86,8 +86,8 @@ for (j=COUNT; --j>=0; ) {
 //   // debug("============== _calculateObjectSize :: " + BSON._calculateObjectSize(object))
 //   // BSON._calculateObjectSize(object);
 //   // BSON.calculateObjectSize(object);
-// 
-//   objectBSON = BSON.serialize(object, null, true)
+
+  objectBSON = BSON.serialize(object, null, true)
 //   // objectBSON = BSON._serialize(object, null, true)
 // 
 //   // var b = BSON.deserialize(objectBSON);
@@ -95,19 +95,19 @@ for (j=COUNT; --j>=0; ) {
 //   // debug(inspect(b))
 // 
 
-var doc = {};
-for(var i = 0; i < 1; i++) {
-    doc['timestamp' + i] = Date.now();
-}
-var docs = [];
-for(var i = 0; i < 1; i++) {
-    docs.push(doc);
-}
-
-var object = {'doc':docs}
-debug(inspect(object))
-
-BSON.calculateObjectSize(object);
+// var doc = {};
+// for(var i = 0; i < 1; i++) {
+//     doc['timestamp' + i] = Date.now();
+// }
+// var docs = [];
+// for(var i = 0; i < 1; i++) {
+//     docs.push(doc);
+// }
+// 
+// var object = {'doc':docs}
+// debug(inspect(object))
+// 
+// BSON.calculateObjectSize(object);
 
   // objectBSON = BSON.serialize(object, null, true)
 // 
@@ -117,11 +117,14 @@ BSON.calculateObjectSize(object);
 }
 
 // // debug(inspect(objectBSON))
-// 
-// end = new Date
-// // console.log("bson size (bytes): ", objectBSON.length)
-// console.log("time = ", end - start, "ms -", COUNT * 1000 / (end - start), " ops/sec")
-// 
+
+end = new Date
+var opsprsecond = COUNT / ((end - start)/1000);
+console.log("bson size (bytes): ", objectBSON.length);
+console.log("time = ", end - start, "ms -", COUNT / ((end - start)/1000), " ops/sec");
+console.log("MB/s = " + ((opsprsecond*objectBSON.length)/1024));
+// console.log("bson size (bytes): ", ((objectBSON.length * COUNT)/(1024*1024))/((end - start)/1000));
+
 // var COUNT = 1000000;
 // // var COUNT = 1;
 // 

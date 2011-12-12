@@ -18,7 +18,7 @@ var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: tru
 // db connection once
 var tests = testCase({
   setUp: function(callback) {
-    client.open(function(err, db_p) {      
+    client.open(function(err, db_p) {
       if(numberOfTestsRun == Object.keys(tests).length) {
         // If first test drop the db
         client.dropDatabase(function(err, done) {
