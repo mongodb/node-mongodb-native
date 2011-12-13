@@ -67,7 +67,7 @@ Here are the constructors the non-Javascript BSON primitive types:
 The C/C++ bson parser/serializer
 --------
 
-From V0.8.0 to V0.9.6.9, the Javascript bson parser was slower than an optional C/C++ bson parser. As of V0.9.6.9+, due to performance improvements in the Javascript parser, the C/C++ perser is deprecated and is not installed by default anymore.
+From V0.8.0 to V0.9.6.9, the Javascript bson parser was slower than an optional C/C++ bson parser. As of V0.9.6.9+, due to performance improvements in the Javascript parser, the C/C++ parser is deprecated and is not installed by default anymore.
 
 If you are running a version of this library has the C/C++ parser compiled, to enable the driver to use the C/C++ bson parser pass it the option native_parser:true like below
 
