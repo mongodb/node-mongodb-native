@@ -948,6 +948,32 @@ var tests = testCase({
       });
     });
   },
+
+  shouldCorrectlyExecuteEnsureIndexWithNoCallback : function(test) {
+    var docs = [];
+    
+    for(var i = 0; i < 1; i++) {
+      var d = new Date().getTime() + i*1000;
+      docs[i] = {createdAt:new Date(d)};
+    }
+
+    // Create collection
+    client.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
+      // ensure index of createdAt index
+      collection.ensureIndex({createdAt:1})
+      // insert all docs
+      collection.insert(docs, {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        // Find with sort
+        collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
+          if (err) logger.error("error in collection_info.find: " + err);            
+          test.equal(1, items.length);            
+          test.done();
+        })                    
+      })        
+    });    
+  },
   
   shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex : function(test) {
     var docs = [];

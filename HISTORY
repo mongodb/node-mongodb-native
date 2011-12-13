@@ -1,7 +1,7 @@
 0.9.7.2
-* Added SSL support for future version of mongodb (EXPERIMENTAL)
+* Added SSL support for future version of mongodb (VERY VERY EXPERIMENTAL)
 	* pass in the ssl:true option to the server or replicaset server config to enable
-	* a bug either in mongodb or node.js does not allow for more than 1 connection pr server.
+	* a bug either in mongodb or node.js does not allow for more than 1 connection pr db instance (poolSize:1).
 * Added getTimestamp() method to objectID that returns a date object
 * Added finalize function to collection.group
 	* function group (keys, condition, initial, reduce, finalize, command, callback)
@@ -10,6 +10,10 @@
 	* reaperTimeout, set timeout for calls (default 30000 miliseconds)
 	* reaper, enable/disable reaper (default false)
 * Work around for issues with findAndModify during high concurrency load, insure that the behavior is the same across the 1.8.X branch and 2.X branch of MongoDb
+* Reworked multiple db's sharing same connection pool to behave correctly on error, timeout and close
+* EnsureIndex command can be executed without a callback (Issue #438)
+* Eval function no accepts options including nolock (Issue #432)
+	* eval(code, parameters, options, callback) (where options = {nolock:true})
 
 0.9.7.1-2 2011-11-27
 * Set statistical selection strategy as default for secondary choice.

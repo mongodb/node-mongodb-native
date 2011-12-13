@@ -131,6 +131,10 @@ var tests = testCase({
     client.eval('function (x) {return x;}', [3], function(err, result) {
       test.equal(3, result);
     });
+
+    client.eval('function (x) {return x;}', [3], {nolock:true}, function(err, result) {
+      test.equal(3, result);
+    });
   
     client.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
       // Locate the entry
