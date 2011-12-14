@@ -4,7 +4,7 @@ var mongodb = require("../../lib/mongodb"),
 var options = {
   auto_reconnect: true,
   poolSize: 4,
-  socketOptions: { keepAlive: 100, timeout:6000 }
+  socketOptions: { keepAlive: 100, timeout:10000 }
 };
 
 var userObjects = [];
