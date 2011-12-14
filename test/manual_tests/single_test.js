@@ -3,8 +3,9 @@ var mongodb = require("../../lib/mongodb"),
 
 var options = {
   auto_reconnect: true,
-  poolSize: 4,
-  socketOptions: { keepAlive: 100, timeout:10000 }
+  poolSize: 1,
+  // socketOptions: { keepAlive: 100, timeout:8000 }
+  socketOptions: { timeout:8000 }
 };
 
 var userObjects = [];
@@ -36,10 +37,12 @@ db.open(function(err, client){
   }
   
   client.collection("users", function(err, coll){      
-    coll.insert(userObjects, {safe:true}, function(err, result) {
-      users = coll;
-      query();        
-    })
+    coll.remove({}, {safe:true}, function(err) {
+      coll.insert(userObjects, {safe:true}, function(err, result) {
+        users = coll;
+        query();        
+      })      
+    });
   });    
 });
 
