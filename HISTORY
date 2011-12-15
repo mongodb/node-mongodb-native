@@ -1,4 +1,4 @@
-0.9.7.2
+0.9.7.2 2011-12-15
 * Added SSL support for future version of mongodb (VERY VERY EXPERIMENTAL)
 	* pass in the ssl:true option to the server or replicaset server config to enable
 	* a bug either in mongodb or node.js does not allow for more than 1 connection pr db instance (poolSize:1).
