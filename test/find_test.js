@@ -1065,6 +1065,17 @@ var tests = testCase({
     });
   },
   
+  shouldCorrectlyCallNumberOfHandlers : function(test) {
+    client.createCollection('shouldCorrectlyCallNumberOfHandlers', function(err, collection) {
+      collection.insert({a:1}, {safe:true}, function() {});
+      collection.insert({a:2}, {safe:true}, function() {});
+      collection.insert({a:3}, {safe:true}, function() {});
+      collection.insert({a:4}, {safe:true}, function() {});      
+      test.ok(client.numberOfHandlers() > 0);
+      test.done();
+    });
+  },
+  
   // shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad : function(test) {
   //   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   //   p_client.bson_deserializer = client.bson_deserializer;
