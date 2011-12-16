@@ -2,8 +2,10 @@
 - Allow multiple bson docs to be serialized in bson parser in one go (avoid context switch on c++ driver)
 - Amortize documents (only deserialize when accessed)
 - New C++ serializer code (based on js)
-- MongoS tests
-- Better error handling for MongoS situation ()
+- Mongo tests to handle special Mongos situations
+
+0.9.7.2-2 2011-12-16
+* Fixes infinite streamRecords QueryFailure fix when using Mongos (Issue #442)
 
 0.9.7.2-1 2011-12-16
 * ~10% perf improvement for ObjectId#toHexString (Issue #448, https://github.com/aheckmann)
