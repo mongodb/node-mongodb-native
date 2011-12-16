@@ -1,4 +1,4 @@
-0.9.7.2-1
+0.9.7.2-1 2011-12-16
 * ~10% perf improvement for ObjectId#toHexString (Issue #448, https://github.com/aheckmann)
 * Only using process.nextTick on errors emitted on callbacks not on all parsing, reduces number of ticks in the driver
 * Changed parsing off bson messages to use process.nextTick to do bson parsing in batches if the message is over 10K as to yield more time to the event look increasing concurrency on big mongoreply messages with multiple documents
