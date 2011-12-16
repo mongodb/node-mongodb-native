@@ -166,6 +166,35 @@ module.exports = testCase({
       });      
     })    
   },
+
+  shouldCorrectlyQuerySecondaries : function(test) {
+    // debug("=========================================== shouldCorrectlyQuerySecondaries")
+    var self = this;
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } ),
+      ], 
+      {rs_name:RS.name, read_secondary:false}
+    );
+  
+    // Insert some data
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+      
+      // Ensure the checkoutReader gives us the actual writer object
+      var reader = replSet.checkoutReader();
+      var writer = replSet.checkoutWriter();
+      // Ensure the connections are the same
+      test.equal(reader.socketOptions.host, writer.socketOptions.host);
+      test.equal(reader.socketOptions.port, writer.socketOptions.port);
+      // Close connection to Spain
+      db.close();
+      test.done();
+    })    
+  },
   
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
