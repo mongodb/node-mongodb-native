@@ -12,7 +12,7 @@ var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NO
 console.log("Connecting to " + host + ":" + port);
 var db = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
 db.open(function(err, db) {
-  db.dropDatabase(function(err, result){
+  db.dropDatabase(function(err, result){    
     db.dropCollection('test', function(err, result) {
       db.createCollection('test', function(err, collection) {
 

@@ -948,7 +948,7 @@ var tests = testCase({
       });
     });
   },
-
+  
   shouldCorrectlyExecuteEnsureIndexWithNoCallback : function(test) {
     var docs = [];
     
@@ -956,7 +956,7 @@ var tests = testCase({
       var d = new Date().getTime() + i*1000;
       docs[i] = {createdAt:new Date(d)};
     }
-
+  
     // Create collection
     client.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
       // ensure index of createdAt index
@@ -964,7 +964,7 @@ var tests = testCase({
       // insert all docs
       collection.insert(docs, {safe:true}, function(err, result) {
         test.equal(null, err);
-
+  
         // Find with sort
         collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
           if (err) logger.error("error in collection_info.find: " + err);            
@@ -982,7 +982,7 @@ var tests = testCase({
       var d = new Date().getTime() + i*1000;
       docs[i] = {createdAt:new Date(d)};
     }
-
+  
     // Create collection
     client.createCollection('shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex', function(err, collection) {
       // ensure index of createdAt index
@@ -992,7 +992,7 @@ var tests = testCase({
         // insert all docs
         collection.insert(docs, {safe:true}, function(err, result) {
           test.equal(null, err);
-
+  
           // Find with sort
           collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
             if (err) logger.error("error in collection_info.find: " + err);            
@@ -1011,7 +1011,7 @@ var tests = testCase({
       var d = new Date().getTime() + i*1000;
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
-
+  
     // Create collection
     client.createCollection('Should_correctly_rewind_and_restart_cursor', function(err, collection) {
       test.equal(null, err);
@@ -1032,6 +1032,42 @@ var tests = testCase({
             test.done();
           })
         })
+      })        
+    });        
+  },
+
+  'Should correctly execute count on cursor' : function(test) {
+    var docs = [];
+    
+    for(var i = 0; i < 1000; i++) {
+      var d = new Date().getTime() + i*1000;
+      docs[i] = {'a':i, createdAt:new Date(d)};
+    }
+
+    // Create collection
+    client.createCollection('Should_correctly_execute_count_on_cursor', function(err, collection) {
+      test.equal(null, err);
+      
+      // insert all docs
+      collection.insert(docs, {safe:true}, function(err, result) {
+        test.equal(null, err);
+        var total = 0;
+        // Create a cursor for the content
+        var cursor = collection.find({});
+        cursor.count(function(err, c) {
+          // Ensure each returns all documents
+          cursor.each(function(err, item) {
+            if(item != null) {
+              total++;
+            } else {
+              cursor.count(function(err, c) {
+                test.equal(1000, c);
+                test.equal(1000, total);
+                test.done();
+              })
+            }
+          });
+        })        
       })        
     });        
   },
