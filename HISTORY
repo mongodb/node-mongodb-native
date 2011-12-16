@@ -1,3 +1,6 @@
+0.9.7.2-2 2011-12-16
+* Fixes infinite streamRecords QueryFailure fix when using Mongos (Issue #442)
+
 0.9.7.2-1 2011-12-16
 * ~10% perf improvement for ObjectId#toHexString (Issue #448, https://github.com/aheckmann)
 * Only using process.nextTick on errors emitted on callbacks not on all parsing, reduces number of ticks in the driver
