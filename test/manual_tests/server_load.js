@@ -16,11 +16,13 @@ app.configure(function() {
 
 app.renderResponse = function(res, err, data, allCount) {
   res.header('Content-Type', 'application/json');
+  
   if(err == null) {
-    if(typeof allCount == "undefined")
+    if(typeof allCount == "undefined") {
       res.send({data: data, success: true});
-    else
+    } else {
       res.send({allCount: allCount, data: data, success: true});
+    }
   } else {
     util.log(util.inspect(err));
     console.log(err.stack);
@@ -142,10 +144,9 @@ app.get('/:db/:collection/:id?', function(req, res, next)
     },
     spec,
     options,
-    function(err, docs, allCount)
-    {
+    function(err, docs, allCount) {
       app.renderResponse(res, err, docs, allCount);
     });
 });
 
-app.listen(9999);
+app.listen(9999, '127.0.0.1');
