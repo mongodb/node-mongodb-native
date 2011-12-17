@@ -353,20 +353,21 @@ var tests = testCase({
   
     test.done();
   },
-       
+
   'Should Correctly Serialize and Deserialize Oid' : function(test) {
     var doc = {doc: new BSONSE.ObjectID()};
     var doc2 = {doc: BSONDE.ObjectID.createFromHexString(doc.doc.toHexString())};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
-  
+
     var serialized_data2 = new Buffer(BSONSE.BSON.calculateObjectSize(doc));
-    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2, 0);    
+    BSONSE.BSON.serializeWithBufferAndIndex(doc, false, serialized_data2, 0);
     assertBuffersEqual(test, serialized_data, serialized_data2, 0);
-  
+
+    delete doc.doc.__id;
     test.deepEqual(doc, BSONDE.BSON.deserialize(serialized_data));
-    test.done();        
+    test.done();
   },
-      
+
   'Should Correctly encode Empty Hash' : function(test) {
     var doc = {};
     var serialized_data = BSONSE.BSON.serialize(doc, false, true);
