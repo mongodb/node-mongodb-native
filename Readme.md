@@ -4,6 +4,8 @@ Install
 To install the most recent release from npm, run:
 
     npm install mongodb
+    
+That may give you a warning telling you that bugs['web'] should be bugs['url'], it would be safe to ignore it (this has been fixed in the development version) 
 
 To install from the latest from the repository, run::
 
