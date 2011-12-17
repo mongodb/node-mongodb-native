@@ -4,6 +4,8 @@ Install
 To install the most recent release from npm, run:
 
     npm install mongodb
+    
+That may give you a warning telling you that bugs['web'] should be bugs['url'], it would be safe to ignore it (this has been fixed in the development version) 
 
 To install from the latest from the repository, run::
 
@@ -357,7 +359,7 @@ Sponsors
 ========
 Just as Felix Geisendörfer I'm also working on the driver for my own startup and this driver is a big project that also benefits other companies who are using MongoDB.
 
-If your company could benefit from a even better-engineered node.js mongodb driver I would appreciate any type of sponsorship you may be able to provide. All the sponsors will get a lifetime display in this readme, priority support and help on problems and votes on the roadmap decisions for the driver. If you are interested contact me on [christkv@gmail.com](mailto:christkv@gmail.com) for details.
+If your company could benefit from a even better-engineered node.js mongodb driver I would appreciate any type of sponsorship you may be able to provide. All the sponsors will get a lifetime display in this readme, priority support and help on problems and votes on the roadmap decisions for the driver. If you are interested contact me on [christkv AT g m a i l.com](mailto:christkv@gmail.com) for details.
 
 And I'm very thankful for code contributions. If you are interested in working on features please contact me so we can discuss API design and testing.
 
