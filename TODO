@@ -5,7 +5,6 @@
 - Mongo tests to handle special Mongos situations
 - If a secondary server disappears don't kill the driver connection
 - Check for new servers coming online (a new secondary server etc)
-- Allow for force send query to primary
 - http://api.mongodb.org/python/current/api/pymongo/index.html#pymongo.ReadPreference
 
 

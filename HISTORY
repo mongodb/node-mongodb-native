@@ -1,5 +1,7 @@
 0.9.7.3-dev
 * Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450)
+* Allow for force send query to primary, pass option (read:'primary') on find command
+	* find({a:1}, {read:'primary'}).toArray(function(err, items) {});
 
 0.9.7.2-2 2011-12-16
 * Fixes infinite streamRecords QueryFailure fix when using Mongos (Issue #442)

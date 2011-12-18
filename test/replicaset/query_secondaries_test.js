@@ -166,7 +166,7 @@ module.exports = testCase({
       });      
     })    
   },
-
+  
   shouldCorrectlyQuerySecondaries : function(test) {
     // debug("=========================================== shouldCorrectlyQuerySecondaries")
     var self = this;
@@ -194,6 +194,40 @@ module.exports = testCase({
       db.close();
       test.done();
     })    
+  },
+  
+  shouldAllowToForceReadWithPrimary : function(test) {
+    // debug("=========================================== shouldAllowToForceReadWithPrimary")
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      ], 
+      {rs_name:RS.name, read_secondary:true}
+    );
+  
+    // Insert some data
+    var db = new Db('integration_test_', replSet);
+    db.open(function(err, p_db) {
+      if(err != null) debug("shouldReadPrimary :: " + inspect(err));
+      // Create a collection
+      p_db.createCollection('shouldAllowToForceReadWithPrimary', function(err, collection) {
+        test.equal(null, err);
+        // Insert a document
+        collection.insert({a:1}, {safe:{w:2, wtimeout:10000}}, function(err, result) {
+          test.equal(null, err);
+          
+          // Force read using primary
+          var cursor = collection.find({}, {read:'primary'})            
+          // Get documents
+          cursor.toArray(function(err, items) {
+            test.equal(1, items.length);
+            test.equal(1, items[0].a);
+            p_db.close();
+            test.done();
+          })
+        });
+      })
+    })                
   },
   
   noGlobalsLeaked : function(test) {
