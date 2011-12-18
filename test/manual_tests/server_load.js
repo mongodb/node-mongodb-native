@@ -90,7 +90,7 @@ var openConnection = function(dbname, config, callback) {
   else {
     var target;
     target = new mongo.Server(config.host, config.port, {'auto_reconnect':true, 'poolSize':4});
-    db = new mongo.Db(dbname, target);
+    db = new mongo.Db(dbname, target, {native_parser:false});
     db.open(callback);
   }
 }
