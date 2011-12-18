@@ -62,8 +62,6 @@ var tests = testCase({
         })
         
         db.open(function(err, db) {
-          console.dir(err)
-
           db.createCollection('shouldCorrectlyErrorOnAllDbs', function(err, collection) {
             test.equal(null, err);
 

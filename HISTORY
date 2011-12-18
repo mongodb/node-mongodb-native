@@ -1,4 +1,4 @@
-0.9.7.3-dev
+0.9.7.2-3 2011-12-18
 * Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450)
 * Allow for force send query to primary, pass option (read:'primary') on find command
 	* find({a:1}, {read:'primary'}).toArray(function(err, items) {});
