@@ -1075,6 +1075,24 @@ var tests = testCase({
       test.done();
     });
   },
+
+  shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError : function(test) {
+    client.createCollection('shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError', function(err, collection) {
+      var q = { x: 1 };
+      var set = { y:2, _id: new client.bson_serializer.ObjectID() };
+      var opts = { new: true, upsert: true };
+      // Original doc
+      var doc = {_id: new client.bson_serializer.ObjectID(), x:1};
+
+      // Insert original doc
+      collection.insert(doc, {safe:true}, function(err, result) {
+        collection.findAndModify(q, [], set, opts, function (err, res) {
+          test.ok(err != null);
+          test.done();
+        });        
+      });
+    });
+  },
   
   // shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad : function(test) {
   //   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10}), {native_parser: (process.env['TEST_NATIVE'] != null)});

@@ -1,13 +1,5 @@
 0.9.7.3-dev
-- Allow multiple bson docs to be serialized in bson parser in one go (avoid context switch on c++ driver)
-- Amortize documents (only deserialize when accessed)
-- New C++ serializer code (based on js)
-- Mongo tests to handle special Mongos situations
-- If a secondary server disappears don't kill the driver connection
-- Check for new servers coming online (a new secondary server etc)
-- Allow for force send query to primary
-- http://api.mongodb.org/python/current/api/pymongo/index.html#pymongo.ReadPreference
-- https://github.com/christkv/node-mongodb-native/issues/450
+* Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450)
 
 0.9.7.2-2 2011-12-16
 * Fixes infinite streamRecords QueryFailure fix when using Mongos (Issue #442)
