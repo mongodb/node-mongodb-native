@@ -16,6 +16,7 @@ class BSON : public ObjectWrap {
     static void Initialize(Handle<Object> target);
     static Handle<Value> BSONSerialize(const Arguments &args);
     static Handle<Value> BSONDeserialize(const Arguments &args);
+    static Handle<Value> BSONDeserializeStream(const Arguments &args);
 
     // Encode functions
     static Handle<Value> EncodeLong(const Arguments &args);

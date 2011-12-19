@@ -76,6 +76,7 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   NODE_SET_METHOD(constructor_template->GetFunction(), "serialize", BSONSerialize);  
   NODE_SET_METHOD(constructor_template->GetFunction(), "serializeWithBufferAndIndex", SerializeWithBufferAndIndex);
   NODE_SET_METHOD(constructor_template->GetFunction(), "deserialize", BSONDeserialize);  
+	NODE_SET_METHOD(constructor_template->GetFunction(), "deserializeStream", BSONDeserializeStream);
   NODE_SET_METHOD(constructor_template->GetFunction(), "encodeLong", EncodeLong);  
   NODE_SET_METHOD(constructor_template->GetFunction(), "toLong", ToLong);
   NODE_SET_METHOD(constructor_template->GetFunction(), "toInt", ToInt);
@@ -1149,6 +1150,32 @@ uint32_t BSON::calculate_object_size(Handle<Value> value, bool serializeFunction
   return object_size;
 }
 
+Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) {
+	HandleScope scope;
+	
+	// At least 3 arguments required
+	if(args.Length() < 3)	VException("Arguments required (Buffer(data), Number(index in data), Number(number of documents to deserialize), Object(optional))");
+	
+	// If the number of argumets equals 3
+	if(args.Length() >= 3) {
+		if(!Buffer::HasInstance(args[0])) return VException("First argument must be Buffer instance");
+		if(!args[1]->IsUint32()) return VException("Second argument must be a positive index number");
+		if(!args[2]->IsUint32()) return VException("Third argument must be a positive number of documents to deserialize");
+	}
+	
+	// If we have 4 arguments
+	if(args.Length() == 4 && !args[3]->IsObject()) return VException("Fourth argument must be an object with options");
+	
+	// Create return Object to wrap data in
+	Local<Object> resultObject = Object::New();
+	// Create an array for results
+	Local<Array> documents = Array::New(args[2]->ToUint32()->Value());
+	// Add objects to the result Object
+	resultObject->Set(String::New("index"), Integer::New(0));
+	resultObject->Set(String::New("documents"), documents);
+	return scope.Close(resultObject);
+}
+
 Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
   HandleScope scope;
 
@@ -1177,12 +1204,9 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
 
     return BSON::deserialize(data, NULL);
   } else {
-    // Let's fetch the encoding
-    // enum encoding enc = ParseEncoding(args[1]);
     // The length of the data for this encoding
     ssize_t len = DecodeBytes(args[0], BINARY);
     // Let's define the buffer size
-    // data = new char[len];
     data = (char *)malloc(len);
     // Write the data to the buffer from the string object
     ssize_t written = DecodeWrite(data, len, args[0], BINARY);
