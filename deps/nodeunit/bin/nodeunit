@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/env node 
+//--prof --trace-opt --trace-deopt --trace-bailout
 
 var
     fs = require('fs'),

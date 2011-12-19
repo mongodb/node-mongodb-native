@@ -6,11 +6,11 @@ var BSON = require('../lib/mongodb').BSONNative.BSON,
   debug = require('util').debug,
   inspect = require('util').inspect;
 
-var BSON = require('../lib/mongodb').BSONPure.BSON,
-  ObjectID = require('../lib/mongodb').BSONPure.ObjectID,
-  Code = require('../lib/mongodb').BSONPure.Code,
-  Long = require('../lib/mongodb').BSONPure.Long,
-  Binary = require('../lib/mongodb').BSONPure.Binary;
+// var BSON = require('../lib/mongodb').BSONPure.BSON,
+//   ObjectID = require('../lib/mongodb').BSONPure.ObjectID,
+//   Code = require('../lib/mongodb').BSONPure.Code,
+//   Long = require('../lib/mongodb').BSONPure.Long,
+//   Binary = require('../lib/mongodb').BSONPure.Binary;
 
 var COUNT = 1000;
 var COUNT = 100;
@@ -58,6 +58,9 @@ for(var i = 0; i < numberOfObjects; i++) {
 var x, start, end, j
 var objectBSON, objectJSON
 
+// Allocate the return array (avoid concatinating everything)
+var results = new Array(numberOfObjects);
+
 console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
 start = new Date
 
@@ -68,7 +71,7 @@ start = new Date
 // console.dir(objects)
 
 for (j=COUNT; --j>=0; ) {  
-  var objects = BSON.deserializeStream(data, 0, numberOfObjects);
+  var nextIndex = BSON.deserializeStream(data, 0, numberOfObjects, results, 0);
 }
 
 end = new Date
@@ -76,3 +79,8 @@ var opsprsecond = COUNT / ((end - start)/1000);
 console.log("bson size (bytes): ", objectBSON.length);
 console.log("time = ", end - start, "ms -", COUNT / ((end - start)/1000), " ops/sec");
 console.log("MB/s = " + ((opsprsecond*objectBSON.length)/1024));
+
+// console.dir(nextIndex)
+// console.dir(results)
+
+

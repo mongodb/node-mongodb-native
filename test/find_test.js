@@ -47,7 +47,7 @@ var tests = testCase({
   },
   
   // Test a simple find
-  shouldCorrectlyPerformSimpleFind : function(test) {
+  shouldCorrectlyPerformSimpleFind : function(test) {    
     client.createCollection('test_find_simple', function(err, r) {
       var collection = client.collection('test_find_simple', function(err, collection) {
         var doc1 = null;
@@ -1075,7 +1075,7 @@ var tests = testCase({
       test.done();
     });
   },
-
+  
   shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError : function(test) {
     client.createCollection('shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError', function(err, collection) {
       var q = { x: 1 };
@@ -1083,7 +1083,7 @@ var tests = testCase({
       var opts = { new: true, upsert: true };
       // Original doc
       var doc = {_id: new client.bson_serializer.ObjectID(), x:1};
-
+  
       // Insert original doc
       collection.insert(doc, {safe:true}, function(err, result) {
         collection.findAndModify(q, [], set, opts, function (err, res) {
@@ -1094,49 +1094,49 @@ var tests = testCase({
     });
   },
   
-  // shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad : function(test) {
-  //   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-  //   p_client.bson_deserializer = client.bson_deserializer;
-  //   p_client.bson_serializer = client.bson_serializer;
-  //   p_client.pkFactory = client.pkFactory;
-  //   var running = true;
-  // 
-  //   p_client.open(function(err, p_client) {
-  //     // Create a collection
-  //     p_client.collection("collection1", function(err, collection) {
-  //       // Wait a bit and then execute something that will throw a duplicate error
-  //       setTimeout(function() {          
-  //         var id = new p_client.bson_serializer.ObjectID();
-  //         
-  //         collection.insert({_id:id, a:1}, {safe:true}, function(err, result) {
-  //           test.equal(null, err);
-  //           
-  //           collection.insert({_id:id, a:1}, {safe:true}, function(err, result) {
-  //             running = false;
-  //             test.done();
-  //             p_client.close();
-  //           });                      
-  //         });          
-  //       }, 200);
-  //     });
-  //     
-  //     p_client.collection("collection2", function(err, collection) {
-  //       // Keep hammering in inserts
-  //       var insert = function() {
-  //         process.nextTick(function() {
-  //           collection.insert({a:1});
-  //           if(running) process.nextTick(insert);
-  //         });
-  //       }
-  //       
-  //       // while(running) {
-  //       //   process.nextTick(function() {
-  //       //     collection.insert({a:1});
-  //       //   })
-  //       // }
-  //     });      
-  //   });
-  // },  
+  shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad : function(test) {
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    p_client.bson_deserializer = client.bson_deserializer;
+    p_client.bson_serializer = client.bson_serializer;
+    p_client.pkFactory = client.pkFactory;
+    var running = true;
+  
+    p_client.open(function(err, p_client) {
+      // Create a collection
+      p_client.collection("collection1", function(err, collection) {
+        // Wait a bit and then execute something that will throw a duplicate error
+        setTimeout(function() {          
+          var id = new p_client.bson_serializer.ObjectID();
+          
+          collection.insert({_id:id, a:1}, {safe:true}, function(err, result) {
+            test.equal(null, err);
+            
+            collection.insert({_id:id, a:1}, {safe:true}, function(err, result) {
+              running = false;
+              test.done();
+              p_client.close();
+            });                      
+          });          
+        }, 200);
+      });
+      
+      p_client.collection("collection2", function(err, collection) {
+        // Keep hammering in inserts
+        var insert = function() {
+          process.nextTick(function() {
+            collection.insert({a:1});
+            if(running) process.nextTick(insert);
+          });
+        }
+        
+        // while(running) {
+        //   process.nextTick(function() {
+        //     collection.insert({a:1});
+        //   })
+        // }
+      });      
+    });
+  },  
 
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();

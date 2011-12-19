@@ -1154,17 +1154,19 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) {
 	HandleScope scope;
 	
 	// At least 3 arguments required
-	if(args.Length() < 3)	VException("Arguments required (Buffer(data), Number(index in data), Number(number of documents to deserialize), Object(optional))");
+	if(args.Length() < 5)	VException("Arguments required (Buffer(data), Number(index in data), Number(number of documents to deserialize), Array(results), Number(index in the array), Object(optional))");
 	
 	// If the number of argumets equals 3
-	if(args.Length() >= 3) {
+	if(args.Length() >= 5) {
 		if(!Buffer::HasInstance(args[0])) return VException("First argument must be Buffer instance");
 		if(!args[1]->IsUint32()) return VException("Second argument must be a positive index number");
 		if(!args[2]->IsUint32()) return VException("Third argument must be a positive number of documents to deserialize");
+		if(!args[3]->IsArray()) return VException("Fourth argument must be an array the size of documents to deserialize");
+		if(!args[4]->IsUint32()) return VException("Sixth argument must be a positive index number");
 	}
 	
 	// If we have 4 arguments
-	if(args.Length() == 4 && !args[3]->IsObject()) return VException("Fourth argument must be an object with options");
+	if(args.Length() == 6 && !args[5]->IsObject()) return VException("Fifth argument must be an object with options");
 
   // Define pointer to data
   char *data;
@@ -1172,6 +1174,7 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) {
   Local<Object> obj = args[0]->ToObject();
   uint32_t numberOfDocuments = args[2]->ToUint32()->Value();
   uint32_t index = args[1]->ToUint32()->Value();
+  uint32_t resultIndex = args[4]->ToUint32()->Value();
 
   // Unpack the buffer variable
   #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
@@ -1183,10 +1186,11 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) {
    length = Buffer::Length(obj);
   #endif
 
-	// Create return Object to wrap data in
-	Local<Object> resultObject = Object::New();
-	// Create an array for results
-	Local<Array> documents = Array::New(args[2]->ToUint32()->Value());
+  // // Create return Object to wrap data in
+  // Local<Object> resultObject = Object::New();
+  // // Create an array for results
+  // Local<Array> documents = Array::New(args[2]->ToUint32()->Value());
+  Local<Object> documents = args[3]->ToObject();
   
   for(uint32_t i = 0; i < numberOfDocuments; i++) {
     // Decode the size of the BSON data structure
@@ -1196,16 +1200,16 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) {
     Handle<Value> result = BSON::deserialize(data, index, NULL);
     
     // Add result to array
-    documents->Set(i, result);
+    documents->Set(i + resultIndex, result);
     
     // Adjust the index for next pass
     index = index + size;
   }
 	
 	// Add objects to the result Object
-	resultObject->Set(String::New("index"), Uint32::New(index));
-	resultObject->Set(String::New("documents"), documents);
-	return scope.Close(resultObject);
+  // resultObject->Set(String::New("index"), Uint32::New(index));
+  // resultObject->Set(String::New("documents"), documents);
+	return scope.Close(Uint32::New(index));
 }
 
 Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
