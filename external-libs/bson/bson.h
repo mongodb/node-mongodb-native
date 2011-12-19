@@ -32,7 +32,7 @@ class BSON : public ObjectWrap {
 
   private:
     static Handle<Value> New(const Arguments &args);
-    static Handle<Value> deserialize(char *data, bool is_array_item);
+    static Handle<Value> deserialize(char *data, uint32_t startIndex, bool is_array_item);
     static uint32_t serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key, bool serializeFunctions);
 
     static char* extract_string(char *data, uint32_t offset);

@@ -6,14 +6,14 @@ var BSON = require('../lib/mongodb').BSONNative.BSON,
   debug = require('util').debug,
   inspect = require('util').inspect;
 
-// var BSON = require('../lib/mongodb').BSONPure.BSON,
-//   ObjectID = require('../lib/mongodb').BSONPure.ObjectID,
-//   Code = require('../lib/mongodb').BSONPure.Code,
-//   Long = require('../lib/mongodb').BSONPure.Long,
-//   Binary = require('../lib/mongodb').BSONPure.Binary;
+var BSON = require('../lib/mongodb').BSONPure.BSON,
+  ObjectID = require('../lib/mongodb').BSONPure.ObjectID,
+  Code = require('../lib/mongodb').BSONPure.Code,
+  Long = require('../lib/mongodb').BSONPure.Long,
+  Binary = require('../lib/mongodb').BSONPure.Binary;
 
-var COUNT = 10000;
-// var COUNT = 100;
+var COUNT = 1000;
+var COUNT = 100;
 
 var object = {
   string: "Strings are great",
@@ -34,7 +34,7 @@ var object = {
 }
 
 // Number of objects
-var numberOfObjects = 1000;
+var numberOfObjects = 100;
 // var numberOfObjects = 2;
 
 // Object serialized
@@ -61,16 +61,15 @@ var objectBSON, objectJSON
 console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
 start = new Date
 
-var objects = BSON.deserializeStream(data, 0, numberOfObjects);
+// var objects = BSON.deserializeStream(data, 0, numberOfObjects);
 // console.log("----------------------------------------------------------------------------------- 0")
 // var objects = BSON.deserialize(data);
-console.log("----------------------------------------------------------------------------------- 1")
-console.dir(objects)
+// console.log("----------------------------------------------------------------------------------- 1")
+// console.dir(objects)
 
-// for (j=COUNT; --j>=0; ) {  
-//   // objectBSON = BSON.serialize(object, null, true)
-//   objects
-// }
+for (j=COUNT; --j>=0; ) {  
+  var objects = BSON.deserializeStream(data, 0, numberOfObjects);
+}
 
 end = new Date
 var opsprsecond = COUNT / ((end - start)/1000);

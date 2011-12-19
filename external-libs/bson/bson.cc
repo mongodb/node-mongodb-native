@@ -1165,13 +1165,45 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) {
 	
 	// If we have 4 arguments
 	if(args.Length() == 4 && !args[3]->IsObject()) return VException("Fourth argument must be an object with options");
-	
+
+  // Define pointer to data
+  char *data;
+  uint32_t length;      
+  Local<Object> obj = args[0]->ToObject();
+  uint32_t numberOfDocuments = args[2]->ToUint32()->Value();
+  uint32_t index = args[1]->ToUint32()->Value();
+
+  // Unpack the buffer variable
+  #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+   Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+   data = buffer->data();
+   length = buffer->length();
+  #else
+   data = Buffer::Data(obj);
+   length = Buffer::Length(obj);
+  #endif
+
 	// Create return Object to wrap data in
 	Local<Object> resultObject = Object::New();
 	// Create an array for results
 	Local<Array> documents = Array::New(args[2]->ToUint32()->Value());
+  
+  for(uint32_t i = 0; i < numberOfDocuments; i++) {
+    // Decode the size of the BSON data structure
+    uint32_t size = BSON::deserialize_int32(data, index);
+    
+    // Get result
+    Handle<Value> result = BSON::deserialize(data, index, NULL);
+    
+    // Add result to array
+    documents->Set(i, result);
+    
+    // Adjust the index for next pass
+    index = index + size;
+  }
+	
 	// Add objects to the result Object
-	resultObject->Set(String::New("index"), Integer::New(0));
+	resultObject->Set(String::New("index"), Uint32::New(index));
 	resultObject->Set(String::New("documents"), documents);
 	return scope.Close(resultObject);
 }
@@ -1202,7 +1234,7 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
      uint32_t length = Buffer::Length(obj);
     #endif
 
-    return BSON::deserialize(data, NULL);
+    return BSON::deserialize(data, 0, NULL);
   } else {
     // The length of the data for this encoding
     ssize_t len = DecodeBytes(args[0], BINARY);
@@ -1213,7 +1245,7 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
     // Assert that we wrote the same number of bytes as we have length
     assert(written == len);
     // Get result
-    Handle<Value> result = BSON::deserialize(data, NULL);
+    Handle<Value> result = BSON::deserialize(data, 0, NULL);
     // Free memory
     free(data);
     // Deserialize the content
@@ -1222,20 +1254,24 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
 }
 
 // Deserialize the stream
-Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
+Handle<Value> BSON::deserialize(char *data, uint32_t startIndex, bool is_array_item) {
   HandleScope scope;
   // Holds references to the objects that are going to be returned
   Local<Object> return_data = Object::New();
   Local<Array> return_array = Array::New();      
   // The current index in the char data
-  uint32_t index = 0;
+  uint32_t index = startIndex;
   // Decode the size of the BSON data structure
   uint32_t size = BSON::deserialize_int32(data, index);
+
+  // Data length
+  uint32_t dataLength = index + size;
+
   // Adjust the index to point to next piece
   index = index + 4;      
 
   // While we have data left let's decode
-  while(index < size) {
+  while(index < dataLength) {
     // Read the first to bytes to indicate the type of object we are decoding
     uint8_t type = BSON::deserialize_int8(data, index);    
     // Handles the internal size of the object
@@ -1748,7 +1784,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Adjust the index
       index = index + bson_object_size;
       // Parse the bson object
-      Handle<Value> scope_object = BSON::deserialize(bson_buffer, false);
+      Handle<Value> scope_object = BSON::deserialize(bson_buffer, 0, false);
       // Define the try catch block
       TryCatch try_catch;                
       // Decode the code object
@@ -1791,7 +1827,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       // Define the try catch block
       TryCatch try_catch;                
       // Decode the code object
-      Handle<Value> obj = BSON::deserialize(data + index, false);
+      Handle<Value> obj = BSON::deserialize(data + index, 0, false);
       // Adjust the index
       index = index + bson_object_size;
       // If an error was thrown push it up the chain
@@ -1827,7 +1863,7 @@ Handle<Value> BSON::deserialize(char *data, bool is_array_item) {
       TryCatch try_catch;                
 
       // Decode the code object
-      Handle<Value> obj = BSON::deserialize(data + index, true);
+      Handle<Value> obj = BSON::deserialize(data + index, 0, true);
       // If an error was thrown push it up the chain
       if(try_catch.HasCaught()) {
         // Rethrow exception
