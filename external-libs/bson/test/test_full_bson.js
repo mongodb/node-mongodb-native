@@ -1,16 +1,16 @@
 var sys = require('util'),
   fs = require('fs'),
   Buffer = require('buffer').Buffer,
-  BSON = require('./bson').BSON,
+  BSON = require('../bson').BSON,
   Buffer = require('buffer').Buffer,
   assert = require('assert'),
-  Long = require('./bson').Long,
-  ObjectID = require('./bson').ObjectID,
-  Binary = require('./bson').Binary,
-  Code = require('./bson').Code,
-  BinaryParser = require('../../lib/mongodb/bson/binary_parser').BinaryParser,
-  BSONJS = require('../../lib/mongodb/bson/bson').BSON,
-  Binary2 = require('../../lib/mongodb/bson/bson').Binary;
+  Long = require('../bson').Long,
+  ObjectID = require('../bson').ObjectID,
+  Binary = require('../bson').Binary,
+  Code = require('../bson').Code,
+  BinaryParser = require('../../../lib/mongodb/bson/binary_parser').BinaryParser,
+  BSONJS = require('../../../lib/mongodb/bson/bson').BSON,
+  Binary2 = require('../../../lib/mongodb/bson/bson').Binary;
 
 sys.puts("=== EXECUTING TEST_FULL_BSON ===");
 
