@@ -118,7 +118,7 @@ var tests = testCase({
       });
     });
   },  
-
+  
   shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction : function(test) {
     client.createCollection('test_group2', function(err, collection) {
       collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
@@ -316,6 +316,50 @@ var tests = testCase({
           test.done();
         });        
       });  
+    });
+  },
+  
+  shouldCorrectlyReturnNestedKeys : function(test) {
+    var start = new Date().setTime(new Date().getTime() - 10000);
+    var end = new Date().setTime(new Date().getTime() + 10000);
+    
+    var keys =  {
+       "data.lastname": true
+    };
+
+    var condition = {
+     "data.date": { 
+           $gte: start,
+           $lte: end
+       }
+    };
+    
+    condition = {}
+
+    var initial = {
+       count : 0
+    };
+
+    var reduce = function(doc, output) {
+      output.count++;
+    }
+
+    // Execute the group
+    client.createCollection('data', function(err, collection) {
+      collection.insert({
+          data: {
+            lastname:'smith',
+            date:new Date()
+          }
+        }, {safe:true}, function(err, result) {
+        
+        // Execute the group 
+        collection.group(keys, condition, initial, reduce, true, function(err, r) {
+          test.equal(1, r[0].count)
+          test.equal('smith', r[0]['data.lastname']);    
+          test.done();
+        });
+      });      
     });
   },
 

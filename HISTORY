@@ -1,3 +1,7 @@
+0.9.7.2-4 2011-12-21
+* Refactoring of callback code to work around performance regression on linux
+* Fixed group function to correctly use the command mode as default
+
 0.9.7.2-3 2011-12-18
 * Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450)
 * Allow for force send query to primary, pass option (read:'primary') on find command
