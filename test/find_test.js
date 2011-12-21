@@ -1065,16 +1065,16 @@ var tests = testCase({
     });
   },
   
-  shouldCorrectlyCallNumberOfHandlers : function(test) {
-    client.createCollection('shouldCorrectlyCallNumberOfHandlers', function(err, collection) {
-      collection.insert({a:1}, {safe:true}, function() {});
-      collection.insert({a:2}, {safe:true}, function() {});
-      collection.insert({a:3}, {safe:true}, function() {});
-      collection.insert({a:4}, {safe:true}, function() {});      
-      test.ok(client.numberOfHandlers() > 0);
-      test.done();
-    });
-  },
+  // shouldCorrectlyCallNumberOfHandlers : function(test) {
+  //   client.createCollection('shouldCorrectlyCallNumberOfHandlers', function(err, collection) {
+  //     collection.insert({a:1}, {safe:true}, function() {});
+  //     collection.insert({a:2}, {safe:true}, function() {});
+  //     collection.insert({a:3}, {safe:true}, function() {});
+  //     collection.insert({a:4}, {safe:true}, function() {});      
+  //     test.ok(client.numberOfHandlers() > 0);
+  //     test.done();
+  //   });
+  // },
   
   shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError : function(test) {
     client.createCollection('shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError', function(err, collection) {
@@ -1137,7 +1137,7 @@ var tests = testCase({
       });      
     });
   },  
-
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
