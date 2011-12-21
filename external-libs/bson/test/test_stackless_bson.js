@@ -24,67 +24,67 @@ var Long2 = require('../bson').Long,
 
 console.log("=== EXECUTING TEST_FULL_BSON ===");
 
-// Number of iterations for the benchmark
-var COUNT = 100000;
-// Sample simple doc
-// var doc = {key:"Hello world"};
-var doc = {};
-for(var i = 0; i < 100; i++) {
-  doc['string' + i] = "dumdyms fsdfdsfdsfdsfsdfdsfsdfsdfsdfsdfsdfsdfsdffsfsdfs";
-}
-
-// Calculate size
-console.log(BSON.calculateObjectSize2(doc));
-console.log(BSONJS.calculateObjectSize(doc));
-assert.equal(BSONJS.calculateObjectSize(doc), BSON.calculateObjectSize2(doc));
-
-// Serialize the content
-var _serializedDoc1 = BSONJS.serialize(doc, true, false);
-var _serializedDoc2 = BSON.serialize2(doc, true, false);
-console.dir(_serializedDoc1);
-console.dir(_serializedDoc2);
-assert.equal(_serializedDoc1.toString('hex'), _serializedDoc2.toString('hex'))
-
-
-// Benchmark 1
-console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
-start = new Date
-
-for (j=COUNT; --j>=0; ) {  
-  // var objectBSON = BSON.serialize2(doc, true, false);
-  var objectBSON = BSONJS.serialize(doc, true, false);
-}
-
-end = new Date
-var opsprsecond = COUNT / ((end - start)/1000);
-console.log("bson size (bytes): ", objectBSON.length);
-console.log("time = ", end - start, "ms -", COUNT / ((end - start)/1000), " ops/sec");
-console.log("MB/s = " + ((opsprsecond*objectBSON.length)/1024));
-
-// Benchmark 2
-console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
-start = new Date
-
-for (j=COUNT; --j>=0; ) {  
-  var objectBSON = BSON.serialize2(doc, true, false);
-}
-
-end = new Date
-var opsprsecond = COUNT / ((end - start)/1000);
-console.log("bson size (bytes): ", objectBSON.length);
-console.log("time = ", end - start, "ms -", COUNT / ((end - start)/1000), " ops/sec");
-console.log("MB/s = " + ((opsprsecond*objectBSON.length)/1024));
-
-// Benchmark 3
-console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
-start = new Date
-
-for (j=COUNT; --j>=0; ) {  
-  var objectBSON = BSON.serialize(doc, true, false);
-}
-
-end = new Date
-var opsprsecond = COUNT / ((end - start)/1000);
-console.log("bson size (bytes): ", objectBSON.length);
-console.log("time = ", end - start, "ms -", COUNT / ((end - start)/1000), " ops/sec");
-console.log("MB/s = " + ((opsprsecond*objectBSON.length)/1024));
+// // Number of iterations for the benchmark
+// var COUNT = 100000;
+// // Sample simple doc
+// // var doc = {key:"Hello world"};
+// var doc = {};
+// for(var i = 0; i < 100; i++) {
+//   doc['string' + i] = "dumdyms fsdfdsfdsfdsfsdfdsfsdfsdfsdfsdfsdfsdfsdffsfsdfs";
+// }
+// 
+// // Calculate size
+// console.log(BSON.calculateObjectSize2(doc));
+// console.log(BSONJS.calculateObjectSize(doc));
+// assert.equal(BSONJS.calculateObjectSize(doc), BSON.calculateObjectSize2(doc));
+// 
+// // Serialize the content
+// var _serializedDoc1 = BSONJS.serialize(doc, true, false);
+// var _serializedDoc2 = BSON.serialize2(doc, true, false);
+// console.dir(_serializedDoc1);
+// console.dir(_serializedDoc2);
+// assert.equal(_serializedDoc1.toString('hex'), _serializedDoc2.toString('hex'))
+// 
+// 
+// // Benchmark 1
+// console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
+// start = new Date
+// 
+// for (j=COUNT; --j>=0; ) {  
+//   // var objectBSON = BSON.serialize2(doc, true, false);
+//   var objectBSON = BSONJS.serialize(doc, true, false);
+// }
+// 
+// end = new Date
+// var opsprsecond = COUNT / ((end - start)/1000);
+// console.log("bson size (bytes): ", objectBSON.length);
+// console.log("time = ", end - start, "ms -", COUNT / ((end - start)/1000), " ops/sec");
+// console.log("MB/s = " + ((opsprsecond*objectBSON.length)/1024));
+// 
+// // Benchmark 2
+// console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
+// start = new Date
+// 
+// for (j=COUNT; --j>=0; ) {  
+//   var objectBSON = BSON.serialize2(doc, true, false);
+// }
+// 
+// end = new Date
+// var opsprsecond = COUNT / ((end - start)/1000);
+// console.log("bson size (bytes): ", objectBSON.length);
+// console.log("time = ", end - start, "ms -", COUNT / ((end - start)/1000), " ops/sec");
+// console.log("MB/s = " + ((opsprsecond*objectBSON.length)/1024));
+// 
+// // Benchmark 3
+// console.log(COUNT + "x (objectBSON = BSON.serialize(object))")
+// start = new Date
+// 
+// for (j=COUNT; --j>=0; ) {  
+//   var objectBSON = BSON.serialize(doc, true, false);
+// }
+// 
+// end = new Date
+// var opsprsecond = COUNT / ((end - start)/1000);
+// console.log("bson size (bytes): ", objectBSON.length);
+// console.log("time = ", end - start, "ms -", COUNT / ((end - start)/1000), " ops/sec");
+// console.log("MB/s = " + ((opsprsecond*objectBSON.length)/1024));
