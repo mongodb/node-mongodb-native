@@ -1,3 +1,6 @@
+0.9.7-2-5 2011-12-22
+* Brand spanking new Streaming Cursor support Issue #458 (https://github.com/christkv/node-mongodb-native/pull/458) thanks to Mr Aaron Heckmann
+
 0.9.7.2-4 2011-12-21
 * Refactoring of callback code to work around performance regression on linux
 * Fixed group function to correctly use the command mode as default
