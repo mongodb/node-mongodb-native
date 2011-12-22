@@ -32,6 +32,9 @@ test_nodeunit_pure:
 	@echo "\n == Execute Test Suite using Pure JS BSON Parser == "
 	@$(NODEUNIT) test/ test/gridstore test/bson
 
+test_js:
+	@$(NODEUNIT) $(TESTS)
+
 test_nodeunit_replicaset_pure:
 	@echo "\n == Execute Test Suite using Pure JS BSON Parser == "
 	@$(NODEUNIT) test/replicaset
