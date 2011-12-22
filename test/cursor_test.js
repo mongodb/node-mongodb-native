@@ -7,6 +7,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Cursor = require('../lib/mongodb').Cursor,
   Step = require("../deps/step/lib/step"),
   Collection = require('../lib/mongodb').Collection,
+  fs = require('fs'),
   Server = require('../lib/mongodb').Server;
 
 var MONGODB = 'integration_tests';
@@ -1070,6 +1071,252 @@ var tests = testCase({
         })        
       })        
     });        
+  },
+
+  'should be able to stream documents': function(test) {
+    var docs = [];
+
+    for (var i = 0; i < 1000; i++) {
+      docs[i] = { a: i+1 };
+    }
+
+    // Create collection
+    client.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
+      test.equal(null, err);
+
+      // insert all docs
+      collection.insert(docs, {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        var paused = 0
+          , closed = 0
+          , resumed = 0
+          , i = 0
+          , err
+
+        var stream = collection.find().stream();
+
+        stream.on('data', function (doc) {
+          test.equal(true, !! doc);
+          test.equal(true, !! doc.a);
+
+          if (paused > 0 && 0 === resumed) {
+            err = new Error('data emitted during pause');
+            return done();
+          }
+
+          if (++i === 3) {
+            test.equal(false, stream.paused);
+            stream.pause();
+            test.equal(true, stream.paused);
+            paused++;
+
+            setTimeout(function () {
+              test.equal(true, stream.paused);
+              stream.resume();
+              test.equal(false, stream.paused);
+              resumed++;
+            }, 20);
+          }
+        });
+
+        stream.on('error', function (er) {
+          err = er;
+          done();
+        });
+
+        stream.on('close', function () {
+          closed++;
+          done();
+        });
+
+        function done () {
+          test.equal(undefined, err);
+          test.equal(i, docs.length);
+          test.equal(1, closed);
+          test.equal(1, paused);
+          test.equal(1, resumed);
+          test.strictEqual(stream._cursor.isClosed(), true);
+          test.done();
+        }
+      })
+    })
+  },
+
+  'immediately destroying a stream prevents the query from executing': function(test) {
+    var i = 0
+      , docs = [{ b: 2 }, { b: 3 }]
+      , doneCalled = 0
+
+    client.createCollection('immediately_destroying_a_stream_prevents_the_query_from_executing', function(err, collection) {
+      test.equal(null, err);
+
+      // insert all docs
+      collection.insert(docs, {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        var stream = collection.find().stream();
+
+        stream.on('data', function () {
+          i++;
+        })
+        stream.on('close', done);
+        stream.on('error', done);
+
+        stream.destroy();
+
+        function done (err) {
+          test.equal(++doneCalled, 1);
+          test.equal(undefined, err);
+          test.strictEqual(0, i);
+          test.strictEqual(true, stream._destroyed);
+          test.done();
+        }
+      });
+    });
+  },
+
+  'destroying a stream stops it': function (test) {
+    client.createCollection('destroying_a_stream_stops_it', function(err, collection) {
+      test.equal(null, err);
+
+      var docs = [];
+      for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
+
+      // insert all docs
+      collection.insert(docs, {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        var finished = 0
+          , i = 0
+
+        var stream = collection.find().stream();
+
+        test.strictEqual(null, stream._destroyed);
+        test.strictEqual(true, stream.readable);
+
+        stream.on('data', function (doc) {
+          if (++i === 5) {
+            stream.destroy();
+            test.strictEqual(false, stream.readable);
+          }
+        });
+
+        stream.on('close', done);
+        stream.on('error', done);
+
+        function done (err) {
+          ++finished;
+          setTimeout(function () {
+            test.strictEqual(undefined, err);
+            test.strictEqual(5, i);
+            test.strictEqual(1, finished);
+            test.strictEqual(true, stream._destroyed);
+            test.strictEqual(false, stream.readable);
+            test.strictEqual(true, stream._cursor.isClosed());
+            test.done();
+          }, 150)
+        }
+      });
+    });
+  },
+
+  'cursor stream errors': function (test) {
+    var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    client.open(function(err, db_p) {
+      test.equal(null, err);
+
+      client.createCollection('cursor_stream_errors', function(err, collection) {
+        test.equal(null, err);
+
+        var docs = [];
+        for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
+
+        // insert all docs
+        collection.insert(docs, {safe:true}, function(err, result) {
+          test.equal(null, err);
+
+          var finished = 0
+            , closed = 0
+            , i = 0
+
+          var stream = collection.find({}, { batchSize: 5 }).stream();
+
+          stream.on('data', function (doc) {
+            if (++i === 5) {
+              client.close();
+            }
+          });
+
+          stream.on('close', function () {
+            closed++;
+          });
+
+          stream.on('error', done);
+
+          function done (err) {
+            ++finished;
+            setTimeout(function () {
+              test.equal('no open connections', err.message);
+              test.equal(5, i);
+              test.equal(1, closed);
+              test.equal(1, finished);
+              test.equal(true, stream._destroyed);
+              test.equal(false, stream.readable);
+              test.equal(true, stream._cursor.isClosed());
+              test.done();
+            }, 150)
+          }
+        });
+      });
+    });
+  },
+
+  'cursor stream pipe': function (test) {
+    client.createCollection('cursor_stream_pipe', function(err, collection) {
+      test.equal(null, err);
+
+      var docs = [];
+      ;('Aaden Aaron Adrian Aditya Bob Joe').split(' ').forEach(function (name) {
+        docs.push({ name: name });
+      });
+
+      // insert all docs
+      collection.insert(docs, {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        var filename = '/tmp/_nodemongodbnative_stream_out.txt'
+          , out = fs.createWriteStream(filename)
+
+        // hack so we don't need to create a stream filter just to
+        // stringify the objects (otherwise the created file would
+        // just contain a bunch of [object Object])
+        var toString = Object.prototype.toString;
+        Object.prototype.toString = function () {
+          return JSON.stringify(this);
+        }
+
+        var stream = collection.find().stream();
+        stream.pipe(out);
+
+        stream.on('error', done);
+        stream.on('close', done);
+
+        function done (err) {
+          Object.prototype.toString = toString;
+          test.strictEqual(undefined, err);
+          var contents = fs.readFileSync(filename, 'utf8');
+          test.ok(/Aaden/.test(contents));
+          test.ok(/Aaron/.test(contents));
+          test.ok(/Adrian/.test(contents));
+          test.ok(/Aditya/.test(contents));
+          test.ok(/Bob/.test(contents));
+          test.ok(/Joe/.test(contents));
+          fs.unlink(filename);
+          test.done();
+        }
+      });
+    });
   },
 
   // run this last
