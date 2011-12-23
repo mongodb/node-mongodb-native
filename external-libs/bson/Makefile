@@ -9,6 +9,7 @@ all:
 	@$(NODE) --expose-gc test/test_bson.js
 	@$(NODE) --expose-gc test/test_full_bson.js
 	@$(NODE) --expose-gc test/test_stackless_bson.js
+	@$(NODE) --expose-gc test/test_shared_objects.js
 
 all_debug:
 	rm -rf build .lock-wscript bson.node
@@ -17,11 +18,13 @@ all_debug:
 	@$(NODE) --expose-gc test/test_bson.js
 	@$(NODE) --expose-gc test/test_full_bson.js
 	@$(NODE) --expose-gc test/test_stackless_bson.js
+	@$(NODE) --expose-gc test/test_shared_objects.js
 
 test:
 	@$(NODE) --expose-gc test/test_bson.js
 	@$(NODE) --expose-gc test/test_full_bson.js
 	@$(NODE) --expose-gc test/test_stackless_bson.js
+	@$(NODE) --expose-gc test/test_shared_objects.js
 
 clang:
 	rm -rf build .lock-wscript bson.node
@@ -30,6 +33,7 @@ clang:
 	@$(NODE) --expose-gc test/test_bson.js
 	@$(NODE) --expose-gc test/test_full_bson.js
 	@$(NODE) --expose-gc test/test_stackless_bson.js
+	@$(NODE) --expose-gc test/test_shared_objects.js
 
 clang_debug:
 	rm -rf build .lock-wscript bson.node
@@ -38,6 +42,7 @@ clang_debug:
 	@$(NODE) --expose-gc test/test_bson.js
 	@$(NODE) --expose-gc test/test_full_bson.js
 	@$(NODE) --expose-gc test/test_stackless_bson.js
+	@$(NODE) --expose-gc test/test_shared_objects.js
 
 clean:
 	rm -rf build .lock-wscript bson.node

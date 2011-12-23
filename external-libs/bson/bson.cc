@@ -74,10 +74,20 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
   constructor_template->SetClassName(String::NewSymbol("BSON"));
   
+  // Instance methods
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserialize", BSONDeserializeJS);
+  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
+  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
+  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
+  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "equals", Equals);
+  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "toJSON", ToJSON);
+  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "getTimestamp", GetTimestamp);    
+  
   // Class methods
   NODE_SET_METHOD(constructor_template->GetFunction(), "serialize", BSONSerialize);  
   NODE_SET_METHOD(constructor_template->GetFunction(), "serializeWithBufferAndIndex", SerializeWithBufferAndIndex);
   NODE_SET_METHOD(constructor_template->GetFunction(), "deserialize", BSONDeserialize);  
+  NODE_SET_METHOD(constructor_template->GetFunction(), "deserializeJS", BSONDeserializeJS);  
 	NODE_SET_METHOD(constructor_template->GetFunction(), "deserializeStream", BSONDeserializeStream);
   NODE_SET_METHOD(constructor_template->GetFunction(), "encodeLong", EncodeLong);  
   NODE_SET_METHOD(constructor_template->GetFunction(), "toLong", ToLong);
@@ -95,9 +105,77 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
 Handle<Value> BSON::New(const Arguments &args) {
   HandleScope scope;
   
-  BSON *bson = new BSON();
-  bson->Wrap(args.This());
-  return args.This();
+  // Check that we have an array
+  if(args.Length() == 1 && args[0]->IsArray()) {
+    // Cast the array to a local reference
+    Local<Array> array = Local<Array>::Cast(args[0]);
+    
+    if(array->Length() > 0) {
+      // printf("=================== is_function = %d\n", (array->Get(0)->IsFunction() ? 1 : 0));
+      // Local<Object> newObject = array->Get(0)->ToFunction()->NewInstance();
+
+      // Create a bson object instance and return it
+      BSON *bson = new BSON();
+
+      // total number of found classes
+      uint32_t numberOfClasses = 0;
+      
+      // Iterate over all entries to save the instantiate funtions
+      for(uint32_t i = 0; i < array->Length(); i++) {
+        // Let's get a reference to the function
+        Local<Function> func = Local<Function>::Cast(array->Get(i));
+        Local<String> functionName = func->GetName()->ToString();
+      
+        // Save the functions making them persistant handles (they don't get collected)
+        if(functionName->StrictEquals(String::New("Long"))) {
+          bson->longConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        } else if(functionName->StrictEquals(String::New("ObjectID"))) {
+          bson->objectIDConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        } else if(functionName->StrictEquals(String::New("Binary"))) {
+          bson->binaryConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        } else if(functionName->StrictEquals(String::New("Code"))) {
+          bson->codeConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        } else if(functionName->StrictEquals(String::New("DBRef"))) {
+          bson->dbrefConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        } else if(functionName->StrictEquals(String::New("Symbol"))) {
+          bson->symbolConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        } else if(functionName->StrictEquals(String::New("Double"))) {
+          bson->doubleConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        } else if(functionName->StrictEquals(String::New("Timestamp"))) {
+          bson->timestampConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        } else if(functionName->StrictEquals(String::New("MinKey"))) {
+          bson->minKeyConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        } else if(functionName->StrictEquals(String::New("MaxKey"))) {
+          bson->maxKeyConstructor = Persistent<Function>::New(func);
+          numberOfClasses = numberOfClasses + 1;
+        }
+      }
+      
+      // Check if we have the right number of constructors otherwise throw an error
+      if(numberOfClasses != 10) {
+        // Destroy object
+        delete(bson);
+        // Fire exception
+        return VException("Missing function constructor for either [Long/ObjectID/Binary/Code/DbRef/Symbol/Double/Timestamp/MinKey/MaxKey]");
+      } else {
+        bson->Wrap(args.This());
+        return args.This();                  
+      }
+    } else {
+      return VException("No types passed in");
+    }    
+  } else {
+    return VException("Argument passed in must be an array of types");
+  }  
 }
 
 Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
@@ -1386,7 +1464,7 @@ Handle<Value> BSON::deserialize(char *data, uint32_t startIndex, bool is_array_i
       if(is_array_item) {
         insert_index = atoi(string_name);
       }      
-            
+      
       // Add the element to the object
       if(is_array_item) {
         return_array->Set(Number::New(insert_index), BSON::decodeLong(data, index));
@@ -1918,12 +1996,27 @@ Handle<Value> BSON::decodeDBref(Local<Value> ref, Local<Value> oid, Local<Value>
   return scope.Close(dbref_obj);
 }
 
+Handle<Value> BSON::decodeDBrefJS(BSON *bson, Local<Value> ref, Local<Value> oid, Local<Value> db) {
+  HandleScope scope;
+  Local<Value> argv[] = {ref, oid, db};
+  Handle<Value> dbrefObj = bson->dbrefConstructor->NewInstance(3, argv);    
+  return scope.Close(dbrefObj);
+}
+
 Handle<Value> BSON::decodeCode(char *code, Handle<Value> scope_object) {
   HandleScope scope;
   
   Local<Value> argv[] = {String::New(code), scope_object->ToObject()};
   Handle<Value> code_obj = Code::constructor_template->GetFunction()->NewInstance(2, argv);
   return scope.Close(code_obj);
+}
+
+Handle<Value> BSON::decodeCodeJS(BSON *bson, char *code, Handle<Value> scope_object) {
+  HandleScope scope;
+  
+  Local<Value> argv[] = {String::New(code), scope_object->ToObject()};
+  Handle<Value> codeObj = bson->codeConstructor->NewInstance(2, argv);
+  return scope.Close(codeObj);
 }
 
 Handle<Value> BSON::decodeBinary(uint32_t sub_type, uint32_t number_of_bytes, char *data) {
@@ -1935,12 +2028,38 @@ Handle<Value> BSON::decodeBinary(uint32_t sub_type, uint32_t number_of_bytes, ch
   return scope.Close(binary_obj);
 }
 
+Handle<Value> BSON::decodeBinaryJS(BSON *bson, uint32_t sub_type, uint32_t number_of_bytes, char *data) {
+  HandleScope scope;
+  
+  // Create a buffer object that wraps the raw stream
+  Buffer *bufferObj = Buffer::New(data, number_of_bytes);
+  // Arguments to be passed to create the binary
+  Handle<Value> argv[] = {bufferObj->handle_, Uint32::New(sub_type)};
+  // Return the buffer handle
+  Local<Object> bufferObjHandle = bson->binaryConstructor->NewInstance(2, argv);
+  // Close the scope
+  return scope.Close(bufferObjHandle);
+}
+
 Handle<Value> BSON::decodeOid(char *oid) {
   HandleScope scope;
   
   Local<Value> argv[] = {String::New(oid)};
   Handle<Value> oid_obj = ObjectID::constructor_template->GetFunction()->NewInstance(1, argv);
   return scope.Close(oid_obj);
+}
+
+Handle<Value> BSON::decodeOidJS(BSON *bson, char *oid) {
+  HandleScope scope;
+
+  // Encode the string (string - null termiating character)
+  Local<Value> bin_value = Encode(oid, 12, BINARY)->ToString();
+
+  // Return the id object
+  // Local<Value> argv[] = {String::New(123451234512")};
+  Local<Value> argv[] = {bin_value};
+  Local<Object> oidObj = bson->objectIDConstructor->NewInstance(1, argv);
+  return scope.Close(oidObj);
 }
 
 Handle<Value> BSON::decodeLong(char *data, uint32_t index) {
@@ -1955,17 +2074,9 @@ Handle<Value> BSON::decodeLong(char *data, uint32_t index) {
   // Decode 64bit value
   int64_t value = 0;
   memcpy(&value, (data + index), 8);        
-  
-  // printf("==================================== %llu\n", value);
-  
-  // if(value >= (-2^53) && value <= (2^53)) {
-  //   printf("----------------------------------------------- 2\n");
-  //   
-  // }
-  
+
   // If value is < 2^53 and >-2^53
   if((highBits < 0x200000 || (highBits == 0x200000 && lowBits == 0)) && highBits >= -0x200000) {
-    // printf("----------------------------------------------- 1\n");
     int64_t finalValue = 0;
     memcpy(&finalValue, (data + index), 8);        
     return scope.Close(Number::New(finalValue));
@@ -1982,6 +2093,47 @@ Handle<Value> BSON::decodeTimestamp(int64_t value) {
   
   Local<Value> argv[] = {Number::New(value)};
   Handle<Value> timestamp_obj = Timestamp::constructor_template->GetFunction()->NewInstance(1, argv);    
+  return scope.Close(timestamp_obj);      
+}
+
+Handle<Value> BSON::decodeLongJS(BSON *bson, char *data, uint32_t index) {
+  HandleScope scope;
+  
+  // Decode the integer value
+  int32_t lowBits = 0;
+  int32_t highBits = 0;
+  memcpy(&lowBits, (data + index), 4);        
+  memcpy(&highBits, (data + index + 4), 4);        
+  
+  // Decode 64bit value
+  int64_t value = 0;
+  memcpy(&value, (data + index), 8);        
+
+  // If value is < 2^53 and >-2^53
+  if((highBits < 0x200000 || (highBits == 0x200000 && lowBits == 0)) && highBits >= -0x200000) {
+    int64_t finalValue = 0;
+    memcpy(&finalValue, (data + index), 8);        
+    return scope.Close(Number::New(finalValue));
+  }
+
+  // Instantiate the js object and pass it back
+  Local<Value> argv[] = {Int32::New(lowBits), Int32::New(highBits)};
+  Local<Object> longObject = bson->longConstructor->NewInstance(2, argv);
+  return scope.Close(longObject);      
+}
+
+Handle<Value> BSON::decodeTimestampJS(BSON *bson, char *data, uint32_t index) {
+  HandleScope scope;
+  
+  // Decode the integer value
+  int32_t lowBits = 0;
+  int32_t highBits = 0;
+  memcpy(&lowBits, (data + index), 4);        
+  memcpy(&highBits, (data + index + 4), 4);        
+
+  // Build timestamp
+  Local<Value> argv[] = {Int32::New(lowBits), Int32::New(highBits)};
+  Handle<Value> timestamp_obj = bson->timestampConstructor->NewInstance(2, argv);
   return scope.Close(timestamp_obj);      
 }
 
@@ -2544,6 +2696,698 @@ uint32_t BSON::serialize2(char *serialized_object, uint32_t index, Handle<Value>
   
   return 0;
 }
+
+//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
+Handle<Value> BSON::BSONDeserializeJS(const Arguments &args) {
+  HandleScope scope;
+
+  // Ensure that we have an parameter
+  if(Buffer::HasInstance(args[0]) && args.Length() > 1) return VException("One argument required - buffer1.");
+  if(args[0]->IsString() && args.Length() > 1) return VException("One argument required - string1.");
+  // Throw an exception if the argument is not of type Buffer
+  if(!Buffer::HasInstance(args[0]) && !args[0]->IsString()) return VException("Argument must be a Buffer or String.");
+  
+  // Define pointer to data
+  char *data;
+  uint32_t length;      
+  Local<Object> obj = args[0]->ToObject();
+
+  // Unpack the BSON parser instance
+  BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+
+  // If we passed in a buffer, let's unpack it, otherwise let's unpack the string
+  if(Buffer::HasInstance(obj)) {
+
+    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+     Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+     data = buffer->data();
+     uint32_t length = buffer->length();
+    #else
+     data = Buffer::Data(obj);
+     uint32_t length = Buffer::Length(obj);
+    #endif
+
+    return BSON::deserializeJS(bson, data, 0, NULL);
+  } else {
+    // The length of the data for this encoding
+    ssize_t len = DecodeBytes(args[0], BINARY);
+    // Let's define the buffer size
+    data = (char *)malloc(len);
+    // Write the data to the buffer from the string object
+    ssize_t written = DecodeWrite(data, len, args[0], BINARY);
+    // Assert that we wrote the same number of bytes as we have length
+    assert(written == len);
+    // Get result
+    Handle<Value> result = BSON::deserializeJS(bson, data, 0, NULL);
+    // Free memory
+    free(data);
+    // Deserialize the content
+    return result;
+  }  
+}
+
+// Deserialize the stream
+Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, bool is_array_item) {
+  HandleScope scope;
+  // Holds references to the objects that are going to be returned
+  Local<Object> return_data = Object::New();
+  Local<Array> return_array = Array::New();      
+  // The current index in the char data
+  uint32_t index = startIndex;
+  // Decode the size of the BSON data structure
+  uint32_t size = BSON::deserialize_int32(data, index);
+
+  // Data length
+  uint32_t dataLength = index + size;
+
+  // Adjust the index to point to next piece
+  index = index + 4;      
+
+  // While we have data left let's decode
+  while(index < dataLength) {
+    // Read the first to bytes to indicate the type of object we are decoding
+    uint8_t type = BSON::deserialize_int8(data, index);    
+    // Handles the internal size of the object
+    uint32_t insert_index = 0;
+    // Adjust index to skip type byte
+    index = index + 1;
+    
+    if(type == BSON_DATA_STRING) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+
+      // Read the length of the string (next 4 bytes)
+      uint32_t string_size = BSON::deserialize_int32(data, index);
+      // Adjust index to point to start of string
+      index = index + 4;
+      // Decode the string and add zero terminating value at the end of the string
+      char *value = (char *)malloc((string_size * sizeof(char)));
+      strncpy(value, (data + index), string_size);
+      // Encode the string (string - null termiating character)
+      Local<Value> utf8_encoded_str = Encode(value, string_size - 1, UTF8)->ToString();
+      // Add the value to the data
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), utf8_encoded_str);
+      } else {
+        return_data->Set(String::New(string_name), utf8_encoded_str);
+      }
+      
+      // Adjust index
+      index = index + string_size;
+      // Free up the memory
+      free(value);
+      free(string_name);
+    } else if(type == BSON_DATA_INT) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Decode the integer value
+      uint32_t value = 0;
+      memcpy(&value, (data + index), 4);
+            
+      // Adjust the index for the size of the value
+      index = index + 4;
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Integer::New(insert_index), Integer::New(value));
+      } else {
+        return_data->Set(String::New(string_name), Integer::New(value));
+      }          
+      // Free up the memory
+      free(string_name);
+    } else if(type == BSON_DATA_TIMESTAMP) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), BSON::decodeTimestampJS(bson, data, index));
+      } else {
+        return_data->Set(String::New(string_name), BSON::decodeTimestampJS(bson, data, index));
+      }
+      
+      // Adjust the index for the size of the value
+      index = index + 8;
+      
+      // Free up the memory
+      free(string_name);            
+    } else if(type == BSON_DATA_LONG) { 
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }
+      
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), BSON::decodeLongJS(bson, data, index));
+      } else {
+        return_data->Set(String::New(string_name), BSON::decodeLongJS(bson, data, index));
+      }        
+
+      // Adjust the index for the size of the value
+      index = index + 8;
+
+      // Free up the memory
+      free(string_name);      
+    } else if(type == BSON_DATA_NUMBER) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Decode the integer value
+      double value = 0;
+      memcpy(&value, (data + index), 8);      
+      // Adjust the index for the size of the value
+      index = index + 8;
+      
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), Number::New(value));
+      } else {
+        return_data->Set(String::New(string_name), Number::New(value));
+      }
+      // Free up the memory
+      free(string_name);      
+    } else if(type == BSON_DATA_MIN_KEY) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Create new MinKey
+      Local<Object> minKey = bson->minKeyConstructor->NewInstance();
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), minKey);
+      } else {
+        return_data->Set(String::New(string_name), minKey);
+      }      
+      // Free up the memory
+      free(string_name);      
+    } else if(type == BSON_DATA_MAX_KEY) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Create new MinKey
+      Local<Object> maxKey = bson->maxKeyConstructor->NewInstance();
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), maxKey);
+      } else {
+        return_data->Set(String::New(string_name), maxKey);
+      }      
+      // Free up the memory
+      free(string_name);      
+    } else if(type == BSON_DATA_NULL) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), Null());
+      } else {
+        return_data->Set(String::New(string_name), Null());
+      }      
+      // Free up the memory
+      free(string_name);      
+    } else if(type == BSON_DATA_BOOLEAN) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+
+      // Decode the boolean value
+      char bool_value = *(data + index);
+      // Adjust the index for the size of the value
+      index = index + 1;
+      
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), bool_value == 1 ? Boolean::New(true) : Boolean::New(false));
+      } else {
+        return_data->Set(String::New(string_name), bool_value == 1 ? Boolean::New(true) : Boolean::New(false));
+      }            
+      // Free up the memory
+      free(string_name);      
+    } else if(type == BSON_DATA_DATE) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+
+      // Decode the value 64 bit integer
+      int64_t value = 0;
+      memcpy(&value, (data + index), 8);      
+      // Adjust the index for the size of the value
+      index = index + 8;
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), Date::New((double)value));
+      } else {
+        return_data->Set(String::New(string_name), Date::New((double)value));
+      }     
+      // Free up the memory
+      free(string_name);        
+    } else if(type == BSON_DATA_REGEXP) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+
+      // Length variable
+      int32_t length_regexp = 0;
+      int32_t start_index = index;
+      char chr;
+      
+      // Locate end of the regexp expression \0
+      while((chr = *(data + index + length_regexp)) != '\0') {
+        length_regexp = length_regexp + 1;
+      }
+
+      // Contains the reg exp
+      char *reg_exp = (char *)malloc(length_regexp * sizeof(char) + 2);
+      // Copy the regexp from the data to the char *
+      memcpy(reg_exp, (data + index), (length_regexp + 1));
+      // Adjust the index to skip the first part of the regular expression
+      index = index + length_regexp + 1;
+            
+      // Reset the length
+      int32_t options_length = 0;
+      // Locate the end of the options for the regexp terminated with a '\0'
+      while((chr = *(data + index + options_length)) != '\0') {
+        options_length = options_length + 1;
+      }
+
+      // Contains the reg exp
+      char *options = (char *)malloc(options_length * sizeof(char) + 1);
+      // Copy the options from the data to the char *
+      memcpy(options, (data + index), (options_length + 1));      
+      // Adjust the index to skip the option part of the regular expression
+      index = index + options_length + 1;      
+      // ARRRRGH Google does not expose regular expressions through the v8 api
+      // Have to use Script to instantiate the object (slower)
+
+      // Generate the string for execution in the string context
+      int flag = 0;
+
+      for(int i = 0; i < options_length; i++) {
+        // Multiline
+        if(*(options + i) == 'm') {
+          flag = flag | 4;
+        } else if(*(options + i) == 'i') {
+          flag = flag | 2;          
+        }
+      }
+
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), RegExp::New(String::New(reg_exp), (v8::RegExp::Flags)flag));
+      } else {
+        return_data->Set(String::New(string_name), RegExp::New(String::New(reg_exp), (v8::RegExp::Flags)flag));
+      }  
+      
+      // Free memory
+      free(reg_exp);          
+      free(options);          
+      free(string_name);
+    } else if(type == BSON_DATA_OID) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+
+      // The id string
+      char *oid_string = (char *)malloc(12 * sizeof(char));
+      // Copy the options from the data to the char *
+      memcpy(oid_string, (data + index), 12);
+      
+      // Adjust the index
+      index = index + 12;
+      
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), BSON::decodeOidJS(bson, oid_string));
+      } else {
+        return_data->Set(String::New(string_name), BSON::decodeOidJS(bson, oid_string));
+      }     
+      
+      // Free memory
+      free(oid_string);                       
+      free(string_name);
+    } else if(type == BSON_DATA_BINARY) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Read the binary data size
+      uint32_t number_of_bytes = BSON::deserialize_int32(data, index);
+      // Adjust the index
+      index = index + 4;
+      // Decode the subtype, ensure it's positive
+      uint32_t sub_type = (int)*(data + index) & 0xff;
+      // Adjust the index
+      index = index + 1;
+      // Copy the binary data into a buffer
+      char *buffer = (char *)malloc(number_of_bytes * sizeof(char) + 1);
+      memcpy(buffer, (data + index), number_of_bytes);
+      *(buffer + number_of_bytes) = '\0';
+
+      // Adjust the index
+      index = index + number_of_bytes;
+
+      // Add the element to the object
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), BSON::decodeBinaryJS(bson, sub_type, number_of_bytes, buffer));
+      } else {
+        return_data->Set(String::New(string_name), BSON::decodeBinaryJS(bson, sub_type, number_of_bytes, buffer));
+      }
+      // Free memory
+      free(buffer);                             
+      free(string_name);
+    } else if(type == BSON_DATA_SYMBOL) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Read the length of the string (next 4 bytes)
+      uint32_t string_size = BSON::deserialize_int32(data, index);
+      // Adjust index to point to start of string
+      index = index + 4;
+      // Decode the string and add zero terminating value at the end of the string
+      char *value = (char *)malloc((string_size * sizeof(char)));
+      strncpy(value, (data + index), string_size);
+      // Encode the string (string - null termiating character)
+      Local<Value> utf8_encoded_str = Encode(value, string_size - 1, UTF8)->ToString();
+      
+      // Wrap up the string in a Symbol Object
+      Local<Value> argv[] = {utf8_encoded_str};
+      Handle<Value> symbolObj = bson->symbolConstructor->NewInstance(1, argv);
+      
+      // Add the value to the data
+      if(is_array_item) {
+        return_array->Set(Number::New(insert_index), symbolObj);
+      } else {
+        return_data->Set(String::New(string_name), symbolObj);
+      }
+      
+      // Adjust index
+      index = index + string_size;
+      // Free up the memory
+      free(value);
+      free(string_name);
+    } else if(type == BSON_DATA_CODE) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Read the string size
+      uint32_t string_size = BSON::deserialize_int32(data, index);
+      // Adjust the index
+      index = index + 4;
+      // Read the string
+      char *code = (char *)malloc(string_size * sizeof(char) + 1);
+      // Copy string + terminating 0
+      memcpy(code, (data + index), string_size);
+      
+      // Define empty scope object
+      Handle<Value> scope_object = Object::New();
+      
+      // Define the try catch block
+      TryCatch try_catch;                
+      // Decode the code object
+      Handle<Value> obj = BSON::decodeCodeJS(bson, code, scope_object);
+      // If an error was thrown push it up the chain
+      if(try_catch.HasCaught()) {
+        free(string_name);
+        free(code);
+        // Rethrow exception
+        return try_catch.ReThrow();
+      }
+      
+      // Add the element to the object
+      if(is_array_item) {        
+        return_array->Set(Number::New(insert_index), obj);
+      } else {
+        return_data->Set(String::New(string_name), obj);
+      }      
+      
+      // Clean up memory allocation
+      free(code);
+      free(string_name);
+    } else if(type == BSON_DATA_CODE_W_SCOPE) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Total number of bytes after array index
+      uint32_t total_code_size = BSON::deserialize_int32(data, index);
+      // Adjust the index
+      index = index + 4;
+      // Read the string size
+      uint32_t string_size = BSON::deserialize_int32(data, index);
+      // Adjust the index
+      index = index + 4;
+      // Read the string
+      char *code = (char *)malloc(string_size * sizeof(char) + 1);
+      // Copy string + terminating 0
+      memcpy(code, (data + index), string_size);
+      // Adjust the index
+      index = index + string_size;      
+      // Get the scope object (bson object)
+      uint32_t bson_object_size = total_code_size - string_size - 8;
+      // Allocate bson object buffer and copy out the content
+      char *bson_buffer = (char *)malloc(bson_object_size * sizeof(char));
+      memcpy(bson_buffer, (data + index), bson_object_size);
+      // Adjust the index
+      index = index + bson_object_size;
+      // Parse the bson object
+      Handle<Value> scope_object = BSON::deserializeJS(bson, bson_buffer, 0, false);
+      // Define the try catch block
+      TryCatch try_catch;                
+      // Decode the code object
+      Handle<Value> obj = BSON::decodeCodeJS(bson, code, scope_object);
+      // If an error was thrown push it up the chain
+      if(try_catch.HasCaught()) {
+        // Clean up memory allocation
+        free(string_name);
+        free(bson_buffer);
+        free(code);
+        // Rethrow exception
+        return try_catch.ReThrow();
+      }
+      
+      // Add the element to the object
+      if(is_array_item) {        
+        return_array->Set(Number::New(insert_index), obj);
+      } else {
+        return_data->Set(String::New(string_name), obj);
+      }      
+      
+      // Clean up memory allocation
+      free(code);
+      free(bson_buffer);      
+      free(string_name);
+    } else if(type == BSON_DATA_OBJECT) {
+      // If this is the top level object we need to skip the undecoding
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }             
+      
+      // Get the object size
+      uint32_t bson_object_size = BSON::deserialize_int32(data, index);
+      // Define the try catch block
+      TryCatch try_catch;                
+      // Decode the code object
+      Handle<Value> obj = BSON::deserializeJS(bson, data + index, 0, false);
+      // Adjust the index
+      index = index + bson_object_size;
+      // If an error was thrown push it up the chain
+      if(try_catch.HasCaught()) {
+        // Rethrow exception
+        return try_catch.ReThrow();
+      }
+      
+      // Add the element to the object
+      if(is_array_item) {        
+        return_array->Set(Number::New(insert_index), obj);
+      } else {
+        return_data->Set(String::New(string_name), obj);
+      }
+      
+      // Clean up memory allocation
+      free(string_name);
+    } else if(type == BSON_DATA_ARRAY) {
+      // Read the null terminated index String
+      char *string_name = BSON::extract_string(data, index);
+      if(string_name == NULL) return VException("Invalid C String found.");
+      // Let's create a new string
+      index = index + strlen(string_name) + 1;
+      // Handle array value if applicable
+      uint32_t insert_index = 0;
+      if(is_array_item) {
+        insert_index = atoi(string_name);
+      }      
+      
+      // Get the size
+      uint32_t array_size = BSON::deserialize_int32(data, index);
+      // Define the try catch block
+      TryCatch try_catch;                
+
+      // Decode the code object
+      Handle<Value> obj = BSON::deserializeJS(bson, data + index, 0, true);
+      // If an error was thrown push it up the chain
+      if(try_catch.HasCaught()) {
+        // Rethrow exception
+        return try_catch.ReThrow();
+      }
+      // Adjust the index for the next value
+      index = index + array_size;
+      // Add the element to the object
+      if(is_array_item) {        
+        return_array->Set(Number::New(insert_index), obj);
+      } else {
+        return_data->Set(String::New(string_name), obj);
+      }      
+      // Clean up memory allocation
+      free(string_name);
+    }
+  }
+  
+  // Check if we have a db reference
+  if(!is_array_item && return_data->Has(String::New("$ref")) && return_data->Has(String::New("$id"))) {
+    Handle<Value> dbrefValue = BSON::decodeDBrefJS(bson, return_data->Get(String::New("$ref")), return_data->Get(String::New("$id")), return_data->Get(String::New("$db")));
+    return scope.Close(dbrefValue);
+  }
+  
+  // Return the data object to javascript
+  if(is_array_item) {
+    return scope.Close(return_array);
+  } else {
+    return scope.Close(return_data);
+  }
+}
+
 
 // Exporting function
 extern "C" void init(Handle<Object> target) {

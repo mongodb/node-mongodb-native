@@ -16,6 +16,7 @@ class BSON : public ObjectWrap {
     static void Initialize(Handle<Object> target);
     static Handle<Value> BSONSerialize(const Arguments &args);
     static Handle<Value> BSONDeserialize(const Arguments &args);
+    static Handle<Value> BSONDeserializeJS(const Arguments &args);
     static Handle<Value> BSONDeserializeStream(const Arguments &args);
 
     // Encode functions
@@ -37,6 +38,7 @@ class BSON : public ObjectWrap {
   private:
     static Handle<Value> New(const Arguments &args);
     static Handle<Value> deserialize(char *data, uint32_t startIndex, bool is_array_item);
+    static Handle<Value> deserializeJS(BSON *bson, char *data, uint32_t startIndex, bool is_array_item);
     static uint32_t serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key, bool serializeFunctions);
 
     static char* extract_string(char *data, uint32_t offset);
@@ -53,6 +55,18 @@ class BSON : public ObjectWrap {
     static uint32_t deserialize_int32(char* data, uint32_t offset);
     static char *check_key(Local<String> key);
     static char *decode_utf8(char * string, uint32_t length);
+     
+    // BSON type instantiate functions
+    Persistent<Function> longConstructor;
+    Persistent<Function> objectIDConstructor;
+    Persistent<Function> binaryConstructor;
+    Persistent<Function> codeConstructor;
+    Persistent<Function> dbrefConstructor;
+    Persistent<Function> symbolConstructor;
+    Persistent<Function> doubleConstructor;
+    Persistent<Function> timestampConstructor;
+    Persistent<Function> minKeyConstructor;
+    Persistent<Function> maxKeyConstructor;
         
     // Decode function
     static Handle<Value> decodeLong(char *data, uint32_t index);
@@ -61,6 +75,14 @@ class BSON : public ObjectWrap {
     static Handle<Value> decodeBinary(uint32_t sub_type, uint32_t number_of_bytes, char *data);
     static Handle<Value> decodeCode(char *code, Handle<Value> scope);
     static Handle<Value> decodeDBref(Local<Value> ref, Local<Value> oid, Local<Value> db);
+
+    // Decode JS function
+    static Handle<Value> decodeLongJS(BSON *bson, char *data, uint32_t index);
+    static Handle<Value> decodeTimestampJS(BSON *bson, char *data, uint32_t index);
+    static Handle<Value> decodeOidJS(BSON *bson, char *oid);
+    static Handle<Value> decodeBinaryJS(BSON *bson, uint32_t sub_type, uint32_t number_of_bytes, char *data);
+    static Handle<Value> decodeCodeJS(BSON *bson, char *code, Handle<Value> scope);
+    static Handle<Value> decodeDBrefJS(BSON *bson, Local<Value> ref, Local<Value> oid, Local<Value> db);    
 
 		// Experimental
 		static uint32_t calculate_object_size2(Handle<Value> object);

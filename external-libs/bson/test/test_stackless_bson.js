@@ -22,7 +22,7 @@ var Long2 = require('../bson').Long,
     Timestamp2 = require('../bson').Timestamp,
     DBRef2 = require('../bson').DBRef;
 
-console.log("=== EXECUTING TEST_FULL_BSON ===");
+console.log("=== EXECUTING TEST_STACKLESS_BSON ===");
 
 // // Number of iterations for the benchmark
 // var COUNT = 100000;
