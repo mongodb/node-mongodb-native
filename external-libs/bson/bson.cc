@@ -76,6 +76,8 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   
   // Instance methods
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserialize", BSONDeserializeJS);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "serialize", BSONSerializeJS);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "calculateObjectSize", CalculateObjectSizeJS);
   // NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   // NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
   // NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
@@ -117,6 +119,9 @@ Handle<Value> BSON::New(const Arguments &args) {
       // Create a bson object instance and return it
       BSON *bson = new BSON();
 
+      // Setup pre-allocated comparision objects
+      bson->_bsontypeString = Persistent<String>::New(String::New("_bsontype"));
+
       // total number of found classes
       uint32_t numberOfClasses = 0;
       
@@ -125,37 +130,47 @@ Handle<Value> BSON::New(const Arguments &args) {
         // Let's get a reference to the function
         Local<Function> func = Local<Function>::Cast(array->Get(i));
         Local<String> functionName = func->GetName()->ToString();
-      
+            
         // Save the functions making them persistant handles (they don't get collected)
         if(functionName->StrictEquals(String::New("Long"))) {
           bson->longConstructor = Persistent<Function>::New(func);
+          bson->longString = Persistent<String>::New(String::New("Long"));
           numberOfClasses = numberOfClasses + 1;
         } else if(functionName->StrictEquals(String::New("ObjectID"))) {
           bson->objectIDConstructor = Persistent<Function>::New(func);
+          bson->objectIDString = Persistent<String>::New(String::New("ObjectID"));
           numberOfClasses = numberOfClasses + 1;
         } else if(functionName->StrictEquals(String::New("Binary"))) {
           bson->binaryConstructor = Persistent<Function>::New(func);
+          bson->binaryString = Persistent<String>::New(String::New("Binary"));
           numberOfClasses = numberOfClasses + 1;
         } else if(functionName->StrictEquals(String::New("Code"))) {
           bson->codeConstructor = Persistent<Function>::New(func);
+          bson->codeString = Persistent<String>::New(String::New("Code"));
           numberOfClasses = numberOfClasses + 1;
         } else if(functionName->StrictEquals(String::New("DBRef"))) {
           bson->dbrefConstructor = Persistent<Function>::New(func);
+          bson->dbrefString = Persistent<String>::New(String::New("DBRef"));
           numberOfClasses = numberOfClasses + 1;
         } else if(functionName->StrictEquals(String::New("Symbol"))) {
           bson->symbolConstructor = Persistent<Function>::New(func);
+          bson->symbolString = Persistent<String>::New(String::New("Symbol"));
           numberOfClasses = numberOfClasses + 1;
         } else if(functionName->StrictEquals(String::New("Double"))) {
           bson->doubleConstructor = Persistent<Function>::New(func);
+          bson->doubleString = Persistent<String>::New(String::New("Double"));
           numberOfClasses = numberOfClasses + 1;
         } else if(functionName->StrictEquals(String::New("Timestamp"))) {
           bson->timestampConstructor = Persistent<Function>::New(func);
+          bson->timestampString = Persistent<String>::New(String::New("Timestamp"));
           numberOfClasses = numberOfClasses + 1;
         } else if(functionName->StrictEquals(String::New("MinKey"))) {
           bson->minKeyConstructor = Persistent<Function>::New(func);
+          bson->minKeyString = Persistent<String>::New(String::New("MinKey"));
           numberOfClasses = numberOfClasses + 1;
         } else if(functionName->StrictEquals(String::New("MaxKey"))) {
           bson->maxKeyConstructor = Persistent<Function>::New(func);
+          bson->maxKeyString = Persistent<String>::New(String::New("MaxKey"));
           numberOfClasses = numberOfClasses + 1;
         }
       }
@@ -337,7 +352,6 @@ Handle<Value> BSON::CalculateObjectSize(const Arguments &args) {
   // Return the object size
   return scope.Close(Uint32::New(object_size));
 }
-
 
 Handle<Value> BSON::ToLong(const Arguments &args) {
   HandleScope scope;
@@ -3388,6 +3402,257 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
   }
 }
 
+Handle<Value> BSON::BSONSerializeJS(const Arguments &args) {
+  HandleScope scope;
+
+  if(args.Length() == 1 && !args[0]->IsObject()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
+  if(args.Length() == 2 && !args[0]->IsObject() && !args[1]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
+  if(args.Length() == 3 && !args[0]->IsObject() && !args[1]->IsBoolean() && !args[2]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
+  if(args.Length() == 4 && !args[0]->IsObject() && !args[1]->IsBoolean() && !args[2]->IsBoolean() && !args[3]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean] or [object, boolean, boolean, boolean]");
+  if(args.Length() > 4) return VException("One, two, tree or four arguments required - [object] or [object, boolean] or [object, boolean, boolean] or [object, boolean, boolean, boolean]");
+
+  // Unpack the BSON parser instance
+  BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+
+  uint32_t object_size = 0;
+  // Calculate the total size of the document in binary form to ensure we only allocate memory once
+  // With serialize function
+  if(args.Length() == 4) {
+    object_size = BSON::calculate_object_sizeJS(bson, args[0], args[3]->BooleanValue());    
+  } else {
+    object_size = BSON::calculate_object_sizeJS(bson, args[0], false);        
+  }
+
+  // Allocate the memory needed for the serializtion
+  char *serialized_object = (char *)malloc(object_size * sizeof(char));  
+  // Catch any errors
+  try {
+    // Check if we have a boolean value
+    bool check_key = false;
+    if(args.Length() >= 3 && args[1]->IsBoolean()) {
+      check_key = args[1]->BooleanValue();
+    }
+
+    // Check if we have a boolean value
+    bool serializeFunctions = false;
+    if(args.Length() == 4 && args[1]->IsBoolean()) {
+      serializeFunctions = args[3]->BooleanValue();
+    }
+    
+    // Serialize the object
+    BSON::serialize(serialized_object, 0, Null(), args[0], check_key, serializeFunctions);      
+  } catch(char *err_msg) {
+    // Free up serialized object space
+    free(serialized_object);
+    V8::AdjustAmountOfExternalAllocatedMemory(-object_size);
+    // Throw exception with the string
+    Handle<Value> error = VException(err_msg);
+    // free error message
+    free(err_msg);
+    // Return error
+    return error;
+  }
+
+  // Write the object size
+  BSON::write_int32((serialized_object), object_size);  
+
+  // If we have 3 arguments
+  if(args.Length() == 3 || args.Length() == 4) {
+    // Local<Boolean> asBuffer = args[2]->ToBoolean();    
+    Buffer *buffer = Buffer::New(serialized_object, object_size);
+    // Release the serialized string
+    free(serialized_object);
+    return scope.Close(buffer->handle_);
+  } else {
+    // Encode the string (string - null termiating character)
+    Local<Value> bin_value = Encode(serialized_object, object_size, BINARY)->ToString();
+    // Return the serialized content
+    return bin_value;    
+  }  
+}
+
+Handle<Value> BSON::CalculateObjectSizeJS(const Arguments &args) {
+  HandleScope scope;
+  // Ensure we have a valid object
+  if(args.Length() == 1 && !args[0]->IsObject()) return VException("One argument required - [object]");
+  if(args.Length() == 2 && !args[0]->IsObject() && !args[1]->IsBoolean())  return VException("Two arguments required - [object, boolean]");
+  if(args.Length() > 3) return VException("One or two arguments required - [object] or [object, boolean]");
+  
+  // Unpack the BSON parser instance
+  BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+  
+  // Object size
+  uint32_t object_size = 0;
+  // Check if we have our argument, calculate size of the object  
+  if(args.Length() == 2) {
+    object_size = BSON::calculate_object_sizeJS(bson, args[0], args[1]->BooleanValue());
+  } else {
+    object_size = BSON::calculate_object_sizeJS(bson, args[0], false);
+  }
+
+  // Return the object size
+  return scope.Close(Uint32::New(object_size));
+}
+
+uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool serializeFunctions) {
+  uint32_t object_size = 0;
+
+  // If we have an object let's unwrap it and calculate the sub sections
+  if(value->IsString()) {
+    Local<String> str = value->ToString();
+    uint32_t utf8_length = str->Utf8Length();
+  
+    if(utf8_length != str->Length()) {
+      // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
+      object_size += str->Utf8Length() + 1 + 4;  
+    } else {
+      object_size += str->Length() + 1 + 4;        
+    }  
+  } else if(value->IsNumber()) {
+    // Check if we have a float value or a long value
+    Local<Number> number = value->ToNumber();
+    double d_number = number->NumberValue();
+    int64_t l_number = number->IntegerValue();
+    // Check if we have a double value and not a int64
+    double d_result = d_number - l_number;    
+    // If we have a value after subtracting the integer value we have a float
+    if(d_result > 0 || d_result < 0) {
+      object_size = object_size + 8;      
+    } else if(l_number <= BSON_INT32_MAX && l_number >= BSON_INT32_MIN) {
+      object_size = object_size + 4;
+    } else {
+      object_size = object_size + 8;
+    }
+  } else if(value->IsBoolean()) {
+    object_size = object_size + 1;
+  } else if(value->IsDate()) {
+    object_size = object_size + 8;
+  } else if(value->IsRegExp()) {
+    // Fetch the string for the regexp
+    Handle<RegExp> regExp = Handle<RegExp>::Cast(value);    
+    ssize_t len = DecodeBytes(regExp->GetSource(), UTF8);
+    int flags = regExp->GetFlags();
+    
+    // ignorecase
+    if((flags & (1 << 1)) != 0) len++;
+    //multiline
+    if((flags & (1 << 2)) != 0) len++;
+    // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
+    object_size = object_size + len + 2;
+  } else if(value->IsNull()) {
+  } else if(value->IsArray()) {
+    // Cast to array
+    Local<Array> array = Local<Array>::Cast(value->ToObject());
+    // Turn length into string to calculate the size of all the strings needed
+    char *length_str = (char *)malloc(256 * sizeof(char));
+    // Calculate the size of each element
+    for(uint32_t i = 0; i < array->Length(); i++) {
+      // Add "index" string size for each element
+      sprintf(length_str, "%d", i);
+      // Add the size of the string length
+      uint32_t label_length = strlen(length_str) + 1;
+      // Add the type definition size for each item
+      object_size = object_size + label_length + 1;
+      // Add size of the object
+      uint32_t object_length = BSON::calculate_object_sizeJS(bson, array->Get(Integer::New(i)), serializeFunctions);
+      object_size = object_size + object_length;
+    }
+    // Add the object size
+    object_size = object_size + 4 + 1;
+    // Free up memory
+    free(length_str);
+  } else if(value->IsFunction()) {
+    if(serializeFunctions) {
+      // Need to convert function into string
+      Local<String> functionString = value->ToString();
+      // Length of string
+      ssize_t len = DecodeBytes(functionString, UTF8);
+      // Adjust size of binary
+      object_size += len + 1 + 4;
+    }
+  } else if(value->ToObject()->Has(bson->_bsontypeString)) {
+    // Handle holder
+    Local<String> constructorString = value->ToObject()->GetConstructorName();
+    
+    // BSON type object, avoid non-needed checking unless we have a type
+    if(bson->longString->StrictEquals(constructorString)) {
+      object_size = object_size + 8;
+    } else if(bson->timestampString->StrictEquals(constructorString)) {
+      object_size = object_size + 8;
+    } else if(bson->objectIDString->StrictEquals(constructorString)) {
+      object_size = object_size + 12;
+    } else if(bson->binaryString->StrictEquals(constructorString)) {
+      // Unpack the object and encode
+      Local<Uint32> positionObj = value->ToObject()->Get(String::New("position"))->ToUint32();
+      // Adjust the object_size, binary content lengt + total size int32 + binary size int32 + subtype
+      object_size += positionObj->Value() + 4 + 1;
+    } else if(bson->codeString->StrictEquals(constructorString)) {
+      // Unpack the object and encode
+      Local<Object> obj = value->ToObject();
+      // Get the function
+      Local<String> function = obj->Get(String::New("code"))->ToString();
+      // Get the scope object
+      Local<Object> scope = obj->Get(String::New("scope"))->ToObject();
+
+      // Check if the scope has any parameters
+      // Let's calculate the size the code object adds adds
+      if(scope->GetPropertyNames()->Length() > 0) {
+        object_size += function->Utf8Length() + 4 + BSON::calculate_object_sizeJS(bson, scope, serializeFunctions) + 4 + 1;
+      } else {
+        object_size += function->Utf8Length() + 4 + 1;
+      } 
+    } else if(bson->dbrefString->StrictEquals(constructorString)) {
+      // Unpack the dbref
+      Local<Object> dbref = value->ToObject();
+      // Create an object containing the right namespace variables
+      Local<Object> obj = Object::New();
+      // Encode the object
+      obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
+      obj->Set(String::New("$id"), dbref->Get(String::New("oid")));
+      if(!obj->Get(String::New("$db"))->IsNull()) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
+      // Calculate size
+      object_size += BSON::calculate_object_sizeJS(bson, obj, serializeFunctions);
+    } else if(bson->minKeyString->StrictEquals(constructorString) || bson->maxKeyString->Equals(constructorString)) {    
+    } else if(bson->symbolString->StrictEquals(constructorString)) {
+      // Get string
+      Local<String> str = value->ToObject()->Get(String::New("value"))->ToString();
+      // Get the utf8 length
+      uint32_t utf8_length = str->Utf8Length();
+      // Check if we have a utf8 encoded string or not
+      if(utf8_length != str->Length()) {
+        // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
+        object_size += str->Utf8Length() + 1 + 4;  
+      } else {
+        object_size += str->Length() + 1 + 4;        
+      }    
+    } else if(bson->doubleString->StrictEquals(constructorString)) {
+      object_size = object_size + 8;
+    }    
+  } else if(value->IsObject()) {
+    // Unwrap the object
+    Local<Object> object = value->ToObject();
+    Local<Array> property_names = object->GetOwnPropertyNames();
+    
+    // Process all the properties on the object
+    for(uint32_t index = 0; index < property_names->Length(); index++) {
+      // Fetch the property name
+      Local<String> property_name = property_names->Get(index)->ToString();
+      
+      // Fetch the object for the property
+      Local<Value> property = object->Get(property_name);
+      // Get size of property (property + property name length + 1 for terminating 0)
+      if(!property->IsFunction() || (property->IsFunction() && serializeFunctions)) {
+        // Convert name to char*
+        ssize_t len = DecodeBytes(property_name, UTF8);
+        object_size += BSON::calculate_object_sizeJS(bson, property, serializeFunctions) + len + 1 + 1;
+      }
+    }      
+    
+    object_size = object_size + 4 + 1;
+  } 
+
+  return object_size;
+}
 
 // Exporting function
 extern "C" void init(Handle<Object> target) {

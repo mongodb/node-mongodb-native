@@ -16,8 +16,11 @@ class BSON : public ObjectWrap {
     static void Initialize(Handle<Object> target);
     static Handle<Value> BSONSerialize(const Arguments &args);
     static Handle<Value> BSONDeserialize(const Arguments &args);
-    static Handle<Value> BSONDeserializeJS(const Arguments &args);
     static Handle<Value> BSONDeserializeStream(const Arguments &args);
+
+    // JS based objects
+    static Handle<Value> BSONSerializeJS(const Arguments &args);
+    static Handle<Value> BSONDeserializeJS(const Arguments &args);
 
     // Encode functions
     static Handle<Value> EncodeLong(const Arguments &args);
@@ -26,6 +29,7 @@ class BSON : public ObjectWrap {
   
     // Calculate size of function
     static Handle<Value> CalculateObjectSize(const Arguments &args);
+    static Handle<Value> CalculateObjectSizeJS(const Arguments &args);
     static Handle<Value> SerializeWithBufferAndIndex(const Arguments &args);
 
   	// Experimental
@@ -44,6 +48,7 @@ class BSON : public ObjectWrap {
     static char* extract_string(char *data, uint32_t offset);
     static const char* ToCString(const v8::String::Utf8Value& value);
     static uint32_t calculate_object_size(Handle<Value> object, bool serializeFunctions);
+    static uint32_t calculate_object_sizeJS(BSON *bson, Handle<Value> object, bool serializeFunctions);
 
     static void write_int32(char *data, uint32_t value);
     static void write_int64(char *data, int64_t value);
@@ -67,6 +72,21 @@ class BSON : public ObjectWrap {
     Persistent<Function> timestampConstructor;
     Persistent<Function> minKeyConstructor;
     Persistent<Function> maxKeyConstructor;
+    
+    // Equality Objects
+    Persistent<String> longString;
+    Persistent<String> objectIDString;
+    Persistent<String> binaryString;
+    Persistent<String> codeString;
+    Persistent<String> dbrefString;
+    Persistent<String> symbolString;
+    Persistent<String> doubleString;
+    Persistent<String> timestampString;
+    Persistent<String> minKeyString;
+    Persistent<String> maxKeyString;
+    
+    // Equality speed up comparision objects
+    Persistent<String> _bsontypeString;
         
     // Decode function
     static Handle<Value> decodeLong(char *data, uint32_t index);
