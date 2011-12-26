@@ -30,10 +30,9 @@ console.log("=== EXECUTING TEST_SHARED_OBJECTS_BSON ===");
 var bsonJS = new BSONJS();
 var bsonC = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 
-console.dir(bsonC)
-
 // Total count
 var COUNT = 10000;
+// var COUNT = 100;
 
 // Basic doc
 var doc = {
@@ -48,7 +47,7 @@ var doc = {
     double: new Double(32.33),
     code: new Code("function() {}", {}),
     code_w_scope: new Code("function() {}", {c:1}),
-    // dbref: new DBRef('collection', new ObjectID(), 'db'),
+    dbref: new DBRef('collection', new ObjectID(), 'db'),
     object: {
       a: 1,
       b: 'hello',
@@ -64,13 +63,13 @@ var doc2 = {
     timestamp:Timestamp2.fromNumber(10000),
     minKey:new MinKey2(),
     maxKey:new MaxKey2(),
-    // symbol:new Symbol2("hello"),
+    symbol:new Symbol2("hello"),
     binary:new Binary2(new Buffer('Hello world')),
     objectId: ObjectID2.createFromHexString("4ef48c19a9af58a399000001"),
     double: new Double2(32.33),
-    // code: new Code2("function() {}", {}),
-    // code_w_scope: new Code2("function() {}", {c:1}),
-    // dbref: new DBRef2('collection', new ObjectID2(), 'db'),
+    code: new Code2("function() {}", {}),
+    code_w_scope: new Code2("function() {}", {c:1}),
+    dbref: new DBRef2('collection', new ObjectID2(), 'db'),
     object: {
       a: 1,
       b: 'hello',
@@ -80,128 +79,138 @@ var doc2 = {
     }
   };
   
-// // Serialize using the js driver
-// var docBin = BSONJS.serialize(doc, false, true);
+// // Serialize using the c++ driver
+// var doc2Bin = bsonC.serialize(doc, false, true);
+// var r = bsonC.deserialize(doc2Bin);
+// console.dir(r);
 
-// Serialize using the c++ driver
-var doc2Bin = bsonC.serialize(doc, false, true);
+// Serialized document
+var docBin = BSONJS.serialize(doc, false, true);
 
-var r = bsonC.deserialize(doc2Bin);
-console.dir(r);
-// console.log(r.binary.value())
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// Serialize performance
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+console.log("----------------------------------------------------- serialize bson");
+// Some quick benchmark of using a js object vs a c++ object
+var startTimeS1 = new Date().getTime();
 
-// // --------------------------------------------------------------------------------------
-// // --------------------------------------------------------------------------------------
-// // Serialize performance
-// // --------------------------------------------------------------------------------------
-// // --------------------------------------------------------------------------------------
-// console.log("----------------------------------------------------- serialize");
-// // Some quick benchmark of using a js object vs a c++ object
-// var startTime = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   bsonC.serialize(doc, false, true);
-// }
-// 
-// console.log("serialize :: -------------------- C++ js objects = " + (new Date().getTime() - startTime));
-// 
-// var startTime = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   BSON.serialize(doc2, false, true);
-// }
-// 
-// console.log("serialize :: -------------------- C++ objects = " + (new Date().getTime() - startTime));
-// 
-// var startTime = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   BSONJS.serialize(doc, false, true);
-// }
-// 
-// console.log("serialize :: -------------------- JS objects = " + (new Date().getTime() - startTime));
+for(var i = 0; i < COUNT; i++) {
+  bsonC.serialize(doc, false, true);
+}
+
+// Calculate delta
+var deltaTimeS1 = new Date().getTime() - startTimeS1;
+console.log("C++ with js objects = " + (deltaTimeS1));
+
+var startTimeS2 = new Date().getTime();
+
+for(var i = 0; i < COUNT; i++) {
+  BSON.serialize(doc2, false, true);
+}
+
+// Calculate delta
+var deltaTimeS2 = new Date().getTime() - startTimeS2;
+console.log("C++ with c++ objects = " + (deltaTimeS2));
+
+var startTimeS3 = new Date().getTime();
+
+for(var i = 0; i < COUNT; i++) {
+  BSONJS.serialize(doc, false, true);
+}
+
+var deltaTimeS3 = new Date().getTime() - startTimeS3;
+console.log("JS with js objects = " + (deltaTimeS3));
+
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// Calculate sizes
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// Some quick benchmark of using a js object vs a c++ object
+console.log("----------------------------------------------------- calculate bson object size");
+var startTimeC1 = new Date().getTime();
+
+for(var i = 0; i < COUNT; i++) {
+  bsonC.calculateObjectSize(doc);
+}
+
+var deltaTimeC1 = new Date().getTime() - startTimeC1;
+console.log("C++ with js objects = " + (deltaTimeC1));
+
+var startTimeC2 = new Date().getTime();
+
+for(var i = 0; i < COUNT; i++) {
+  BSON.calculateObjectSize(doc2);
+}
+
+var deltaTimeC2 = new Date().getTime() - startTimeC2;
+console.log("C++ with c++ objects = " + (deltaTimeC2));
+
+var startTimeC3 = new Date().getTime();
+
+for(var i = 0; i < COUNT; i++) {
+  BSONJS.calculateObjectSize(doc);
+}
+
+var deltaTimeC3 = new Date().getTime() - startTimeC3;
+console.log("JS with js objects = " + (deltaTimeC3));
+
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// Deserialize sizes
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// Some quick benchmark of using a js object vs a c++ object
+console.log("----------------------------------------------------- deserialize bson");
+var startTimeD1 = new Date().getTime();
+
+for(var i = 0; i < COUNT; i++) {
+  bsonC.deserialize(docBin);
+}
+
+var deltaTimeD1 = new Date().getTime() - startTimeD1;
+console.log("C++ with js objects = " + (deltaTimeD1));
+
+var startTimeD2 = new Date().getTime();
+
+for(var i = 0; i < COUNT; i++) {
+  BSON.deserialize(docBin);
+}
+
+var deltaTimeD2 = new Date().getTime() - startTimeD2;
+console.log("C++ with c++ objects = " + (deltaTimeD2));
+
+var startTimeD3 = new Date().getTime();
+
+for(var i = 0; i < COUNT; i++) {
+  BSONJS.deserialize(docBin);
+}
+
+var deltaTimeD3 = new Date().getTime() - startTimeD3;
+console.log("JS with js objects = " + (deltaTimeD3));
+
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// Final totals
+// --------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// Calculate the deltas
+var total1 = (deltaTimeS1 + deltaTimeC1 + deltaTimeD1);
+var total2 = (deltaTimeS2 + deltaTimeC2 + deltaTimeD2);
+var total3 = (deltaTimeS3 + deltaTimeC3 + deltaTimeD3);
+
+// Print all the deltas
+console.log("//////////////////////////////////////////////////////////////////// FINAL NUMBERS");
+console.log("C++ parser with JS objects :: " + total1);
+console.log("C++ parser with c++ objects :: " + total2);
+console.log("JS parser with js objects :: " + total3);
+
+console.log("//////////////////////////////////////////////////////////////////// COMPARISONS");
+// Calculate difference from js version
+console.log("C++ parser with JS compared to js :: " + Math.round((((total3 - total1) / total3) * 100)) + "%");
+console.log("C++ parser with C++ compared to js :: " + Math.round((((total3 - total2) / total3) * 100)) + "%");
 
 
-
-
-
-
-
-
-// // Calculate sizes
-// var c_js_size = bsonC.calculateObjectSize(doc);
-// var js_size = BSONJS.calculateObjectSize(doc);
-// 
-// console.log("----------------------------------------------------- calculateSize");
-// console.log("c_js = " + c_js_size);
-// console.log("js = " + js_size);
-// 
-// // Some quick benchmark of using a js object vs a c++ object
-// var startTime = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   bsonC.calculateObjectSize(doc);
-// }
-// 
-// console.log("calculateObjectSize :: -------------------- C++ js objects = " + (new Date().getTime() - startTime));
-// 
-// var startTime = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   BSON.calculateObjectSize(doc2);
-// }
-// 
-// console.log("calculateObjectSize :: -------------------- C++ objects = " + (new Date().getTime() - startTime));
-// 
-// var startTime = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   BSONJS.calculateObjectSize(doc);
-// }
-// 
-// console.log("calculateObjectSize :: -------------------- JS objects = " + (new Date().getTime() - startTime));
-// 
-// 
-// // Deserialize the doc using the bson
-// var deserializedDoc = bsonC.deserialize(docBin);
-// 
-// console.log("-------------------------------------------------- deserialize")
-// console.dir(deserializedDoc)
-// 
-// console.log("-------------------------------------------------- deserialize check")
-// console.log("isLong = " + (doc.long instanceof Long));
-// console.log("isTimestamp = " + (doc.timestamp instanceof Timestamp));
-// console.log("isMinKey = " + (doc.minKey instanceof MinKey));
-// console.log("isMaxKey = " + (doc.maxKey instanceof MaxKey));
-// console.log("isSymbol = " + (doc.symbol instanceof Symbol));
-// console.log("isBinary = " + (doc.binary instanceof Binary));
-// console.log("isObjectID = " + (doc.objectId instanceof ObjectID));
-// console.log("isCode = " + (doc.code instanceof Code));
-// console.log("isCodeWScope = " + (doc.code_w_scope instanceof Code));
-// console.log("isDBRef = " + (doc.dbref instanceof DBRef));
-// 
-// // Some quick benchmark of using a js object vs a c++ object
-// var startTime = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   bsonC.deserialize(docBin);
-// }
-// 
-// console.log("-------------------- C++ js objects = " + (new Date().getTime() - startTime));
-// 
-// var startTime = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   BSON.deserialize(docBin);
-// }
-// 
-// console.log("-------------------- C++ objects = " + (new Date().getTime() - startTime));
-// 
-// var startTime = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   BSONJS.deserialize(docBin);
-// }
-// 
-// console.log("-------------------- JS objects = " + (new Date().getTime() - startTime));
 

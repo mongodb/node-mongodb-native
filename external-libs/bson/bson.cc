@@ -129,6 +129,12 @@ Handle<Value> BSON::New(const Arguments &args) {
       bson->_binaryBufferString = Persistent<String>::New(String::New("buffer"));
       bson->_doubleValueString = Persistent<String>::New(String::New("value"));
       bson->_symbolValueString = Persistent<String>::New(String::New("value"));
+      bson->_dbRefRefString = Persistent<String>::New(String::New("$ref"));
+      bson->_dbRefIdRefString = Persistent<String>::New(String::New("$id"));
+      bson->_dbRefDbRefString = Persistent<String>::New(String::New("$db"));
+      bson->_dbRefNamespaceString = Persistent<String>::New(String::New("namespace"));
+      bson->_dbRefDbString = Persistent<String>::New(String::New("db"));
+      bson->_dbRefOidString = Persistent<String>::New(String::New("oid"));
 
       // total number of found classes
       uint32_t numberOfClasses = 0;
@@ -3617,7 +3623,7 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
       // Encode the object
       obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
       obj->Set(String::New("$id"), dbref->Get(String::New("oid")));
-      if(!obj->Get(String::New("$db"))->IsNull()) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
+      if(!dbref->Get(String::New("$db"))->IsNull()) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
       // Calculate size
       object_size += BSON::calculate_object_sizeJS(bson, obj, serializeFunctions);
     } else if(bson->minKeyString->StrictEquals(constructorString) || bson->maxKeyString->Equals(constructorString)) {    
@@ -3939,7 +3945,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
     }
   } else if(value->ToObject()->Has(bson->_bsontypeString)) {
     // Handle holder
-    Local<String> constructorString = value->ToObject()->GetConstructorName();
+    Local<String> constructorString = value->ToObject()->GetConstructorName();    
     uint32_t originalIndex = index;
     // Adjust writing position for the first byte
     index = index + 1;
@@ -4139,51 +4145,20 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
         index = index + len;
         // Write \0 for string
         *(serialized_object + index) = 0x00;
-      }
-      
-      
+      }          
+    } else if(bson->dbrefString->StrictEquals(constructorString)) {
+      // Unpack the dbref
+      Local<Object> dbref = value->ToObject();
+      // Create an object containing the right namespace variables
+      Local<Object> obj = Object::New();
 
-      // // Unpack the object and encode
-      // Local<Object> obj = value->ToObject();
-      // Code *code_obj = Code::Unwrap<Code>(obj);
-      // // Keep pointer to start
-      // uint32_t first_pointer = index;
-      // // Adjust the index
-      // index = index + 4;
-      // // Write the size of the code string
-      // BSON::write_int32((serialized_object + index), strlen(code_obj->code) + 1);
-      // // Adjust the index
-      // index = index + 4;    
-      // // Write the code string
-      // memcpy((serialized_object + index), code_obj->code, strlen(code_obj->code));
-      // *(serialized_object + index + strlen(code_obj->code)) = '\0';
-      // // Adjust index
-      // index = index + strlen(code_obj->code) + 1;
-      // // Encode the scope
-      // uint32_t scope_object_size = BSON::calculate_object_size(code_obj->scope_object, serializeFunctions);
-      // // Serialize the scope object
-      // BSON::serialize((serialized_object + index), 0, Null(), code_obj->scope_object, check_key, serializeFunctions);
-      // // Adjust the index
-      // index = index + scope_object_size;
-      // // Encode the total size of the object
-      // BSON::write_int32((serialized_object + first_pointer), (index - first_pointer));
-          
-  // } else if(DBRef::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.DBRef")))) {
-  //   // Unpack the dbref
-  //   Local<Object> dbref = value->ToObject();
-  //   // Create an object containing the right namespace variables
-  //   Local<Object> obj = Object::New();
-  //   // unpack dbref to get to the bin
-  //   DBRef *db_ref_obj = DBRef::Unwrap<DBRef>(dbref);
-  //   // Unpack the reference value
-  //   Persistent<Value> oid_value = db_ref_obj->oid;
-  //   // Encode the oid to bin
-  //   obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
-  //   obj->Set(String::New("$id"), oid_value);      
-  //   // obj->Set(String::New("$db"), dbref->Get(String::New("db")));
-  //   if(db_ref_obj->db != NULL) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
-  //   // Encode the variable
-  //   index = BSON::serialize(serialized_object, index, name, obj, false, serializeFunctions);
+      // Build the new object
+      obj->Set(bson->_dbRefRefString, dbref->Get(bson->_dbRefNamespaceString));
+      obj->Set(bson->_dbRefIdRefString, dbref->Get(bson->_dbRefOidString));      
+      if(!dbref->Get(bson->_dbRefDbString)->IsNull()) obj->Set(bson->_dbRefDbRefString, dbref->Get(bson->_dbRefDbString));
+
+      // Encode the variable
+      index = BSON::serializeJS(bson, serialized_object, originalIndex, name, obj, false, serializeFunctions);
     } else if(bson->minKeyString->StrictEquals(constructorString)) {
       // Save the string at the offset provided
       *(serialized_object + originalIndex) = BSON_DATA_MIN_KEY;
