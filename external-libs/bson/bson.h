@@ -44,6 +44,7 @@ class BSON : public ObjectWrap {
     static Handle<Value> deserialize(char *data, uint32_t startIndex, bool is_array_item);
     static Handle<Value> deserializeJS(BSON *bson, char *data, uint32_t startIndex, bool is_array_item);
     static uint32_t serialize(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key, bool serializeFunctions);
+    static uint32_t serializeJS(BSON *bson, char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key, bool serializeFunctions);
 
     static char* extract_string(char *data, uint32_t offset);
     static const char* ToCString(const v8::String::Utf8Value& value);
@@ -87,6 +88,9 @@ class BSON : public ObjectWrap {
     
     // Equality speed up comparision objects
     Persistent<String> _bsontypeString;
+    Persistent<String> _longLowString;
+    Persistent<String> _longHighString;
+    Persistent<String> _objectIDidString;
         
     // Decode function
     static Handle<Value> decodeLong(char *data, uint32_t index);
