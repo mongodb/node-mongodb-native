@@ -124,6 +124,9 @@ Handle<Value> BSON::New(const Arguments &args) {
       bson->_longLowString = Persistent<String>::New(String::New("low_"));
       bson->_longHighString = Persistent<String>::New(String::New("high_"));
       bson->_objectIDidString = Persistent<String>::New(String::New("id"));
+      bson->_binaryPositionString = Persistent<String>::New(String::New("position"));
+      bson->_binarySubTypeString = Persistent<String>::New(String::New("sub_type"));
+      bson->_binaryBufferString = Persistent<String>::New(String::New("buffer"));
 
       // total number of found classes
       uint32_t numberOfClasses = 0;
@@ -3989,35 +3992,46 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       written = DecodeWrite((serialized_object + index), len, idString, BINARY);
       // Adjust the index
       index = index + 12;
+  } else if(bson->binaryString->StrictEquals(constructorString)) {
+    // Save the string at the offset provided
+    *(serialized_object + originalIndex) = BSON_DATA_BINARY;
+    
+    // Let's get the binary object
+    Local<Object> binaryObject = value->ToObject();
+    
+    // Grab the size(position of the binary)
+    uint32_t position = value->ToObject()->Get(bson->_binaryPositionString)->ToUint32()->Value();
+    // Grab the subtype
+    uint32_t subType = value->ToObject()->Get(bson->_binarySubTypeString)->ToUint32()->Value();
+    // Grab the buffer object
+    Local<Object> bufferObj = value->ToObject()->Get(bson->_binaryBufferString)->ToObject();
 
-  // } else if(Binary::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("Binary")))) {
-  //   // Save the string at the offset provided
-  //   *(serialized_object + index) = BSON_DATA_BINARY;
-  //   // Adjust writing position for the first byte
-  //   index = index + 1;
-  //   // Convert name to char*
-  //   ssize_t len = DecodeBytes(name, UTF8);
-  //   ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-  //   // Add null termiation for the string
-  //   *(serialized_object + index + len) = '\0';    
-  //   // Adjust the index
-  //   index = index + len + 1;    
-  // 
-  //   // Unpack the object and encode
-  //   Local<Object> obj = value->ToObject();
-  //   Binary *binary_obj = Binary::Unwrap<Binary>(obj);
-  //   // Let's write the content to the char* array
-  //   BSON::write_int32((serialized_object + index), binary_obj->index);
-  //   // Adjust index
-  //   index = index + 4;
-  //   // Write subtype
-  //   *(serialized_object + index)  = (char)binary_obj->sub_type;
-  //   // Adjust index
-  //   index = index + 1;
-  //   // Write binary content
-  //   memcpy((serialized_object + index), binary_obj->data, binary_obj->index);
-  //   // Adjust index.rar">_</a>
-  //   index = index + binary_obj->index;      
+    // Buffer data pointers
+    char *data;
+    uint32_t length;      
+
+    // Unpack the buffer variable
+    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+     Buffer *buffer = ObjectWrap::Unwrap<Buffer>(bufferObj);
+     data = buffer->data();
+     length = buffer->length();
+    #else
+     data = Buffer::Data(bufferObj);
+     length = Buffer::Length(bufferObj);
+    #endif
+
+    // Write the size of the buffer out
+    BSON::write_int32((serialized_object + index), position);
+    // Adjust index
+    index = index + 4;
+    // Write subtype
+    *(serialized_object + index)  = (char)subType;
+    // Adjust index
+    index = index + 1;
+    // Write binary content
+    memcpy((serialized_object + index), data, position);
+    // Adjust index.rar">_</a>
+    index = index + position;
   // } else if(DBRef::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.DBRef")))) {
   //   // Unpack the dbref
   //   Local<Object> dbref = value->ToObject();

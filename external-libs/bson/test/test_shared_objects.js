@@ -43,7 +43,7 @@ var doc = {
     minKey:new MinKey(),
     maxKey:new MaxKey(),
     // symbol:new Symbol("hello"),
-    // binary:new Binary(new Buffer(256)),
+    binary:new Binary(new Buffer('Hello world')),
     objectId: ObjectID.createFromHexString("4ef48c19a9af58a399000001"),
     // code: new Code("function() {}", {}),
     // code_w_scope: new Code("function() {}", {c:1}),
@@ -61,10 +61,10 @@ var doc2 = {
     doc:'hello', 
     long:Long2.fromNumber(100), 
     timestamp:Timestamp2.fromNumber(10000),
-    // minKey:new MinKey2(),
-    // maxKey:new MaxKey2(),
+    minKey:new MinKey2(),
+    maxKey:new MaxKey2(),
     // symbol:new Symbol2("hello"),
-    // binary:new Binary2(new Buffer(256)),
+    binary:new Binary2(new Buffer('Hello world')),
     objectId: ObjectID2.createFromHexString("4ef48c19a9af58a399000001"),
     // code: new Code2("function() {}", {}),
     // code_w_scope: new Code2("function() {}", {c:1}),
@@ -72,9 +72,9 @@ var doc2 = {
     object: {
       a: 1,
       b: 'hello',
-      // c: {
-      //   long:Long2.fromNumber(100)
-      // }
+      c: {
+        long:Long2.fromNumber(100)
+      }
     }
   };
   
@@ -84,7 +84,9 @@ var doc2 = {
 // Serialize using the c++ driver
 var doc2Bin = bsonC.serialize(doc, false, true);
 
-console.dir(bsonC.deserialize(doc2Bin));
+var r = bsonC.deserialize(doc2Bin);
+console.dir(r);
+// console.log(r.binary.value())
 
 // --------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------
