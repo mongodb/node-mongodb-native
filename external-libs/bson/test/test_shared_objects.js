@@ -42,7 +42,7 @@ var doc = {
     timestamp:Timestamp.fromNumber(10000),
     minKey:new MinKey(),
     maxKey:new MaxKey(),
-    // // symbol:new Symbol("hello"),
+    symbol:new Symbol("hello"),
     binary:new Binary(new Buffer('Hello world')),
     objectId: ObjectID.createFromHexString("4ef48c19a9af58a399000001"),
     double: new Double(32.33),

@@ -95,6 +95,7 @@ class BSON : public ObjectWrap {
     Persistent<String> _binarySubTypeString;
     Persistent<String> _binaryBufferString;
     Persistent<String> _doubleValueString;
+    Persistent<String> _symbolValueString;
         
     // Decode function
     static Handle<Value> decodeLong(char *data, uint32_t index);

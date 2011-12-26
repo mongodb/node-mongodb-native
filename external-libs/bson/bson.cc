@@ -128,6 +128,7 @@ Handle<Value> BSON::New(const Arguments &args) {
       bson->_binarySubTypeString = Persistent<String>::New(String::New("sub_type"));
       bson->_binaryBufferString = Persistent<String>::New(String::New("buffer"));
       bson->_doubleValueString = Persistent<String>::New(String::New("value"));
+      bson->_symbolValueString = Persistent<String>::New(String::New("value"));
 
       // total number of found classes
       uint32_t numberOfClasses = 0;
@@ -4045,7 +4046,44 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       // Write the double to the char array
       BSON::write_double((serialized_object + index), doubleValue->NumberValue());
       // Adjust index for double
-      index = index + 8;    
+      index = index + 8;
+    } else if(bson->symbolString->StrictEquals(constructorString)) {
+      // Save the string at the offset provided
+      *(serialized_object + originalIndex) = BSON_DATA_SYMBOL;
+      // Unpack symbol object
+      Local<Object> symbolObj = value->ToObject();
+    
+      // Grab the actual string
+      Local<String> str = symbolObj->Get(bson->_symbolValueString)->ToString();
+      // Let's fetch the int value
+      uint32_t utf8_length = str->Utf8Length();
+  
+      // If the Utf8 length is different from the string length then we
+      // have a UTF8 encoded string, otherwise write it as ascii
+      if(utf8_length != str->Length()) {
+        // Write the integer to the char *
+        BSON::write_int32((serialized_object + index), utf8_length + 1);
+        // Adjust the index
+        index = index + 4;
+        // Write string to char in utf8 format
+        str->WriteUtf8((serialized_object + index), utf8_length);
+        // Add the null termination
+        *(serialized_object + index + utf8_length) = '\0';    
+        // Adjust the index
+        index = index + utf8_length + 1;      
+      } else {
+        // Write the integer to the char *
+        BSON::write_int32((serialized_object + index), str->Length() + 1);
+        // Adjust the index
+        index = index + 4;
+        // Write string to char in utf8 format
+        written = DecodeWrite((serialized_object + index), str->Length(), str, BINARY);
+        // Add the null termination
+        *(serialized_object + index + str->Length()) = '\0';    
+        // Adjust the index
+        index = index + str->Length() + 1;      
+      }       
+          
   // } else if(DBRef::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.DBRef")))) {
   //   // Unpack the dbref
   //   Local<Object> dbref = value->ToObject();
