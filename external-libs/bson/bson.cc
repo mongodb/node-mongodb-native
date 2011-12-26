@@ -3935,21 +3935,21 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
   } else if(value->ToObject()->Has(bson->_bsontypeString)) {
     // Handle holder
     Local<String> constructorString = value->ToObject()->GetConstructorName();
+    uint32_t originalIndex = index;
+    // Adjust writing position for the first byte
+    index = index + 1;
+    // Convert name to char*
+    ssize_t len = DecodeBytes(name, UTF8);
+    ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+    // Add null termiation for the string
+    *(serialized_object + index + len) = '\0';    
+    // Adjust the index
+    index = index + len + 1;    
 
     // BSON type object, avoid non-needed checking unless we have a type
     if(bson->longString->StrictEquals(constructorString)) {
       // Save the string at the offset provided
-      *(serialized_object + index) = BSON_DATA_LONG;
-      // Adjust writing position for the first byte
-      index = index + 1;
-      // Convert name to char*
-      ssize_t len = DecodeBytes(name, UTF8);
-      ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-      // Add null termiation for the string
-      *(serialized_object + index + len) = '\0';    
-      // Adjust the index
-      index = index + len + 1;
-
+      *(serialized_object + originalIndex) = BSON_DATA_LONG;
       // Object reference
       Local<Object> longObject = value->ToObject();
 
@@ -3964,17 +3964,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       index = index + 8;      
     } else if(bson->timestampString->StrictEquals(constructorString)) {
       // Save the string at the offset provided
-      *(serialized_object + index) = BSON_DATA_TIMESTAMP;
-      // Adjust writing position for the first byte
-      index = index + 1;
-      // Convert name to char*
-      ssize_t len = DecodeBytes(name, UTF8);
-      ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-      // Add null termiation for the string
-      *(serialized_object + index + len) = '\0';    
-      // Adjust the index
-      index = index + len + 1;
-
+      *(serialized_object + originalIndex) = BSON_DATA_TIMESTAMP;
       // Object reference
       Local<Object> timestampObject = value->ToObject();
 
@@ -3989,17 +3979,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       index = index + 8;      
     } else if(bson->objectIDString->StrictEquals(constructorString)) {
       // Save the string at the offset provided
-      *(serialized_object + index) = BSON_DATA_OID;
-      // Adjust writing position for the first byte
-      index = index + 1;
-      // Convert name to char*
-      ssize_t len = DecodeBytes(name, UTF8);
-      ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-      // Add null termiation for the string
-      *(serialized_object + index + len) = '\0';    
-      // Adjust the index
-      index = index + len + 1;
-      
+      *(serialized_object + originalIndex) = BSON_DATA_OID;
       // Convert to object
       Local<Object> objectIDObject = value->ToObject();
       // Let's grab the id
@@ -4009,7 +3989,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       written = DecodeWrite((serialized_object + index), len, idString, BINARY);
       // Adjust the index
       index = index + 12;
-    }
+
   // } else if(Binary::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("Binary")))) {
   //   // Save the string at the offset provided
   //   *(serialized_object + index) = BSON_DATA_BINARY;
@@ -4166,30 +4146,12 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
   //     // Adjust the index
   //     index = index + str->Length() + 1;      
   //   }       
-  // } else if(MinKey::HasInstance(value)) {
-  //   // Save the string at the offset provided
-  //   *(serialized_object + index) = BSON_DATA_MIN_KEY;
-  //   // Adjust writing position for the first byte
-  //   index = index + 1;
-  //   // Convert name to char*
-  //   ssize_t len = DecodeBytes(name, UTF8);
-  //   ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-  //   // Add null termiation for the string
-  //   *(serialized_object + index + len) = '\0';    
-  //   // Adjust the index
-  //   index = index + len + 1;    
-  // } else if(MaxKey::HasInstance(value)) {
-  //   // Save the string at the offset provided
-  //   *(serialized_object + index) = BSON_DATA_MAX_KEY;
-  //   // Adjust writing position for the first byte
-  //   index = index + 1;
-  //   // Convert name to char*
-  //   ssize_t len = DecodeBytes(name, UTF8);
-  //   ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-  //   // Add null termiation for the string
-  //   *(serialized_object + index + len) = '\0';    
-  //   // Adjust the index
-  //   index = index + len + 1;    
+    } else if(bson->minKeyString->StrictEquals(constructorString)) {
+      // Save the string at the offset provided
+      *(serialized_object + originalIndex) = BSON_DATA_MIN_KEY;
+    } else if(bson->maxKeyString->StrictEquals(constructorString)) {
+      *(serialized_object + originalIndex) = BSON_DATA_MAX_KEY;
+    }
   } else if(value->IsObject()) {
     if(!name->IsNull()) {
       // Save the string at the offset provided
