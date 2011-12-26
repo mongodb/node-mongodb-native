@@ -42,9 +42,10 @@ var doc = {
     timestamp:Timestamp.fromNumber(10000),
     minKey:new MinKey(),
     maxKey:new MaxKey(),
-    // symbol:new Symbol("hello"),
+    // // symbol:new Symbol("hello"),
     binary:new Binary(new Buffer('Hello world')),
     objectId: ObjectID.createFromHexString("4ef48c19a9af58a399000001"),
+    double: new Double(32.33),
     // code: new Code("function() {}", {}),
     // code_w_scope: new Code("function() {}", {c:1}),
     // dbref: new DBRef('collection', new ObjectID(), 'db'),
@@ -66,6 +67,7 @@ var doc2 = {
     // symbol:new Symbol2("hello"),
     binary:new Binary2(new Buffer('Hello world')),
     objectId: ObjectID2.createFromHexString("4ef48c19a9af58a399000001"),
+    double: new Double2(32.33),
     // code: new Code2("function() {}", {}),
     // code_w_scope: new Code2("function() {}", {c:1}),
     // dbref: new DBRef2('collection', new ObjectID2(), 'db'),
@@ -88,36 +90,36 @@ var r = bsonC.deserialize(doc2Bin);
 console.dir(r);
 // console.log(r.binary.value())
 
-// --------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------
-// Serialize performance
-// --------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------
-console.log("----------------------------------------------------- serialize");
-// Some quick benchmark of using a js object vs a c++ object
-var startTime = new Date().getTime();
-
-for(var i = 0; i < COUNT; i++) {
-  bsonC.serialize(doc, false, true);
-}
-
-console.log("serialize :: -------------------- C++ js objects = " + (new Date().getTime() - startTime));
-
-var startTime = new Date().getTime();
-
-for(var i = 0; i < COUNT; i++) {
-  BSON.serialize(doc2, false, true);
-}
-
-console.log("serialize :: -------------------- C++ objects = " + (new Date().getTime() - startTime));
-
-var startTime = new Date().getTime();
-
-for(var i = 0; i < COUNT; i++) {
-  BSONJS.serialize(doc, false, true);
-}
-
-console.log("serialize :: -------------------- JS objects = " + (new Date().getTime() - startTime));
+// // --------------------------------------------------------------------------------------
+// // --------------------------------------------------------------------------------------
+// // Serialize performance
+// // --------------------------------------------------------------------------------------
+// // --------------------------------------------------------------------------------------
+// console.log("----------------------------------------------------- serialize");
+// // Some quick benchmark of using a js object vs a c++ object
+// var startTime = new Date().getTime();
+// 
+// for(var i = 0; i < COUNT; i++) {
+//   bsonC.serialize(doc, false, true);
+// }
+// 
+// console.log("serialize :: -------------------- C++ js objects = " + (new Date().getTime() - startTime));
+// 
+// var startTime = new Date().getTime();
+// 
+// for(var i = 0; i < COUNT; i++) {
+//   BSON.serialize(doc2, false, true);
+// }
+// 
+// console.log("serialize :: -------------------- C++ objects = " + (new Date().getTime() - startTime));
+// 
+// var startTime = new Date().getTime();
+// 
+// for(var i = 0; i < COUNT; i++) {
+//   BSONJS.serialize(doc, false, true);
+// }
+// 
+// console.log("serialize :: -------------------- JS objects = " + (new Date().getTime() - startTime));
 
 
 

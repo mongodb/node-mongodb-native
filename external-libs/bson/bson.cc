@@ -127,6 +127,7 @@ Handle<Value> BSON::New(const Arguments &args) {
       bson->_binaryPositionString = Persistent<String>::New(String::New("position"));
       bson->_binarySubTypeString = Persistent<String>::New(String::New("sub_type"));
       bson->_binaryBufferString = Persistent<String>::New(String::New("buffer"));
+      bson->_doubleValueString = Persistent<String>::New(String::New("value"));
 
       // total number of found classes
       uint32_t numberOfClasses = 0;
@@ -3992,46 +3993,59 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       written = DecodeWrite((serialized_object + index), len, idString, BINARY);
       // Adjust the index
       index = index + 12;
-  } else if(bson->binaryString->StrictEquals(constructorString)) {
-    // Save the string at the offset provided
-    *(serialized_object + originalIndex) = BSON_DATA_BINARY;
+    } else if(bson->binaryString->StrictEquals(constructorString)) {
+      // Save the string at the offset provided
+      *(serialized_object + originalIndex) = BSON_DATA_BINARY;
     
-    // Let's get the binary object
-    Local<Object> binaryObject = value->ToObject();
+      // Let's get the binary object
+      Local<Object> binaryObject = value->ToObject();
     
-    // Grab the size(position of the binary)
-    uint32_t position = value->ToObject()->Get(bson->_binaryPositionString)->ToUint32()->Value();
-    // Grab the subtype
-    uint32_t subType = value->ToObject()->Get(bson->_binarySubTypeString)->ToUint32()->Value();
-    // Grab the buffer object
-    Local<Object> bufferObj = value->ToObject()->Get(bson->_binaryBufferString)->ToObject();
+      // Grab the size(position of the binary)
+      uint32_t position = value->ToObject()->Get(bson->_binaryPositionString)->ToUint32()->Value();
+      // Grab the subtype
+      uint32_t subType = value->ToObject()->Get(bson->_binarySubTypeString)->ToUint32()->Value();
+      // Grab the buffer object
+      Local<Object> bufferObj = value->ToObject()->Get(bson->_binaryBufferString)->ToObject();
 
-    // Buffer data pointers
-    char *data;
-    uint32_t length;      
+      // Buffer data pointers
+      char *data;
+      uint32_t length;      
 
-    // Unpack the buffer variable
-    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
-     Buffer *buffer = ObjectWrap::Unwrap<Buffer>(bufferObj);
-     data = buffer->data();
-     length = buffer->length();
-    #else
-     data = Buffer::Data(bufferObj);
-     length = Buffer::Length(bufferObj);
-    #endif
+      // Unpack the buffer variable
+      #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+       Buffer *buffer = ObjectWrap::Unwrap<Buffer>(bufferObj);
+       data = buffer->data();
+       length = buffer->length();
+      #else
+       data = Buffer::Data(bufferObj);
+       length = Buffer::Length(bufferObj);
+      #endif
 
-    // Write the size of the buffer out
-    BSON::write_int32((serialized_object + index), position);
-    // Adjust index
-    index = index + 4;
-    // Write subtype
-    *(serialized_object + index)  = (char)subType;
-    // Adjust index
-    index = index + 1;
-    // Write binary content
-    memcpy((serialized_object + index), data, position);
-    // Adjust index.rar">_</a>
-    index = index + position;
+      // Write the size of the buffer out
+      BSON::write_int32((serialized_object + index), position);
+      // Adjust index
+      index = index + 4;
+      // Write subtype
+      *(serialized_object + index)  = (char)subType;
+      // Adjust index
+      index = index + 1;
+      // Write binary content
+      memcpy((serialized_object + index), data, position);
+      // Adjust index.rar">_</a>
+      index = index + position;
+    } else if(bson->doubleString->StrictEquals(constructorString)) {
+      // Save the string at the offset provided
+      *(serialized_object + originalIndex) = BSON_DATA_NUMBER;
+
+      // Unpack the double
+      Local<Object> doubleObject = value->ToObject();
+    
+      // Fetch the double value
+      Local<Number> doubleValue = doubleObject->Get(bson->_doubleValueString)->ToNumber();
+      // Write the double to the char array
+      BSON::write_double((serialized_object + index), doubleValue->NumberValue());
+      // Adjust index for double
+      index = index + 8;    
   // } else if(DBRef::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.DBRef")))) {
   //   // Unpack the dbref
   //   Local<Object> dbref = value->ToObject();
@@ -4085,33 +4099,6 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
   //   index = index + scope_object_size;
   //   // Encode the total size of the object
   //   BSON::write_int32((serialized_object + first_pointer), (index - first_pointer));
-  // } else if(Double::HasInstance(value)) {
-  //   // printf("=================================================================== serialize double\n");
-  //   // Save the string at the offset provided
-  //   *(serialized_object + index) = BSON_DATA_NUMBER;
-  //   // Adjust writing position for the first byte
-  //   index = index + 1;
-  //   // Convert name to char*
-  //   ssize_t len = DecodeBytes(name, UTF8);
-  //   ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-  //   // Add null termiation for the string
-  //   *(serialized_object + index + len) = '\0';    
-  //   // Adjust the index
-  //   index = index + len + 1;    
-  // 
-  //   // Unpack the double
-  //   Local<Object> doubleHObject = value->ToObject();
-  //   Double *double_obj = Double::Unwrap<Double>(doubleHObject);
-  //   
-  //   // Write the value out
-  //   Local<Number> number = double_obj->value->ToNumber();
-  //   // Get the values
-  //   double d_number = number->NumberValue();
-  //   
-  //   // Write the double to the char array
-  //   BSON::write_double((serialized_object + index), d_number);
-  //   // Adjust index for double
-  //   index = index + 8;    
   // } else if(Symbol::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Symbol")))) {
   //   // Unpack the symbol
   //   Local<Object> symbol = value->ToObject();
