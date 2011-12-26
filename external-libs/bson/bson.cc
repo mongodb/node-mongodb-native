@@ -4083,6 +4083,90 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
         // Adjust the index
         index = index + str->Length() + 1;      
       }       
+    } else if(bson->codeString->StrictEquals(constructorString)) {
+      // Unpack the object and encode
+      Local<Object> obj = value->ToObject();
+      // Get the function
+      Local<String> function = obj->Get(String::New("code"))->ToString();
+      // Get the scope object
+      Local<Object> scope = obj->Get(String::New("scope"))->ToObject();
+
+      // Set the right type if we have a scope or not
+      if(scope->GetPropertyNames()->Length() > 0) {
+        // Set basic data code object with scope object
+        *(serialized_object + originalIndex) = BSON_DATA_CODE_W_SCOPE;        
+
+        // Calculate the size of the whole object
+        uint32_t scopeSize = BSON::calculate_object_sizeJS(bson, scope, false);
+        // Decode the function length
+        ssize_t len = DecodeBytes(function, UTF8);
+        // Calculate total size
+        uint32_t size = len + 1 + 4 + scopeSize;
+        
+        // Write the total size
+        BSON::write_int32((serialized_object + index), size);
+        // Adjust the index
+        index = index + 4;
+        
+        // Write the function size
+        BSON::write_int32((serialized_object + index), len);
+        // Adjust the index
+        index = index + 4;
+
+        // Write the data into the serialization stream
+        ssize_t written = DecodeWrite((serialized_object + index), len, function, UTF8);      
+        // Adjust the index with the length of the function
+        index = index + len;
+        // Write \0 for string
+        *(serialized_object + index) = 0x00;
+        
+        // Write the scope object
+        BSON::serializeJS(bson, (serialized_object + index), 0, Null(), scope, check_key, serializeFunctions);
+        // Adjust the index
+        index = index + scopeSize;
+      } else {
+        // Set basic data code object
+        *(serialized_object + originalIndex) = BSON_DATA_CODE;                
+        // Decode the function
+        ssize_t len = DecodeBytes(function, UTF8);
+        // Write the size of the code string
+        BSON::write_int32((serialized_object + index), len);
+        // Adjust the index
+        index = index + 4;    
+        // Write the data into the serialization stream
+        ssize_t written = DecodeWrite((serialized_object + index), len, function, UTF8);      
+        // Adjust the index with the length of the function
+        index = index + len;
+        // Write \0 for string
+        *(serialized_object + index) = 0x00;
+      }
+      
+      
+
+      // // Unpack the object and encode
+      // Local<Object> obj = value->ToObject();
+      // Code *code_obj = Code::Unwrap<Code>(obj);
+      // // Keep pointer to start
+      // uint32_t first_pointer = index;
+      // // Adjust the index
+      // index = index + 4;
+      // // Write the size of the code string
+      // BSON::write_int32((serialized_object + index), strlen(code_obj->code) + 1);
+      // // Adjust the index
+      // index = index + 4;    
+      // // Write the code string
+      // memcpy((serialized_object + index), code_obj->code, strlen(code_obj->code));
+      // *(serialized_object + index + strlen(code_obj->code)) = '\0';
+      // // Adjust index
+      // index = index + strlen(code_obj->code) + 1;
+      // // Encode the scope
+      // uint32_t scope_object_size = BSON::calculate_object_size(code_obj->scope_object, serializeFunctions);
+      // // Serialize the scope object
+      // BSON::serialize((serialized_object + index), 0, Null(), code_obj->scope_object, check_key, serializeFunctions);
+      // // Adjust the index
+      // index = index + scope_object_size;
+      // // Encode the total size of the object
+      // BSON::write_int32((serialized_object + first_pointer), (index - first_pointer));
           
   // } else if(DBRef::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.DBRef")))) {
   //   // Unpack the dbref
@@ -4100,91 +4184,6 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
   //   if(db_ref_obj->db != NULL) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
   //   // Encode the variable
   //   index = BSON::serialize(serialized_object, index, name, obj, false, serializeFunctions);
-  // } else if(Code::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Code")))) {
-  //   // Save the string at the offset provided
-  //   *(serialized_object + index) = BSON_DATA_CODE_W_SCOPE;
-  //   // Adjust writing position for the first byte
-  //   index = index + 1;
-  //   // Convert name to char*
-  //   ssize_t len = DecodeBytes(name, UTF8);
-  //   ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-  //   // Add null termiation for the string
-  //   *(serialized_object + index + len) = '\0';    
-  //   // Adjust the index
-  //   index = index + len + 1;    
-  // 
-  //   // Unpack the object and encode
-  //   Local<Object> obj = value->ToObject();
-  //   Code *code_obj = Code::Unwrap<Code>(obj);
-  //   // Keep pointer to start
-  //   uint32_t first_pointer = index;
-  //   // Adjust the index
-  //   index = index + 4;
-  //   // Write the size of the code string
-  //   BSON::write_int32((serialized_object + index), strlen(code_obj->code) + 1);
-  //   // Adjust the index
-  //   index = index + 4;    
-  //   // Write the code string
-  //   memcpy((serialized_object + index), code_obj->code, strlen(code_obj->code));
-  //   *(serialized_object + index + strlen(code_obj->code)) = '\0';
-  //   // Adjust index
-  //   index = index + strlen(code_obj->code) + 1;
-  //   // Encode the scope
-  //   uint32_t scope_object_size = BSON::calculate_object_size(code_obj->scope_object, serializeFunctions);
-  //   // Serialize the scope object
-  //   BSON::serialize((serialized_object + index), 0, Null(), code_obj->scope_object, check_key, serializeFunctions);
-  //   // Adjust the index
-  //   index = index + scope_object_size;
-  //   // Encode the total size of the object
-  //   BSON::write_int32((serialized_object + first_pointer), (index - first_pointer));
-  // } else if(Symbol::HasInstance(value)) { // || (value->IsObject() && value->ToObject()->GetConstructorName()->Equals(String::New("exports.Symbol")))) {
-  //   // Unpack the symbol
-  //   Local<Object> symbol = value->ToObject();
-  //   Symbol *symbol_obj = Symbol::Unwrap<Symbol>(symbol);
-  //   // Let's get the length
-  //   value = symbol_obj->value->ToString();    
-  //   // Save the string at the offset provided
-  //   *(serialized_object + index) = BSON_DATA_SYMBOL;
-  //   // Adjust writing position for the first byte
-  //   index = index + 1;
-  //   // Convert name to char*
-  //   ssize_t len = DecodeBytes(name, UTF8);
-  //   ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-  //   // Add null termiation for the string
-  //   *(serialized_object + index + len) = '\0';    
-  //   // Adjust the index
-  //   index = index + len + 1;        
-  //   
-  //   // Write the actual string into the char array
-  //   Local<String> str = value->ToString();
-  //   // Let's fetch the int value
-  //   uint32_t utf8_length = str->Utf8Length();
-  // 
-  //   // If the Utf8 length is different from the string length then we
-  //   // have a UTF8 encoded string, otherwise write it as ascii
-  //   if(utf8_length != str->Length()) {
-  //     // Write the integer to the char *
-  //     BSON::write_int32((serialized_object + index), utf8_length + 1);
-  //     // Adjust the index
-  //     index = index + 4;
-  //     // Write string to char in utf8 format
-  //     str->WriteUtf8((serialized_object + index), utf8_length);
-  //     // Add the null termination
-  //     *(serialized_object + index + utf8_length) = '\0';    
-  //     // Adjust the index
-  //     index = index + utf8_length + 1;      
-  //   } else {
-  //     // Write the integer to the char *
-  //     BSON::write_int32((serialized_object + index), str->Length() + 1);
-  //     // Adjust the index
-  //     index = index + 4;
-  //     // Write string to char in utf8 format
-  //     written = DecodeWrite((serialized_object + index), str->Length(), str, BINARY);
-  //     // Add the null termination
-  //     *(serialized_object + index + str->Length()) = '\0';    
-  //     // Adjust the index
-  //     index = index + str->Length() + 1;      
-  //   }       
     } else if(bson->minKeyString->StrictEquals(constructorString)) {
       // Save the string at the offset provided
       *(serialized_object + originalIndex) = BSON_DATA_MIN_KEY;

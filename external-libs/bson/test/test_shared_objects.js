@@ -46,8 +46,8 @@ var doc = {
     binary:new Binary(new Buffer('Hello world')),
     objectId: ObjectID.createFromHexString("4ef48c19a9af58a399000001"),
     double: new Double(32.33),
-    // code: new Code("function() {}", {}),
-    // code_w_scope: new Code("function() {}", {c:1}),
+    code: new Code("function() {}", {}),
+    code_w_scope: new Code("function() {}", {c:1}),
     // dbref: new DBRef('collection', new ObjectID(), 'db'),
     object: {
       a: 1,
