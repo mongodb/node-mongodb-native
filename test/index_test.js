@@ -270,6 +270,43 @@ var tests = testCase({
     });
   },
 
+  shouldCorrectlyHandleGeospatialIndexes : function(test) {
+    client.createCollection('geospatial_index_test', function(err, r) {
+      client.collection('geospatial_index_test', function(err, collection) {
+        collection.ensureIndex({loc:'2d'}, function(err, indexName) {
+          collection.insert({'loc': [-100,100]}, {safe:true}, function(err, result) {
+            test.equal(err,null);
+            collection.insert({'loc': [200,200]}, {safe:true}, function(err, result) {
+              err = err ? err : {};
+              test.equal(err.err,"point not in interval of [ -180, 180 )");
+              test.done();
+            });
+          });
+ 	});	  
+      });
+    });
+  },
+  
+  shouldCorrectlyHandleGeospatialIndexesAlteredRange : function(test) {
+    client.createCollection('geospatial_index_altered_test', function(err, r) {
+      client.collection('geospatial_index_altered_test', function(err, collection) {
+        collection.ensureIndex({loc:'2d'},{min:0,max:1024}, function(err, indexName) {
+          collection.insert({'loc': [100,100]}, {safe:true}, function(err, result) {
+            test.equal(err,null);
+            collection.insert({'loc': [200,200]}, {safe:true}, function(err, result) {
+              test.equal(err,null);
+              collection.insert({'loc': [-200,-200]}, {safe:true}, function(err, result) {
+                err = err ? err : {};
+                test.equal(err.err,"point not in interval of [ 0, 1024 )");
+                test.done();
+              });
+            });
+          });
+ 	});	  
+      });
+    });    
+  },
+
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
