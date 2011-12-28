@@ -94,10 +94,6 @@ var tests = testCase({
   // Test the auto connect functionality of the db
   shouldCorrectlyUseSameConnectionsForTwoDifferentDbs : function(test) {
     var second_test_database = new Db(MONGODB + "_2", new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
-    second_test_database.bson_deserializer = client.bson_deserializer;
-    second_test_database.bson_serializer = client.bson_serializer;
-    second_test_database.pkFactory = client.pkFactory;
-    
     // Just create second database
     second_test_database.open(function(err, second_test_database) {
       // Close second database
@@ -140,10 +136,6 @@ var tests = testCase({
   // Test the auto connect functionality of the db
   shouldCorrectlyUseSameConnectionsForTwoDifferentDbs : function(test) {
     var second_test_database = new Db(MONGODB + "_2", new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
-    second_test_database.bson_deserializer = client.bson_deserializer;
-    second_test_database.bson_serializer = client.bson_serializer;
-    second_test_database.pkFactory = client.pkFactory;
-    
     // Just create second database
     second_test_database.open(function(err, second_test_database) {
       // Close second database

@@ -69,10 +69,6 @@ var tests = testCase({
     var password = 'password';
   
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:3, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
     p_client.open(function(err, automatic_connect_client) {
       p_client.authenticate('admin', 'admin', function(err, replies) {
         test.ok(err instanceof Error);
@@ -109,10 +105,6 @@ var tests = testCase({
     var password = 'password';
   
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
     p_client.open(function(err, automatic_connect_client) {
       p_client.authenticate('admin', 'admin', function(err, replies) {
         test.ok(err instanceof Error);

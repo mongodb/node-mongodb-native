@@ -6,6 +6,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   nodeunit = require('../../deps/nodeunit'),
   gleak = require('../../tools/gleak'),
   fs = require('fs'),
+  ObjectID = require('../../lib/mongodb/bson/objectid').ObjectID,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -49,7 +50,7 @@ var tests = testCase({
   
   shouldCorrectlyWriteLargeFileStringAndReadBack : function(test) {
     var db = client;
-    var fileId = new client.bson_serializer.ObjectID();
+    var fileId = new ObjectID();
     var gridStore = new GridStore(db, fileId, "w", {root:'fs'});
     gridStore.chunkSize = 5000;
   
@@ -102,7 +103,7 @@ var tests = testCase({
   
   shouldCorrectlyWriteLargeFileBufferAndReadBack : function(test) {
     var db = client;
-    var fileId = new client.bson_serializer.ObjectID();
+    var fileId = new ObjectID();
     var gridStore = new GridStore(db, fileId, "w", {root:'fs'});
     gridStore.chunkSize = 5000;
   

@@ -6,6 +6,8 @@ var testCase = require('../deps/nodeunit').testCase,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
   gleak = require('../tools/gleak'),
+  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
+  Code = require('../lib/mongodb/bson/code').Code,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -206,7 +208,7 @@ var tests = testCase({
   
         var t = function(val){ return val+1; }
   
-        collection.mapReduce(map, reduce, {scope:{test:new client.bson_serializer.Code(t.toString())}}, function(err, collection) {
+        collection.mapReduce(map, reduce, {scope:{test:new Code(t.toString())}}, function(err, collection) {
           collection.find(function(err, cursor) {
             cursor.toArray(function(err, results) {
               test.equal(2, results[0].value)
@@ -264,8 +266,8 @@ var tests = testCase({
     client.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
       collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
         // String functions
-        var map = new client.bson_serializer.Code("function() { emit(this.user_id, 1); }");
-        var reduce = new client.bson_serializer.Code("function(k,vals) { return 1; }");
+        var map = new Code("function() { emit(this.user_id, 1); }");
+        var reduce = new Code("function(k,vals) { return 1; }");
   
         collection.mapReduce(map, reduce, function(err, collection) {
           collection.findOne({'_id':1}, function(err, result) {
@@ -284,8 +286,8 @@ var tests = testCase({
     client.createCollection('test_map_reduce_with_options', function(err, collection) {
       collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {safe:true}, function(err, r) {
         // String functions
-        var map = new client.bson_serializer.Code("function() { emit(this.user_id, 1); }");
-        var reduce = new client.bson_serializer.Code("function(k,vals) { return 1; }");
+        var map = new Code("function() { emit(this.user_id, 1); }");
+        var reduce = new Code("function(k,vals) { return 1; }");
   
         collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
           collection.count(function(err, count) {
@@ -308,8 +310,8 @@ var tests = testCase({
     client.createCollection('test_map_reduce_error', function(err, collection) {
       collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {safe:true}, function(err, r) {
         // String functions
-        var map = new client.bson_serializer.Code("function() { throw 'error'; }");
-        var reduce = new client.bson_serializer.Code("function(k,vals) { throw 'error'; }");
+        var map = new Code("function() { throw 'error'; }");
+        var reduce = new Code("function(k,vals) { throw 'error'; }");
   
         collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, r) {
           test.ok(err != null);

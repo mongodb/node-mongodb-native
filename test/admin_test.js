@@ -47,10 +47,6 @@ var tests = testCase({
 
   shouldCorrectlyCallValidateCollection : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -81,10 +77,6 @@ var tests = testCase({
   
   shouldCorrectlySetDefaultProfilingLevel : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -109,10 +101,6 @@ var tests = testCase({
   
   shouldCorrectlyChangeProfilingLevel : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {
@@ -154,10 +142,6 @@ var tests = testCase({
   
   shouldCorrectlySetAndExtractProfilingInfo : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         fs_client.collection('test', function(err, collection) {

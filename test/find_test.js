@@ -7,6 +7,9 @@ var testCase = require('../deps/nodeunit').testCase,
   nodeunit = require('../deps/nodeunit'),
   gleak = require('../tools/gleak'),
   Step = require('../deps/step/lib/step'),
+  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
+  Code = require('../lib/mongodb/bson/code').Code,
+  Long = require('../lib/mongodb/goog/math/long').Long,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -407,11 +410,11 @@ var tests = testCase({
           test.equal(3, count);
   
           // Let's test usage of the $where statement
-          collection.find({'$where':new client.bson_serializer.Code('this.a > 2')}).count(function(err, count) {
+          collection.find({'$where':new Code('this.a > 2')}).count(function(err, count) {
             test.equal(1, count);
           });
   
-          collection.find({'$where':new client.bson_serializer.Code('this.a > i', {i:1})}).count(function(err, count) {
+          collection.find({'$where':new Code('this.a > i', {i:1})}).count(function(err, count) {
             test.equal(2, count);
   
             // Let's close the db
@@ -472,13 +475,13 @@ var tests = testCase({
   shouldCorrectlyPerformFindByObjectID : function(test) {
     client.createCollection('test_find_by_oid', function(err, collection) {
       collection.save({'hello':'mike'}, {safe:true}, function(err, docs) {
-        test.ok(docs._id instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
+        test.ok(docs._id instanceof ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
   
         collection.findOne({'_id':docs._id}, function(err, doc) {
           test.equal('mike', doc.hello);
   
           var id = doc._id.toString();
-          collection.findOne({'_id':new client.bson_serializer.ObjectID(id)}, function(err, doc) {
+          collection.findOne({'_id':new ObjectID(id)}, function(err, doc) {
             test.equal('mike', doc.hello);
             // Let's close the db
             test.done();
@@ -490,13 +493,13 @@ var tests = testCase({
   
   shouldCorrectlyReturnDocumentWithOriginalStructure: function(test) {
     client.createCollection('test_find_by_oid_with_subdocs', function(err, collection) {
-      var c1 = { _id: new client.bson_serializer.ObjectID, comments: [], title: 'number 1' };
-      var c2 = { _id: new client.bson_serializer.ObjectID, comments: [], title: 'number 2' };
+      var c1 = { _id: new ObjectID, comments: [], title: 'number 1' };
+      var c2 = { _id: new ObjectID, comments: [], title: 'number 2' };
       var doc = {
           numbers: []
         , owners: []
         , comments: [c1, c2]
-        , _id: new client.bson_serializer.ObjectID
+        , _id: new ObjectID
       };
       
       collection.insert(doc, {safe:true}, function(err, docs) {
@@ -514,10 +517,6 @@ var tests = testCase({
   
   shouldCorrectlyRetrieveSingleRecord : function(test) {
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
     p_client.open(function(err, p_client) {
       client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {
         collection.insert({'a':0}, {safe:true}, function(err, r) {
@@ -538,7 +537,7 @@ var tests = testCase({
       // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
       // is the error handling of the findOne Method
       try {
-        collection.findOne({"_id":client.bson_serializer.ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {});
+        collection.findOne({"_id":ObjectID.createFromHexString('5e9bd59248305adf18ebc15703a1')}, function(err, result) {});
       } catch (err) {
         test.done();
       }
@@ -791,10 +790,6 @@ var tests = testCase({
   // Test findAndModify a document with strict mode enabled
   shouldCorrectlyFindAndModifyDocumentWithDBStrict : function(test) {
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
     p_client.open(function(err, p_client) {
       p_client.createCollection('shouldCorrectlyFindAndModifyDocumentWithDBStrict', function(err, collection) {
         // Test return old document on change
@@ -836,10 +831,6 @@ var tests = testCase({
   // Test findAndModify a document that fails in first step before safe
   shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments : function(test) {
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
     p_client.open(function(err, p_client) {
       p_client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments', function(err, collection) {
         // Test return old document on change
@@ -859,7 +850,7 @@ var tests = testCase({
   
   'Should correctly return new modified document' : function(test) {
     client.createCollection('Should_correctly_return_new_modified_document', function(err, collection) {
-      var id = new client.bson_serializer.ObjectID();
+      var id = new ObjectID();
       var doc = {_id:id, a:1, b:1, c:{a:1, b:1}};
       
       collection.insert(doc, {safe:true}, function(err, result) {
@@ -882,7 +873,7 @@ var tests = testCase({
   // Should correctly execute findAndModify that is breaking in prod
   shouldCorrectlyExecuteFindAndModify : function(test) {
     client.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
-      var self = {_id : new client.bson_serializer.ObjectID()}
+      var self = {_id : new ObjectID()}
       var _uuid = 'sddffdss'
       
       collection.findAndModify(
@@ -898,10 +889,10 @@ var tests = testCase({
   
   'Should correctly return record with 64-bit id' : function(test) {
     client.createCollection('should_correctly_return_record_with_64bit_id', function(err, collection) {
-      var _lowerId = new client.bson_serializer.ObjectID();
-      var _higherId = new client.bson_serializer.ObjectID();
-      var lowerId = new client.bson_serializer.Long.fromString('133118461172916224', 10);
-      var higherId = new client.bson_serializer.Long.fromString('133118461172916225', 10);
+      var _lowerId = new ObjectID();
+      var _higherId = new ObjectID();
+      var lowerId = new Long.fromString('133118461172916224', 10);
+      var higherId = new Long.fromString('133118461172916225', 10);
   
       var lowerDoc = {_id:_lowerId, id: lowerId};
       var higherDoc = {_id:_higherId, id: higherId};
@@ -926,7 +917,7 @@ var tests = testCase({
   
   'Should Correctly find a Document using findOne excluding _id field' : function(test) {
     client.createCollection('Should_Correctly_find_a_Document_using_findOne_excluding__id_field', function(err, collection) {
-      var doc = {_id : new client.bson_serializer.ObjectID(), a:1, c:2}
+      var doc = {_id : new ObjectID(), a:1, c:2}
       // insert doc
       collection.insert(doc, {safe:true}, function(err, result) {
         // Get one document, excluding the _id field
@@ -949,7 +940,7 @@ var tests = testCase({
   
   'Should correctly execute find and findOne queries in the same way' : function(test) {
     client.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {      
-      var doc = {_id : new client.bson_serializer.ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
+      var doc = {_id : new ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
       // insert doc
       collection.insert(doc, {safe:true}, function(err, result) {
         
@@ -967,7 +958,7 @@ var tests = testCase({
   
   'Should correctly execute find and findOne queries with selector set to null' : function(test) {
     client.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {      
-      var doc = {_id : new client.bson_serializer.ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
+      var doc = {_id : new ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
       // insert doc
       collection.insert(doc, {safe:true}, function(err, result) {
         
@@ -997,8 +988,8 @@ var tests = testCase({
     var transaction = {};
     transaction.document = {};
     transaction.document.type = "documentType";
-    transaction.document.id = new client.bson_serializer.ObjectID();    
-    transaction.transactionId = new client.bson_serializer.ObjectID();
+    transaction.document.id = new ObjectID();    
+    transaction.transactionId = new ObjectID();
     transaction.amount = 12.3333
   
     var transactions = [];
@@ -1029,10 +1020,6 @@ var tests = testCase({
   
   shouldCorrectlyExecuteMultipleFindsInParallel : function(test) {
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
-  
     p_client.open(function(err, p_client) {
       p_client.createCollection('tasks', function(err, collection) {
         var numberOfOperations = 0;
@@ -1065,24 +1052,13 @@ var tests = testCase({
     });
   },
   
-  // shouldCorrectlyCallNumberOfHandlers : function(test) {
-  //   client.createCollection('shouldCorrectlyCallNumberOfHandlers', function(err, collection) {
-  //     collection.insert({a:1}, {safe:true}, function() {});
-  //     collection.insert({a:2}, {safe:true}, function() {});
-  //     collection.insert({a:3}, {safe:true}, function() {});
-  //     collection.insert({a:4}, {safe:true}, function() {});      
-  //     test.ok(client.numberOfHandlers() > 0);
-  //     test.done();
-  //   });
-  // },
-  
   shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError : function(test) {
     client.createCollection('shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError', function(err, collection) {
       var q = { x: 1 };
-      var set = { y:2, _id: new client.bson_serializer.ObjectID() };
+      var set = { y:2, _id: new ObjectID() };
       var opts = { new: true, upsert: true };
       // Original doc
-      var doc = {_id: new client.bson_serializer.ObjectID(), x:1};
+      var doc = {_id: new ObjectID(), x:1};
   
       // Insert original doc
       collection.insert(doc, {safe:true}, function(err, result) {
@@ -1096,9 +1072,6 @@ var tests = testCase({
   
   shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad : function(test) {
     var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    p_client.bson_deserializer = client.bson_deserializer;
-    p_client.bson_serializer = client.bson_serializer;
-    p_client.pkFactory = client.pkFactory;
     var running = true;
   
     p_client.open(function(err, p_client) {
@@ -1106,7 +1079,7 @@ var tests = testCase({
       p_client.collection("collection1", function(err, collection) {
         // Wait a bit and then execute something that will throw a duplicate error
         setTimeout(function() {          
-          var id = new p_client.bson_serializer.ObjectID();
+          var id = new ObjectID();
           
           collection.insert({_id:id, a:1}, {safe:true}, function(err, result) {
             test.equal(null, err);

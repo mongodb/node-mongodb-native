@@ -6,6 +6,7 @@ var testCase = require('../deps/nodeunit').testCase,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
   gleak = require('../tools/gleak'),
+  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -72,7 +73,7 @@ var tests = testCase({
       });
   
       // Manually created id
-      var objectId = new client.bson_serializer.ObjectID(null);
+      var objectId = new ObjectID(null);
       // Insert a manually created document with generated oid
       collection.insert({"_id":objectId, name:"Donald", age:95}, {safe:true}, function(err, ids) {
         test.equal(1, ids.length);
@@ -96,10 +97,10 @@ var tests = testCase({
   },
   
   shouldCorrectlyTransformObjectIDToAndFromHexString : function(test) {
-    var objectId = new client.bson_serializer.ObjectID(null);
+    var objectId = new ObjectID(null);
     var originalHex= objectId.toHexString();
   
-    var newObjectId= new client.bson_serializer.ObjectID.createFromHexString(originalHex)
+    var newObjectId= new ObjectID.createFromHexString(originalHex)
     var newHex= newObjectId.toHexString();
     test.equal(originalHex, newHex);
     test.done();
@@ -131,7 +132,7 @@ var tests = testCase({
   
   shouldCorrectlyGenerateObjectIDFromTimestamp : function(test) {
     var timestamp = Math.floor(new Date().getTime()/1000);
-    var objectID = new client.bson_serializer.ObjectID(timestamp);
+    var objectID = new ObjectID(timestamp);
     var time2 = objectID.generationTime;
     test.equal(timestamp, time2);
     test.done();

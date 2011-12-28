@@ -60,10 +60,6 @@ var tests = testCase({
     }
         
     var automatic_connect_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50, logger:logger});
-    automatic_connect_client.bson_deserializer = client.bson_deserializer;
-    automatic_connect_client.bson_serializer = client.bson_serializer;
-    automatic_connect_client.pkFactory = client.pkFactory;
-    
     automatic_connect_client.open(function(err, automatic_connect_client) {
       automatic_connect_client.close();
       test.equal(true, loggedOutput);

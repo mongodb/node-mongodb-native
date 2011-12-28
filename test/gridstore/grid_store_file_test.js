@@ -5,6 +5,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   inspect = require('util').inspect,
   nodeunit = require('../../deps/nodeunit'),
   gleak = require('../../tools/gleak'),
+  ObjectID = require('../../lib/mongodb/bson/objectid').ObjectID,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -60,10 +61,10 @@ var tests = testCase({
               cursor.toArray(function(err, items) {
                 test.equal(1, items.length);
                 var item = items[0];
-                test.ok(item._id instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
+                test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
   
                 client.collection('fs.chunks', function(err, collection) {
-                  var id = client.bson_serializer.ObjectID.createFromHexString(item._id.toHexString());
+                  var id = ObjectID.createFromHexString(item._id.toHexString());
   
                   collection.find({'files_id':id}, function(err, cursor) {
                     cursor.toArray(function(err, items) {
@@ -92,7 +93,7 @@ var tests = testCase({
               cursor.toArray(function(err, items) {
                 test.equal(1, items.length);
                 var item = items[0];
-                test.ok(item._id instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
+                test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
   
                 client.collection('fs.chunks', function(err, collection) {
                   collection.find({'files_id':item._id}, function(err, cursor) {
@@ -324,10 +325,6 @@ var tests = testCase({
   
   shouldCorrectlyAppendToFile : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_append", "w");
@@ -412,10 +409,6 @@ var tests = testCase({
   
   shouldCorrectlySaveEmptyFile : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");

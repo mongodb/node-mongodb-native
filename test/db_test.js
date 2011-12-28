@@ -7,6 +7,9 @@ var testCase = require('../deps/nodeunit').testCase,
   nodeunit = require('../deps/nodeunit'),
   gleak = require('../tools/gleak'),
   Db = mongodb.Db,
+  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
+  DBRef = require('../lib/mongodb/bson/db_ref').DBRef,
+  Code = require('../lib/mongodb/bson/code').Code,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server;
@@ -97,10 +100,6 @@ var tests = testCase({
   // Test the auto connect functionality of the db
   shouldCorrectlyPerformAutomaticConnect : function(test) {
     var automatic_connect_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
-    automatic_connect_client.bson_deserializer = client.bson_deserializer;
-    automatic_connect_client.bson_serializer = client.bson_serializer;
-    automatic_connect_client.pkFactory = client.pkFactory;
-    
     automatic_connect_client.open(function(err, automatic_connect_client) {
       // Listener for closing event
       var closeListener = function(has_error) {
@@ -128,14 +127,14 @@ var tests = testCase({
   },
   
   shouldCorrectlyExecuteEvalFunctions : function(test) {
-    client.eval('function (x) {return x;}', [3], function(err, result) {
+    client.eval('function (x) {return x;}', [3], function(err, result) {      
       test.equal(3, result);
     });
-
+    
     client.eval('function (x) {return x;}', [3], {nolock:true}, function(err, result) {
       test.equal(3, result);
     });
-  
+      
     client.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
       // Locate the entry
       client.collection('test_eval', function(err, collection) {
@@ -144,31 +143,32 @@ var tests = testCase({
         });
       });
     });
-  
+      
     client.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
       test.equal(5, result);
     });
-  
+      
     client.eval('function () {return 5;}', function(err, result) {
       test.equal(5, result);
     });
-  
+      
     client.eval('2 + 3;', function(err, result) {
       test.equal(5, result);
     });
-  
-    client.eval(new client.bson_serializer.Code("2 + 3;"), function(err, result) {
+      
+    client.eval(new Code("2 + 3;"), function(err, result) {
       test.equal(5, result);
     });
-  
-    client.eval(new client.bson_serializer.Code("return i;", {'i':2}), function(err, result) {
+      
+    client.eval(new Code("return i;", {'i':2}), function(err, result) {
       test.equal(2, result);
     });
-  
-    client.eval(new client.bson_serializer.Code("i + 3;", {'i':2}), function(err, result) {
+      
+    client.eval(new Code("i + 3;", {'i':2}), function(err, result) {
       test.equal(5, result);
+      test.done();
     });
-  
+      
     client.eval("5 ++ 5;", function(err, result) {
       test.ok(err instanceof Error);
       test.ok(err.message != null);
@@ -185,24 +185,24 @@ var tests = testCase({
             test.equal(0, count);
   
             // Execute deref a db reference
-            client.dereference(new client.bson_serializer.DBRef("test_deref", new client.bson_serializer.ObjectID()), function(err, result) {
+            client.dereference(new DBRef("test_deref", new ObjectID()), function(err, result) {
               collection.insert({'x':'hello'}, {safe:true}, function(err, ids) {
                 collection.findOne(function(err, document) {
                   test.equal('hello', document.x);
   
-                  client.dereference(new client.bson_serializer.DBRef("test_deref", document._id), function(err, result) {
+                  client.dereference(new DBRef("test_deref", document._id), function(err, result) {
                     test.equal('hello', document.x);
   
-                    client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, result) {
+                    client.dereference(new DBRef("test_deref", 4), function(err, result) {
                       var obj = {'_id':4};
   
                       collection.insert(obj, {safe:true}, function(err, ids) {
-                        client.dereference(new client.bson_serializer.DBRef("test_deref", 4), function(err, document) {
+                        client.dereference(new DBRef("test_deref", 4), function(err, document) {
   
                           test.equal(obj['_id'], document._id);
                           collection.remove({}, {safe:true}, function(err, result) {
                             collection.insert({'x':'hello'}, {safe:true}, function(err, ids) {
-                              client.dereference(new client.bson_serializer.DBRef("test_deref", null), function(err, result) {
+                              client.dereference(new DBRef("test_deref", null), function(err, result) {
                                 test.equal(null, result);
                                 // Let's close the db
                                 test.done();
@@ -306,9 +306,6 @@ var tests = testCase({
   
   shouldCorrectlyHandleFailedConnection : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27117, {auto_reconnect: false, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;  
     fs_client.open(function(err, fs_client) {
       test.ok(err != null)
       test.done();
@@ -319,22 +316,27 @@ var tests = testCase({
     client.dropCollection('test_resave_dbref', function() {
       client.createCollection('test_resave_dbref', function(err, collection) {
         test.ifError(err);
+
         collection.insert({'name': 'parent'}, {safe : true}, function(err, objs) {
            test.ok(objs && objs.length == 1 && objs[0]._id != null);
            var parent = objs[0];
-           var child = {'name' : 'child', 'parent' : new client.bson_serializer.DBRef("test_resave_dbref",  parent._id)};
+           var child = {'name' : 'child', 'parent' : new DBRef("test_resave_dbref",  parent._id)};
+
            collection.insert(child, {safe : true}, function(err, objs) {
              test.ifError(err);
+
              collection.findOne({'name' : 'child'}, function(err, child) { //Child deserialized
                 test.ifError(err);
                 test.ok(child != null);
+
                 collection.save(child, {save : true}, function(err) {
                   test.ifError(err); //Child node with dbref resaved!
-                  collection.findOne({'parent' : new client.bson_serializer.DBRef("test_resave_dbref",  parent._id)},
+                  
+                  collection.findOne({'parent' : new DBRef("test_resave_dbref",  parent._id)},
                     function(err, child) {
-                       test.ifError(err);
-                       test.ok(child != null);//!!!! Main test point!
-                       test.done();
+                      test.ifError(err);
+                      test.ok(child != null);//!!!! Main test point!
+                      test.done();
                     })
                 });
              });

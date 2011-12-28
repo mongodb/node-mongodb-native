@@ -6,6 +6,7 @@ var testCase = require('../deps/nodeunit').testCase,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
   gleak = require('../tools/gleak'),
+  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -53,7 +54,7 @@ var tests = testCase({
           var objects = [];
           for(var i = 0; i < items.length; i++) {
             test.ok(items[i] instanceof Buffer);
-            objects.push(client.bson_deserializer.BSON.deserialize(items[i]));
+            objects.push(client.bson.deserialize(items[i]));
           }
           
           test.equal(1, objects[0].a);
@@ -63,7 +64,7 @@ var tests = testCase({
           // Execute findOne
           collection.findOne({a:1}, {raw:true}, function(err, item) {
             test.ok(item instanceof Buffer);
-            var object = client.bson_deserializer.BSON.deserialize(item);
+            var object = client.bson.deserialize(item);
             test.equal(1, object.a)            
             test.done();
           })          
@@ -79,8 +80,8 @@ var tests = testCase({
         // Let's create a raw delete command
         var queryObject = {b:2000};
         // Create raw bson buffer
-        var rawQueryObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(queryObject));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(queryObject, false, rawQueryObject, 0);    
+        var rawQueryObject = new Buffer(client.bson.calculateObjectSize(queryObject));
+        client.bson.serializeWithBufferAndIndex(queryObject, false, rawQueryObject, 0);    
   
         // Update the document and return the raw new document
         collection.remove(rawQueryObject, {safe:true}, function(err, numberOfDeleted) {
@@ -102,13 +103,13 @@ var tests = testCase({
         // Let's create a raw delete command
         var selectorObject = {b:2000};
         // Create raw bson buffer
-        var rawSelectorObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(selectorObject));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(selectorObject, false, rawSelectorObject, 0);    
+        var rawSelectorObject = new Buffer(client.bson.calculateObjectSize(selectorObject));
+        client.bson.serializeWithBufferAndIndex(selectorObject, false, rawSelectorObject, 0);    
         // Let's create a raw delete command
         var updateObject = {"$set":{c:2}};
         // Create raw bson buffer
-        var rawUpdateObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(updateObject));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(updateObject, false, rawUpdateObject, 0);    
+        var rawUpdateObject = new Buffer(client.bson.calculateObjectSize(updateObject));
+        client.bson.serializeWithBufferAndIndex(updateObject, false, rawUpdateObject, 0);    
         // Update the document and return the raw new document
         collection.update(rawSelectorObject, rawUpdateObject, {safe:true}, function(err, numberOfUpdated) {
           test.equal(1, numberOfUpdated);
@@ -118,7 +119,7 @@ var tests = testCase({
             var objects = [];
             for(var i = 0; i < items.length; i++) {
               test.ok(items[i] instanceof Buffer);
-              objects.push(client.bson_deserializer.BSON.deserialize(items[i]));
+              objects.push(client.bson.deserialize(items[i]));
             }
             
             test.equal(1, objects[0].a);
@@ -135,15 +136,15 @@ var tests = testCase({
   shouldCorreclyInsertRawDocumentAndRetrieveThem : function(test) {
     client.createCollection('shouldCorreclyInsertRawDocumentAndRetrieveThem', function(err, collection) {
       // Create serialized insert objects
-      var id = new client.bson_deserializer.ObjectID();
+      var id = new ObjectID();
       var inputObjects = [{_id:id}, {a:1}, {b:2}, {c:4}]
       var serializedObjects = [];
       
       // Serialize all object
       for(var i = 0; i < inputObjects.length; i++) {
         // Create raw bson buffer
-        var rawObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(inputObjects[i]));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(inputObjects[i], false, rawObject, 0);
+        var rawObject = new Buffer(client.bson.calculateObjectSize(inputObjects[i]));
+        client.bson.serializeWithBufferAndIndex(inputObjects[i], false, rawObject, 0);
         serializedObjects.push(rawObject);
       }
       
@@ -156,7 +157,7 @@ var tests = testCase({
           var objects = [];
           for(var i = 0; i < items.length; i++) {
             test.ok(items[i] instanceof Buffer);
-            objects.push(client.bson_deserializer.BSON.deserialize(items[i]));
+            objects.push(client.bson.deserialize(items[i]));
           }
   
           test.equal(id.toHexString(), objects[0]._id.toHexString());
@@ -177,26 +178,26 @@ var tests = testCase({
         // Let's create a raw query object
         var queryObject = {b:3};
         // Create raw bson buffer
-        var rawQueryObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(queryObject));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(queryObject, false, rawQueryObject, 0);    
+        var rawQueryObject = new Buffer(client.bson.calculateObjectSize(queryObject));
+        client.bson.serializeWithBufferAndIndex(queryObject, false, rawQueryObject, 0);    
   
         // Let's create a raw fields object
         var fieldsObject = {};
         // Create raw bson buffer
-        var rawFieldsObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(fieldsObject));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(fieldsObject, false, rawFieldsObject, 0);    
+        var rawFieldsObject = new Buffer(client.bson.calculateObjectSize(fieldsObject));
+        client.bson.serializeWithBufferAndIndex(fieldsObject, false, rawFieldsObject, 0);    
 
         collection.find(rawQueryObject, rawFieldsObject, {raw:true}).toArray(function(err, items) {
           test.equal(1, items.length);
           test.ok(items[0] instanceof Buffer);
           if(items[0] == null) console.dir(items)
-          var object = client.bson_deserializer.BSON.deserialize(items[0]);
+          var object = client.bson.deserialize(items[0]);
           test.equal(3, object.b)            
   
           collection.findOne(rawQueryObject, rawFieldsObject, {raw:true}, function(err, item) {
             test.equal(null, err);
             test.ok(item != null);
-            var object = client.bson_deserializer.BSON.deserialize(item);
+            var object = client.bson.deserialize(item);
             test.equal(3, object.b)                        
             test.done();
           });
@@ -267,26 +268,26 @@ var tests = testCase({
         // Let's create a raw query object
         var queryObject = {b:3};
         // Create raw bson buffer
-        var rawQueryObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(queryObject));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(queryObject, false, rawQueryObject, 0);    
+        var rawQueryObject = new Buffer(client.bson.calculateObjectSize(queryObject));
+        client.bson.serializeWithBufferAndIndex(queryObject, false, rawQueryObject, 0);    
   
         // Let's create a raw fields object
         var fieldsObject = {};
         // Create raw bson buffer
-        var rawFieldsObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(fieldsObject));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(fieldsObject, false, rawFieldsObject, 0);    
+        var rawFieldsObject = new Buffer(client.bson.calculateObjectSize(fieldsObject));
+        client.bson.serializeWithBufferAndIndex(fieldsObject, false, rawFieldsObject, 0);    
   
         client.collection('shouldCorrectlyPeformQueryUsingRaw', {raw:true}, function(err, collection) {
           collection.find(rawQueryObject, rawFieldsObject).toArray(function(err, items) {
             test.equal(1, items.length);
             test.ok(items[0] instanceof Buffer);
-            var object = client.bson_deserializer.BSON.deserialize(items[0]);
+            var object = client.bson.deserialize(items[0]);
             test.equal(3, object.b)            
 
             collection.findOne(rawQueryObject, rawFieldsObject, {raw:true}, function(err, item) {
               test.equal(null, err);
               test.ok(item != null);
-              var object = client.bson_deserializer.BSON.deserialize(item);
+              var object = client.bson.deserialize(item);
               test.equal(3, object.b)                        
               test.done();
             });
@@ -299,15 +300,15 @@ var tests = testCase({
   shouldCorreclyInsertRawDocumentAndRetrieveThemSettingRawAtCollectionLevel : function(test) {
     client.createCollection('shouldCorreclyInsertRawDocumentAndRetrieveThemSettingRawAtCollectionLevel', {raw:true}, function(err, collection) {
       // Create serialized insert objects
-      var id = new client.bson_deserializer.ObjectID();
+      var id = new ObjectID();
       var inputObjects = [{_id:id}, {a:1}, {b:2}, {c:4}]
       var serializedObjects = [];
       
       // Serialize all object
       for(var i = 0; i < inputObjects.length; i++) {
         // Create raw bson buffer
-        var rawObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(inputObjects[i]));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(inputObjects[i], false, rawObject, 0);
+        var rawObject = new Buffer(client.bson.calculateObjectSize(inputObjects[i]));
+        client.bson.serializeWithBufferAndIndex(inputObjects[i], false, rawObject, 0);
         serializedObjects.push(rawObject);
       }
       
@@ -320,7 +321,7 @@ var tests = testCase({
           var objects = [];
           for(var i = 0; i < items.length; i++) {
             test.ok(items[i] instanceof Buffer);
-            objects.push(client.bson_deserializer.BSON.deserialize(items[i]));
+            objects.push(client.bson.deserialize(items[i]));
           }
   
           test.equal(id.toHexString(), objects[0]._id.toHexString());
@@ -340,13 +341,13 @@ var tests = testCase({
         // Let's create a raw delete command
         var selectorObject = {b:2000};
         // Create raw bson buffer
-        var rawSelectorObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(selectorObject));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(selectorObject, false, rawSelectorObject, 0);    
+        var rawSelectorObject = new Buffer(client.bson.calculateObjectSize(selectorObject));
+        client.bson.serializeWithBufferAndIndex(selectorObject, false, rawSelectorObject, 0);    
         // Let's create a raw delete command
         var updateObject = {"$set":{c:2}};
         // Create raw bson buffer
-        var rawUpdateObject = new Buffer(client.bson_deserializer.BSON.calculateObjectSize(updateObject));
-        client.bson_deserializer.BSON.serializeWithBufferAndIndex(updateObject, false, rawUpdateObject, 0);    
+        var rawUpdateObject = new Buffer(client.bson.calculateObjectSize(updateObject));
+        client.bson.serializeWithBufferAndIndex(updateObject, false, rawUpdateObject, 0);    
         // Update the document and return the raw new document
         collection.update(rawSelectorObject, rawUpdateObject, {safe:true}, function(err, numberOfUpdated) {
           test.equal(1, numberOfUpdated);
@@ -356,7 +357,7 @@ var tests = testCase({
             var objects = [];
             for(var i = 0; i < items.length; i++) {
               test.ok(items[i] instanceof Buffer);
-              objects.push(client.bson_deserializer.BSON.deserialize(items[i]));
+              objects.push(client.bson.deserialize(items[i]));
             }
             
             test.equal(1, objects[0].a);

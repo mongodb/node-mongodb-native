@@ -650,10 +650,6 @@ var tests = testCase({
   
   shouldCorrectlyExecuteMultipleFetches : function(test) {
     var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    db.bson_deserializer = client.bson_deserializer;
-    db.bson_serializer = client.bson_serializer;
-    db.pkFactory = client.pkFactory;
-  
     // Search parameter
     var to = 'ralph'
     // Execute query

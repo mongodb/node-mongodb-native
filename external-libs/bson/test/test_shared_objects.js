@@ -89,15 +89,57 @@ var doc2 = {
 // console.dir(docBin2.length)
 // console.log(docBin2.toString('hex'))
 
-var docBin1 = BSONJS.serialize({test:undefined}, false, true);
-var docBin2 = bsonC.serialize({test:undefined}, false, true);
+var doc = { '$eval': new Code('function (x) {return x;}', {}), args: [ 3 ] };
+var doc = { '$eval': new Code('function (x) {return x;}', {}), args: [ 3 ], nolock: true };
+var doc = { '$eval': new Code('function (x) {db.test_eval.save({y:x});}', {}), args: [ 5 ] };
+var doc = { '$eval': new Code('function (x, y) {return x + y;}', {}), args: [ 2, 3 ] };
+
+// var doc = { '$eval': new Code('function () {return 5;}', {}), args: [ [Function] ] }
+// -------------------------------------------------- 002 
+// ----------------------------------------------------
+// { '$eval': { _bsontype: 'Code', code: '2 + 3;', scope: {} },
+//   args: [ [Function] ] }
+// -------------------------------------------------- 002 
+// ----------------------------------------------------
+// { '$eval': { _bsontype: 'Code', code: '2 + 3;', scope: {} },
+//   args: [ [Function] ] }
+// -------------------------------------------------- 002 
+// ----------------------------------------------------
+// { '$eval': { _bsontype: 'Code', code: 'return i;', scope: { i: 2 } },
+//   args: [ [Function] ] }
+// -------------------------------------------------- 001 
+// ----------------------------------------------------
+// { '$eval': { _bsontype: 'Code', code: 'i + 3;', scope: { i: 2 } },
+//   args: [ [Function] ] }
+// -------------------------------------------------- 001 
+// ----------------------------------------------------
+// { '$eval': { _bsontype: 'Code', code: '5 ++ 5;', scope: {} },
+//   args: [ [Function] ] }
+
+// var doc = { '$eval': new Code('function (x, y) {return x + y;}', {}), args: [ 2, 3 ]}
+var docBin1 = BSONJS.serialize(doc, false, true);
+var docBin2 = bsonC.serialize(doc, false, true);
 
 console.log("------------------------------------------------------------------------------ JS")
 console.dir(docBin1.length)
 console.log(docBin1.toString('hex'))
+// console.log(docBin1.toString('ascii'))
 console.log("------------------------------------------------------------------------------ C++")
 console.dir(docBin2.length)
 console.log(docBin2.toString('hex'))
+// console.log(docBin2.toString('ascii'))
+
+assert.equal(docBin1.toString('hex'), docBin2.toString('hex'));
+
+// var docBin1 = BSONJS.serialize({test:undefined}, false, true);
+// var docBin2 = bsonC.serialize({test:undefined}, false, true);
+// 
+// console.log("------------------------------------------------------------------------------ JS")
+// console.dir(docBin1.length)
+// console.log(docBin1.toString('hex'))
+// console.log("------------------------------------------------------------------------------ C++")
+// console.dir(docBin2.length)
+// console.log(docBin2.toString('hex'))
 
   
 // // Serialized document

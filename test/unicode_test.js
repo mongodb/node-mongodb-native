@@ -146,6 +146,10 @@ var tests = testCase({
             // finished_test({test_utf8_key_name:'ok'}); 
         collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}, function(err, cursor) { 
           cursor.toArray(function(err, items) { 
+            // console.log("---------------------------------------------------------------")
+            // console.dir(err)
+            // console.dir(items)
+            // 
             test.equal(1, items[0]['šđžčćŠĐŽČĆ']); 
             // Let's close the db 
             test.done();

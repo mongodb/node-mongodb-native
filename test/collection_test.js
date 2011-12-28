@@ -9,6 +9,8 @@ var testCase = require('../deps/nodeunit').testCase,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
+  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
+  Long = require('../lib/mongodb/goog/math/long').Long,
   Step = require("../deps/step/lib/step"),
   Server = mongodb.Server;
 
@@ -220,9 +222,6 @@ var tests = testCase({
   
   shouldEnsureStrictAccessCollection : function(test) {
     var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
-    error_client.bson_deserializer = client.bson_deserializer;
-    error_client.bson_serializer = client.bson_serializer;
-    error_client.pkFactory = client.pkFactory;  
     test.equal(true, error_client.strict);
     
     error_client.open(function(err, error_client) {
@@ -244,9 +243,6 @@ var tests = testCase({
   
   shouldPerformStrictCreateCollection : function(test) {
     var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
-    error_client.bson_deserializer = client.bson_deserializer;
-    error_client.bson_serializer = client.bson_serializer;
-    error_client.pkFactory = client.pkFactory;
     test.equal(true, error_client.strict);
   
     error_client.open(function(err, error_client) {
@@ -362,7 +358,7 @@ var tests = testCase({
     client.createCollection('test_save', function(err, collection) {
       var doc = {'hello':'world'};
       collection.save(doc, {safe:true}, function(err, docs) {
-        test.ok(docs._id instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
+        test.ok(docs._id instanceof ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
   
         collection.count(function(err, count) {
           test.equal(1, count);
@@ -406,9 +402,9 @@ var tests = testCase({
   
   shouldCorrectlySaveDocumentWithLongValue : function(test) {
     client.createCollection('test_save_long', function(err, collection) {
-      collection.insert({'x':client.bson_serializer.Long.fromNumber(9223372036854775807)}, {safe:true}, function(err, r) {
+      collection.insert({'x':Long.fromNumber(9223372036854775807)}, {safe:true}, function(err, r) {
         collection.findOne(function(err, doc) {
-          test.ok(client.bson_serializer.Long.fromNumber(9223372036854775807).equals(doc.x));
+          test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
           // Let's close the db
           test.done();
         });        
@@ -446,7 +442,7 @@ var tests = testCase({
   
   shouldCorrectlyPerformUpsert : function(test) {
     client.createCollection('test_should_correctly_do_upsert', function(err, collection) {
-      var id = new client.bson_serializer.ObjectID(null)
+      var id = new ObjectID(null)
       var doc = {_id:id, a:1};
     
       Step(
@@ -465,7 +461,7 @@ var tests = testCase({
           var self = this;
           test.equal(1, doc.a);
   
-          id = new client.bson_serializer.ObjectID(null)
+          id = new ObjectID(null)
           doc = {_id:id, a:2};
           
           collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, result) {
@@ -496,7 +492,7 @@ var tests = testCase({
   
   shouldCorrectlyUpdateWithNoDocs : function(test) {
     client.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
-      var id = new client.bson_serializer.ObjectID(null)
+      var id = new ObjectID(null)
       var doc = {_id:id, a:1};
       collection.update({"_id":id}, doc, {safe:true}, function(err, numberofupdateddocs) {
         test.equal(null, err);
@@ -563,10 +559,6 @@ var tests = testCase({
     
   shouldCorrectlySaveDocumentWithNestedArray : function(test) {
     var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    db.bson_deserializer = client.bson_deserializer;
-    db.bson_serializer = client.bson_serializer;
-    db.pkFactory = client.pkFactory;
-  
     db.open(function(err, db) {
       db.createCollection("save_error_on_save_test", function(err, collection) {      
         // Create unique index for username
@@ -595,7 +587,7 @@ var tests = testCase({
                   test.equal(null, err);    
   
                   // Update again
-                  collection.update({_id:new client.bson_serializer.ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, safe:true}, function(err, result) {
+                  collection.update({_id:new ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, safe:true}, function(err, result) {
                     test.equal(null, err);
                     test.equal(1, result);                
                     

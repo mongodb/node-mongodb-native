@@ -3572,12 +3572,7 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
     free(length_str);
   } else if(value->IsFunction()) {
     if(serializeFunctions) {
-      // Need to convert function into string
-      Local<String> functionString = value->ToString();
-      // Length of string
-      ssize_t len = DecodeBytes(functionString, UTF8);
-      // Adjust size of binary
-      object_size += len + 1 + 4;
+      object_size += value->ToString()->Utf8Length() + 4 + 1;
     }
   } else if(value->ToObject()->Has(bson->_bsontypeString)) {
     // Handle holder
@@ -3615,10 +3610,10 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
       Local<Object> dbref = value->ToObject();
       // Create an object containing the right namespace variables
       Local<Object> obj = Object::New();
-      // Encode the object
-      obj->Set(String::New("$ref"), dbref->Get(String::New("namespace")));
-      obj->Set(String::New("$id"), dbref->Get(String::New("oid")));
-      if(!dbref->Get(String::New("$db"))->IsNull()) obj->Set(String::New("$db"), dbref->Get(String::New("db")));
+      // Build the new object
+      obj->Set(bson->_dbRefRefString, dbref->Get(bson->_dbRefNamespaceString));
+      obj->Set(bson->_dbRefIdRefString, dbref->Get(bson->_dbRefOidString));      
+      if(!dbref->Get(bson->_dbRefDbString)->IsNull() && !dbref->Get(bson->_dbRefDbString)->IsUndefined()) obj->Set(bson->_dbRefDbRefString, dbref->Get(bson->_dbRefDbString));
       // Calculate size
       object_size += BSON::calculate_object_sizeJS(bson, obj, serializeFunctions);
     } else if(bson->minKeyString->StrictEquals(constructorString) || bson->maxKeyString->Equals(constructorString)) {    
@@ -3902,35 +3897,22 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       // Adjust the index
       index = index + len + 1;    
   
-      // Need to convert function into string
-      Local<String> str = value->ToString();
-      uint32_t utf8_length = str->Utf8Length();
+      // Function String
+      Local<String> function = value->ToString();
   
-      // If the Utf8 length is different from the string length then we
-      // have a UTF8 encoded string, otherwise write it as ascii
-      if(utf8_length != str->Length()) {
-        // Write the integer to the char *
-        BSON::write_int32((serialized_object + index), utf8_length + 1);
-        // Adjust the index
-        index = index + 4;
-        // Write string to char in utf8 format
-        str->WriteUtf8((serialized_object + index), utf8_length);
-        // Add the null termination
-        *(serialized_object + index + utf8_length) = '\0';    
-        // Adjust the index
-        index = index + utf8_length + 1;      
-      } else {
-        // Write the integer to the char *
-        BSON::write_int32((serialized_object + index), str->Length() + 1);
-        // Adjust the index
-        index = index + 4;
-        // Write string to char in utf8 format
-        written = DecodeWrite((serialized_object + index), str->Length(), str, BINARY);
-        // Add the null termination
-        *(serialized_object + index + str->Length()) = '\0';    
-        // Adjust the index
-        index = index + str->Length() + 1;      
-      }             
+      // Decode the function
+      len = DecodeBytes(function, BINARY);
+      // Write the size of the code string + 0 byte end of cString
+      BSON::write_int32((serialized_object + index), len + 1);
+      // Adjust the index
+      index = index + 4;    
+      
+      // Write the data into the serialization stream
+      written = DecodeWrite((serialized_object + index), len, function, BINARY);      
+      // Write \0 for string
+      *(serialized_object + index + len) = 0x00;
+      // Adjust the index
+      index = index + len + 1;  
     }
   } else if(value->ToObject()->Has(bson->_bsontypeString)) {
     // Handle holder
@@ -3942,7 +3924,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
     ssize_t len = DecodeBytes(name, UTF8);
     ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
     // Add null termiation for the string
-    *(serialized_object + index + len) = '\0';    
+    *(serialized_object + index + len) = 0x00;    
     // Adjust the index
     index = index + len + 1;    
 
@@ -4122,17 +4104,18 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
         // Set basic data code object
         *(serialized_object + originalIndex) = BSON_DATA_CODE;                
         // Decode the function
-        ssize_t len = DecodeBytes(function, UTF8);
-        // Write the size of the code string
-        BSON::write_int32((serialized_object + index), len);
+        ssize_t len = DecodeBytes(function, BINARY);
+        // Write the size of the code string + 0 byte end of cString
+        BSON::write_int32((serialized_object + index), len + 1);
         // Adjust the index
         index = index + 4;    
+        
         // Write the data into the serialization stream
-        ssize_t written = DecodeWrite((serialized_object + index), len, function, UTF8);      
+        ssize_t written = DecodeWrite((serialized_object + index), len, function, BINARY);      
         // Write \0 for string
-        *(serialized_object + len) = 0x00;
-        // Adjust the index with the length of the function
-        index = index + len;
+        *(serialized_object + index + len) = 0x00;
+        // Adjust the index
+        index = index + len + 1;
       }          
     } else if(bson->dbrefString->StrictEquals(constructorString)) {
       // Unpack the dbref
@@ -4143,7 +4126,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       // Build the new object
       obj->Set(bson->_dbRefRefString, dbref->Get(bson->_dbRefNamespaceString));
       obj->Set(bson->_dbRefIdRefString, dbref->Get(bson->_dbRefOidString));      
-      if(!dbref->Get(bson->_dbRefDbString)->IsNull()) obj->Set(bson->_dbRefDbRefString, dbref->Get(bson->_dbRefDbString));
+      if(!dbref->Get(bson->_dbRefDbString)->IsNull() && !dbref->Get(bson->_dbRefDbString)->IsUndefined()) obj->Set(bson->_dbRefDbRefString, dbref->Get(bson->_dbRefDbString));
 
       // Encode the variable
       index = BSON::serializeJS(bson, serialized_object, originalIndex, name, obj, false, serializeFunctions);

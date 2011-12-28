@@ -48,10 +48,6 @@ var tests = testCase({
   shouldCorrectlyRetrieveErrorMessagesFromServer : function(test) {    
     // Just run with one connection in the pool
     var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    error_client.bson_deserializer = client.bson_deserializer;
-    error_client.bson_serializer = client.bson_serializer;
-    error_client.pkFactory = client.pkFactory;
-  
     // Open the db
     error_client.open(function(err, error_client) {
       error_client.resetErrorHistory(function() {
@@ -116,10 +112,6 @@ var tests = testCase({
   shouldCorrectlyExecuteLastStatus : function(test) {
     // Just run with one connection in the pool
     var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    error_client.bson_deserializer = client.bson_deserializer;
-    error_client.bson_serializer = client.bson_serializer;
-    error_client.pkFactory = client.pkFactory;
-  
     // Open the db
     error_client.open(function(err, client) {
       client.createCollection('test_last_status', function(err, collection) {
@@ -193,10 +185,6 @@ var tests = testCase({
   // Test the error reporting functionality
   shouldFailInsertDueToUniqueIndexStrict : function(test) {
     var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    error_client.bson_deserializer = client.bson_deserializer;
-    error_client.bson_serializer = client.bson_serializer;
-    error_client.pkFactory = client.pkFactory;
-    
     error_client.open(function(err, error_client) {
       error_client.dropCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
         error_client.createCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
@@ -219,10 +207,6 @@ var tests = testCase({
   
   'safe mode should pass the disconnected error to the callback': function (test) {
     var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    error_client.bson_deserializer = client.bson_deserializer;
-    error_client.bson_serializer = client.bson_serializer;
-    error_client.pkFactory = client.pkFactory;
-  
     var name = 'test_safe_mode_when_disconnected';
     error_client.open(function(err, error_client) {
       test.ok(err == null);

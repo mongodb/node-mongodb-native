@@ -6,6 +6,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   nodeunit = require('../../deps/nodeunit'),
   gleak = require('../../tools/gleak'),
   fs = require('fs'),
+  ObjectID = require('../../lib/mongodb/bson/objectid').ObjectID,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -57,11 +58,11 @@ var tests = testCase({
             test.equal(true, result);
           })
   
-          GridStore.exist(client, new client.bson_serializer.ObjectID(), function(err, result) {
+          GridStore.exist(client, new ObjectID(), function(err, result) {
             test.equal(false, result);
           });
             
-          GridStore.exist(client, new client.bson_serializer.ObjectID(), 'another_root', function(err, result) {
+          GridStore.exist(client, new ObjectID(), 'another_root', function(err, result) {
             test.equal(false, result);
             test.done();
           });
@@ -214,10 +215,6 @@ var tests = testCase({
   
   shouldCorrectlyHandleMultipleChunkGridStore : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
@@ -273,10 +270,6 @@ var tests = testCase({
   
   shouldCorrectlyHandleUnlinkingWeirdName : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
@@ -321,10 +314,6 @@ var tests = testCase({
   
   shouldCorrectlyUnlink : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
@@ -369,10 +358,6 @@ var tests = testCase({
   
   shouldCorrectlyUnlinkAnArrayOfFiles : function(test) {
     var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    fs_client.bson_deserializer = client.bson_deserializer;
-    fs_client.bson_serializer = client.bson_serializer;
-    fs_client.pkFactory = client.pkFactory;
-  
     fs_client.open(function(err, fs_client) {
       fs_client.dropDatabase(function(err, done) {
         var gridStore = new GridStore(fs_client, "test_gs_unlink_as_array", "w");
@@ -635,7 +620,7 @@ var tests = testCase({
   },  
   
   shouldCorrectlySaveDataByObjectID : function(test) {
-    var id = new client.bson_serializer.ObjectID();
+    var id = new ObjectID();
     var gridStore = new GridStore(client, id, 'w');
   
     gridStore.open(function(err, gridStore) {
