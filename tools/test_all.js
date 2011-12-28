@@ -3,6 +3,7 @@ var nodeunit = require('../deps/nodeunit'),
   inspect = require('util').inspect,
   fs = require('fs'),
   exec = require('child_process').exec,
+  spawn = require('child_process').spawn,
   Step = require('../deps/step/lib/step'),
   ServerManager = require('../test/tools/server_manager').ServerManager,
   ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
@@ -16,9 +17,6 @@ var directories = [{dir: __dirname + "/../test", path: "/test/"},
       {dir: __dirname + "/../test/gridstore", path: "/test/gridstore/"},
       {dir: __dirname + "/../test/connection", path: "/test/connection/"},
       {dir: __dirname + "/../test/bson", path: "/test/bson/"}];
-
-// var directories = [
-//       {dir: __dirname + "/../test/bson", path: "/test/bson/"}];
 
 // Generate a list of tests
 directories.forEach(function(dirEntry) {
@@ -68,6 +66,7 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
     runner = nodeunit.reporters.junit;
     // Set up options
     options.output = './output';
+    options.junit = true;
   }
 
   // Run all tests including replicaset ones
@@ -78,21 +77,35 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
       function startSingleServer() {
         serverManager.start(true, {purgedirectories:true}, this);
       },
+
       // Run all the integration tests using the pure js bson parser
       function runPureJS() {
         options.suffix = 'pure';
-        runner.run(files, options, this);
+        var test_set_runner = spawn('node', ['./tools/test_set_runner.js', JSON.stringify(files), JSON.stringify(options)]);
+        test_set_runner.stdout.on('data', function(data) {
+          process.stdout.write(data.toString());
+        });
+        test_set_runner.stderr.on('data', function(data) {
+          process.stdout.write("err: " + data.toString());
+        });
+
+        test_set_runner.on('exit', this);        
       },
-      // Run all integration tests using the native bson parser
-      // function runNativeJS() {
-      //   process.env['TEST_NATIVE'] = 'TRUE';
-      //   options.suffix = 'native';
-      //   runner.run(files, options, this);      
-      // },
+
       // Execute all the replicaset tests
       function executeReplicaSetTests() {
-        runner.run(replicasetFiles, options, this);                
+        options.suffix = 'pure';
+        var test_set_runner = spawn('node', ['./tools/test_set_runner.js', JSON.stringify(replicasetFiles), JSON.stringify(options)]);
+        test_set_runner.stdout.on('data', function(data) {
+          process.stdout.write(data.toString());
+        });
+        test_set_runner.stderr.on('data', function(data) {
+          process.stdout.write("err: " + data.toString());
+        });
+
+        test_set_runner.on('exit', this);        
       },    
+
       function done() {
         // Kill all mongod server
         replicaSetManager.killAll(function() {
@@ -107,15 +120,35 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
       function startSingleServer() {
         serverManager.start(true, {purgedirectories:true}, this);
       },
+      
       function runPureJS() {
         options.suffix = 'pure';
-        runner.run(files, options, this);
+        var test_set_runner = spawn('node', ['./tools/test_set_runner.js', JSON.stringify(files), JSON.stringify(options)]);
+        test_set_runner.stdout.on('data', function(data) {
+          process.stdout.write(data.toString());
+        });
+        test_set_runner.stderr.on('data', function(data) {
+          process.stdout.write("err: " + data.toString());
+        });
+
+        test_set_runner.on('exit', this);                
       },
+      
       function runNativeJS() {
-        process.env['TEST_NATIVE'] = 'TRUE';
         options.suffix = 'native';
-        runner.run(files, options, this);      
+        options.native = true;
+
+        var test_set_runner = spawn('node', ['./tools/test_set_runner.js', JSON.stringify(files), JSON.stringify(options)]);
+        test_set_runner.stdout.on('data', function(data) {
+          process.stdout.write(data.toString());
+        });
+        test_set_runner.stderr.on('data', function(data) {
+          process.stdout.write("err: " + data.toString());
+        });
+
+        test_set_runner.on('exit', this);        
       },
+      
       function done() {
         replicaSetManager.killAll(function() {
           process.exit();
