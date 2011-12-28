@@ -68,9 +68,11 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   constructor_template->SetClassName(String::NewSymbol("BSON"));
   
   // Instance methods
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserialize", BSONDeserializeJS);
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "serialize", BSONSerializeJS);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "calculateObjectSize", CalculateObjectSizeJS);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "serialize", BSONSerializeJS);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "serializeWithBufferAndIndex", SerializeWithBufferAndIndexJS);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserialize", BSONDeserializeJS);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserializeStream", BSONDeserializeStreamJS);
   // NODE_SET_PROTOTYPE_METHOD(constructor_template, "toString", ToString);
   // NODE_SET_PROTOTYPE_METHOD(constructor_template, "inspect", Inspect);  
   // NODE_SET_PROTOTYPE_METHOD(constructor_template, "toHexString", ToHexString);  
@@ -3546,7 +3548,7 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
     if((flags & (1 << 2)) != 0) len++;
     // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
     object_size = object_size + len + 2;
-  } else if(value->IsNull()) {
+  } else if(value->IsNull() || value->IsUndefined()) {
   } else if(value->IsArray()) {
     // Cast to array
     Local<Array> array = Local<Array>::Cast(value->ToObject());
@@ -3744,13 +3746,11 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       // Adjust index for double
       index = index + 8;
     } else if(l_number <= BSON_INT32_MAX && l_number >= BSON_INT32_MIN) {
-      // printf("--------------------------------------------------------------- 2\n");
       // Smaller than 32 bit, write as 32 bit value
       BSON::write_int32(serialized_object + index, value->ToInt32()->Value());
       // Adjust the size of the index
       index = index + 4;
     } else if(l_number <= (2^53) && l_number >= (-2^53)) {
-      // printf("--------------------------------------------------------------- 3\n");
       // Write the double to the char array
       BSON::write_double((serialized_object + index), d_number);
       // Adjust type to be double
@@ -3758,10 +3758,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       // Adjust index for double
       index = index + 8;      
     } else {
-      // printf("--------------------------------------------------------------- 4\n");
       BSON::write_double((serialized_object + index), d_number);
-      // BSON::write_int64((serialized_object + index), d_number);
-      // BSON::write_int64((serialized_object + index), l_number);
       // Adjust type to be double
       *(serialized_object + first_pointer) = BSON_DATA_NUMBER;
       // Adjust the size of the index
@@ -3802,7 +3799,6 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
     BSON::write_int64((serialized_object + index), integer_value);
     // Adjust the index
     index = index + 8;
-  // } else if(value->IsObject() && value->ToObject()->ObjectProtoToString()->Equals(String::New("[object RegExp]"))) {
   } else if(value->IsNull() || value->IsUndefined()) {
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_NULL;
@@ -4100,7 +4096,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
         // Decode the function length
         ssize_t len = DecodeBytes(function, UTF8);
         // Calculate total size
-        uint32_t size = len + 1 + 4 + scopeSize;
+        uint32_t size = 4 + len + 1 + 4 + scopeSize;
         
         // Write the total size
         BSON::write_int32((serialized_object + index), size);
@@ -4108,17 +4104,16 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
         index = index + 4;
         
         // Write the function size
-        BSON::write_int32((serialized_object + index), len);
+        BSON::write_int32((serialized_object + index), len + 1);
         // Adjust the index
         index = index + 4;
 
         // Write the data into the serialization stream
         ssize_t written = DecodeWrite((serialized_object + index), len, function, UTF8);      
-        // Adjust the index with the length of the function
-        index = index + len;
         // Write \0 for string
-        *(serialized_object + index) = 0x00;
-        
+        *(serialized_object + index + len) = 0x00;
+        // Adjust the index with the length of the function
+        index = index + len + 1;
         // Write the scope object
         BSON::serializeJS(bson, (serialized_object + index), 0, Null(), scope, check_key, serializeFunctions);
         // Adjust the index
@@ -4134,10 +4129,10 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
         index = index + 4;    
         // Write the data into the serialization stream
         ssize_t written = DecodeWrite((serialized_object + index), len, function, UTF8);      
+        // Write \0 for string
+        *(serialized_object + len) = 0x00;
         // Adjust the index with the length of the function
         index = index + len;
-        // Write \0 for string
-        *(serialized_object + index) = 0x00;
       }          
     } else if(bson->dbrefString->StrictEquals(constructorString)) {
       // Unpack the dbref
@@ -4218,6 +4213,148 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
   }
   
   return index;
+}
+
+Handle<Value> BSON::SerializeWithBufferAndIndexJS(const Arguments &args) {
+  HandleScope scope;  
+
+  //BSON.serializeWithBufferAndIndex = function serializeWithBufferAndIndex(object, checkKeys, buffer, index) {
+  // Ensure we have the correct values
+  if(args.Length() > 5) return VException("Four or five parameters required [object, boolean, Buffer, int] or [object, boolean, Buffer, int, boolean]");
+  if(args.Length() == 4 && !args[0]->IsObject() && !args[1]->IsBoolean() && !Buffer::HasInstance(args[2]) && !args[3]->IsUint32()) return VException("Four parameters required [object, boolean, Buffer, int]");
+  if(args.Length() == 5 && !args[0]->IsObject() && !args[1]->IsBoolean() && !Buffer::HasInstance(args[2]) && !args[3]->IsUint32() && !args[4]->IsBoolean()) return VException("Four parameters required [object, boolean, Buffer, int, boolean]");
+
+  // Unpack the BSON parser instance
+  BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+
+  // Define pointer to data
+  char *data;
+  uint32_t length;      
+  // Unpack the object
+  Local<Object> obj = args[2]->ToObject();
+
+  // Unpack the buffer object and get pointers to structures
+  #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+    Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+    data = buffer->data();
+    length = buffer->length();
+  #else
+    data = Buffer::Data(obj);
+    length = Buffer::Length(obj);
+  #endif
+  
+  uint32_t object_size = 0;
+  // Calculate the total size of the document in binary form to ensure we only allocate memory once
+  if(args.Length() == 5) {
+    object_size = BSON::calculate_object_sizeJS(bson, args[0], args[4]->BooleanValue());    
+  } else {
+    object_size = BSON::calculate_object_sizeJS(bson, args[0], false);    
+  }
+  
+  // Unpack the index variable
+  Local<Uint32> indexObject = args[3]->ToUint32();
+  uint32_t index = indexObject->Value();
+
+  // Allocate the memory needed for the serializtion
+  char *serialized_object = (char *)malloc(object_size * sizeof(char));  
+
+  // Catch any errors
+  try {
+    // Check if we have a boolean value
+    bool check_key = false;
+    if(args.Length() >= 4 && args[1]->IsBoolean()) {
+      check_key = args[1]->BooleanValue();
+    }
+    
+    bool serializeFunctions = false;
+    if(args.Length() == 5) {
+      serializeFunctions = args[4]->BooleanValue();
+    }
+    
+    // Serialize the object
+    BSON::serializeJS(bson, serialized_object, 0, Null(), args[0], check_key, serializeFunctions);
+  } catch(char *err_msg) {
+    // Free up serialized object space
+    free(serialized_object);
+    V8::AdjustAmountOfExternalAllocatedMemory(-object_size);
+    // Throw exception with the string
+    Handle<Value> error = VException(err_msg);
+    // free error message
+    free(err_msg);
+    // Return error
+    return error;
+  }
+
+  for(int i = 0; i < object_size; i++) {
+    *(data + index + i) = *(serialized_object + i);
+  }
+  
+  return scope.Close(Uint32::New(index + object_size - 1));
+}
+
+Handle<Value> BSON::BSONDeserializeStreamJS(const Arguments &args) {
+	HandleScope scope;
+	
+	// At least 3 arguments required
+	if(args.Length() < 5)	VException("Arguments required (Buffer(data), Number(index in data), Number(number of documents to deserialize), Array(results), Number(index in the array), Object(optional))");
+	
+	// If the number of argumets equals 3
+	if(args.Length() >= 5) {
+		if(!Buffer::HasInstance(args[0])) return VException("First argument must be Buffer instance");
+		if(!args[1]->IsUint32()) return VException("Second argument must be a positive index number");
+		if(!args[2]->IsUint32()) return VException("Third argument must be a positive number of documents to deserialize");
+		if(!args[3]->IsArray()) return VException("Fourth argument must be an array the size of documents to deserialize");
+		if(!args[4]->IsUint32()) return VException("Sixth argument must be a positive index number");
+	}
+	
+	// If we have 4 arguments
+	if(args.Length() == 6 && !args[5]->IsObject()) return VException("Fifth argument must be an object with options");
+
+  // Define pointer to data
+  char *data;
+  uint32_t length;      
+  Local<Object> obj = args[0]->ToObject();
+  uint32_t numberOfDocuments = args[2]->ToUint32()->Value();
+  uint32_t index = args[1]->ToUint32()->Value();
+  uint32_t resultIndex = args[4]->ToUint32()->Value();
+
+  // Unpack the BSON parser instance
+  BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+
+  // Unpack the buffer variable
+  #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+   Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
+   data = buffer->data();
+   length = buffer->length();
+  #else
+   data = Buffer::Data(obj);
+   length = Buffer::Length(obj);
+  #endif
+
+  // // Create return Object to wrap data in
+  // Local<Object> resultObject = Object::New();
+  // // Create an array for results
+  // Local<Array> documents = Array::New(args[2]->ToUint32()->Value());
+  Local<Object> documents = args[3]->ToObject();
+  
+  for(uint32_t i = 0; i < numberOfDocuments; i++) {
+    // Decode the size of the BSON data structure
+    uint32_t size = BSON::deserialize_int32(data, index);
+    
+    // Get result
+    Handle<Value> result = BSON::deserializeJS(bson, data, index, NULL);
+    
+    // Add result to array
+    documents->Set(i + resultIndex, result);
+    
+    // Adjust the index for next pass
+    index = index + size;
+  }
+	
+	// Add objects to the result Object
+  // resultObject->Set(String::New("index"), Uint32::New(index));
+  // resultObject->Set(String::New("documents"), documents);
+	return scope.Close(Uint32::New(index));
 }
 
 // Exporting function

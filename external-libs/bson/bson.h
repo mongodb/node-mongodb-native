@@ -17,6 +17,7 @@ class BSON : public ObjectWrap {
     static Handle<Value> BSONSerialize(const Arguments &args);
     static Handle<Value> BSONDeserialize(const Arguments &args);
     static Handle<Value> BSONDeserializeStream(const Arguments &args);
+    static Handle<Value> BSONDeserializeStreamJS(const Arguments &args);
 
     // JS based objects
     static Handle<Value> BSONSerializeJS(const Arguments &args);
@@ -31,6 +32,7 @@ class BSON : public ObjectWrap {
     static Handle<Value> CalculateObjectSize(const Arguments &args);
     static Handle<Value> CalculateObjectSizeJS(const Arguments &args);
     static Handle<Value> SerializeWithBufferAndIndex(const Arguments &args);
+    static Handle<Value> SerializeWithBufferAndIndexJS(const Arguments &args);
 
   	// Experimental
     static Handle<Value> CalculateObjectSize2(const Arguments &args);
