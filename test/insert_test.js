@@ -9,6 +9,12 @@ var testCase = require('../deps/nodeunit').testCase,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Script = require('vm'),
+  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
+  Binary = require('../lib/mongodb/bson/binary').Binary,
+  Code = require('../lib/mongodb/bson/code').Code,
+  DBRef = require('../lib/mongodb/bson/db_ref').DBRef,
+  Timestamp = require('../lib/mongodb/bson/timestamp').Timestamp,
+  Long = require('../lib/mongodb/goog/math/long').Long,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
   Step = require("../deps/step/lib/step"),
@@ -90,9 +96,6 @@ var tests = testCase({
   shouldForceMongoDbServerToAssignId : function(test) {
     /// Set up server with custom pk factory
     var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), 'forceServerObjectId':true});
-    db.bson_deserializer = client.bson_deserializer;
-    db.bson_serializer = client.bson_serializer;
-  
     db.open(function(err, client) {
       client.createCollection('test_insert2', function(err, r) {
         client.collection('test_insert2', function(err, collection) {
@@ -188,7 +191,7 @@ var tests = testCase({
   
         collection.insert(docs, {safe:true}, function(err, ids) {
           ids.forEach(function(doc) {
-            test.ok(((doc['_id']) instanceof client.bson_serializer.ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
+            test.ok(((doc['_id']) instanceof ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
           });
   
           // Let's ensure we have both documents
@@ -253,9 +256,9 @@ var tests = testCase({
   shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes : function(test) {
     client.createCollection('test_all_serialization_types', function(err, collection) {
       var date = new Date();
-      var oid = new client.bson_serializer.ObjectID();
+      var oid = new ObjectID();
       var string = 'binstring'
-      var bin = new client.bson_serializer.Binary()
+      var bin = new Binary()
       for(var index = 0; index < string.length; index++) {
         bin.put(string.charAt(index))
       }
@@ -272,8 +275,8 @@ var tests = testCase({
         'regexp': /regexp/,
         'boolean': true,
         'long': date.getTime(),
-        'where': new client.bson_serializer.Code('this.a > i', {i:1}),        
-        'dbref': new client.bson_serializer.DBRef('namespace', oid, 'integration_tests_')
+        'where': new Code('this.a > i', {i:1}),        
+        'dbref': new DBRef('namespace', oid, 'integration_tests_')
       }
   
       collection.insert(motherOfAllDocuments, {safe:true}, function(err, docs) {      
@@ -308,10 +311,6 @@ var tests = testCase({
   
   shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext: function(test) {
     var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    db.bson_deserializer = client.bson_deserializer;
-    db.bson_serializer = client.bson_serializer;
-    db.pkFactory = client.pkFactory;
-  
     db.open(function(err, db) {
       //convience curried handler for functions of type 'a -> (err, result)
       function getResult(callback){
@@ -380,7 +379,16 @@ var tests = testCase({
         "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
         "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
   
-      var context = { motherOfAllDocuments : {}, mongo:client.bson_serializer, date:date};
+      var context = { 
+        motherOfAllDocuments : {}, 
+        mongo:{
+          ObjectID:ObjectID,
+          Binary:Binary,
+          Code:Code,
+          DBRef:DBRef
+        },
+        date:date};
+        
       // Execute function in context
       Script.runInNewContext(scriptCode, context, "testScript");
       // sys.puts(sys.inspect(context.motherOfAllDocuments))
@@ -420,7 +428,7 @@ var tests = testCase({
     client.createCollection('test_to_json_for_long', function(err, collection) {
       test.ok(collection instanceof Collection);
   
-      collection.insertAll([{value: client.bson_serializer.Long.fromNumber(32222432)}], {safe:true}, function(err, ids) {
+      collection.insertAll([{value: Long.fromNumber(32222432)}], {safe:true}, function(err, ids) {
         collection.findOne({}, function(err, item) {
           test.equal(32222432, item.value);          
           test.done();
@@ -431,10 +439,6 @@ var tests = testCase({
   
   shouldCorrectlyInsertAndUpdateWithNoCallback : function(test) {
     var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    db.bson_deserializer = client.bson_deserializer;
-    db.bson_serializer = client.bson_serializer;
-    db.pkFactory = client.pkFactory;
-  
     db.open(function(err, client) {
       client.createCollection('test_insert_and_update_no_callback', function(err, collection) {
         // Insert the update
@@ -459,10 +463,10 @@ var tests = testCase({
   shouldInsertAndQueryTimestamp : function(test) {
     client.createCollection('test_insert_and_query_timestamp', function(err, collection) {
       // Insert the update
-      collection.insert({i:client.bson_serializer.Timestamp.fromNumber(100), j:client.bson_serializer.Long.fromNumber(200)}, {safe:true}, function(err, r) {
+      collection.insert({i:Timestamp.fromNumber(100), j:Long.fromNumber(200)}, {safe:true}, function(err, r) {
         // Locate document
         collection.findOne({}, function(err, item) {
-          test.ok(item.i instanceof client.bson_serializer.Timestamp);
+          test.ok(item.i instanceof Timestamp);
           test.equal(100, item.i);
           test.ok(typeof item.j == "number");
           test.equal(200, item.j);
@@ -488,9 +492,7 @@ var tests = testCase({
   },
   
   shouldCorrectlySerializeDBRefToJSON : function(test) {
-    var dbref = new client.bson_serializer.DBRef("foo",
-                                                 client.bson_serializer.ObjectID.createFromHexString("fc24a04d4560531f00000000"),
-                                                 null);
+    var dbref = new DBRef("foo", ObjectID.createFromHexString("fc24a04d4560531f00000000"), null);
     JSON.stringify(dbref);
     test.done();
   },
@@ -567,7 +569,7 @@ var tests = testCase({
           test.equal(items[0].field, '1')
   
           // Generate a binary id
-          var binaryUUID = new client.bson_serializer.Binary('00000078123456781234567812345678', client.bson_serializer.BSON.BSON_BINARY_SUBTYPE_UUID);
+          var binaryUUID = new Binary('00000078123456781234567812345678', Binary.SUBTYPE_UUID);
   
           collection.insert({_id : binaryUUID, field: '2'}, {safe:true}, function(err, result) {
             collection.find({_id : binaryUUID}).toArray(function(err, items) {
@@ -583,10 +585,6 @@ var tests = testCase({
   
   shouldCorrectlyCallCallbackWithDbDriverInStrictMode : function(test) {
     var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
-    db.bson_deserializer = client.bson_deserializer;
-    db.bson_serializer = client.bson_serializer;
-    db.pkFactory = client.pkFactory;
-  
     db.open(function(err, client) {
       client.createCollection('test_insert_and_update_no_callback_strict', function(err, collection) {
         collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
@@ -606,13 +604,13 @@ var tests = testCase({
   
   shouldCorrectlyInsertDBRefWithDbNotDefined : function(test) {
     client.createCollection('shouldCorrectlyInsertDBRefWithDbNotDefined', function(err, collection) {
-      var doc = {_id: new client.bson_serializer.ObjectID()};
-      var doc2 = {_id: new client.bson_serializer.ObjectID()};
-      var doc3 = {_id: new client.bson_serializer.ObjectID()};
+      var doc = {_id: new ObjectID()};
+      var doc2 = {_id: new ObjectID()};
+      var doc3 = {_id: new ObjectID()};
       collection.insert(doc, {safe:true}, function(err, result) {
         // Create object with dbref
-        doc2.ref = new client.bson_serializer.DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id);
-        doc3.ref = new client.bson_serializer.DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id, MONGODB);
+        doc2.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id);
+        doc3.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id, MONGODB);
   
         collection.insert([doc2, doc3], {safe:true}, function(err, result) {
           // Get all items
@@ -634,15 +632,11 @@ var tests = testCase({
   
   shouldCorrectlyInsertUpdateRemoveWithNoOptions : function(test) {
     var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-    db.bson_deserializer = client.bson_deserializer;
-    db.bson_serializer = client.bson_serializer;
-    db.pkFactory = client.pkFactory;
-  
     db.open(function(err, db) {
       db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions', function(err, collection) {
-        collection.insert({a:1});//, function(err, result) {
-        collection.update({a:1}, {a:2});//, function(err, result) {
-        collection.remove({a:2});//, function(err, result) {
+        collection.insert({a:1});
+        collection.update({a:1}, {a:2});
+        collection.remove({a:2});
         
         collection.count(function(err, count) {
           test.equal(0, count);
@@ -681,7 +675,7 @@ var tests = testCase({
   
   shouldCorrectlyFailWhenNoObjectToUpdate: function(test) {
     client.createCollection('shouldCorrectlyExecuteSaveInsertUpdate', function(err, collection) {
-      collection.update({_id : new client.bson_serializer.ObjectID()}, { email : 'update' }, {safe:true},
+      collection.update({_id : new ObjectID()}, { email : 'update' }, {safe:true},
         function(err, result) {
           test.equal(0, result);
           test.done();
@@ -692,7 +686,7 @@ var tests = testCase({
   
   'Should correctly insert object and retrieve it when containing array and IsoDate' : function(test) {
     var doc = {
-     "_id" : new client.bson_serializer.ObjectID("4e886e687ff7ef5e00000162"),
+     "_id" : new ObjectID("4e886e687ff7ef5e00000162"),
      "str" : "foreign",
      "type" : 2,
      "timestamp" : ISODate("2011-10-02T14:00:08.383Z"),
@@ -716,14 +710,14 @@ var tests = testCase({
   
   'Should correctly insert object with timestamps' : function(test) {
     var doc = {
-     "_id" : new client.bson_serializer.ObjectID("4e886e687ff7ef5e00000162"),
+     "_id" : new ObjectID("4e886e687ff7ef5e00000162"),
      "str" : "foreign",
      "type" : 2,
-     "timestamp" : new client.bson_serializer.Timestamp(10000),
+     "timestamp" : new Timestamp(10000),
      "links" : [
        "http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
      ],
-     "timestamp2" : new client.bson_serializer.Timestamp(33333),
+     "timestamp2" : new Timestamp(33333),
     }    
   
     client.createCollection('Should_correctly_insert_object_with_timestamps', function(err, collection) {
@@ -758,7 +752,7 @@ var tests = testCase({
   
             // Execute a safe insert with replication to two servers
             collection.findAndModify({str:"String"}, [['a', 1]], {'$set':{'f':function() {}}}, {new:true, safe: true, serializeFunctions:true}, function(err, result) {
-              test.ok(result.f instanceof client.bson_deserializer.Code)
+              test.ok(result.f instanceof Code)
               test.done();
             })
           })
@@ -780,7 +774,7 @@ var tests = testCase({
         test.equal(null, err);
         
         collection.findOne({str : "String"}, function(err, item) {
-          test.ok(item.func instanceof client.bson_deserializer.Code);
+          test.ok(item.func instanceof Code);
           test.done();
         });
       });
@@ -820,7 +814,7 @@ var tests = testCase({
   
   'Should Correctly update two fields including a sub field' : function(test) {
     var doc = { 
-      _id: new client.bson_serializer.ObjectID(),
+      _id: new ObjectID(),
       Prop1: 'p1', 
       Prop2: 'p2', 
       More: { 

@@ -51,13 +51,6 @@ const uint32_t BSON_DATA_MAX_KEY = 0x7f;
 const int32_t BSON_INT32_MAX = (int32_t)2147483647L;
 const int32_t BSON_INT32_MIN = (int32_t)(-1) * 2147483648L;
 
-// BSON BINARY DATA SUBTYPES
-const uint32_t BSON_BINARY_SUBTYPE_FUNCTION = 1;
-const uint32_t BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;
-const uint32_t BSON_BINARY_SUBTYPE_UUID = 3;
-const uint32_t BSON_BINARY_SUBTYPE_MD5 = 4;
-const uint32_t BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
-
 static Handle<Value> VException(const char *msg) {
     HandleScope scope;
     return ThrowException(Exception::Error(String::New(msg)));
