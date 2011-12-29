@@ -1,11 +1,15 @@
 var bson = require('./bson');
 exports.BSON = bson.BSON;
-exports.Long = bson.Long;
-exports.ObjectID = bson.ObjectID;
-exports.DBRef = bson.DBRef;
-exports.Code = bson.Code;
-exports.Timestamp = bson.Timestamp;
-exports.Binary = bson.Binary;
+exports.Long = require('../../lib/mongodb/goog/math/long').Long;
+exports.ObjectID = require('../../lib/mongodb/bson/objectid').ObjectID;
+exports.DBRef = require('../../lib/mongodb/bson/db_ref').DBRef;
+exports.Code = require('../../lib/mongodb/bson/code').Code;
+exports.Timestamp = require('../../lib/mongodb/bson/timestamp').Timestamp;
+exports.Binary = require('../../lib/mongodb/bson/binary').Binary;
+exports.Double = require('../../lib/mongodb/bson/double').Double;
+exports.MaxKey = require('../../lib/mongodb/bson/max_key').MaxKey;
+exports.MinKey = require('../../lib/mongodb/bson/min_key').MinKey;
+exports.Symbol = require('../../lib/mongodb/bson/symbol').Symbol;
 
 // Just add constants tot he Native BSON parser
 exports.BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;

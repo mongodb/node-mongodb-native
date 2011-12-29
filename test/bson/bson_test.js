@@ -603,7 +603,7 @@ var tests = testCase({
   },
   
   'Should Correclty Serialize and Deserialize a Code object'  : function(test) {
-    var doc = {'doc': {'doc2': new BSONSE.Code('this.a > i', {i:1})}};
+    var doc = {'doc': {'doc2': new Code('this.a > i', {i:1})}};
     var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
   
     var serialized_data2 = new Buffer(new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).calculateObjectSize(doc));
@@ -723,7 +723,7 @@ var tests = testCase({
     var date = new Date();
     var oid = new ObjectID();
     var string = 'binstring'
-    var bin = new BSONSE.Binary()
+    var bin = new Binary()
     for(var index = 0; index < string.length; index++) {
       bin.put(string.charAt(index))
     }
@@ -740,14 +740,14 @@ var tests = testCase({
       'regexp': /regexp/,
       'boolean': true,
       'long': date.getTime(),
-      'where': new BSONSE.Code('this.a > i', {i:1}),
-      'dbref': new BSONSE.DBRef('namespace', oid, 'integration_tests_')
+      'where': new Code('this.a > i', {i:1}),
+      'dbref': new DBRef('namespace', oid, 'integration_tests_')
     }
   
     // Second doc
     var oid = new ObjectID.createFromHexString(oid.toHexString());
     var string = 'binstring'
-    var bin = new BSONDE.Binary()
+    var bin = new Binary()
     for(var index = 0; index < string.length; index++) {
       bin.put(string.charAt(index))
     }
@@ -764,8 +764,8 @@ var tests = testCase({
       'regexp': /regexp/,
       'boolean': true,
       'long': date.getTime(),
-      'where': new BSONDE.Code('this.a > i', {i:1}),
-      'dbref': new BSONDE.DBRef('namespace', oid, 'integration_tests_')
+      'where': new Code('this.a > i', {i:1}),
+      'dbref': new DBRef('namespace', oid, 'integration_tests_')
     }
   
     var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
@@ -817,10 +817,10 @@ var tests = testCase({
     var oid2 = new ObjectID();
   
     // JS doc
-    var doc = { dbref2: new BSONSE.DBRef('namespace', oid1, 'integration_tests_'),
+    var doc = { dbref2: new DBRef('namespace', oid1, 'integration_tests_'),
          _id: oid2 };
   
-    var doc2 = { dbref2: new BSONDE.DBRef('namespace', ObjectID.createFromHexString(oid1.toHexString()), 'integration_tests_'),
+    var doc2 = { dbref2: new DBRef('namespace', ObjectID.createFromHexString(oid1.toHexString()), 'integration_tests_'),
         _id: new ObjectID.createFromHexString(oid2.toHexString()) };
   
     var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
