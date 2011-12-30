@@ -293,10 +293,13 @@ var tests = testCase({
         collection.ensureIndex({loc:'2d'},{min:0,max:1024}, function(err, indexName) {
           collection.insert({'loc': [100,100]}, {safe:true}, function(err, result) {
             test.equal(err,null);
-            collection.insert({'loc': [-200,-200]}, {safe:true}, function(err, result) {
-              err = err ? err : {};
-              test.equal(err.err,"point not in interval of [ 0, 1024 )");
-              test.done();
+            collection.insert({'loc': [200,200]}, {safe:true}, function(err, result) {
+              test.equal(err,null);
+              collection.insert({'loc': [-200,-200]}, {safe:true}, function(err, result) {
+                err = err ? err : {};
+                test.equal(err.err,"point not in interval of [ 0, 1024 )");
+                test.done();
+              });
             });
           });
  	});	  
