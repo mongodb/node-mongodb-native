@@ -601,7 +601,7 @@ var tests = testCase({
                   test.equal(3, updated_doc.a);
                   test.equal(2, updated_doc.b);
   
-                  // // Let's upsert!
+                  // Let's upsert!
                   collection.findAndModify({'a':4}, [], {'$set':{'b':3}}, {'new': true, upsert: true}, function(err, updated_doc) {
                     test.equal(4, updated_doc.a);
                     test.equal(3, updated_doc.b);
@@ -1101,15 +1101,38 @@ var tests = testCase({
             if(running) process.nextTick(insert);
           });
         }
-        
-        // while(running) {
-        //   process.nextTick(function() {
-        //     collection.insert({a:1});
-        //   })
-        // }
       });      
     });
   },  
+  
+  shouldCorrectlyIterateOverCollection : function(test) {
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    var numberOfSteps = 0;
+  
+    // Open db connection
+    p_client.open(function(err, p_client) {
+      // Create a collection
+      p_client.createCollection('shouldCorrectlyIterateOverCollection', function(err, collection) {
+        for(var i = 0; i < 1000; i++) {
+          collection.insert({a:1, b:2, c:{d:3, f:'sfdsffffffffffffffffffffffffffffff'}});
+        }      
+        
+        collection.find({}, {}, function(err,cursor) {
+           cursor.count(function(err,count) {
+             cursor.each(function(err, obj) {
+               if (obj == null) {
+                 p_client.close();
+                 test.equal(1000, numberOfSteps);
+                 test.done();
+               } else {
+                 numberOfSteps = numberOfSteps + 1;
+               }               
+             });
+           });
+        });
+      });    
+    });
+  },
   
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
