@@ -58,11 +58,11 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   constructor_template->SetClassName(String::NewSymbol("BSON"));
   
   // Instance methods
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "calculateObjectSize", CalculateObjectSizeJS);
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "serialize", BSONSerializeJS);
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "serializeWithBufferAndIndex", SerializeWithBufferAndIndexJS);
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserialize", BSONDeserializeJS);
-  NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserializeStream", BSONDeserializeStreamJS);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "calculateObjectSize", CalculateObjectSize);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "serialize", BSONSerialize);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "serializeWithBufferAndIndex", SerializeWithBufferAndIndex);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserialize", BSONDeserialize);
+  NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserializeStream", BSONDeserializeStream);
 
   // // Experimental
   //   NODE_SET_METHOD(constructor_template->GetFunction(), "calculateObjectSize2", CalculateObjectSize2);
@@ -223,14 +223,14 @@ const char* BSON::ToCString(const v8::String::Utf8Value& value) {
   return *value ? *value : "<string conversion failed>";
 }
 
-Handle<Value> BSON::decodeDBrefJS(BSON *bson, Local<Value> ref, Local<Value> oid, Local<Value> db) {
+Handle<Value> BSON::decodeDBref(BSON *bson, Local<Value> ref, Local<Value> oid, Local<Value> db) {
   HandleScope scope;
   Local<Value> argv[] = {ref, oid, db};
   Handle<Value> dbrefObj = bson->dbrefConstructor->NewInstance(3, argv);    
   return scope.Close(dbrefObj);
 }
 
-Handle<Value> BSON::decodeCodeJS(BSON *bson, char *code, Handle<Value> scope_object) {
+Handle<Value> BSON::decodeCode(BSON *bson, char *code, Handle<Value> scope_object) {
   HandleScope scope;
   
   Local<Value> argv[] = {String::New(code), scope_object->ToObject()};
@@ -238,7 +238,7 @@ Handle<Value> BSON::decodeCodeJS(BSON *bson, char *code, Handle<Value> scope_obj
   return scope.Close(codeObj);
 }
 
-Handle<Value> BSON::decodeBinaryJS(BSON *bson, uint32_t sub_type, uint32_t number_of_bytes, char *data) {
+Handle<Value> BSON::decodeBinary(BSON *bson, uint32_t sub_type, uint32_t number_of_bytes, char *data) {
   HandleScope scope;
   
   // Create a buffer object that wraps the raw stream
@@ -251,7 +251,7 @@ Handle<Value> BSON::decodeBinaryJS(BSON *bson, uint32_t sub_type, uint32_t numbe
   return scope.Close(bufferObjHandle);
 }
 
-Handle<Value> BSON::decodeOidJS(BSON *bson, char *oid) {
+Handle<Value> BSON::decodeOid(BSON *bson, char *oid) {
   HandleScope scope;
 
   // Encode the string (string - null termiating character)
@@ -263,7 +263,7 @@ Handle<Value> BSON::decodeOidJS(BSON *bson, char *oid) {
   return scope.Close(oidObj);
 }
 
-Handle<Value> BSON::decodeLongJS(BSON *bson, char *data, uint32_t index) {
+Handle<Value> BSON::decodeLong(BSON *bson, char *data, uint32_t index) {
   HandleScope scope;
   
   // Decode the integer value
@@ -289,7 +289,7 @@ Handle<Value> BSON::decodeLongJS(BSON *bson, char *data, uint32_t index) {
   return scope.Close(longObject);      
 }
 
-Handle<Value> BSON::decodeTimestampJS(BSON *bson, char *data, uint32_t index) {
+Handle<Value> BSON::decodeTimestamp(BSON *bson, char *data, uint32_t index) {
   HandleScope scope;
   
   // Decode the integer value
@@ -801,7 +801,7 @@ uint32_t BSON::deserialize_int32(char* data, uint32_t offset) {
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
-Handle<Value> BSON::BSONDeserializeJS(const Arguments &args) {
+Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
   HandleScope scope;
 
   // Ensure that we have an parameter
@@ -830,7 +830,7 @@ Handle<Value> BSON::BSONDeserializeJS(const Arguments &args) {
      uint32_t length = Buffer::Length(obj);
     #endif
 
-    return BSON::deserializeJS(bson, data, 0, NULL);
+    return BSON::deserialize(bson, data, 0, NULL);
   } else {
     // The length of the data for this encoding
     ssize_t len = DecodeBytes(args[0], BINARY);
@@ -841,7 +841,7 @@ Handle<Value> BSON::BSONDeserializeJS(const Arguments &args) {
     // Assert that we wrote the same number of bytes as we have length
     assert(written == len);
     // Get result
-    Handle<Value> result = BSON::deserializeJS(bson, data, 0, NULL);
+    Handle<Value> result = BSON::deserialize(bson, data, 0, NULL);
     // Free memory
     free(data);
     // Deserialize the content
@@ -850,7 +850,7 @@ Handle<Value> BSON::BSONDeserializeJS(const Arguments &args) {
 }
 
 // Deserialize the stream
-Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, bool is_array_item) {
+Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t startIndex, bool is_array_item) {
   HandleScope scope;
   // Holds references to the objects that are going to be returned
   Local<Object> return_data = Object::New();
@@ -948,9 +948,9 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
       
       // Add the element to the object
       if(is_array_item) {
-        return_array->Set(Number::New(insert_index), BSON::decodeTimestampJS(bson, data, index));
+        return_array->Set(Number::New(insert_index), BSON::decodeTimestamp(bson, data, index));
       } else {
-        return_data->Set(String::New(string_name), BSON::decodeTimestampJS(bson, data, index));
+        return_data->Set(String::New(string_name), BSON::decodeTimestamp(bson, data, index));
       }
       
       // Adjust the index for the size of the value
@@ -972,9 +972,9 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
       
       // Add the element to the object
       if(is_array_item) {
-        return_array->Set(Number::New(insert_index), BSON::decodeLongJS(bson, data, index));
+        return_array->Set(Number::New(insert_index), BSON::decodeLong(bson, data, index));
       } else {
-        return_data->Set(String::New(string_name), BSON::decodeLongJS(bson, data, index));
+        return_data->Set(String::New(string_name), BSON::decodeLong(bson, data, index));
       }        
 
       // Adjust the index for the size of the value
@@ -1212,9 +1212,9 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
       
       // Add the element to the object
       if(is_array_item) {
-        return_array->Set(Number::New(insert_index), BSON::decodeOidJS(bson, oid_string));
+        return_array->Set(Number::New(insert_index), BSON::decodeOid(bson, oid_string));
       } else {
-        return_data->Set(String::New(string_name), BSON::decodeOidJS(bson, oid_string));
+        return_data->Set(String::New(string_name), BSON::decodeOid(bson, oid_string));
       }     
       
       // Free memory
@@ -1250,9 +1250,9 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
 
       // Add the element to the object
       if(is_array_item) {
-        return_array->Set(Number::New(insert_index), BSON::decodeBinaryJS(bson, sub_type, number_of_bytes, buffer));
+        return_array->Set(Number::New(insert_index), BSON::decodeBinary(bson, sub_type, number_of_bytes, buffer));
       } else {
-        return_data->Set(String::New(string_name), BSON::decodeBinaryJS(bson, sub_type, number_of_bytes, buffer));
+        return_data->Set(String::New(string_name), BSON::decodeBinary(bson, sub_type, number_of_bytes, buffer));
       }
       // Free memory
       free(buffer);                             
@@ -1322,7 +1322,7 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
       // Define the try catch block
       TryCatch try_catch;                
       // Decode the code object
-      Handle<Value> obj = BSON::decodeCodeJS(bson, code, scope_object);
+      Handle<Value> obj = BSON::decodeCode(bson, code, scope_object);
       // If an error was thrown push it up the chain
       if(try_catch.HasCaught()) {
         free(string_name);
@@ -1375,11 +1375,11 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
       // Adjust the index
       index = index + bson_object_size;
       // Parse the bson object
-      Handle<Value> scope_object = BSON::deserializeJS(bson, bson_buffer, 0, false);
+      Handle<Value> scope_object = BSON::deserialize(bson, bson_buffer, 0, false);
       // Define the try catch block
       TryCatch try_catch;                
       // Decode the code object
-      Handle<Value> obj = BSON::decodeCodeJS(bson, code, scope_object);
+      Handle<Value> obj = BSON::decodeCode(bson, code, scope_object);
       // If an error was thrown push it up the chain
       if(try_catch.HasCaught()) {
         // Clean up memory allocation
@@ -1419,7 +1419,7 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
       // Define the try catch block
       TryCatch try_catch;                
       // Decode the code object
-      Handle<Value> obj = BSON::deserializeJS(bson, data + index, 0, false);
+      Handle<Value> obj = BSON::deserialize(bson, data + index, 0, false);
       // Adjust the index
       index = index + bson_object_size;
       // If an error was thrown push it up the chain
@@ -1455,7 +1455,7 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
       TryCatch try_catch;                
 
       // Decode the code object
-      Handle<Value> obj = BSON::deserializeJS(bson, data + index, 0, true);
+      Handle<Value> obj = BSON::deserialize(bson, data + index, 0, true);
       // If an error was thrown push it up the chain
       if(try_catch.HasCaught()) {
         // Rethrow exception
@@ -1476,7 +1476,7 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
   
   // Check if we have a db reference
   if(!is_array_item && return_data->Has(String::New("$ref")) && return_data->Has(String::New("$id"))) {
-    Handle<Value> dbrefValue = BSON::decodeDBrefJS(bson, return_data->Get(String::New("$ref")), return_data->Get(String::New("$id")), return_data->Get(String::New("$db")));
+    Handle<Value> dbrefValue = BSON::decodeDBref(bson, return_data->Get(String::New("$ref")), return_data->Get(String::New("$id")), return_data->Get(String::New("$db")));
     return scope.Close(dbrefValue);
   }
   
@@ -1488,7 +1488,7 @@ Handle<Value> BSON::deserializeJS(BSON *bson, char *data, uint32_t startIndex, b
   }
 }
 
-Handle<Value> BSON::BSONSerializeJS(const Arguments &args) {
+Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   HandleScope scope;
 
   if(args.Length() == 1 && !args[0]->IsObject()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
@@ -1504,9 +1504,9 @@ Handle<Value> BSON::BSONSerializeJS(const Arguments &args) {
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
   // With serialize function
   if(args.Length() == 4) {
-    object_size = BSON::calculate_object_sizeJS(bson, args[0], args[3]->BooleanValue());    
+    object_size = BSON::calculate_object_size(bson, args[0], args[3]->BooleanValue());    
   } else {
-    object_size = BSON::calculate_object_sizeJS(bson, args[0], false);        
+    object_size = BSON::calculate_object_size(bson, args[0], false);        
   }
 
   // Allocate the memory needed for the serializtion
@@ -1526,7 +1526,7 @@ Handle<Value> BSON::BSONSerializeJS(const Arguments &args) {
     }
     
     // Serialize the object
-    BSON::serializeJS(bson, serialized_object, 0, Null(), args[0], check_key, serializeFunctions);      
+    BSON::serialize(bson, serialized_object, 0, Null(), args[0], check_key, serializeFunctions);      
   } catch(char *err_msg) {
     // Free up serialized object space
     free(serialized_object);
@@ -1557,7 +1557,7 @@ Handle<Value> BSON::BSONSerializeJS(const Arguments &args) {
   }  
 }
 
-Handle<Value> BSON::CalculateObjectSizeJS(const Arguments &args) {
+Handle<Value> BSON::CalculateObjectSize(const Arguments &args) {
   HandleScope scope;
   // Ensure we have a valid object
   if(args.Length() == 1 && !args[0]->IsObject()) return VException("One argument required - [object]");
@@ -1571,16 +1571,16 @@ Handle<Value> BSON::CalculateObjectSizeJS(const Arguments &args) {
   uint32_t object_size = 0;
   // Check if we have our argument, calculate size of the object  
   if(args.Length() == 2) {
-    object_size = BSON::calculate_object_sizeJS(bson, args[0], args[1]->BooleanValue());
+    object_size = BSON::calculate_object_size(bson, args[0], args[1]->BooleanValue());
   } else {
-    object_size = BSON::calculate_object_sizeJS(bson, args[0], false);
+    object_size = BSON::calculate_object_size(bson, args[0], false);
   }
 
   // Return the object size
   return scope.Close(Uint32::New(object_size));
 }
 
-uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool serializeFunctions) {
+uint32_t BSON::calculate_object_size(BSON *bson, Handle<Value> value, bool serializeFunctions) {
   uint32_t object_size = 0;
 
   // If we have an object let's unwrap it and calculate the sub sections
@@ -1640,7 +1640,7 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
       // Add the type definition size for each item
       object_size = object_size + label_length + 1;
       // Add size of the object
-      uint32_t object_length = BSON::calculate_object_sizeJS(bson, array->Get(Integer::New(i)), serializeFunctions);
+      uint32_t object_length = BSON::calculate_object_size(bson, array->Get(Integer::New(i)), serializeFunctions);
       object_size = object_size + object_length;
     }
     // Add the object size
@@ -1674,14 +1674,21 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
       Local<String> function = obj->Get(String::New("code"))->ToString();
       // Get the scope object
       Local<Object> scope = obj->Get(String::New("scope"))->ToObject();
-
+            
+      // For Node < 0.6.X use the GetPropertyNames
+      #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
+        uint32_t propertyNameLength = scope->GetPropertyNames()->Length();
+      #else
+        uint32_t propertyNameLength = scope->GetOwnPropertyNames()->Length();
+      #endif
+      
       // Check if the scope has any parameters
-      // Let's calculate the size the code object adds adds
-      if(scope->GetPropertyNames()->Length() > 0) {
-        object_size += function->Utf8Length() + 4 + BSON::calculate_object_sizeJS(bson, scope, serializeFunctions) + 4 + 1;
+      // Let's calculate the size the code object adds adds      
+      if(propertyNameLength > 0) {
+       object_size += function->Utf8Length() + 4 + BSON::calculate_object_size(bson, scope, serializeFunctions) + 4 + 1;
       } else {
-        object_size += function->Utf8Length() + 4 + 1;
-      } 
+       object_size += function->Utf8Length() + 4 + 1;
+      }       
     } else if(bson->dbrefString->StrictEquals(constructorString)) {
       // Unpack the dbref
       Local<Object> dbref = value->ToObject();
@@ -1692,7 +1699,7 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
       obj->Set(bson->_dbRefIdRefString, dbref->Get(bson->_dbRefOidString));      
       if(!dbref->Get(bson->_dbRefDbString)->IsNull() && !dbref->Get(bson->_dbRefDbString)->IsUndefined()) obj->Set(bson->_dbRefDbRefString, dbref->Get(bson->_dbRefDbString));
       // Calculate size
-      object_size += BSON::calculate_object_sizeJS(bson, obj, serializeFunctions);
+      object_size += BSON::calculate_object_size(bson, obj, serializeFunctions);
     } else if(bson->minKeyString->StrictEquals(constructorString) || bson->maxKeyString->Equals(constructorString)) {    
     } else if(bson->symbolString->StrictEquals(constructorString)) {
       // Get string
@@ -1712,8 +1719,13 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
   } else if(value->IsObject()) {
     // Unwrap the object
     Local<Object> object = value->ToObject();
-    Local<Array> property_names = object->GetOwnPropertyNames();
-    
+
+    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
+      Local<Array> property_names = object->GetPropertyNames();
+    #else
+      Local<Array> property_names = object->GetOwnPropertyNames();
+    #endif
+
     // Process all the properties on the object
     for(uint32_t index = 0; index < property_names->Length(); index++) {
       // Fetch the property name
@@ -1725,7 +1737,7 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
       if(!property->IsFunction() || (property->IsFunction() && serializeFunctions)) {
         // Convert name to char*
         ssize_t len = DecodeBytes(property_name, UTF8);
-        object_size += BSON::calculate_object_sizeJS(bson, property, serializeFunctions) + len + 1 + 1;
+        object_size += BSON::calculate_object_size(bson, property, serializeFunctions) + len + 1 + 1;
       }
     }      
     
@@ -1735,7 +1747,7 @@ uint32_t BSON::calculate_object_sizeJS(BSON *bson, Handle<Value> value, bool ser
   return object_size;
 }
 
-uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key, bool serializeFunctions) {
+uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, bool check_key, bool serializeFunctions) {
   // Scope for method execution
   HandleScope scope;
 
@@ -1900,7 +1912,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
     // Adjust the index
     index = index + len + 1;        
     // Object size
-    uint32_t object_size = BSON::calculate_object_sizeJS(bson, value, serializeFunctions);
+    uint32_t object_size = BSON::calculate_object_size(bson, value, serializeFunctions);
     // Write the size of the object
     BSON::write_int32((serialized_object + index), object_size);
     // Adjust the index
@@ -1910,7 +1922,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       // Add "index" string size for each element
       sprintf(length_str, "%d", i);
       // Encode the values      
-      index = BSON::serializeJS(bson, serialized_object, index, String::New(length_str), array->Get(Integer::New(i)), check_key, serializeFunctions);
+      index = BSON::serialize(bson, serialized_object, index, String::New(length_str), array->Get(Integer::New(i)), check_key, serializeFunctions);
       // Write trailing '\0' for object
       *(serialized_object + index) = '\0';
     }
@@ -2145,13 +2157,19 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       // Get the scope object
       Local<Object> scope = obj->Get(String::New("scope"))->ToObject();
 
+      #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
+        uint32_t propertyNameLength = scope->GetPropertyNames()->Length();
+      #else
+        uint32_t propertyNameLength = scope->GetOwnPropertyNames()->Length();
+      #endif
+
       // Set the right type if we have a scope or not
-      if(scope->GetPropertyNames()->Length() > 0) {
+      if(propertyNameLength > 0) {
         // Set basic data code object with scope object
         *(serialized_object + originalIndex) = BSON_DATA_CODE_W_SCOPE;        
 
         // Calculate the size of the whole object
-        uint32_t scopeSize = BSON::calculate_object_sizeJS(bson, scope, false);
+        uint32_t scopeSize = BSON::calculate_object_size(bson, scope, false);
         // Decode the function length
         ssize_t len = DecodeBytes(function, UTF8);
         // Calculate total size
@@ -2174,7 +2192,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
         // Adjust the index with the length of the function
         index = index + len + 1;
         // Write the scope object
-        BSON::serializeJS(bson, (serialized_object + index), 0, Null(), scope, check_key, serializeFunctions);
+        BSON::serialize(bson, (serialized_object + index), 0, Null(), scope, check_key, serializeFunctions);
         // Adjust the index
         index = index + scopeSize;
       } else {
@@ -2206,7 +2224,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
       if(!dbref->Get(bson->_dbRefDbString)->IsNull() && !dbref->Get(bson->_dbRefDbString)->IsUndefined()) obj->Set(bson->_dbRefDbRefString, dbref->Get(bson->_dbRefDbString));
 
       // Encode the variable
-      index = BSON::serializeJS(bson, serialized_object, originalIndex, name, obj, false, serializeFunctions);
+      index = BSON::serialize(bson, serialized_object, originalIndex, name, obj, false, serializeFunctions);
     } else if(bson->minKeyString->StrictEquals(constructorString)) {
       // Save the string at the offset provided
       *(serialized_object + originalIndex) = BSON_DATA_MIN_KEY;
@@ -2230,10 +2248,15 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
         
     // Unwrap the object
     Local<Object> object = value->ToObject();
-    Local<Array> property_names = object->GetOwnPropertyNames();
+
+    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
+      Local<Array> property_names = object->GetPropertyNames();
+    #else
+      Local<Array> property_names = object->GetOwnPropertyNames();
+    #endif
 
     // Calculate size of the total object
-    uint32_t object_size = BSON::calculate_object_sizeJS(bson, value, serializeFunctions);
+    uint32_t object_size = BSON::calculate_object_size(bson, value, serializeFunctions);
     // Write the size
     BSON::write_int32((serialized_object + index), object_size);
     // Adjust size
@@ -2255,7 +2278,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
         *(data + len) = '\0';
         ssize_t written = DecodeWrite(data, len, property_name, UTF8);      
         // Serialize the content
-        index = BSON::serializeJS(bson, serialized_object, index, property_name, property, check_key, serializeFunctions);      
+        index = BSON::serialize(bson, serialized_object, index, property_name, property, check_key, serializeFunctions);      
         // Free up memory of data
         free(data);
       }
@@ -2275,7 +2298,7 @@ uint32_t BSON::serializeJS(BSON *bson, char *serialized_object, uint32_t index, 
   return index;
 }
 
-Handle<Value> BSON::SerializeWithBufferAndIndexJS(const Arguments &args) {
+Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
   HandleScope scope;  
 
   //BSON.serializeWithBufferAndIndex = function serializeWithBufferAndIndex(object, checkKeys, buffer, index) {
@@ -2306,9 +2329,9 @@ Handle<Value> BSON::SerializeWithBufferAndIndexJS(const Arguments &args) {
   uint32_t object_size = 0;
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
   if(args.Length() == 5) {
-    object_size = BSON::calculate_object_sizeJS(bson, args[0], args[4]->BooleanValue());    
+    object_size = BSON::calculate_object_size(bson, args[0], args[4]->BooleanValue());    
   } else {
-    object_size = BSON::calculate_object_sizeJS(bson, args[0], false);    
+    object_size = BSON::calculate_object_size(bson, args[0], false);    
   }
   
   // Unpack the index variable
@@ -2332,7 +2355,7 @@ Handle<Value> BSON::SerializeWithBufferAndIndexJS(const Arguments &args) {
     }
     
     // Serialize the object
-    BSON::serializeJS(bson, serialized_object, 0, Null(), args[0], check_key, serializeFunctions);
+    BSON::serialize(bson, serialized_object, 0, Null(), args[0], check_key, serializeFunctions);
   } catch(char *err_msg) {
     // Free up serialized object space
     free(serialized_object);
@@ -2352,7 +2375,7 @@ Handle<Value> BSON::SerializeWithBufferAndIndexJS(const Arguments &args) {
   return scope.Close(Uint32::New(index + object_size - 1));
 }
 
-Handle<Value> BSON::BSONDeserializeStreamJS(const Arguments &args) {
+Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) {
 	HandleScope scope;
 	
 	// At least 3 arguments required
@@ -2402,7 +2425,7 @@ Handle<Value> BSON::BSONDeserializeStreamJS(const Arguments &args) {
     uint32_t size = BSON::deserialize_int32(data, index);
     
     // Get result
-    Handle<Value> result = BSON::deserializeJS(bson, data, index, NULL);
+    Handle<Value> result = BSON::deserialize(bson, data, index, NULL);
     
     // Add result to array
     documents->Set(i + resultIndex, result);

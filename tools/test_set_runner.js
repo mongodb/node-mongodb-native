@@ -8,13 +8,13 @@ if(process.argv.length === 4) {
   
   // Basic default test runner
   var runner = options['junit'] == true ? nodeunit.reporters.junit : nodeunit.reporters.default;
-  var native = options['native'] == null ? false : options['native'];
+  var nativeExecution = options['native'] == null ? false : options['native'];
   // Remove junit tag if it exists
   delete options['junit'];
   delete options['native'];
   
   // Set native process 
-  if(native) {
+  if(nativeExecution) {
     process.env['TEST_NATIVE'] = 'TRUE';    
   }
   
