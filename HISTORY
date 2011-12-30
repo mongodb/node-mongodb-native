@@ -1,3 +1,4 @@
+0.9.7-3 2011-12-30
 * Moved BSON_BINARY_SUBTYPE_DEFAULT from BSON object to Binary object and removed the BSON_BINARY_ prefixes
 * Removed Native BSON types, C++ parser uses JS types (faster due to cost of crossing the JS-C++ barrier for each call)
 * Added build fix for 0.4.X branch of Node.js where GetOwnPropertyNames is not defined in v8
