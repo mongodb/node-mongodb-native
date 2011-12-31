@@ -25,7 +25,7 @@ class BSON : public ObjectWrap {
     static Handle<Value> SerializeWithBufferAndIndex(const Arguments &args);
 
   	// Experimental
-    // static Handle<Value> CalculateObjectSize2(const Arguments &args);
+    static Handle<Value> CalculateObjectSize2(const Arguments &args);
     // static Handle<Value> BSONSerialize2(const Arguments &args);
 
     // Constructor used for creating new BSON objects from C++
@@ -98,7 +98,7 @@ class BSON : public ObjectWrap {
     static Handle<Value> decodeDBref(BSON *bson, Local<Value> ref, Local<Value> oid, Local<Value> db);    
 
 		// Experimental
-    // static uint32_t calculate_object_size2(Handle<Value> object);
+    static uint32_t calculate_object_size2(Handle<Value> object);
     // static uint32_t serialize2(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, uint32_t object_size, bool check_key);    
 };
 

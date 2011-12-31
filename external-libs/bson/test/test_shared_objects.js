@@ -142,9 +142,9 @@ var doc = {
 // console.log(docBin2.toString('hex'))
 
   
-// // Serialized document
-// var docBin = BSONJS.serialize(doc, false, true);
-// 
+// Serialized document
+var docBin = BSONJS.serialize(doc, false, true);
+
 // // --------------------------------------------------------------------------------------
 // // --------------------------------------------------------------------------------------
 // // Serialize performance
@@ -230,15 +230,6 @@ var doc = {
 // 
 // var deltaTimeD1 = new Date().getTime() - startTimeD1;
 // console.log("C++ with js objects = " + (deltaTimeD1));
-// 
-// var startTimeD2 = new Date().getTime();
-// 
-// for(var i = 0; i < COUNT; i++) {
-//   BSON.deserialize(docBin);
-// }
-// 
-// var deltaTimeD2 = new Date().getTime() - startTimeD2;
-// console.log("C++ with c++ objects = " + (deltaTimeD2));
 // 
 // var startTimeD3 = new Date().getTime();
 // 
