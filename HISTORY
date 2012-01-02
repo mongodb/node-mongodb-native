@@ -1,3 +1,7 @@
+0.9.7.3-2 2012-01-02
+* Fixed up documentation to reflect the preferred way of instantiating bson types
+* GC bug fix for JS bson parser to avoid stop-and-go GC collection
+
 0.9.7.3-1 2012-01-02
 * Fix to make db.bson_serializer and db.bson_deserializer work as it did previously
 
