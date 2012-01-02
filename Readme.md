@@ -63,8 +63,7 @@ Here are the constructors the non-Javascript BSON primitive types:
 
     // Fetch the library
     var mongo = require('mongodb');
-		
-		// Create new instances of BSON types
+    // Create new instances of BSON types
     new mongo.Long(numberString)
     new mongo.ObjectID(hexString)
     new mongo.Timestamp()  // the actual unique number is generated on insert.
