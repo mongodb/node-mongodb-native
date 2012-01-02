@@ -134,6 +134,13 @@ var tests = testCase({
     })    
   },
   
+  testAccessToSerializationObjects : function(test) {
+    var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}, ssl:useSSL}),{native_parser: (process.env['TEST_NATIVE'] != null)});
+    test.ok(db.bson_serializer.ObjectID != null);
+    test.ok(db.bson_deserializer.ObjectID != null);    
+    test.done();
+  },
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
