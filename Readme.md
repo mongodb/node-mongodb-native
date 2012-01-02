@@ -48,23 +48,32 @@ A simple example of inserting a document.
 Data types
 ========
 
-To store and retrieve the non-JSON MongoDb primitives ([ObjectID](http://www.mongodb.org/display/DOCS/Object+IDs), Long, Binary, [Timestamp](http://www.mongodb.org/display/DOCS/Timestamp+data+type), [DBRef](http://www.mongodb.org/display/DOCS/Database+References#DatabaseReferences-DBRef), Code), you have to use one of the types from the bson_serializer.
+To store and retrieve the non-JSON MongoDb primitives ([ObjectID](http://www.mongodb.org/display/DOCS/Object+IDs), Long, Binary, [Timestamp](http://www.mongodb.org/display/DOCS/Timestamp+data+type), [DBRef](http://www.mongodb.org/display/DOCS/Database+References#DatabaseReferences-DBRef), Code).
 
 In particular, every document has a unique `_id` which can be almost any type, and by default a 12-byte ObjectID is created. ObjectIDs can be represented as 24-digit hexadecimal strings, but you must convert the string back into an ObjectID before you can use it in the database. For example:
 
+		// Get the objectID type
+		var ObjectID = require('mongodb').ObjectID;
+
     var idString = '4e4e1638c85e808431000003';
-    collection.findOne({_id: new client.bson_serializer.ObjectID(idString)}, console.log)  // ok
+    collection.findOne({_id: new ObjectID(idString)}, console.log)  // ok
     collection.findOne({_id: idString}, console.log)  // wrong! callback gets undefined
 
 Here are the constructors the non-Javascript BSON primitive types:
 
-    var client = new Db(...);
-    new client.bson_serializer.Long(numberString)
-    new client.bson_serializer.ObjectID(hexString)
-    new client.bson_serializer.Timestamp()  // the actual unique number is generated on insert.
-    new client.bson_serializer.DBRef(collectionName, id, dbName)
-    new client.bson_serializer.Binary(buffer)  // takes a string or Buffer
-    new client.bson_serializer.Code(code, [context])
+		// Fetch the library
+		var mongo = require('mongodb');
+		// Create new instances of BSON types
+    new mongo.Long(numberString)
+    new mongo.ObjectID(hexString)
+    new mongo.Timestamp()  // the actual unique number is generated on insert.
+    new mongo.DBRef(collectionName, id, dbName)
+    new mongo.Binary(buffer)  // takes a string or Buffer
+    new mongo.Code(code, [context])
+    new mongo.Symbol(string)
+    new mongo.MinKey()
+    new mongo.MaxKey()
+    new mongo.Double(number)	// Force double storage
 
 The C/C++ bson parser/serializer
 --------
@@ -78,7 +87,7 @@ If you are running a version of this library has the C/C++ parser compiled, to e
                         new Server("127.0.0.1", 27017),
                         {native_parser:true});
 
-Since objects created using the C/C++ bson parser are incompatible with a client configured to use the Javascript bson parser and vice versa, you should call constructors using `client.bson_serializer` as described above (don't use `mongodb.BSONNative` and `mongodb.BSONPure` directly).
+The C++ parser uses the js objects both for serialization and deserialization.
 
 GitHub information
 ========

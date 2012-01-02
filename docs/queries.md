@@ -59,9 +59,9 @@ In order to treat these binary _id values as strings it would be wise to convert
 
     var idHex = document._id.toHexString();
     
-Hex strings can be reverted back to binary (for example to perform queries) with `db.bson_serializer.ObjectID.createFromHexString`
+Hex strings can be reverted back to binary (for example to perform queries) with `ObjectID.createFromHexString`
 
-    {_id: db.bson_serializer.ObjectID.createFromHexString(idHex)}
+    {_id: ObjectID.createFromHexString(idHex)}
 
 When inserting new records it is possible to use custom `_id` values as well which do not need to be binary hashes, for example strings.
 

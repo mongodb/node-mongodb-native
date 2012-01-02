@@ -106,7 +106,7 @@ var tests = testCase({
         fs_client.collection('test', function(err, collection) {
           collection.insert({'a':1}, {safe:true}, function(err, doc) {
             fs_client.admin(function(err, adminDb) {
-              adminDb.authenticate('admin', 'admin', function(err, replies) {                
+              adminDb.authenticate('admin', 'admin', function(err, replies) {                                
                 adminDb.setProfilingLevel('slow_only', function(err, level) {
                   adminDb.profilingLevel(function(err, level) {
                     test.equal('slow_only', level);

@@ -10,11 +10,6 @@ var parser = require('../lib/mongodb').BSONPure;
 var objectID = require('../lib/mongodb').ObjectID;
 
 var db = new Db('streaming_benchmark', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:4}), {})
-// Set native deserializer
-db.bson_deserializer = parser;
-db.bson_serializer = parser;
-db.pkFactory = objectID;
-
 // Open the db
 db.open(function(err, client) {
   client.collection('streaming_benchmark', function(err, collection) {
