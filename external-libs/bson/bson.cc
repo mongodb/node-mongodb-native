@@ -1595,10 +1595,13 @@ uint32_t BSON::calculate_object_size(BSON *bson, Handle<Value> value, bool seria
     ssize_t len = DecodeBytes(regExp->GetSource(), UTF8);
     int flags = regExp->GetFlags();
     
+    // global
+    if((flags & (1 << 0)) != 0) len++;
     // ignorecase
     if((flags & (1 << 1)) != 0) len++;
     //multiline
     if((flags & (1 << 2)) != 0) len++;
+    // if((flags & (1 << 2)) != 0) len++;
     // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
     object_size = object_size + len + 2;
   } else if(value->IsNull() || value->IsUndefined()) {
@@ -1915,6 +1918,12 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
     index = index + len + 1;
+    
+    // global
+    if((flags & (1 << 0)) != 0) {
+      *(serialized_object + index) = 's';
+      index = index + 1;      
+    }
     
     // ignorecase
     if((flags & (1 << 1)) != 0) {
