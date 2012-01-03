@@ -791,35 +791,38 @@ var tests = testCase({
   },
   
   shouldCorrectlyRefillViaGetMoreCommand : function(test) {
+    var COUNT = 1000;
+    
     client.createCollection('test_refill_via_get_more', function(err, collection) {
       Step(
         function insert() {
           var group = this.group();
   
-          for(var i = 0; i < 1000; i++) { 
+          for(var i = 0; i < COUNT; i++) { 
             collection.save({'a': i}, {safe:true}, group()); 
           }
         }, 
         
         function finished() {
           collection.count(function(err, count) {
-            test.equal(1000, count);
+            test.equal(COUNT, count);
           });
   
           var total = 0;
-          collection.find(function(err, cursor) {
-            cursor.each(function(err, item) {
+          var i = 0;
+          collection.find({}, {}, function(err, cursor) {
+            cursor.each(function(err, item) {                            
               if(item != null) {
                 total = total + item.a;
               } else {
                 test.equal(499500, total);
   
                 collection.count(function(err, count) {
-                  test.equal(1000, count);
+                  test.equal(COUNT, count);
                 });
   
                 collection.count(function(err, count) {
-                  test.equal(1000, count);
+                  test.equal(COUNT, count);
   
                   var total2 = 0;
                   collection.find(function(err, cursor) {
@@ -829,7 +832,7 @@ var tests = testCase({
                       } else {
                         test.equal(499500, total2);
                         collection.count(function(err, count) {
-                          test.equal(1000, count);
+                          test.equal(COUNT, count);
                           test.equal(total, total2);
                           // Let's close the db
                           test.done();
@@ -1036,7 +1039,7 @@ var tests = testCase({
       })        
     });        
   },
-
+  
   'Should correctly execute count on cursor' : function(test) {
     var docs = [];
     
@@ -1044,7 +1047,7 @@ var tests = testCase({
       var d = new Date().getTime() + i*1000;
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
-
+  
     // Create collection
     client.createCollection('Should_correctly_execute_count_on_cursor', function(err, collection) {
       test.equal(null, err);
@@ -1072,45 +1075,45 @@ var tests = testCase({
       })        
     });        
   },
-
+  
   'should be able to stream documents': function(test) {
     var docs = [];
-
+  
     for (var i = 0; i < 1000; i++) {
       docs[i] = { a: i+1 };
     }
-
+  
     // Create collection
     client.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
       test.equal(null, err);
-
+  
       // insert all docs
       collection.insert(docs, {safe:true}, function(err, result) {
         test.equal(null, err);
-
+  
         var paused = 0
           , closed = 0
           , resumed = 0
           , i = 0
           , err
-
+  
         var stream = collection.find().stream();
-
+  
         stream.on('data', function (doc) {
           test.equal(true, !! doc);
           test.equal(true, !! doc.a);
-
+  
           if (paused > 0 && 0 === resumed) {
             err = new Error('data emitted during pause');
             return done();
           }
-
+  
           if (++i === 3) {
             test.equal(false, stream.paused);
             stream.pause();
             test.equal(true, stream.paused);
             paused++;
-
+  
             setTimeout(function () {
               test.equal(true, stream.paused);
               stream.resume();
@@ -1119,17 +1122,17 @@ var tests = testCase({
             }, 20);
           }
         });
-
+  
         stream.on('error', function (er) {
           err = er;
           done();
         });
-
+  
         stream.on('close', function () {
           closed++;
           done();
         });
-
+  
         function done () {
           test.equal(undefined, err);
           test.equal(i, docs.length);
@@ -1142,29 +1145,29 @@ var tests = testCase({
       })
     })
   },
-
+  
   'immediately destroying a stream prevents the query from executing': function(test) {
     var i = 0
       , docs = [{ b: 2 }, { b: 3 }]
       , doneCalled = 0
-
+  
     client.createCollection('immediately_destroying_a_stream_prevents_the_query_from_executing', function(err, collection) {
       test.equal(null, err);
-
+  
       // insert all docs
       collection.insert(docs, {safe:true}, function(err, result) {
         test.equal(null, err);
-
+  
         var stream = collection.find().stream();
-
+  
         stream.on('data', function () {
           i++;
         })
         stream.on('close', done);
         stream.on('error', done);
-
+  
         stream.destroy();
-
+  
         function done (err) {
           test.equal(++doneCalled, 1);
           test.equal(undefined, err);
@@ -1175,36 +1178,36 @@ var tests = testCase({
       });
     });
   },
-
+  
   'destroying a stream stops it': function (test) {
     client.createCollection('destroying_a_stream_stops_it', function(err, collection) {
       test.equal(null, err);
-
+  
       var docs = [];
       for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
-
+  
       // insert all docs
       collection.insert(docs, {safe:true}, function(err, result) {
         test.equal(null, err);
-
+  
         var finished = 0
           , i = 0
-
+  
         var stream = collection.find().stream();
-
+  
         test.strictEqual(null, stream._destroyed);
         test.strictEqual(true, stream.readable);
-
+  
         stream.on('data', function (doc) {
           if (++i === 5) {
             stream.destroy();
             test.strictEqual(false, stream.readable);
           }
         });
-
+  
         stream.on('close', done);
         stream.on('error', done);
-
+  
         function done (err) {
           ++finished;
           setTimeout(function () {
@@ -1220,40 +1223,40 @@ var tests = testCase({
       });
     });
   },
-
+  
   'cursor stream errors': function (test) {
     var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
     client.open(function(err, db_p) {
       test.equal(null, err);
-
+  
       client.createCollection('cursor_stream_errors', function(err, collection) {
         test.equal(null, err);
-
+  
         var docs = [];
         for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
-
+  
         // insert all docs
         collection.insert(docs, {safe:true}, function(err, result) {
           test.equal(null, err);
-
+  
           var finished = 0
             , closed = 0
             , i = 0
-
+  
           var stream = collection.find({}, { batchSize: 5 }).stream();
-
+  
           stream.on('data', function (doc) {
             if (++i === 5) {
               client.close();
             }
           });
-
+  
           stream.on('close', function () {
             closed++;
           });
-
+  
           stream.on('error', done);
-
+  
           function done (err) {
             ++finished;
             setTimeout(function () {
@@ -1271,23 +1274,23 @@ var tests = testCase({
       });
     });
   },
-
+  
   'cursor stream pipe': function (test) {
     client.createCollection('cursor_stream_pipe', function(err, collection) {
       test.equal(null, err);
-
+  
       var docs = [];
       ;('Aaden Aaron Adrian Aditya Bob Joe').split(' ').forEach(function (name) {
         docs.push({ name: name });
       });
-
+  
       // insert all docs
       collection.insert(docs, {safe:true}, function(err, result) {
         test.equal(null, err);
-
+  
         var filename = '/tmp/_nodemongodbnative_stream_out.txt'
           , out = fs.createWriteStream(filename)
-
+  
         // hack so we don't need to create a stream filter just to
         // stringify the objects (otherwise the created file would
         // just contain a bunch of [object Object])
@@ -1295,13 +1298,13 @@ var tests = testCase({
         Object.prototype.toString = function () {
           return JSON.stringify(this);
         }
-
+  
         var stream = collection.find().stream();
         stream.pipe(out);
-
+  
         stream.on('error', done);
         stream.on('close', done);
-
+  
         function done (err) {
           Object.prototype.toString = toString;
           test.strictEqual(undefined, err);
