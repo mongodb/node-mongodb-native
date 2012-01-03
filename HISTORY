@@ -1,3 +1,7 @@
+0.9.7.3-3 2012-01-04
+* Bug fixes for performance issues going form 0.9.6.X to 0.9.7.X on linux
+* BSON bug fixes for performance
+
 0.9.7.3-2 2012-01-02
 * Fixed up documentation to reflect the preferred way of instantiating bson types
 * GC bug fix for JS bson parser to avoid stop-and-go GC collection
