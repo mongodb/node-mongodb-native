@@ -6,7 +6,7 @@ var Db = require('../lib/mongodb').Db,
 var Mongolian = require('mongolian');
 var COUNT = 1000;
 var currentWritingIndex = 0;
-var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:3, native_parser:false});
+var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1, native_parser:true});
 
 // Read in the test file
 var fileData = require('fs').readFileSync("./test/gridstore/iya_logo_final_bw.jpg");
