@@ -1,3 +1,6 @@
+0.9.7.3-4 2012-01-04
+* Chased down potential memory leak on findAndModify, Issue #467 (node.js removeAllListeners leaves the key in the _events object, node.js bug on eventlistener?, leads to extremely slow memory leak on listener object)
+
 0.9.7.3-3 2012-01-04
 * Bug fixes for performance issues going form 0.9.6.X to 0.9.7.X on linux
 * BSON bug fixes for performance
