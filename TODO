@@ -1,4 +1,13 @@
-0.9.7.3-dev
+TODO for jan 4 - 2011
+- Chase down potential memory leak in findAndModify
+- Check compatibility for gridFS between python and js
+- Ensure GridFS streaming api is correct
+- Map out python replicaset driver functionality
+
+ACCOMPLISHED jan 4 - 2011
++ Chase down potential memory leak in findAndModify
+
+0.9.7.4-dev
 - Amortize documents (only deserialize when accessed)
 - New C++ serializer code (based on js)
 - Mongo tests to handle special Mongos situations
@@ -6,15 +15,7 @@
 - Check for new servers coming online (a new secondary server etc)
 - http://api.mongodb.org/python/current/api/pymongo/index.html#pymongo.ReadPreference
 
-
-
-
-
-
-
-
--------------------------------------------------------------------------------------------------
-* Allow secondary read with no master 
+--------------------------------------------------------------------------------------------* Allow secondary read with no master 
 * Add lowest response time selection of read server for replicaset using a selectable strategy. First one being using the ping command response time
 * Allow execution of multiple commands against the same server connection when having a connection pool
 * Implement tag support for replicasets
