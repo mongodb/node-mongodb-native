@@ -368,7 +368,11 @@ uint32_t BSON::calculate_object_size2(Handle<Value> value) {
   // Current object we are processing
   Local<Object> currentObject = value->ToObject();
   // Current list of object keys
-  Local<Array> keys = currentObject->GetOwnPropertyNames();
+  #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
+    Local<Array> keys = currentObject->GetPropertyNames();
+  #else
+    Local<Array> keys = currentObject->GetOwnPropertyNames();
+  #endif
   // Contains pointer to keysIndex
   uint32_t keysIndex = 0;
   uint32_t keysLength = keys->Length();
@@ -380,7 +384,11 @@ uint32_t BSON::calculate_object_size2(Handle<Value> value) {
     // If the index is bigger than the number of keys for the object
     // we finished up the previous object and are ready for the next one
     if(keysIndex >= keys->Length()) {
-      keys = currentObject->GetOwnPropertyNames();
+      #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
+        keys = currentObject->GetPropertyNames();
+      #else
+        keys = currentObject->GetOwnPropertyNames();
+      #endif
       keysLength = keys->Length();
     }
     
