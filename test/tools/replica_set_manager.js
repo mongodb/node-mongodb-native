@@ -107,7 +107,7 @@ ReplicaSetManager.prototype.startSet = function(killall, callback) {
           
           // Start passive instances
           for(var i = 0; i < self.passiveCount; i++) {
-            self.initNode(n, {priority:0, tags:self.tags[tagsIndex] != null ? self.tags[tagsIndex++] : null}, group())
+            self.initNode(n, {passive:true, priority:0, tags:self.tags[tagsIndex] != null ? self.tags[tagsIndex++] : null}, group())
             n = n + 1;
           }
           
@@ -185,6 +185,7 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
   var port = this.startPort + n;
   this.ports.push(port);
   this.mongods[n]["ssl"] = this.ssl;
+  this.mongods[n]["host"] = this.host;
   this.mongods[n]["port"] = port;
   this.mongods[n]["db_path"] = getPath(this, "rs-" + port);
   this.mongods[n]["log_path"] = getPath(this, "log-" + port);
