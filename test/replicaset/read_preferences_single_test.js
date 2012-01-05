@@ -126,19 +126,34 @@ module.exports = testCase({
   // |                      |                |secondary.      |                |
   // +----------------------+----------------+----------------+----------------+  
   'Connection to a arbiter host with primary preference should give error' : function(test) {
-    // console.log("=============================================================")
-    // console.dir(RS.mongods)
-    // 
-    // // Total number of servers to query
-    // var numberOfServersToCheck = Object.keys(RS.mongods);
-    // 
-    // // Let's establish what all servers so we can pick targets for our queries
-    // var keys = Object.keys(RS.mongods);
-    // for(var i = 0; i < keys.length; i++) {
-    //   var host = RS.mongods[keys[i]].host;
-    //   var port = RS.mongods[keys[i]].port;
-    // }
+    console.log("=============================================================")
+    console.dir(RS.mongods)
     
+    // Total number of servers to query
+    var numberOfServersToCheck = Object.keys(RS.mongods);
+    
+    // Let's establish what all servers so we can pick targets for our queries
+    var keys = Object.keys(RS.mongods);
+    for(var i = 0; i < keys.length; i++) {
+      var host = RS.mongods[keys[i]].host;
+      var port = RS.mongods[keys[i]].port;
+      
+      // Connect to the db and query the state
+      var server = new Server(host, port,{auto_reconnect: true});
+      // Create db instance
+      var db = new Db('single_server_replicaset', server, {native_parser: (process.env['TEST_NATIVE'] != null)});
+      // Connect to the db
+      db.open(function(err, db) {
+        numberOfServersToCheck = numberOfServersToCheck - 1;
+        console.log("---------------------------------------- connected to db")
+        console.dir(err)
+        
+        db.close();
+        if(numberOfServersToCheck <= 0) {
+          test.done();
+        }
+      })
+    }    
     
     test.done();
   },
