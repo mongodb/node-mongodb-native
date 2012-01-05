@@ -87,6 +87,46 @@ var ensureConnection = function(test, numberOfTries, callback) {
   })            
 }
 
+var identifyServers = function(rs, dbname, callback) {
+  // Total number of servers to query
+  var numberOfServersToCheck = Object.keys(rs.mongods).length;
+  
+  // Arbiters
+  var arbiters = [];
+  var secondaries = [];
+  var primary = null;
+  
+  // Let's establish what all servers so we can pick targets for our queries
+  var keys = Object.keys(rs.mongods);
+  for(var i = 0; i < keys.length; i++) {
+    var host = rs.mongods[keys[i]].host;
+    var port = rs.mongods[keys[i]].port;
+    
+    // Connect to the db and query the state
+    var server = new Server(host, port,{auto_reconnect: true});
+    // Create db instance
+    var db = new Db(dbname, server, {native_parser: (process.env['TEST_NATIVE'] != null)});
+    // Connect to the db
+    db.open(function(err, db) {
+      numberOfServersToCheck = numberOfServersToCheck - 1;
+      if(db.serverConfig.isMasterDoc.ismaster) {
+        primary = {host:db.serverConfig.host, port:db.serverConfig.port};
+      } else if(db.serverConfig.isMasterDoc.secondary) {
+        secondaries.push({host:db.serverConfig.host, port:db.serverConfig.port});
+      } else if(db.serverConfig.isMasterDoc.arbiterOnly) {
+        arbiters.push({host:db.serverConfig.host, port:db.serverConfig.port});          
+      }
+            
+      // Close the db
+      db.close();
+      // If we are done perform the callback
+      if(numberOfServersToCheck <= 0) {
+        callback(null, {primary:primary, secondaries:secondaries, arbiters:arbiters});
+      }
+    })
+  }  
+}
+
 module.exports = testCase({
   setUp: function(callback) {
     // Create instance of replicaset manager but only for the first call
@@ -129,8 +169,113 @@ module.exports = testCase({
   // |                      |                |available.      |                |
   // |                      |                |                |                |
   // +----------------------+----------------+----------------+----------------+
-  'Connection to replicaset with primary preference' : function(test) {
-    test.done();
+  'Connection to replicaset with primary read preference' : function(test) {
+    // Replica configuration
+    var replSet = new ReplSetServers( [ 
+        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      ], 
+      {rs_name:RS.name, readPreference:Server.READ_PRIMARY}
+    );
+    
+    // Create db instance
+    var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+    // Connect to the db
+    db.open(function(err, p_db) {
+      // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
+      var checkoutWriterMethod = p_db.serverConfig._state.master.checkoutWriter;
+      // Set up checkoutWriter to catch correct write request
+      p_db.serverConfig._state.master.checkoutWriter = function() {
+        p_db.close();
+        test.done();
+      }
+      
+      // Grab the collection
+      db.collection("read_preference_replicaset_test_0", function(err, collection) {
+        // Attempt to read (should fail due to the server not being a primary);
+        collection.find().toArray(function(err, items) {
+          // Does not get called or we don't care
+        });
+      });
+    });
+  },
+  
+  'Connection to replicaset with secondary read preference' : function(test) {
+    // Fetch all the identity servers
+    identifyServers(RS, 'integration_test_', function(err, servers) {
+      // Replica configuration
+      var replSet = new ReplSetServers( [ 
+          new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+        ], 
+        {rs_name:RS.name, readPreference:Server.READ_SECONDARY}
+      );
+    
+      // Create db instance
+      var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+      // Connect to the db
+      db.open(function(err, p_db) {
+        // Rip out secondaries forcing an attempt to read from the primary
+        p_db.serverConfig._state.secondaries = {};
+  
+        // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
+        var checkoutWriterMethod = p_db.serverConfig._state.master.checkoutWriter;
+        // Set up checkoutWriter to catch correct write request
+        p_db.serverConfig._state.master.checkoutWriter = function() {        
+          var r = checkoutWriterMethod.apply(p_db.serverConfig._state.master);
+          test.equal(servers.primary.host, r.socketOptions.host);
+          test.equal(servers.primary.port, r.socketOptions.port);
+          return r;
+        }
+      
+        // Grab the collection
+        p_db.collection("read_preference_replicaset_test_0", function(err, collection) {
+          // Attempt to read (should fail due to the server not being a primary);
+          collection.find().toArray(function(err, items) {
+            // Does not get called or we don't care
+            p_db.close();
+            // test.fail("Should not correctly work as primary checkoutReader should be called");
+            test.done();
+          });
+        });
+      });
+    });
+  },
+
+  'Connection to replicaset with secondary only read preference' : function(test) {
+    // Fetch all the identity servers
+    identifyServers(RS, 'integration_test_', function(err, servers) {
+      // Replica configuration
+      var replSet = new ReplSetServers( [ 
+          new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+        ], 
+        {rs_name:RS.name, readPreference:Server.READ_SECONDARY_ONLY}
+      );
+    
+      // Create db instance
+      var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+      // Connect to the db
+      db.open(function(err, p_db) {
+        // Rip out secondaries forcing an attempt to read from the primary
+        p_db.serverConfig._state.secondaries = {};
+      
+        // Grab the collection
+        p_db.collection("read_preference_replicaset_test_0", function(err, collection) {
+          // Attempt to read (should fail due to the server not being a primary);
+          collection.find().toArray(function(err, items) {
+            test.ok(err != null);
+            test.equal("no open connections", err.message);
+            // Does not get called or we don't care
+            p_db.close();
+            test.done();
+          });
+        });
+      });
+    });
   },
   
   'Connection to replicaset with secondary preference' : function(test) {
