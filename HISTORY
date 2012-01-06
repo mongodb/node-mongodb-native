@@ -1,5 +1,7 @@
 * Replicasets now correctly adjusts to live changes in the replicaset configuration on the servers, reconnecting correctly.
   * Set the interval for checking for changes setting the replicaSetCheckInterval property when creating the ReplSetServers instance or on db.serverConfig.replicaSetCheckInterval. (default 1000 miliseconds)
+* Fixes formattedOrderClause in collection.js to accept a plain hash as a parameter (Issue #469) https://github.com/tedeh
+* Removed duplicate code for formattedOrderClause and moved to utils module
 
 0.9.7.3-5 2012-01-04
 * Fix for RegExp serialization for 0.4.X where typeof /regexp/ == 'function' vs in 0.6.X typeof /regexp/ == 'object'
