@@ -1,3 +1,6 @@
+* Replicasets now correctly adjusts to live changes in the replicaset configuration on the servers, reconnecting correctly.
+  * Set the interval for checking for changes setting the replicaSetCheckInterval property when creating the ReplSetServers instance or on db.serverConfig.replicaSetCheckInterval. (default 1000 miliseconds)
+
 0.9.7.3-5 2012-01-04
 * Fix for RegExp serialization for 0.4.X where typeof /regexp/ == 'function' vs in 0.6.X typeof /regexp/ == 'object'
 * Don't allow keepAlive and setNoDelay for 0.4.X as it throws errors

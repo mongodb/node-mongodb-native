@@ -233,33 +233,6 @@ module.exports = testCase({
         var intervalId = setTimeout(checking, timeoutInterval);        
       })    
     });
-    
-    // // Execute flag
-    // var executedCorrectly = false;      
-    // 
-    // // Create db instance
-    // var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
-    // // Connect to the db
-    // db.open(function(err, p_db) {
-    //   // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
-    //   var checkoutWriterMethod = p_db.serverConfig._state.master.checkoutWriter;
-    //   // Set up checkoutWriter to catch correct write request
-    //   p_db.serverConfig._state.master.checkoutWriter = function() {
-    //     executedCorrectly = true;
-    //     return checkoutWriterMethod.apply(this);
-    //   }
-    //   
-    //   // Grab the collection
-    //   db.collection("read_preference_replicaset_test_0", function(err, collection) {
-    //     // Attempt to read (should fail due to the server not being a primary);
-    //     collection.find().toArray(function(err, items) {
-    //       // Does not get called or we don't care
-    //       test.ok(executedCorrectly);
-    //       p_db.close();
-    //       test.done();
-    //     });
-    //   });
-    // });
   },
   
   noGlobalsLeaked : function(test) {
