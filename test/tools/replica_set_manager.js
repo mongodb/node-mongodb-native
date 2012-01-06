@@ -17,7 +17,7 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.name = options["name"] != null ? options["name"] : "replica-set-foo";
   this.host = options["host"] != null ? options["host"] : "localhost";
   this.retries = options["retries"] != null ? options["retries"] : 60;
-  this.config = {"_id": this.name, "members": []};
+  this.config = {"_id": this.name, "version": 1, "members": []};
   this.durable = options["durable"] != null ? options["durable"] : false;
   this.auth = options['auth'] != null ? options['auth'] : false; 
   this.path = path.resolve("data");
@@ -144,11 +144,7 @@ ReplicaSetManager.prototype.initiate = function(callback) {
   var done = false;
   // Get master connection
   self.getConnection(function(err, connection) {    
-    if(err != null) return callback(err, null);   
-
-    // debug("=================================================== replicaset config")
-    // debug(inspect(self.config))
-     
+    if(err != null) return callback(err, null);        
     // Set replica configuration
     connection.admin().command({replSetInitiate:self.config}, function(err, result) {
       // Close connection
