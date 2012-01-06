@@ -179,6 +179,9 @@ module.exports = testCase({
       {rs_name:RS.name, readPreference:Server.READ_PRIMARY}
     );
     
+    // Execute flag
+    var executedCorrectly = false;      
+    
     // Create db instance
     var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
     // Connect to the db
@@ -187,8 +190,8 @@ module.exports = testCase({
       var checkoutWriterMethod = p_db.serverConfig._state.master.checkoutWriter;
       // Set up checkoutWriter to catch correct write request
       p_db.serverConfig._state.master.checkoutWriter = function() {
-        p_db.close();
-        test.done();
+        executedCorrectly = true;
+        return checkoutWriterMethod.apply(this);
       }
       
       // Grab the collection
@@ -196,12 +199,15 @@ module.exports = testCase({
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().toArray(function(err, items) {
           // Does not get called or we don't care
+          test.ok(executedCorrectly);
+          p_db.close();
+          test.done();
         });
       });
     });
   },
   
-  'Connection to replicaset with secondary read preference' : function(test) {
+  'Connection to replicaset with secondary read preference with no secondaries should return primary' : function(test) {
     // Fetch all the identity servers
     identifyServers(RS, 'integration_test_', function(err, servers) {
       // Replica configuration
@@ -236,7 +242,6 @@ module.exports = testCase({
           collection.find().toArray(function(err, items) {
             // Does not get called or we don't care
             p_db.close();
-            // test.fail("Should not correctly work as primary checkoutReader should be called");
             test.done();
           });
         });
@@ -244,7 +249,7 @@ module.exports = testCase({
     });
   },
 
-  'Connection to replicaset with secondary only read preference' : function(test) {
+  'Connection to replicaset with secondary only read preference no secondaries should not return a connection' : function(test) {
     // Fetch all the identity servers
     identifyServers(RS, 'integration_test_', function(err, servers) {
       // Replica configuration
@@ -277,13 +282,94 @@ module.exports = testCase({
       });
     });
   },
-  
-  'Connection to replicaset with secondary preference' : function(test) {
-    test.done();
+
+  'Connection to replicaset with secondary only read preference should return secondary server' : function(test) {
+    // Fetch all the identity servers
+    identifyServers(RS, 'integration_test_', function(err, servers) {
+      // Replica configuration
+      var replSet = new ReplSetServers( [ 
+          new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+        ], 
+        {rs_name:RS.name, readPreference:Server.READ_SECONDARY_ONLY}
+      );
+      
+      // Execute flag
+      var executedCorrectly = false;      
+    
+      // Create db instance
+      var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+      // Connect to the db
+      db.open(function(err, p_db) {        
+        // Let's set up all the secondaries
+        var keys = Object.keys(p_db.serverConfig._state.secondaries);
+        
+        // Set up checkoutReaders
+        for(var i = 0; i < keys.length; i++) {
+          var checkoutReader = p_db.serverConfig._state.secondaries[keys[i]].checkoutReader;
+          p_db.serverConfig._state.secondaries[keys[i]].checkoutReader = function() {
+            executedCorrectly = true;
+          }
+        }
+        
+        // Grab the collection
+        p_db.collection("read_preference_replicaset_test_0", function(err, collection) {
+          // Attempt to read (should fail due to the server not being a primary);
+          collection.find().toArray(function(err, items) {
+            // Does not get called or we don't care
+            test.ok(executedCorrectly);
+            p_db.close();
+            test.done();
+          });
+        });
+      });
+    });
   },
 
-  'Connection to replicaset with secondary only preference' : function(test) {
-    test.done();
+  'Connection to replicaset with secondary read preference should return secondary server' : function(test) {
+    // Fetch all the identity servers
+    identifyServers(RS, 'integration_test_', function(err, servers) {
+      // Replica configuration
+      var replSet = new ReplSetServers( [ 
+          new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+          new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+        ], 
+        {rs_name:RS.name, readPreference:Server.READ_SECONDARY_ONLY}
+      );
+      
+      // Execute flag
+      var executedCorrectly = false;
+    
+      // Create db instance
+      var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+      // Connect to the db
+      db.open(function(err, p_db) {        
+        // Let's set up all the secondaries
+        var keys = Object.keys(p_db.serverConfig._state.secondaries);
+        
+        // Set up checkoutReaders
+        for(var i = 0; i < keys.length; i++) {
+          var checkoutReader = p_db.serverConfig._state.secondaries[keys[i]].checkoutReader;
+          p_db.serverConfig._state.secondaries[keys[i]].checkoutReader = function() {
+            executedCorrectly = true;
+            return checkoutReader.apply(this);
+          }
+        }
+        
+        // Grab the collection
+        p_db.collection("read_preference_replicaset_test_0", function(err, collection) {
+          // Attempt to read (should fail due to the server not being a primary);
+          collection.find().toArray(function(err, items) {
+            // Does not get called or we don't care
+            test.ok(executedCorrectly);
+            p_db.close();
+            test.done();
+          });
+        });
+      });
+    });
   },
   
   noGlobalsLeaked : function(test) {
