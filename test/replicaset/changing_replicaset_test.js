@@ -163,12 +163,12 @@ module.exports = testCase({
                   }
                 }
               }
-
+  
               // Reassign the array
               newConfig.members = members;
               // Adjust version
               newConfig.version = newConfig.version + 1;
-
+  
               // Issue replicaset reconfig command to server
               _db.admin().command({replSetReconfig:newConfig}, function(err, result) {
                 test.equal(null, err);
@@ -202,7 +202,7 @@ module.exports = testCase({
               newConfig = JSON.parse(JSON.stringify(RS.config));
               // Adjust version
               newConfig.version = version + 1;
-
+  
               // Issue replicaset reconfig command to server
               _db.admin().command({replSetReconfig:newConfig}, function(err, result) {
                 test.equal(null, err);
@@ -228,12 +228,113 @@ module.exports = testCase({
             test.done();
           }
         }
-
+  
         // Let's boot up a checking loop
         var intervalId = setTimeout(checking, timeoutInterval);        
       })    
     });
   },
+
+  // 'Inflight queries should be finished even after the reconnect is performed' : function(test) {
+  //   // Fetch all the identity servers
+  //   identifyServers(RS, 'integration_test_', function(err, servers) {
+  //     console.log("------------------------------------------------------------ 0")
+  //     // Replica configuration
+  //     var replSet = new ReplSetServers( [ 
+  //         new Server( RS.host, RS.ports[1], { auto_reconnect: true, poolSize: 4 } ),
+  //         new Server( RS.host, RS.ports[0], { auto_reconnect: true, poolSize: 4 } ),
+  //         new Server( RS.host, RS.ports[2], { auto_reconnect: true, poolSize: 4 } )
+  //       ], 
+  //       {rs_name:RS.name, readPreference:Server.READ_SECONDARY, replicaSetCheckInterval:100, poolSize:4}
+  //     );
+  //               
+  //     // Replicaset server setup
+  //     var replDb = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+  //     replDb.open(function(err, replDb) {
+  //       console.log("------------------------------------------------------------ 1")
+  //       // Are we done processing
+  //       var timeoutInterval = 1000;
+  //       var numberOfStepsDone = 0;
+  //       var newConfig = null;
+  //       var step = 0;
+  // 
+  //       // Var checking function
+  //       var checking = function() {
+  //         console.log("------------------------------------------------------------ 2")
+  //         console.log("numberOfStepsDone = " + numberOfStepsDone)
+  // 
+  //         // First step let's do a reconfig of the replicaset
+  //         if(numberOfStepsDone == 0) {
+  //           console.log("------------------------------------------------------------ 3")
+  //           numberOfStepsDone = numberOfStepsDone + 1;
+  //           var collection = replDb.collection('inflight_collection');
+  //           // Fire a bunch of messages, attempting to have stuff in flight
+  //           for(var i = 0; i < 10000; i++) {
+  //             collection.insert({a:1, b:'hello world', c:i});
+  //           }
+  //           
+  //           process.nextTick(checking);
+  //         } else if(numberOfStepsDone == 1) {
+  //           console.log("------------------------------------------------------------ 4")
+  //           // Update to the next step
+  //           numberOfStepsDone = numberOfStepsDone + 1;
+  //           // Connect directly to the primary server to change the config setup
+  //           var _server = new Server(servers.primary.host, servers.primary.port, {auto_reconnect: true});
+  //           // Create db instance
+  //           var _db = new Db('integration_test_', _server, {native_parser: (process.env['TEST_NATIVE'] != null)});
+  //           _db.open(function(err, _db) {
+  //             // The number of members to remove
+  //             var numberOfMembersToRemove = 1;
+  //             
+  //             // Let's change the configuration set and update the replicaset
+  //             newConfig = JSON.parse(JSON.stringify(RS.config));
+  //             var members = newConfig.members;
+  //             // Remove one of the secondaries
+  //             for(var i = 0; i < members.length; i++) {
+  //               if(members[i].arbiterOnly == null && (servers.primary.host + ":" + servers.primary.port) != members[i].host) {
+  //                 numberOfMembersToRemove = numberOfMembersToRemove - 1;
+  //                 members.splice(i, 1);
+  //                 
+  //                 // Stop removing members
+  //                 if(numberOfMembersToRemove == 0) {
+  //                   break;                    
+  //                 }
+  //               }
+  //             }
+  // 
+  //             // // Reassign the array
+  //             // newConfig.members = members;
+  //             // // Adjust version
+  //             // newConfig.version = newConfig.version + 1;
+  //             // 
+  //             // // Issue replicaset reconfig command to server
+  //             // _db.admin().command({replSetReconfig:newConfig}, function(err, result) {
+  //             //   console.log("============================================================")
+  //             //   console.dir(err)
+  //             //   console.dir(result)
+  //             //   
+  //             //   test.equal(null, err);
+  //             //   // Close the db connection
+  //             //   _db.close();
+  //             //   // Let's do some queries
+  //             //   setTimeout(checking, timeoutInterval);
+  //             // });
+  //           });
+  //         } else if(numberOfStepsDone < 10) {
+  //           numberOfStepsDone = numberOfStepsDone + 1;
+  //           setTimeout(checking, timeoutInterval);
+  //         } else {
+  //           replDb.close();
+  //           test.done();            
+  //         }
+  //       }
+  // 
+  //       console.log("------------------------------------------------------------ 5");
+  //       // Let's fire off the method
+  //       process.nextTick(checking);
+  //     })    
+  //   });
+  // },
   
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
