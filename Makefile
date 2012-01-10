@@ -22,7 +22,7 @@ clean_native:
 
 test: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
-	$(NODE) tools/test_all.js --noreplicaset
+	$(NODE) tools/test_all.js --noreplicaset --boot
 
 test_junit: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
@@ -49,11 +49,11 @@ test_nodeunit_replicaset_native:
 
 test_all: build_native
 	@echo "\n == Run All tests =="
-	$(NODE) tools/test_all.js
+	$(NODE) tools/test_all.js --boot
 
 test_all_junit: build_native
 	@echo "\n == Run All tests =="
-	$(NODE) tools/test_all.js --junit
+	$(NODE) tools/test_all.js --junit --boot
 
 clean:
 	rm ./external-libs/bson/bson.node
