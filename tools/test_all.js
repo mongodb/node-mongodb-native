@@ -45,6 +45,7 @@ var specifedParameter = function(arguments, param) {
 // Different options
 var junit = specifedParameter(process.argv, '--junit', false);
 var noReplicaSet = specifedParameter(process.argv, '--noreplicaset', false);
+var boot = specifedParameter(process.argv, '--boot', false);
 // Basic default test runner
 var runner = nodeunit.reporters.default;
 var options = { error_prefix: '\u001b[31m',
@@ -75,7 +76,11 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
     Step(
       // Start the single server
       function startSingleServer() {
-        serverManager.start(true, {purgedirectories:true}, this);
+        if(boot) {          
+          serverManager.start(true, {purgedirectories:true}, this);          
+        } else {
+          this(null, null);
+        }
       },
 
       // Run all the integration tests using the pure js bson parser
@@ -107,18 +112,26 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
       },    
 
       function done() {
-        // Kill all mongod server
-        replicaSetManager.killAll(function() {
-          // Force exit
+        if(boot) {          
+          // Kill all mongod server
+          replicaSetManager.killAll(function() {
+            // Force exit
+            process.exit();
+          })
+        } else {
           process.exit();
-        })
+        }
       }
     );    
   } else {
     // Execute without replicaset tests
     Step(
       function startSingleServer() {
-        serverManager.start(true, {purgedirectories:true}, this);
+        if(boot) {          
+          serverManager.start(true, {purgedirectories:true}, this);
+        } else {
+          this(null, null);
+        }
       },
       
       function runPureJS() {
@@ -150,9 +163,15 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
       },
       
       function done() {
-        replicaSetManager.killAll(function() {
+        if(boot) {          
+          // Kill all mongod server
+          replicaSetManager.killAll(function() {
+            // Force exit
+            process.exit();
+          })
+        } else {
           process.exit();
-        })
+        }
       }
     );    
   }
