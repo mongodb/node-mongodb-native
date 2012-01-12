@@ -18,7 +18,7 @@ Check out the google group [node-mongodb-native](http://groups.google.com/group/
 Introduction
 ========
 
-This is a node.js driver for MongoDB. It's a port (or close to a port) of the libary for ruby at http://github.com/mongodb/mongo-ruby-driver/.
+This is a node.js driver for MongoDB. It's a port (or close to a port) of the library for ruby at http://github.com/mongodb/mongo-ruby-driver/.
 
 A simple example of inserting a document.
 
