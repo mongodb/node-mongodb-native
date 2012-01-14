@@ -13,16 +13,10 @@ var BSON = require('../lib/mongodb').BSONNative.BSON,
 var BSON = require('../lib/mongodb').BSONPure.BSON,
   ObjectID = require('../lib/mongodb').BSONPure.ObjectID;
 
+var db = null;
+var poolSize = 1;
 var RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
 RS.startSet(true, function(err, result) {      
-  if(err != null) throw err;
-  // Start hammering
-  hammerTime();
-});      
-
-// Hammer the set
-var hammerTime = function() {
-  var poolSize = 1;
   // Replica configuration
   var replSet = new ReplSetServers( [ 
       new Server( RS.host, RS.ports[1], { auto_reconnect: true, poolSize: poolSize } ),
@@ -33,93 +27,108 @@ var hammerTime = function() {
   );
   
   // Open the db connection
-  new Db('hammer_db', replSet, {native_parser: false}).open(function(err, db) {
-    db.dropCollection('hammer_collection', function(err, result) {
-      var i = 0;
-      // Fire random command
-      setInterval(function() {
-        var command = Math.round(Math.random() * 4);
-        command = 2;
+  new Db('hammer_db', replSet, {native_parser: false, retryMiliSeconds: 1000}).open(function(err, p_db) {
+    db = p_db;
+    if(err != null) throw err;
+    // Start hammering
+    hammerTime();
+  });
+});      
 
-        debug("================= execute :: " + i++ + " = " + command)
+// Hammer the set
+var hammerTime = function() {
+  db.dropCollection('hammer_collection', function(err, result) {
+    var i = 0;
+    // Fire random command
+    setInterval(function() {
+      var command = Math.round(Math.random() * 4);
+      // command = 2;
 
-        // Execute the command
-        if(command == 1) {
-          // Execute an insert
-          db.collection('hammer_collection', function(err, collection) {
-            collection.insert(randomDoc(), {safe:false}, function(err, result) {
-              debug("---------------------------------------- INSERT")
-            });
+      debug("================= execute :: " + i++ + " = " + command)
+
+      // Execute the command
+      if(command == 1) {
+        // Execute an insert
+        db.collection('hammer_collection', function(err, collection) {
+          collection.insert(randomDoc(), {safe:false}, function(err, result) {
+            debug("---------------------------------------- INSERT ")
+            debug(inspect(err))
           });
-        } else if(command == 2) {
-          // Update some random record
-          db.collection('hammer_collection', function(err, collection) {
-            console.log("================================================================== update :: 0")
-            if(err != null) {
-              console.log("------------------------------------- error update 1")
-              console.dir(err)                
+        });
+      } else if(command == 2) {
+        // Update some random record
+        db.collection('hammer_collection', function(err, collection) {
+          console.log("================================================================== update :: 0")
+          if(err != null) {
+            console.log("------------------------------------- error update 1")
+            console.dir(err)                
+          }
+
+          collection.findOne({}, function(err, item) {
+            // debug(inspect(err))
+            // debug(inspect(item))
+
+            if(err == null && item != null) {
+              console.log("================================================================== update :: 1")
+              // Grab key before we bork it
+              var _id = item._id;
+              var keys = Object.keys(item);
+              var objLength = keys.length;
+              var pickRandomItem = Math.round(Math.random() * objLength);
+              // Show a random doc in
+              item[keys[pickRandomItem]] = randomDoc();
+              // Update doc
+              collection.update({'_id':_id}, item, {safe:false}, function(err, result) {
+                debug("---------------------------------------- UPDATE")                
+              });
+            } else {
+              console.log("------------------------------------- error update 2")
+              console.dir(err)
             }
-
-            collection.findOne({}, function(err, item) {
-              if(!err && item != null) {
-                console.log("================================================================== update :: 1")
-                // Grab key before we bork it
-                var _id = item._id;
-                var keys = Object.keys(item);
-                var objLength = keys.length;
-                var pickRandomItem = Math.round(Math.random() * objLength);
-                // Show a random doc in
-                item[keys[pickRandomItem]] = randomDoc();
-                // Update doc
-                collection.update({'_id':_id}, item, {safe:false}, function(err, result) {
-                  debug("---------------------------------------- UPDATE")                
-                });
-              } else {
-                console.log("------------------------------------- error update 2")
-                console.dir(err)
-              }
-            })
-          });
-        } else if(command == 3) {
-          // Update some random record
-          db.collection('hammer_collection', function(err, collection) {
-            // if(err != null) {
-            //   console.log("------------------------------------- error remove 1")
-            //   console.dir(err)                
-            // }
-
-            collection.findOne({}, function(err, item) {
-              if(!err && item != null) {
-                // Update doc
-                collection.remove({'_id':item._id}, {safe:false}, function(err, result) {
-                  debug("---------------------------------------- REMOVE")
-                });
-              } else {
-                // console.log("------------------------------------- error remove 2")
-                // console.dir(err)
-              }
-            })
-          });
-        } else if(command == 4) {
-          db.collection('hammer_collection', function(err, collection) {
-            // if(err != null) {
-            //   console.log("------------------------------------- error query 1")
-            //   console.dir(err)                
-            // }
-
-            collection.find().limit(100).toArray(function(err, items) {                        
-              debug("---------------------------------------- QUERY :: " + items.length)
-              
-              // if(err != null) {
-              //   console.log("------------------------------------- error query 2")
-              //   console.dir(err)                
-              // }
-            })
           })
-        }      
-      }, 0);    
-    });
-  });  
+        });
+      } else if(command == 3) {
+        // Update some random record
+        db.collection('hammer_collection', function(err, collection) {
+          // if(err != null) {
+          //   console.log("------------------------------------- error remove 1")
+          //   console.dir(err)                
+          // }
+
+          collection.findOne({}, function(err, item) {
+            // debug(inspect(err))
+            // debug(inspect(item))
+
+            if(err == null && item != null) {
+              // Update doc
+              collection.remove({'_id':item._id}, {safe:false}, function(err, result) {
+                debug("---------------------------------------- REMOVE")
+              });
+            } else {
+              // console.log("------------------------------------- error remove 2")
+              // console.dir(err)
+            }
+          })
+        });
+      } else if(command == 4) {
+        db.collection('hammer_collection', function(err, collection) {
+          // if(err != null) {
+          //   console.log("------------------------------------- error query 1")
+          //   console.dir(err)                
+          // }
+
+          collection.find().limit(100).toArray(function(err, items) {                        
+            debug("---------------------------------------- QUERY :: " + items.length)
+            
+            // if(err != null) {
+            //   console.log("------------------------------------- error query 2")
+            //   console.dir(err)                
+            // }
+          })
+        })
+      }      
+    }, 100);    
+  });
 }
 
 //
