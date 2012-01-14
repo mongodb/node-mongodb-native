@@ -233,8 +233,7 @@ module.exports = testCase({
                 test.ok(err != null)
   
                 if(err != null) {
-                  collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {  
-                    
+                  collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {                      
                     // Peform a count
                     collection.count(function(err, count) {
                       test.equal(2, count);
@@ -357,6 +356,7 @@ module.exports = testCase({
           
                 test.ok(err == null);
           
+                // p_db.collection('shouldWorkCorrectlyWithInserts', {safe:true}, function(err, collection) {
                 p_db.collection('shouldWorkCorrectlyWithInserts', function(err, collection) {
                   if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
                   // Execute a set of inserts
@@ -406,7 +406,7 @@ module.exports = testCase({
                                                             
                                     collection.find().toArray(function(err, items) {
                                       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                                                            
+                                                                                                  
                                       // Ensure we have the correct values
                                       test.equal(7, items.length);
                                       
