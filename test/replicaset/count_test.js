@@ -115,11 +115,13 @@ module.exports = testCase({
                 // Kill the primary
                 RS.killPrimary(function(node) {
 
+                  // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect :: 0")
                   // Ensure valid connection
                   // Do inserts
-                  ensureConnection(test, retries, function(err, p_db) {
-                    if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
-                    test.ok(err == null);
+                  // ensureConnection(test, retries, function(err, p_db) {
+                  //   // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect :: 1")
+                  //   if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
+                  //   test.ok(err == null);
 
                     p_db.collection('testsets', function(err, collection) {
                       if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
@@ -142,7 +144,7 @@ module.exports = testCase({
                         });
                       });
                     });
-                  });        
+                  // });        
                 });              
               }, 2000);
             })
