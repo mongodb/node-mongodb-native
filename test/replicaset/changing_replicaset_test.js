@@ -115,8 +115,8 @@ module.exports = testCase({
   },
 
   'Basic replicaset changes removing a secondary server from the set, should be reflected in the driver' : function(test) {
-    test.done();
-    return;
+    // test.done();
+    // return;
     
     // Fetch all the identity servers
     identifyServers(RS, 'integration_test_', function(err, servers) {
@@ -174,9 +174,10 @@ module.exports = testCase({
   
               // Issue replicaset reconfig command to server
               _db.admin().command({replSetReconfig:newConfig}, function(err, result) {
-                test.equal(null, err);
+                // test.equal(null, err);
                 // Close the db connection
                 _db.close();
+                
                 // Let's do some queries
                 setTimeout(checking, timeoutInterval);
               });

@@ -58,18 +58,15 @@ var hammerTime = function() {
       } else if(command == 2) {
         // Update some random record
         db.collection('hammer_collection', function(err, collection) {
-          console.log("================================================================== update :: 0")
+          // console.log("================================================================== update :: 0")
           if(err != null) {
             console.log("------------------------------------- error update 1")
             console.dir(err)                
           }
 
           collection.findOne({}, function(err, item) {
-            // debug(inspect(err))
-            // debug(inspect(item))
-
             if(err == null && item != null) {
-              console.log("================================================================== update :: 1")
+              // console.log("================================================================== update :: 1")
               // Grab key before we bork it
               var _id = item._id;
               var keys = Object.keys(item);
@@ -117,13 +114,13 @@ var hammerTime = function() {
           //   console.dir(err)                
           // }
 
-          collection.find().limit(100).toArray(function(err, items) {                        
-            debug("---------------------------------------- QUERY :: " + items.length)
-            
-            // if(err != null) {
-            //   console.log("------------------------------------- error query 2")
-            //   console.dir(err)                
-            // }
+          collection.find().limit(100).toArray(function(err, items) {                                    
+            if(err != null) {
+              console.log("------------------------------------- error query 2")
+              console.dir(err)                
+            } else {
+              debug("---------------------------------------- QUERY :: " + items.length)              
+            }
           })
         })
       }      
