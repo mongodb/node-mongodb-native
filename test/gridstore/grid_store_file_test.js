@@ -45,6 +45,28 @@ var tests = testCase({
       callback();        
     }      
   },
+    
+  shouldCorrectlyFailDueToMissingChunks : function(test) {
+    var FILE = "empty.test.file";
+    client.collection('fs.files', function(err, collection) {
+      collection.insert({filename: FILE,
+        "contentType" : "application/json; charset=UTF-8",
+        "length" : 91,
+        "chunkSize" : 262144,
+        "aliases" : null,
+        "metadata" : {},
+        "md5" : "4e638392b289870da9291a242e474930"},
+        {safe:true}, function(err, result) {
+          new mongodb.GridStore(client, FILE, "r").open(function (err, gs) {
+            gs.read(function(err, data) {
+              test.ok(err != null);
+              gs.close(function (){});
+              test.done();
+            });
+          });          
+        }); 
+    });
+  },  
 
   shouldCorrectlyWriteASmallPayload : function(test) {
     var gridStore = new GridStore(client, "test_gs_small_write", "w");
@@ -117,7 +139,7 @@ var tests = testCase({
       gridStore.write("hello world!", function(err, gridStore) {
         gridStore.close(function(err, result) {
           client.collection('fs.files', function(err, collection) {
-
+  
             collection.find({'filename':'test_gs_small_file'}, function(err, cursor) {
               cursor.toArray(function(err, items) {
                 test.equal(1, items.length);
