@@ -1134,6 +1134,26 @@ var tests = testCase({
     });
   },
   
+  shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord : function(test) {
+    var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+    p_client.open(function(err, p_client) {
+      p_client.createCollection('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', function(err, collection) {
+        // Test return old document on change
+        collection.insert([{'login':'user1'}, {'login':'user2'}], {safe:true}, function(err, docs) {
+          var id = docs[1]._id;
+          // Set an index
+          collection.ensureIndex('login', {unique:true}, function(err, result) {
+            // Attemp to modify document
+            collection.findAndModify({_id: id}, [], { $set: {login: 'user1'} }, {}, function(err, user){
+              test.ok(err != null);
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  },
+  
   noGlobalsLeaked : function(test) {
     var leaks = gleak.detectNew();
     test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
