@@ -14,7 +14,6 @@ var testCase = require('../../deps/nodeunit').testCase,
   Step = require("../../deps/step/lib/step");  
 
 var MONGODB = 'integration_tests';
-// var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 var serverManager = null;
 var RS = RS == null ? null : RS;
 
@@ -35,9 +34,9 @@ var tests = testCase({
   },
   
   tearDown: function(callback) {
-    RS.killAll(function() {
+    // RS.killAll(function() {
       callback();                      
-    });
+    // });
   },
 
   shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts : function(test) {
@@ -58,6 +57,7 @@ var tests = testCase({
         },
         
         function ensureFailingInsert(err, result) {
+          // return
           var self = this;
           test.equal(null, err);
           test.ok(result != null);
@@ -71,6 +71,18 @@ var tests = testCase({
           test.ok(err != null);
           
           db.admin().authenticate("me", "secret", this);
+        },
+        
+        function changePassword(err, result) {
+          var self = this;
+          test.equal(null, err);
+          test.ok(result);
+
+          db.admin().addUser("me", "secret2", this);
+        },
+
+        function authenticate(err, result) {
+          db.admin().authenticate("me", "secret2", this);
         },
         
         function insertShouldSuccedNow(err, result) {
@@ -123,7 +135,7 @@ var tests = testCase({
         
         function shouldCorrectlyAuthenticateAgainstSecondary(err, result) {
           test.ok(err != null)          
-          slaveDb.admin().authenticate('me', 'secret', this);
+          slaveDb.admin().authenticate('me', 'secret2', this);
         },
         
         function shouldCorrectlyInsertItem(err, result) {

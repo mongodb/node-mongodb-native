@@ -1037,6 +1037,29 @@ var tests = testCase({
     test.done();
   },
   
+  'Should Correctly throw error on bsonparser errors' : function(test) {
+    var data = new Buffer(3);
+    var parser = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
+    
+    // Catch to small buffer error
+    try {
+      parser.deserialize(data);
+      test.ok(false);
+    } catch(err) {}
+    
+    data = new Buffer(5);
+    data[0] = 0xff;
+    data[1] = 0xff;
+    // Catch illegal size
+    try {
+      parser.deserialize(data);
+      test.ok(false);
+    } catch(err) {}
+
+    // Finish up
+    test.done();
+  },  
+  
   // 'Should Correctly Function' : function(test) {
   //   var doc = {b:1, func:function() {
   //     this.b = 2;

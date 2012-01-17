@@ -708,11 +708,23 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
      data = Buffer::Data(obj);
      uint32_t length = Buffer::Length(obj);
     #endif
+    
+    // Validate that we have at least 5 bytes
+    if(length < 5) {
+      return VException("corrupt bson message < 5 bytes long");
+    }
 
-    return BSON::deserialize(bson, data, 0, NULL);
+    // Deserialize the data
+    return BSON::deserialize(bson, data, length, 0, NULL);
   } else {
     // The length of the data for this encoding
     ssize_t len = DecodeBytes(args[0], BINARY);
+
+    // Validate that we have at least 5 bytes
+    if(len < 5) {
+      return VException("corrupt bson message < 5 bytes long");
+    }
+
     // Let's define the buffer size
     data = (char *)malloc(len);
     // Write the data to the buffer from the string object
@@ -720,7 +732,7 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
     // Assert that we wrote the same number of bytes as we have length
     assert(written == len);
     // Get result
-    Handle<Value> result = BSON::deserialize(bson, data, 0, NULL);
+    Handle<Value> result = BSON::deserialize(bson, data, len, 0, NULL);
     // Free memory
     free(data);
     // Deserialize the content
@@ -729,7 +741,7 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
 }
 
 // Deserialize the stream
-Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t startIndex, bool is_array_item) {
+Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t inDataLength, uint32_t startIndex, bool is_array_item) {
   HandleScope scope;
   // Holds references to the objects that are going to be returned
   Local<Object> return_data = Object::New();
@@ -738,6 +750,9 @@ Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t startIndex, boo
   uint32_t index = startIndex;
   // Decode the size of the BSON data structure
   uint32_t size = BSON::deserialize_int32(data, index);
+  
+  // If we have an illegal message size
+  if(size < 0 || size > inDataLength) return VException("corrupt bson message");
 
   // Data length
   uint32_t dataLength = index + size;
@@ -1254,7 +1269,7 @@ Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t startIndex, boo
       // Adjust the index
       index = index + bson_object_size;
       // Parse the bson object
-      Handle<Value> scope_object = BSON::deserialize(bson, bson_buffer, 0, false);
+      Handle<Value> scope_object = BSON::deserialize(bson, bson_buffer, inDataLength, 0, false);
       // Define the try catch block
       TryCatch try_catch;                
       // Decode the code object
@@ -1298,7 +1313,7 @@ Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t startIndex, boo
       // Define the try catch block
       TryCatch try_catch;                
       // Decode the code object
-      Handle<Value> obj = BSON::deserialize(bson, data + index, 0, false);
+      Handle<Value> obj = BSON::deserialize(bson, data + index, inDataLength, 0, false);
       // Adjust the index
       index = index + bson_object_size;
       // If an error was thrown push it up the chain
@@ -1334,7 +1349,7 @@ Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t startIndex, boo
       TryCatch try_catch;                
 
       // Decode the code object
-      Handle<Value> obj = BSON::deserialize(bson, data + index, 0, true);
+      Handle<Value> obj = BSON::deserialize(bson, data + index, inDataLength, 0, true);
       // If an error was thrown push it up the chain
       if(try_catch.HasCaught()) {
         // Rethrow exception
@@ -2290,7 +2305,7 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) {
     uint32_t size = BSON::deserialize_int32(data, index);
     
     // Get result
-    Handle<Value> result = BSON::deserialize(bson, data, index, NULL);
+    Handle<Value> result = BSON::deserialize(bson, data, size, index, NULL);
     
     // Add result to array
     documents->Set(i + resultIndex, result);
