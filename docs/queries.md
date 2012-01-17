@@ -10,7 +10,7 @@ See also:
 
 [Collections](collections.md) can be queried with `find`. 
 
-    collection.find(query[[[, fields], options], callback]);
+    collection.find(query[[[, fields], options], raw]);
 
 Where
 
