@@ -729,6 +729,20 @@ var tests = testCase({
     });
   },
   
+  'Should fail on insert due to key starting with $' : function(test) {
+    var doc = {
+     "_id" : new ObjectID("4e886e687ff7ef5e00000162"),
+     "$key" : "foreign",
+    }    
+  
+    client.createCollection('Should_fail_on_insert_due_to_key_starting_with', function(err, collection) {
+      collection.insert(doc, {safe:true}, function(err, result) {
+        test.ok(err != null);
+        test.done();
+      });        
+    });    
+  },
+  
   'Should Correctly allow for control of serialization of functions on command level' : function(test) {
     var doc = {
       str : "String",
