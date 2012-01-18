@@ -11,6 +11,9 @@
 
 var _keys = function(obj){
     if(Object.keys) return Object.keys(obj);
+    if (typeof obj != 'object' && typeof obj != 'function') {
+        throw new TypeError('-');
+    }
     var keys = [];
     for(var k in obj){
         if(obj.hasOwnProperty(k)) keys.push(k);
@@ -164,6 +167,14 @@ function _deepEqual(actual, expected) {
   // equivalent if it is also a Date object that refers to the same time.
   } else if (actual instanceof Date && expected instanceof Date) {
     return actual.getTime() === expected.getTime();
+
+  // 7.2.1 If the expcted value is a RegExp object, the actual value is
+  // equivalent if it is also a RegExp object that refers to the same source and options
+  } else if (actual instanceof RegExp && expected instanceof RegExp) {
+    return actual.source === expected.source &&
+           actual.global === expected.global &&
+           actual.ignoreCase === expected.ignoreCase &&
+           actual.multiline === expected.multiline;
 
   // 7.3. Other pairs that do not both pass typeof value == "object",
   // equivalence is determined by ==.

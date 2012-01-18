@@ -5,7 +5,7 @@
  *
  * THIS FILE SHOULD BE BROWSER-COMPATIBLE JS!
  * You can use @REMOVE_LINE_FOR_BROWSER to remove code from the browser build.
- * Only code on that line will be removed, its mostly to avoid requiring code
+ * Only code on that line will be removed, it's mostly to avoid requiring code
  * that is node specific
  */
 
@@ -52,8 +52,10 @@ exports.assertionList = function (arr, duration) {
     var that = arr || [];
     that.failures = function () {
         var failures = 0;
-        for (var i=0; i<this.length; i++) {
-            if (this[i].failed()) failures++;
+        for (var i = 0; i < this.length; i += 1) {
+            if (this[i].failed()) {
+                failures += 1;
+            }
         }
         return failures;
     };
@@ -66,7 +68,7 @@ exports.assertionList = function (arr, duration) {
 
 /**
  * Create a wrapper function for assert module methods. Executes a callback
- * after the it's complete with an assertion object representing the result.
+ * after it's complete with an assertion object representing the result.
  *
  * @param {Function} callback
  * @api private
@@ -75,7 +77,7 @@ exports.assertionList = function (arr, duration) {
 var assertWrapper = function (callback) {
     return function (new_method, assert_method, arity) {
         return function () {
-            var message = arguments[arity-1];
+            var message = arguments[arity - 1];
             var a = exports.assertion({method: new_method, message: message});
             try {
                 assert[assert_method].apply(null, arguments);

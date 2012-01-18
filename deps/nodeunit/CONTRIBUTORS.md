@@ -25,10 +25,14 @@ Nodeunit contributors (sorted alphabeticaly)
 
   * First comand-line tool
 
-* **[Kadir Pekel](https://github.com/coffeemate)**
+* **[Kadir Pekel](https://github.com/kadirpekel)**
 
   * Improvements to default test reporter
   * HTTP test utility
+
+* **[Λlisue](https://github.com/lambdalisue)**
+
+  * Add machineout reporter
 
 * **[Matthias Lübken](https://github.com/luebken)**
 
@@ -55,6 +59,10 @@ Nodeunit contributors (sorted alphabeticaly)
 * **[Thomas Mayfield](https://github.com/thegreatape)**
 
   * Async setUp and tearDown support for testCase
+
+* **[Maciej Małecki](https://github.com/mmalecki)**
+
+  * Removal of `testCase`
 
 **[Full contributors list](https://github.com/caolan/nodeunit/contributors).**
 

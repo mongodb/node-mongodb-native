@@ -11,7 +11,6 @@
 var nodeunit = require('../nodeunit'),
     utils = require('../utils'),
     fs = require('fs'),
-    sys = require('sys'),
     path = require('path'),
     AssertionError = require('assert').AssertionError;
 
@@ -28,7 +27,7 @@ exports.info = "Skip passed tests output";
  * @api public
  */
 
-exports.run = function (files, options) {
+exports.run = function (files, options, callback) {
 
     if (!options) {
         // load default options
@@ -57,54 +56,52 @@ exports.run = function (files, options) {
     });
 
     nodeunit.runFiles(paths, {
+        testspec: options.testspec,
         moduleStart: function (name) {
-            sys.puts('\n' + bold(name));
+            console.log('\n' + bold(name));
         },
         testDone: function (name, assertions) {
             if (assertions.failures()) {
-                sys.puts(error('✖ ' + name) + '\n');
+                console.log(error('✖ ' + name) + '\n');
                 assertions.forEach(function (a) {
                     if (a.failed()) {
                         a = utils.betterErrors(a);
                         if (a.error instanceof AssertionError && a.message) {
-                            sys.puts(
+                            console.log(
                                 'Assertion Message: ' + assertion_message(a.message)
                             );
                         }
-                        sys.puts(a.error.stack + '\n');
+                        console.log(a.error.stack + '\n');
                     }
                 });
             }
         },
         moduleDone: function (name, assertions) {
             if (!assertions.failures()) {
-                sys.puts('✔ all tests passed');
+                console.log('✔ all tests passed');
             }
             else {
-                sys.puts(error('✖ some tests failed'));
+                console.log(error('✖ some tests failed'));
             }
         },
         done: function (assertions) {
             var end = new Date().getTime();
             var duration = end - start;
             if (assertions.failures()) {
-                sys.puts(
+                console.log(
                     '\n' + bold(error('FAILURES: ')) + assertions.failures() +
                     '/' + assertions.length + ' assertions failed (' +
                     assertions.duration + 'ms)'
                 );
             }
             else {
-                sys.puts(
+                console.log(
                     '\n' + bold(ok('OK: ')) + assertions.length +
                     ' assertions (' + assertions.duration + 'ms)'
                 );
             }
-            // should be able to flush stdout here, but doesn't seem to work,
-            // instead delay the exit to give enough to time flush.
-            setTimeout(function () {
-                process.reallyExit(assertions.failures());
-            }, 10);
+
+            if (callback) callback(assertions.failures() ? new Error('We have got test failures.') : undefined);
         }
     });
 };

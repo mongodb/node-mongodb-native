@@ -10,8 +10,8 @@
 
 var async = require('../deps/async'),
     fs = require('fs'),
-    sys = require('sys'),
-    Script = process.binding('evals').Script,
+    util = require('util'),
+    Script = process.binding('evals').Script || process.binding('evals').NodeScript,
     http = require('http');
 
 
@@ -190,8 +190,8 @@ exports.betterErrors = function (assertion) {
         Object.getOwnPropertyDescriptor(e, 'expected')) {
 
         // alexgorbatchev 2010-10-22 :: Added a bit of depth to inspection
-        var actual = sys.inspect(e.actual, false, 10).replace(/\n$/, '');
-        var expected = sys.inspect(e.expected, false, 10).replace(/\n$/, '');
+        var actual = util.inspect(e.actual, false, 10).replace(/\n$/, '');
+        var expected = util.inspect(e.expected, false, 10).replace(/\n$/, '');
         var multiline = (
             actual.indexOf('\n') !== -1 ||
             expected.indexOf('\n') !== -1

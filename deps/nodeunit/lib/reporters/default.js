@@ -11,9 +11,8 @@
 var nodeunit = require('../nodeunit'),
     utils = require('../utils'),
     fs = require('fs'),
-    sys = require('util'),
     track = require('../track'),
-    path = require('path');
+    path = require('path'),
     AssertionError = require('../assert').AssertionError;
 
 /**
@@ -54,84 +53,78 @@ exports.run = function (files, options, callback) {
     };
 
     var start = new Date().getTime();
-    var paths = files.map(function (p) {
-        return path.join(process.cwd(), p);
-    });
     var tracker = track.createTracker(function (tracker) {
         if (tracker.unfinished()) {
-            sys.puts('');
-            sys.puts(error(bold(
+            console.log('');
+            console.log(error(bold(
                 'FAILURES: Undone tests (or their setups/teardowns): '
             )));
             var names = tracker.names();
             for (var i = 0; i < names.length; i += 1) {
-                sys.puts('- ' + names[i]);
+                console.log('- ' + names[i]);
             }
-            sys.puts('');
-            sys.puts('To fix this, make sure all tests call test.done()');
+            console.log('');
+            console.log('To fix this, make sure all tests call test.done()');
             process.reallyExit(tracker.unfinished());
         }
     });
 
-    nodeunit.runFiles(paths, {
+	var opts = {
+        testspec: options.testspec,
         moduleStart: function (name) {
-            sys.puts('\n' + bold(name));
+            console.log('\n' + bold(name));
         },
         testDone: function (name, assertions) {
             tracker.remove(name);
 
             if (!assertions.failures()) {
-                sys.puts('✔ ' + name);
+                console.log('✔ ' + name);
             }
             else {
-                sys.puts(error('✖ ' + name) + '\n');
+                console.log(error('✖ ' + name) + '\n');
                 assertions.forEach(function (a) {
                     if (a.failed()) {
                         a = utils.betterErrors(a);
                         if (a.error instanceof AssertionError && a.message) {
-                            sys.puts(
+                            console.log(
                                 'Assertion Message: ' +
                                 assertion_message(a.message)
                             );
                         }
-                        sys.puts(a.error.stack + '\n');
+                        console.log(a.error.stack + '\n');
                     }
                 });
             }
         },
-        done: function (assertions) {
-            var end = new Date().getTime();
+        done: function (assertions, end) {
+            var end = end || new Date().getTime();
             var duration = end - start;
             if (assertions.failures()) {
-                sys.puts(
+                console.log(
                     '\n' + bold(error('FAILURES: ')) + assertions.failures() +
                     '/' + assertions.length + ' assertions failed (' +
                     assertions.duration + 'ms)'
                 );
             }
             else {
-                sys.puts(
-                    '\n' + bold(ok('OK: ')) + assertions.length +
-                    ' assertions (' + assertions.duration + 'ms)'
+                console.log(
+                   '\n' + bold(ok('OK: ')) + assertions.length +
+                   ' assertions (' + assertions.duration + 'ms)'
                 );
             }
-            // alexgorbatchev 2010-11-10 :: should be able to flush stdout
-            // here, but doesn't seem to work, instead delay the exit to give
-            // enough to time flush.
-            // process.stdout.flush()
-            // process.stdout.end()
-            var timer = setTimeout(function () {
-               clearTimeout(timer);
-              
-              if(callback != null) {
-                return callback();
-              } else {                
-                process.reallyExit(assertions.failures());
-              }              
-            }, 10);
+
+            if (callback) callback(assertions.failures() ? new Error('We have got test failures.') : undefined);
         },
         testStart: function(name) {
             tracker.put(name);
         }
-    });
+    };
+	if (files && files.length) {
+	    var paths = files.map(function (p) {
+	        return path.join(process.cwd(), p);
+	    });
+	    nodeunit.runFiles(paths, opts);
+	} else {
+		nodeunit.runModules(files,opts);
+	}
 };

@@ -11,7 +11,6 @@
 var nodeunit = require('../nodeunit'),
     utils = require('../utils'),
     fs = require('fs'),
-    sys = require('sys'),
     path = require('path'),
     AssertionError = require('assert').AssertionError;
 
@@ -28,7 +27,7 @@ exports.info = "Pretty minimal output";
  * @api public
  */
 
-exports.run = function (files, options) {
+exports.run = function (files, options, callback) {
 
     if (!options) {
         // load default options
@@ -52,27 +51,25 @@ exports.run = function (files, options) {
     };
 
     var start = new Date().getTime();
-    var paths = files.map(function (p) {
-        return path.join(process.cwd(), p);
-    });
 
-    nodeunit.runFiles(paths, {
+	var opts = {
+        testspec: options.testspec,
         moduleStart: function (name) {
-            sys.print(bold(name) + ': ');
+            process.stdout.write(bold(name) + ': ');
         },
         moduleDone: function (name, assertions) {
-            sys.puts('');
+            console.log('');
             if (assertions.failures()) {
                 assertions.forEach(function (a) {
                     if (a.failed()) {
                         a = utils.betterErrors(a);
                         if (a.error instanceof AssertionError && a.message) {
-                            sys.puts(
+                            console.log(
                                 'Assertion in test ' + bold(a.testname) + ': ' +
                                 magenta(a.message)
                             );
                         }
-                        sys.puts(a.error.stack + '\n');
+                        console.log(a.error.stack + '\n');
                     }
                 });
             }
@@ -82,10 +79,10 @@ exports.run = function (files, options) {
         },
         testDone: function (name, assertions) {
             if (!assertions.failures()) {
-                sys.print('.');
+                process.stdout.write('.');
             }
             else {
-                sys.print(red('F'));
+                process.stdout.write(red('F'));
                 assertions.forEach(function (assertion) {
                     assertion.testname = name;
                 });
@@ -95,23 +92,29 @@ exports.run = function (files, options) {
             var end = new Date().getTime();
             var duration = end - start;
             if (assertions.failures()) {
-                sys.puts(
+                console.log(
                     '\n' + bold(red('FAILURES: ')) + assertions.failures() +
                     '/' + assertions.length + ' assertions failed (' +
                     assertions.duration + 'ms)'
                 );
             }
             else {
-                sys.puts(
+                console.log(
                     '\n' + bold(green('OK: ')) + assertions.length +
                     ' assertions (' + assertions.duration + 'ms)'
                 );
             }
-            // should be able to flush stdout here, but doesn't seem to work,
-            // instead delay the exit to give enough to time flush.
-            setTimeout(function () {
-                process.reallyExit(assertions.failures());
-            }, 10);
+
+            if (callback) callback(assertions.failures() ? new Error('We have got test failures.') : undefined);
         }
-    });
+    };
+
+	if (files && files.length) {
+	    var paths = files.map(function (p) {
+	        return path.join(process.cwd(), p);
+	    });
+	    nodeunit.runFiles(paths, opts);
+	} else {
+		nodeunit.runModules(files,opts);
+	}
 };

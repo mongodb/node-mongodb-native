@@ -60,7 +60,7 @@ clean:
 	rm -r ./external-libs/bson/build
 
 generate_docs:
-	$(DOX) < lib/mongodb/admin.js > build/admin.json
-	$(NODE) tools/debug-doc.js
+	# $(DOX) < lib/mongodb/admin.js > build/admin.json
+	$(NODE) tools/build-docs.js
 
 .PHONY: total

@@ -17,12 +17,14 @@ __Contributors__
 * [alexgorbatchev](https://github.com/alexgorbatchev)
 * [alexkwolfe](https://github.com/alexkwolfe)
 * [azatoth](https://github.com/azatoth)
-* [coffeemate](https://github.com/coffeemate)
+* [kadirpekel](https://github.com/kadirpekel)
+* [lambdalisue](https://github.com/lambdalisue)
 * [luebken](https://github.com/luebken)
 * [orlandov](https://github.com/orlandov)
 * [Sannis](https://github.com/Sannis)
 * [sstephenson](https://github.com/sstephenson)
 * [thegreatape](https://github.com/thegreatape)
+* [mmalecki](https://github.com/mmalecki)
 * and thanks to [cjohansen](https://github.com/cjohansen) for input and advice
   on implementing setUp and tearDown functions. See
   [cjohansen's fork](https://github.com/cjohansen/nodeunit).
@@ -179,14 +181,11 @@ This would be run as:
     group - test2
     group - test3
 
-Using these groups its possible to add setUp and tearDown functions to your
-tests. Nodeunit has a utility function called testCase which allows you to
-define a setUp function, which is run before each test, and a tearDown
-function, which is run after each test calls test.done():
+Using these groups, Nodeunit allows you to define a `setUp` function, which is
+run before each test, and a `tearDown` function, which is run after each test
+calls `test.done()`:
 
-    var testCase = require('nodeunit').testCase;
-
-    module.exports = testCase({
+    module.exports = {
         setUp: function (callback) {
             this.foo = 'bar';
             callback();
@@ -199,7 +198,7 @@ function, which is run after each test calls test.done():
             test.equals(this.foo, 'bar');
             test.done();
         }
-    });
+    };
 
 In this way, its possible to have multiple groups of tests in a module, each
 group with its own setUp and tearDown functions.
@@ -294,12 +293,10 @@ Adding nodeunit to Your Projects
 
 If you don't want people to have to install the nodeunit command-line tool,
 you'll want to create a script that runs the tests for your project with the
-correct require paths set up. Here's an example test script, with a deps
-directory containing the projects dependencies:
+correct require paths set up. Here's an example test script, that assumes you
+have nodeunit in a suitably located node_modules directory.
 
     #!/usr/bin/env node
-    require.paths.unshift(__dirname + '/deps');
-
     var reporter = require('nodeunit').reporters.default;
     reporter.run(['test']);
 
@@ -308,10 +305,10 @@ submodule. Using submodules makes it easy for developers to download nodeunit
 and run your test suite, without cluttering up your repository with
 the source code. To add nodeunit as a git submodule do the following:
 
-    git submodule add git://github.com/caolan/nodeunit.git deps/nodeunit
+    git submodule add git://github.com/caolan/nodeunit.git node_modules/nodeunit
 
-This will add nodeunit to the deps folder of your project. Now, when cloning
-the repository, nodeunit can be downloaded by doing the following:
+This will add nodeunit to the node_modules folder of your project. Now, when
+cloning the repository, nodeunit can be downloaded by doing the following:
 
     git submodule init
     git submodule update
@@ -320,20 +317,16 @@ Let's update the test script above with a helpful hint on how to get nodeunit,
 if its missing:
 
     #!/usr/bin/env node
-
-    require.paths.unshift(__dirname + '/deps');
-
     try {
         var reporter = require('nodeunit').reporters.default;
     }
     catch(e) {
-        var sys = require('sys');
-        sys.puts("Cannot find nodeunit module.");
-        sys.puts("You can download submodules for this project by doing:");
-        sys.puts("");
-        sys.puts("    git submodule init");
-        sys.puts("    git submodule update");
-        sys.puts("");
+        console.log("Cannot find nodeunit module.");
+        console.log("You can download submodules for this project by doing:");
+        console.log("");
+        console.log("    git submodule init");
+        console.log("    git submodule update");
+        console.log("");
         process.exit();
     }
 
@@ -352,6 +345,8 @@ Built-in Test Reporters
 * __html__ - Outputs a HTML report to stdout
 * __junit__ - Creates jUnit compatible XML reports, which can be used with
   continuous integration tools such as [Hudson](http://hudson-ci.org/).
+* __machineout__ - Simple reporter for machine analysis. There is [nodeunit.vim](https://github.com/lambdalisue/nodeunit.vim)
+  which is useful for TDD on VIM
 
 
 Writing a Test Reporter
@@ -417,12 +412,28 @@ module to ensure that test functions are actually run, and a basic level of
 nodeunit functionality is available.
 
 To run the nodeunit tests do:
-    
+
     make test
 
 __Note:__ There was a bug in node v0.2.0 causing the tests to hang, upgrading
 to v0.2.1 fixes this.
 
+
+__machineout__ reporter
+----------------------------------------------
+
+The default reporter is really readable for human but for machinally analysis. 
+When you want to analyze the output of nodeunit, use __machineout__ reporter and you will get
+
+<img src="https://github.com/caolan/nodeunit/raw/master/img/example_machineout.png" />
+
+
+nodeunit with vim
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+There is [nodeunit.vim](https://github.com/lambdalisue/nodeunit.vim) so you can use nodeunit with VIM.
+That compiler use __machineout__ reporter and it is useful to use with [vim-makegreen](https://github.com/reinh/vim-makegreen)
+
+    
 
 Contributing
 ------------
@@ -430,4 +441,3 @@ Contributing
 Contributions to the project are most welcome, so feel free to fork and improve.
 When submitting a pull request, please run 'make lint' first to ensure
 we're following a consistent coding style.
-

@@ -1,5 +1,4 @@
 var assert = require('assert'),
-    sys = require('sys'),
     fs = require('fs'),
     path = require('path'),
     nodeunit = require('../lib/nodeunit');
@@ -8,12 +7,11 @@ var assert = require('assert'),
 var setup = function (fn) {
     return function (test) {
         process.chdir(__dirname);
-        //require.paths.push(__dirname);
         var env = {
-            mock_module1: require('./fixtures/mock_module1'),
-            mock_module2: require('./fixtures/mock_module2'),
-            mock_module3: require('./fixtures/dir/mock_module3'),
-            mock_module4: require('./fixtures/dir/mock_module4')
+            mock_module1: require(__dirname + '/fixtures/mock_module1'),
+            mock_module2: require(__dirname + '/fixtures/mock_module2'),
+            mock_module3: require(__dirname + '/fixtures/dir/mock_module3'),
+            mock_module4: require(__dirname + '/fixtures/dir/mock_module4')
         };
         fn.call(env, test);
     };
@@ -75,7 +73,9 @@ exports.testRunFiles = setup(function (test) {
     };
 
     nodeunit.runFiles(
-        ['fixtures/mock_module1.js', 'fixtures/mock_module2.js', 'fixtures/dir'],
+        [__dirname + '/fixtures/mock_module1.js',
+         __dirname + '/fixtures/mock_module2.js',
+         __dirname + '/fixtures/dir'],
         opts
     );
 });
@@ -148,9 +148,9 @@ try {
 if (CoffeeScript) {
     exports.testCoffeeScript = function (test) {
         process.chdir(__dirname);
-        //require.paths.push(__dirname);
         var env = {
-            mock_coffee_module: require('./fixtures/coffee/mock_coffee_module')
+            mock_coffee_module: require(__dirname +
+                                        '/fixtures/coffee/mock_coffee_module')
         };
 
         test.expect(9);
@@ -207,7 +207,7 @@ if (CoffeeScript) {
         };
 
         nodeunit.runFiles(
-            ['fixtures/coffee/mock_coffee_module.coffee'],
+            [__dirname + 'fixtures/coffee/mock_coffee_module.coffee'],
             opts
         );
     };

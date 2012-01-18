@@ -31,7 +31,9 @@ exports.info = "Browser-based test reporter";
  */
 
 exports.run = function (modules, options) {
-    var start = new Date().getTime();
+    var start = new Date().getTime(), div;
+	options = options || {};
+	div = options.div || document.body;
 
     function setText(el, txt) {
         if ('innerText' in el) {
@@ -47,7 +49,7 @@ exports.run = function (modules, options) {
         if (!el) {
             el = document.createElement(tag);
             el.id = id;
-            document.body.appendChild(el);
+            div.appendChild(el);
         }
         return el;
     };

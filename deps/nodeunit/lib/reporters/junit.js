@@ -11,7 +11,6 @@
 var nodeunit = require('../nodeunit'),
     utils = require('../utils'),
     fs = require('fs'),
-    sys = require('sys'),
     path = require('path'),
     async = require('../../deps/async'),
     AssertionError = require('assert').AssertionError,
@@ -102,6 +101,7 @@ exports.run = function (files, opts, callback) {
     var curModule;
 
     nodeunit.runFiles(paths, {
+        testspec: opts.testspec,
         moduleStart: function (name) {
             curModule = {
                 errorCount: 0,
@@ -144,51 +144,36 @@ exports.run = function (files, opts, callback) {
                 fs.readFile(tmpl, function (err, data) {
                     if (err) throw err;
                     var tmpl = data.toString();
-
-                    async.forEach(Object.keys(modules), function (k, cb) {
+                    for(var k in modules) {
                         var module = modules[k];
                         var rendered = ejs.render(tmpl, {
                             locals: {suites: [module]}
                         });
-                        var suffix = opts.suffix == null ? '' : "_" + opts.suffix;
-                        
                         var filename = path.join(
                             opts.output,
-                            module.name + suffix + '.xml'
+                            module.name + '.xml'
                         );
-                        sys.puts('Writing ' + filename);
-                        fs.writeFile(filename, rendered, cb);
-                    },
-                    function (err) {
-                        if (err) throw err;
-                        else if (assertions.failures()) {
-                            sys.puts(
-                                '\n' + bold(error('FAILURES: ')) +
-                                assertions.failures() + '/' +
-                                assertions.length + ' assertions failed (' +
-                                assertions.duration + 'ms)'
-                            );
-                        }
-                        else {
-                            sys.puts(
-                                '\n' + bold(ok('OK: ')) + assertions.length +
-                                ' assertions (' + assertions.duration + 'ms)'
-                            );
-                        }
-                        var timer = setTimeout(function () {
-                           clearTimeout(timer);
-
-                          if(callback != null) {
-                            return callback();
-                          } else {                
-                            process.reallyExit(assertions.failures());
-                          }              
-                        }, 10);
-                    });
-
+                        console.log('Writing ' + filename);
+                        fs.writeFileSync(filename, rendered, 'utf8');
+                    }
+                    if (assertions.failures()) {
+                        console.log(
+                            '\n' + bold(error('FAILURES: ')) +
+                            assertions.failures() + '/' +
+                            assertions.length + ' assertions failed (' +
+                            assertions.duration + 'ms)'
+                    	);
+                    }
+                    else {
+                        console.log(
+                            '\n' + bold(ok('OK: ')) + assertions.length +
+                            ' assertions (' + assertions.duration + 'ms)'
+                        );
+                    }
+                    
+                    if (callback) callback(assertions.failures() ? new Error('We have got test failures.') : undefined);
                 });
             });
-
         }
     });
 }

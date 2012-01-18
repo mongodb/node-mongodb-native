@@ -5,15 +5,14 @@
  */
 
 var nodeunit = require('../lib/nodeunit'); // @REMOVE_LINE_FOR_BROWSER
-var testCase = nodeunit.testCase;
 
 exports.testTestCase = function (test) {
     test.expect(7);
     var call_order = [];
-    var s = testCase({
+    var s = {
         setUp: function (callback) {
             call_order.push('setUp');
-            test.equals(this.one, undefined);
+            test.equals(this.one, undefined, 'in setUp, this.one not set');
             this.one = 1;
             callback();
         },
@@ -24,16 +23,16 @@ exports.testTestCase = function (test) {
         },
         test1: function (t) {
             call_order.push('test1');
-            test.equals(this.one, 1);
+            test.equals(this.one, 1, 'in test1, this.one is 1');
             this.one = 2;
             t.done();
         },
         test2: function (t) {
             call_order.push('test2');
-            test.equals(this.one, 1);
+            test.equals(this.one, 1, 'in test2, this.one is still 1');
             t.done();
         }
-    });
+    };
     nodeunit.runSuite(null, s, {}, function () {
         test.same(call_order, [
             'setUp', 'test1', 'tearDown',
@@ -45,7 +44,7 @@ exports.testTestCase = function (test) {
 
 exports.tearDownAfterError = function (test) {
     test.expect(1);
-    var s = testCase({
+    var s = {
         tearDown: function (callback) {
             test.ok(true, 'tearDown called');
             callback();
@@ -53,7 +52,7 @@ exports.tearDownAfterError = function (test) {
         test: function (t) {
             throw new Error('some error');
         }
-    });
+    };
     nodeunit.runSuite(null, s, {}, function () {
         test.done();
     });
@@ -62,7 +61,7 @@ exports.tearDownAfterError = function (test) {
 exports.catchSetUpError = function (test) {
     test.expect(2);
     var test_error = new Error('test error');
-    var s = testCase({
+    var s = {
         setUp: function (callback) {
             throw test_error;
         },
@@ -70,7 +69,7 @@ exports.catchSetUpError = function (test) {
             test.ok(false, 'test function should not be called');
             t.done();
         }
-    });
+    };
     nodeunit.runSuite(null, s, {}, function (err, assertions) {
         test.equal(assertions.length, 1);
         test.equal(assertions[0].error, test_error);
@@ -81,7 +80,7 @@ exports.catchSetUpError = function (test) {
 exports.setUpErrorCallback = function (test) {
     test.expect(2);
     var test_error = new Error('test error');
-    var s = testCase({
+    var s = {
         setUp: function (callback) {
             callback(test_error);
         },
@@ -89,7 +88,7 @@ exports.setUpErrorCallback = function (test) {
             test.ok(false, 'test function should not be called');
             t.done();
         }
-    });
+    };
     nodeunit.runSuite(null, s, {}, function (err, assertions) {
         test.equal(assertions.length, 1);
         test.equal(assertions[0].error, test_error);
@@ -100,14 +99,14 @@ exports.setUpErrorCallback = function (test) {
 exports.catchTearDownError = function (test) {
     test.expect(2);
     var test_error = new Error('test error');
-    var s = testCase({
+    var s = {
         tearDown: function (callback) {
             throw test_error;
         },
         test: function (t) {
             t.done();
         }
-    });
+    };
     nodeunit.runSuite(null, s, {}, function (err, assertions) {
         test.equal(assertions.length, 1);
         test.equal(assertions[0].error, test_error);
@@ -118,14 +117,14 @@ exports.catchTearDownError = function (test) {
 exports.tearDownErrorCallback = function (test) {
     test.expect(2);
     var test_error = new Error('test error');
-    var s = testCase({
+    var s = {
         tearDown: function (callback) {
             callback(test_error);
         },
         test: function (t) {
             t.done();
         }
-    });
+    };
     nodeunit.runSuite(null, s, {}, function (err, assertions) {
         test.equal(assertions.length, 1);
         test.equal(assertions[0].error, test_error);
@@ -137,14 +136,14 @@ exports.testErrorAndtearDownError = function (test) {
     test.expect(3);
     var error1 = new Error('test error one');
     var error2 = new Error('test error two');
-    var s = testCase({
+    var s = {
         tearDown: function (callback) {
             callback(error2);
         },
         test: function (t) {
             t.done(error1);
         }
-    });
+    };
     nodeunit.runSuite(null, s, {}, function (err, assertions) {
         test.equal(assertions.length, 2);
         test.equal(assertions[0].error, error1);
@@ -155,7 +154,7 @@ exports.testErrorAndtearDownError = function (test) {
 
 exports.testCaseGroups = function (test) {
     var call_order = [];
-    var s = testCase({
+    var s = {
         setUp: function (callback) {
             call_order.push('setUp');
             callback();
@@ -174,7 +173,7 @@ exports.testCaseGroups = function (test) {
                 test.done();
             }
         }
-    });
+    };
     nodeunit.runSuite(null, s, {}, function (err, assertions) {
         test.same(call_order, [
             'setUp',
@@ -190,7 +189,7 @@ exports.testCaseGroups = function (test) {
 
 exports.nestedTestCases = function (test) {
     var call_order = [];
-    var s = testCase({
+    var s = {
         setUp: function (callback) {
             call_order.push('setUp');
             callback();
@@ -203,7 +202,7 @@ exports.nestedTestCases = function (test) {
             call_order.push('test1');
             test.done();
         },
-        group1: testCase({
+        group1: {
             setUp: function (callback) {
                 call_order.push('group1.setUp');
                 callback();
@@ -216,8 +215,8 @@ exports.nestedTestCases = function (test) {
                 call_order.push('group1.test2');
                 test.done();
             }
-        })
-    });
+        }
+    };
     nodeunit.runSuite(null, s, {}, function (err, assertions) {
         test.same(call_order, [
             'setUp',
@@ -229,6 +228,29 @@ exports.nestedTestCases = function (test) {
             'group1.tearDown',
             'tearDown'
         ]);
+        test.done();
+    });
+};
+
+exports.deepNestedTestCases = function (test) {
+    var val = 'foo';
+    var s = {
+        setUp: function (callback) {
+            val = 'bar';
+            callback();
+        },
+        group1: {
+            test: {
+                test2: function (test) {
+                    test.equal(val, 'bar');
+                    test.done();
+                }
+            }
+        }
+    };
+    nodeunit.runSuite(null, s, {}, function (err, assertions) {
+        test.ok(!assertions[0].failed());
+        test.equal(assertions.length, 1);
         test.done();
     });
 };

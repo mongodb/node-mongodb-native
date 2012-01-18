@@ -5,7 +5,7 @@
  *
  * THIS FILE SHOULD BE BROWSER-COMPATIBLE JS!
  * You can use @REMOVE_LINE_FOR_BROWSER to remove code from the browser build.
- * Only code on that line will be removed, its mostly to avoid requiring code
+ * Only code on that line will be removed, it's mostly to avoid requiring code
  * that is node specific
  */
 
@@ -13,21 +13,36 @@
  * Module dependencies
  */
 
-var async = require('../deps/async'), //@REMOVE_LINE_FOR_BROWSER
-    types = require('./types');       //@REMOVE_LINE_FOR_BROWSER
+var async    = require('../deps/async'), //@REMOVE_LINE_FOR_BROWSER
+    nodeunit = require('./nodeunit'),    //@REMOVE_LINE_FOR_BROWSER
+    types    = require('./types');       //@REMOVE_LINE_FOR_BROWSER
 
 
 /**
  * Added for browser compatibility
  */
 
-var _keys = function(obj){
-    if(Object.keys) return Object.keys(obj);
+var _keys = function (obj) {
+    if (Object.keys) {
+        return Object.keys(obj);
+    }
     var keys = [];
-    for(var k in obj){
-        if(obj.hasOwnProperty(k)) keys.push(k);
+    for (var k in obj) {
+        if (obj.hasOwnProperty(k)) {
+            keys.push(k);
+        }
     }
     return keys;
+};
+
+
+var _copy = function (obj) {
+    var nobj = {};
+    var keys = _keys(obj);
+    for (var i = 0; i <  keys.length; i += 1) {
+        nobj[keys[i]] = obj[keys[i]];
+    }
+    return nobj;
 };
 
 
@@ -74,20 +89,34 @@ exports.runTest = function (name, fn, opt, callback) {
  */
 
 exports.runSuite = function (name, suite, opt, callback) {
+    suite = wrapGroup(suite);
     var keys = _keys(suite);
 
     async.concatSeries(keys, function (k, cb) {
         var prop = suite[k], _name;
 
         _name = name ? [].concat(name, k) : [k];
-
         _name.toString = function () {
             // fallback for old one
             return this.join(' - ');
         };
 
         if (typeof prop === 'function') {
-            exports.runTest(_name, suite[k], opt, cb);
+            var in_name = false;
+            for (var i = 0; i < _name.length; i += 1) {
+                if (_name[i] === opt.testspec) {
+                    in_name = true;
+                }
+            }
+            if (!opt.testspec || in_name) {
+                if (opt.moduleStart) {
+                    opt.moduleStart();
+                }
+                exports.runTest(_name, suite[k], opt, cb);
+            }
+            else {
+                return cb();
+            }
         }
         else {
             exports.runSuite(_name, suite[k], opt, cb);
@@ -106,15 +135,30 @@ exports.runSuite = function (name, suite, opt, callback) {
  */
 
 exports.runModule = function (name, mod, opt, callback) {
-    var options = types.options(opt);
+    var options = _copy(types.options(opt));
 
-    options.moduleStart(name);
+    var _run = false;
+    var _moduleStart = options.moduleStart;
+
+    mod = wrapGroup(mod);
+
+    function run_once() {
+        if (!_run) {
+            _run = true;
+            _moduleStart(name);
+        }
+    }
+    options.moduleStart = run_once;
+
     var start = new Date().getTime();
 
-    exports.runSuite(null, mod, opt, function (err, a_list) {
+    exports.runSuite(null, mod, options, function (err, a_list) {
         var end = new Date().getTime();
         var assertion_list = types.assertionList(a_list, end - start);
         options.moduleDone(name, assertion_list);
+        if (nodeunit.complete) {
+            nodeunit.complete(name, assertion_list);
+        }
         callback(null, a_list);
     });
 };
@@ -188,7 +232,34 @@ var wrapTest = function (setUp, tearDown, fn) {
         else {
             fn.call(context, test);
         }
+    };
+};
+
+
+/**
+ * Returns a serial callback from two functions.
+ *
+ * @param {Function} funcFirst
+ * @param {Function} funcSecond
+ * @api private
+ */
+
+var getSerialCallback = function (fns) {
+    if (!fns.length) {
+        return null;
     }
+    return function (callback) {
+        var that = this;
+        var bound_fns = [];
+        for (var i = 0, len = fns.length; i < len; i++) {
+            (function (j) {
+                bound_fns.push(function () {
+                    return fns[j].apply(that, arguments);
+                });
+            })(i);
+        }
+        return async.series(bound_fns, callback);
+    };
 };
 
 
@@ -196,41 +267,50 @@ var wrapTest = function (setUp, tearDown, fn) {
  * Wraps a group of tests with setUp and tearDown functions.
  * Used by testCase.
  *
- * @param {Function} setUp
- * @param {Function} tearDown
  * @param {Object} group
+ * @param {Array} setUps - parent setUp functions
+ * @param {Array} tearDowns - parent tearDown functions
  * @api private
  */
 
-var wrapGroup = function (setUp, tearDown, group) {
+var wrapGroup = function (group, setUps, tearDowns) {
     var tests = {};
+
+    var setUps = setUps ? setUps.slice(): [];
+    var tearDowns = tearDowns ? tearDowns.slice(): [];
+
+    if (group.setUp) {
+        setUps.push(group.setUp);
+        delete group.setUp;
+    }
+    if (group.tearDown) {
+        tearDowns.unshift(group.tearDown);
+        delete group.tearDown;
+    }
+
     var keys = _keys(group);
-    for (var i=0; i<keys.length; i++) {
+
+    for (var i = 0; i < keys.length; i += 1) {
         var k = keys[i];
         if (typeof group[k] === 'function') {
-            tests[k] = wrapTest(setUp, tearDown, group[k]);
+            tests[k] = wrapTest(
+                getSerialCallback(setUps),
+                getSerialCallback(tearDowns),
+                group[k]
+            );
         }
         else if (typeof group[k] === 'object') {
-            tests[k] = wrapGroup(setUp, tearDown, group[k]);
+            tests[k] = wrapGroup(group[k], setUps, tearDowns);
         }
     }
     return tests;
-}
+};
 
 
 /**
- * Utility for wrapping a suite of test functions with setUp and tearDown
- * functions.
- *
- * @param {Object} suite
- * @return {Object}
- * @api public
+ * Backwards compatibility for test suites using old testCase API
  */
 
 exports.testCase = function (suite) {
-    var setUp = suite.setUp;
-    var tearDown = suite.tearDown;
-    delete suite.setUp;
-    delete suite.tearDown;
-    return wrapGroup(setUp, tearDown, suite);
+    return suite;
 };
