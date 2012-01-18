@@ -1,6 +1,6 @@
-
 NODE = node
 NODEUNIT = deps/nodeunit/bin/nodeunit
+DOX = node_modules/dox/bin/dox
 name = all
 
 total: build_native
@@ -58,5 +58,9 @@ test_all_junit: build_native
 clean:
 	rm ./external-libs/bson/bson.node
 	rm -r ./external-libs/bson/build
+
+generate_docs:
+	$(DOX) < lib/mongodb/admin.js > build/admin.json
+	$(NODE) tools/debug-doc.js
 
 .PHONY: total
