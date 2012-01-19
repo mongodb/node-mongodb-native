@@ -14,9 +14,8 @@ var async = require('../deps/async'),
     core = require('./core'),
     reporters = require('./reporters'),
     assert = require('./assert'),
-    path = require('path')
+    path = require('path'),
     events = require('events');
-
 
 /**
  * Export sub-modules.

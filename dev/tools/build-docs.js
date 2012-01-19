@@ -110,13 +110,13 @@ var testClasses = [
 
 // Read all the templates
 var templates = [
-  {tag:'index', path:'./tools/doc-templates/index.ejs'},
-  {tag:'class', path:'./tools/doc-templates/class.ejs'},
-  {tag:'function', path:'./tools/doc-templates/function.ejs'}
+  {tag:'index', path:'./dev/tools/doc-templates/index.ejs'},
+  {tag:'class', path:'./dev/tools/doc-templates/class.ejs'},
+  {tag:'function', path:'./dev/tools/doc-templates/function.ejs'}
 ]
 
 // Output directory
-var outputDirectory = "./sphinx-docs/source/api-generated"
+var outputDirectory = "./docs/sphinx-docs/source/api-generated"
 
 // Force create the directory for the generated docs
 exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});

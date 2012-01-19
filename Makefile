@@ -22,11 +22,11 @@ clean_native:
 
 test: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
-	$(NODE) tools/test_all.js --noreplicaset --boot
+	$(NODE) dev/tools/test_all.js --noreplicaset --boot
 
 test_junit: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
-	$(NODE) tools/test_all.js --junit --noreplicaset
+	$(NODE) dev/tools/test_all.js --junit --noreplicaset
 
 test_nodeunit_pure:
 	@echo "\n == Execute Test Suite using Pure JS BSON Parser == "
@@ -49,18 +49,18 @@ test_nodeunit_replicaset_native:
 
 test_all: build_native
 	@echo "\n == Run All tests =="
-	$(NODE) tools/test_all.js --boot
+	$(NODE) dev/tools/test_all.js --boot
 
 test_all_junit: build_native
 	@echo "\n == Run All tests =="
-	$(NODE) tools/test_all.js --junit --boot
+	$(NODE) dev/tools/test_all.js --junit --boot
 
 clean:
 	rm ./external-libs/bson/bson.node
 	rm -r ./external-libs/bson/build
 
 generate_docs:
-	$(NODE) tools/build-docs.js
+	$(NODE) dev/tools/build-docs.js
 	# make --directory=./sphinx-docs --file=Makefile html
 
 .PHONY: total
