@@ -1,4 +1,4 @@
-var nodeunit = require('../deps/nodeunit');
+var nodeunit = require('../../deps/nodeunit');
 
 // Let's parse the argv (ensure we have all the number of parameters)
 if(process.argv.length === 4) {
@@ -22,8 +22,6 @@ if(process.argv.length === 4) {
   runner.run(files, options, function() {
     process.exit(0);
   });
-  // console.dir(options)
-  // console.dir(nodeunit)
 } else {
   console.error("Must pass in a list of files and options object");
 }

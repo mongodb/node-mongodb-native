@@ -1,22 +1,22 @@
-var nodeunit = require('../deps/nodeunit'),
+var nodeunit = require('../../deps/nodeunit'),
   debug = require('util').debug,
   inspect = require('util').inspect,
   fs = require('fs'),
   exec = require('child_process').exec,
   spawn = require('child_process').spawn,
-  Step = require('../deps/step/lib/step'),
-  ServerManager = require('../test/tools/server_manager').ServerManager,
-  ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
+  Step = require('../../deps/step/lib/step'),
+  ServerManager = require('../../test/tools/server_manager').ServerManager,
+  ReplicaSetManager = require('../../test/tools/replica_set_manager').ReplicaSetManager;
 
 // Manage the test server
 var serverManager = new ServerManager();
 var replicaSetManager = new ReplicaSetManager();
 // test directories
 var files = [];
-var directories = [{dir: __dirname + "/../test", path: "/test/"}, 
-      {dir: __dirname + "/../test/gridstore", path: "/test/gridstore/"},
-      {dir: __dirname + "/../test/connection", path: "/test/connection/"},
-      {dir: __dirname + "/../test/bson", path: "/test/bson/"}];
+var directories = [{dir: __dirname + "/../../test", path: "/test/"}, 
+      {dir: __dirname + "/../../test/gridstore", path: "/test/gridstore/"},
+      {dir: __dirname + "/../../test/connection", path: "/test/connection/"},
+      {dir: __dirname + "/../../test/bson", path: "/test/bson/"}];
 
 // Generate a list of tests
 directories.forEach(function(dirEntry) {
@@ -29,7 +29,7 @@ directories.forEach(function(dirEntry) {
 });
 
 // Replicasetfiles
-var replicasetFiles = fs.readdirSync(__dirname + "/../test/replicaset").filter(function(item) {
+var replicasetFiles = fs.readdirSync(__dirname + "/../../test/replicaset").filter(function(item) {
   return /_test\.js$/i.test(item);
 }).map(function(file) {
   return "/test/replicaset/" + file; 
@@ -63,8 +63,6 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
   if(junit) {
     // Remove directory
     fs.mkdirSync("./output", 0777);
-    // Set up the runner for junit
-    runner = nodeunit.reporters.junit;
     // Set up options
     options.output = './output';
     options.junit = true;
@@ -86,7 +84,7 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
       // Run all the integration tests using the pure js bson parser
       function runPureJS() {
         options.suffix = 'pure';
-        var test_set_runner = spawn('node', ['./tools/test_set_runner.js', JSON.stringify(files), JSON.stringify(options)]);
+        var test_set_runner = spawn('node', ['./dev/tools/test_set_runner.js', JSON.stringify(files), JSON.stringify(options)]);
         test_set_runner.stdout.on('data', function(data) {
           process.stdout.write(data.toString());
         });
@@ -100,7 +98,7 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
       // Execute all the replicaset tests
       function executeReplicaSetTests() {
         options.suffix = 'pure';
-        var test_set_runner = spawn('node', ['./tools/test_set_runner.js', JSON.stringify(replicasetFiles), JSON.stringify(options)]);
+        var test_set_runner = spawn('node', ['./dev/tools/test_set_runner.js', JSON.stringify(replicasetFiles), JSON.stringify(options)]);
         test_set_runner.stdout.on('data', function(data) {
           process.stdout.write(data.toString());
         });
@@ -136,7 +134,7 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
       
       function runPureJS() {
         options.suffix = 'pure';
-        var test_set_runner = spawn('node', ['./tools/test_set_runner.js', JSON.stringify(files), JSON.stringify(options)]);
+        var test_set_runner = spawn('node', ['./dev/tools/test_set_runner.js', JSON.stringify(files), JSON.stringify(options)]);
         test_set_runner.stdout.on('data', function(data) {
           process.stdout.write(data.toString());
         });
@@ -151,7 +149,7 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
         options.suffix = 'native';
         options.native = true;
 
-        var test_set_runner = spawn('node', ['./tools/test_set_runner.js', JSON.stringify(files), JSON.stringify(options)]);
+        var test_set_runner = spawn('node', ['./dev/tools/test_set_runner.js', JSON.stringify(files), JSON.stringify(options)]);
         test_set_runner.stdout.on('data', function(data) {
           process.stdout.write(data.toString());
         });
