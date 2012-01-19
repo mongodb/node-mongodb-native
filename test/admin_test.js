@@ -8,7 +8,7 @@ var testCase = require('../deps/nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../deps/nodeunit'),
-  gleak = require('../tools/gleak'),
+  gleak = require('../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -24,9 +24,9 @@ var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: tru
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = this;  
+  var self = exports;  
   client.open(function(err, db_p) {
-    if(numberOfTestsRun == (Object.keys(self).length - 2)) {
+    if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
       client.dropDatabase(function(err, done) {
         callback();
@@ -46,16 +46,9 @@ exports.setUp = function(callback) {
 exports.tearDown = function(callback) {
   var self = this;
   numberOfTestsRun = numberOfTestsRun - 1;
-  // Drop the database and close it
-  if(numberOfTestsRun <= 0) {
-    // client.dropDatabase(function(err, done) {
-      client.close();
-      callback();
-    // });
-  } else {
-    client.close();
-    callback();
-  }
+  // Close connection
+  client.close();
+  callback();
 }
 
 /**
@@ -248,17 +241,17 @@ exports.shouldCorrectlyCallValidateCollection = function(test) {
   });
 }
 
-// /**
-//  * Retrieve the server information for the current
-//  * instance of the db client
-//  * 
-//  * @ignore
-//  */
-// exports.noGlobalsLeaked = function(test) {
-//   var leaks = gleak.detectNew();
-//   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-//   test.done();
-// }
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+exports.noGlobalsLeaked = function(test) {
+  var leaks = gleak.detectNew();
+  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+  test.done();
+}
 
 /**
  * Retrieve the server information for the current

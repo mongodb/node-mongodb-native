@@ -3,7 +3,7 @@ var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : fals
 var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  gleak = require('../../tools/gleak'),
+  gleak = require('../../dev/tools/gleak'),
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = require('../../lib/mongodb').Db,
   ReplSetServers = require('../../lib/mongodb').ReplSetServers,
@@ -50,117 +50,146 @@ var ensureConnection = function(test, numberOfTries, callback) {
   })            
 }
 
-module.exports = testCase({
-  setUp: function(callback) {
-    // Create instance of replicaset manager but only for the first call
-    if(!serversUp && !noReplicasetStart) {
-      serversUp = true;
-      RS = new ReplicaSetManager({retries:120});
-      RS.startSet(true, function(err, result) {      
-        if(err != null) throw err;
-        // Finish setup
-        callback();      
-      });      
-    } else {
-      RS.restartKilledNodes(function(err, result) {
-        if(err != null) throw err;
-        callback();        
-      })
-    }
-  },
-  
-  tearDown: function(callback) {
-    // RS.restartKilledNodes(function(err, result) {
-      callback();                
-    // });
-  },
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+exports.setUp = function(callback) {
+  // Create instance of replicaset manager but only for the first call
+  if(!serversUp && !noReplicasetStart) {
+    serversUp = true;
+    RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
+    RS.startSet(true, function(err, result) {      
+      if(err != null) throw err;
+      // Finish setup
+      callback();      
+    });      
+  } else {    
+    RS.restartKilledNodes(function(err, result) {
+      if(err != null) throw err;
+      callback();        
+    })
+  }
+}
 
-  shouldRetrieveCorrectCountAfterInsertionReconnect : function(test) {
-    // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect")
-    // Replica configuration
-    var replSet = new ReplSetServers( [ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-      ], 
-      {rs_name:RS.name}
-    );
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+exports.tearDown = function(callback) {
+  numberOfTestsRun = numberOfTestsRun - 1;
+  if(numberOfTestsRun == 0) {
+    // Finished kill all instances
+    RS.killAll(function() {
+      callback();              
+    })
+  } else {
+    callback();            
+  }  
+}
 
-    // Insert some data
-    var db = new Db('integration_test_', replSet);
-    db.open(function(err, p_db) {
-      // if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
-      // Drop collection on replicaset
-      p_db.dropCollection('testsets', function(err, r) {
+exports.shouldRetrieveCorrectCountAfterInsertionReconnect = function(test) {
+  // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect")
+  // Replica configuration
+  var replSet = new ReplSetServers( [ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ], 
+    {rs_name:RS.name}
+  );
+
+  // Insert some data
+  var db = new Db('integration_test_', replSet);
+  db.open(function(err, p_db) {
+    // if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
+    // Drop collection on replicaset
+    p_db.dropCollection('testsets', function(err, r) {
+      if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
+
+      // Recreate collection on replicaset
+      p_db.createCollection('testsets', function(err, collection) {
         if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
-
-        // Recreate collection on replicaset
-        p_db.createCollection('testsets', function(err, collection) {
+        
+        // Insert a dummy document
+        collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
           if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
           
-          // Insert a dummy document
-          collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+          // Execute a count
+          collection.count(function(err, c) {
             if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
+
+            test.equal(1, c);
+            // Close starting connection
+            p_db.close();
             
-            // Execute a count
-            collection.count(function(err, c) {
-              if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
+            // Ensure replication happened in time
+            setTimeout(function() {
+              // Kill the primary
+              RS.killPrimary(function(node) {
 
-              test.equal(1, c);
-              // Close starting connection
-              p_db.close();
-              
-              // Ensure replication happened in time
-              setTimeout(function() {
-                // Kill the primary
-                RS.killPrimary(function(node) {
+                // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect :: 0")
+                // Ensure valid connection
+                // Do inserts
+                // ensureConnection(test, retries, function(err, p_db) {
+                //   // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect :: 1")
+                //   if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
+                //   test.ok(err == null);
 
-                  // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect :: 0")
-                  // Ensure valid connection
-                  // Do inserts
-                  // ensureConnection(test, retries, function(err, p_db) {
-                  //   // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect :: 1")
-                  //   if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
-                  //   test.ok(err == null);
+                  p_db.collection('testsets', function(err, collection) {
+                    if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
-                    p_db.collection('testsets', function(err, collection) {
+                    collection.insert({a:30}, {safe:true}, function(err, r) {  
                       if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
-                      collection.insert({a:30}, {safe:true}, function(err, r) {  
+                      collection.insert({a:40}, {safe:true}, function(err, r) {
                         if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
-                        collection.insert({a:40}, {safe:true}, function(err, r) {
+                        // Execute count
+                        collection.count(function(err, c) {
                           if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
-                          // Execute count
-                          collection.count(function(err, c) {
-                            if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
+                          test.equal(3, c);
 
-                            test.equal(3, c);
-
-                            p_db.close();
-                            test.done();          
-                          });
+                          p_db.close();
+                          test.done();          
                         });
                       });
                     });
-                  // });        
-                });              
-              }, 2000);
-            })
+                  });
+                // });        
+              });              
+            }, 2000);
           })
-        });
+        })
       });
-    })                
-  },
+    });
+  })                
+}
 
-  noGlobalsLeaked : function(test) {
-    var leaks = gleak.detectNew();
-    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-    test.done();
-  }  
-})
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+exports.noGlobalsLeaked = function(test) {
+  var leaks = gleak.detectNew();
+  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+  test.done();
+}
 
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+var numberOfTestsRun = Object.keys(this).length - 2;
 
 
 

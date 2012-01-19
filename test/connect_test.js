@@ -8,7 +8,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   connect = mongodb.connect,
-  gleak = require('../tools/gleak'),
+  gleak = require('../dev/tools/gleak'),
   Script = require('vm'),
   Collection = mongodb.Collection,
   Server = mongodb.Server,
@@ -26,6 +26,7 @@ function connectionTester(test, testName) {
       collection.insert({foo:123}, {safe:true}, function(err, docs) {
         test.equal(err, null);
         db.dropDatabase(function(err, done) {
+          db.close();
           test.equal(err, null);
           test.ok(done);
           test.done();
@@ -69,6 +70,7 @@ exports.testConnectGoodAuth = function(test) {
       restOfTest();
     });
   });
+
   function restOfTest() {
     var url = 'mongo://' + user + ':' + password + '@localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
     connect(url, connectionTester(test, 'testConnectGoodAuth'));
@@ -77,9 +79,10 @@ exports.testConnectGoodAuth = function(test) {
 
 exports.testConnectBadAuth = function(test) {
   var url = 'mongo://slithy:toves@localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
-  connect(url, function(err, db) {
+  connect(url, function(err, db) {    
     test.ok(err);
-    test.equal(db, null);
+    test.ok(db);
+    db.close();
     test.done();
   });
 };

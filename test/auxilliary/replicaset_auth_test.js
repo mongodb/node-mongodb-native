@@ -4,7 +4,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('../../deps/nodeunit'),
-  gleak = require('../../tools/gleak'),
+  gleak = require('../../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -17,217 +17,226 @@ var MONGODB = 'integration_tests';
 var serverManager = null;
 var RS = RS == null ? null : RS;
 
-// Define the tests, we want them to run as a nested test so we only clean up the 
-// db connection once
-var tests = testCase({
-  setUp: function(callback) {
-    RS = new ReplicaSetManager({retries:120, 
-      auth:true, 
-      arbiter_count:0,
-      secondary_count:1,
-      passive_count:0});
-    RS.startSet(true, function(err, result) {      
-      if(err != null) throw err;
-      // Finish setup
-      callback();      
-    });      
-  },
-  
-  tearDown: function(callback) {
-    // RS.killAll(function() {
-      callback();                      
-    // });
-  },
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+exports.setUp = function(callback) {
+  RS = new ReplicaSetManager({retries:120, 
+    auth:true, 
+    arbiter_count:0,
+    secondary_count:1,
+    passive_count:0});
+  RS.startSet(true, function(err, result) {      
+    if(err != null) throw err;
+    // Finish setup
+    callback();      
+  });      
+}
 
-  shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts : function(test) {
-    var replSet = new ReplSetServers( [ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      ], 
-      {rs_name:RS.name}
-    );
-    
-    // Connect to the replicaset
-    var slaveDb = null;
-    var db = new Db('foo', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
-    db.open(function(err, p_db) {
-      Step(
-        function addUser() {
-          db.admin().addUser("me", "secret", this);
-        },
-        
-        function ensureFailingInsert(err, result) {
-          // return
-          var self = this;
-          test.equal(null, err);
-          test.ok(result != null);
-  
-          db.collection("stuff", function(err, collection) {
-            collection.insert({a:2}, {safe: {w: 3}}, self);
-          });                  
-        },
-        
-        function authenticate(err, result) {
-          test.ok(err != null);
-          
-          db.admin().authenticate("me", "secret", this);
-        },
-        
-        function changePassword(err, result) {
-          var self = this;
-          test.equal(null, err);
-          test.ok(result);
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+exports.tearDown = function(callback) {
+  callback();
+}
 
-          db.admin().addUser("me", "secret2", this);
-        },
-
-        function authenticate(err, result) {
-          db.admin().authenticate("me", "secret2", this);
-        },
-        
-        function insertShouldSuccedNow(err, result) {
-          var self = this;
-          test.equal(null, err);
-          test.ok(result);
+exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = function(test) {
+  var replSet = new ReplSetServers( [ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+    ], 
+    {rs_name:RS.name}
+  );
   
-          db.collection("stuff", function(err, collection) {
-            collection.insert({a:3}, {safe: true}, self);
-          });                            
-        }, 
+  // Connect to the replicaset
+  var slaveDb = null;
+  var db = new Db('foo', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+  db.open(function(err, p_db) {
+    Step(
+      function addUser() {
+        db.admin().addUser("me", "secret", this);
+      },
+      
+      function ensureFailingInsert(err, result) {
+        // return
+        var self = this;
+        test.equal(null, err);
+        test.ok(result != null);
+
+        db.collection("stuff", function(err, collection) {
+          collection.insert({a:2}, {safe: {w: 3}}, self);
+        });                  
+      },
+      
+      function authenticate(err, result) {
+        test.ok(err != null);
         
-        function queryShouldExecuteCorrectly(err, result) {
-          var self = this;
-          test.equal(null, err);
-          
-          db.collection("stuff", function(err, collection) {
-            collection.findOne(self);
-          });                            
-        },
+        db.admin().authenticate("me", "secret", this);
+      },
+      
+      function changePassword(err, result) {
+        var self = this;
+        test.equal(null, err);
+        test.ok(result);
+
+        db.admin().addUser("me", "secret2", this);
+      },
+
+      function authenticate(err, result) {
+        db.admin().authenticate("me", "secret2", this);
+      },
+      
+      function insertShouldSuccedNow(err, result) {
+        var self = this;
+        test.equal(null, err);
+        test.ok(result);
+
+        db.collection("stuff", function(err, collection) {
+          collection.insert({a:3}, {safe: true}, self);
+        });                            
+      }, 
+      
+      function queryShouldExecuteCorrectly(err, result) {
+        var self = this;
+        test.equal(null, err);
         
-        function logout(err, item) {
-          test.ok(err == null);
-          test.equal(3, item.a);
-          
-          db.admin().logout(this);
-        },
+        db.collection("stuff", function(err, collection) {
+          collection.findOne(self);
+        });                            
+      },
+      
+      function logout(err, item) {
+        test.ok(err == null);
+        test.equal(3, item.a);
         
-        function findShouldFailDueToLoggedOut(err, result) {
-          var self = this;
-          test.equal(null, err);
-          
-          db.collection("stuff", function(err, collection) {
-            collection.findOne(self);
-          });
-        },
+        db.admin().logout(this);
+      },
+      
+      function findShouldFailDueToLoggedOut(err, result) {
+        var self = this;
+        test.equal(null, err);
         
-        function sameShouldApplyToRandomSecondaryServer(err, result) {
-          var self = this;
-          test.ok(err != null);
-          
-          slaveDb = new Db('foo', new Server(db.serverConfig.secondaries[0].host
-                    , db.serverConfig.secondaries[0].port, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null), slave_ok:true});
-          slaveDb.open(function(err, slaveDb) {            
-            slaveDb.collection('stuff', function(err, collection) {
-              collection.findOne(self)
-            })            
-          });
-        },
+        db.collection("stuff", function(err, collection) {
+          collection.findOne(self);
+        });
+      },
+      
+      function sameShouldApplyToRandomSecondaryServer(err, result) {
+        var self = this;
+        test.ok(err != null);
         
-        function shouldCorrectlyAuthenticateAgainstSecondary(err, result) {
-          test.ok(err != null)          
-          slaveDb.admin().authenticate('me', 'secret2', this);
-        },
-        
-        function shouldCorrectlyInsertItem(err, result) {
-          var self = this;          
-          test.equal(null, err);
-          test.ok(result);
-          
+        slaveDb = new Db('foo', new Server(db.serverConfig.secondaries[0].host
+                  , db.serverConfig.secondaries[0].port, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null), slave_ok:true});
+        slaveDb.open(function(err, slaveDb) {            
           slaveDb.collection('stuff', function(err, collection) {
             collection.findOne(self)
-          })                      
-        },
+          })            
+        });
+      },
+      
+      function shouldCorrectlyAuthenticateAgainstSecondary(err, result) {
+        test.ok(err != null)          
+        slaveDb.admin().authenticate('me', 'secret2', this);
+      },
+      
+      function shouldCorrectlyInsertItem(err, result) {
+        var self = this;          
+        test.equal(null, err);
+        test.ok(result);
         
-        function finishUp(err, item) {
-          test.ok(err == null);
-          test.equal(3, item.a);          
-          
-          test.done();
-          p_db.close();
-          slaveDb.close();
-        }
-      )      
-    });
-  },
-  
-  shouldCorrectlyAuthenticate : function(test) {
-    var replSet = new ReplSetServers( [ 
-        new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-        new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      ], 
-      {rs_name:RS.name, read_secondary:true}
-    );
-    
-    // Connect to the replicaset
-    var slaveDb = null;
-    var db = new Db('foo', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
-    db.open(function(err, p_db) {
-      Step(
-        function addUser() {
-          db.admin().addUser("me", "secret", this);
-        },
+        slaveDb.collection('stuff', function(err, collection) {
+          collection.findOne(self)
+        })                      
+      },
+      
+      function finishUp(err, item) {
+        test.ok(err == null);
+        test.equal(3, item.a);          
         
-        function ensureFailingInsert(err, result) {
-          var self = this;
-          test.equal(null, err);
-          test.ok(result != null);
-  
-          db.collection("stuff", function(err, collection) {
-            collection.insert({a:2}, {safe: {w: 2, wtimeout: 10000}}, self);
-          });                  
-        },
-        
-        function authenticate(err, result) {
-          test.ok(err != null);
-          
-          db.admin().authenticate("me", "secret", this);
-        },
-        
-        function insertShouldSuccedNow(err, result) {
-          var self = this;
-          test.equal(null, err);
-          test.ok(result);
-  
-          db.collection("stuff", function(err, collection) {
-            collection.insert({a:2}, {safe: {w: 2, wtimeout: 10000}}, self);
-          });                            
-        }, 
-        
-        function queryShouldExecuteCorrectly(err, result) {
-          var self = this;
-          test.equal(null, err);
-          
-          db.collection("stuff", function(err, collection) {
-            collection.findOne(self);
-          });                            
-        },
-        
-        function finishUp(err, item) {
-          test.ok(err == null);
-          test.equal(2, item.a);
-          test.done();
-          p_db.close();
-        }      
-      )      
-    });
-  },
-  
-  noGlobalsLeaked : function(test) {
-    var leaks = gleak.detectNew();
-    test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-    test.done();
-  }    
-})
+        test.done();
+        p_db.close();
+        slaveDb.close();
+      }
+    )      
+  });
+}
 
-// Assign out tests
-module.exports = tests;
+exports.shouldCorrectlyAuthenticate = function(test) {
+  var replSet = new ReplSetServers( [ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+    ], 
+    {rs_name:RS.name, read_secondary:true}
+  );
+  
+  // Connect to the replicaset
+  var slaveDb = null;
+  var db = new Db('foo', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+  db.open(function(err, p_db) {
+    Step(
+      function addUser() {
+        db.admin().addUser("me", "secret", this);
+      },
+      
+      function ensureFailingInsert(err, result) {
+        var self = this;
+        test.equal(null, err);
+        test.ok(result != null);
+
+        db.collection("stuff", function(err, collection) {
+          collection.insert({a:2}, {safe: {w: 2, wtimeout: 10000}}, self);
+        });                  
+      },
+      
+      function authenticate(err, result) {
+        test.ok(err != null);
+        
+        db.admin().authenticate("me", "secret", this);
+      },
+      
+      function insertShouldSuccedNow(err, result) {
+        var self = this;
+        test.equal(null, err);
+        test.ok(result);
+
+        db.collection("stuff", function(err, collection) {
+          collection.insert({a:2}, {safe: {w: 2, wtimeout: 10000}}, self);
+        });                            
+      }, 
+      
+      function queryShouldExecuteCorrectly(err, result) {
+        var self = this;
+        test.equal(null, err);
+        
+        db.collection("stuff", function(err, collection) {
+          collection.findOne(self);
+        });                            
+      },
+      
+      function finishUp(err, item) {
+        test.ok(err == null);
+        test.equal(2, item.a);
+        test.done();
+        p_db.close();
+      }      
+    )      
+  });
+}
+
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+exports.noGlobalsLeaked = function(test) {
+  var leaks = gleak.detectNew();
+  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+  test.done();
+}
