@@ -4,6 +4,6 @@
 .project
 .settings
 data
-node_modules
+node_modules/
 output
 build

@@ -27,7 +27,6 @@ test: build_native
 
 test_junit: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
-	$(NPM) install -d
 	$(NODE) dev/tools/test_all.js --junit --noreplicaset
 
 test_nodeunit_pure:
