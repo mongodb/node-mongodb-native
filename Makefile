@@ -1,4 +1,5 @@
 NODE = node
+NPM = npm
 NODEUNIT = deps/nodeunit/bin/nodeunit
 DOX = node_modules/dox/bin/dox
 name = all
@@ -26,6 +27,7 @@ test: build_native
 
 test_junit: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
+	$(NPM) install -g
 	$(NODE) dev/tools/test_all.js --junit --noreplicaset
 
 test_nodeunit_pure:
