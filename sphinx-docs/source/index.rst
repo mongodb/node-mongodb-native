@@ -19,7 +19,7 @@ API Documentation
 .. toctree::
   :maxdepth: 1
 
-  api-documentation
+  api-generated/index
 
 Major Topics
 ------------

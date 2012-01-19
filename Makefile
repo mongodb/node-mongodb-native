@@ -60,7 +60,7 @@ clean:
 	rm -r ./external-libs/bson/build
 
 generate_docs:
-	# $(DOX) < lib/mongodb/admin.js > build/admin.json
 	$(NODE) tools/build-docs.js
+	# make --directory=./sphinx-docs --file=Makefile html
 
 .PHONY: total

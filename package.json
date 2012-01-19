@@ -63,6 +63,7 @@
 , "devDependencies": {
       "dox": "0.1.3"
     , "uglify-js": "1.2.5"
+    , "ejs": "0.6.1"
   }
 , "config":         { "native" : false }                    
 , "main":             "./lib/mongodb/index"
