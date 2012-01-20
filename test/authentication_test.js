@@ -48,7 +48,11 @@ exports.tearDown = function(callback) {
   callback();
 }
 
-// Test the authentication method for the user
+/**
+ * Test the authentication method for the user
+ * 
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticate = function(test) {
   var user_name = 'spongebob';
   var password = 'squarepants';
@@ -68,6 +72,11 @@ exports.shouldCorrectlyAuthenticate = function(test) {
   });    
 }
 
+/**
+ * Test the authentication method for the user
+ * 
+ * @ignore
+ */
 exports.shouldCorrectlyReAuthorizeReconnectedConnections = function(test) {
   var user_name = 'spongebob2';
   var password = 'password';

@@ -144,7 +144,7 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
   }
   
   var isFunction = function(entry) {
-    return entry.ctx.type == 'method';
+    return entry.ctx.type == 'method' && entry.isPrivate == false;
   }
   
   // Iterate over all classes

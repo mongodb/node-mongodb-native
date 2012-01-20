@@ -35,6 +35,9 @@ for(var i = 0; i < entries.length; i++) {
 }
 
 for(var i = 0; i < entries.length; i++) {
+  console.log("---------------------------------------------------------------")
+  console.dir(entries[i])
+  
   if(isFunction(entries[i])) {
     var paramsStrings = [];
     var paramNames = [];
@@ -70,7 +73,8 @@ for(var i = 0; i < entries.length; i++) {
     fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
       .replace(/\<\/code\>\<\/pre\>/g, "")
       .replace(/\<h2\>|\<\/h2\>/g, "**")
-      .replace(/\<p\>|\<\/p\>/g, "");
+      .replace(/\<p\>|\<\/p\>/g, "")
+      .replace(/\<br\>|\<\/br\>/g, "\n");
         
     %><%= format("------------------\n%s\n------------------\n", entries[i].ctx.name) %><%
     %><%- format("%s\n\n", fullDescription) %><%
@@ -84,8 +88,8 @@ for(var i = 0; i < entries.length; i++) {
     if(examples[entries[i].ctx.name]) {
       %><%= format("**Examples**\n\n") %><%      
       var examplesArray = examples[entries[i].ctx.name];
-      console.log("------------------------------------------------------- EXAMPLES ARRAY")
-      console.dir(examplesArray)
+      // console.log("------------------------------------------------------- EXAMPLES ARRAY")
+      // console.dir(examplesArray)
       // Iterate over all the examples
       for(var ei = 0; ei < examplesArray.length; ei++) {
         // Fetch an example
@@ -95,7 +99,9 @@ for(var i = 0; i < entries.length; i++) {
           .replace("native_parser: native_parser", "native_parser: false")
           .replace(/test\.ok/g, "assert.ok")
           .replace(/test\.equal/g, "assert.equal")
-          .replace(/test\.deepEqual/g, "assert.deepEqual");
+          .replace(/test\.deepEqual/g, "assert.deepEqual")
+          .replace(/\n[ |\t]*test\.done\(\)\;/, "");
+
         // Split and adjust code
         var codeLines = code.split(/\n/);
         for(var ci = 0; ci < codeLines.length; ci++) {
@@ -106,19 +112,27 @@ for(var i = 0; i < entries.length; i++) {
         fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
           .replace(/\<\/code\>\<\/pre\>/g, "")
           .replace(/\<h2\>|\<\/h2\>/g, "**")
-          .replace(/\<p\>|\<\/p\>/g, "");
+          .replace(/\<p\>|\<\/p\>/g, "")
+          .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
           
         // Split up and move
         var fullDescriptionLines = fullDescription.split(/\n/);
         for(var ci = 0; ci < fullDescriptionLines.length; ci++) {
           fullDescriptionLines[ci] = "  " + fullDescriptionLines[ci];
         }
+        
+        // Starting template Lines
+        var startingTemplateLines = [
+            "     var Db = require('mongodb').Db,",
+            "         Server = require('mongodb').Server,",
+            "         assert = require('assert');\n\n"
+          ];
                 
-        console.log("------------------------------------------------------- EXAMPLE")
-        console.dir(example)
+        // console.log("------------------------------------------------------- EXAMPLE")
+        // console.dir(example)
         // Let's render it
-        %><%= format("%s\n\n", fullDescriptionLines.join("\n")) %><%
-        %><%= format("  .. code-block:: javascript\n\n%s\n", codeLines.join("\n")) %><%
+        %><%- format("%s\n\n", fullDescriptionLines.join("\n")) %><%
+        %><%- format("  .. code-block:: javascript\n\n%s%s\n\n", startingTemplateLines.join("\n"), codeLines.join("\n")) %><%
       }
     }
   }
