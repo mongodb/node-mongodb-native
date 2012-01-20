@@ -34,6 +34,37 @@ for(var i = 0; i < entries.length; i++) {
   }
 }
 
+%><%= format("------------------\nProperties\n------------------\n") %><%
+
+for(var i = 0; i < entries.length; i++) {
+  if(isProperty(entries[i])) {
+    // Extract values
+    var attributeName = "";
+    var getterSetters = [];
+    var type = "";
+  
+    // Loop over all tags
+    for(var ti = 0; ti < entries[i].tags.length; ti++) {
+      if(entries[i].tags[ti].type == 'field') attributeName = entries[i].tags[ti].string;
+      if(entries[i].tags[ti].type == 'getter') getterSetters.push("Getter");
+      if(entries[i].tags[ti].type == 'setter') getterSetters.push("Setter");
+      if(entries[i].tags[ti].type == 'type') type = entries[i].tags[ti].types[0].toLowerCase();
+    }
+    
+    // Get full description and clean it
+    var fullDescription = entries[i].description.full;
+    fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
+      .replace(/\<\/code\>\<\/pre\>/g, "")
+      .replace(/\<h2\>|\<\/h2\>/g, "**")
+      .replace(/\<p\>|\<\/p\>/g, "")
+      .replace(/\<br\>|\<\/br\>/g, "\n");
+      
+    // Write out the text
+    %><%- format("%s\n\n", fullDescription) %><%
+    %><%= format(".. js:attribute:: %s %s [%s]\n\n", attributeName, type, getterSetters.join("|")) %><%    
+  }
+}
+
 for(var i = 0; i < entries.length; i++) {
 // for(var i = 0; i < 4; i++) {
   // console.log("---------------------------------------------------------------")
@@ -80,22 +111,10 @@ for(var i = 0; i < entries.length; i++) {
       .replace(/\<p\>|\<\/p\>/g, "")
       .replace(/\<br\>|\<\/br\>/g, "\n");
         
-    // console.dir("================================================================= 1111")
-    // console.dir(Array.isArray(paramsStrings) ? paramsStrings.join("") : paramsStrings)
-    // console.dir("================================================================= 2222")
-        
     %><%= format("------------------\n%s\n------------------\n", entries[i].ctx.name) %><%
-    // console.dir("================================================================= 3333")
     %><%- format("%s\n\n", fullDescription) %><%
-    // console.dir("================================================================= 4444")
     %><%= format(".. js:function:: %s(%s)\n\n", entries[i].ctx.name, paramsString) %><%
-    // console.dir("================================================================= 5555")
     %><%= Array.isArray(paramsStrings) ? paramsStrings.join("") : paramsStrings %><%
-    // console.dir("================================================================= 6666")
-    // console.dir(examples)
-
-    // console.log("-------------------------------------------------------")
-    // console.dir(examples[entries[i].ctx.name])
 
     // If we have examples render them
     if(examples != null && examples[entries[i].ctx.name]) {
@@ -147,7 +166,7 @@ for(var i = 0; i < entries.length; i++) {
         %><%- format("%s\n\n", fullDescriptionLines.join("\n")) %><%
         %><%- format("  .. code-block:: javascript\n\n%s%s\n\n", startingTemplateLines.join("\n"), codeLines.join("\n")) %><%
       }
-    }
+    } 
   }
 }
 %>

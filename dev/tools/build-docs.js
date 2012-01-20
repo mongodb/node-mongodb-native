@@ -148,6 +148,16 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
     return entry.ctx != null && entry.ctx.type == 'method' && entry.isPrivate == false;
   }
   
+  var isProperty = function(entry) {
+    var tags = entry.tags;
+    
+    for(var k = 0; k < tags.length; k++) {
+      if(tags[k].type == 'property') return true;
+    }
+    
+    return false;    
+  }
+  
   // Iterate over all classes
   var classNames = Object.keys(dataObjects);
   
@@ -160,7 +170,8 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
     var classExamplesData = testObjects[className];
     // Render the class template
     var classContent = ejs.render(templates['class'], 
-      {entries:classMetaData, examples:classExamplesData, isClass:isClass, isFunction:isFunction, format:format});    
+      {entries:classMetaData, examples:classExamplesData, isClass:isClass, 
+        isFunction:isFunction, isProperty:isProperty, format:format});    
     
     // console.dir("------------------------------------------------------------------- -1")
     // console.dir(templates)
@@ -183,7 +194,7 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
   
   // Let's render the index api file
   var indexContent = ejs.render(templates['index'], 
-    {entries:classNames, isClass:isClass, isFunction:isFunction, format:format});    
+    {entries:classNames, isClass:isClass, isFunction:isFunction, isProperty:isProperty, format:format});    
   // Write out the api index to disk
   fs.writeFileSync(format("%s/%s.rst", outputDirectory, "index"), indexContent);
   
