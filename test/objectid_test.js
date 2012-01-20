@@ -142,6 +142,18 @@ exports.shouldCorrectlyGenerateObjectIDFromTimestamp = function(test) {
   test.done();
 }
 
+exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = function(test) {
+  var timestamp = 1000;
+  var objectID = new ObjectID();
+  var id1 = objectID.id;
+  // Override the timestamp
+  objectID.generationTime = timestamp
+  var id2 = objectID.id;  
+  // Check the strings
+  test.equal(id1.substr(4), id2.substr(4));
+  test.done();
+}
+
 exports.shouldCorrectlyInsertWithObjectId = function(test) {
   client.createCollection('shouldCorrectlyInsertWithObjectId', function(err, collection) {
     collection.insert({}, {safe:true}, function(err, ids) {
