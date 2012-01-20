@@ -1,4 +1,4 @@
-0.9.8-2 2012-01-17
+0.9.8-2 2012-01-20
 * Fixed a missing this in the ReplSetServers constructor.
 
 0.9.8-1 2012-01-17
