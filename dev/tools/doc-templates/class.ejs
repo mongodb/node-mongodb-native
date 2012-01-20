@@ -35,12 +35,16 @@ for(var i = 0; i < entries.length; i++) {
 }
 
 for(var i = 0; i < entries.length; i++) {
-  console.log("---------------------------------------------------------------")
-  console.dir(entries[i])
+// for(var i = 0; i < 4; i++) {
+  // console.log("---------------------------------------------------------------")
+  // console.dir(entries[i])
   
   if(isFunction(entries[i])) {
     var paramsStrings = [];
     var paramNames = [];
+    
+    // console.log("-------------------------------------------------------------- 0")
+    // console.dir(entries[i].tags)
         
     for(var ti = 0; ti < entries[i].tags.length; ti++) { 
       // Get the current tag
@@ -76,16 +80,25 @@ for(var i = 0; i < entries.length; i++) {
       .replace(/\<p\>|\<\/p\>/g, "")
       .replace(/\<br\>|\<\/br\>/g, "\n");
         
+    // console.dir("================================================================= 1111")
+    // console.dir(Array.isArray(paramsStrings) ? paramsStrings.join("") : paramsStrings)
+    // console.dir("================================================================= 2222")
+        
     %><%= format("------------------\n%s\n------------------\n", entries[i].ctx.name) %><%
+    // console.dir("================================================================= 3333")
     %><%- format("%s\n\n", fullDescription) %><%
+    // console.dir("================================================================= 4444")
     %><%= format(".. js:function:: %s(%s)\n\n", entries[i].ctx.name, paramsString) %><%
-    %><%= paramsStrings.join("") %><%
+    // console.dir("================================================================= 5555")
+    %><%= Array.isArray(paramsStrings) ? paramsStrings.join("") : paramsStrings %><%
+    // console.dir("================================================================= 6666")
+    // console.dir(examples)
 
     // console.log("-------------------------------------------------------")
     // console.dir(examples[entries[i].ctx.name])
 
     // If we have examples render them
-    if(examples[entries[i].ctx.name]) {
+    if(examples != null && examples[entries[i].ctx.name]) {
       %><%= format("**Examples**\n\n") %><%      
       var examplesArray = examples[entries[i].ctx.name];
       // console.log("------------------------------------------------------- EXAMPLES ARRAY")

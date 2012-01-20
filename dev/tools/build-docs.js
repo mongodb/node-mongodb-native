@@ -100,7 +100,8 @@ var readAllTemplates = function(templates) {
 // ----------------------------------------------------------------------------
 // All source files for the api generation
 var apiClasses = [
-    {tag:"admin", path:"./lib/mongodb/admin.js"}
+    {tag:"admin", path:"./lib/mongodb/admin.js"},
+    {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"}
   ];
   
 // All test files 
@@ -144,7 +145,7 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
   }
   
   var isFunction = function(entry) {
-    return entry.ctx.type == 'method' && entry.isPrivate == false;
+    return entry.ctx != null && entry.ctx.type == 'method' && entry.isPrivate == false;
   }
   
   // Iterate over all classes
