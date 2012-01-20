@@ -62,6 +62,6 @@ clean:
 
 generate_docs:
 	$(NODE) dev/tools/build-docs.js
-	# make --directory=./sphinx-docs --file=Makefile html
+	# make --directory=./docs/sphinx-docs --file=Makefile html
 
 .PHONY: total

@@ -1,5 +1,6 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /*!
  * Module dependencies.
@@ -204,15 +205,17 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = function(test) {
 }
 
 /**
- * Retrieve the server information for the current
- * instance of the db client
+ * An example of how to use the validateCollection command
+ * Use this command to check that a collection is valid (not corrupt) and to get various statistics.
  * 
  * @ignore
  * @_class admin
  * @_function validateCollection
  */
 exports.shouldCorrectlyCallValidateCollection = function(test) {
-  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var fs_client = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), 
+    {native_parser: native_parser});
   fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       fs_client.collection('test', function(err, collection) {

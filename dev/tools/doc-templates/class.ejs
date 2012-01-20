@@ -1,7 +1,7 @@
 <%
 for(var i = 0; i < entries.length; i++) {
   if(isClass(entries[i].tags)) {
-    %><%= format("==================\n%s\n==================\n", entries[i].ctx.string) %><%
+    %><%= format("==================\n%s Class Methods\n==================\n", entries[i].ctx.string) %><%
     %><%- format("%s", entries[i].description.full.replace(/<[^>]+>/g, '')) %><%
   }
 }
@@ -33,13 +33,7 @@ for(var i = 0; i < entries.length; i++) {
     }
   }
 }
-%>
 
-------------------
-Class methods
-------------------
-
-<% 
 for(var i = 0; i < entries.length; i++) {
   if(isFunction(entries[i])) {
     var paramsStrings = [];
@@ -66,12 +60,67 @@ for(var i = 0; i < entries.length; i++) {
         paramsStrings.push(format("   :returns: %s %s\n\n", type, description));
       }
     }
-    
+        
     // Reformat any optional parameters from ,[] to [,]
     var paramsString = paramNames.join(", ").replace(/\, \[/, "[, ");
     // Write out the methods
+    // %><%- format("\n%s\n", entries[i].description.full.replace(/<[^>]+>/g, '')) %><%
+    
+    var fullDescription = entries[i].description.full;
+    fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
+      .replace(/\<\/code\>\<\/pre\>/g, "")
+      .replace(/\<h2\>|\<\/h2\>/g, "**")
+      .replace(/\<p\>|\<\/p\>/g, "");
+        
+    %><%= format("------------------\n%s\n------------------\n", entries[i].ctx.name) %><%
+    %><%- format("%s\n\n", fullDescription) %><%
     %><%= format(".. js:function:: %s(%s)\n\n", entries[i].ctx.name, paramsString) %><%
     %><%= paramsStrings.join("") %><%
+
+    // console.log("-------------------------------------------------------")
+    // console.dir(examples[entries[i].ctx.name])
+
+    // If we have examples render them
+    if(examples[entries[i].ctx.name]) {
+      %><%= format("**Examples**\n\n") %><%      
+      var examplesArray = examples[entries[i].ctx.name];
+      console.log("------------------------------------------------------- EXAMPLES ARRAY")
+      console.dir(examplesArray)
+      // Iterate over all the examples
+      for(var ei = 0; ei < examplesArray.length; ei++) {
+        // Fetch an example
+        var example = examplesArray[ei];
+        var code = example.code;        
+        code = code.replace(", ssl:useSSL", "")
+          .replace("native_parser: native_parser", "native_parser: false")
+          .replace(/test\.ok/g, "assert.ok")
+          .replace(/test\.equal/g, "assert.equal")
+          .replace(/test\.deepEqual/g, "assert.deepEqual");
+        // Split and adjust code
+        var codeLines = code.split(/\n/);
+        for(var ci = 0; ci < codeLines.length; ci++) {
+          codeLines[ci] = "     " + codeLines[ci];
+        }
+
+        var fullDescription = example.description.full;
+        fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
+          .replace(/\<\/code\>\<\/pre\>/g, "")
+          .replace(/\<h2\>|\<\/h2\>/g, "**")
+          .replace(/\<p\>|\<\/p\>/g, "");
+          
+        // Split up and move
+        var fullDescriptionLines = fullDescription.split(/\n/);
+        for(var ci = 0; ci < fullDescriptionLines.length; ci++) {
+          fullDescriptionLines[ci] = "  " + fullDescriptionLines[ci];
+        }
+                
+        console.log("------------------------------------------------------- EXAMPLE")
+        console.dir(example)
+        // Let's render it
+        %><%= format("%s\n\n", fullDescriptionLines.join("\n")) %><%
+        %><%= format("  .. code-block:: javascript\n\n%s\n", codeLines.join("\n")) %><%
+      }
+    }
   }
 }
 %>

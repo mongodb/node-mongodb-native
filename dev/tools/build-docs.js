@@ -68,7 +68,7 @@ var buildTestHash = function(objects) {
         // Format the block code
         var codeLines = block.code.split(/\n/);
         // Drop first and last line
-        codeLines = codeLines.slice(1, codeLines.length - 3);
+        codeLines = codeLines.slice(1, codeLines.length - 1);
         // Indent the code
         for(var k = 0; k < codeLines.length; k++) {
           codeLines[k] = codeLines[k].replace(/^  /, "")
@@ -163,10 +163,10 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
     
     // console.dir("------------------------------------------------------------------- -1")
     // console.dir(templates)
-    console.dir("------------------------------------------------------------------- 0")
-    for(var j = 0; j < classMetaData.length; j++) {
-      console.dir(classMetaData[j]);
-    }
+    // console.dir("------------------------------------------------------------------- 0")
+    // for(var j = 0; j < classMetaData.length; j++) {
+    //   console.dir(classMetaData[j]);
+    // }
     // console.dir(classMetaData)
     console.dir("------------------------------------------------------------------- -1")
     console.dir("------------------------------------------------------------------- -1")
