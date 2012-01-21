@@ -1,3 +1,7 @@
+0.9.8-3 2012-01-21
+* Workaround for issue with Object.defineProperty (Issue #484)
+* ObjectID generation with date does not set rest of fields to zero (Issue #482)
+
 0.9.8-2 2012-01-20
 * Fixed a missing this in the ReplSetServers constructor.
 
