@@ -22,9 +22,12 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var useSSL = process.env['USE_SSL'] != null ? true : false;
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
+ * @ignore
  */
 var ISODate = function (string) {
   var match;
@@ -94,6 +97,165 @@ exports.tearDown = function(callback) {
   callback();
 }
 
+/**
+ * A simple document insert example, not using safe mode to ensure document persistance on MongoDB
+ *
+ * @_class collection
+ * @_function insert
+ * @ignore
+ */
+exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Fetch a collection to insert document into
+    db.collection("simple_document_insert_collection_no_safe", function(err, collection) {
+      
+      // Insert a single document
+      collection.insert({hello:'world_no_safe'});
+      
+      // Wait for a second before finishing up, to ensure we have written the item to disk
+      setTimeout(function() {
+        
+        // Fetch the document
+        collection.findOne({hello:'world_no_safe'}, function(err, item) {
+          test.equal(null, err);
+          test.equal('world_no_safe', item.hello);
+          test.done();
+          db.close();
+        })
+      }, 1000);      
+    });
+  });              
+}
+
+/**
+ * A batch document insert example, using safe mode to ensure document persistance on MongoDB
+ *
+ * @_class collection
+ * @_function insert
+ * @ignore
+ */
+exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Fetch a collection to insert document into
+    db.collection("batch_document_insert_collection_safe", function(err, collection) {
+      
+      // Insert a single document
+      collection.insert([{hello:'world_safe1'}
+        , {hello:'world_safe2'}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Fetch the document
+        collection.findOne({hello:'world_safe2'}, function(err, item) {
+          test.equal(null, err);
+          test.equal('world_safe2', item.hello);
+          test.done();
+          db.close();
+        })        
+      });
+    });
+  });              
+}
+
+/**
+ * Example of inserting a document containing functions
+ *
+ * @_class collection
+ * @_function insert
+ * @ignore
+ */
+exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Fetch a collection to insert document into
+    db.collection("simple_document_insert_with_function_safe", function(err, collection) {
+      
+      // Insert a single document
+      collection.insert({hello:'world'
+        , func:function() {}}, {safe:true, serializeFunctions:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Fetch the document
+        collection.findOne({hello:'world'}, function(err, item) {
+          test.equal(null, err);
+          test.ok("function() {}", item.code);
+          test.done();
+          db.close();
+        })        
+      });
+    });
+  });              
+}
+
+/**
+ * Example of using keepGoing to allow batch insert to complete even when there are illegal documents in the batch
+ *
+ * @_class collection
+ * @_function insert
+ * @ignore
+ */
+exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Only run the rest of the code if we have a mongodb server with version >= 1.9.1
+    db.admin().serverInfo(function(err, result){
+      
+      // Ensure we are running at least MongoDB v1.9.1
+      if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
+
+        // Create a collection
+        client.createCollection('keepGoingExample', function(err, collection) {
+          
+          // Add an unique index to title to force errors in the batch insert
+          collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
+
+            // Insert some intial data into the collection
+            collection.insert([{name:"Jim"}
+              , {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
+
+              // Force keep going flag, ignoring unique index issue
+              collection.insert([{name:"Jim"}
+                , {name:"Sarah", title:"Princess"}
+                , {name:'Gump', title:"Gump"}], {safe:true, keepGoing:true}, function(err, result) {
+
+                // Count the number of documents left (should not include the duplicates)
+                collection.count(function(err, count) {
+                  test.equal(3, count);
+                  db.close();
+                  test.done();        
+                })
+              });
+            });
+          });
+        });      
+      } else {
+        db.close();
+        test.done();      
+      }      
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
 exports.shouldForceMongoDbServerToAssignId = function(test) {
   /// Set up server with custom pk factory
   var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), 'forceServerObjectId':true});
@@ -136,6 +298,9 @@ exports.shouldForceMongoDbServerToAssignId = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformSingleInsert = function(test) {
   client.createCollection('shouldCorrectlyPerformSingleInsert', function(err, collection) {
     collection.insert({a:1}, {safe:true}, function(err, result) {
@@ -147,6 +312,9 @@ exports.shouldCorrectlyPerformSingleInsert = function(test) {
   })
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformBasicInsert = function(test) {
   client.createCollection('test_insert', function(err, r) {
     client.collection('test_insert', function(err, collection) {
@@ -184,7 +352,9 @@ exports.shouldCorrectlyPerformBasicInsert = function(test) {
   });    
 }
 
-// Test multiple document insert
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleMultipleDocumentInsert = function(test) {
   client.createCollection('test_multiple_insert', function(err, r) {
     var collection = client.collection('test_multiple_insert', function(err, collection) {
@@ -214,6 +384,9 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteSaveInsertUpdate= function(test) {
   client.createCollection('shouldCorrectlyExecuteSaveInsertUpdate', function(err, collection) {
     collection.save({ email : 'save' }, {safe:true}, function() {
@@ -237,6 +410,9 @@ exports.shouldCorrectlyExecuteSaveInsertUpdate= function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument = function(test) {
   client.createCollection('test_should_deserialize_large_integrated_array', function(err, collection) {
     var doc = {'a':0,
@@ -254,6 +430,9 @@ exports.shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument = function(
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = function(test) {
   client.createCollection('test_all_serialization_types', function(err, collection) {
     var date = new Date();
@@ -310,6 +489,9 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext= function(test) {
   var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
@@ -357,6 +539,9 @@ exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext= function(tes
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = function(test) {
   client.createCollection('test_all_serialization_types_new_context', function(err, collection) {
     var date = new Date();
@@ -425,11 +610,14 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = function(test
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyDoToJsonForLongValue = function(test) {
   client.createCollection('test_to_json_for_long', function(err, collection) {
     test.ok(collection instanceof Collection);
 
-    collection.insertAll([{value: Long.fromNumber(32222432)}], {safe:true}, function(err, ids) {
+    collection.insert([{value: Long.fromNumber(32222432)}], {safe:true}, function(err, ids) {
       collection.findOne({}, function(err, item) {
         test.equal(32222432, item.value);          
         test.done();
@@ -438,6 +626,9 @@ exports.shouldCorrectlyDoToJsonForLongValue = function(test) {
   });        
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertAndUpdateWithNoCallback = function(test) {
   var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, client) {
@@ -461,23 +652,36 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldInsertAndQueryTimestamp = function(test) {
-  client.createCollection('test_insert_and_query_timestamp', function(err, collection) {
-    // Insert the update
-    collection.insert({i:Timestamp.fromNumber(100), j:Long.fromNumber(200)}, {safe:true}, function(err, r) {
-      // Locate document
-      collection.findOne({}, function(err, item) {
-        test.ok(item.i instanceof Timestamp);
-        test.equal(100, item.i);
-        test.ok(typeof item.j == "number");
-        test.equal(200, item.j);
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-        test.done();
-      });                
-    })
-  })
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    db.createCollection('test_insert_and_query_timestamp', function(err, collection) {
+      // Insert the update
+      collection.insert({i:Timestamp.fromNumber(100), j:Long.fromNumber(200)}, {safe:true}, function(err, r) {
+        // Locate document
+        collection.findOne({}, function(err, item) {
+          test.ok(item.i instanceof Timestamp);
+          test.equal(100, item.i);
+          test.ok(typeof item.j == "number");
+          test.equal(200, item.j);
+
+          db.close();
+          test.done();
+        });                
+      });
+    });
+  });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertAndQueryUndefined = function(test) {
   client.createCollection('test_insert_and_query_undefined', function(err, collection) {
     // Insert the update
@@ -492,12 +696,18 @@ exports.shouldCorrectlyInsertAndQueryUndefined = function(test) {
   })
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySerializeDBRefToJSON = function(test) {
   var dbref = new DBRef("foo", ObjectID.createFromHexString("fc24a04d4560531f00000000"), null);
   JSON.stringify(dbref);
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformSafeInsert = function(test) {
   var fixtures = [{
       name: "empty", array: [], bool: false, dict: {}, float: 0.0, string: ""
@@ -545,6 +755,9 @@ exports.shouldCorrectlyPerformSafeInsert = function(test) {
   })
 }
 
+/**
+ * @ignore
+ */
 exports.shouldThrowErrorIfSerializingFunction = function(test) {
   client.createCollection('test_should_throw_error_if_serializing_function', function(err, collection) {
     var func = function() { return 1};
@@ -559,6 +772,9 @@ exports.shouldThrowErrorIfSerializingFunction = function(test) {
   })    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertDocumentWithUUID = function(test) {
   client.collection("insert_doc_with_uuid", function(err, collection) {
     collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
@@ -584,6 +800,9 @@ exports.shouldCorrectlyInsertDocumentWithUUID = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = function(test) {
   var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, client) {
@@ -603,6 +822,9 @@ exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertDBRefWithDbNotDefined = function(test) {
   client.createCollection('shouldCorrectlyInsertDBRefWithDbNotDefined', function(err, collection) {
     var doc = {_id: new ObjectID()};
@@ -631,6 +853,9 @@ exports.shouldCorrectlyInsertDBRefWithDbNotDefined = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = function(test) {
   var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
@@ -649,6 +874,9 @@ exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteMultipleFetches = function(test) {
   var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   // Search parameter
@@ -670,6 +898,9 @@ exports.shouldCorrectlyExecuteMultipleFetches = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyFailWhenNoObjectToUpdate= function(test) {
   client.createCollection('shouldCorrectlyExecuteSaveInsertUpdate', function(err, collection) {
     collection.update({_id : new ObjectID()}, { email : 'update' }, {safe:true},
@@ -681,6 +912,9 @@ exports.shouldCorrectlyFailWhenNoObjectToUpdate= function(test) {
   });    
 }  
 
+/**
+ * @ignore
+ */
 exports['Should correctly insert object and retrieve it when containing array and IsoDate'] = function(test) {
   var doc = {
    "_id" : new ObjectID("4e886e687ff7ef5e00000162"),
@@ -705,6 +939,9 @@ exports['Should correctly insert object and retrieve it when containing array an
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly insert object with timestamps'] = function(test) {
   var doc = {
    "_id" : new ObjectID("4e886e687ff7ef5e00000162"),
@@ -730,6 +967,9 @@ exports['Should correctly insert object with timestamps'] = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should fail on insert due to key starting with $'] = function(test) {
   var doc = {
    "_id" : new ObjectID("4e886e687ff7ef5e00000162"),
@@ -744,6 +984,9 @@ exports['Should fail on insert due to key starting with $'] = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly allow for control of serialization of functions on command level'] = function(test) {
   var doc = {
     str : "String",
@@ -772,6 +1015,9 @@ exports['Should Correctly allow for control of serialization of functions on com
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly allow for control of serialization of functions on collection level'] = function(test) {
   var doc = {
     str : "String",
@@ -792,6 +1038,9 @@ exports['Should Correctly allow for control of serialization of functions on col
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly allow for using a Date object as _id'] = function(test) {
   var doc = {
     _id : new Date(),
@@ -812,6 +1061,9 @@ exports['Should Correctly allow for using a Date object as _id'] = function(test
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly fail to update returning 0 results'] = function(test) {
   client.createCollection("Should_Correctly_fail_to_update_returning_0_results", {serializeFunctions:true}, function(err, collection) {
     test.ok(err == null);
@@ -823,6 +1075,9 @@ exports['Should Correctly fail to update returning 0 results'] = function(test) 
   });    
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly update two fields including a sub field'] = function(test) {
   var doc = { 
     _id: new ObjectID(),

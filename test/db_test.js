@@ -16,6 +16,7 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
  * Retrieve the server information for the current
@@ -51,7 +52,9 @@ exports.tearDown = function(callback) {
   callback();
 }
 
-// Test the auto connect functionality of the db
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleIllegalDbNames = function(test) {
   // Assert rename
   try {
@@ -101,7 +104,9 @@ exports.shouldCorrectlyHandleIllegalDbNames = function(test) {
   test.done();
 }
   
-// Test the auto connect functionality of the db
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformAutomaticConnect = function(test) {
   var automatic_connect_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
   automatic_connect_client.open(function(err, automatic_connect_client) {
@@ -130,6 +135,9 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteEvalFunctions = function(test) {
   client.eval('function (x) {return x;}', [3], function(err, result) {      
     test.equal(3, result);
@@ -181,6 +189,9 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyDereferenceDbRef = function(test) {
   client.createCollection('test_deref', function(err, collection) {
     collection.insert({'a':1}, {safe:true}, function(err, ids) {
@@ -226,88 +237,101 @@ exports.shouldCorrectlyDereferenceDbRef = function(test) {
   });
 }
 
+/**
+ * An example of illegal and legal renaming of a collection
+ *
+ * @_class collection
+ * @_function rename
+ * @ignore
+ */
 exports.shouldCorrectlyRenameCollection = function(test) {
-  client.createCollection('test_rename_collection', function(err, collection) {
-    client.createCollection('test_rename_collection2', function(err, collection) {
-      client.collection('test_rename_collection', function(err, collection1) {
-        client.collection('test_rename_collection2', function(err, collection2) {
-          // Assert rename
-          try {
-            collection1.rename(5, function(err, collection) {});         
-          } catch(err) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    
+    // Open a couple of collections
+    db.createCollection('test_rename_collection', function(err, collection1) {
+      db.createCollection('test_rename_collection2', function(err, collection2) {        
+
+        // Attemp to rename a collection to a number
+        try {
+          collection1.rename(5, function(err, collection) {});         
+        } catch(err) {
+          test.ok(err instanceof Error);
+          test.equal("collection name must be a String", err.message);
+        }
+
+        // Attemp to rename a collection to an empty string
+        try {
+          collection1.rename("", function(err, collection) {});
+        } catch(err) {
+          test.ok(err instanceof Error);
+          test.equal("collection names cannot be empty", err.message);              
+        }
+
+        // Attemp to rename a collection to an illegal name including the character $
+        try {
+          collection1.rename("te$t", function(err, collection) {});
+        } catch(err) {
+          test.ok(err instanceof Error);
+          test.equal("collection names must not contain '$'", err.message);
+        }
+
+        // Attemp to rename a collection to an illegal name starting with the character .
+        try {
+          collection1.rename(".test", function(err, collection) {});
+        } catch(err) {
+          test.ok(err instanceof Error);
+          test.equal("collection names must not start or end with '.'", err.message);
+        }
+
+        // Attemp to rename a collection to an illegal name ending with the character .
+        try {
+          collection1.rename("test.", function(err, collection) {});
+        } catch(err) {
+          test.ok(err instanceof Error);
+          test.equal("collection names must not start or end with '.'", err.message);
+        }
+
+        // Attemp to rename a collection to an illegal name with an empty middle name
+        try {
+          collection1.rename("tes..t", function(err, collection) {});
+        } catch(err) {
+          test.equal("collection names cannot be empty", err.message);
+        }
+
+        // Insert a couple of documents
+        collection1.insert([{'x':1}, {'x':2}], {safe:true}, function(err, docs) {
+
+          // Attemp to rename the first collection to the second one, this will fail
+          collection1.rename('test_rename_collection2', function(err, collection) {
             test.ok(err instanceof Error);
-            test.equal("collection name must be a String", err.message);
-          }
-
-          try {
-            collection1.rename("", function(err, collection) {});
-          } catch(err) {
-            test.ok(err instanceof Error);
-            test.equal("collection names cannot be empty", err.message);              
-          }
-
-          try {
-            collection1.rename("te$t", function(err, collection) {});
-          } catch(err) {
-            test.ok(err instanceof Error);
-            test.equal("collection names must not contain '$'", err.message);
-          }
-
-          try {
-            collection1.rename(".test", function(err, collection) {});
-          } catch(err) {
-            test.ok(err instanceof Error);
-            test.equal("collection names must not start or end with '.'", err.message);
-          }
-
-          try {
-            collection1.rename("test.", function(err, collection) {});
-          } catch(err) {
-            test.ok(err instanceof Error);
-            test.equal("collection names must not start or end with '.'", err.message);
-          }
-
-          try {
-            collection1.rename("tes..t", function(err, collection) {});
-          } catch(err) {
-            test.equal("collection names cannot be empty", err.message);
-          }
-
-          collection1.count(function(err, count) {
-            test.equal(0, count);
-            
-            collection1.insert([{'x':1}, {'x':2}], {safe:true}, function(err, docs) {
+            test.ok(err.message.length > 0);
+    
+            // Attemp to rename the first collection to a name that does not exist
+            // this will be succesful
+            collection1.rename('test_rename_collection3', function(err, collection) {
+              test.equal("test_rename_collection3", collection.collectionName);
+    
+              // Ensure that the collection is pointing to the new one
               collection1.count(function(err, count) {
                 test.equal(2, count);
-            
-                collection1.rename('test_rename_collection2', function(err, collection) {
-                  test.ok(err instanceof Error);
-                  test.ok(err.message.length > 0);
-            
-                  collection1.rename('test_rename_collection3', function(err, collection) {
-                    test.equal("test_rename_collection3", collection.collectionName);
-            
-                    // Check count
-                    collection.count(function(err, count) {
-                      test.equal(2, count);
-                      // Let's close the db
-                      test.done();
-                    });
-                  });
-                });
+                db.close();
+                test.done();
               });
-            })
-          })
-            
-          collection2.count(function(err, count) {
-            test.equal(0, count);
-          })
-        });
+            });
+          });
+        })
       });
     });
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleFailedConnection = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27117, {auto_reconnect: false, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
@@ -316,6 +340,9 @@ exports.shouldCorrectlyHandleFailedConnection = function(test) {
   })
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyResaveDBRef = function(test) {
   client.dropCollection('test_resave_dbref', function() {
     client.createCollection('test_resave_dbref', function(err, collection) {

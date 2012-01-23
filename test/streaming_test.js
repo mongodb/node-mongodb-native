@@ -13,6 +13,7 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
  * Retrieve the server information for the current
@@ -101,7 +102,7 @@ exports.shouldStreamDocumentsWithLimitForFetching = function(test) {
   client.createCollection('test_streaming_function_with_limit_for_fetching', function(err, collection) {
     test.ok(collection instanceof Collection);
 
-    collection.insertAll(docs, {safe:true}, function(err, ids) {        
+    collection.insert(docs, {safe:true}, function(err, ids) {        
       collection.find({}, function(err, cursor) {
         // Execute find on all the documents
         var stream = cursor.streamRecords({fetchSize:1000}); 

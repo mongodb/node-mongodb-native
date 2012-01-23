@@ -13,6 +13,7 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
  * Retrieve the server information for the current
@@ -48,7 +49,82 @@ exports.tearDown = function(callback) {
   callback();
 }
 
-// Test clearing out of the collection
+/**
+ * An example removing all documents in a collection not using safe mode
+ *
+ * @_class collection
+ * @_function remove
+ * @ignore
+ */
+exports.shouldRemoveAllDocumentsNoSafe = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Fetch a collection to insert document into
+    db.collection("remove_all_documents_no_safe", function(err, collection) {
+      
+      // Insert a bunch of documents
+      collection.insert([{a:1}, {b:2}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Remove all the document
+        collection.remove();
+        
+        // Wait for a second to ensure command went through
+        setTimeout(function() {
+          
+          // Fetch all results
+          collection.find().toArray(function(err, items) {
+            test.equal(null, err);
+            test.equal(0, items.length);
+            db.close();
+            test.done();
+          });
+        }, 1000);        
+      });
+    })
+  });  
+}
+
+/**
+ * An example removing a subset of documents using safe mode to ensure removal of documents
+ *
+ * @_class collection
+ * @_function remove
+ * @ignore
+ */
+exports.shouldRemoveSubsetOfDocumentsSafeMode = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Fetch a collection to insert document into
+    db.collection("remove_subset_of_documents_safe", function(err, collection) {
+      
+      // Insert a bunch of documents
+      collection.insert([{a:1}, {b:2}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Remove all the document
+        collection.remove({a:1}, {safe:true}, function(err, numberOfRemovedDocs) {
+          test.equal(null, err);
+          test.equal(1, numberOfRemovedDocs);
+          db.close();
+          test.done();
+        });        
+      });
+    })
+  });  
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyClearOutCollection = function(test) {
   client.createCollection('test_clear', function(err, r) {
     client.collection('test_clear', function(err, collection) {

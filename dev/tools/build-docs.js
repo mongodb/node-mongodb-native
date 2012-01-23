@@ -14,6 +14,10 @@ var extractLibraryMetaData = function(sourceFiles) {
     var sourceFile = fs.readFileSync(sourceFiles[i].path);
     // Parse the content
     var metaData = dox.parseComments(sourceFile.toString());
+    // console.log("-------------------------------------------------------------- METADATA")
+    // console.log("-------------------------------------------------------------- METADATA")
+    // console.log("-------------------------------------------------------------- METADATA")
+    // console.dir(metaData)
     // Save the metadata
     dataObjects[sourceFiles[i]["tag"] != null ? sourceFiles[i].tag : i] = metaData;
   }
@@ -100,14 +104,18 @@ var readAllTemplates = function(templates) {
 // ----------------------------------------------------------------------------
 // All source files for the api generation
 var apiClasses = [
-    {tag:"admin", path:"./lib/mongodb/admin.js"},
-    {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"}
+    // {tag:"admin", path:"./lib/mongodb/admin.js"},
+    // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"}
+    {tag:"collection", path:"./lib/mongodb/collection.js"}
   ];
   
 // All test files 
 var testClasses = [
     {path:"./test/admin_test.js"},
-    {path:"./test/objectid_test.js"}
+    {path:"./test/objectid_test.js"},
+    {path:"./test/insert_test.js"},
+    {path:"./test/remove_test.js"},
+    {path:"./test/db_test.js"}
   ]
 
 // Read all the templates
@@ -137,7 +145,7 @@ var templates = readAllTemplates(templates);
 // Render all the templates
 var renderAllTemplates = function(outputDirectory, templates, dataObjects, testObjects) {
   // Helper methods used in the rendering
-  var isClass = function(tags) {
+  var isClass = function(tags) {    
     for(var k = 0; k < tags.length; k++) {
       if(tags[k].type == 'class') return true;
     }
@@ -173,6 +181,9 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
     var classContent = ejs.render(templates['class'], 
       {entries:classMetaData, examples:classExamplesData, isClass:isClass, 
         isFunction:isFunction, isProperty:isProperty, format:format});    
+    
+    console.log("======================================================== " + className)
+    console.log(classContent)
     
     // Write out the content to disk
     fs.writeFileSync(format("%s/%s.rst", outputDirectory, className), classContent);
