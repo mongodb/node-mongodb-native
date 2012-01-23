@@ -49,7 +49,9 @@ exports.tearDown = function(callback) {
   callback();
 }
 
-// Test the generation of the object ids
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyGenerateObjectID = function(test) {
   var number_of_tests_done = 0;
 
@@ -100,17 +102,134 @@ exports.shouldCorrectlyGenerateObjectID = function(test) {
   }, 100);    
 }
 
-exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(test) {
-  var objectId = new ObjectID(null);
-  var originalHex= objectId.toHexString();
+/**
+ * Generate 12 byte binary string representation using a second based timestamp or
+ * default value
+ *
+ * @_class objectid
+ * @_function getTimestamp
+ * @ignore
+ */
+exports.shouldCorrectlyGenerate12ByteStringFromTimestamp = function(test) {
+  // Get a timestamp in seconds
+  var timestamp = Math.floor(new Date().getTime()/1000);
+  // Create a date with the timestamp
+  var timestampDate = new Date(timestamp*1000);
+  
+  // Create a new ObjectID with a specific timestamp
+  var objectId = new ObjectID(timestamp);
+  
+  // Get the timestamp and validate correctness
+  test.equal(timestampDate.toString(), objectId.getTimestamp().toString());
+  test.done();
+}
 
-  var newObjectId= new ObjectID.createFromHexString(originalHex)
-  var newHex= newObjectId.toHexString();
+/**
+ * Generate a 24 character hex string representation of the ObjectID
+ *
+ * @_class objectid
+ * @_function toHexString
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(test) {
+  // Create a new ObjectID
+  var objectId = new ObjectID();  
+  // Verify that the hex string is 24 characters long
+  test.equal(24, objectId.toHexString().length);
+  test.done();
+}
+
+/**
+ * Get and set the generation time for an ObjectID
+ *
+ * @_class objectid
+ * @_function generationTime
+ * @ignore
+ */
+exports.shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty = function(test) {
+  // Create a new ObjectID
+  var objectId = new ObjectID();  
+  // Get the generation time
+  var generationTime = objectId.generationTime;
+  // Add 1000 miliseconds to the generation time
+  objectId.generationTime = generationTime + 1000;
+
+  // Create a timestamp
+  var timestampDate = new Date();
+  timestampDate.setTime((generationTime + 1000) * 1000);
+  
+  // Get the timestamp and validate correctness
+  test.equal(timestampDate.toString(), objectId.getTimestamp().toString());
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(test) {
+  // Create a new ObjectID
+  var objectId = new ObjectID();  
+  // Verify that the hex string is 24 characters long
+  test.equal(24, objectId.toString().length);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(test) {
+  // Create a new ObjectID
+  var objectId = new ObjectID();  
+  // Verify that the hex string is 24 characters long
+  test.equal(24, objectId.toJSON().length);
+  test.done();
+}
+
+/**
+ * Convert a ObjectID into a hex string representation and then back to an ObjectID
+ *
+ * @_class objectid
+ * @_function createFromHexString
+ * @ignore
+ */
+exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(test) {
+  // Create a new ObjectID
+  var objectId = new ObjectID();
+  // Convert the object id to a hex string
+  var originalHex = objectId.toHexString();
+  // Create a new ObjectID using the createFromHexString function
+  var newObjectId = new ObjectID.createFromHexString(originalHex)
+  // Convert the new ObjectID back into a hex string using the toHexString function
+  var newHex = newObjectId.toHexString();
+  // Compare the two hex strings
   test.equal(originalHex, newHex);
   test.done();
 }
 
-// Use some other id than the standard for inserts
+/**
+ * Compare two different ObjectID's using the equals method
+ *
+ * @_class objectid
+ * @_function equals
+ * @ignore
+ */
+exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(test) {
+  // Create a new ObjectID
+  var objectId = new ObjectID();
+  // Create a new ObjectID Based on the first ObjectID
+  var objectId2 = new ObjectID(objectId.id);
+  // Create another ObjectID
+  var objectId3 = new ObjectID();
+  // objectId and objectId2 should be the same
+  test.ok(objectId.equals(objectId2));
+  // objectId and objectId2 should be different
+  test.ok(!objectId.equals(objectId3));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyCreateOIDNotUsingObjectID = function(test) {
   client.createCollection('test_non_oid_id', function(err, collection) {
     var date = new Date();
@@ -134,6 +253,9 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyGenerateObjectIDFromTimestamp = function(test) {
   var timestamp = Math.floor(new Date().getTime()/1000);
   var objectID = new ObjectID(timestamp);
@@ -142,6 +264,9 @@ exports.shouldCorrectlyGenerateObjectIDFromTimestamp = function(test) {
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = function(test) {
   var timestamp = 1000;
   var objectID = new ObjectID();
@@ -154,6 +279,9 @@ exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = function(test) 
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertWithObjectId = function(test) {
   client.createCollection('shouldCorrectlyInsertWithObjectId', function(err, collection) {
     collection.insert({}, {safe:true}, function(err, ids) {

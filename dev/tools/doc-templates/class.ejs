@@ -62,20 +62,63 @@ for(var i = 0; i < entries.length; i++) {
     // Write out the text
     %><%- format("%s\n\n", fullDescription) %><%
     %><%= format(".. js:attribute:: %s %s [%s]\n\n", attributeName, type, getterSetters.join("|")) %><%    
+
+    // If we have examples render them
+    if(examples != null && examples[attributeName]) {
+      %><%= format("**Examples**\n\n") %><%      
+      var examplesArray = examples[attributeName];
+      // Iterate over all the examples
+      for(var ei = 0; ei < examplesArray.length; ei++) {
+        // Fetch an example
+        var example = examplesArray[ei];
+        var code = example.code;        
+        code = code.replace(", ssl:useSSL", "")
+          .replace("native_parser: native_parser", "native_parser: false")
+          .replace(/test\.ok/g, "assert.ok")
+          .replace(/test\.equal/g, "assert.equal")
+          .replace(/test\.deepEqual/g, "assert.deepEqual")
+          .replace(/\n[ |\t]*test\.done\(\)\;/, "");
+      
+        // Split and adjust code
+        var codeLines = code.split(/\n/);
+        for(var ci = 0; ci < codeLines.length; ci++) {
+          codeLines[ci] = "     " + codeLines[ci];
+        }
+      
+        var fullDescription = example.description.full;
+        fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
+          .replace(/\<\/code\>\<\/pre\>/g, "")
+          .replace(/\<h2\>|\<\/h2\>/g, "**")
+          .replace(/\<p\>|\<\/p\>/g, "")
+          .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
+          
+        // Split up and move
+        var fullDescriptionLines = fullDescription.split(/\n/);
+        for(var ci = 0; ci < fullDescriptionLines.length; ci++) {
+          fullDescriptionLines[ci] = "  " + fullDescriptionLines[ci];
+        }
+        
+        // Starting template Lines
+        var startingTemplateLines = [
+            "     var Db = require('mongodb').Db,",
+            "         Server = require('mongodb').Server,",
+            "         ObjectID = require('mongodb').ObjectID,",
+            "         assert = require('assert');\n\n"
+          ];
+                
+        // Let's render it
+        %><%- format("%s\n\n", fullDescriptionLines.join("\n")) %><%
+        %><%- format("  .. code-block:: javascript\n\n%s%s\n\n", startingTemplateLines.join("\n"), codeLines.join("\n")) %><%
+      }
+    }
   }
 }
 
 for(var i = 0; i < entries.length; i++) {
-// for(var i = 0; i < 4; i++) {
-  // console.log("---------------------------------------------------------------")
-  // console.dir(entries[i])
-  
+  // If it's a function parse it
   if(isFunction(entries[i])) {
     var paramsStrings = [];
     var paramNames = [];
-    
-    // console.log("-------------------------------------------------------------- 0")
-    // console.dir(entries[i].tags)
         
     for(var ti = 0; ti < entries[i].tags.length; ti++) { 
       // Get the current tag
@@ -102,8 +145,6 @@ for(var i = 0; i < entries.length; i++) {
     // Reformat any optional parameters from ,[] to [,]
     var paramsString = paramNames.join(", ").replace(/\, \[/, "[, ");
     // Write out the methods
-    // %><%- format("\n%s\n", entries[i].description.full.replace(/<[^>]+>/g, '')) %><%
-    
     var fullDescription = entries[i].description.full;
     fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
       .replace(/\<\/code\>\<\/pre\>/g, "")
@@ -120,8 +161,6 @@ for(var i = 0; i < entries.length; i++) {
     if(examples != null && examples[entries[i].ctx.name]) {
       %><%= format("**Examples**\n\n") %><%      
       var examplesArray = examples[entries[i].ctx.name];
-      // console.log("------------------------------------------------------- EXAMPLES ARRAY")
-      // console.dir(examplesArray)
       // Iterate over all the examples
       for(var ei = 0; ei < examplesArray.length; ei++) {
         // Fetch an example
@@ -157,11 +196,10 @@ for(var i = 0; i < entries.length; i++) {
         var startingTemplateLines = [
             "     var Db = require('mongodb').Db,",
             "         Server = require('mongodb').Server,",
+            "         ObjectID = require('mongodb').ObjectID,",
             "         assert = require('assert');\n\n"
           ];
                 
-        // console.log("------------------------------------------------------- EXAMPLE")
-        // console.dir(example)
         // Let's render it
         %><%- format("%s\n\n", fullDescriptionLines.join("\n")) %><%
         %><%- format("  .. code-block:: javascript\n\n%s%s\n\n", startingTemplateLines.join("\n"), codeLines.join("\n")) %><%
