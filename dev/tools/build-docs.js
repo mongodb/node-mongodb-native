@@ -115,6 +115,7 @@ var testClasses = [
     {path:"./test/objectid_test.js"},
     {path:"./test/insert_test.js"},
     {path:"./test/remove_test.js"},
+    {path:"./test/collection_test.js"},
     {path:"./test/db_test.js"}
   ]
 
