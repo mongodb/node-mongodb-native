@@ -18,6 +18,7 @@ var testCase = require('../deps/nodeunit').testCase,
 var MONGODB = 'integration_tests';
 var POOL_SIZE = 4;
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: POOL_SIZE, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
  * Retrieve the server information for the current
@@ -53,7 +54,10 @@ exports.tearDown = function(callback) {
   callback();
 }
   
-// Test a simple find
+/**
+ * Test a simple find
+ * @ignore
+ */
 exports.shouldCorrectlyPerformSimpleFind = function(test) {    
   client.createCollection('test_find_simple', function(err, r) {
     var collection = client.collection('test_find_simple', function(err, collection) {
@@ -90,7 +94,10 @@ exports.shouldCorrectlyPerformSimpleFind = function(test) {
   });    
 }
 
-// Test a simple find chained
+/**
+ * Test a simple find chained
+ * @ignore
+ */
 exports.shouldCorrectlyPeformSimpleChainedFind = function(test) {
   client.createCollection('test_find_simple_chained', function(err, r) {
     var collection = client.collection('test_find_simple_chained', function(err, collection) {
@@ -123,7 +130,10 @@ exports.shouldCorrectlyPeformSimpleChainedFind = function(test) {
   });    
 }
 
-// Test advanced find
+/**
+ * Test advanced find
+ * @ignore
+ */
 exports.shouldCorrectlyPeformAdvancedFinds = function(test) {
   client.createCollection('test_find_advanced', function(err, r) {
     var collection = client.collection('test_find_advanced', function(err, collection) {
@@ -205,7 +215,10 @@ exports.shouldCorrectlyPeformAdvancedFinds = function(test) {
   });    
 }
 
-// Test sorting of results
+/**
+ * Test sorting of results
+ * @ignore
+ */
 exports.shouldCorrectlyPerformFindWithSort = function(test) {
   client.createCollection('test_find_sorting', function(err, r) {
     client.collection('test_find_sorting', function(err, collection) {
@@ -301,7 +314,10 @@ exports.shouldCorrectlyPerformFindWithSort = function(test) {
   });    
 }
 
-// Test the limit function of the db
+/**
+ * Test the limit function of the db
+ * @ignore
+ */
 exports.shouldCorrectlyPerformFindWithLimit = function(test) {
   client.createCollection('test_find_limits', function(err, r) {
     client.collection('test_find_limits', function(err, collection) {
@@ -349,7 +365,10 @@ exports.shouldCorrectlyPerformFindWithLimit = function(test) {
   });    
 }
 
-// Test find by non-quoted values (issue #128)
+/**
+ * Test find by non-quoted values (issue #128)
+ * @ignore
+ */
 exports.shouldCorrectlyFindWithNonQuotedValues = function(test) {
   client.createCollection('test_find_non_quoted_values', function(err, r) {
     client.collection('test_find_non_quoted_values', function(err, collection) {
@@ -366,7 +385,10 @@ exports.shouldCorrectlyFindWithNonQuotedValues = function(test) {
   });    
 }
 
-// Test for querying embedded document using dot-notation (issue #126)
+/**
+ * Test for querying embedded document using dot-notation (issue #126)
+ * @ignore
+ */
 exports.shouldCorrectlyFindEmbeddedDocument = function(test) {
   client.createCollection('test_find_embedded_document', function(err, r) {
     client.collection('test_find_embedded_document', function(err, collection) {
@@ -393,7 +415,10 @@ exports.shouldCorrectlyFindEmbeddedDocument = function(test) {
   });    
 }
 
-// Find no records
+/**
+ * Find no records
+ * @ignore
+ */
 exports.shouldCorrectlyFindNoRecords = function(test) {
   client.createCollection('test_find_one_no_records', function(err, r) {
     client.collection('test_find_one_no_records', function(err, collection) {
@@ -406,6 +431,9 @@ exports.shouldCorrectlyFindNoRecords = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformFindByWhere = function(test) {
   client.createCollection('test_where', function(err, collection) {
     test.ok(collection instanceof Collection);
@@ -429,6 +457,9 @@ exports.shouldCorrectlyPerformFindByWhere = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformFindsWithHintTurnedOn = function(test) {
   client.createCollection('test_hint', function(err, collection) {
     collection.insert({'a':1}, {safe:true}, function(err, ids) {
@@ -476,6 +507,9 @@ exports.shouldCorrectlyPerformFindsWithHintTurnedOn = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformFindByObjectID = function(test) {
   client.createCollection('test_find_by_oid', function(err, collection) {
     collection.save({'hello':'mike'}, {safe:true}, function(err, docs) {
@@ -495,6 +529,9 @@ exports.shouldCorrectlyPerformFindByObjectID = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReturnDocumentWithOriginalStructure= function(test) {
   client.createCollection('test_find_by_oid_with_subdocs', function(err, collection) {
     var c1 = { _id: new ObjectID, comments: [], title: 'number 1' };
@@ -519,6 +556,9 @@ exports.shouldCorrectlyReturnDocumentWithOriginalStructure= function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyRetrieveSingleRecord = function(test) {
   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
@@ -536,6 +576,9 @@ exports.shouldCorrectlyRetrieveSingleRecord = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleError = function(test) {
   client.createCollection('test_find_one_error_handling', function(err, collection) {
     // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
@@ -548,7 +591,10 @@ exports.shouldCorrectlyHandleError = function(test) {
   });
 }
 
-// Test field select with options
+/**
+ * Test field select with options
+ * @ignore
+ */
 exports.shouldCorrectlyPerformFindWithOptions = function(test) {
   client.createCollection('test_field_select_with_options', function(err, r) {
     var collection = client.collection('test_field_select_with_options', function(err, collection) {
@@ -581,7 +627,10 @@ exports.shouldCorrectlyPerformFindWithOptions = function(test) {
   });
 }
 
-// Test findAndModify a document
+/**
+ * Test findAndModify a document
+ * @ignore
+ */
 exports.shouldCorrectlyFindAndModifyDocument = function(test) {
   client.createCollection('test_find_and_modify_a_document', function(err, collection) {
     // Test return new document on change
@@ -630,6 +679,9 @@ exports.shouldCorrectlyFindAndModifyDocument = function(test) {
   });
 }
   
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = function(test) {
   client.createCollection('shouldCorrectlyExecuteFindOneWithAnInSearchTag', function(err, collection) {
     // Test return new document on change
@@ -711,6 +763,9 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports['ShouldCorrectlyLocatePostAndIncValues'] = function(test) {
   client.createCollection('shouldCorrectlyExecuteFindOneWithAnInSearchTag', function(err, collection) {
     // Test return new document on change
@@ -733,7 +788,10 @@ exports['ShouldCorrectlyLocatePostAndIncValues'] = function(test) {
   });
 }
 
-// Test findAndModify a document
+/**
+ * Test findAndModify a document
+ * @ignore
+ */
 exports['Should Correctly Handle FindAndModify Duplicate Key Error'] = function(test) {
   client.createCollection('FindAndModifyDuplicateKeyError', function(err, collection) {
     collection.ensureIndex(['name', 1], {unique:true}, function(err, index) {
@@ -750,6 +808,9 @@ exports['Should Correctly Handle FindAndModify Duplicate Key Error'] = function(
   });  
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly return null when attempting to modify a non-existing document'] = function(test) {
   client.createCollection('AttemptToFindAndModifyNonExistingDocument', function(err, collection) {
     // Let's modify the document in place
@@ -761,6 +822,9 @@ exports['Should correctly return null when attempting to modify a non-existing d
   });  
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly handle chained skip and limit on find with toArray'] = function(test) {
   client.createCollection('skipAndLimitOnFindWithToArray', function(err, collection) {
     collection.insert([{a:1}, {b:2}, {c:3}], {safe:true}, function(err, result) {
@@ -775,6 +839,9 @@ exports['Should correctly handle chained skip and limit on find with toArray'] =
   });      
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly pass timeout options to cursor'] = function(test) {
   client.createCollection('timeoutFalse', function(err, collection) {
     collection.find({},{timeout:false},function(err, cursor) {
@@ -791,7 +858,10 @@ exports['Should correctly pass timeout options to cursor'] = function(test) {
   });
 }
 
-// Test findAndModify a document with strict mode enabled
+/**
+ * Test findAndModify a document with strict mode enabled
+ * @ignore
+ */
 exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = function(test) {
   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
@@ -810,7 +880,10 @@ exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = function(test) {
   });
 }
 
-// Test findAndModify a document that fails in first step before safe
+/**
+ * Test findAndModify a document that fails in first step before safe
+ * @ignore
+ */
 exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = function(test) {
   client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function(err, collection) {
     // Set up an index to force duplicate index erro
@@ -829,7 +902,10 @@ exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = function(test
   });
 }
   
-// Test findAndModify a document that fails in first step before safe
+/**
+ * Test findAndModify a document that fails in first step before safe
+ * @ignore
+ */
 exports.shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments = function(test) {
   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
@@ -849,6 +925,9 @@ exports.shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingD
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly return new modified document'] = function(test) {
   client.createCollection('Should_correctly_return_new_modified_document', function(err, collection) {
     var id = new ObjectID();
@@ -871,7 +950,10 @@ exports['Should correctly return new modified document'] = function(test) {
   });
 }
 
-// Should correctly execute findAndModify that is breaking in prod
+/**
+ * Should correctly execute findAndModify that is breaking in prod
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteFindAndModify = function(test) {
   client.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
     var self = {_id : new ObjectID()}
@@ -888,6 +970,9 @@ exports.shouldCorrectlyExecuteFindAndModify = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly return record with 64-bit id'] = function(test) {
   client.createCollection('should_correctly_return_record_with_64bit_id', function(err, collection) {
     var _lowerId = new ObjectID();
@@ -916,6 +1001,9 @@ exports['Should correctly return record with 64-bit id'] = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly find a Document using findOne excluding _id field'] = function(test) {
   client.createCollection('Should_Correctly_find_a_Document_using_findOne_excluding__id_field', function(err, collection) {
     var doc = {_id : new ObjectID(), a:1, c:2}
@@ -939,6 +1027,9 @@ exports['Should Correctly find a Document using findOne excluding _id field'] = 
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly execute find and findOne queries in the same way'] = function(test) {
   client.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {      
     var doc = {_id : new ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
@@ -957,6 +1048,9 @@ exports['Should correctly execute find and findOne queries in the same way'] = f
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly execute find and findOne queries with selector set to null'] = function(test) {
   client.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {      
     var doc = {_id : new ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
@@ -975,6 +1069,9 @@ exports['Should correctly execute find and findOne queries with selector set to 
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists = function(test) {
   client.createCollection('shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists', function(err, collection) {
     collection.findAndModify({'a':1}, [], {'$set':{'b':3}}, {'new': true}, function(err, updated_doc) {
@@ -985,6 +1082,9 @@ exports.shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists = function
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = function(test) {
   var transaction = {};
   transaction.document = {};
@@ -1019,6 +1119,9 @@ exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = function(
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteMultipleFindsInParallel = function(test) {
   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
@@ -1053,6 +1156,9 @@ exports.shouldCorrectlyExecuteMultipleFindsInParallel = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = function(test) {
   client.createCollection('shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError', function(err, collection) {
     var q = { x: 1 };
@@ -1071,6 +1177,9 @@ exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = functi
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = function(test) {
   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   var running = true;
@@ -1106,6 +1215,9 @@ exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = function(test) 
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyIterateOverCollection = function(test) {
   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   var numberOfSteps = 0;
@@ -1135,6 +1247,9 @@ exports.shouldCorrectlyIterateOverCollection = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = function(test) {
   var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
@@ -1151,6 +1266,65 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = function(test) {
             test.done();
           });
         });
+      });
+    });
+  });
+}
+
+/**
+ * A whole set of different ways to use the findAndModify command.
+ *
+ * The first findAndModify command modifies a document and returns the modified document back.
+ * The second findAndModify command removes the document.
+ * The second findAndModify command upserts a document and returns the new document.
+ * @_class collection
+ * @_function findAndModify
+ */
+exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('simple_find_and_modify_operations_', function(err, collection) {      
+      test.equal(null, err);
+      
+      // Insert some test documentations
+      collection.insert([{a:1}, {b:1}, {c:1}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Simple findAndModify command returning the new document
+        collection.findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true}, function(err, doc) {
+          test.equal(null, err);
+          test.equal(1, doc.a);
+          test.equal(1, doc.b1);
+          
+          // Simple findAndModify command returning the new document and 
+          // removing it at the same time
+          collection.findAndModify({b:1}, [['b', 1]], 
+            {$set:{b:2}}, {remove:true}, function(err, doc) {
+            
+            // Verify that the document is gone
+            collection.findOne({b:1}, function(err, item) {
+              test.equal(null, err);
+              test.equal(null, item);
+
+              // Simple findAndModify command performing an upsert and returning the new document
+              // executing the command safely
+              collection.findAndModify({d:1}, [['b', 1]],
+                {d:1, f:1}, {new:true, upsert:true, safe:true}, function(err, doc) {
+                  test.equal(null, err);
+                  test.equal(1, doc.d);
+                  test.equal(1, doc.f);
+                  
+                  db.close();
+                  test.done();
+              })
+            });
+          }); 
+        });        
       });
     });
   });
