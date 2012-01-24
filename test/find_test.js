@@ -1331,6 +1331,47 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
 }
 
 /**
+ * An example of using findAndRemove
+ *
+ * @_class collection
+ * @_function findAndRemove
+ */
+exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('simple_find_and_modify_operations_', function(err, collection) {      
+      test.equal(null, err);
+      
+      // Insert some test documentations
+      collection.insert([{a:1}, {b:1}, {c:1}], {safe:true}, function(err, result) {
+        test.equal(null, err);        
+        
+        // Simple findAndModify command returning the new document and 
+        // removing it at the same time
+        collection.findAndRemove({b:1}, [['b', 1]], function(err, doc) {
+          test.equal(null, err);
+          test.equal(1, doc.b);
+          
+          // Verify that the document is gone
+          collection.findOne({b:1}, function(err, item) {
+            test.equal(null, err);
+            test.equal(null, item);
+
+            db.close();
+            test.done();
+          });
+        }); 
+      });
+    });
+  });
+}
+
+/**
  * A simple query using the find method on the collection.
  *
  * @_class collection

@@ -387,6 +387,48 @@ exports.shouldCorrectlyExecuteIsCapped = function(test) {
 }
 
 /**
+ * An example showing the use of the indexExists function for a single index name and a list of index names.
+ *
+ * @_class collection
+ * @_function indexExists
+ */
+exports.shouldCorrectlyExecuteIndexExists = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a test collection that we are getting the options back from
+    db.createCollection('test_collection_index_exists', function(err, collection) {
+      test.equal(null, err);
+
+      // Create an index on the collection
+      collection.createIndex('a', function(err, indexName) {
+        
+        // Let's test to check if a single index exists
+        collection.indexExists("a_1", function(err, result) {
+          test.equal(true, result);
+
+          // Let's test to check if multiple indexes are available
+          collection.indexExists(["a_1", "_id_"], function(err, result) {
+            test.equal(true, result);
+
+            // Check if a non existing index exists
+            collection.indexExists("c_1", function(err, result) {
+              test.equal(false, result);
+
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });    
+  });
+}
+
+/**
  * @ignore
  */
 exports.shouldEnsureStrictAccessCollection = function(test) {

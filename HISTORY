@@ -3,6 +3,8 @@
 * Added support for $returnKey, $maxScan, $min, $max, $showDiskLoc, $comment to cursor and find/findOne methods.
 * Added dropDups and v option to createIndex and ensureIndex.
 * Added isCapped method to collection.
+* Added indexExists method to collection. 
+* Added findAndRemove method to collection.
 
 0.9.8-3 2012-01-21
 * Workaround for issue with Object.defineProperty (Issue #484)

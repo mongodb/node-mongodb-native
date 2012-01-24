@@ -309,7 +309,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
             test.equal("c_1", indexName);
           
             // Drop the index
-            collection.dropIndexes(function(err, result) {
+            collection.dropAllIndexes(function(err, result) {
               test.equal(null, err);
             
               // Verify that the index is gone
@@ -512,7 +512,7 @@ exports.shouldCorrectlyDropIndexes = function(test) {
       client.createIndex(collection.collectionName, 'a', function(err, indexName) {
         test.equal("a_1", indexName);
         // Drop all the indexes
-        collection.dropIndexes(function(err, result) {
+        collection.dropAllIndexes(function(err, result) {
           test.equal(true, result);
 
           collection.indexInformation(function(err, result) {
