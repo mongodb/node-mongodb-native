@@ -330,6 +330,53 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
 }
 
 /**
+ * An example showing how to force a reindex of a collection.
+ *
+ * @_class collection
+ * @_function reIndex
+ */
+exports.shouldCorrectlyForceReindexOnCollection = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('create_and_drop_all_indexes', function(err, collection) {      
+      test.equal(null, err);
+      
+      // Insert a bunch of documents for the index
+      collection.insert([{a:1, b:1}, {a:1, b:1}
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Create an index on the a field
+        collection.ensureIndex({a:1, b:1}
+          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          test.equal("a_1_b_1", indexName);
+
+          // Force a reindex of the collection
+          collection.reIndex(function(err, result) {
+            test.equal(null, err);
+            test.equal(true, result);
+            
+            // Verify that the index is gone
+            collection.indexInformation(function(err, indexInformation) {              
+              test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+              test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+
+              db.close();
+              test.done();              
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
  * @ignore
  */
 exports.shouldCorrectlyExtractIndexInformation = function(test) {

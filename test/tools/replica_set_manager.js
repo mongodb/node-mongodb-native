@@ -256,7 +256,7 @@ ReplicaSetManager.prototype.kill = function(node, signal, options, callback) {
     function (error, stdout, stderr) {
       debug('stdout: ' + stdout);
       debug('stderr: ' + stderr);
-      if (error !== null) {
+      if (error != null) {
         debug('exec error: ' + error);
       }
 
@@ -541,7 +541,7 @@ var start = ReplicaSetManager.prototype.start = function(node, callback) {
     function (error, stdout, stderr) {
       debug('stdout: ' + stdout);
       debug('stderr: ' + stderr);
-      if (error !== null) {
+      if (error != null) {
         debug('exec error: ' + error);
       }
     });

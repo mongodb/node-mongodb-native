@@ -1,3 +1,9 @@
+0.9.8.4 (NOT RELEASED YET)
+* Added reIndex command to collection and db level.
+* Added support for $returnKey, $maxScan, $min, $max, $showDiskLoc, $comment to cursor and find/findOne methods.
+* Added dropDups and v option to createIndex and ensureIndex.
+* Added isCapped method to collection.
+
 0.9.8-3 2012-01-21
 * Workaround for issue with Object.defineProperty (Issue #484)
 * ObjectID generation with date does not set rest of fields to zero (Issue #482)

@@ -52,7 +52,7 @@ ShardingManager.prototype.start = function(killall, callback) {
             function (error, stdout, stderr) {
               // console.log('stdout: ' + stdout);
               // console.log('stderr: ' + stderr);
-              if (error !== null) {
+              if (error != null) {
                 console.log('exec error: ' + error);
               }
           });
@@ -74,7 +74,7 @@ ShardingManager.prototype.start = function(killall, callback) {
       // Start up mongod process
       var mongodb = exec(startCmd,
         function (error, stdout, stderr) {
-          if (error !== null) {
+          if (error != null) {
             console.log('exec error: ' + error);
           }
       });
@@ -113,7 +113,7 @@ ShardingManager.prototype.stop = function(signal, callback) {
     function (error, stdout, stderr) {
       // console.log('stdout: ' + stdout);
       // console.log('stderr: ' + stderr);
-      if (error !== null) {
+      if (error != null) {
         console.log('exec error: ' + error);
       }
 

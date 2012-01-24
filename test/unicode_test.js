@@ -111,7 +111,7 @@ exports.shouldCorrectlyInsertUnicodeCharacters = function(test) {
         collection.insert({id: 2, text: test_strings[2]}, {safe:true}, function(err, ids) {
           collection.find(function(err, cursor) {
             cursor.each(function(err, item) {
-              if(item !== null) {
+              if(item != null) {
                 test.equal(test_strings[item.id], item.text);
               } else {
                 test.done();                  

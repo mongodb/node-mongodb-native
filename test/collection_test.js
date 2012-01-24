@@ -327,21 +327,63 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
 }
 
 /**
- * @ignore
+ * An example returning the options for a collection.
+ *
+ * @_class collection
+ * @_function options
  */
 exports.shouldCorrectlyRetriveCollectionOptions = function(test) {
-  client.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {
-    test.ok(collection instanceof Collection);
-    test.equal('test_collection_options', collection.collectionName);
-    // Let's fetch the collection options
-    collection.options(function(err, options) {
-      test.equal(true, options.capped);
-      test.equal(1024, options.size);
-      test.equal("test_collection_options", options.create);
-      // Let's close the db
-      test.done();
-    });
-  });    
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a test collection that we are getting the options back from
+    db.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {
+      test.ok(collection instanceof Collection);
+      test.equal('test_collection_options', collection.collectionName);
+
+      // Let's fetch the collection options
+      collection.options(function(err, options) {
+        test.equal(true, options.capped);
+        test.equal(1024, options.size);
+        test.equal("test_collection_options", options.create);
+
+        db.close();
+        test.done();
+      });
+    });    
+  });
+}
+
+/**
+ * An example showing how to establish if it's a capped collection
+ *
+ * @_class collection
+ * @_function isCapped
+ */
+exports.shouldCorrectlyExecuteIsCapped = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a test collection that we are getting the options back from
+    db.createCollection('test_collection_is_capped', {'capped':true, 'size':1024}, function(err, collection) {
+      test.ok(collection instanceof Collection);
+      test.equal('test_collection_is_capped', collection.collectionName);
+
+      // Let's fetch the collection options
+      collection.isCapped(function(err, capped) {
+        test.equal(true, capped);
+
+        db.close();
+        test.done();
+      });
+    });    
+  });
 }
 
 /**
@@ -661,7 +703,6 @@ exports.shouldCorrectlyUpdateWithNoDocs = function(test) {
  *
  * @_class collection
  * @_function update
- * @ignore
  */
 exports.shouldCorrectlyUpdateASimpleDocument = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
