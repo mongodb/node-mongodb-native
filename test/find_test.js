@@ -1331,6 +1331,145 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
 }
 
 /**
+ * A simple query using the find method on the collection.
+ *
+ * @_class collection
+ * @_function find
+ */
+exports.shouldPeformASimpleQuery = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('simple_query', function(err, collection) {      
+      test.equal(null, err);
+      
+      // Insert a bunch of documents for the testing
+      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        // Peform a simple find and return all the documents
+        collection.find().toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(3, docs.length);
+          
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });  
+}
+
+/**
+ * A simple query showing the explain for a query
+ *
+ * @_class collection
+ * @_function find
+ */
+exports.shouldPeformASimpleExplainQuery = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('simple_explain_query', function(err, collection) {      
+      test.equal(null, err);
+      
+      // Insert a bunch of documents for the testing
+      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        // Peform a simple find and return all the documents
+        collection.find({}, {explain:true}).toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(1, docs.length);
+          
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });  
+}
+
+/**
+ * A simple query showing skip and limit
+ *
+ * @_class collection
+ * @_function find
+ */
+exports.shouldPeformASimpleLimitSkipQuery = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('simple_limit_skip_query', function(err, collection) {      
+      test.equal(null, err);
+      
+      // Insert a bunch of documents for the testing
+      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        // Peform a simple find and return all the documents
+        collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(1, docs.length);
+          test.equal(null, docs[0].a);
+          test.equal(2, docs[0].b);
+          
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });  
+}
+
+/**
+ * A simple query using findOne
+ *
+ * @_class collection
+ * @_function findOne
+ */
+exports.shouldPeformASimpleLimitSkipFindOneQuery = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('simple_limit_skip_find_one_query', function(err, collection) {      
+      test.equal(null, err);
+      
+      // Insert a bunch of documents for the testing
+      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        // Peform a simple find and return all the documents
+        collection.findOne({a:2}, {fields:{b:1}}, function(err, doc) {
+          test.equal(null, err);
+          test.equal(null, doc.a);
+          test.equal(2, doc.b);
+          
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });  
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 

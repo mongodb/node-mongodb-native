@@ -117,7 +117,8 @@ var testClasses = [
     {path:"./test/remove_test.js"},
     {path:"./test/collection_test.js"},
     {path:"./test/db_test.js"},
-    {path:"./test/find_test.js"}
+    {path:"./test/find_test.js"},
+    {path:"./test/index_test.js"}
   ]
 
 // Read all the templates
