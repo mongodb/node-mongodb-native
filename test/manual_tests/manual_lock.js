@@ -44,11 +44,11 @@ RS.startSet(true, function(err, result) {
             var timeoutFunc = function() {
               lookup(function(err, result) {
                 console.log("-------------------------------------------- lookedup")
-                setTimeout(timeoutFunc, 500);
+                process.nextTick(timeoutFunc, 1);
               })
             }   
         
-            setTimeout(timeoutFunc, 500);     
+            process.nextTick(timeoutFunc, 1);     
           });
         });
       });

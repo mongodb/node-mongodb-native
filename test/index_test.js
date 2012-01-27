@@ -99,38 +99,46 @@ exports.shouldCreateComplexIndexOnTwoFields = function(test) {
 
   // Establish connection to db  
   db.open(function(err, db) {
+  
+    // Only run this on mongodb never than 1.9.1
+    db.admin().serverInfo(function(err, result){
+      if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
+        // Create a collection we want to drop later
+        db.createCollection('more_complex_index_test', function(err, collection) {      
+          test.equal(null, err);
     
-    // Create a collection we want to drop later
-    db.createCollection('more_complex_index_test', function(err, collection) {      
-      test.equal(null, err);
-      
-      // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
-        test.equal(null, err);
-        
-        // Create an index on the a field
-        collection.createIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
-          test.equal("a_1_b_1", indexName);
-          
-          // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
+          // Insert a bunch of documents for the index
+          collection.insert([{a:1, b:1}, {a:1, b:1}
+            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
             test.equal(null, err);
-            test.equal(4, items.length);
-            
-            // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
-              test.ok(explanation[0].indexBounds.a != null);
-              test.ok(explanation[0].indexBounds.b != null);
+      
+            // Create an index on the a field
+            collection.createIndex({a:1, b:1}
+              , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+              test.equal("a_1_b_1", indexName);
+        
+              // Show that duplicate records got dropped
+              collection.find({}).toArray(function(err, items) {
+                test.equal(null, err);
+                test.equal(4, items.length);
+          
+                // Peform a query, with explain to show we hit the query
+                collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+                  test.equal(null, err);
+                  test.ok(explanation[0].indexBounds.a != null);
+                  test.ok(explanation[0].indexBounds.b != null);
 
-              db.close();
-              test.done();
+                  db.close();
+                  test.done();
+                });
+              })
             });
-          })
+          });
         });
-      });
+      } else {
+        db.close();
+        test.done();
+      }
     });
   });
 }
@@ -148,37 +156,46 @@ exports.shouldCreateComplexEnsureIndex = function(test) {
   // Establish connection to db  
   db.open(function(err, db) {
     
-    // Create a collection we want to drop later
-    db.createCollection('more_complex_ensure_index_test', function(err, collection) {      
-      test.equal(null, err);
-      
-      // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
-        test.equal(null, err);
-        
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
-          test.equal("a_1_b_1", indexName);
-          
-          // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal(4, items.length);
-            
-            // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
-              test.ok(explanation[0].indexBounds.a != null);
-              test.ok(explanation[0].indexBounds.b != null);
+    // Only run this on mongodb never than 1.9.1
+    db.admin().serverInfo(function(err, result){
+      if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
 
-              db.close();
-              test.done();
+        // Create a collection we want to drop later
+        db.createCollection('more_complex_ensure_index_test', function(err, collection) {      
+          test.equal(null, err);
+      
+          // Insert a bunch of documents for the index
+          collection.insert([{a:1, b:1}, {a:1, b:1}
+            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+            test.equal(null, err);
+        
+            // Create an index on the a field
+            collection.ensureIndex({a:1, b:1}
+              , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+              test.equal("a_1_b_1", indexName);
+          
+              // Show that duplicate records got dropped
+              collection.find({}).toArray(function(err, items) {
+                test.equal(null, err);
+                test.equal(4, items.length);
+            
+                // Peform a query, with explain to show we hit the query
+                collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+                  test.equal(null, err);
+                  test.ok(explanation[0].indexBounds.a != null);
+                  test.ok(explanation[0].indexBounds.b != null);
+
+                  db.close();
+                  test.done();
+                });
+              })
             });
-          })
+          });
         });
-      });
+      } else {
+        db.close();
+        test.done();
+      }
     });
   });
 }
@@ -196,36 +213,45 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
   // Establish connection to db  
   db.open(function(err, db) {
     
-    // Create a collection we want to drop later
-    db.createCollection('more_index_information_test', function(err, collection) {      
-      test.equal(null, err);
+    // Only run this on mongodb never than 1.9.1
+    db.admin().serverInfo(function(err, result){
+      if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
+
+        // Create a collection we want to drop later
+        db.createCollection('more_index_information_test', function(err, collection) {      
+          test.equal(null, err);
       
-      // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
-        test.equal(null, err);
+          // Insert a bunch of documents for the index
+          collection.insert([{a:1, b:1}, {a:1, b:1}
+            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+            test.equal(null, err);
         
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
-          test.equal("a_1_b_1", indexName);
+            // Create an index on the a field
+            collection.ensureIndex({a:1, b:1}
+              , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+              test.equal("a_1_b_1", indexName);
           
-          // Fetch basic indexInformation for collection
-          collection.indexInformation(function(err, indexInformation) {
-            test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-            test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+              // Fetch basic indexInformation for collection
+              collection.indexInformation(function(err, indexInformation) {
+                test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+                test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
 
-            // Fetch full index information
-            collection.indexInformation({full:true}, function(err, indexInformation) {
-              test.deepEqual({ _id: 1 }, indexInformation[0].key);
-              test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
+                // Fetch full index information
+                collection.indexInformation({full:true}, function(err, indexInformation) {
+                  test.deepEqual({ _id: 1 }, indexInformation[0].key);
+                  test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
-              db.close();
-              test.done();              
+                  db.close();
+                  test.done();              
+                });
+              });
             });
           });
         });
-      });
+      } else {
+        db.close();
+        test.done();
+      }
     });
   });
 }
@@ -243,35 +269,43 @@ exports.shouldCorrectlyCreateAndDropIndex = function(test) {
   // Establish connection to db  
   db.open(function(err, db) {
     
-    // Create a collection we want to drop later
-    db.createCollection('create_and_drop_an_index', function(err, collection) {      
-      test.equal(null, err);
+    // Only run this on mongodb never than 1.9.1
+    db.admin().serverInfo(function(err, result){
+      if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
+        // Create a collection we want to drop later
+        db.createCollection('create_and_drop_an_index', function(err, collection) {      
+          test.equal(null, err);
       
-      // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
-        test.equal(null, err);
-        
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
-          test.equal("a_1_b_1", indexName);
-          
-          // Drop the index
-          collection.dropIndex("a_1_b_1", function(err, result) {
+          // Insert a bunch of documents for the index
+          collection.insert([{a:1, b:1}, {a:1, b:1}
+            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
             test.equal(null, err);
+        
+            // Create an index on the a field
+            collection.ensureIndex({a:1, b:1}
+              , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+              test.equal("a_1_b_1", indexName);
+          
+              // Drop the index
+              collection.dropIndex("a_1_b_1", function(err, result) {
+                test.equal(null, err);
             
-            // Verify that the index is gone
-            collection.indexInformation(function(err, indexInformation) {              
-              test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-              test.equal(null, indexInformation.a_1_b_1);
+                // Verify that the index is gone
+                collection.indexInformation(function(err, indexInformation) {              
+                  test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+                  test.equal(null, indexInformation.a_1_b_1);
 
-              db.close();
-              test.done();              
+                  db.close();
+                  test.done();              
+                });
+              });
             });
           });
         });
-      });
+      } else {
+        db.close();
+        test.done();
+      }
     });
   });
 }
@@ -289,42 +323,51 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
   // Establish connection to db  
   db.open(function(err, db) {
     
-    // Create a collection we want to drop later
-    db.createCollection('create_and_drop_all_indexes', function(err, collection) {      
-      test.equal(null, err);
+    // Only run this on mongodb never than 1.9.1
+    db.admin().serverInfo(function(err, result){
+      if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
+
+        // Create a collection we want to drop later
+        db.createCollection('create_and_drop_all_indexes', function(err, collection) {      
+          test.equal(null, err);
       
-      // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
-        test.equal(null, err);
+          // Insert a bunch of documents for the index
+          collection.insert([{a:1, b:1}, {a:1, b:1}
+            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
+            test.equal(null, err);
         
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
-          test.equal("a_1_b_1", indexName);
+            // Create an index on the a field
+            collection.ensureIndex({a:1, b:1}
+              , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+              test.equal("a_1_b_1", indexName);
 
-          // Create an additional index
-          collection.ensureIndex({c:1}
-            , {unique:true, background:true, dropDups:true}, function(err, indexName) {
-            test.equal("c_1", indexName);
+              // Create an additional index
+              collection.ensureIndex({c:1}
+                , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+                test.equal("c_1", indexName);
           
-            // Drop the index
-            collection.dropAllIndexes(function(err, result) {
-              test.equal(null, err);
+                // Drop the index
+                collection.dropAllIndexes(function(err, result) {
+                  test.equal(null, err);
             
-              // Verify that the index is gone
-              collection.indexInformation(function(err, indexInformation) {              
-                test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-                test.equal(null, indexInformation.a_1_b_1);
-                test.equal(null, indexInformation.c_1);
+                  // Verify that the index is gone
+                  collection.indexInformation(function(err, indexInformation) {              
+                    test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+                    test.equal(null, indexInformation.a_1_b_1);
+                    test.equal(null, indexInformation.c_1);
 
-                db.close();
-                test.done();              
+                    db.close();
+                    test.done();              
+                  });
+                });
               });
             });
           });
         });
-      });
+      } else {
+        db.close();
+        test.done();
+      }
     });
   });
 }
@@ -342,36 +385,45 @@ exports.shouldCorrectlyForceReindexOnCollection = function(test) {
   // Establish connection to db  
   db.open(function(err, db) {
     
-    // Create a collection we want to drop later
-    db.createCollection('create_and_drop_all_indexes', function(err, collection) {      
-      test.equal(null, err);
+    // Only run this on mongodb never than 1.9.1
+    db.admin().serverInfo(function(err, result){
+      if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
+
+        // Create a collection we want to drop later
+        db.createCollection('create_and_drop_all_indexes', function(err, collection) {      
+          test.equal(null, err);
       
-      // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
-        test.equal(null, err);
-        
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
-          test.equal("a_1_b_1", indexName);
-
-          // Force a reindex of the collection
-          collection.reIndex(function(err, result) {
+          // Insert a bunch of documents for the index
+          collection.insert([{a:1, b:1}, {a:1, b:1}
+            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
             test.equal(null, err);
-            test.equal(true, result);
-            
-            // Verify that the index is gone
-            collection.indexInformation(function(err, indexInformation) {              
-              test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-              test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+        
+            // Create an index on the a field
+            collection.ensureIndex({a:1, b:1}
+              , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+              test.equal("a_1_b_1", indexName);
 
-              db.close();
-              test.done();              
+              // Force a reindex of the collection
+              collection.reIndex(function(err, result) {
+                test.equal(null, err);
+                test.equal(true, result);
+            
+                // Verify that the index is gone
+                collection.indexInformation(function(err, indexInformation) {              
+                  test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+                  test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+
+                  db.close();
+                  test.done();              
+                });
+              });
             });
           });
         });
-      });
+      } else {
+        db.close();
+        test.done();
+      }
     });
   });
 }

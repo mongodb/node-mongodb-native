@@ -1272,6 +1272,47 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = function(test) {
 }
 
 /**
+ * An example of using find with a very large in parameter
+ *
+ * @ignore
+ */
+exports.shouldPerformSimpleFindInArray = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('simple_find_in_array', function(err, collection) {      
+      test.equal(null, err);
+      
+      var docs = [];
+      for(var i = 0; i < 100; i++) docs.push({a:i});
+      
+      // Insert some test documentations
+      collection.insert(docs, {safe:true}, function(err, result) {
+        test.equal(null, err);        
+        
+        // Find all the variables in a specific array
+        var inArray = [];
+        for(var i = 0; i < 100; i++) docs.push(i);
+        
+        // Fin all in
+        collection.find({a:{$in:docs}}).toArray(function(err, items) {
+          test.equal(null, err);
+          test.equal(100, items.length);
+          
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}
+
+
+/**
  * A whole set of different ways to use the findAndModify command.
  *
  * The first findAndModify command modifies a document and returns the modified document back.
