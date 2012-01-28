@@ -215,21 +215,8 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
 
   // Insert some data
   var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
-
-  // Print any errors
-  db.on("error", function(err) {
-    console.log("============================= ensureConnection caught error")
-    console.dir(err)
-    if(err != null && err.stack != null) console.log(err.stack)
-    db.close();
-  })
-  
-  var first = false;
-  
   // Open db
   db.open(function(err, p_db) {
-    if(first) return
-    first = true
     // Check if we got an error
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
@@ -242,15 +229,17 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {            
           // Kill the primary
-          RS.killPrimary(2, {killNodeWaitTime:1}, function(node) {
+          RS.killPrimary(2, {killNodeWaitTime:0}, function(node) {
             // Attempt insert (should fail)
             collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
               test.ok(err != null)
 
               if(err != null) {
                 collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {                      
+                  
                   // Peform a count
                   collection.count(function(err, count) {
+
                     test.equal(2, count);
                     p_db.close();
                     test.done();

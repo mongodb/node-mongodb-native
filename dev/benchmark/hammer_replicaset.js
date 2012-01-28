@@ -1,17 +1,17 @@
-var BSON = require('../lib/mongodb').BSONNative.BSON,
-  ObjectID = require('../lib/mongodb').BSONNative.ObjectID,
-  Code = require('../lib/mongodb').BSONNative.Code,
+var BSON = require('../../lib/mongodb').BSONNative.BSON,
+  ObjectID = require('../../lib/mongodb').BSONNative.ObjectID,
+  Code = require('../../lib/mongodb').BSONNative.Code,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  mongodb = require('../lib/mongodb'),
+  mongodb = require('../../lib/mongodb'),
   Db = mongodb.Db,
   Server = mongodb.Server,
-  ReplSetServers = require('../lib/mongodb').ReplSetServers,
-  ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager,
-  Step = require("../deps/step/lib/step");
+  ReplSetServers = require('../../lib/mongodb').ReplSetServers,
+  ReplicaSetManager = require('../../test/tools/replica_set_manager').ReplicaSetManager,
+  Step = require("../../deps/step/lib/step");
 
-var BSON = require('../lib/mongodb').BSONPure.BSON,
-  ObjectID = require('../lib/mongodb').BSONPure.ObjectID;
+var BSON = require('../../lib/mongodb').BSONPure.BSON,
+  ObjectID = require('../../lib/mongodb').BSONPure.ObjectID;
 
 var db = null;
 var poolSize = 1;

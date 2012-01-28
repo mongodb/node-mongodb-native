@@ -93,6 +93,22 @@ exports.tearDown = function(callback) {
   }  
 }
 
+exports.shouldCorrectlyHandleErrorWhenNoServerUpInReplicaset = function(test) {
+  // Replica configuration
+  var replSet = new ReplSetServers([ 
+      new Server('localhost', 28390, { auto_reconnect: true } ),
+      new Server('localhost', 28391, { auto_reconnect: true } ),
+      new Server('localhost', 28392, { auto_reconnect: true } )
+    ] 
+  );
+
+  var db = new Db('integration_test_', replSet);
+  db.open(function(err, p_db) {
+    test.ok(err != null);
+    test.done();
+  });
+}
+
 exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
