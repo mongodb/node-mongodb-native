@@ -292,7 +292,7 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {            
           // Kill the primary
-          RS.killPrimary(2, {killNodeWaitTime:1}, function(node) {
+          RS.killPrimary(2, {killNodeWaitTime:0}, function(node) {
             // Ok let's execute same query a couple of times
             collection.find({}).toArray(function(err, items) {
               // console.log("============================================ CALLED :: 0")

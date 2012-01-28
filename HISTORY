@@ -7,6 +7,7 @@
 * Added findAndRemove method to collection.
 * Fixed bug for replicaset connection when no active servers in the set.
 * Fixed bug for replicaset connections when errors occur during connection. 
+* Merged in patch for BSON Number handling from Lee Salzman, did some small fixes and added test coverage.
 
 0.9.8-3 2012-01-21
 * Workaround for issue with Object.defineProperty (Issue #484)

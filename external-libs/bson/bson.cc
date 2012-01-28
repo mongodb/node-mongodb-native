@@ -41,6 +41,12 @@ const uint32_t BSON_DATA_MAX_KEY = 0x7f;
 const int32_t BSON_INT32_MAX = (int32_t)2147483647L;
 const int32_t BSON_INT32_MIN = (int32_t)(-1) * 2147483648L;
 
+const int64_t BSON_INT64_MAX = ((int64_t)1 << 63) - 1;
+const int64_t BSON_INT64_MIN = (int64_t)-1 << 63;
+
+const int64_t JS_INT_MAX = (int64_t)1 << 53;
+const int64_t JS_INT_MIN = (int64_t)-1 << 53;
+
 static Handle<Value> VException(const char *msg) {
     HandleScope scope;
     return ThrowException(Exception::Error(String::New(msg)));
@@ -1711,7 +1717,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
       BSON::write_int32(serialized_object + index, value->ToInt32()->Value());
       // Adjust the size of the index
       index = index + 4;
-    } else if(l_number <= (2^53) && l_number >= (-2^53)) {
+    } else if(l_number <= JS_INT_MAX && l_number >= JS_INT_MIN) {
       // Write the double to the char array
       BSON::write_double((serialized_object + index), d_number);
       // Adjust type to be double

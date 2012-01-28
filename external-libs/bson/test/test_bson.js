@@ -28,6 +28,17 @@ assert.throws(function() { new ObjectID('foo'); })
 var bsonC = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 var bsonJS = new BSONJS([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 
+// Simple serialization and deserialization of edge value
+var doc = {doc:0x1ffffffffffffe};
+var simple_string_serialized = bsonC.serialize(doc, false, true);
+assert.deepEqual(simple_string_serialized, bsonJS.serialize(doc, false, true));
+assert.deepEqual(bsonJS.deserialize(new Buffer(simple_string_serialized, 'binary')), bsonC.deserialize(simple_string_serialized));
+
+var doc = {doc:-0x1ffffffffffffe};
+var simple_string_serialized = bsonC.serialize(doc, false, true);
+assert.deepEqual(simple_string_serialized, bsonJS.serialize(doc, false, true));
+assert.deepEqual(bsonJS.deserialize(new Buffer(simple_string_serialized, 'binary')), bsonC.deserialize(simple_string_serialized));
+
 //
 // Assert correct toJSON
 //
