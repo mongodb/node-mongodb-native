@@ -758,8 +758,7 @@ exports.shouldCorrectlyAddAndRemoveUser = function(test) {
 
           // Remove the user from the db
           db.removeUser('user', function(err, result) {
-            test.equal(true, result);
-            
+                        
             // Authenticate
             db.authenticate('user', 'name', function(err, result) {
               test.equal(false, result);
