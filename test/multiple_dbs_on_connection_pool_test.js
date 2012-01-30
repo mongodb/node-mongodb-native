@@ -14,6 +14,7 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
  * Retrieve the server information for the current
@@ -49,6 +50,9 @@ exports.tearDown = function(callback) {
   callback();
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(test) {
   if(process.platform !== 'linux') {
     var db = new Db('tests', new Server("127.0.0.1", 27027, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
@@ -95,7 +99,11 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(test) {
   }
 }
 
-// Test the auto connect functionality of the db
+/**
+ * Test the auto connect functionality of the db
+ * 
+ * @ignore
+ */
 exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(test) {
   var second_test_database = new Db(MONGODB + "_2", new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
   // Just create second database
@@ -137,7 +145,11 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(test) {
   });    
 }
 
-// Test the auto connect functionality of the db
+/**
+ * Test the auto connect functionality of the db
+ * 
+ * @ignore
+ */
 exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(test) {
   var second_test_database = new Db(MONGODB + "_2", new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
   // Just create second database
@@ -178,6 +190,49 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(test) {
     });
   });    
 }
+
+/**
+ * Simple example connecting to two different databases sharing the socket connections below.
+ *
+ * @_class db
+ * @_function db
+ */
+exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    test.equal(null, err);
+    
+    // Reference a different database sharing the same connections
+    // for the data transfer
+    var secondDb = db.db("integration_tests_2");
+    
+    // Fetch the collections
+    var multipleColl1 = db.collection("multiple_db_instances");
+    var multipleColl2 = secondDb.collection("multiple_db_instances");
+    
+    // Write a record into each and then count the records stored
+    multipleColl1.insert({a:1}, {safe:true}, function(err, result) {      
+      multipleColl2.insert({a:1}, {safe:true}, function(err, result) {
+        
+        // Count over the results ensuring only on record in each collection
+        multipleColl1.count(function(err, count) {
+          test.equal(1, count);
+
+          multipleColl2.count(function(err, count) {
+            test.equal(1, count);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+}
+
   
 /**
  * Retrieve the server information for the current

@@ -105,8 +105,9 @@ var readAllTemplates = function(templates) {
 // All source files for the api generation
 var apiClasses = [
     // {tag:"admin", path:"./lib/mongodb/admin.js"},
-    // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"}
-    {tag:"collection", path:"./lib/mongodb/collection.js"}
+    // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
+    // {tag:"collection", path:"./lib/mongodb/collection.js"},
+    {tag:"db", path:"./lib/mongodb/db.js"}
   ];
   
 // All test files 
@@ -119,7 +120,10 @@ var testClasses = [
     {path:"./test/db_test.js"},
     {path:"./test/find_test.js"},
     {path:"./test/map_reduce_test.js"},
-    {path:"./test/index_test.js"}
+    {path:"./test/index_test.js"},
+    {path:"./test/geo_search_test.js"},
+    {path:"./test/replicaset/connect_test.js"},
+    {path:"./test/multiple_dbs_on_connection_pool_test.js"}
   ]
 
 // Read all the templates
@@ -152,8 +156,7 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
   var isClass = function(tags) {    
     for(var k = 0; k < tags.length; k++) {
       if(tags[k].type == 'class') return true;
-    }
-    
+    }    
     return false;
   }
   
@@ -162,12 +165,18 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
   }
   
   var isProperty = function(entry) {
-    var tags = entry.tags;
-    
+    var tags = entry.tags;    
     for(var k = 0; k < tags.length; k++) {
       if(tags[k].type == 'property') return true;
-    }
-    
+    }    
+    return false;    
+  }
+  
+  var isClassConstant = function(entry) {
+    var tags = entry.tags;    
+    for(var k = 0; k < tags.length; k++) {
+      if(tags[k].type == 'classconstant') return true;
+    }    
     return false;    
   }
   
@@ -184,7 +193,8 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
     // Render the class template
     var classContent = ejs.render(templates['class'], 
       {entries:classMetaData, examples:classExamplesData, isClass:isClass, 
-        isFunction:isFunction, isProperty:isProperty, format:format});    
+        isFunction:isFunction, isProperty:isProperty, isClassConstant:isClassConstant, 
+        format:format});    
     
     console.log("======================================================== " + className)
     console.log(classContent)
@@ -195,7 +205,8 @@ var renderAllTemplates = function(outputDirectory, templates, dataObjects, testO
   
   // Let's render the index api file
   var indexContent = ejs.render(templates['index'], 
-    {entries:classNames, isClass:isClass, isFunction:isFunction, isProperty:isProperty, format:format});    
+    {entries:classNames, isClass:isClass, isFunction:isFunction, isProperty:isProperty, 
+      isClassConstant:isClassConstant, format:format});    
   // Write out the api index to disk
   fs.writeFileSync(format("%s/%s.rst", outputDirectory, "index"), indexContent);
 }

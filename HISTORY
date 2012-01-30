@@ -1,3 +1,10 @@
+0.9.8-5
+* Added geoNear command to collection.
+* Added geoHaystackSearch command to collection.
+* Added indexes command to collection to retrieve the indexes on a collection.
+* Added stats command to collection to retrieve the statistics on a collection.
+* Changed createCreateIndexCommand to work better with options.
+
 0.9.8-4 2012-01-28
 * Added reIndex command to collection and db level.
 * Added support for $returnKey, $maxScan, $min, $max, $showDiskLoc, $comment to cursor and find/findOne methods.

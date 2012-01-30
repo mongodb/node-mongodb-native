@@ -2,7 +2,17 @@
 for(var i = 0; i < entries.length; i++) {
   if(isClass(entries[i].tags)) {
     %><%= format("==================\n%s Class Methods\n==================\n", entries[i].ctx.string) %><%
-    %><%- format("%s", entries[i].description.full.replace(/<[^>]+>/g, '')) %><%
+
+    // Get full description and clean it
+    var fullDescription = entries[i].description.full;
+    fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
+      .replace(/\<\/code\>\<\/pre\>/g, "")
+      .replace(/\<h2\>|\<\/h2\>/g, "**")
+      .replace(/\<p\>|\<\/p\>/g, "")
+      .replace(/\<strong\>|\<\/strong\>/g, "**")
+      .replace(/\<em\>|\<\/em\>/g, "*")
+      .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
+    %><%- format("%s", fullDescription) %><%
   }
 }
 %>
@@ -34,7 +44,36 @@ for(var i = 0; i < entries.length; i++) {
   }
 }
 
-%><%= format("------------------\nProperties\n------------------\n") %><%
+%><%= format("------------------\nClass Constants\n------------------\n") %><%
+%>
+.. csv-table:: 
+   :header: "Constant Name", "Value", "Description"
+   :widths: 15, 10, 30
+
+<%
+
+for(var i = 0; i < entries.length; i++) {
+  if(isClassConstant(entries[i])) {
+    // console.log("----------------------------------------------------------------")
+    // console.dir(entries[i])
+    
+    // Extract values
+    var attributeName = format("%s = %s;", entries[i].ctx.string, entries[i].ctx.value);
+    var getterSetters = [];
+    var type = "";
+  
+    // Get full description and clean it
+    var fullDescription = entries[i].description.full;
+    fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
+      .replace(/\<\/code\>\<\/pre\>/g, "")
+      .replace(/\<h2\>|\<\/h2\>/g, "**")
+      .replace(/\<p\>|\<\/p\>/g, "")
+      .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
+
+   // Write out the class definition row
+   %><%- format("    \"%s\", \"%s\", \"%s\"\n", entries[i].ctx.string, entries[i].ctx.value, fullDescription) %><%
+  }
+}
 
 for(var i = 0; i < entries.length; i++) {
   if(isProperty(entries[i])) {
@@ -57,7 +96,7 @@ for(var i = 0; i < entries.length; i++) {
       .replace(/\<\/code\>\<\/pre\>/g, "")
       .replace(/\<h2\>|\<\/h2\>/g, "**")
       .replace(/\<p\>|\<\/p\>/g, "")
-      .replace(/\<br\>|\<\/br\>/g, "\n");
+      .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
       
     // Write out the text
     %><%- format("%s\n\n", fullDescription) %><%
@@ -102,6 +141,7 @@ for(var i = 0; i < entries.length; i++) {
         var startingTemplateLines = [
             "     var Db = require('mongodb').Db,",
             "         Server = require('mongodb').Server,",
+            "         ReplSetServers = require('mongodb').ReplSetServers,",
             "         ObjectID = require('mongodb').ObjectID,",
             "         assert = require('assert');\n\n"
           ];
@@ -114,7 +154,7 @@ for(var i = 0; i < entries.length; i++) {
   }
 }
 
-for(var i = 0; i < entries.length; i++) {
+for(var i = 0; i < entries.length; i++) {  
   // If it's a function parse it
   if(isFunction(entries[i])) {
     var paramsStrings = [];
@@ -198,6 +238,7 @@ for(var i = 0; i < entries.length; i++) {
         var startingTemplateLines = [
             "     var Db = require('mongodb').Db,",
             "         Server = require('mongodb').Server,",
+            "         ReplSetServers = require('mongodb').ReplSetServers,",
             "         ObjectID = require('mongodb').ObjectID,",
             "         assert = require('assert');\n\n"
           ];

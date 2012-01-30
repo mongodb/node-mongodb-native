@@ -93,6 +93,9 @@ exports.tearDown = function(callback) {
   }  
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleErrorWhenNoServerUpInReplicaset = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
@@ -109,6 +112,32 @@ exports.shouldCorrectlyHandleErrorWhenNoServerUpInReplicaset = function(test) {
   });
 }
 
+/**
+ * Simple replicaset connection setup, requires a running replicaset on the correct ports
+ *
+ * @_class db
+ * @_function open
+ */
+exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
+  // Replica configuration
+  var replSet = new ReplSetServers([ 
+      new Server('localhost', 30000, { auto_reconnect: true } ),
+      new Server('localhost', 30001, { auto_reconnect: true } ),
+      new Server('localhost', 30002, { auto_reconnect: true } )
+    ] 
+  );
+
+  var db = new Db('integration_test_', replSet);
+  db.open(function(err, p_db) {
+    test.equal(null, err);
+    test.done();
+    p_db.close();
+  });
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
@@ -126,6 +155,9 @@ exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyConnectWithDefaultReplicaset = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
@@ -144,6 +176,9 @@ exports.shouldCorrectlyConnectWithDefaultReplicaset = function(test) {
   })    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyConnectWithDefaultReplicasetAndSocketOptionsSet = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
@@ -163,6 +198,9 @@ exports.shouldCorrectlyConnectWithDefaultReplicasetAndSocketOptionsSet = functio
   })    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldEmitCloseNoCallback = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
@@ -185,6 +223,9 @@ exports.shouldEmitCloseNoCallback = function(test) {
   })
 }
 
+/**
+ * @ignore
+ */
 exports.shouldEmitCloseWithCallback = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
@@ -209,6 +250,9 @@ exports.shouldEmitCloseWithCallback = function(test) {
   })
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPassErrorWhenWrongReplicaSet = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
@@ -226,6 +270,9 @@ exports.shouldCorrectlyPassErrorWhenWrongReplicaSet = function(test) {
   })    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldConnectWithPrimarySteppedDown = function(test) {
   var replSet = new ReplSetServers( [ 
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -251,6 +298,9 @@ exports.shouldConnectWithPrimarySteppedDown = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldConnectWithThirdNodeKilled = function(test) {
   RS.getNodeFromPort(RS.ports[2], function(err, node) {
     if(err != null) debug("shouldConnectWithThirdNodeKilled :: " + inspect(err));
@@ -280,6 +330,9 @@ exports.shouldConnectWithThirdNodeKilled = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldConnectWithSecondaryNodeKilled = function(test) {
   RS.killSecondary(function(node) {
     
@@ -312,6 +365,9 @@ exports.shouldConnectWithSecondaryNodeKilled = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldConnectWithPrimaryNodeKilled = function(test) {
   RS.killPrimary(function(node) {
     // Replica configuration
@@ -331,6 +387,9 @@ exports.shouldConnectWithPrimaryNodeKilled = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyBeAbleToUsePortAccessors = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers( [ 
@@ -352,6 +411,9 @@ exports.shouldCorrectlyBeAbleToUsePortAccessors = function(test) {
   })            
 }
   
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyConnect = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers( [ 

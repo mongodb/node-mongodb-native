@@ -134,6 +134,30 @@ exports.shouldCorrectlyAuthenticate = function(test) {
 }
 
 /**
+ * Example showing how to access the Admin database for admin level operations.
+ *
+ * @_class db
+ * @_function admin
+ * @ignore
+ */
+exports.shouldCorrectlyAuthenticate = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+
+    // Use the admin database for the operation
+    db.admin(function(err, adminDb) {
+      test.equal(null, err);
+      
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
  * Retrieve the buildInfo for the current MongoDB instance
  *
  * @_class admin

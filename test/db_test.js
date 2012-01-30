@@ -330,6 +330,90 @@ exports.shouldCorrectlyRenameCollection = function(test) {
 }
 
 /**
+ * An example of a simple single server db connection
+ *
+ * @_class db
+ * @_function open
+ * @ignore
+ */
+exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+    
+    db.close();
+    test.done();
+  });
+}
+
+/**
+ * An example of a simple single server db connection and close function
+ *
+ * @_class db
+ * @_function close
+ * @ignore
+ */
+exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+    
+    // Close the connection with a callback that is optional
+    db.close(function(err, result) {
+      test.equal(null, err);
+            
+      test.done();
+    });
+  });
+}
+
+/**
+ * An example of retrieveing the information of all the collections
+ *
+ * @_class db
+ * @_function collectionsInfo
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+    
+    // Create a collection
+    client.createCollection('test_collections_info', function(err, r) {
+      test.equal(null, err);
+      
+      // Return the information of a single collection name
+      db.collectionsInfo("test_collections_info").toArray(function(err, items) {
+        test.equal(1, items.length);
+
+        // Return the information of a all collections, using the callback format
+        db.collectionsInfo(function(err, cursor) {
+
+          // Turn the cursor into an array of results
+          cursor.toArray(function(err, items) {
+            test.ok(items.length > 0);
+
+            db.close();
+            test.done();
+          });
+        })
+      });      
+    });
+  });
+}
+
+
+/**
  * @ignore
  */
 exports.shouldCorrectlyHandleFailedConnection = function(test) {

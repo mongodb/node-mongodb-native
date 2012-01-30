@@ -1094,7 +1094,78 @@ exports.shouldPeformCollectionRemoveWithNoCallback = function(test) {
        });
     });
   });
-},    
+},  
+
+/**
+ * Example of retrieving a collections indexes
+ *
+ * @_class collection
+ * @_function indexes
+ * @ignore
+ */
+exports.shouldCorrectlyRetriveACollectionsIndexes = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+
+    // Crete the collection for the distinct example
+    db.createCollection('simple_key_based_distinct', function(err, collection) {
+      
+      // Create a geo 2d index
+      collection.ensureIndex({loc:"2d"}, function(err, result) {
+        test.equal(null, err);
+        
+        // Create a simple single field index
+        collection.ensureIndex({a:1}, function(err, result) {
+          test.equal(null, err);
+
+          // List all of the indexes on the collection
+          collection.indexes(function(err, indexes) {
+            test.equal(3, indexes.length);
+            
+            db.close();
+            test.done();            
+          });
+        })
+      })
+    });
+  });
+}
+
+/**
+ * Example of retrieving a collections stats
+ *
+ * @_class collection
+ * @_function stats
+ * @ignore
+ */
+exports.shouldCorrectlyReturnACollectionsStats = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+
+    // Crete the collection for the distinct example
+    db.createCollection('collection_stats_test', function(err, collection) {
+      
+        // Insert some documents
+        collection.insert([{a:1}, {hello:'world'}], {safe:true}, function(err, result) {
+          
+          // Retrieve the statistics for the collection
+          collection.stats(function(err, stats) {
+            test.equal(2, stats.count);
+            
+            db.close();
+            test.done();            
+          });          
+        });      
+    });
+  });
+}
+  
 
 /**
  * Retrieve the server information for the current
