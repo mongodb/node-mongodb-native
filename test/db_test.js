@@ -136,55 +136,80 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(test) {
 }
 
 /**
+ * A whole bunch of examples on how to use eval on the server.
+ *
+ * @_class db
+ * @_function eval
  * @ignore
  */
 exports.shouldCorrectlyExecuteEvalFunctions = function(test) {
-  client.eval('function (x) {return x;}', [3], function(err, result) {      
-    test.equal(3, result);
-  });
-  
-  client.eval('function (x) {return x;}', [3], {nolock:true}, function(err, result) {
-    test.equal(3, result);
-  });
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
     
-  client.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
-    // Locate the entry
-    client.collection('test_eval', function(err, collection) {
-      collection.findOne(function(err, item) {
-        test.equal(5, item.y);
+    // Evaluate a function on the server with the parameter 3 passed in
+    db.eval('function (x) {return x;}', [3], function(err, result) {      
+      test.equal(3, result);
+    });
+  
+    // Evaluate a function on the server with the parameter 3 passed in no lock aquired for eval
+    // on server
+    db.eval('function (x) {return x;}', [3], {nolock:true}, function(err, result) {
+      test.equal(3, result);
+    });
+    
+    // Evaluate a function on the server that writes to a server collection
+    db.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
+      // Locate the entry
+      client.collection('test_eval', function(err, collection) {
+        collection.findOne(function(err, item) {
+          test.equal(5, item.y);
+        });
       });
     });
-  });
     
-  client.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
-    test.equal(5, result);
-  });
+    // Evaluate a function with 2 parameters passed in
+    db.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
+      test.equal(5, result);
+    });
     
-  client.eval('function () {return 5;}', function(err, result) {
-    test.equal(5, result);
-  });
+    // Evaluate a function with no parameters passed in
+    db.eval('function () {return 5;}', function(err, result) {
+      test.equal(5, result);
+    });
     
-  client.eval('2 + 3;', function(err, result) {
-    test.equal(5, result);
-  });
+    // Evaluate a statement
+    db.eval('2 + 3;', function(err, result) {
+      test.equal(5, result);
+    });
     
-  client.eval(new Code("2 + 3;"), function(err, result) {
-    test.equal(5, result);
-  });
+    // Evaluate a statement using the code object
+    db.eval(new Code("2 + 3;"), function(err, result) {
+      test.equal(5, result);
+    });
     
-  client.eval(new Code("return i;", {'i':2}), function(err, result) {
-    test.equal(2, result);
-  });
+    // Evaluate a statement using the code object including a scope
+    db.eval(new Code("return i;", {'i':2}), function(err, result) {
+      test.equal(2, result);
+    });
     
-  client.eval(new Code("i + 3;", {'i':2}), function(err, result) {
-    test.equal(5, result);
-    test.done();
-  });
+    // Evaluate a statement using the code object including a scope
+    db.eval(new Code("i + 3;", {'i':2}), function(err, result) {
+      test.equal(5, result);
+      test.done();
+    });
     
-  client.eval("5 ++ 5;", function(err, result) {
-    test.ok(err instanceof Error);
-    test.ok(err.message != null);
-    // Let's close the db
+    // Evaluate an illegal statement
+    db.eval("5 ++ 5;", function(err, result) {
+      test.ok(err instanceof Error);
+      test.ok(err.message != null);
+      // Let's close the db
+      test.done();
+    });
+    
+    db.close();
     test.done();
   });
 }
@@ -374,7 +399,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(test) {
 }
 
 /**
- * An example of retrieveing the information of all the collections
+ * An example of retrieveing the information of all the collections.
  *
  * @_class db
  * @_function collectionsInfo
@@ -389,7 +414,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
     test.equal(null, err);
     
     // Create a collection
-    client.createCollection('test_collections_info', function(err, r) {
+    db.createCollection('test_collections_info', function(err, r) {
       test.equal(null, err);
       
       // Return the information of a single collection name
@@ -412,6 +437,112 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
   });
 }
 
+/**
+ * An example of retrieveing the collection names for a database.
+ *
+ * @_class db
+ * @_function collectionNames
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+    
+    // Create a collection
+    db.createCollection('test_collections_info', function(err, r) {
+      test.equal(null, err);
+      
+      // Return the information of a single collection name
+      db.collectionNames("test_collections_info", function(err, items) {
+        test.equal(1, items.length);
+
+        // Return the information of a all collections, using the callback format
+        db.collectionNames(function(err, items) {
+          test.ok(items.length > 0);
+
+          db.close();
+          test.done();
+        });
+      });      
+    });
+  });
+}
+
+/**
+ * An example of retrieving a collection from a db using the collection function.
+ *
+ * @_class db
+ * @_function collection
+ * @ignore
+ */
+exports.shouldCorrectlyAccessACollection = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+    
+    // Grab a collection without a callback no safe mode
+    var col1 = db.collection('test_correctly_access_collections');
+    
+    // Grab a collection with a callback but no safe operation
+    db.collection('test_correctly_access_collections', function(err, col2) {
+      test.equal(null, err);
+      
+      // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
+      db.collection('test_correctly_access_collections', {safe:true}, function(err, col3) {
+        test.ok(err != null);
+        
+        // Create the collection
+        db.createCollection('test_correctly_access_collections', function(err, result) {
+
+          // Retry to get the collection, should work as it's now created
+          db.collection('test_correctly_access_collections', {safe:true}, function(err, col3) {
+            test.equal(null, err);
+          
+            db.close();
+            test.done();        
+          });
+        });        
+      });      
+    });
+  });
+}
+
+/**
+ * An example of retrieving all collections for a db as Collection objects
+ *
+ * @_class db
+ * @_function collections
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieveAllCollections = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+        
+    // Create the collection
+    db.createCollection('test_correctly_access_collections', function(err, result) {
+
+      // Retry to get the collection, should work as it's now created
+      db.collections(function(err, collections) {
+        test.equal(null, err);
+        test.ok(collections.length > 0);
+      
+        db.close();
+        test.done();        
+      });
+    });        
+  });
+}
 
 /**
  * @ignore
@@ -461,6 +592,188 @@ exports.shouldCorrectlyResaveDBRef = function(test) {
   });
 },
   
+/**
+ * An example of dereferencing values.
+ *
+ * @_class db
+ * @_function dereference
+ * @ignore
+ */
+exports.shouldCorrectlyDereferenceDbRefExamples = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+
+    // Get a second db
+    var secondDb = db.db('integration_tests_2');
+
+    // Create a dereference example
+    secondDb.createCollection('test_deref_examples', function(err, collection) {
+      
+      // Insert a document in the collection
+      collection.insert({'a':1}, {safe:true}, function(err, ids) {
+        
+        // Let's build a db reference and resolve it
+        var dbRef = new DBRef('test_deref_examples', ids[0]._id, 'integration_tests_2');
+        
+        // Resolve it including a db resolve
+        db.dereference(dbRef, function(err, item) {          
+          test.equal(1, item.a);
+
+          // Let's build a db reference and resolve it
+          var dbRef = new DBRef('test_deref_examples', ids[0]._id);
+
+          // Simple local resolve
+          secondDb.dereference(dbRef, function(err, item) {          
+            test.equal(1, item.a);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * An example of using the logout command for the database.
+ *
+ * @_class db
+ * @_function logout
+ * @ignore
+ */
+exports.shouldCorrectlyLogoutFromTheDatabase = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+
+    // Add a user to the database
+    db.addUser('user', 'name', function(err, result) {
+      test.equal(null, err);
+      
+      // Authenticate
+      db.authenticate('user', 'name', function(err, result) {
+        test.equal(true, result);
+
+        // Logout the db
+        db.logout(function(err, result) {
+          test.equal(true, result);
+          
+          db.close();
+          test.done();
+        });        
+      });      
+    });
+  });
+}
+
+/**
+ * An example of using the authenticate command.
+ *
+ * @_class db
+ * @_function authenticate
+ * @ignore
+ */
+exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+
+    // Add a user to the database
+    db.addUser('user', 'name', function(err, result) {
+      test.equal(null, err);
+      
+      // Authenticate
+      db.authenticate('user', 'name', function(err, result) {
+        test.equal(true, result);
+
+        db.close();
+        test.done();
+      });      
+    });
+  });
+}
+
+/**
+ * An example of adding a user to the database.
+ *
+ * @_class db
+ * @_function addUser
+ * @ignore
+ */
+exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+
+    // Add a user to the database
+    db.addUser('user', 'name', function(err, result) {
+      test.equal(null, err);
+      
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
+ * An example of dereferencing values.
+ *
+ * @_class db
+ * @_function removeUser
+ * @ignore
+ */
+exports.shouldCorrectlyAddAndRemoveUser = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    test.equal(null, err);
+
+    // Add a user to the database
+    db.addUser('user', 'name', function(err, result) {
+      test.equal(null, err);
+      
+      // Authenticate
+      db.authenticate('user', 'name', function(err, result) {
+        test.equal(true, result);
+
+        // Logout the db
+        db.logout(function(err, result) {
+          test.equal(true, result);
+
+          // Remove the user from the db
+          db.removeUser('user', function(err, result) {
+            test.equal(true, result);
+            
+            // Authenticate
+            db.authenticate('user', 'name', function(err, result) {
+              test.equal(false, result);
+
+              db.close();
+              test.done();
+            });
+          });
+        });        
+      });      
+    });
+  });
+}
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
