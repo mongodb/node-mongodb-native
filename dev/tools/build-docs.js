@@ -104,7 +104,8 @@ var apiClasses = [
     // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
     // {tag:"collection", path:"./lib/mongodb/collection.js"},
     // {tag:"db", path:"./lib/mongodb/db.js"},
-    {tag:"cursor", path:"./lib/mongodb/cursor.js"}
+    {tag:"cursor", path:"./lib/mongodb/cursor.js"},
+    {tag:"cursorstream", path:"./lib/mongodb/cursorstream.js"}
   ];
   
 // All test files 
@@ -122,7 +123,8 @@ var testClasses = [
     {path:"./test/replicaset/connect_test.js"},
     {path:"./test/connect_test.js"},
     {path:"./test/multiple_dbs_on_connection_pool_test.js"},
-    {path:"./test/cursor_test.js"}
+    {path:"./test/cursor_test.js"},
+    {path:"./test/cursorstream_test.js"}
   ]
 
 // Read all the templates

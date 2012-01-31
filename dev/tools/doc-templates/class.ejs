@@ -66,13 +66,18 @@ for(var i = 0; i < entries.length; i++) {
   }
 }
 
-%><%= format("\n------------------\nConstants\n------------------\n") %><%
+for(var i = 0; i < entries.length; i++) {
+  if(isClassConstant(entries[i])) {
+    %><%= format("\n------------------\nConstants\n------------------\n") %><%
 %>
 .. csv-table:: 
    :header: "Constant Name", "Value", "Description"
    :widths: 15, 10, 30
 
 <%
+    break;
+  }
+}
 
 for(var i = 0; i < entries.length; i++) {
   if(isClassConstant(entries[i])) {
