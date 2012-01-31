@@ -7,6 +7,7 @@
 * Changed createCreateIndexCommand to work better with options.
 * Fixed dereference method on Db class to correctly dereference Db reference objects. 
 * Moved connect object onto Db class(Db.connect) as well as keeping backward compatibility.
+* Removed writeBuffer method from gridstore, write handles switching automatically now.
 
 0.9.8-4 2012-01-28
 * Added reIndex command to collection and db level.

@@ -17,6 +17,8 @@ var testCase = require('../../deps/nodeunit').testCase,
 var MONGODB = 'integration_tests';
 // var MONGODB = 'ruby-test-db';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var useSSL = process.env['USE_SSL'] != null ? true : false;
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
  * Retrieve the server information for the current
@@ -52,7 +54,9 @@ exports.tearDown = function(callback) {
   callback();
 }
   
-// Gridstore tests
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = function(test) {
   var gridStore = new GridStore(client, null, "w");
   gridStore.open(function(err, gridStore) {
@@ -75,6 +79,9 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySafeFileAndReadFileByObjectId = function(test) {
   var gridStore = new GridStore(client, null, "w");
   gridStore.open(function(err, gridStore) {
@@ -91,6 +98,9 @@ exports.shouldCorrectlySafeFileAndReadFileByObjectId = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteGridStoreExists = function(test) {
   var gridStore = new GridStore(client, "foobar", "w");
   gridStore.open(function(err, gridStore) {
@@ -113,6 +123,9 @@ exports.shouldCorrectlyExecuteGridStoreExists = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteGridStoreList = function(test) {
   var gridStore = new GridStore(client, "foobar2", "w");
   gridStore.open(function(err, gridStore) {
@@ -183,6 +196,9 @@ exports.shouldCorrectlyExecuteGridStoreList = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPeformGridStoreReadLength = function(test) {
   var gridStore = new GridStore(client, "test_gs_read_length", "w");
   gridStore.open(function(err, gridStore) {
@@ -198,6 +214,9 @@ exports.shouldCorrectlyPeformGridStoreReadLength = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReadFromFileWithOffset = function(test) {
   var gridStore = new GridStore(client, "test_gs_read_with_offset", "w");
   gridStore.open(function(err, gridStore) {
@@ -217,6 +236,9 @@ exports.shouldCorrectlyReadFromFileWithOffset = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleMultipleChunkGridStore = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
@@ -254,6 +276,9 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReadlinesAndPutLines = function(test) {
   var gridStore = new GridStore(client, "test_gs_puts_and_readlines", "w");
   gridStore.open(function(err, gridStore) {
@@ -272,6 +297,9 @@ exports.shouldCorrectlyReadlinesAndPutLines = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleUnlinkingWeirdName = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
@@ -316,6 +344,9 @@ exports.shouldCorrectlyHandleUnlinkingWeirdName = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyUnlink = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
@@ -360,6 +391,9 @@ exports.shouldCorrectlyUnlink = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyUnlinkAnArrayOfFiles = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
@@ -404,6 +438,9 @@ exports.shouldCorrectlyUnlinkAnArrayOfFiles = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyWriteFileToGridStore= function(test) {
   var gridStore = new GridStore(client, 'test_gs_writing_file', 'w');
   var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
@@ -426,6 +463,9 @@ exports.shouldCorrectlyWriteFileToGridStore= function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId= function(test) {
   var gridStore = new GridStore(client, null, 'w');
   var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
@@ -449,6 +489,9 @@ exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId= function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformWorkingFiledRead = function(test) {
   var gridStore = new GridStore(client, "test_gs_working_field_read", "w");
   var data = fs.readFileSync("./test/gridstore/test_gs_working_field_read.pdf", 'binary');
@@ -466,6 +509,9 @@ exports.shouldCorrectlyPerformWorkingFiledRead = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReadAndWriteFile = function(test) {
   var gridStore = new GridStore(client, "test_gs_weird_bug", "w");
   var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png", 'binary');
@@ -483,6 +529,9 @@ exports.shouldCorrectlyReadAndWriteFile = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReadAndWriteFileByObjectId = function(test) {
   var gridStore = new GridStore(client, null, "w");
   var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png", 'binary');
@@ -501,6 +550,9 @@ exports.shouldCorrectlyReadAndWriteFileByObjectId = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyWriteAndReadJpgImage = function(test) {
   var data = fs.readFileSync('./test/gridstore/iya_logo_final_bw.jpg').toString('binary');
   
@@ -524,6 +576,9 @@ exports.shouldCorrectlyWriteAndReadJpgImage = function(test) {
   })    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = function(test) {
   var gridStore = new GridStore(client, null, 'w');
   // Force multiple chunks to be stored
@@ -533,8 +588,8 @@ exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = function(test) {
   
   gridStore.open(function(err, gridStore) {
       
-    // Write the file using writeBuffer
-    gridStore.writeBuffer(data, function(err, doc) {
+    // Write the file using write
+    gridStore.write(data, function(err, doc) {
       gridStore.close(function(err, doc) {
 
         // Read the file using readBuffer
@@ -549,6 +604,9 @@ exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = function(test) {
   var gridStore = new GridStore(client, null, 'w');
   // Force multiple chunks to be stored
@@ -558,7 +616,7 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = function(test) {
   gridStore.open(function(err, gridStore) {
       
     // Write the file using writeBuffer
-    gridStore.writeBuffer(data, function(err, doc) {
+    gridStore.write(data, function(err, doc) {
       gridStore.close(function(err, doc) {
 
         // Read the file using readBuffer
@@ -573,6 +631,9 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks = function(test) {
   var gridStore = new GridStore(client, null, 'w');
   // Force multiple chunks to be stored
@@ -598,6 +659,9 @@ exports.shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks = f
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance = function(test) {
   var gridStore = new GridStore(client, null, 'w');
   // Force multiple chunks to be stored
@@ -607,7 +671,7 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance = funct
   gridStore.open(function(err, gridStore) {
       
     // Write the file using writeBuffer
-    gridStore.writeBuffer(data, function(err, doc) {
+    gridStore.write(data, function(err, doc) {
       gridStore.close(function(err, doc) {
 
         // Read the file using readBuffer
@@ -623,6 +687,9 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance = funct
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySaveDataByObjectID = function(test) {
   var id = new ObjectID();
   var gridStore = new GridStore(client, id, 'w');
@@ -643,6 +710,9 @@ exports.shouldCorrectlySaveDataByObjectID = function(test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCheckExistsByUsingRegexp = function(test) {
   var gridStore = new GridStore(client, 'shouldCheckExistsByUsingRegexp.txt', 'w');
 
@@ -661,6 +731,434 @@ exports.shouldCheckExistsByUsingRegexp = function(test) {
     });
   });    
 }
+
+/**
+ * A simple example showing opening a file using a filename, writing to it and saving it.
+ *
+ * @_class gridstore
+ * @_function open
+ * @ignore
+ */
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Create a new instance of the gridstore
+    var gridStore = new GridStore(db, 'ourexamplefiletowrite.txt', 'w');
+
+    // Open the file
+    gridStore.open(function(err, gridStore) {
+      
+      // Write some data to the file
+      gridStore.write('bar', function(err, gridStore) {
+        test.equal(null, err);
+        
+        // Close (Flushes the data to MongoDB)
+        gridStore.close(function(err, result) {
+          test.equal(null, err);
+
+          // Verify that the file exists
+          GridStore.exist(db, 'ourexamplefiletowrite.txt', function(err, result) {
+            test.equal(null, err);
+            test.equal(true, result);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * A simple example showing opening a file using an ObjectID, writing to it and saving it.
+ *
+ * @_class gridstore
+ * @_function open
+ * @ignore
+ */
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+    
+    // Create a new instance of the gridstore
+    var gridStore = new GridStore(db, fileId, 'w');
+
+    // Open the file
+    gridStore.open(function(err, gridStore) {
+      
+      // Write some data to the file
+      gridStore.write('bar', function(err, gridStore) {
+        test.equal(null, err);
+        
+        // Close (Flushes the data to MongoDB)
+        gridStore.close(function(err, result) {
+          test.equal(null, err);
+
+          // Verify that the file exists
+          GridStore.exist(db, fileId, function(err, result) {
+            test.equal(null, err);
+            test.equal(true, result);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * A simple example showing how to write a file to Gridstore using file location path.
+ *
+ * @_class gridstore
+ * @_function writeFile
+ * @ignore
+ */
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w');
+    
+    // Read the filesize of file on disk (provide your own)
+    var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
+    // Read the buffered data for comparision reasons
+    var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png', 'binary');
+
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+      
+      // Write the file to gridFS
+      gridStore.writeFile('./test/gridstore/test_gs_weird_bug.png', function(err, doc) {
+        
+        // Read back all the written content and verify the correctness
+        GridStore.read(db, fileId, function(err, fileData) {
+          test.equal(data, fileData)
+          test.equal(fileSize, fileData.length);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}   
+
+/**
+ * A simple example showing how to write a file to Gridstore using a file handle.
+ *
+ * @_class gridstore
+ * @_function writeFile
+ * @ignore
+ */
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w');
+    
+    // Read the filesize of file on disk (provide your own)
+    var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
+    // Read the buffered data for comparision reasons
+    var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png', 'binary');
+
+    // Open a file handle for reading the file
+    var fd = fs.openSync('./test/gridstore/test_gs_weird_bug.png', 'r', 0666);
+
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+      
+      // Write the file to gridFS using the file handle
+      gridStore.writeFile(fd, function(err, doc) {
+        
+        // Read back all the written content and verify the correctness
+        GridStore.read(db, fileId, function(err, fileData) {
+          test.equal(data, fileData)
+          test.equal(fileSize, fileData.length);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}   
+
+/**
+ * A simple example showing how to use the write command with strings and Buffers.
+ *
+ * @_class gridstore
+ * @_function write
+ * @ignore
+ */
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w');
+    
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+      
+      // Write a text string
+      gridStore.write('Hello world', function(err, gridStore) {
+        
+        // Write a buffer
+        gridStore.write(new Buffer('Buffer Hello world'), function(err, gridStore) {
+
+          // Close the 
+          gridStore.close(function(err, result) {
+            
+            // Read back all the written content and verify the correctness
+            GridStore.read(db, fileId, function(err, fileData) {
+              test.equal('Hello worldBuffer Hello world', fileData.toString());
+
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  });
+}   
+
+/**
+ * A simple example showing how to use the write command with strings and Buffers.
+ *
+ * @_class gridstore
+ * @_function close
+ * @ignore
+ */
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w');
+    
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+      
+      // Write a text string
+      gridStore.write('Hello world', function(err, gridStore) {
+        
+        // Close the 
+        gridStore.close(function(err, result) {
+          test.equal(err, null);
+                    
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}   
+
+/**
+ * A simple example showing how to access the chunks collection object.
+ *
+ * @_class gridstore
+ * @_function chunkCollection
+ * @ignore
+ */
+exports.shouldCorrectlyAccessChunkCollection = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w');
+    
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+      
+      // Access the Chunk collection
+      gridStore.chunkCollection(function(err, collection) {
+        test.equal(err, null);
+        test.ok(collection instanceof Collection);
+        
+        db.close();
+        test.done();
+      });      
+    });
+  });
+} 
+
+/**
+ * A simple example showing how to use the instance level unlink command to delete a gridstore item.
+ *
+ * @_class gridstore
+ * @_function unlink
+ * @ignore
+ */
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w');
+    
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+      
+      // Write a text string
+      gridStore.write('Hello world', function(err, gridStore) {
+        
+        // Close the 
+        gridStore.close(function(err, result) {
+          test.equal(err, null);
+          
+          // Open the file again and unlin it
+          new GridStore(db, fileId, 'r').open(function(err, gridStore) {
+            
+            // Unlink the file
+            gridStore.unlink(function(err, result) {
+              test.equal(null, err);
+              
+              // Verify that the file no longer exists
+              GridStore.exist(db, fileId, function(err, result) {
+                test.equal(null, err);
+                test.equal(false, result);
+
+                db.close();
+                test.done();
+              });
+            });            
+          });                    
+        });
+      });
+    });
+  });
+}   
+
+/**
+ * A simple example showing how to access the files collection object.
+ *
+ * @_class gridstore
+ * @_function collection
+ * @ignore
+ */
+exports.shouldCorrectlyAccessFilesCollection = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w');
+    
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+      
+      // Access the Chunk collection
+      gridStore.collection(function(err, collection) {
+        test.equal(err, null);
+        test.ok(collection instanceof Collection);
+        
+        db.close();
+        test.done();
+      });      
+    });
+  });
+} 
+
+/**
+ * A simple example showing reading back using readlines to split the text into lines by the seperator provided.
+ *
+ * @_class gridstore
+ * @_function readlines
+ * @ignore
+ */
+exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w');
+
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+
+      // Write one line to gridStore
+      gridStore.puts("line one", function(err, gridStore) {
+
+        // Write second line to gridStore
+        gridStore.puts("line two", function(err, gridStore) {
+
+          // Write third line to gridStore
+          gridStore.puts("line three", function(err, gridStore) {
+
+            // Flush file to disk
+            gridStore.close(function(err, result) {
+
+              // Read back all the lines
+              GridStore.readlines(db, fileId, function(err, lines) {
+                test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
+
+                db.close();
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+} 
+/**
+ * @ignore
+ */
 
 /**
  * Retrieve the server information for the current

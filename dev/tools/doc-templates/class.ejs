@@ -102,6 +102,13 @@ for(var i = 0; i < entries.length; i++) {
 
 for(var i = 0; i < entries.length; i++) {
   if(isProperty(entries[i])) {
+    %><%= format("\n------------------\nProperties\n------------------\n") %><%
+    break;
+  }
+}
+
+for(var i = 0; i < entries.length; i++) {
+  if(isProperty(entries[i])) {
     // Extract values
     var attributeName = "";
     var getterSetters = [];
