@@ -10,8 +10,8 @@ var className = null;
 
 for(var i = 0; i < entries.length; i++) {
   if(isClass(entries[i].tags)) {
-    console.log("-------------------------------------------------------------------------")
-    console.dir(entries[i])
+    // console.log("-------------------------------------------------------------------------")
+    // console.dir(entries[i])
     
     %><%= format("==================\n%s\n==================\n", entries[i].ctx.string) %><%
     className = entries[i].ctx.string;
@@ -91,7 +91,7 @@ for(var i = 0; i < entries.length; i++) {
       .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
 
    // Write out the class definition row
-   %><%- format("    \"%s\", \"%s\", \"%s\"\n", entries[i].ctx.string, entries[i].ctx.value, fullDescription) %><%
+   %><%- format("   \"%s\", \"%s\", \"%s\"\n", entries[i].ctx.string.trim(), entries[i].ctx.value.trim(), fullDescription.trim()) %><%
   }
 }
 
@@ -212,8 +212,6 @@ for(var i = 0; i < entries.length; i++) {
     var paramsString = paramNames.join(", ").replace(/\, \[/, "[, ");
     // Write out the methods
     var fullDescription = entries[i].description.full;
-    console.log("----------------------------------------------------------------------------------")
-    console.dir(fullDescription)
     
     fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
       .replace(/\<\/code\>\<\/pre\>/g, "")

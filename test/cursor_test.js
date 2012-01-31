@@ -1611,7 +1611,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
       collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
         test.equal(null, err);
         
-        // Do normal ascending sort
+        // Limit to only one document returned
         collection.find().limit(1).toArray(function(err, items) {
           test.equal(null, err);
           test.equal(1, items.length);
@@ -1621,6 +1621,325 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
         });        
       });      
     });
+  });
+}
+
+/**
+ * A simple example showing the use of skip on the cursor
+ *
+ * @_class cursor
+ * @_function skip
+ * @ignore
+ */
+exports.shouldCorrectlyPeformSkipOnCursor = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection
+    db.createCollection('simple_skip_collection', function(err, collection) {
+      test.equal(null, err);
+      
+      // Insert some documents we can sort on
+      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+        test.equal(null, err);
+        
+        // Skip one document
+        collection.find().skip(1).nextObject(function(err, item) {
+          test.equal(null, err);
+          test.equal(2, item.a);
+
+          db.close();
+          test.done();
+        });        
+      });      
+    });
+  });
+}
+
+/**
+ * A simple example showing the use of batchSize on the cursor, batchSize only regulates how many 
+ * documents are returned for each batch using the getMoreCommand against the MongoDB server
+ *
+ * @_class cursor
+ * @_function batchSize
+ * @ignore
+ */
+exports.shouldCorrectlyPeformBatchSizeOnCursor = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection
+    db.createCollection('simple_batch_size_collection', function(err, collection) {
+      test.equal(null, err);
+      
+      // Insert some documents we can sort on
+      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+        test.equal(null, err);
+        
+        // Do normal ascending sort
+        collection.find().batchSize(1).nextObject(function(err, item) {
+          test.equal(null, err);
+          test.equal(1, item.a);
+
+          db.close();
+          test.done();
+        });        
+      });      
+    });
+  });
+}
+
+/**
+ * A simple example showing the use of nextObject.
+ *
+ * @_class cursor
+ * @_function nextObject
+ * @ignore
+ */
+exports.shouldCorrectlyPeformNextObjectOnCursor = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection
+    db.createCollection('simple_next_object_collection', function(err, collection) {
+      test.equal(null, err);
+      
+      // Insert some documents we can sort on
+      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+        test.equal(null, err);
+        
+        // Do normal ascending sort
+        collection.find().nextObject(function(err, item) {
+          test.equal(null, err);
+          test.equal(1, item.a);
+
+          db.close();
+          test.done();
+        });        
+      });      
+    });
+  });
+}
+
+/**
+ * A simple example showing the use of the cursor explain function.
+ *
+ * @_class cursor
+ * @_function explain
+ * @ignore
+ */
+exports.shouldCorrectlyPeformSimpleExplainCursor = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection
+    db.createCollection('simple_explain_collection', function(err, collection) {
+      test.equal(null, err);
+      
+      // Insert some documents we can sort on
+      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+        test.equal(null, err);
+        
+        // Do normal ascending sort
+        collection.find().explain(function(err, explaination) {
+          test.equal(null, err);
+
+          db.close();
+          test.done();
+        });        
+      });      
+    });
+  });
+}
+
+/**
+ * A simple example showing the use of the cursor streamRecords function.
+ *
+ * @_class cursor
+ * @_function streamRecords
+ * @ignore
+ */
+exports.shouldStreamDocumentsUsingTheStreamRecords = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a lot of documents to insert
+    var docs = []  
+    for(var i = 0; i < 100; i++) {
+      docs.push({'a':i})
+    }
+
+    // Create a collection
+    db.createCollection('test_streamingRecords_function', function(err, collection) {
+      test.equal(null, err);
+
+      // Insert documents into collection
+      collection.insert(docs, {safe:true}, function(err, ids) {        
+        // Peform a find to get a cursor
+        var stream = collection.find().streamRecords({fetchSize:1000});
+
+        // Execute find on all the documents
+        stream.on('end', function() { 
+          db.close();
+          test.done();
+        });
+
+        stream.on('data', function(data) { 
+          test.ok(data != null);
+        }); 
+      });
+    });    
+  });
+}
+
+/**
+ * A simple example showing the use of the cursor stream function.
+ *
+ * @_class cursor
+ * @_function stream
+ * @ignore
+ */
+exports.shouldStreamDocumentsUsingTheStreamFunction = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a lot of documents to insert
+    var docs = []  
+    for(var i = 0; i < 100; i++) {
+      docs.push({'a':i})
+    }
+
+    // Create a collection
+    db.createCollection('test_stream_function', function(err, collection) {
+      test.equal(null, err);
+
+      // Insert documents into collection
+      collection.insert(docs, {safe:true}, function(err, ids) {        
+        // Peform a find to get a cursor
+        var stream = collection.find().stream();
+
+        // Execute find on all the documents
+        stream.on('close', function() { 
+          db.close();
+          test.done();
+        });
+
+        stream.on('data', function(data) { 
+          test.ok(data != null);
+        }); 
+      });
+    });    
+  });
+}
+
+/**
+ * A simple example showing the use of the cursor close function.
+ *
+ * @_class cursor
+ * @_function close
+ * @ignore
+ */
+exports.shouldStreamDocumentsUsingTheCloseFunction = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a lot of documents to insert
+    var docs = []  
+    for(var i = 0; i < 100; i++) {
+      docs.push({'a':i})
+    }
+
+    // Create a collection
+    db.createCollection('test_close_function_on_cursor', function(err, collection) {
+      test.equal(null, err);
+
+      // Insert documents into collection
+      collection.insert(docs, {safe:true}, function(err, ids) {        
+        // Peform a find to get a cursor
+        var cursor = collection.find();
+        
+        // Fetch the first object
+        cursor.nextObject(function(err, object) {
+          test.equal(null, err);
+          
+          // Close the cursor, this is the same as reseting the query
+          cursor.close(function(err, result) {
+            test.equal(null, err);
+              
+            db.close();
+            test.done();
+          });          
+        });
+      });
+    });    
+  });
+}
+
+/**
+ * A simple example showing the use of the cursor close function.
+ *
+ * @_class cursor
+ * @_function isClosed
+ * @ignore
+ */
+exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a lot of documents to insert
+    var docs = []  
+    for(var i = 0; i < 100; i++) {
+      docs.push({'a':i})
+    }
+
+    // Create a collection
+    db.createCollection('test_is_close_function_on_cursor', function(err, collection) {
+      test.equal(null, err);
+
+      // Insert documents into collection
+      collection.insert(docs, {safe:true}, function(err, ids) {        
+        // Peform a find to get a cursor
+        var cursor = collection.find();
+        
+        // Fetch the first object
+        cursor.nextObject(function(err, object) {
+          test.equal(null, err);
+          
+          // Close the cursor, this is the same as reseting the query
+          cursor.close(function(err, result) {
+            test.equal(null, err);
+            test.equal(true, cursor.isClosed());
+              
+            db.close();
+            test.done();
+          });          
+        });
+      });
+    });    
   });
 }
 
