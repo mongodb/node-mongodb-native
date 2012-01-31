@@ -649,6 +649,34 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = function(test) {
 }
 
 /**
+ * An example of listing all available databases.
+ * 
+ * @_class admin
+ * @_function listDatabases
+ */
+exports.shouldCorrectlyListAllAvailableDatabases = function(test) {  
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+
+    // Use the admin database for the operation
+    db.admin(function(err, adminDb) {
+      
+      // List all the available databases
+      adminDb.listDatabases(function(err, dbs) {
+        test.equal(null, err);
+        test.ok(dbs.databases.length > 0);
+        
+        db.close();
+        test.done();
+      });
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 

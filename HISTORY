@@ -3,8 +3,10 @@
 * Added geoHaystackSearch command to Collection.
 * Added indexes command to collection to retrieve the indexes on a Collection.
 * Added stats command to collection to retrieve the statistics on a Collection.
+* Added listDatabases command to admin object to allow retrieval of all available dbs.
 * Changed createCreateIndexCommand to work better with options.
 * Fixed dereference method on Db class to correctly dereference Db reference objects. 
+* Moved connect object onto Db class(Db.connect) as well as keeping backward compatibility.
 
 0.9.8-4 2012-01-28
 * Added reIndex command to collection and db level.

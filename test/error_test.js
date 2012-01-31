@@ -135,13 +135,13 @@ exports.shouldCorrectlyExecuteLastStatus = function(test) {
             collection.update({i:1}, {"$set":{i:2}}, function(err, result) {
               // Check for the last message from the server
               client.lastStatus(function(err, status) {
-                test.equal(true, status.documents[0].ok);
-                test.equal(true, status.documents[0].updatedExisting);
+                test.equal(true, status[0].ok);
+                test.equal(true, status[0].updatedExisting);
                 // Check for failed update of document
                 collection.update({i:1}, {"$set":{i:500}}, function(err, result) {
                   client.lastStatus(function(err, status) {
-                    test.equal(true, status.documents[0].ok);
-                    test.equal(false, status.documents[0].updatedExisting);
+                    test.equal(true, status[0].ok);
+                    test.equal(false, status[0].updatedExisting);
 
                     // Check safe update of a document
                     collection.insert({x:1}, function(err, ids) {

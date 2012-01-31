@@ -17,6 +17,9 @@ var testCase = require('../deps/nodeunit').testCase,
 var MONGODB = 'integration_tests';
 var clientUrl = 'mongo://localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
 
+/**
+ * @ignore
+ */
 function connectionTester(test, testName) {
   return function(err, db) {
     test.equal(err, null);
@@ -36,22 +39,34 @@ function connectionTester(test, testName) {
   };
 };
 
+/**
+ * @ignore
+ */
 exports.testConnectNoOptions = function(test) {
   connect(clientUrl, connectionTester(test, 'testConnectNoOptions'));
 };
 
+/**
+ * @ignore
+ */
 exports.testConnectDbOptions = function(test) {
   connect(clientUrl,
           { db: {native_parser: (process.env['TEST_NATIVE'] != null)} },
           connectionTester(test, 'testConnectDbOptions'));
 };
 
+/**
+ * @ignore
+ */
 exports.testConnectServerOptions = function(test) {
   connect(clientUrl,
           { server: {auto_reconnect: true, poolSize: 4} },
           connectionTester(test, 'testConnectServerOptions'));
 };
 
+/**
+ * @ignore
+ */
 exports.testConnectAllOptions = function(test) {
   connect(clientUrl,
           { server: {auto_reconnect: true, poolSize: 4},
@@ -59,6 +74,9 @@ exports.testConnectAllOptions = function(test) {
           connectionTester(test, 'testConnectAllOptions'));
 };
 
+/**
+ * @ignore
+ */
 exports.testConnectGoodAuth = function(test) {
   var user = 'testConnectGoodAuth', password = 'password';
   // First add a user.
@@ -77,6 +95,9 @@ exports.testConnectGoodAuth = function(test) {
   }
 };
 
+/**
+ * @ignore
+ */
 exports.testConnectBadAuth = function(test) {
   var url = 'mongo://slithy:toves@localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
   connect(url, function(err, db) {    
@@ -87,6 +108,9 @@ exports.testConnectBadAuth = function(test) {
   });
 };
 
+/**
+ * @ignore
+ */
 exports.testConnectBadUrl = function(test) {
   test.throws(function() {
     connect('mango://localhost:27017/' + MONGODB, function(err, db) {
@@ -96,7 +120,27 @@ exports.testConnectBadUrl = function(test) {
   test.done();
 };
 
-// run this last
+/**
+ * Example of a simple url connection string.
+ *
+ * @_class db
+ * @_function connect
+ * @ignore
+ */
+exports.shouldCorrectlyDoSimpleCountExamples = function(test) {
+  // Connect to the server
+  Db.connect('mongodb://localhost:27017/integration_tests', function(err, db) {
+    test.equal(null, err);
+    
+    db.close();
+    test.done();
+  });
+}
+
+
+/**
+ * @ignore
+ */
 exports.noGlobalsLeaked = function(test) {
   var leaks = gleak.detectNew();
   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));

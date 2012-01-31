@@ -14,10 +14,6 @@ var extractLibraryMetaData = function(sourceFiles) {
     var sourceFile = fs.readFileSync(sourceFiles[i].path);
     // Parse the content
     var metaData = dox.parseComments(sourceFile.toString());
-    // console.log("-------------------------------------------------------------- METADATA")
-    // console.log("-------------------------------------------------------------- METADATA")
-    // console.log("-------------------------------------------------------------- METADATA")
-    // console.dir(metaData)
     // Save the metadata
     dataObjects[sourceFiles[i]["tag"] != null ? sourceFiles[i].tag : i] = metaData;
   }
@@ -107,7 +103,8 @@ var apiClasses = [
     // {tag:"admin", path:"./lib/mongodb/admin.js"},
     // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
     // {tag:"collection", path:"./lib/mongodb/collection.js"},
-    {tag:"db", path:"./lib/mongodb/db.js"}
+    // {tag:"db", path:"./lib/mongodb/db.js"},
+    {tag:"cursor", path:"./lib/mongodb/cursor.js"}
   ];
   
 // All test files 
@@ -123,7 +120,9 @@ var testClasses = [
     {path:"./test/index_test.js"},
     {path:"./test/geo_search_test.js"},
     {path:"./test/replicaset/connect_test.js"},
-    {path:"./test/multiple_dbs_on_connection_pool_test.js"}
+    {path:"./test/connect_test.js"},
+    {path:"./test/multiple_dbs_on_connection_pool_test.js"},
+    {path:"./test/cursor_test.js"}
   ]
 
 // Read all the templates

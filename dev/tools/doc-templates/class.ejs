@@ -1,26 +1,36 @@
 <%
 for(var i = 0; i < entries.length; i++) {
   if(isClass(entries[i].tags)) {
-    %><%= format("==================\n%s Class Methods\n==================\n", entries[i].ctx.string) %><%
+
+  }
+}
+
+// Contains the current class name
+var className = null;
+
+for(var i = 0; i < entries.length; i++) {
+  if(isClass(entries[i].tags)) {
+    console.log("-------------------------------------------------------------------------")
+    console.dir(entries[i])
+    
+    %><%= format("==================\n%s\n==================\n", entries[i].ctx.string) %><%
+    className = entries[i].ctx.string;
+    
+    %><%= format("\n\n------------------\nConstructor\n------------------\n") %><%
 
     // Get full description and clean it
-    var fullDescription = entries[i].description.full;
+    var fullDescription = entries[i].description.summary;
     fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
       .replace(/\<\/code\>\<\/pre\>/g, "")
       .replace(/\<h2\>|\<\/h2\>/g, "**")
-      .replace(/\<p\>|\<\/p\>/g, "")
+      .replace(/\<p\>/g, "\n\n")
+      .replace(/\<\/p\>/g, "")
       .replace(/\<strong\>|\<\/strong\>/g, "**")
       .replace(/\<em\>|\<\/em\>/g, "*")
       .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
-    %><%- format("%s", fullDescription) %><%
-  }
-}
-%>
+    %><%- format("%s\n\n", fullDescription) %><%    
 
-<% 
-for(var i = 0; i < entries.length; i++) {
-  if(isClass(entries[i].tags)) {
-    %><%= format(".. js:class:: %s\n\n", entries[i].ctx.string) %><%
+    %><%= format("\n  .. js:class:: %s\n\n", entries[i].ctx.string) %><%
 
     for(var ti = 0; ti < entries[i].tags.length; ti++) { 
       // Get the current tag
@@ -41,10 +51,22 @@ for(var i = 0; i < entries.length; i++) {
         %><%= format("   :returns: %s %s\n", type, description) %><%        
       }
     }
+    
+    // Get full description and clean it
+    var fullDescription = entries[i].description.body;
+    fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
+      .replace(/\<\/code\>\<\/pre\>/g, "")
+      .replace(/\<h2\>|\<\/h2\>/g, "**")
+      .replace(/\<p\>/g, "\n\n")
+      .replace(/\<\/p\>/g, "")
+      .replace(/\<strong\>|\<\/strong\>/g, "**")
+      .replace(/\<em\>|\<\/em\>/g, "*")
+      .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
+    %><%- format("%s\n\n", fullDescription) %><%    
   }
 }
 
-%><%= format("------------------\nClass Constants\n------------------\n") %><%
+%><%= format("\n------------------\nConstants\n------------------\n") %><%
 %>
 .. csv-table:: 
    :header: "Constant Name", "Value", "Description"
@@ -54,9 +76,6 @@ for(var i = 0; i < entries.length; i++) {
 
 for(var i = 0; i < entries.length; i++) {
   if(isClassConstant(entries[i])) {
-    // console.log("----------------------------------------------------------------")
-    // console.dir(entries[i])
-    
     // Extract values
     var attributeName = format("%s = %s;", entries[i].ctx.string, entries[i].ctx.value);
     var getterSetters = [];
@@ -67,7 +86,8 @@ for(var i = 0; i < entries.length; i++) {
     fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
       .replace(/\<\/code\>\<\/pre\>/g, "")
       .replace(/\<h2\>|\<\/h2\>/g, "**")
-      .replace(/\<p\>|\<\/p\>/g, "")
+      .replace(/\<p\>/g, "\n\n")
+      .replace(/\<\/p\>/g, "")
       .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
 
    // Write out the class definition row
@@ -95,7 +115,8 @@ for(var i = 0; i < entries.length; i++) {
     fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
       .replace(/\<\/code\>\<\/pre\>/g, "")
       .replace(/\<h2\>|\<\/h2\>/g, "**")
-      .replace(/\<p\>|\<\/p\>/g, "")
+      .replace(/\<p\>/g, "\n\n")
+      .replace(/\<\/p\>/g, "")
       .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
       
     // Write out the text
@@ -128,7 +149,8 @@ for(var i = 0; i < entries.length; i++) {
         fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
           .replace(/\<\/code\>\<\/pre\>/g, "")
           .replace(/\<h2\>|\<\/h2\>/g, "**")
-          .replace(/\<p\>|\<\/p\>/g, "")
+          .replace(/\<p\>/g, "\n\n")
+          .replace(/\<\/p\>/g, "")
           .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
           
         // Split up and move
@@ -156,6 +178,9 @@ for(var i = 0; i < entries.length; i++) {
 }
 
 for(var i = 0; i < entries.length; i++) {  
+  // console.log("----------------------------------------------------------------")
+  // console.dir(entries[i])
+
   // If it's a function parse it
   if(isFunction(entries[i])) {
     var paramsStrings = [];
@@ -187,17 +212,27 @@ for(var i = 0; i < entries.length; i++) {
     var paramsString = paramNames.join(", ").replace(/\, \[/, "[, ");
     // Write out the methods
     var fullDescription = entries[i].description.full;
+    console.log("----------------------------------------------------------------------------------")
+    console.dir(fullDescription)
+    
     fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
       .replace(/\<\/code\>\<\/pre\>/g, "")
       .replace(/\<h2\>|\<\/h2\>/g, "**")
-      .replace(/\<p\>|\<\/p\>/g, "")
+      .replace(/\<p\>/g, "\n\n")
+      .replace(/\<\/p\>/g, "")
       .replace(/\<strong\>|\<\/strong\>/g, "**")
       .replace(/\<em\>|\<\/em\>/g, "*")
       .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
         
-    %><%= format("------------------\n%s\n------------------\n", entries[i].ctx.name) %><%
+    %><%= format("\n------------------\n%s\n------------------\n", entries[i].ctx.name) %><%
     %><%- format("%s\n\n", fullDescription) %><%
-    %><%= format(".. js:function:: %s(%s)\n\n", entries[i].ctx.name, paramsString) %><%
+
+    if(entries[i].ctx.receiver != null) {
+      %><%= format(".. js:function:: %s.%s(%s)\n\n", className, entries[i].ctx.name, paramsString) %><%      
+    } else {      
+      %><%= format(".. js:function:: %s(%s)\n\n", entries[i].ctx.name, paramsString) %><%
+    }
+        
     %><%= Array.isArray(paramsStrings) ? paramsStrings.join("") : paramsStrings %><%
 
     // If we have examples render them
@@ -226,7 +261,8 @@ for(var i = 0; i < entries.length; i++) {
         fullDescription = fullDescription.replace(/\<pre\>\<code\>/g, ".. code-block:: javascript\n\n   ")
           .replace(/\<\/code\>\<\/pre\>/g, "")
           .replace(/\<h2\>|\<\/h2\>/g, "**")
-          .replace(/\<p\>|\<\/p\>/g, "")
+          .replace(/\<p\>/g, "\n\n")
+          .replace(/\<\/p\>/g, "")
           .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
           
         // Split up and move

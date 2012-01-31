@@ -150,7 +150,7 @@ exports.shouldCorrectExecuteBasicCollectionMethods = function(test) {
       test.ok(true, found);
       // Rename the collection and check that it's gone
       client.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
-        test.equal(1, reply.documents[0].ok);
+        test.equal(null, err);
         // Drop the collection and check that it's gone
         client.dropCollection("test_collection_methods2", function(err, result) {
           test.equal(true, result);
