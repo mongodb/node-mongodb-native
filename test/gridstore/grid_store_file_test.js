@@ -112,7 +112,7 @@ exports.shouldCorrectlyWriteSmallFileUsingABuffer = function(test) {
   gridStore.open(function(err, gridStore) {
     var data = new Buffer("hello world", "utf8");
   
-    gridStore.writeBuffer(data, function(err, gridStore) {
+    gridStore.write(data, function(err, gridStore) {
       gridStore.close(function(err, result) {
         client.collection('fs.files', function(err, collection) {
           collection.find({'filename':'test_gs_small_write_with_buffer'}, function(err, cursor) {
@@ -188,7 +188,7 @@ exports.shouldCorrectlySeekWithBuffer = function(test) {
   var gridStore = new GridStore(client, "test_gs_seek_with_buffer", "w");
   gridStore.open(function(err, gridStore) {
     var data = new Buffer("hello, world!", "utf8");
-    gridStore.writeBuffer(data, function(err, gridStore) {
+    gridStore.write(data, function(err, gridStore) {
       gridStore.close(function(result) {
         var gridStore2 = new GridStore(client, "test_gs_seek_with_buffer", "r");
         gridStore2.open(function(err, gridStore) {
