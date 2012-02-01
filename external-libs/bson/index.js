@@ -1,6 +1,6 @@
 var bson = require('./bson');
 exports.BSON = bson.BSON;
-exports.Long = require('../../lib/mongodb/goog/math/long').Long;
+exports.Long = require('../../lib/mongodb/bson/long').Long;
 exports.ObjectID = require('../../lib/mongodb/bson/objectid').ObjectID;
 exports.DBRef = require('../../lib/mongodb/bson/db_ref').DBRef;
 exports.Code = require('../../lib/mongodb/bson/code').Code;

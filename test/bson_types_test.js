@@ -20,7 +20,7 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var BSONSE = mongodb,
   BSONDE = mongodb;
-
+  
 // for tests
 BSONDE.BSON_BINARY_SUBTYPE_DEFAULT = 0;
 BSONDE.BSON_BINARY_SUBTYPE_FUNCTION = 1;
@@ -120,7 +120,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldCorrectUsePutForBinaryType = function(test) {
   // Create an empty Binary object
-  var binary = new Binary(new Buffer(''), Binary.SUBTYPE_DEFAULT);
+  var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
   // Write some character to the Binary value
   binary.put('h');
   binary.put('e');
@@ -141,7 +141,7 @@ exports.shouldCorrectUsePutForBinaryType = function(test) {
  */
 exports.shouldCorrectUseWriteForBinaryType = function(test) {
   // Create an empty Binary object
-  var binary = new Binary(new Buffer(''), Binary.SUBTYPE_DEFAULT);
+  var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
   // Write some data to the binary
   binary.write('hello', 0);
   // Validate the content of the binary
@@ -158,7 +158,7 @@ exports.shouldCorrectUseWriteForBinaryType = function(test) {
  */
 exports.shouldCorrectUseReadForBinaryType = function(test) {
   // Create an empty Binary object
-  var binary = new Binary(new Buffer(''), Binary.SUBTYPE_DEFAULT);
+  var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
   // Write some data to the binary
   binary.write('hello', 0);
   // Read a couple of characters from the binary
@@ -177,7 +177,7 @@ exports.shouldCorrectUseReadForBinaryType = function(test) {
  */
 exports.shouldCorrectUseValueForBinaryType = function(test) {
   // Create an empty Binary object
-  var binary = new Binary(new Buffer(''), Binary.SUBTYPE_DEFAULT);
+  var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
   // Write some data to the binary
   binary.write('hello', 0);
   // Validate the content of the binary
@@ -194,7 +194,7 @@ exports.shouldCorrectUseValueForBinaryType = function(test) {
  */
 exports.shouldCorrectUseLengthForBinaryType = function(test) {
   // Create an empty Binary object
-  var binary = new Binary(new Buffer(''), Binary.SUBTYPE_DEFAULT);
+  var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
   // Write some data to the binary
   binary.write('hello');
   // Validate the content of the binary

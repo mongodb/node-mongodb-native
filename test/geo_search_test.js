@@ -10,7 +10,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
-  Long = require('../lib/mongodb/goog/math/long').Long,
+  Long = require('../lib/mongodb/bson/long').Long,
   Step = require("../deps/step/lib/step"),
   Server = mongodb.Server;
 

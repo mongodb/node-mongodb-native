@@ -1,7 +1,7 @@
 var BSON = require('/Users/christiankvalheim/coding/checkout/node-buffalo/buffalo')
 var mongoNative = require('../lib/mongodb'),
   assert = require('assert'),
-  Long = require('../lib/mongodb/goog/math/long').Long,
+  Long = require('../lib/mongodb/bson/long').Long,
   ObjectID = require('../lib/mongodb/bson/bson').ObjectID,
   Binary = require('../lib/mongodb/bson/bson').Binary,
   Code = require('../lib/mongodb/bson/bson').Code,  

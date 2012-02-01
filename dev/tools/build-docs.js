@@ -61,6 +61,10 @@ var buildTestHash = function(objects) {
         if(objectsByClassAndMethod[tagObject['_class']][tagObject['_function']] == null) {
           objectsByClassAndMethod[tagObject['_class']][tagObject['_function']] = [];
         }
+
+        // console.log("------------------------------------------------------------")
+        // console.dir(objectsByClassAndMethod[tagObject['_class']][tagObject['_function']])
+        // console.dir(typeof block)
         
         // Push the object on the list
         objectsByClassAndMethod[tagObject['_class']][tagObject['_function']].push(block);          
@@ -101,7 +105,6 @@ var readAllTemplates = function(templates) {
 // All source files for the api generation
 var apiClasses = [
     // {tag:"admin", path:"./lib/mongodb/admin.js"},
-    // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
     // {tag:"collection", path:"./lib/mongodb/collection.js"},
     // {tag:"db", path:"./lib/mongodb/db.js"},
     // {tag:"cursor", path:"./lib/mongodb/cursor.js"},
@@ -109,7 +112,14 @@ var apiClasses = [
     // {tag:"gridstore", path:"./lib/mongodb/gridfs/gridstore.js"},
     // {tag:"readstream", path:"./lib/mongodb/gridfs/readstream.js"},
     // {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"},
-    {tag:"binary", path:"./lib/mongodb/bson/binary.js"}
+    // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
+    // {tag:"binary", path:"./lib/mongodb/bson/binary.js"},
+    // {tag:"code", path:"./lib/mongodb/bson/code.js"},
+    // {tag:"code", path:"./lib/mongodb/bson/db_ref.js"},
+    // {tag:"double", path:"./lib/mongodb/bson/double.js"},
+    // {tag:"maxkey", path:"./lib/mongodb/bson/max_key.js"},
+    // {tag:"symbol", path:"./lib/mongodb/bson/symbol.js"},
+    {tag:"timestamp", path:"./lib/mongodb/bson/timestamp.js"}
   ];
   
 // All test files 
