@@ -14,7 +14,7 @@ for(var i = 0; i < entries.length; i++) {
     // console.dir(entries[i])
     
     %><%= format("==================\n%s\n==================\n", entries[i].ctx.string) %><%
-    className = entries[i].ctx.string;
+    className = entries[i].ctx.string.replace("()", "");
     
     %><%= format("\n\n------------------\nConstructor\n------------------\n") %><%
 

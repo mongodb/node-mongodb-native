@@ -124,7 +124,7 @@ exports.testConnectBadUrl = function(test) {
  * Example of a simple url connection string.
  *
  * @_class db
- * @_function connect
+ * @_function Db.connect
  * @ignore
  */
 exports.shouldCorrectlyDoSimpleCountExamples = function(test) {
