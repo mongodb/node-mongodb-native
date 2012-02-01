@@ -107,7 +107,8 @@ var apiClasses = [
     // {tag:"cursor", path:"./lib/mongodb/cursor.js"},
     // {tag:"cursorstream", path:"./lib/mongodb/cursorstream.js"},
     // {tag:"gridstore", path:"./lib/mongodb/gridfs/gridstore.js"},
-    {tag:"readstream", path:"./lib/mongodb/gridfs/readstream.js"},
+    // {tag:"readstream", path:"./lib/mongodb/gridfs/readstream.js"},
+    {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"}
   ];
   
 // All test files 
@@ -130,7 +131,8 @@ var testClasses = [
     {path:"./test/gridstore/grid_store_test.js"},
     {path:"./test/gridstore/grid_store_file_test.js"},
     {path:"./test/gridstore/grid_store_stream_test.js"},
-    {path:"./test/gridstore/readstream_test.js"}
+    {path:"./test/gridstore/readstream_test.js"},
+    {path:"./test/gridstore/grid_test.js"}
   ]
 
 // Read all the templates
