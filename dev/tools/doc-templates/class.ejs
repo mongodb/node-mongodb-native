@@ -177,6 +177,7 @@ for(var i = 0; i < entries.length; i++) {
             "         Server = require('mongodb').Server,",
             "         ReplSetServers = require('mongodb').ReplSetServers,",
             "         ObjectID = require('mongodb').ObjectID,",
+            "         GridStore = require('mongodb').GridStore,",
             "         Code = require('mongodb').Code,",
             "         assert = require('assert');\n\n"
           ];
@@ -233,22 +234,34 @@ for(var i = 0; i < entries.length; i++) {
       .replace(/\<strong\>|\<\/strong\>/g, "**")
       .replace(/\<em\>|\<\/em\>/g, "*")
       .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
+    
+    // The name of examples
+    var examplesName = entries[i].ctx.name;
         
-    %><%= format("\n------------------\n%s\n------------------\n", entries[i].ctx.name) %><%
-    %><%- format("%s\n\n", fullDescription) %><%
-
+    // Write header depending on if it's class or instance level
     if(entries[i].ctx.receiver != null) {
+      // Change examples Name to include class name
+      var examplesName = format("%s.%s", className, entries[i].ctx.name);
+      
+      %><%= format("\n------------------\n%s.%s\n------------------\n", className, entries[i].ctx.name) %><%
+      %><%- format("%s\n\n", fullDescription) %><%
       %><%= format(".. js:function:: %s.%s(%s)\n\n", className, entries[i].ctx.name, paramsString) %><%      
     } else {      
+      %><%= format("\n------------------\n%s\n------------------\n", entries[i].ctx.name) %><%
+      %><%- format("%s\n\n", fullDescription) %><%
       %><%= format(".. js:function:: %s(%s)\n\n", entries[i].ctx.name, paramsString) %><%
     }
         
     %><%= Array.isArray(paramsStrings) ? paramsStrings.join("") : paramsStrings %><%
 
+    // console.dir("===========================================================")
+    // console.dir(examplesName)
+    // console.dir(Object.keys(examples))
+
     // If we have examples render them
-    if(examples != null && examples[entries[i].ctx.name]) {
+    if(examples != null && examples[examplesName]) {
       %><%= format("**Examples**\n\n") %><%      
-      var examplesArray = examples[entries[i].ctx.name];
+      var examplesArray = examples[examplesName];
       // Iterate over all the examples
       for(var ei = 0; ei < examplesArray.length; ei++) {
         // Fetch an example
@@ -287,6 +300,7 @@ for(var i = 0; i < entries.length; i++) {
             "         Server = require('mongodb').Server,",
             "         ReplSetServers = require('mongodb').ReplSetServers,",
             "         ObjectID = require('mongodb').ObjectID,",
+            "         GridStore = require('mongodb').GridStore,",
             "         Code = require('mongodb').Code,",
             "         assert = require('assert');\n\n"
           ];

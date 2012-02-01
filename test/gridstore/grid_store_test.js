@@ -55,24 +55,46 @@ exports.tearDown = function(callback) {
 }
   
 /**
+ * A simple example showing the usage of the Gridstore.exist method.
+ *
+ * @_class gridstore
+ * @_function GridStore.exist
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = function(test) {
-  var gridStore = new GridStore(client, null, "w");
-  gridStore.open(function(err, gridStore) {
-    gridStore.write("hello world!", function(err, gridStore) {
-      gridStore.close(function(err, result) {          
-        GridStore.exist(client, result._id, function(err, result) {
-          test.equal(true, result);
-        })
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-        GridStore.exist(client, new ObjectID(), function(err, result) {
-          test.equal(false, result);
-        });
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Open a file for writing
+    var gridStore = new GridStore(db, null, "w");    
+    gridStore.open(function(err, gridStore) {
+      
+      // Writing some content to the file
+      gridStore.write("hello world!", function(err, gridStore) {
+        
+        // Flush the file to GridFS
+        gridStore.close(function(err, result) {          
           
-        GridStore.exist(client, new ObjectID(), 'another_root', function(err, result) {
-          test.equal(false, result);
-          test.done();
+          // Check if the file exists using the id returned from the close function
+          GridStore.exist(db, result._id, function(err, result) {
+            test.equal(true, result);
+          })
+
+          // Show that the file does not exist for a random ObjectID
+          GridStore.exist(db, new ObjectID(), function(err, result) {
+            test.equal(false, result);
+          });
+          
+          // Show that the file does not exist for a different file root
+          GridStore.exist(db, result._id, 'another_root', function(err, result) {
+            test.equal(false, result);
+
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -124,68 +146,95 @@ exports.shouldCorrectlyExecuteGridStoreExists = function(test) {
 }
 
 /**
+ * A simple example showing the usage of the eof method.
+ *
+ * @_class gridstore
+ * @_function GridStore.list
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreList = function(test) {
-  var gridStore = new GridStore(client, "foobar2", "w");
-  gridStore.open(function(err, gridStore) {
-    gridStore.write("hello world!", function(err, gridStore) {
-      gridStore.close(function(err, result) {
-        GridStore.list(client, function(err, items) {
-          var found = false;
-          items.forEach(function(filename) {
-            if(filename == 'foobar2') found = true;
-          });
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-          test.ok(items.length >= 1);
-          test.ok(found);
-        });
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Open a file for writing
+    var gridStore = new GridStore(db, "foobar2", "w");
+    gridStore.open(function(err, gridStore) {
+      
+      // Write some content to the file
+      gridStore.write("hello world!", function(err, gridStore) {
+        // Flush to GridFS
+        gridStore.close(function(err, result) {
+          
+          // List the existing files
+          GridStore.list(db, function(err, items) {
+            var found = false;
+            items.forEach(function(filename) {
+              if(filename == 'foobar2') found = true;
+            });
+
+            test.ok(items.length >= 1);
+            test.ok(found);
+          });
         
-        GridStore.list(client, {id:true}, function(err, items) {
-          var found = false;
-          items.forEach(function(id) {
-            test.ok(typeof id == 'object');
+          // List the existing files but return only the file ids
+          GridStore.list(db, {id:true}, function(err, items) {
+            var found = false;
+            items.forEach(function(id) {
+              test.ok(typeof id == 'object');
+            });
+
+            test.ok(items.length >= 1);
+          });          
+
+          // List the existing files in a specific root collection
+          GridStore.list(db, 'fs', function(err, items) {
+            var found = false;
+            items.forEach(function(filename) {
+              if(filename == 'foobar2') found = true;
+            });
+
+            test.ok(items.length >= 1);
+            test.ok(found);
           });
 
-          test.ok(items.length >= 1);
-        });          
+          // List the existing files in a different root collection where the file is not located
+          GridStore.list(client, 'my_fs', function(err, items) {
+            var found = false;
+            items.forEach(function(filename) {
+              if(filename == 'foobar2') found = true;
+            });
 
-        GridStore.list(client, 'fs', function(err, items) {
-          var found = false;
-          items.forEach(function(filename) {
-            if(filename == 'foobar2') found = true;
-          });
+            test.ok(items.length >= 0);
+            test.ok(!found);
 
-          test.ok(items.length >= 1);
-          test.ok(found);
-        });
-
-        GridStore.list(client, 'my_fs', function(err, items) {
-          var found = false;
-          items.forEach(function(filename) {
-            if(filename == 'foobar2') found = true;
-          });
-
-          test.ok(items.length >= 0);
-          test.ok(!found);
-
-          var gridStore2 = new GridStore(client, "foobar3", "w");
-          gridStore2.open(function(err, gridStore) {
-            gridStore2.write('my file', function(err, gridStore) {
-              gridStore.close(function(err, result) {
-                GridStore.list(client, function(err, items) {
-                  var found = false;
-                  var found2 = false;
-                  items.forEach(function(filename) {
-                    if(filename == 'foobar2') found = true;
-                    if(filename == 'foobar3') found2 = true;
-                  });
-
-                  test.ok(items.length >= 2);
-                  test.ok(found);
-                  test.ok(found2);
+            // Write another file to GridFS
+            var gridStore2 = new GridStore(db, "foobar3", "w");
+            gridStore2.open(function(err, gridStore) {
+              // Write the content
+              gridStore2.write('my file', function(err, gridStore) {
+                // Flush to GridFS
+                gridStore.close(function(err, result) {
                   
-                  test.done();
+                  // List all the available files and verify that our files are there
+                  GridStore.list(db, function(err, items) {
+                    var found = false;
+                    var found2 = false;
+
+                    items.forEach(function(filename) {
+                      if(filename == 'foobar2') found = true;
+                      if(filename == 'foobar3') found2 = true;
+                    });
+
+                    test.ok(items.length >= 2);
+                    test.ok(found);
+                    test.ok(found2);
+                  
+                    db.close();
+                    test.done();
+                  });
                 });
               });
             });
@@ -277,21 +326,36 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = function(test) {
 }
 
 /**
+ * A simple example showing the usage of the puts method.
+ *
+ * @_class gridstore
+ * @_function puts
  * @ignore
  */
 exports.shouldCorrectlyReadlinesAndPutLines = function(test) {
-  var gridStore = new GridStore(client, "test_gs_puts_and_readlines", "w");
-  gridStore.open(function(err, gridStore) {
-    gridStore.puts("line one", function(err, gridStore) {
-      gridStore.puts("line two\n", function(err, gridStore) {
-        gridStore.puts("line three", function(err, gridStore) {
-          gridStore.close(function(err, result) {
-            GridStore.readlines(client, 'test_gs_puts_and_readlines', function(err, lines) {
-              test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
-              test.done();
-            });
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Open a file for writing
+    var gridStore = new GridStore(db, "test_gs_puts_and_readlines", "w");    
+    gridStore.open(function(err, gridStore) {
+      
+      // Write a line to the file using the puts method
+      gridStore.puts("line one", function(err, gridStore) {
+        
+        // Flush the file to GridFS
+        gridStore.close(function(err, result) {
+          
+          // Read in the entire contents
+          GridStore.read(db, 'test_gs_puts_and_readlines', function(err, data) {
+            test.equal("line one\n", data.toString());
+
+            db.close();
+            test.done();
           });
-        });
+        });        
       });
     });
   });
@@ -345,45 +409,62 @@ exports.shouldCorrectlyHandleUnlinkingWeirdName = function(test) {
 }
 
 /**
+ * A simple example showing the usage of the GridStore.unlink method.
+ *
+ * @_class gridstore
+ * @_function GridStore.unlink
  * @ignore
  */
 exports.shouldCorrectlyUnlink = function(test) {
-  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
-  fs_client.open(function(err, fs_client) {
-    fs_client.dropDatabase(function(err, done) {
-      var gridStore = new GridStore(fs_client, "test_gs_unlink", "w");
-      gridStore.open(function(err, gridStore) {
-        gridStore.write("hello, world!", function(err, gridStore) {
-          gridStore.close(function(err, result) {
-            fs_client.collection('fs.files', function(err, collection) {
-              collection.count(function(err, count) {
-                test.equal(1, count);
-              })
-            });
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-            fs_client.collection('fs.chunks', function(err, collection) {
-              collection.count(function(err, count) {
-                test.equal(1, count);
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Open a new file for writing
+    var gridStore = new GridStore(db, "test_gs_unlink", "w");
+    gridStore.open(function(err, gridStore) {
+      
+      // Write some content
+      gridStore.write("hello, world!", function(err, gridStore) {
+        
+        // Flush file to GridFS
+        gridStore.close(function(err, result) {
+          
+          // Verify the existance of the fs.files document
+          db.collection('fs.files', function(err, collection) {
+            collection.count(function(err, count) {
+              test.equal(1, count);
+            })
+          });
 
-                // Unlink the file
-                GridStore.unlink(fs_client, 'test_gs_unlink', function(err, gridStore) {
-                  fs_client.collection('fs.files', function(err, collection) {
-                    collection.count(function(err, count) {
-                      test.equal(0, count);
-                    })
-                  });
+          // Verify the existance of the fs.chunks chunk document
+          db.collection('fs.chunks', function(err, collection) {
+            collection.count(function(err, count) {
+              test.equal(1, count);
 
-                  fs_client.collection('fs.chunks', function(err, collection) {
-                    collection.count(function(err, count) {
-                      test.equal(0, count);
-                        
-                      fs_client.close();
-                      test.done();
-                    })
-                  });
+              // Unlink the file (removing it)
+              GridStore.unlink(db, 'test_gs_unlink', function(err, gridStore) {
+                
+                // Verify that fs.files document is gone
+                db.collection('fs.files', function(err, collection) {
+                  collection.count(function(err, count) {
+                    test.equal(0, count);
+                  })
                 });
-              })
-            });
+
+                // Verify that fs.chunks chunk documents are gone
+                db.collection('fs.chunks', function(err, collection) {
+                  collection.count(function(err, count) {
+                    test.equal(0, count);
+                    
+                    db.close();
+                    test.done();
+                  })
+                });
+              });
+            })
           });
         });
       });
@@ -529,51 +610,51 @@ exports.shouldCorrectlyReadAndWriteFile = function(test) {
   });
 }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyReadAndWriteFileByObjectId = function(test) {
-  var gridStore = new GridStore(client, null, "w");
-  var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png", 'binary');
-
-  gridStore.open(function(err, gridStore) {
-    gridStore.write(data, function(err, gridStore) {
-      gridStore.close(function(err, result) {
-
-        // Assert that we have overwriten the data
-        GridStore.read(client, result._id, function(err, fileData) {
-          test.equal(data.length, fileData.length);
-          test.done();
-        });
-      });
-    });
-  });
-}
 
 /**
+ * A simple example showing the usage of the read method.
+ *
+ * @_class gridstore
+ * @_function read
  * @ignore
  */
 exports.shouldCorrectlyWriteAndReadJpgImage = function(test) {
-  var data = fs.readFileSync('./test/gridstore/iya_logo_final_bw.jpg');
-  
-  var gs = new GridStore(client, "test", "w");
-  gs.open(function(err, gs) {
-    gs.write(data, function(err, gs) {
-      gs.close(function(err, gs) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Read in the content of a file
+    var data = fs.readFileSync('./test/gridstore/iya_logo_final_bw.jpg');
+    // Create a new file
+    var gs = new GridStore(db, "test", "w");
+    // Open the file
+    gs.open(function(err, gs) {
+      // Write the file to GridFS
+      gs.write(data, function(err, gs) {
+        // Flush to the GridFS
+        gs.close(function(err, gs) {
         
-        // Open and read
-        var gs2 = new GridStore(client, "test", "r");
-        gs2.open(function(err, gs) {
-          gs2.seek(0, function() {
-            gs2.read(function(err, data2) {
-              test.equal(data.toString('hex'), data2.toString('hex'));
-              test.done();                          
+          // Define the file we wish to read
+          var gs2 = new GridStore(db, "test", "r");
+          // Open the file
+          gs2.open(function(err, gs) {
+            // Set the pointer of the read head to the start of the gridstored file
+            gs2.seek(0, function() {
+              // Read the entire file
+              gs2.read(function(err, data2) {
+                // Compare the file content against the orgiinal
+                test.equal(data.toString('hex'), data2.toString('hex'));
+
+                db.close();
+                test.done();
+              });
             });
           });
         });
       });
-    })
-  })    
+    });
+  });
 }
 
 /**
@@ -1112,7 +1193,7 @@ exports.shouldCorrectlyAccessFilesCollection = function(test) {
  * A simple example showing reading back using readlines to split the text into lines by the seperator provided.
  *
  * @_class gridstore
- * @_function readlines
+ * @_function GridStore.readlines
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = function(test) {
@@ -1155,7 +1236,99 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = function(te
       });
     });
   });
-} 
+}
+
+/**
+ * A simple example showing reading back using readlines to split the text into lines by the seperator provided.
+ *
+ * @_class gridstore
+ * @_function readlines
+ * @ignore
+ */
+exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w');
+
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+
+      // Write one line to gridStore
+      gridStore.puts("line one", function(err, gridStore) {
+
+        // Write second line to gridStore
+        gridStore.puts("line two", function(err, gridStore) {
+
+          // Write third line to gridStore
+          gridStore.puts("line three", function(err, gridStore) {
+
+            // Flush file to disk
+            gridStore.close(function(err, result) {
+
+              // Open file for reading
+              gridStore = new GridStore(db, fileId, 'r');
+              gridStore.open(function(err, gridStore) {
+                
+                // Read all the lines and verify correctness
+                gridStore.readlines(function(err, lines) {                  
+                  test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
+
+                  db.close();
+                  test.done();
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * A simple example showing the usage of the read method.
+ *
+ * @_class gridstore
+ * @_function GridStore.read
+ * @ignore
+ */
+exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Create a new file
+    var gridStore = new GridStore(db, null, "w");
+    // Read in the content from a file, replace with your own
+    var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
+
+    // Open the file
+    gridStore.open(function(err, gridStore) {
+      // Write the binary file data to GridFS
+      gridStore.write(data, function(err, gridStore) {
+        // Flush the remaining data to GridFS
+        gridStore.close(function(err, result) {
+          
+          // Read in the whole file and check that it's the same content
+          GridStore.read(client, result._id, function(err, fileData) {
+            test.equal(data.length, fileData.length);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+}
 
 /**
  * Retrieve the server information for the current

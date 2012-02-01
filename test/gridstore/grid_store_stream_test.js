@@ -17,6 +17,8 @@ var testCase = require('../../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var useSSL = process.env['USE_SSL'] != null ? true : false;
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
  * Retrieve the server information for the current
@@ -51,7 +53,10 @@ exports.tearDown = function(callback) {
   client.close();
   callback();
 }
-  
+
+/** 
+ * @ignore
+ */
 exports.shouldCorrectlyWriteLargeFileStringAndReadBack = function(test) {
   var db = client;
   var fileId = new ObjectID();
@@ -105,6 +110,9 @@ exports.shouldCorrectlyWriteLargeFileStringAndReadBack = function(test) {
   });    
 }
 
+/** 
+ * @ignore
+ */
 exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = function(test) {
   var db = client;
   var fileId = new ObjectID();
@@ -158,29 +166,61 @@ exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = function(test) {
   });    
 }
 
+/**
+ * A simple example showing the usage of the stream method.
+ *
+ * @_class gridstore
+ * @_function stream
+ * @ignore
+ */
 exports.shouldCorrectlyReadFileUsingStream = function(test) {
-  var gridStoreR = new GridStore(client, "test_gs_read_stream", "r");
-  var gridStoreW = new GridStore(client, "test_gs_read_stream", "w");
-  var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png", 'binary');
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  var readLen = 0;
-  var gotEnd = 0;
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Open a file for reading
+    var gridStoreR = new GridStore(db, "test_gs_read_stream", "r");
+    // Open a file for writing
+    var gridStoreW = new GridStore(db, "test_gs_read_stream", "w");
+    // Read in the data of a file
+    var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
 
-  gridStoreW.open(function(err, gs) {
-    gs.write(data, function(err, gs) {
-      gs.close(function(err, result) {
-        gridStoreR.open(function(err, gs) {
-          var stream = gs.stream(true);
-          stream.on("data", function(chunk) {
-            readLen += chunk.length;
-          });
-          stream.on("end", function() {
-            ++gotEnd;
-          });
-          stream.on("close", function() {
-            test.equal(data.length, readLen);
-            test.equal(1, gotEnd);
-            test.done();
+    var readLen = 0;
+    var gotEnd = 0;
+    
+    // Open the file we are writting to
+    gridStoreW.open(function(err, gs) {
+      // Write the file content
+      gs.write(data, function(err, gs) {
+        // Flush the file to GridFS
+        gs.close(function(err, result) {
+          
+          // Open the read file
+          gridStoreR.open(function(err, gs) {
+            
+            // Create a stream to the file
+            var stream = gs.stream(true);
+            
+            // Register events
+            stream.on("data", function(chunk) {              
+              // Record the length of the file
+              readLen += chunk.length;
+            });
+
+            stream.on("end", function() {              
+              // Record the end was called
+              ++gotEnd;
+            });
+
+            stream.on("close", function() {
+              // Verify the correctness of the read data
+              test.equal(data.length, readLen);
+              test.equal(1, gotEnd);
+              
+              db.close();
+              test.done();
+            });
           });
         });
       });
@@ -188,6 +228,9 @@ exports.shouldCorrectlyReadFileUsingStream = function(test) {
   });
 }
   
+/** 
+ * @ignore
+ */
 exports['Should return same data for streaming as for direct read'] = function(test) {
   var gridStoreR = new GridStore(client, "test_gs_read_stream", "r");
   var gridStoreW = new GridStore(client, "test_gs_read_stream", "w", {chunkSize:56});

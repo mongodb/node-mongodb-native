@@ -202,77 +202,98 @@ exports.shouldCorrectlyOverwriteFile = function(test) {
 }
 
 /**
+ * A simple example showing the usage of the seek method.
+ *
+ * @_class gridstore
+ * @_function seek
  * @ignore
  */
 exports.shouldCorrectlySeekWithBuffer = function(test) {
-  var gridStore = new GridStore(client, "test_gs_seek_with_buffer", "w");
-  gridStore.open(function(err, gridStore) {
-    var data = new Buffer("hello, world!", "utf8");
-    gridStore.write(data, function(err, gridStore) {
-      gridStore.close(function(result) {
-        var gridStore2 = new GridStore(client, "test_gs_seek_with_buffer", "r");
-        gridStore2.open(function(err, gridStore) {
-          gridStore.seek(0, function(err, gridStore) {
-            gridStore.getc(function(err, chr) {
-              test.equal('h', chr);
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Create a file and open it
+    var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w");
+    gridStore.open(function(err, gridStore) {
+      // Write some content to the file
+      gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+        // Flush the file to GridFS
+        gridStore.close(function(result) {
+          
+          // Open the file in read mode
+          var gridStore2 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+          gridStore2.open(function(err, gridStore) {
+            // Seek to start
+            gridStore.seek(0, function(err, gridStore) {
+              // Read first character and verify
+              gridStore.getc(function(err, chr) {
+                test.equal('h', chr);
+              });
             });
           });
-        });
 
-        var gridStore3 = new GridStore(client, "test_gs_seek_with_buffer", "r");
-        gridStore3.open(function(err, gridStore) {
-          gridStore.seek(7, function(err, gridStore) {
-            gridStore.getc(function(err, chr) {
-              test.equal('w', chr);
+          // Open the file in read mode
+          var gridStore3 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+          gridStore3.open(function(err, gridStore) {
+            // Seek to 7 characters from the beginning off the file and verify
+            gridStore.seek(7, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('w', chr);
+              });
             });
           });
-        });
 
-        var gridStore4 = new GridStore(client, "test_gs_seek_with_buffer", "r");
-        gridStore4.open(function(err, gridStore) {
-          gridStore.seek(4, function(err, gridStore) {
-            gridStore.getc(function(err, chr) {
-              test.equal('o', chr);
+          // Open the file in read mode
+          var gridStore5 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+          gridStore5.open(function(err, gridStore) {
+            // Seek to -1 characters from the end off the file and verify
+            gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('!', chr);
+              });
             });
           });
-        });
 
-        var gridStore5 = new GridStore(client, "test_gs_seek_with_buffer", "r");
-        gridStore5.open(function(err, gridStore) {
-          gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
-            gridStore.getc(function(err, chr) {
-              test.equal('!', chr);
+          // Open the file in read mode
+          var gridStore6 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+          gridStore6.open(function(err, gridStore) {
+            // Seek to -6 characters from the end off the file and verify
+            gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('w', chr);
+              });
             });
           });
-        });
 
-        var gridStore6 = new GridStore(client, "test_gs_seek_with_buffer", "r");
-        gridStore6.open(function(err, gridStore) {
-          gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
-            gridStore.getc(function(err, chr) {
-              test.equal('w', chr);
-            });
-          });
-        });
+          // Open the file in read mode
+          var gridStore7 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+          gridStore7.open(function(err, gridStore) {
 
-        var gridStore7 = new GridStore(client, "test_gs_seek_with_buffer", "r");
-        gridStore7.open(function(err, gridStore) {
-          gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-            gridStore.getc(function(err, chr) {
-              test.equal('w', chr);
+            // Seek forward 7 characters from the current read position and verify
+            gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+              gridStore.getc(function(err, chr) {
+                test.equal('w', chr);
 
-              gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
-                  test.equal('w', chr);
+                // Seek forward -1 characters from the current read position and verify
+                gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                  gridStore.getc(function(err, chr) {
+                    test.equal('w', chr);
 
-                  gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                    gridStore.getc(function(err, chr) {
-                      test.equal('o', chr);
+                    // Seek forward -4 characters from the current read position and verify
+                    gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                      gridStore.getc(function(err, chr) {
+                        test.equal('o', chr);
 
-                      gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                        gridStore.getc(function(err, chr) {
-                          test.equal('o', chr);
-                          test.done();
+                        // Seek forward 3 characters from the current read position and verify
+                        gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                          gridStore.getc(function(err, chr) {
+                            test.equal('o', chr);
+                            
+                            db.close();
+                            test.done();
+                          });
                         });
                       });
                     });
@@ -472,30 +493,6 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = function(test) {
 /**
  * @ignore
  */
-exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
-  var gridStore = new GridStore(client, "test_gs_tell", "w");
-  gridStore.open(function(err, gridStore) {
-    gridStore.write("hello, world!", function(err, gridStore) {
-      gridStore.close(function(err, result) {
-        var gridStore2 = new GridStore(client, "test_gs_tell", "r");
-        gridStore2.open(function(err, gridStore) {
-          gridStore.read(5, function(err, data) {
-            test.equal("hello", data);
-
-            gridStore.tell(function(err, position) {
-              test.equal(5, position);
-              test.done();
-            })
-          });
-        });
-      });
-    });
-  });
-}
-
-/**
- * @ignore
- */
 exports.shouldCorrectlySaveEmptyFile = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
@@ -526,17 +523,35 @@ exports.shouldCorrectlySaveEmptyFile = function(test) {
 }
 
 /**
+ * A simple example showing the usage of the eof method.
+ *
+ * @_class gridstore
+ * @_function eof
  * @ignore
  */
 exports.shouldCorrectlyDetectEOF = function(test) {
-  var gridStore = new GridStore(client, 'test_gs_empty_file_eof', "w");
-  gridStore.open(function(err, gridStore) {
-    gridStore.close(function(err, gridStore) {
-      var gridStore2 = new GridStore(client, 'test_gs_empty_file_eof', "r");
-      gridStore2.open(function(err, gridStore) {
-        test.equal(true, gridStore.eof());
-        test.done();
-      })
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Open the file in write mode
+    var gridStore = new GridStore(db, 'test_gs_empty_file_eof', "w");
+    gridStore.open(function(err, gridStore) {
+      // Flush the empty file to GridFS
+      gridStore.close(function(err, gridStore) {
+        
+        // Open the file in read mode
+        var gridStore2 = new GridStore(db, 'test_gs_empty_file_eof', "r");
+        gridStore2.open(function(err, gridStore) {
+          // Verify that we are at the end of the file
+          test.equal(true, gridStore.eof());
+
+          db.close();
+          test.done();
+        })
+      });
     });
   });
 }
@@ -825,6 +840,91 @@ exports.shouldNotThrowErrorOnClose = function(test) {
     });
   });
 }
+
+/**
+ * A simple example showing the usage of the tell method.
+ *
+ * @_class gridstore
+ * @_function tell
+ * @ignore
+ */
+exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Create a new file
+    var gridStore = new GridStore(db, "test_gs_tell", "w");
+    // Open the file
+    gridStore.open(function(err, gridStore) {
+      // Write a string to the file
+      gridStore.write("hello, world!", function(err, gridStore) {
+        // Flush the file to GridFS
+        gridStore.close(function(err, result) {
+          
+          // Open the file in read only mode
+          var gridStore2 = new GridStore(db, "test_gs_tell", "r");
+          gridStore2.open(function(err, gridStore) {
+
+            // Read the first 5 characters
+            gridStore.read(5, function(err, data) {
+              test.equal("hello", data);
+
+              // Get the current position of the read head
+              gridStore.tell(function(err, position) {
+                test.equal(5, position);
+                
+                db.close();
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * A simple example showing the usage of the seek method.
+ *
+ * @_class gridstore
+ * @_function getc
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Create a file and open it
+    var gridStore = new GridStore(db, "test_gs_getc_file", "w");
+    gridStore.open(function(err, gridStore) {
+      // Write some content to the file
+      gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+        // Flush the file to GridFS
+        gridStore.close(function(result) {
+          
+          // Open the file in read mode
+          var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
+          gridStore2.open(function(err, gridStore) {
+
+            // Read first character and verify
+            gridStore.getc(function(err, chr) {
+              test.equal('h', chr);
+              
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
 
 /**
  * Retrieve the server information for the current
