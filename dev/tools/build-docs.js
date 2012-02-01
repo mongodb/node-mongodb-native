@@ -104,22 +104,23 @@ var readAllTemplates = function(templates) {
 // ----------------------------------------------------------------------------
 // All source files for the api generation
 var apiClasses = [
-    // {tag:"admin", path:"./lib/mongodb/admin.js"},
-    // {tag:"collection", path:"./lib/mongodb/collection.js"},
-    // {tag:"db", path:"./lib/mongodb/db.js"},
-    // {tag:"cursor", path:"./lib/mongodb/cursor.js"},
-    // {tag:"cursorstream", path:"./lib/mongodb/cursorstream.js"},
-    // {tag:"gridstore", path:"./lib/mongodb/gridfs/gridstore.js"},
-    // {tag:"readstream", path:"./lib/mongodb/gridfs/readstream.js"},
-    // {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"},
-    // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
-    // {tag:"binary", path:"./lib/mongodb/bson/binary.js"},
-    // {tag:"code", path:"./lib/mongodb/bson/code.js"},
-    // {tag:"code", path:"./lib/mongodb/bson/db_ref.js"},
-    // {tag:"double", path:"./lib/mongodb/bson/double.js"},
-    // {tag:"maxkey", path:"./lib/mongodb/bson/max_key.js"},
-    // {tag:"symbol", path:"./lib/mongodb/bson/symbol.js"},
-    {tag:"timestamp", path:"./lib/mongodb/bson/timestamp.js"}
+    {tag:"admin", path:"./lib/mongodb/admin.js"},
+    {tag:"collection", path:"./lib/mongodb/collection.js"},
+    {tag:"db", path:"./lib/mongodb/db.js"},
+    {tag:"cursor", path:"./lib/mongodb/cursor.js"},
+    {tag:"cursorstream", path:"./lib/mongodb/cursorstream.js"},
+    {tag:"gridstore", path:"./lib/mongodb/gridfs/gridstore.js"},
+    {tag:"readstream", path:"./lib/mongodb/gridfs/readstream.js"},
+    {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"},
+    {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
+    {tag:"binary", path:"./lib/mongodb/bson/binary.js"},
+    {tag:"code", path:"./lib/mongodb/bson/code.js"},
+    {tag:"code", path:"./lib/mongodb/bson/db_ref.js"},
+    {tag:"double", path:"./lib/mongodb/bson/double.js"},
+    {tag:"maxkey", path:"./lib/mongodb/bson/max_key.js"},
+    {tag:"symbol", path:"./lib/mongodb/bson/symbol.js"},
+    {tag:"timestamp", path:"./lib/mongodb/bson/timestamp.js"},
+    {tag:"long", path:"./lib/mongodb/bson/long.js"}
   ];
   
 // All test files 
