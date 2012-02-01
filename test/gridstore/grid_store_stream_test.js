@@ -221,7 +221,7 @@ exports['Should return same data for streaming as for direct read'] = function(t
             // Read entire file in one go and compare
             var gridStoreRead = new GridStore(client, "test_gs_read_stream", "r");
             gridStoreRead.open(function(err, gs) {
-              gridStoreRead.readBuffer(function(err, data2) {
+              gridStoreRead.read(function(err, data2) {
                 // Put together all the chunks
                 var streamData = new Buffer(data.length);
                 var index = 0;

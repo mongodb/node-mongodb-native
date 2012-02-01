@@ -126,7 +126,8 @@ var testClasses = [
     {path:"./test/multiple_dbs_on_connection_pool_test.js"},
     {path:"./test/cursor_test.js"},
     {path:"./test/cursorstream_test.js"},
-    {path:"./test/gridstore/grid_store_test.js"}
+    {path:"./test/gridstore/grid_store_test.js"},
+    {path:"./test/gridstore/grid_store_file_test.js"}
   ]
 
 // Read all the templates

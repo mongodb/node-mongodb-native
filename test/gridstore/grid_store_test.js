@@ -444,12 +444,12 @@ exports.shouldCorrectlyUnlinkAnArrayOfFiles = function(test) {
 exports.shouldCorrectlyWriteFileToGridStore= function(test) {
   var gridStore = new GridStore(client, 'test_gs_writing_file', 'w');
   var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
-  var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png', 'binary');
+  var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png');
   
   gridStore.open(function(err, gridStore) {
     gridStore.writeFile('./test/gridstore/test_gs_weird_bug.png', function(err, doc) {
       GridStore.read(client, 'test_gs_writing_file', function(err, fileData) {
-        test.equal(data, fileData)
+        test.equal(data.toString('hex'), fileData.toString('hex'));        
         test.equal(fileSize, fileData.length);
         
         // Ensure we have a md5
@@ -469,13 +469,13 @@ exports.shouldCorrectlyWriteFileToGridStore= function(test) {
 exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId= function(test) {
   var gridStore = new GridStore(client, null, 'w');
   var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
-  var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png', 'binary');
+  var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png');
   
   gridStore.open(function(err, gridStore) {
     gridStore.writeFile('./test/gridstore/test_gs_weird_bug.png', function(err, doc) {
       
       GridStore.read(client, doc._id, function(err, fileData) {
-        test.equal(data, fileData)
+        test.equal(data.toString('hex'), fileData.toString('hex'));
         test.equal(fileSize, fileData.length);
         
         // Ensure we have a md5
@@ -554,7 +554,7 @@ exports.shouldCorrectlyReadAndWriteFileByObjectId = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyWriteAndReadJpgImage = function(test) {
-  var data = fs.readFileSync('./test/gridstore/iya_logo_final_bw.jpg').toString('binary');
+  var data = fs.readFileSync('./test/gridstore/iya_logo_final_bw.jpg');
   
   var gs = new GridStore(client, "test", "w");
   gs.open(function(err, gs) {
@@ -565,8 +565,8 @@ exports.shouldCorrectlyWriteAndReadJpgImage = function(test) {
         var gs2 = new GridStore(client, "test", "r");
         gs2.open(function(err, gs) {
           gs2.seek(0, function() {
-            gs2.read(0, function(err, data2) {
-              test.equal(data, data2);
+            gs2.read(function(err, data2) {
+              test.equal(data.toString('hex'), data2.toString('hex'));
               test.done();                          
             });
           });
@@ -594,7 +594,7 @@ exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = function(test) {
 
         // Read the file using readBuffer
         new GridStore(client, doc._id, 'r').open(function(err, gridStore) {
-          gridStore.readBuffer(function(err, data2) {
+          gridStore.read(function(err, data2) {
             test.equal(data.toString('base64'), data2.toString('base64'));
             test.done();            
           })
@@ -621,7 +621,7 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = function(test) {
 
         // Read the file using readBuffer
         new GridStore(client, doc._id, 'r').open(function(err, gridStore) {
-          gridStore.readBuffer(function(err, data2) {
+          gridStore.read(function(err, data2) {
             test.equal(data.toString('base64'), data2.toString('base64'));
             test.done();            
           })
@@ -649,7 +649,7 @@ exports.shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks = f
 
         // Read the file using readBuffer
         new GridStore(client, doc._id, 'r').open(function(err, gridStore) {
-          gridStore.readBuffer(function(err, data2) {
+          gridStore.read(function(err, data2) {
             test.equal(data.toString('base64'), data2.toString('base64'));
             test.done();            
           })
@@ -839,7 +839,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = function(test) 
     // Read the filesize of file on disk (provide your own)
     var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
     // Read the buffered data for comparision reasons
-    var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png', 'binary');
+    var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png');
 
     // Open the new file
     gridStore.open(function(err, gridStore) {
@@ -849,7 +849,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = function(test) 
         
         // Read back all the written content and verify the correctness
         GridStore.read(db, fileId, function(err, fileData) {
-          test.equal(data, fileData)
+          test.equal(data.toString('hex'), fileData.toString('hex'))
           test.equal(fileSize, fileData.length);
 
           db.close();
@@ -882,7 +882,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = funct
     // Read the filesize of file on disk (provide your own)
     var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
     // Read the buffered data for comparision reasons
-    var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png', 'binary');
+    var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png');
 
     // Open a file handle for reading the file
     var fd = fs.openSync('./test/gridstore/test_gs_weird_bug.png', 'r', 0666);
@@ -895,7 +895,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = funct
         
         // Read back all the written content and verify the correctness
         GridStore.read(db, fileId, function(err, fileData) {
-          test.equal(data, fileData)
+          test.equal(data.toString('hex'), fileData.toString('hex'));
           test.equal(fileSize, fileData.length);
 
           db.close();
@@ -1156,9 +1156,6 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = function(te
     });
   });
 } 
-/**
- * @ignore
- */
 
 /**
  * Retrieve the server information for the current

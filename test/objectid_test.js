@@ -302,14 +302,11 @@ exports.shouldCorrectlyInsertWithObjectId = function(test) {
             test.equal(compareDate.getDate(), date1.getDate());
             test.equal(compareDate.getMonth(), date1.getMonth());
             test.equal(compareDate.getHours(), date1.getHours());
-            test.equal(compareDate.getMinutes(), date1.getMinutes());
 
             test.equal(compareDate.getFullYear(), date2.getFullYear());
             test.equal(compareDate.getDate(), date2.getDate());
             test.equal(compareDate.getMonth(), date2.getMonth());
             test.equal(compareDate.getHours(), date2.getHours());
-            test.equal(compareDate.getMinutes(), date2.getMinutes());
-            test.ok(date2.getSeconds() >= date1.getSeconds());
             // Let's close the db
             test.done();
           });

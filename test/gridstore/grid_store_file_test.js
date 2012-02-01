@@ -15,6 +15,8 @@ var testCase = require('../../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var useSSL = process.env['USE_SSL'] != null ? true : false;
+var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
  * Retrieve the server information for the current
@@ -50,6 +52,9 @@ exports.tearDown = function(callback) {
   callback();
 }
     
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyFailDueToMissingChunks = function(test) {
   var FILE = "empty.test.file";
   client.collection('fs.files', function(err, collection) {
@@ -72,6 +77,9 @@ exports.shouldCorrectlyFailDueToMissingChunks = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyWriteASmallPayload = function(test) {
   var gridStore = new GridStore(client, "test_gs_small_write", "w");
   gridStore.open(function(err, gridStore) {
@@ -107,6 +115,9 @@ exports.shouldCorrectlyWriteASmallPayload = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyWriteSmallFileUsingABuffer = function(test) {
   var gridStore = new GridStore(client, "test_gs_small_write_with_buffer", "w");
   gridStore.open(function(err, gridStore) {
@@ -137,6 +148,9 @@ exports.shouldCorrectlyWriteSmallFileUsingABuffer = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldSaveSmallFileToGridStore = function(test) {
   var gridStore = new GridStore(client, "test_gs_small_file", "w");
   gridStore.open(function(err, gridStore) {
@@ -161,6 +175,9 @@ exports.shouldSaveSmallFileToGridStore = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyOverwriteFile = function(test) {
   var gridStore = new GridStore(client, "test_gs_overwrite", "w");
   gridStore.open(function(err, gridStore) {
@@ -184,6 +201,9 @@ exports.shouldCorrectlyOverwriteFile = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySeekWithBuffer = function(test) {
   var gridStore = new GridStore(client, "test_gs_seek_with_buffer", "w");
   gridStore.open(function(err, gridStore) {
@@ -267,6 +287,9 @@ exports.shouldCorrectlySeekWithBuffer = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySeekWithString = function(test) {
   var gridStore = new GridStore(client, "test_gs_seek", "w");
   gridStore.open(function(err, gridStore) {
@@ -349,6 +372,9 @@ exports.shouldCorrectlySeekWithString = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAppendToFile = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
@@ -385,26 +411,57 @@ exports.shouldCorrectlyAppendToFile = function(test) {
   });
 }
 
+/**
+ * A simple example showing how to rewind and overwrite the file.
+ *
+ * @_class gridstore
+ * @_function rewind
+ * @ignore
+ */
 exports.shouldCorrectlyRewingAndTruncateOnWrite = function(test) {
-  var gridStore = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
-  gridStore.open(function(err, gridStore) {
-    gridStore.write("hello, world!", function(err, gridStore) {
-      gridStore.close(function(err, result) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-        var gridStore2 = new GridStore(client, "test_gs_rewind_and_truncate_on_write", "w");
-        gridStore2.open(function(err, gridStore) {
-          gridStore.write('some text is inserted here', function(err, gridStore) {
-            gridStore.rewind(function(err, gridStore) {
-              gridStore.write('abc', function(err, gridStore) {
-                gridStore.close(function(err, result) {
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Our file ID
+    var fileId = new ObjectID();
 
-                  GridStore.read(client, 'test_gs_rewind_and_truncate_on_write', function(err, data) {
-                    test.equal("abc", data);
-                    test.done();
+    // Create a new file
+    var gridStore = new GridStore(db, fileId, "w");
+    // Open the file
+    gridStore.open(function(err, gridStore) {
+      // Write to the file
+      gridStore.write("hello, world!", function(err, gridStore) {
+        // Flush the file to disk
+        gridStore.close(function(err, result) {
+
+          // Reopen the file
+          gridStore = new GridStore(db, fileId, "w");
+          gridStore.open(function(err, gridStore) {
+            // Write some more text to the file
+            gridStore.write('some text is inserted here', function(err, gridStore) {
+
+              // Let's rewind to truncate the file
+              gridStore.rewind(function(err, gridStore) {
+
+                // Write something from the start
+                gridStore.write('abc', function(err, gridStore) {
+
+                  // Flush the data to mongodb
+                  gridStore.close(function(err, result) {
+
+                    // Verify that the new data was written
+                    GridStore.read(db, fileId, function(err, data) {
+                      test.equal("abc", data);
+
+                      db.close();
+                      test.done();
+                    });
                   });
                 });
               });
-            });
+            });            
           });
         });
       });
@@ -412,6 +469,9 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
   var gridStore = new GridStore(client, "test_gs_tell", "w");
   gridStore.open(function(err, gridStore) {
@@ -433,6 +493,9 @@ exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySaveEmptyFile = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
@@ -462,6 +525,9 @@ exports.shouldCorrectlySaveEmptyFile = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyDetectEOF = function(test) {
   var gridStore = new GridStore(client, 'test_gs_empty_file_eof', "w");
   gridStore.open(function(err, gridStore) {
@@ -475,6 +541,9 @@ exports.shouldCorrectlyDetectEOF = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldEnsureThatChunkSizeCannotBeChangedDuringRead = function(test) {
   var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_on_read", "w");
   gridStore.open(function(err, gridStore) {
@@ -492,6 +561,9 @@ exports.shouldEnsureThatChunkSizeCannotBeChangedDuringRead = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldEnsureChunkSizeCannotChangeAfterDataHasBeenWritten = function(test) {
   var gridStore = new GridStore(client, "test_gs_cannot_change_chunk_size_after_data_written", "w");
   gridStore.open(function(err, gridStore) {
@@ -503,7 +575,11 @@ exports.shouldEnsureChunkSizeCannotChangeAfterDataHasBeenWritten = function(test
   });
 }
 
-// checks if 8 bit values will be preserved in gridstore
+/**
+ * checks if 8 bit values will be preserved in gridstore
+ *
+ * @ignore
+ */
 exports.shouldCorrectlyStore8bitValues = function(test) {
   var gridStore = new GridStore(client, "test_gs_check_high_bits", "w");
   var data = new Buffer(255);
@@ -526,6 +602,9 @@ exports.shouldCorrectlyStore8bitValues = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldAllowChangingChunkSize = function(test) {
   var gridStore = new GridStore(client, "test_change_chunk_size", "w");
   gridStore.open(function(err, gridStore) {
@@ -543,6 +622,9 @@ exports.shouldAllowChangingChunkSize = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldAllowChangingChunkSizeAtCreationOfGridStore = function(test) {
   var gridStore = new GridStore(client, "test_change_chunk_size", "w", {'chunk_size':42});
   gridStore.open(function(err, gridStore) {
@@ -558,6 +640,9 @@ exports.shouldAllowChangingChunkSizeAtCreationOfGridStore = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyCalculateMD5 = function(test) {
   var gridStore = new GridStore(client, "new-file", "w");
   gridStore.open(function(err, gridStore) {
@@ -585,6 +670,9 @@ exports.shouldCorrectlyCalculateMD5 = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyUpdateUploadDate = function(test) {
   var now = new Date();
   var originalFileUploadDate = null;
@@ -621,6 +709,9 @@ exports.shouldCorrectlyUpdateUploadDate = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySaveContentType = function(test) {
   var ct = null;
 
@@ -651,6 +742,9 @@ exports.shouldCorrectlySaveContentType = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySaveContentTypeWhenPassedInAtGridStoreCreation = function(test) {
   var gridStore = new GridStore(client, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
   gridStore.open(function(err, gridStore) {
@@ -667,6 +761,9 @@ exports.shouldCorrectlySaveContentTypeWhenPassedInAtGridStoreCreation = function
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReportIllegalMode = function(test) {
   var gridStore = new GridStore(client, "test_gs_unknown_mode", "x");
   gridStore.open(function(err, gridStore) {
@@ -676,6 +773,9 @@ exports.shouldCorrectlyReportIllegalMode = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySaveAndRetrieveFileMetadata = function(test) {
   var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
   gridStore.open(function(err, gridStore) {
@@ -704,6 +804,9 @@ exports.shouldCorrectlySaveAndRetrieveFileMetadata = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldNotThrowErrorOnClose = function(test) {
   var gridStore = new GridStore(client, "test_gs_metadata", "w", {'content_type':'image/jpg'});
   gridStore.open(function(err, gridStore) {
