@@ -8,6 +8,8 @@ var options = {
 };
 
 var userObjects = [];
+var counter = 0;
+var counter2 = 0;
 
 // Build user array
 for(var i = 0; i < 122; i++) {
@@ -63,6 +65,8 @@ RS.startSet(true, function(err, result) {
       a = result;
       waiting--;
       if(waiting === 0){
+        console.log("---------------------------------------------------------------------- collA :: " + counter);
+        counter = counter + 1;
         cb(null, [a, b]);
       }
     });
@@ -71,6 +75,8 @@ RS.startSet(true, function(err, result) {
       b = result;
       waiting--;
       if(waiting === 0){
+        console.log("---------------------------------------------------------------------- collB :: " + counter);
+        counter = counter + 1;
         cb(null, [a, b]);
       }
     });
