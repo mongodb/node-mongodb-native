@@ -34,6 +34,11 @@ RS.startSet(true, function(err, result) {
   var db = new mongodb.Db("data", replSet);
   db.open(function(err, client){
     console.log("Connected");
+    if(err != null) {
+      console.dir(err);
+      return;
+    }
+    
     var userCollection = client.collection('users');
     var accountCollection = client.collection('accounts');
     
