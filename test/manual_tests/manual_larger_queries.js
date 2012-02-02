@@ -25,7 +25,7 @@ RS.startSet(true, function(err, result) {
       new mongodb.Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new mongodb.Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ], 
-    {rs_name:RS.name, read_secondary:true, readPreference:mongodb.Server.READ_SECONDARY_ONLY}
+    {rs_name:RS.name, read_secondary:true, readPreference:mongodb.Server.READ_SECONDARY}
   );
 
   var collA;
@@ -63,7 +63,7 @@ RS.startSet(true, function(err, result) {
     var userDocs = [];
     for(var i = 0; i < maxUserId; i++) {
       // Generate a random number of account ids
-      var numberOfAccounts = Math.floor(Math.random(1000));
+      var numberOfAccounts = Math.floor(Math.random(10000));
       // Generate an array of random numbers
       var accountIds = [];
       for(var j = 0; j < numberOfAccounts; j++) {

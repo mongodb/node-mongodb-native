@@ -96,6 +96,25 @@ exports.tearDown = function(callback) {
 /**
  * @ignore
  */
+exports.shouldThrowErrorDueToSharedConnectionUsage = function(test) {
+  var replSet = new ReplSetServers([ 
+      new Server('localhost', 28390, { auto_reconnect: true } ),
+      new Server('localhost', 28391, { auto_reconnect: true } ),
+      new Server('localhost', 28392, { auto_reconnect: true } )
+    ] 
+  );
+  
+  try {
+    var db = new Db(MONGODB, replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});    
+    var db1 = new Db(MONGODB, replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});    
+  } catch(err) {
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleErrorWhenNoServerUpInReplicaset = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
@@ -424,6 +443,15 @@ exports.shouldCorrectlyConnect = function(test) {
     {rs_name:RS.name}
   );
 
+  // Replica configuration
+  var replSet2 = new ReplSetServers( [ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ], 
+    {rs_name:RS.name}
+  );
+
   var db = new Db('integration_test_', replSet );
   db.open(function(err, p_db) {
     if(err != null) debug("shouldCorrectlyConnect :: " + inspect(err));
@@ -453,7 +481,7 @@ exports.shouldCorrectlyConnect = function(test) {
                                           return item.host + ":" + item.port;
                                         }).sort());
           // Force new instance 
-          var db2 = new Db('integration_test_', replSet );
+          var db2 = new Db('integration_test_', replSet2 );
           db2.open(function(err, p_db2) {
             if(err != null) debug("shouldCorrectlyConnect :: " + inspect(err));
             
