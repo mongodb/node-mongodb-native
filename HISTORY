@@ -1,4 +1,4 @@
-0.9.8-5
+0.9.8-5 2012-02-02
 * Added geoNear command to Collection.
 * Added geoHaystackSearch command to Collection.
 * Added indexes command to collection to retrieve the indexes on a Collection.
