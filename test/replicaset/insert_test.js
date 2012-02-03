@@ -28,13 +28,13 @@ var ensureConnection = function(test, numberOfTries, callback) {
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
   var db = new Db('integration_test_', replSet);
-  // Print any errors
-  db.on("error", function(err) {
-    console.log("============================= ensureConnection caught error")
-    console.dir(err)
-    if(err != null && err.stack != null) console.log(err.stack)
-    db.close();
-  })
+  // // Print any errors
+  // db.on("error", function(err) {
+  //   console.log("============================= ensureConnection caught error")
+  //   console.dir(err)
+  //   if(err != null && err.stack != null) console.log(err.stack)
+  //   db.close();
+  // })
 
   // Open the db
   db.open(function(err, p_db) {

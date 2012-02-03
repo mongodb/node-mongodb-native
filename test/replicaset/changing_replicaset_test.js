@@ -157,6 +157,7 @@ exports['Basic replicaset changes removing a secondary server from the set, shou
       var checking = function() {
         // First step let's do a reconfig of the replicaset
         if(numberOfStepsDone == 0) {
+          // console.log("---------------------------------------------- " + numberOfStepsDone)
           // Update to the next step
           numberOfStepsDone = numberOfStepsDone + 1;
           // Connect directly to the primary server to change the config setup
@@ -197,11 +198,13 @@ exports['Basic replicaset changes removing a secondary server from the set, shou
             });
           });
         } else if(numberOfStepsDone < 10) {
+          // console.log("---------------------------------------------- " + numberOfStepsDone)
           replDb.collection('somecollection').find().toArray(function(err, items) {
             numberOfStepsDone = numberOfStepsDone + 1;
             setTimeout(checking, timeoutInterval);
           });
         } else if(numberOfStepsDone == 10) {          
+          // console.log("---------------------------------------------- " + numberOfStepsDone)
           // Check that we have the right setup
           test.ok(replDb.serverConfig._state.master != null);
           test.equal(1, Object.keys(replDb.serverConfig._state.arbiters).length);
@@ -219,8 +222,7 @@ exports['Basic replicaset changes removing a secondary server from the set, shou
             // Let's change the configuration set and update the replicaset
             newConfig = JSON.parse(JSON.stringify(RS.config));
             // Adjust version
-            newConfig.version = version + 1;
-          
+            newConfig.version = version + 1;                    
             // Issue replicaset reconfig command to server
             _db1.admin().command({replSetReconfig:newConfig}, function(err, result) {
               // Let's do some queries
@@ -228,11 +230,13 @@ exports['Basic replicaset changes removing a secondary server from the set, shou
             });
           });     
         } else if(numberOfStepsDone < 20) {
+          // console.log("---------------------------------------------- " + numberOfStepsDone)
           replDb.collection('somecollection').find().toArray(function(err, items) {
             numberOfStepsDone = numberOfStepsDone + 1;
             setTimeout(checking, timeoutInterval);
           });                   
         } else {
+          // console.log("---------------------------------------------- " + numberOfStepsDone)
           // Check that we have the right setup
           test.ok(replDb.serverConfig._state.master != null);
           test.equal(1, Object.keys(replDb.serverConfig._state.arbiters).length);
