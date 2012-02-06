@@ -1,7 +1,3 @@
-GLOBAL.DEBUG = true;
-
-test = require("assert");
-
 var Db = require('../lib/mongodb').Db,
   Admin = require('../lib/mongodb').Admin,
   DbCommand = require('../lib/mongodb/commands/db_command').DbCommand,

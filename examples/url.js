@@ -1,7 +1,3 @@
-GLOBAL.DEBUG = true;
-
-test = require("assert");
-
 var Db = require('../lib/mongodb').Db,
   connect = require('../lib/mongodb').connect;
 

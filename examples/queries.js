@@ -1,7 +1,3 @@
-GLOBAL.DEBUG = true;
-
-test = require("assert");
-
 var Db = require('../lib/mongodb').Db,
   Connection = require('../lib/mongodb').Connection,
     Server = require('../lib/mongodb').Server;
