@@ -250,13 +250,13 @@ exports.shouldCorrectlyThrowErrorsWhenIllegalySizedMessages = function(test) {
     }              
 
     try {
-      collection.findOne(illegalBuffer).toArray(function() {})
-    } catch(err) {
+      collection.findOne(illegalBuffer, function() {})
+    } catch(err) {      
       test.ok(err.toString().indexOf("query selector") != -1);
     }              
 
     try {
-      collection.findOne({}, illegalBuffer).toArray(function() {})
+      collection.findOne({}, illegalBuffer, function() {})
     } catch(err) {
       test.ok(err.toString().indexOf("query fields") != -1);
       test.done();
