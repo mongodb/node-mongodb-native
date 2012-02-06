@@ -1,3 +1,7 @@
+0.9.8-7 2012-02-06
+* Simplified findOne to use the find command instead of the custom code (Issue #498).
+* BSON JS parser not also checks for _bsonType variable in case BSON object is in weird scope (Issue #495).
+
 0.9.8-6 2012-02-04
 * Removed the check for replicaset change code as it will never work with node.js.
 
