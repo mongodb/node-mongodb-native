@@ -17,9 +17,10 @@ API Documentation
 ---------------
 
 .. toctree::
-  :maxdepth: 1
+  :maxdepth: 3
 
   api-generated/index
+  api-bson-generated/index
 
 Major Topics
 ------------
