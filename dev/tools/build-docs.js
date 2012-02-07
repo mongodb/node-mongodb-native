@@ -61,18 +61,17 @@ var outputDirectory = "./docs/sphinx-docs/source/api-generated"
 exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
 exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {});
 
-// // ----------------------------------------------------------------------------
-// // PROCESS Driver API
-// // ----------------------------------------------------------------------------
-// // Extract meta data from source files
-// var dataObjects = docs.extractLibraryMetaData(apiClasses);
+// ----------------------------------------------------------------------------
+// PROCESS Driver API
+// ----------------------------------------------------------------------------
+// Extract meta data from source files
+var dataObjects = docs.extractLibraryMetaData(apiClasses);
 // Filter out and prepare the test Objects hash
 var testObjects = docs.buildTestHash(docs.extractLibraryMetaData(testClasses));
 // Read all the templates
 var templates = docs.readAllTemplates(templates);
-
-// // Render all the classes that are decorated
-// docs.renderAllTemplates(outputDirectory, templates, dataObjects, testObjects, {index_title:'Driver API'});
+// Render all the classes that are decorated
+docs.renderAllTemplates(outputDirectory, templates, dataObjects, testObjects, {index_title:'Driver API'});
 
 // ----------------------------------------------------------------------------
 // PROCESS BSON API
@@ -84,15 +83,15 @@ exec('rm -rf ' + outputDirectory2, function (error, stdout, stderr) {});
 exec('mkdir ' + outputDirectory2, function (error, stdout, stderr) {});
 
 var apiClasses2 = [
-    // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
-    // {tag:"binary", path:"./lib/mongodb/bson/binary.js"},
-    // {tag:"code", path:"./lib/mongodb/bson/code.js"},
-    // {tag:"code", path:"./lib/mongodb/bson/db_ref.js"},
-    // {tag:"double", path:"./lib/mongodb/bson/double.js"},
-    // {tag:"maxkey", path:"./lib/mongodb/bson/max_key.js"},
-    // {tag:"symbol", path:"./lib/mongodb/bson/symbol.js"},
-    // {tag:"timestamp", path:"./lib/mongodb/bson/timestamp.js"},
-    // {tag:"long", path:"./lib/mongodb/bson/long.js"},
+    {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
+    {tag:"binary", path:"./lib/mongodb/bson/binary.js"},
+    {tag:"code", path:"./lib/mongodb/bson/code.js"},
+    {tag:"code", path:"./lib/mongodb/bson/db_ref.js"},
+    {tag:"double", path:"./lib/mongodb/bson/double.js"},
+    {tag:"maxkey", path:"./lib/mongodb/bson/max_key.js"},
+    {tag:"symbol", path:"./lib/mongodb/bson/symbol.js"},
+    {tag:"timestamp", path:"./lib/mongodb/bson/timestamp.js"},
+    {tag:"long", path:"./lib/mongodb/bson/long.js"},
     {tag:"bson", path:"./lib/mongodb/bson/bson.js"}
   ];
 
