@@ -51,109 +51,93 @@ var testClasses = [
 // Read all the templates
 var templates = [
   {tag:'index', path:'./dev/tools/doc-templates/index.ejs'},
+  {tag:'index_no_header', path:'./dev/tools/doc-templates/index_no_header.ejs'},
   {tag:'class', path:'./dev/tools/doc-templates/class.ejs'},
   {tag:'function', path:'./dev/tools/doc-templates/function.ejs'}
 ]
 
-// Output directory
-var outputDirectory = "./docs/sphinx-docs/source/api-generated"
-
-// Force create the directory for the generated docs
-exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
-exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {});
-
-// ----------------------------------------------------------------------------
-// PROCESS Driver API
-// ----------------------------------------------------------------------------
-// Extract meta data from source files
-var dataObjects = docs.extractLibraryMetaData(apiClasses);
-// Filter out and prepare the test Objects hash
-var testObjects = docs.buildTestHash(docs.extractLibraryMetaData(testClasses));
-// Read all the templates
-var templates = docs.readAllTemplates(templates);
-// Render all the classes that are decorated
-docs.renderAllTemplates(outputDirectory, templates, dataObjects, testObjects, {index_title:'Driver API'});
-
-// ----------------------------------------------------------------------------
-// PROCESS BSON API
-// ----------------------------------------------------------------------------
-// Output directory
-var outputDirectory2 = "./docs/sphinx-docs/source/api-bson-generated"
-// Force create the directory for the generated docs
-exec('rm -rf ' + outputDirectory2, function (error, stdout, stderr) {});
-exec('mkdir ' + outputDirectory2, function (error, stdout, stderr) {});
-
-var apiClasses2 = [
-    // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
-    // {tag:"binary", path:"./lib/mongodb/bson/binary.js"},
-    // {tag:"code", path:"./lib/mongodb/bson/code.js"},
-    // {tag:"code", path:"./lib/mongodb/bson/db_ref.js"},
-    // {tag:"double", path:"./lib/mongodb/bson/double.js"},
-    // {tag:"maxkey", path:"./lib/mongodb/bson/max_key.js"},
-    // {tag:"symbol", path:"./lib/mongodb/bson/symbol.js"},
-    // {tag:"timestamp", path:"./lib/mongodb/bson/timestamp.js"},
-    // {tag:"long", path:"./lib/mongodb/bson/long.js"},
-    {tag:"bson", path:"./lib/mongodb/bson/bson.js"}
-  ];
-
-// Read all the templates
-var templates2 = [
-  {tag:'index', path:'./dev/tools/doc-templates/index.ejs'},
-  {tag:'class', path:'./dev/tools/doc-templates/class.ejs'},
-  {tag:'function', path:'./dev/tools/doc-templates/function.ejs'}
-]
-
-// Extract meta data from source files
-var dataObjects2 = docs.extractLibraryMetaData(apiClasses2);
-// Filter out and prepare the test Objects hash
-var testObjects2 = docs.buildTestHash(docs.extractLibraryMetaData(testClasses));
-// Render all the classes that are decorated
-docs.renderAllTemplates(outputDirectory2, templates, dataObjects2, testObjects2, {index_title:'Binary JSON API'});
-
-// ----------------------------------------------------------------------------
-// PROCESS MARKDOWN DOCUMENTS TO STRUCTURED TEXT
-// ----------------------------------------------------------------------------
-var articles = [
-    {name:"NodeKOArticle1", output:"NodeKOArticle1.rst", path:"./docs/articles/NodeKOArticle1.md"},
-    {name:"NodeKOArticle2", output:"NodeKOArticle2.rst", path:"./docs/articles/NodeKOArticle2.md"}
-  ];
-
-// Output directory
-var outputDirectory = "./docs/sphinx-docs/source/api-articles"
-docs.writeMarkDownFile(outputDirectory, articles, templates);
-
-
+// // Output directory
+// var outputDirectory = "./docs/sphinx-docs/source/api-generated"
+// 
 // // Force create the directory for the generated docs
 // exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
 // exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {});
 // 
-// var names = [];
+// // ----------------------------------------------------------------------------
+// // PROCESS Driver API
+// // ----------------------------------------------------------------------------
+// // Extract meta data from source files
+// var dataObjects = docs.extractLibraryMetaData(apiClasses);
+// // Filter out and prepare the test Objects hash
+// var testObjects = docs.buildTestHash(docs.extractLibraryMetaData(testClasses));
+// Read all the templates
+var templates = docs.readAllTemplates(templates);
+// // Render all the classes that are decorated
+// docs.renderAllTemplates(outputDirectory, templates, dataObjects, testObjects, {index_title:'Driver API'});
 // 
-// // Process all the articles
-// for(var i = 0 ; i < articles.length; i++) {
-//   // Fetch the article markdown content
-//   var article = fs.readFileSync(articles[i].path).toString();
-//   // Convert the text into restructured text for sphinx
-//   var text = docs.transformMarkdownToStructuredText(article);
-//   // Write out the content
-//   fs.writeFileSync(format("%s/%s", outputDirectory, articles[i].output.toLowerCase()), text);
-//   names.push(articles[i].name.toLowerCase());
-//   
-//   // var _markdown = new markdown.Markdown.parse(article);  
-//   // console.dir(markdown)
-//   // console.dir(markdown.parse(article))
-//   // var markdownDoc = _markdown.parse(article);
+// // ----------------------------------------------------------------------------
+// // PROCESS BSON API
+// // ----------------------------------------------------------------------------
+// // Output directory
+// var outputDirectory2 = "./docs/sphinx-docs/source/api-bson-generated"
+// // Force create the directory for the generated docs
+// exec('rm -rf ' + outputDirectory2, function (error, stdout, stderr) {});
+// exec('mkdir ' + outputDirectory2, function (error, stdout, stderr) {});
 // 
-//   
-//   // console.log("--------------------------------------------------------------------------------")
-//   // console.dir(markdownDoc)
-//   
-//   // console.log(article.toString())
-// }
+// var apiClasses2 = [
+//     // {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
+//     // {tag:"binary", path:"./lib/mongodb/bson/binary.js"},
+//     // {tag:"code", path:"./lib/mongodb/bson/code.js"},
+//     // {tag:"code", path:"./lib/mongodb/bson/db_ref.js"},
+//     // {tag:"double", path:"./lib/mongodb/bson/double.js"},
+//     // {tag:"maxkey", path:"./lib/mongodb/bson/max_key.js"},
+//     // {tag:"symbol", path:"./lib/mongodb/bson/symbol.js"},
+//     // {tag:"timestamp", path:"./lib/mongodb/bson/timestamp.js"},
+//     // {tag:"long", path:"./lib/mongodb/bson/long.js"},
+//     {tag:"bson", path:"./lib/mongodb/bson/bson.js"}
+//   ];
 // 
-// // Just write out the index
-// var indexContent = ejs.render(templates['index'], {entries:names, format:format, title:'Articles'});    
-// fs.writeFileSync(format("%s/%s", outputDirectory, 'index.rst'), indexContent);
+// // Read all the templates
+// var templates2 = [
+//   {tag:'index', path:'./dev/tools/doc-templates/index.ejs'},
+//   {tag:'index_no_header', path:'./dev/tools/doc-templates/index_no_header.ejs'},
+//   {tag:'class', path:'./dev/tools/doc-templates/class.ejs'},
+//   {tag:'function', path:'./dev/tools/doc-templates/function.ejs'}
+// ]
+// 
+// // Extract meta data from source files
+// var dataObjects2 = docs.extractLibraryMetaData(apiClasses2);
+// // Filter out and prepare the test Objects hash
+// var testObjects2 = docs.buildTestHash(docs.extractLibraryMetaData(testClasses));
+// // Render all the classes that are decorated
+// docs.renderAllTemplates(outputDirectory2, templates, dataObjects2, testObjects2, {index_title:'Binary JSON API'});
+// 
+// // ----------------------------------------------------------------------------
+// // PROCESS MARKDOWN DOCUMENTS TO STRUCTURED TEXT
+// // ----------------------------------------------------------------------------
+// 
+// // Transform the tutorials
+// var articles = [
+//     {name:"NodeKOArticle1", output:"NodeKOArticle1.rst", path:"./docs/articles/NodeKOArticle1.md"},
+//     {name:"NodeKOArticle2", output:"NodeKOArticle2.rst", path:"./docs/articles/NodeKOArticle2.md"}
+//   ];
+// // Tranform the markdown to restructured text
+// docs.writeMarkDownFile("./docs/sphinx-docs/source/api-articles", articles, templates, 
+//   {title:'Articles', template:'index'});
+
+// Transform the tutorials
+var articles = [
+    // {name:"collections", output:"collections.rst", path:"./docs/collections.md"},
+    {name:"database", output:"database.rst", path:"./docs/database.md"},
+    // {name:"gridfs", output:"gridfs.rst", path:"./docs/gridfs.md"},
+    // {name:"indexes", output:"indexes.rst", path:"./docs/indexes.md"},
+    // {name:"insert", output:"insert.rst", path:"./docs/insert.md"},
+    // {name:"queries", output:"queries.rst", path:"./docs/queries.md"},
+    // {name:"replicaset", output:"replicaset.rst", path:"./docs/replicaset.md"}
+  ];
+// Tranform the markdown to restructured text
+docs.writeMarkDownFile("./docs/sphinx-docs/source/markdown-docs", articles, templates, 
+  {title:'Using the driver', template:'index_no_header'});
 
 
 

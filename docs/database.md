@@ -18,13 +18,17 @@ The first thing to do in order to make queries to the database is to open one. T
 ## Server options
 Several options can be passed to the `Server` constructor with `options` parameter.  
   
-  * `auto_reconnect` - to reconnect automatically, `default:false`
-  * `poolSize` - specify the number of connections in the pool `default:1`
-  * `socketOptions` - a collection of pr socket settings
-	* `timeout` = set seconds before connection times out `default:0`
-	* `noDelay` = Disables the Nagle algorithm `default:true`
-	* `keepAlive` = Set if keepAlive is used `default:0`, which means no keepAlive, set higher than 0 for keepAlive
-	* `encoding` = ['ascii', 'utf8', or 'base64'] `default:null`
+* `auto_reconnect` - to reconnect automatically, `default:false`
+* `poolSize` - specify the number of connections in the pool `default:1`
+* `socketOptions` - a collection of pr socket settings
+
+## Socket options
+Several options can be set for the `socketOptions`.
+
+* `timeout` = set seconds before connection times out `default:0`
+* `noDelay` = Disables the Nagle algorithm `default:true`
+* `keepAlive` = Set if keepAlive is used `default:0`, which means no keepAlive, set higher than 0 for keepAlive
+* `encoding` = 'ascii'|'utf8'|'base64' `default:null`
 
 ## DB options
 
@@ -40,7 +44,6 @@ Several options can be passed to the `Db` constructor with `options` parameter.
   * `reaperInterval` - specify the number of milliseconds between each reaper attempt `default:10000`
   * `reaperTimeout` - specify the number of milliseconds for timing out callbacks that don't return `default:30000`
   * `raw` - driver expects Buffer raw bson document, `default:false`
-
 
 ## Opening a database
 
@@ -94,8 +97,7 @@ To delete a database you need a pointer to it first. Deletion can be done with m
     
 ## Custom primary keys
 
-Every record in the database has an unique primary key called `_id`. Default primary keys are 12 byte hashes but a custom key generator can be used for something else. If you set `_id` "by hand" when
-inserting records then you can use whatever you want, primary key factory generates `_id` values only for records without ones.
+Every record in the database has an unique primary key called `_id`. Default primary keys are 12 byte hashes but a custom key generator can be used for something else. If you set `_id` "by hand" when inserting records then you can use whatever you want, primary key factory generates `_id` values only for records without ones.
 
 Example 1: No need to generate primary key, as its already defined:
 
@@ -105,8 +107,7 @@ Example 2: No primary key, so it needs to be generated before save:
 
     collectionn.insert({name:"Daniel"});
 
-Custom primary key factory is actually an object with method `createPK` which returns a primary key. 
-The context (value for `this`) for `createPK` is left untouched.
+Custom primary key factory is actually an object with method `createPK` which returns a primary key. The context (value for `this`) for `createPK` is left untouched.
 
     var CustomPKFactory = {
         counter:0,

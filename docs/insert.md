@@ -73,8 +73,7 @@ If the replacement object is a document, the matching documents will be replaced
     
 The example above will replace the document contents of id=123 with the replacement object.
 
-To update only selected fields, `$set` operator needs to be used. Following replacement object
-replaces author value but leaves everything else intact.
+To update only selected fields, `$set` operator needs to be used. Following replacement object replaces author value but leaves everything else intact.
 
     collection.update({_id:"123"}, {$set: {author:"Jessica"}});
     

@@ -21,11 +21,7 @@ Collections can be created with `createCollection`
 
 where `name` is the name of the collection, options a set of configuration parameters and `callback` is a callback function. `db` is the database object. 
 
-
-The first parameter for
-the callback is the error object (null if no error) and the second one is the pointer to the newly created
-collection. If strict mode is on and the table exists, the operation yields in error. With strict mode off (default)
-the function simple returns the pointer to the existing collection and does not truncate it.
+The first parameter for the callback is the error object (null if no error) and the second one is the pointer to the newly created collection. If strict mode is on and the table exists, the operation yields in error. With strict mode off (default) the function simple returns the pointer to the existing collection and does not truncate it.
 
     db.createCollection("test", function(err, collection){
         collection.insert({"test":"value"});
@@ -57,11 +53,9 @@ Collections can be listed with `collectionNames`
 
 Collection names also include database name, so a collection named `posts` in a database `blog` will be listed as `blog.posts`.
 
-Additionally there's system collections which should not be altered without knowing exactly what you are doing, these sollections
-can be identified with `system` prefix. For example `posts.system.indexes`.
+Additionally there's system collections which should not be altered without knowing exactly what you are doing, these sollections can be identified with `system` prefix. For example `posts.system.indexes`.
 
 Example:
-
     
     var mongodb = require("mongodb"),
         mongoserver = new mongodb.Server("localhost"),

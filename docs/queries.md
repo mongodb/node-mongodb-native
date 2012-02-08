@@ -80,9 +80,7 @@ To make a simple query where one field must match to a defined value, one can do
 
 This query matches all the records that a) have fields called *fieldname* and b) its value is *"fieldvalue"*.
 
-For example if we have a collection of blog posts where the structure of the 
-records is `{title, author, contents}` and we want 
-to retrieve all the posts for a specific author then we can do it like this:
+For example if we have a collection of blog posts where the structure of the records is `{title, author, contents}` and we want to retrieve all the posts for a specific author then we can do it like this:
 
     posts = pointer_to_collection;
     posts.find({author:"Daniel"}).toArray(function(err, results){
@@ -136,9 +134,7 @@ To mix AND and OR queries, you just need to use $or as one of regular query fiel
 
 ### Conditionals
 
-Conditional operators `<`, `<=`, `>`, `>=` and `!=` can't be used directly, as the query object format doesn't support it but the same
-can be achieved with their aliases `$lt`, `$lte`, `$gt`, `$gte` and `$ne`. When a field value needs to match a conditional, the value
-must be wrapped into a separate object.
+Conditional operators `<`, `<=`, `>`, `>=` and `!=` can't be used directly, as the query object format doesn't support it but the same can be achieved with their aliases `$lt`, `$lte`, `$gt`, `$gte` and `$ne`. When a field value needs to match a conditional, the value must be wrapped into a separate object.
 
     {"fieldname":{$gte:100}}
 
@@ -186,8 +182,7 @@ For example with the following document
         ]
     }
 
-not only the `_id` field can be used as a query field - also the `firstname` and even `title` can be used. This can be done when
-using nested field names as strings, concated with periods.
+not only the `_id` field can be used as a query field - also the `firstname` and even `title` can be used. This can be done when using nested field names as strings, concated with periods.
 
     collection.find({"author.firstname":"Daniel})
     
@@ -250,8 +245,7 @@ Cursor objects are the results for queries and can be used to fetch individual f
 
 ### toArray
 
-`cursor.toArray(function(err, docs){})` converts the cursor object into an array of all the matching records. Probably the 
-most convenient way to retrieve results but be careful with large datasets as every record is loaded into memory. 
+`cursor.toArray(function(err, docs){})` converts the cursor object into an array of all the matching records. Probably the most convenient way to retrieve results but be careful with large datasets as every record is loaded into memory. 
 
     collection.find().toArray(function(err, docs){
         console.log("retrieved records:");

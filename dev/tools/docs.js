@@ -31,6 +31,7 @@ var convert_tree_to_rs = function(nodes, documentLines) {
   // Go through all the tags and render
   for(var i = 0; i < nodes.length; i++) {
     var line = nodes[i];
+    // console.dir(line)
     
     if(Array.isArray(line)) {
       switch(line[0]) {
@@ -69,7 +70,10 @@ var convert_tree_to_rs = function(nodes, documentLines) {
           documentLines.push('\n');
           break;
         case 'link':
-          documentLines.push(format("`%s <%s>`_", line[2], line[1].href));
+          documentLines.push(format("`%s <%s>`_", line[2], line[1].href.replace(".md", ".html")));
+          break;
+        case 'inlinecode':
+          documentLines.push(format("``%s``", line[1]));
           break;
         case 'code_block':
           // Unpack code block
@@ -115,10 +119,14 @@ var convert_tree_to_rs = function(nodes, documentLines) {
           // Merge the docs in
           documentLines.push(format("  * %s", listitemLines.join(' ').trim()));
           break;
+        case 'em':
+          documentLines.push(format("*%s*", line[1]));
+          break;
         case 'strong':
           documentLines.push(format("**%s**", line[1]));
           break;
         default:
+          console.dir(line)
           break;
       }      
     }    
@@ -127,7 +135,7 @@ var convert_tree_to_rs = function(nodes, documentLines) {
   return documentLines;
 }
 
-exports.writeMarkDownFile = function(outputDirectory, articles, templates) {
+exports.writeMarkDownFile = function(outputDirectory, articles, templates, options) {
   // Force create the directory for the generated docs
   exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
   exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {});
@@ -147,7 +155,7 @@ exports.writeMarkDownFile = function(outputDirectory, articles, templates) {
   }
 
   // Just write out the index
-  var indexContent = ejs.render(templates['index'], {entries:names, format:format, title:'Articles'});    
+  var indexContent = ejs.render(templates[options.template], {entries:names, format:format, title:options.title});    
   fs.writeFileSync(format("%s/%s", outputDirectory, 'index.rst'), indexContent);  
 }
 

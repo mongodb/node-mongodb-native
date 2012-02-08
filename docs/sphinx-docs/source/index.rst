@@ -2,6 +2,14 @@
 The Node.JS MongoDB Driver Manual
 =================================
 
+Usage
+-----
+
+.. toctree::
+  :maxdepth: 1
+
+  markdown-docs/index
+
 Tutorials
 ---------
 

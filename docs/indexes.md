@@ -1,8 +1,7 @@
 Indexes
 =======
 
-Indexes are needed to make queries faster. For example if you need to find records by a field named *username* and 
-the field has a related index set, then the query will be a lot faster compared to if the index was not present.
+Indexes are needed to make queries faster. For example if you need to find records by a field named *username* and the field has a related index set, then the query will be a lot faster compared to if the index was not present.
 
 See [MongoDB documentation](http://www.mongodb.org/display/DOCS/Indexes) for details.
 
@@ -44,8 +43,7 @@ or with tuples
     
     collection.ensureIndex([["firstname", 1], ["lastname", 1]], callback)
     
-The number value indicates direction - if it's 1, then it is an ascending value,
-if it's -1 then it's descending. For example if you have documents with a field *date* and you want to sort these records in descending order then you might want to add corresponding index
+The number value indicates direction - if it's 1, then it is an ascending value, if it's -1 then it's descending. For example if you have documents with a field *date* and you want to sort these records in descending order then you might want to add corresponding index
 
     collection.ensureIndex({date:-1}, callback)
 
