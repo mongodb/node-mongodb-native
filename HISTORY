@@ -49,7 +49,7 @@
 0.9.8 2012-01-17
 ----------------
 * Replicasets now correctly adjusts to live changes in the replicaset configuration on the servers, reconnecting correctly.
-  * Set the interval for checking for changes setting the replicaSetCheckInterval property when creating the ReplSetServers instance or on db.serverConfig.replicaSetCheckInterval. (default 1000 miliseconds)
+  - Set the interval for checking for changes setting the replicaSetCheckInterval property when creating the ReplSetServers instance or on db.serverConfig.replicaSetCheckInterval. (default 1000 miliseconds)
 * Fixes formattedOrderClause in collection.js to accept a plain hash as a parameter (Issue #469) https://github.com/tedeh
 * Removed duplicate code for formattedOrderClause and moved to utils module
 * Pass in poolSize for ReplSetServers to set default poolSize for new replicaset members
@@ -101,9 +101,9 @@
 
 0.9.7.2-3 2011-12-18
 --------------------
-* Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450)
-* Allow for force send query to primary, pass option (read:'primary') on find command
-	* find({a:1}, {read:'primary'}).toArray(function(err, items) {});
+* Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450).
+* Allow for force send query to primary, pass option (read:'primary') on find command. 
+	* ``find({a:1}, {read:'primary'}).toArray(function(err, items) {});``
 
 0.9.7.2-2 2011-12-16
 --------------------

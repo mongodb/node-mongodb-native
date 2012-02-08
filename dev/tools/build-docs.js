@@ -156,8 +156,8 @@ var changelog = fs.readFileSync('./HISTORY').toString();
 // Just write out the index
 var content = ejs.render(templates["changelog"], {content:changelog});    
 // Write it out
-console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-console.dir(format("%s/changelog.rst", outputDirectory))
+// console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+// console.dir(format("%s/changelog.rst", outputDirectory))
 fs.writeFileSync(format("%s/changelog.rst", outputDirectory), content);
 
 // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
