@@ -22,7 +22,7 @@ API Documentation
 -----------------
 
 .. toctree::
-  :maxdepth: 3
+  :maxdepth: 2
 
   api-generated/index
   api-bson-generated/index

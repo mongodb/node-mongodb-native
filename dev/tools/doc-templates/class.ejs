@@ -5,15 +5,20 @@ for(var i = 0; i < entries.length; i++) {
   }
 }
 
+var addLine = function(char, length) {
+  var chars = [];  
+  for(var i = 0; i < length; i++) chars[i] = char;
+  return chars.join('');
+}
+
 // Contains the current class name
 var className = null;
 
 for(var i = 0; i < entries.length; i++) {
   if(isClass(entries[i].tags)) {
-    // console.log("-------------------------------------------------------------------------")
-    // console.dir(entries[i])
-    
-    %><%= format("==================\n%s\n==================\n", entries[i].ctx.string) %><%
+    var _name = entries[i].ctx.string.trim();
+        
+    %><%= format("%s\n%s\n%s\n", addLine("=", _name.length), _name, addLine("=", _name.length)) %><%
     className = entries[i].ctx.string.replace("()", "");
     
     %><%= format("\n\n------------------\nConstructor\n------------------\n") %><%
@@ -29,7 +34,6 @@ for(var i = 0; i < entries.length; i++) {
       .replace(/\<em\>|\<\/em\>/g, "*")
       .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
     %><%- format("%s\n\n", fullDescription) %><%    
-
     %><%= format("\n  .. js:class:: %s\n\n", entries[i].ctx.string) %><%
 
     for(var ti = 0; ti < entries[i].tags.length; ti++) { 
@@ -193,9 +197,6 @@ for(var i = 0; i < entries.length; i++) {
 }
 
 for(var i = 0; i < entries.length; i++) {  
-  // console.log("----------------------------------------------------------------")
-  // console.dir(entries[i])
-
   // If it's a function parse it
   if(isFunction(entries[i])) {
     var paramsStrings = [];
@@ -243,22 +244,19 @@ for(var i = 0; i < entries.length; i++) {
     // Write header depending on if it's class or instance level
     if(entries[i].ctx.receiver != null) {
       // Change examples Name to include class name
-      var examplesName = format("%s.%s", className, entries[i].ctx.name);
-      
-      %><%= format("\n------------------\n%s.%s\n------------------\n", className, entries[i].ctx.name) %><%
+      var examplesName = format("%s.%s", className, entries[i].ctx.name);      
+      var _length = format("%s.%s", className, entries[i].ctx.name).length;      
+      %><%= format("\n%s\n%s.%s\n%s\n", addLine("-", _length), className, entries[i].ctx.name, addLine("-", _length)) %><%
       %><%- format("%s\n\n", fullDescription) %><%
       %><%= format(".. js:function:: %s.%s(%s)\n\n", className, entries[i].ctx.name, paramsString) %><%      
     } else {      
-      %><%= format("\n------------------\n%s\n------------------\n", entries[i].ctx.name) %><%
+      var _length = entries[i].ctx.name.length;      
+      %><%= format("\n%s\n%s\n%s\n", addLine("-", _length), entries[i].ctx.name, addLine("-", _length)) %><%
       %><%- format("%s\n\n", fullDescription) %><%
       %><%= format(".. js:function:: %s(%s)\n\n", entries[i].ctx.name, paramsString) %><%
     }
         
     %><%= Array.isArray(paramsStrings) ? paramsStrings.join("") : paramsStrings %><%
-
-    // console.dir("===========================================================")
-    // console.dir(examplesName)
-    // console.dir(Object.keys(examples))
 
     // If we have examples render them
     if(examples != null && examples[examplesName]) {
