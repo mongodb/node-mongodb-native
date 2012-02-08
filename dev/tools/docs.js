@@ -13,7 +13,7 @@ var fs = require('fs'),
 // -----------------------------------------------------------------------------------------------------
 
 // Parse markdown to Rich text format
-exports.transformMarkdownToStructuredText = function(markDownText) {
+var transformMarkdownToStructuredText = exports.transformMarkdownToStructuredText = function(markDownText) {
   // Parse the md file and generate a json tree
   var jsonTree = markdown.parse(markDownText);
   var documentLines = [];
@@ -66,6 +66,7 @@ var convert_tree_to_rs = function(nodes, documentLines) {
         
           // Merge the docs in
           documentLines.push(paraLines.join(' '));
+          documentLines.push('\n');
           break;
         case 'link':
           documentLines.push(format("`%s <%s>`_", line[2], line[1].href));
@@ -112,7 +113,7 @@ var convert_tree_to_rs = function(nodes, documentLines) {
           }          
           
           // Merge the docs in
-          documentLines.push(format("  * %s", listitemLines.join(' ')));
+          documentLines.push(format("  * %s", listitemLines.join(' ').trim()));
           break;
         case 'strong':
           documentLines.push(format("**%s**", line[1]));
@@ -124,6 +125,30 @@ var convert_tree_to_rs = function(nodes, documentLines) {
   }
   
   return documentLines;
+}
+
+exports.writeMarkDownFile = function(outputDirectory, articles, templates) {
+  // Force create the directory for the generated docs
+  exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
+  exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {});
+
+  // Contains all the names for the index
+  var names = [];
+
+  // Process all the articles
+  for(var i = 0 ; i < articles.length; i++) {
+    // Fetch the article markdown content
+    var article = fs.readFileSync(articles[i].path).toString();
+    // Convert the text into restructured text for sphinx
+    var text = transformMarkdownToStructuredText(article);
+    // Write out the content
+    fs.writeFileSync(format("%s/%s", outputDirectory, articles[i].output.toLowerCase()), text);
+    names.push(articles[i].name.toLowerCase());
+  }
+
+  // Just write out the index
+  var indexContent = ejs.render(templates['index'], {entries:names, format:format, title:'Articles'});    
+  fs.writeFileSync(format("%s/%s", outputDirectory, 'index.rst'), indexContent);  
 }
 
 // -----------------------------------------------------------------------------------------------------

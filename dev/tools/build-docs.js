@@ -120,38 +120,40 @@ var articles = [
 
 // Output directory
 var outputDirectory = "./docs/sphinx-docs/source/api-articles"
+docs.writeMarkDownFile(outputDirectory, articles, templates);
 
-// Force create the directory for the generated docs
-exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
-exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {});
 
-var names = [];
-
-// Process all the articles
-for(var i = 0 ; i < articles.length; i++) {
-  // Fetch the article markdown content
-  var article = fs.readFileSync(articles[i].path).toString();
-  // Convert the text into restructured text for sphinx
-  var text = docs.transformMarkdownToStructuredText(article);
-  // Write out the content
-  fs.writeFileSync(format("%s/%s", outputDirectory, articles[i].output.toLowerCase()), text);
-  names.push(articles[i].name.toLowerCase());
-  
-  // var _markdown = new markdown.Markdown.parse(article);  
-  // console.dir(markdown)
-  // console.dir(markdown.parse(article))
-  // var markdownDoc = _markdown.parse(article);
-
-  
-  // console.log("--------------------------------------------------------------------------------")
-  // console.dir(markdownDoc)
-  
-  // console.log(article.toString())
-}
-
-// Just write out the index
-var indexContent = ejs.render(templates['index'], {entries:names, format:format, title:'Articles'});    
-fs.writeFileSync(format("%s/%s", outputDirectory, 'index.rst'), indexContent);
+// // Force create the directory for the generated docs
+// exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
+// exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {});
+// 
+// var names = [];
+// 
+// // Process all the articles
+// for(var i = 0 ; i < articles.length; i++) {
+//   // Fetch the article markdown content
+//   var article = fs.readFileSync(articles[i].path).toString();
+//   // Convert the text into restructured text for sphinx
+//   var text = docs.transformMarkdownToStructuredText(article);
+//   // Write out the content
+//   fs.writeFileSync(format("%s/%s", outputDirectory, articles[i].output.toLowerCase()), text);
+//   names.push(articles[i].name.toLowerCase());
+//   
+//   // var _markdown = new markdown.Markdown.parse(article);  
+//   // console.dir(markdown)
+//   // console.dir(markdown.parse(article))
+//   // var markdownDoc = _markdown.parse(article);
+// 
+//   
+//   // console.log("--------------------------------------------------------------------------------")
+//   // console.dir(markdownDoc)
+//   
+//   // console.log(article.toString())
+// }
+// 
+// // Just write out the index
+// var indexContent = ejs.render(templates['index'], {entries:names, format:format, title:'Articles'});    
+// fs.writeFileSync(format("%s/%s", outputDirectory, 'index.rst'), indexContent);
 
 
 
