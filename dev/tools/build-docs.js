@@ -149,20 +149,13 @@ docs.writeMarkDownFile("./docs/sphinx-docs/source/markdown-docs", articles, temp
 var outputDirectory = "./docs/sphinx-docs/source/changelog";
 // Force create the directory for the generated docs
 exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
-exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {});
-
-// Read the changelog
-var changelog = fs.readFileSync('./HISTORY').toString();
-// Just write out the index
-var content = ejs.render(templates["changelog"], {content:changelog});    
-// Write it out
-// console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-// console.dir(format("%s/changelog.rst", outputDirectory))
-fs.writeFileSync(format("%s/changelog.rst", outputDirectory), content);
-
-// console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-// console.log(content)
-
-// fs.writeFileSync(format("%s/%s", outputDirectory, 'index.rst'), indexContent);  
+exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {
+  // Read the changelog
+  var changelog = fs.readFileSync('./HISTORY').toString();
+  // Just write out the index
+  var content = ejs.render(templates["changelog"], {content:changelog});    
+  // Write it out
+  fs.writeFileSync(format("%s/changelog.rst", outputDirectory), content);  
+});
 
 
