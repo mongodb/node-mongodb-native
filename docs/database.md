@@ -9,11 +9,11 @@ The first thing to do in order to make queries to the database is to open one. T
         
     db_connector.open(callback);
     
-  * `host` is a server hostname or IP
-  * `port` is a MongoDB port, use `mongodb.Connection.DEFAULT_PORT` for default (27017)
-  * `server_options` see *Server options*
-  * `name` is the databse name that needs to be opened, database will be created automatically if it doesn't yet exist
-  * `db_options` see *DB options*
+* `host` is a server hostname or IP
+* `port` is a MongoDB port, use `mongodb.Connection.DEFAULT_PORT` for default (27017)
+* `server_options` see *Server options*
+* `name` is the databse name that needs to be opened, database will be created automatically if it doesn't yet exist
+* `db_options` see *DB options*
 
 ## Server options
 Several options can be passed to the `Server` constructor with `options` parameter.  
@@ -34,16 +34,16 @@ Several options can be set for the `socketOptions`.
 
 Several options can be passed to the `Db` constructor with `options` parameter.
 
-  * `native_parser` - if true, use native BSON parser 
-  * `strict` - sets *strict mode*, if true then existing collections can't be "recreated" etc.
-  * `pk` - custom primary key factory to generate `_id` values (see Custom primary keys).
-  * `forceServerObjectId` - generation of objectid is delegated to the mongodb server instead of the driver. default is false
-  * `retryMiliSeconds` - specify the number of milliseconds between connection attempts `default:5000`
-  * `numberOfRetries` - specify the number of retries for connection attempts `default:3`
-  * `reaper` - enable/disable reaper (true/false) `default:false`
-  * `reaperInterval` - specify the number of milliseconds between each reaper attempt `default:10000`
-  * `reaperTimeout` - specify the number of milliseconds for timing out callbacks that don't return `default:30000`
-  * `raw` - driver expects Buffer raw bson document, `default:false`
+* `native_parser` - if true, use native BSON parser 
+* `strict` - sets *strict mode*, if true then existing collections can't be "recreated" etc.
+* `pk` - custom primary key factory to generate `_id` values (see Custom primary keys).
+* `forceServerObjectId` - generation of objectid is delegated to the mongodb server instead of the driver. default is false
+* `retryMiliSeconds` - specify the number of milliseconds between connection attempts `default:5000`
+* `numberOfRetries` - specify the number of retries for connection attempts `default:3`
+* `reaper` - enable/disable reaper (true/false) `default:false`
+* `reaperInterval` - specify the number of milliseconds between each reaper attempt `default:10000`
+* `reaperTimeout` - specify the number of milliseconds for timing out callbacks that don't return `default:30000`
+* `raw` - driver expects Buffer raw bson document, `default:false`
 
 ## Opening a database
 
@@ -61,15 +61,15 @@ Resulting database object can be used for creating and selecting [collections](c
 
 ### Database properties
 
-  * `databaseName` is the name of the database
-  * `serverConfig` includes information about the server (`serverConfig.host', `serverConfig.port` etc.)
-  * `state` indicates if the database is connected or not
-  * `strict` indicates if *strict mode* is on (true) or off (false, default)
-  * `version` indicates the version of the MongoDB database
+* `databaseName` is the name of the database
+* `serverConfig` includes information about the server (`serverConfig.host`, `serverConfig.port` etc.)
+* `state` indicates if the database is connected or not
+* `strict` indicates if *strict mode* is on (true) or off (false, default)
+* `version` indicates the version of the MongoDB database
 
 ### Database events
 
-  * `close` to indicate that the connection to the database was closed
+* `close` to indicate that the connection to the database was closed
   
 For example
 

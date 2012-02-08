@@ -21,7 +21,7 @@ for(var i = 0; i < entries.length; i++) {
     %><%= format("%s\n%s\n%s\n", addLine("=", _name.length), _name, addLine("=", _name.length)) %><%
     className = entries[i].ctx.string.replace("()", "");
     
-    %><%= format("\n\n------------------\nConstructor\n------------------\n") %><%
+    %><%= format("\n------------------\nConstructor\n------------------\n") %><%
 
     // Get full description and clean it
     var fullDescription = entries[i].description.summary;
@@ -141,7 +141,7 @@ for(var i = 0; i < entries.length; i++) {
 
     // If we have examples render them
     if(examples != null && examples[attributeName]) {
-      %><%= format("**Examples**\n\n") %><%      
+      %><%= format("\n**Examples**\n\n") %><%      
       var examplesArray = examples[attributeName];
       // Iterate over all the examples
       for(var ei = 0; ei < examplesArray.length; ei++) {
@@ -260,7 +260,7 @@ for(var i = 0; i < entries.length; i++) {
 
     // If we have examples render them
     if(examples != null && examples[examplesName]) {
-      %><%= format("**Examples**\n\n") %><%      
+      %><%= format("\n**Examples**\n\n") %><%      
       var examplesArray = examples[examplesName];
       // Iterate over all the examples
       for(var ei = 0; ei < examplesArray.length; ei++) {

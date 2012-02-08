@@ -35,8 +35,7 @@ retrieves fields `name` and `title` (and as a default also `_id`) but not any ot
 
 ## Find first occurence with findOne()
 
-`findOne` is a convinence method finding and returning the first match of a query while regular `find` returns a cursor object instead.
-Use it when you expect only one record, for example when querying with `_id` or another unique property.
+`findOne` is a convinence method finding and returning the first match of a query while regular `find` returns a cursor object instead. Use it when you expect only one record, for example when querying with `_id` or another unique property.
 
     collection.findOne([query], callback)
 
@@ -110,8 +109,7 @@ Whis query matches all records where *key1* is *"value1"* and  *key2* is *"value
 
 ### OR
 
-OR queries are a bit trickier but doable with the `$or` operator. Query operator takes an array which includes
-a set of query objects and at least one of these must match a document before it is retrieved
+OR queries are a bit trickier but doable with the `$or` operator. Query operator takes an array which includes a set of query objects and at least one of these must match a document before it is retrieved
 
     {
         $or:[

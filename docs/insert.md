@@ -16,8 +16,7 @@ Where
 
   * `docs` is a single document object or an array of documents
   * `options` is an object of parameters, if you use a callback, set `safe` to true - this way the callback is executed *after* the record is saved to the database, if `safe` is false (default) callback is fired immediately and thus doesn't make much sense.
-  * `callback` - callback function to run after the record is inserted. Set `safe` to true in `options` when using callback. First parameter for callback
-    is the error object (if an error occured) and the second is an array of records inserted. 
+  * `callback` - callback function to run after the record is inserted. Set `safe` to true in `options` when using callback. First parameter for callback is the error object (if an error occured) and the second is an array of records inserted. 
 
 For example
 
