@@ -1,6 +1,6 @@
-=======================
-MongoDB Manual Contents
-=======================
+======================================
+Node.JS MongoDB Driver Manual Contents
+======================================
 
 .. toctree::
    :maxdepth: 3
