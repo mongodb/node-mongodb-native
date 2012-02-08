@@ -1,0 +1,381 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ReadStream() &mdash; MongoDB Node.JS Driver 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.0.0 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="readstream">
+<h1>ReadStream()<a class="headerlink" href="#readstream" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>ReadStream</p>
+<blockquote>
+<div><dl class="class">
+<dt id="ReadStream">
+<em class="property">class </em><tt class="descname">ReadStream</tt><big>(</big><big>)</big><a class="headerlink" href="#ReadStream" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>autoclose</strong> (<em>boolean</em>) &#8211; automatically close file when the stream reaches the end.</li>
+<li><strong>cursor</strong> (<em>gridstore</em>) &#8211; a cursor object that the stream wraps.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">readstream</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
+<p>Returns a stream interface for the <strong>file</strong>.</p>
+<dl class="docutils">
+<dt>Events</dt>
+<dd><ul class="first last simple">
+<li><strong>data</strong> {function(item) {}} the data event triggers when a document is ready.</li>
+<li><strong>end</strong> {function() {}} the end event triggers when there is no more documents available.</li>
+<li><strong>close</strong> {function() {}} the close event triggers when the stream is closed.</li>
+<li><strong>error</strong> {function(err) {}} the error event triggers if an error happens.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="pause">
+<h2>pause<a class="headerlink" href="#pause" title="Permalink to this headline">¶</a></h2>
+<p>Pauses this stream, then no farther events will be fired.</p>
+<dl class="function">
+<dt>
+<tt class="descname">pause</tt><big>(</big><big>)</big></dt>
+<dd></dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of the readstream pause function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// File id</span>
+  <span class="kd">var</span> <span class="nx">fileId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
+  <span class="c1">// Create a file</span>
+  <span class="kd">var</span> <span class="nx">file</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
+  <span class="nx">file</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Write some content and flush to disk</span>
+    <span class="nx">file</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s1">&#39;Hello world&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">file</span><span class="p">.</span><span class="nx">close</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Let&#39;s create a read file</span>
+        <span class="nx">file</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">);</span>
+        <span class="c1">// Open the file</span>
+        <span class="nx">file</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+          <span class="c1">// Peform a find to get a cursor</span>
+          <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">file</span><span class="p">.</span><span class="nx">stream</span><span class="p">();</span>
+
+          <span class="c1">// For each data item</span>
+          <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// Check if stream is paused</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="nx">stream</span><span class="p">.</span><span class="nx">paused</span><span class="p">);</span>
+            <span class="c1">// Pause stream</span>
+            <span class="nx">stream</span><span class="p">.</span><span class="nx">pause</span><span class="p">();</span>
+            <span class="c1">// Check if cursor is paused</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">stream</span><span class="p">.</span><span class="nx">paused</span><span class="p">);</span>
+
+            <span class="c1">// Restart the stream after 1 miliscecond</span>
+            <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+              <span class="nx">stream</span><span class="p">.</span><span class="nx">resume</span><span class="p">();</span>
+              <span class="c1">// Check if cursor is paused</span>
+              <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="nx">stream</span><span class="p">.</span><span class="nx">paused</span><span class="p">);</span>
+            <span class="p">},</span> <span class="mi">1</span><span class="p">);</span>
+          <span class="p">});</span>
+
+          <span class="c1">// For each data item</span>
+          <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{});</span>
+          <span class="c1">// When the stream is done</span>
+          <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="destroy">
+<h2>destroy<a class="headerlink" href="#destroy" title="Permalink to this headline">¶</a></h2>
+<p>Destroys the stream, then no farther events will be fired.</p>
+<dl class="function">
+<dt>
+<tt class="descname">destroy</tt><big>(</big><big>)</big></dt>
+<dd></dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of the readstream destroy function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// File id</span>
+  <span class="kd">var</span> <span class="nx">fileId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
+  <span class="c1">// Create a file</span>
+  <span class="kd">var</span> <span class="nx">file</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
+  <span class="nx">file</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Write some content and flush to disk</span>
+    <span class="nx">file</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s1">&#39;Hello world&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">file</span><span class="p">.</span><span class="nx">close</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Let&#39;s create a read file</span>
+        <span class="nx">file</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">);</span>
+        <span class="c1">// Open the file</span>
+        <span class="nx">file</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+          <span class="c1">// Peform a find to get a cursor</span>
+          <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">file</span><span class="p">.</span><span class="nx">stream</span><span class="p">();</span>
+
+          <span class="c1">// For each data item</span>
+          <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// Destroy the stream</span>
+            <span class="nx">stream</span><span class="p">.</span><span class="nx">destroy</span><span class="p">();</span>
+          <span class="p">});</span>
+
+          <span class="c1">// When the stream is done</span>
+          <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="resume">
+<h2>resume<a class="headerlink" href="#resume" title="Permalink to this headline">¶</a></h2>
+<p>Resumes this stream.</p>
+<dl class="function">
+<dt>
+<tt class="descname">resume</tt><big>(</big><big>)</big></dt>
+<dd></dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of the readstream resume function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// File id</span>
+  <span class="kd">var</span> <span class="nx">fileId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
+  <span class="c1">// Create a file</span>
+  <span class="kd">var</span> <span class="nx">file</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
+  <span class="nx">file</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Write some content and flush to disk</span>
+    <span class="nx">file</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s1">&#39;Hello world&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">file</span><span class="p">.</span><span class="nx">close</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Let&#39;s create a read file</span>
+        <span class="nx">file</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">);</span>
+        <span class="c1">// Open the file</span>
+        <span class="nx">file</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+          <span class="c1">// Peform a find to get a cursor</span>
+          <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">file</span><span class="p">.</span><span class="nx">stream</span><span class="p">();</span>
+
+          <span class="c1">// For each data item</span>
+          <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// Check if stream is paused</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="nx">stream</span><span class="p">.</span><span class="nx">paused</span><span class="p">);</span>
+            <span class="c1">// Pause stream</span>
+            <span class="nx">stream</span><span class="p">.</span><span class="nx">pause</span><span class="p">();</span>
+            <span class="c1">// Check if cursor is paused</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">stream</span><span class="p">.</span><span class="nx">paused</span><span class="p">);</span>
+
+            <span class="c1">// Restart the stream after 1 miliscecond</span>
+            <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+              <span class="nx">stream</span><span class="p">.</span><span class="nx">resume</span><span class="p">();</span>
+              <span class="c1">// Check if cursor is paused</span>
+              <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="nx">stream</span><span class="p">.</span><span class="nx">paused</span><span class="p">);</span>
+            <span class="p">},</span> <span class="mi">1</span><span class="p">);</span>
+          <span class="p">});</span>
+
+          <span class="c1">// For each data item</span>
+          <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{});</span>
+          <span class="c1">// When the stream is done</span>
+          <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/>
+            </a></p>
+<h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">ReadStream()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#pause">pause</a></li>
+<li><a class="reference internal" href="#destroy">destroy</a></li>
+<li><a class="reference internal" href="#resume">resume</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3><a href="../contents.html">Core Documentation</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/replicaset.html">Replicasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/collections.html">Collections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/insert.html">Inserting and updating</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/queries.html">Queries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/indexes.html">Indexes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/gridfs.html">GridStore</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api-generated/readstream.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, MongoDB Node.JS Team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-7301842-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

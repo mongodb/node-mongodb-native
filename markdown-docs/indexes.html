@@ -1,0 +1,266 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Indexes &mdash; MongoDB Node.JS Driver 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.0.0 documentation" href="../index.html" />
+    <link rel="next" title="GridStore" href="gridfs.html" />
+    <link rel="prev" title="Queries" href="queries.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="gridfs.html" title="GridStore"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="queries.html" title="Queries"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="indexes">
+<h1>Indexes<a class="headerlink" href="#indexes" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><p>Indexes are needed to make queries faster. For example if you need to find records by a field named  <em>username</em>  and the field has a related index set, then the query will be a lot faster compared to if the index was not present.</p>
+<p>See  <a class="reference external" href="http://www.mongodb.org/display/DOCS/Indexes">MongoDB documentation</a>  for details.</p>
+</div></blockquote>
+<div class="section" id="create-indexes-with-createindex">
+<h2>Create indexes with createIndex()<a class="headerlink" href="#create-indexes-with-createindex" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><tt class="docutils literal"><span class="pre">createIndex</span></tt>  adds a new index to a collection. For checking if the index was already set, use  <tt class="docutils literal"><span class="pre">ensureIndex</span></tt>  instead.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">createIndex</span><span class="p">(</span><span class="nx">index</span><span class="p">[,</span> <span class="nx">options</span><span class="p">],</span> <span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>or</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">createIndex</span><span class="p">(</span><span class="nx">collectionname</span><span class="p">,</span> <span class="nx">index</span><span class="p">[,</span> <span class="nx">options</span><span class="p">],</span> <span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>where</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">index</span></tt>  is the field or fields to be indexed. See  <em>index field</em></li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt>  are options, for example  <tt class="docutils literal"><span class="pre">{sparse:</span> <span class="pre">true}</span></tt>  to include only records that have indexed field set or  <tt class="docutils literal"><span class="pre">{unique:</span> <span class="pre">true}</span></tt>  for unique indexes. If the  <tt class="docutils literal"><span class="pre">options</span></tt>  is a boolean value, then it indicates if it&#8217;s an unique index or not.</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and the name for the newly created index</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="ensure-indexes-with-ensureindex">
+<h2>Ensure indexes with ensureIndex()<a class="headerlink" href="#ensure-indexes-with-ensureindex" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>Same as  <tt class="docutils literal"><span class="pre">createIndex</span></tt>  with the difference that the index is checked for existence before adding to avoid duplicate indexes.</div></blockquote>
+</div>
+<div class="section" id="index-field">
+<h2>Index field<a class="headerlink" href="#index-field" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Index field can be a simple string like  <tt class="docutils literal"><span class="pre">&quot;username&quot;</span></tt>  to index certain field (in this case, a field named as  <em>username</em> ).</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">ensureIndex</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">,</span><span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>It is possible to index fields inside nested objects, for example  <tt class="docutils literal"><span class="pre">&quot;user.firstname&quot;</span></tt>  to index field named  <em>firstname</em>  inside a document named  <em>user</em> .</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">ensureIndex</span><span class="p">(</span><span class="s2">&quot;user.firstname&quot;</span><span class="p">,</span><span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>It is also possible to create mixed indexes to include several fields at once.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">ensureIndex</span><span class="p">({</span><span class="nx">firstname</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span> <span class="nx">lastname</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>or with tuples</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">ensureIndex</span><span class="p">([[</span><span class="s2">&quot;firstname&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;lastname&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The number value indicates direction - if it&#8217;s 1, then it is an ascending value, if it&#8217;s -1 then it&#8217;s descending. For example if you have documents with a field  <em>date</em>  and you want to sort these records in descending order then you might want to add corresponding index</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">ensureIndex</span><span class="p">({</span><span class="nx">date</span><span class="o">:-</span><span class="mi">1</span><span class="p">},</span> <span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="remove-indexes-with-dropindex">
+<h2>Remove indexes with dropIndex()<a class="headerlink" href="#remove-indexes-with-dropindex" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>All indexes can be dropped at once with  <tt class="docutils literal"><span class="pre">dropIndexes</span></tt></p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">dropIndexes</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and a boolean value true if operation succeeded.</p>
+</div></blockquote>
+</div>
+<div class="section" id="get-index-information-with-indexinformation">
+<h2>Get index information with indexInformation()<a class="headerlink" href="#get-index-information-with-indexinformation" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><tt class="docutils literal"><span class="pre">indexInformation</span></tt>  can be used to fetch some useful information about collection indexes.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">indexInformation</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Where  <tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and an index information object.</p>
+<p>The keys in the index object are the index names and the values are tuples of included fields.</p>
+<p>For example if a collection has two indexes - as a default an ascending index for the  <tt class="docutils literal"><span class="pre">_id</span></tt>  field and an additonal descending index for  <tt class="docutils literal"><span class="pre">&quot;username&quot;</span></tt>  field, then the index information object would look like the following</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s2">&quot;_id&quot;</span><span class="o">:</span><span class="p">[[</span><span class="s2">&quot;_id&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+    <span class="s2">&quot;username_-1&quot;</span><span class="o">:</span><span class="p">[[</span><span class="s2">&quot;username&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/>
+            </a></p>
+<h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Indexes</a><ul>
+<li><a class="reference internal" href="#create-indexes-with-createindex">Create indexes with createIndex()</a></li>
+<li><a class="reference internal" href="#ensure-indexes-with-ensureindex">Ensure indexes with ensureIndex()</a></li>
+<li><a class="reference internal" href="#index-field">Index field</a></li>
+<li><a class="reference internal" href="#remove-indexes-with-dropindex">Remove indexes with dropIndex()</a></li>
+<li><a class="reference internal" href="#get-index-information-with-indexinformation">Get index information with indexInformation()</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3><a href="../contents.html">Core Documentation</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replicaset.html">Replicasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Collections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="insert.html">Inserting and updating</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queries.html">Queries</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Indexes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#create-indexes-with-createindex">Create indexes with createIndex()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ensure-indexes-with-ensureindex">Ensure indexes with ensureIndex()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#index-field">Index field</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#remove-indexes-with-dropindex">Remove indexes with dropIndex()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-index-information-with-indexinformation">Get index information with indexInformation()</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gridfs.html">GridStore</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/markdown-docs/indexes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+  <h4>Previous page</h4>
+  <p class="topless"><a href="queries.html"
+                        title="previous chapter">Queries</a></p>
+  <h4>Next page</h4>
+  <p class="topless"><a href="gridfs.html"
+                        title="next chapter">GridStore</a></p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="gridfs.html" title="GridStore"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="queries.html" title="Queries"
+             >previous</a> |</li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, MongoDB Node.JS Team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-7301842-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

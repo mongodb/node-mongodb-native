@@ -1,0 +1,253 @@
+============
+ReadStream()
+============
+
+------------------
+Constructor
+------------------
+
+
+ReadStream
+
+
+  .. js:class:: ReadStream()
+
+   :param boolean autoclose: automatically close file when the stream reaches the end.
+   :param gridstore cursor: a cursor object that the stream wraps.
+   :returns: readstream 
+
+
+Returns a stream interface for the **file**.
+
+
+
+Events
+ - **data** {function(item) {}} the data event triggers when a document is ready.
+ - **end** {function() {}} the end event triggers when there is no more documents available.
+ - **close** {function() {}} the close event triggers when the stream is closed.
+ - **error** {function(err) {}} the error event triggers if an error happens.
+
+
+-----
+pause
+-----
+
+
+Pauses this stream, then no farther events will be fired.
+
+.. js:function:: pause()
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of the readstream pause function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       // File id
+       var fileId = new ObjectID();
+       // Create a file
+       var file = new GridStore(db, fileId, "w");
+       file.open(function(err, file) {      
+         // Write some content and flush to disk
+         file.write('Hello world', function(err, file) {        
+           file.close(function(err, result) {
+             
+             // Let's create a read file
+             file = new GridStore(db, fileId, "r");
+             // Open the file
+             file.open(function(err, file) {            
+               // Peform a find to get a cursor
+               var stream = file.stream();
+     
+               // For each data item
+               stream.on("data", function(item) {
+                 // Check if stream is paused
+                 assert.equal(false, stream.paused);
+                 // Pause stream
+                 stream.pause();
+                 // Check if cursor is paused
+                 assert.equal(true, stream.paused);         
+     
+                 // Restart the stream after 1 miliscecond
+                 setTimeout(function() {
+                   stream.resume();
+                   // Check if cursor is paused
+                   assert.equal(false, stream.paused);
+                 }, 1);          
+               });
+     
+               // For each data item
+               stream.on("end", function(item) {});
+               // When the stream is done
+               stream.on("close", function() {
+                 db.close();          
+               });        
+             });
+           });        
+         });      
+       });
+     });
+
+
+-------
+destroy
+-------
+
+
+Destroys the stream, then no farther events will be fired.
+
+.. js:function:: destroy()
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of the readstream destroy function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       // File id
+       var fileId = new ObjectID();
+       // Create a file
+       var file = new GridStore(db, fileId, "w");
+       file.open(function(err, file) {      
+         // Write some content and flush to disk
+         file.write('Hello world', function(err, file) {        
+           file.close(function(err, result) {
+             
+             // Let's create a read file
+             file = new GridStore(db, fileId, "r");
+             // Open the file
+             file.open(function(err, file) {            
+               // Peform a find to get a cursor
+               var stream = file.stream();
+     
+               // For each data item
+               stream.on("data", function(item) {
+                 // Destroy the stream
+                 stream.destroy();
+               });
+     
+               // When the stream is done
+               stream.on("close", function() {
+                 db.close();          
+               });        
+             });
+           });        
+         });      
+       });
+     });
+
+
+------
+resume
+------
+
+
+Resumes this stream.
+
+.. js:function:: resume()
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of the readstream resume function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       // File id
+       var fileId = new ObjectID();
+       // Create a file
+       var file = new GridStore(db, fileId, "w");
+       file.open(function(err, file) {      
+         // Write some content and flush to disk
+         file.write('Hello world', function(err, file) {        
+           file.close(function(err, result) {
+             
+             // Let's create a read file
+             file = new GridStore(db, fileId, "r");
+             // Open the file
+             file.open(function(err, file) {            
+               // Peform a find to get a cursor
+               var stream = file.stream();
+     
+               // For each data item
+               stream.on("data", function(item) {
+                 // Check if stream is paused
+                 assert.equal(false, stream.paused);
+                 // Pause stream
+                 stream.pause();
+                 // Check if cursor is paused
+                 assert.equal(true, stream.paused);         
+     
+                 // Restart the stream after 1 miliscecond
+                 setTimeout(function() {
+                   stream.resume();
+                   // Check if cursor is paused
+                   assert.equal(false, stream.paused);
+                 }, 1);          
+               });
+     
+               // For each data item
+               stream.on("end", function(item) {});
+               // When the stream is done
+               stream.on("close", function() {
+                 db.close();          
+               });        
+             });
+           });        
+         });      
+       });
+     });
+

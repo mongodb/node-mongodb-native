@@ -1,0 +1,30 @@
+========
+Symbol()
+========
+
+------------------
+Constructor
+------------------
+
+
+A class representation of the BSON Symbol type.
+
+
+  .. js:class:: Symbol()
+
+   :param string value: the string representing the symbol.
+   :returns: symbol 
+
+
+
+-------
+valueOf
+-------
+
+
+Access the wrapped string value.
+
+.. js:function:: valueOf()
+
+   :returns: string returns the wrapped string.
+

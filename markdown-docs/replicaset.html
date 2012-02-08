@@ -1,0 +1,237 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Replicasets &mdash; MongoDB Node.JS Driver 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.0.0 documentation" href="../index.html" />
+    <link rel="next" title="Collections" href="collections.html" />
+    <link rel="prev" title="Database" href="database.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="collections.html" title="Collections"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Database"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="replicasets">
+<h1>Replicasets<a class="headerlink" href="#replicasets" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Replica sets is the asynchronous master/slave replication added to Mongodb that takes care off all the failover and recovery for the member nodes. According to the mongodb documentation a replicaset is</p>
+<blockquote>
+<div><ul class="simple">
+<li>Two or more nodes that are copies of each other</li>
+<li>Automatic assignment of a primary(master) node if none is available</li>
+<li>Drivers that automatically detect the new master and send writes to it</li>
+</ul>
+</div></blockquote>
+<p>More information at  <a class="reference external" href="http://www.mongodb.org/display/DOCS/Replica+Sets">Replicasets</a></p>
+</div></blockquote>
+</div>
+<div class="section" id="driver-usage">
+<h2>Driver usage<a class="headerlink" href="#driver-usage" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>To create a new replicaset follow the instructions on the mongodb site to setup the config and the replicaset instances. Then using the driver.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSetServers</span><span class="p">(</span> <span class="p">[</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="mf">127.0</span><span class="p">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">30000</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="mf">127.0</span><span class="p">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">30001</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="mf">127.0</span><span class="p">.</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">30002</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
+  <span class="p">],</span>
+  <span class="p">{</span><span class="nx">rs_name</span><span class="o">:</span><span class="nx">RS</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_test_&#39;</span><span class="p">,</span> <span class="nx">replSet</span><span class="p">);</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">p_db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Do you app stuff :)</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The ReplSetSrvers object has the following parameters</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSetSrvers</span><span class="p">(</span><span class="nx">servers</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Where</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">servers</span></tt>  is an array of  <tt class="docutils literal"><span class="pre">Server</span></tt>  objects</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt>  can contain the following options</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="replicaset-options">
+<h2>Replicaset options<a class="headerlink" href="#replicaset-options" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Several options can be passed to the  <tt class="docutils literal"><span class="pre">Replicaset</span></tt>  constructor with  <tt class="docutils literal"><span class="pre">options</span></tt>  parameter.</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">rs_name</span></tt>  is the name of the replicaset you configured when you started the server, you can have multiple replicasets running on your servers.</li>
+<li><tt class="docutils literal"><span class="pre">read_secondary</span></tt>  set&#8217;s the driver to read from secondary servers (slaves) instead of only from the primary(master) server.</li>
+<li><tt class="docutils literal"><span class="pre">socketOptions</span></tt>  - a collection of pr socket settings</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="socket-options">
+<h2>Socket options<a class="headerlink" href="#socket-options" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Several options can be set for the  <tt class="docutils literal"><span class="pre">socketOptions</span></tt> .</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">timeout</span></tt>  = set seconds before connection times out  <tt class="docutils literal"><span class="pre">default:0</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">noDelay</span></tt>  = Disables the Nagle algorithm  <tt class="docutils literal"><span class="pre">default:true</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">keepAlive</span></tt>  = Set if keepAlive is used  <tt class="docutils literal"><span class="pre">default:0</span></tt> , which means no keepAlive, set higher than 0 for keepAlive</li>
+<li><tt class="docutils literal"><span class="pre">encoding</span></tt>  = &#8216;ascii&#8217;|&#8217;utf8&#8217;|&#8217;base64&#8217;  <tt class="docutils literal"><span class="pre">default:null</span></tt></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/>
+            </a></p>
+<h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Replicasets</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#driver-usage">Driver usage</a></li>
+<li><a class="reference internal" href="#replicaset-options">Replicaset options</a></li>
+<li><a class="reference internal" href="#socket-options">Socket options</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3><a href="../contents.html">Core Documentation</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Replicasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#driver-usage">Driver usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#replicaset-options">Replicaset options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#socket-options">Socket options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Collections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="insert.html">Inserting and updating</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queries.html">Queries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indexes.html">Indexes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridfs.html">GridStore</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/markdown-docs/replicaset.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+  <h4>Previous page</h4>
+  <p class="topless"><a href="database.html"
+                        title="previous chapter">Database</a></p>
+  <h4>Next page</h4>
+  <p class="topless"><a href="collections.html"
+                        title="next chapter">Collections</a></p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="collections.html" title="Collections"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Database"
+             >previous</a> |</li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, MongoDB Node.JS Team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-7301842-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

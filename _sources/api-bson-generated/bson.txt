@@ -1,0 +1,622 @@
+======
+BSON()
+======
+
+------------------
+Constructor
+------------------
+
+
+Create a new BSON instance
+
+
+  .. js:class:: BSON()
+
+   :returns: bson instance of BSON Parser.
+
+
+
+------------------
+Constants
+------------------
+
+.. csv-table:: 
+   :header: "Constant Name", "Value", "Description"
+   :widths: 15, 10, 30
+
+   "BSON.BSON_DATA_NUMBER", "1", "Number BSON Type"
+   "BSON.BSON_DATA_STRING", "2", "String BSON Type"
+   "BSON.BSON_DATA_OBJECT", "3", "Object BSON Type"
+   "BSON.BSON_DATA_ARRAY", "4", "Array BSON Type"
+   "BSON.BSON_DATA_BINARY", "5", "Binary BSON Type"
+   "BSON.BSON_DATA_OID", "7", "ObjectID BSON Type"
+   "BSON.BSON_DATA_BOOLEAN", "8", "Boolean BSON Type"
+   "BSON.BSON_DATA_DATE", "9", "Date BSON Type"
+   "BSON.BSON_DATA_NULL", "10", "null BSON Type"
+   "BSON.BSON_DATA_REGEXP", "11", "RegExp BSON Type"
+   "BSON.BSON_DATA_CODE", "13", "Code BSON Type"
+   "BSON.BSON_DATA_SYMBOL", "14", "Symbol BSON Type"
+   "BSON.BSON_DATA_CODE_W_SCOPE", "15", "Code with Scope BSON Type"
+   "BSON.BSON_DATA_INT", "16", "32 bit Integer BSON Type"
+   "BSON.BSON_DATA_TIMESTAMP", "17", "Timestamp BSON Type"
+   "BSON.BSON_DATA_LONG", "18", "Long BSON Type"
+   "BSON.BSON_DATA_MIN_KEY", "0xff", "MinKey BSON Type"
+   "BSON.BSON_DATA_MAX_KEY", "0x7f", "MaxKey BSON Type"
+   "BSON.BSON_BINARY_SUBTYPE_DEFAULT", "0", "Binary Default Type"
+   "BSON.BSON_BINARY_SUBTYPE_FUNCTION", "1", "Binary Function Type"
+   "BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY", "2", "Binary Byte Array Type"
+   "BSON.BSON_BINARY_SUBTYPE_UUID", "3", "Binary UUID Type"
+   "BSON.BSON_BINARY_SUBTYPE_MD5", "4", "Binary MD5 Type"
+   "BSON.BSON_BINARY_SUBTYPE_USER_DEFINED", "128", "Binary User Defined Type"
+
+------------------------
+BSON.calculateObjectSize
+------------------------
+
+
+Calculate the bson size for a passed in Javascript object.
+
+.. js:function:: BSON.calculateObjectSize(object[, serializeFunctions])
+
+   :param object object: the Javascript object to calculate the BSON byte size for.
+   :param boolean [serializeFunctions]: serialize all functions in the object **(default:false)**.
+   :returns: number returns the number of bytes the BSON object will take up.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON.calculateObjectSize function returning the number of BSON bytes a javascript object needs.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){}}
+     // Calculate the size of the object without serializing the function
+     var size = BSON.calculateObjectSize(doc, false);
+     assert.equal(12, size);
+     // Calculate the size of the object serializing the function
+     size = BSON.calculateObjectSize(doc, true);
+     // Validate the correctness
+     assert.equal(36, size);    
+
+
+--------------------------------
+BSON.serializeWithBufferAndIndex
+--------------------------------
+
+
+Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.
+
+.. js:function:: BSON.serializeWithBufferAndIndex(object, checkKeys, buffer, index, serializeFunctions)
+
+   :param object object: the Javascript object to serialize.
+   :param boolean checkKeys: the serializer will check if keys are valid.
+   :param buffer buffer: the Buffer you pre-allocated to store the serialized BSON object.
+   :param number index: the index in the buffer where we wish to start serializing into.
+   :param boolean serializeFunctions: serialize the javascript functions **(default:false)**.
+   :returns: number returns the new write index in the Buffer.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON.serializeWithBufferAndIndex function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){}}
+     // Calculate the size of the document, no function serialization
+     var size = BSON.calculateObjectSize(doc, false);
+     // Allocate a buffer
+     var buffer = new Buffer(size);
+     // Serialize the object to the buffer, checking keys and not serializing functions
+     var index = BSON.serializeWithBufferAndIndex(doc, true, buffer, 0, false);
+     // Validate the correctness
+     assert.equal(12, size);
+     assert.equal(11, index);
+     
+     // Serialize with functions
+     // Calculate the size of the document, no function serialization
+     var size = BSON.calculateObjectSize(doc, true);
+     // Allocate a buffer
+     var buffer = new Buffer(size);
+     // Serialize the object to the buffer, checking keys and not serializing functions
+     var index = BSON.serializeWithBufferAndIndex(doc, true, buffer, 0, true);
+     // Validate the correctness
+     assert.equal(36, size);
+     assert.equal(35, index);      
+
+
+--------------
+BSON.serialize
+--------------
+
+
+Serialize a Javascript object.
+
+.. js:function:: BSON.serialize(object, checkKeys, asBuffer, serializeFunctions)
+
+   :param object object: the Javascript object to serialize.
+   :param boolean checkKeys: the serializer will check if keys are valid.
+   :param boolean asBuffer: return the serialized object as a Buffer object **(ignore)**.
+   :param boolean serializeFunctions: serialize the javascript functions **(default:false)**.
+   :returns: buffer returns the Buffer object containing the serialized object.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON.serialize function returning serialized BSON Buffer object.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){}}
+     // Serialize the object to a buffer, checking keys and not serializing functions
+     var buffer = BSON.serialize(doc, true, true, false);
+     // Validate the correctness
+     assert.equal(12, buffer.length);
+     
+     // Serialize the object to a buffer, checking keys and serializing functions
+     var buffer = BSON.serialize(doc, true, true, true);
+     // Validate the correctness
+     assert.equal(36, buffer.length);    
+
+
+----------------------
+BSON.deserializeStream
+----------------------
+
+
+Deserialize stream data as BSON documents.
+
+
+
+Options
+ - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
+ - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
+ - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+
+.. js:function:: BSON.deserializeStream(data, startIndex, numberOfDocuments, documents, docStartIndex[, options])
+
+   :param buffer data: the buffer containing the serialized set of BSON documents.
+   :param number startIndex: the start index in the data Buffer where the deserialization is to start.
+   :param number numberOfDocuments: number of documents to deserialize.
+   :param array documents: an array where to store the deserialized documents.
+   :param number docStartIndex: the index in the documents array from where to start inserting documents.
+   :param object [options]: additional options used for the deserialization.
+   :returns: number returns the next index in the buffer after deserialization **x** numbers of documents.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON.deserializeStream function returning deserialized Javascript objects.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){ console.log('hello world'); }}
+     // Serialize the object to a buffer, checking keys and serializing functions
+     var buffer = BSON.serialize(doc, true, true, true);
+     // Validate the correctness
+     assert.equal(65, buffer.length);
+     
+     // The array holding the number of retuned documents
+     var documents = new Array(1);
+     // Deserialize the object with no eval for the functions
+     var index = BSON.deserializeStream(buffer, 0, 1, documents, 0);
+     // Validate the correctness
+     assert.equal(65, index);
+     assert.equal(1, documents.length);
+     assert.equal(1, documents[0].a);
+     assert.equal('object', typeof documents[0].func);
+     
+     // Deserialize the object with eval for the functions caching the functions
+     // The array holding the number of retuned documents
+     var documents = new Array(1);
+     // Deserialize the object with no eval for the functions
+     var index = BSON.deserializeStream(buffer, 0, 1, documents, 0, {evalFunctions:true, cacheFunctions:true});
+     // Validate the correctness
+     assert.equal(65, index);
+     assert.equal(1, documents.length);
+     assert.equal(1, documents[0].a);
+     assert.equal('function', typeof documents[0].func);    
+
+
+----------------
+BSON.deserialize
+----------------
+
+
+Deserialize data as BSON.
+
+
+
+Options
+ - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
+ - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
+ - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+
+.. js:function:: BSON.deserialize(buffer[, options], [isArray])
+
+   :param buffer buffer: the buffer containing the serialized set of BSON documents.
+   :param object [options]: additional options used for the deserialization.
+   :param boolean [isArray]: ignore used for recursive parsing.
+   :returns: object returns the deserialized Javascript Object.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON.deserialize function returning a deserialized Javascript function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){ console.log('hello world'); }}
+     // Serialize the object to a buffer, checking keys and serializing functions
+     var buffer = BSON.serialize(doc, true, true, true);
+     // Validate the correctness
+     assert.equal(65, buffer.length);
+     
+     // Deserialize the object with no eval for the functions
+     var deserializedDoc = BSON.deserialize(buffer);
+     // Validate the correctness
+     assert.equal('object', typeof deserializedDoc.func);
+     assert.equal(1, deserializedDoc.a);
+     
+     // Deserialize the object with eval for the functions caching the functions
+     deserializedDoc = BSON.deserialize(buffer, {evalFunctions:true, cacheFunctions:true});
+     // Validate the correctness
+     assert.equal('function', typeof deserializedDoc.func);
+     assert.equal(1, deserializedDoc.a);    
+
+
+-----------
+deserialize
+-----------
+
+
+Deserialize data as BSON.
+
+
+
+Options
+ - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
+ - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
+ - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+
+.. js:function:: deserialize(buffer[, options], [isArray])
+
+   :param buffer buffer: the buffer containing the serialized set of BSON documents.
+   :param object [options]: additional options used for the deserialization.
+   :param boolean [isArray]: ignore used for recursive parsing.
+   :returns: object returns the deserialized Javascript Object.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON instance deserialize function returning a deserialized Javascript function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){ console.log('hello world'); }}
+     // Create a BSON parser instance
+     var bson = new BSON();
+     // Serialize the object to a buffer, checking keys and serializing functions
+     var buffer = bson.serialize(doc, true, true, true);
+     // Validate the correctness
+     assert.equal(65, buffer.length);
+     
+     // Deserialize the object with no eval for the functions
+     var deserializedDoc = bson.deserialize(buffer);
+     // Validate the correctness
+     assert.equal('object', typeof deserializedDoc.func);
+     assert.equal(1, deserializedDoc.a);
+     
+     // Deserialize the object with eval for the functions caching the functions
+     deserializedDoc = bson.deserialize(buffer, {evalFunctions:true, cacheFunctions:true});
+     // Validate the correctness
+     assert.equal('function', typeof deserializedDoc.func);
+     assert.equal(1, deserializedDoc.a);    
+
+
+-----------------
+deserializeStream
+-----------------
+
+
+Deserialize stream data as BSON documents.
+
+
+
+Options
+ - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
+ - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
+ - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+
+.. js:function:: deserializeStream(data, startIndex, numberOfDocuments, documents, docStartIndex[, options])
+
+   :param buffer data: the buffer containing the serialized set of BSON documents.
+   :param number startIndex: the start index in the data Buffer where the deserialization is to start.
+   :param number numberOfDocuments: number of documents to deserialize.
+   :param array documents: an array where to store the deserialized documents.
+   :param number docStartIndex: the index in the documents array from where to start inserting documents.
+   :param object [options]: additional options used for the deserialization.
+   :returns: number returns the next index in the buffer after deserialization **x** numbers of documents.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON instance deserializeStream function returning deserialized Javascript objects.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){ console.log('hello world'); }}
+     // Create a BSON parser instance
+     var bson = new BSON();
+     // Serialize the object to a buffer, checking keys and serializing functions
+     var buffer = bson.serialize(doc, true, true, true);
+     // Validate the correctness
+     assert.equal(65, buffer.length);
+     
+     // The array holding the number of retuned documents
+     var documents = new Array(1);
+     // Deserialize the object with no eval for the functions
+     var index = bson.deserializeStream(buffer, 0, 1, documents, 0);
+     // Validate the correctness
+     assert.equal(65, index);
+     assert.equal(1, documents.length);
+     assert.equal(1, documents[0].a);
+     assert.equal('object', typeof documents[0].func);
+     
+     // Deserialize the object with eval for the functions caching the functions
+     // The array holding the number of retuned documents
+     var documents = new Array(1);
+     // Deserialize the object with no eval for the functions
+     var index = bson.deserializeStream(buffer, 0, 1, documents, 0, {evalFunctions:true, cacheFunctions:true});
+     // Validate the correctness
+     assert.equal(65, index);
+     assert.equal(1, documents.length);
+     assert.equal(1, documents[0].a);
+     assert.equal('function', typeof documents[0].func);    
+
+
+---------
+serialize
+---------
+
+
+Serialize a Javascript object.
+
+.. js:function:: serialize(object, checkKeys, asBuffer, serializeFunctions)
+
+   :param object object: the Javascript object to serialize.
+   :param boolean checkKeys: the serializer will check if keys are valid.
+   :param boolean asBuffer: return the serialized object as a Buffer object **(ignore)**.
+   :param boolean serializeFunctions: serialize the javascript functions **(default:false)**.
+   :returns: buffer returns the Buffer object containing the serialized object.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON.serialize function returning serialized BSON Buffer object.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){}}
+     // Create a BSON parser instance
+     var bson = new BSON();
+     // Serialize the object to a buffer, checking keys and not serializing functions
+     var buffer = bson.serialize(doc, true, true, false);
+     // Validate the correctness
+     assert.equal(12, buffer.length);
+     
+     // Serialize the object to a buffer, checking keys and serializing functions
+     var buffer = bson.serialize(doc, true, true, true);
+     // Validate the correctness
+     assert.equal(36, buffer.length);    
+
+
+-------------------
+calculateObjectSize
+-------------------
+
+
+Calculate the bson size for a passed in Javascript object.
+
+.. js:function:: calculateObjectSize(object[, serializeFunctions])
+
+   :param object object: the Javascript object to calculate the BSON byte size for.
+   :param boolean [serializeFunctions]: serialize all functions in the object **(default:false)**.
+   :returns: number returns the number of bytes the BSON object will take up.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON.calculateObjectSize function returning the number of BSON bytes a javascript object needs.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){}}
+     // Create a BSON parser instance
+     var bson = new BSON();
+     // Calculate the size of the object without serializing the function
+     var size = bson.calculateObjectSize(doc, false);
+     assert.equal(12, size);
+     // Calculate the size of the object serializing the function
+     size = bson.calculateObjectSize(doc, true);
+     // Validate the correctness
+     assert.equal(36, size);    
+
+
+---------------------------
+serializeWithBufferAndIndex
+---------------------------
+
+
+Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.
+
+.. js:function:: serializeWithBufferAndIndex(object, checkKeys, buffer, index, serializeFunctions)
+
+   :param object object: the Javascript object to serialize.
+   :param boolean checkKeys: the serializer will check if keys are valid.
+   :param buffer buffer: the Buffer you pre-allocated to store the serialized BSON object.
+   :param number index: the index in the buffer where we wish to start serializing into.
+   :param boolean serializeFunctions: serialize the javascript functions **(default:false)**.
+   :returns: number returns the new write index in the Buffer.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of BSON.serializeWithBufferAndIndex function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a simple object
+     var doc = {a: 1, func:function(){}}
+     // Create a BSON parser instance
+     var bson = new BSON();
+     // Calculate the size of the document, no function serialization
+     var size = bson.calculateObjectSize(doc, false);
+     // Allocate a buffer
+     var buffer = new Buffer(size);
+     // Serialize the object to the buffer, checking keys and not serializing functions
+     var index = bson.serializeWithBufferAndIndex(doc, true, buffer, 0, false);
+     // Validate the correctness
+     assert.equal(12, size);
+     assert.equal(11, index);
+     
+     // Serialize with functions
+     // Calculate the size of the document, no function serialization
+     var size = bson.calculateObjectSize(doc, true);
+     // Allocate a buffer
+     var buffer = new Buffer(size);
+     // Serialize the object to the buffer, checking keys and not serializing functions
+     var index = bson.serializeWithBufferAndIndex(doc, true, buffer, 0, true);
+     // Validate the correctness
+     assert.equal(36, size);
+     assert.equal(35, index);      
+

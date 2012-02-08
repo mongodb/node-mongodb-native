@@ -1,0 +1,10 @@
+.. toctree::
+  :maxdepth: 1
+  
+  collections
+  database
+  gridfs
+  indexes
+  insert
+  queries
+  replicaset

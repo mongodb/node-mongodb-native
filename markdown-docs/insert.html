@@ -1,0 +1,314 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Inserting and updating &mdash; MongoDB Node.JS Driver 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.0.0 documentation" href="../index.html" />
+    <link rel="next" title="Queries" href="queries.html" />
+    <link rel="prev" title="Collections" href="collections.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="queries.html" title="Queries"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="collections.html" title="Collections"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="inserting-and-updating">
+<h1>Inserting and updating<a class="headerlink" href="#inserting-and-updating" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><p>See also:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="database.html">Database</a></li>
+<li><a class="reference external" href="collections.html">Collections</a></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<div class="section" id="insert">
+<h2>Insert<a class="headerlink" href="#insert" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Records can be inserted to a collection with  <tt class="docutils literal"><span class="pre">insert</span></tt></p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">[,</span> <span class="nx">options</span><span class="p">,</span> <span class="nx">callback</span><span class="p">])</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Where</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">docs</span></tt>  is a single document object or an array of documents</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt>  is an object of parameters, if you use a callback, set  <tt class="docutils literal"><span class="pre">safe</span></tt>  to true - this way the callback is executed  <em>after</em>  the record is saved to the database, if  <tt class="docutils literal"><span class="pre">safe</span></tt>  is false (default) callback is fired immediately and thus doesn&#8217;t make much sense.</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt>  - callback function to run after the record is inserted. Set  <tt class="docutils literal"><span class="pre">safe</span></tt>  to true in  <tt class="docutils literal"><span class="pre">options</span></tt>  when using callback. First parameter for callback is the error object (if an error occured) and the second is an array of records inserted.</li>
+</ul>
+</div></blockquote>
+<p>For example</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nb">document</span> <span class="o">=</span> <span class="p">{</span><span class="nx">name</span><span class="o">:</span><span class="s2">&quot;David&quot;</span><span class="p">,</span> <span class="nx">title</span><span class="o">:</span><span class="s2">&quot;About MongoDB&quot;</span><span class="p">};</span>
+<span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span> <span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">records</span><span class="p">){</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Record added as &quot;</span><span class="o">+</span><span class="nx">records</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>If trying to insert a record with an existing  <tt class="docutils literal"><span class="pre">_id</span></tt>  value, then the operation yields in error.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">){</span>
+    <span class="c1">// no error, inserted new document, with _id=1</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">){</span>
+        <span class="c1">// error occured since _id=1 already existed</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="save">
+<h2>Save<a class="headerlink" href="#save" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Shorthand for insert/update is  <tt class="docutils literal"><span class="pre">save</span></tt>  - if  <tt class="docutils literal"><span class="pre">_id</span></tt>  value set, the record is updated if it exists or inserted if it does not; if the  <tt class="docutils literal"><span class="pre">_id</span></tt>  value is not set, then the record is inserted as a new one.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">save</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span><span class="s2">&quot;David&quot;</span><span class="p">},{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="nx">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and the record if it was inserted or  <tt class="docutils literal"><span class="pre">1</span></tt>  if the record was updated.</p>
+</div></blockquote>
+</div>
+<div class="section" id="update">
+<h2>Update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Updates can be done with  <tt class="docutils literal"><span class="pre">update</span></tt></p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">criteria</span><span class="p">,</span> <span class="nx">update</span><span class="p">[,</span> <span class="nx">options</span><span class="p">[,</span> <span class="nx">callback</span><span class="p">]]);</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Where</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">criteria</span></tt>  is a query object to find records that need to be updated (see  <a class="reference external" href="queries.html)">Queries</a></li>
+<li><tt class="docutils literal"><span class="pre">update</span></tt>  is the replacement object</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt>  is an options object (see below)</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt>  is the callback to be run after the records are updated. Has two parameters, the first is an error object (if error occured), the second is the count of records that were modified.</li>
+</ul>
+</div></blockquote>
+<p>There are several option values that can be used with an update</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">safe</span></tt>  - run callback only after the update is done, defaults to false</li>
+<li><tt class="docutils literal"><span class="pre">multi</span></tt>  - update all records that match the query object, default is false (only the first one found is updated)</li>
+<li><tt class="docutils literal"><span class="pre">upsert</span></tt>  - if true and no records match the query, insert  <tt class="docutils literal"><span class="pre">update</span></tt>  as a new record</li>
+<li><tt class="docutils literal"><span class="pre">raw</span></tt>  - driver returns updated document as bson binary Buffer,  <tt class="docutils literal"><span class="pre">default:false</span></tt></li>
+</ul>
+</div></blockquote>
+<p>If the replacement object is a document, the matching documents will be replaced (except the  <tt class="docutils literal"><span class="pre">_id</span></tt>  values if no  <tt class="docutils literal"><span class="pre">_id</span></tt>  is set).</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="s2">&quot;123&quot;</span><span class="p">},</span> <span class="p">{</span><span class="nx">author</span><span class="o">:</span><span class="s2">&quot;Jessica&quot;</span><span class="p">,</span> <span class="nx">title</span><span class="o">:</span><span class="s2">&quot;Mongo facts&quot;</span><span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The example above will replace the document contents of id=123 with the replacement object.</p>
+<p>To update only selected fields,  <tt class="docutils literal"><span class="pre">$set</span></tt>  operator needs to be used. Following replacement object replaces author value but leaves everything else intact.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="s2">&quot;123&quot;</span><span class="p">},</span> <span class="p">{</span><span class="nx">$set</span><span class="o">:</span> <span class="p">{</span><span class="nx">author</span><span class="o">:</span><span class="s2">&quot;Jessica&quot;</span><span class="p">}});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>See  <a class="reference external" href="http://www.mongodb.org/display/DOCS/Updating">MongoDB documentation</a>  for all possible operators.</p>
+</div></blockquote>
+</div>
+<div class="section" id="find-and-modify">
+<h2>Find and Modify<a class="headerlink" href="#find-and-modify" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>To update and retrieve the contents for one single record you can use  <tt class="docutils literal"><span class="pre">findAndModify</span></tt> .</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">findAndModify</span><span class="p">(</span><span class="nx">criteria</span><span class="p">,</span> <span class="nx">sort</span><span class="p">,</span> <span class="nx">update</span><span class="p">[,</span> <span class="nx">options</span><span class="p">,</span> <span class="nx">callback</span><span class="p">])</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Where</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">criteria</span></tt>  is the query object to find the record</li>
+<li><tt class="docutils literal"><span class="pre">sort</span></tt>  indicates the order of the matches if there&#8217;s more than one matching record. The first record on the result set will be used. See  <a class="reference external" href="queries.html">Queries-&gt;find-&gt;options-&gt;sort</a>  for the format.</li>
+<li><tt class="docutils literal"><span class="pre">update</span></tt>  is the replacement object</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt>  define the behavior of the function</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt>  is the function to run after the update is done. Has two parameters - error object (if error occured) and the record that was updated.</li>
+</ul>
+</div></blockquote>
+<p>Options object can be used for the following options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">remove</span></tt>  - if set to true (default is false), removes the record from the collection. Callback function still gets the object but it doesn&#8217;t exist in the collection any more.</li>
+<li><tt class="docutils literal"><span class="pre">new</span></tt>  - if set to true, callback function returns the modified record. Default is false (original record is returned)</li>
+<li><tt class="docutils literal"><span class="pre">upsert</span></tt>  - if set to true and no record matched to the query, replacement object is inserted as a new record</li>
+</ul>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongodb</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
+    <span class="nx">server</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{});</span>
+
+<span class="k">new</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="nx">server</span><span class="p">,</span> <span class="p">{}).</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="k">throw</span> <span class="nx">error</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">Collection</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span> <span class="s1">&#39;test_collection&#39;</span><span class="p">);</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">findAndModify</span><span class="p">(</span>
+        <span class="p">{</span><span class="nx">hello</span><span class="o">:</span> <span class="s1">&#39;world&#39;</span><span class="p">},</span> <span class="c1">// query</span>
+        <span class="p">[[</span><span class="s1">&#39;_id&#39;</span><span class="p">,</span><span class="s1">&#39;asc&#39;</span><span class="p">]],</span>  <span class="c1">// sort order</span>
+        <span class="p">{</span><span class="nx">$set</span><span class="o">:</span> <span class="p">{</span><span class="nx">hi</span><span class="o">:</span> <span class="s1">&#39;there&#39;</span><span class="p">}},</span> <span class="c1">// replacement, replaces only the field &quot;hi&quot;</span>
+        <span class="p">{},</span> <span class="c1">// options</span>
+        <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>  <span class="c1">// returns error if no matching object found</span>
+            <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">dir</span><span class="p">(</span><span class="nx">object</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/>
+            </a></p>
+<h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Inserting and updating</a><ul>
+<li><a class="reference internal" href="#insert">Insert</a></li>
+<li><a class="reference internal" href="#save">Save</a></li>
+<li><a class="reference internal" href="#update">Update</a></li>
+<li><a class="reference internal" href="#find-and-modify">Find and Modify</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3><a href="../contents.html">Core Documentation</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replicaset.html">Replicasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collections.html">Collections</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Inserting and updating</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#insert">Insert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save">Save</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#update">Update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find-and-modify">Find and Modify</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="queries.html">Queries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indexes.html">Indexes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridfs.html">GridStore</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/markdown-docs/insert.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+  <h4>Previous page</h4>
+  <p class="topless"><a href="collections.html"
+                        title="previous chapter">Collections</a></p>
+  <h4>Next page</h4>
+  <p class="topless"><a href="queries.html"
+                        title="next chapter">Queries</a></p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="queries.html" title="Queries"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="collections.html" title="Collections"
+             >previous</a> |</li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, MongoDB Node.JS Team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-7301842-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

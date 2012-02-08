@@ -1,0 +1,1090 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Admin() &mdash; MongoDB Node.JS Driver 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.0.0 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="admin">
+<h1>Admin()<a class="headerlink" href="#admin" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>Allows the user to access the admin functionality of MongoDB</p>
+<blockquote>
+<div><dl class="class">
+<dt id="Admin">
+<em class="property">class </em><tt class="descname">Admin</tt><big>(</big><big>)</big><a class="headerlink" href="#Admin" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>db</strong> (<em>object</em>) &#8211; Current db instance we wish to perform Admin operations on.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">function Constructor for Admin type.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="buildinfo">
+<h2>buildInfo<a class="headerlink" href="#buildinfo" title="Permalink to this headline">¶</a></h2>
+<p>Retrieve the server information for the current
+instance of the db client</p>
+<dl class="function">
+<dt id="buildInfo">
+<tt class="descname">buildInfo</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#buildInfo" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Retrieve the buildInfo for the current MongoDB instance</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Use the admin database for the operation</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Add the new user to the admin database</span>
+      <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Authenticate using the newly added user</span>
+        <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+
+          <span class="c1">// Retrive the build information for the MongoDB instance</span>
+          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">buildInfo</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">info</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">null</span><span class="p">);</span>
+
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="profilinglevel">
+<h2>profilingLevel<a class="headerlink" href="#profilinglevel" title="Permalink to this headline">¶</a></h2>
+<p>Retrieve the current profiling Level for MongoDB</p>
+<dl class="function">
+<dt id="profilingLevel">
+<tt class="descname">profilingLevel</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#profilingLevel" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Retrieve the current profiling level set for the MongoDB instance</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+  <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Grab a collection object</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Force the creation of the collection by inserting a document</span>
+      <span class="c1">// Collections are not created until the first document is inserted</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Use the admin database for the operation</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+          <span class="c1">// Add the new user to the admin database</span>
+          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// Authenticate using the newly added user</span>
+            <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">replies</span><span class="p">)</span> <span class="p">{</span>
+
+              <span class="c1">// Retrive the profiling level</span>
+              <span class="nx">adminDb</span><span class="p">.</span><span class="nx">profilingLevel</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">,</span> <span class="nx">level</span><span class="p">);</span>
+
+                <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+              <span class="p">});</span>
+            <span class="p">});</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="ping">
+<h2>ping<a class="headerlink" href="#ping" title="Permalink to this headline">¶</a></h2>
+<p>Ping the MongoDB server and retrieve results</p>
+<dl class="function">
+<dt>
+<tt class="descname">ping</tt><big>(</big><span class="optional">[</span><em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>[options]</strong> (<em>object</em>) &#8211; Optional parameters to the command.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example of how to add a user to the admin database</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+  <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Use the admin database for the operation</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Add the new user to the admin database</span>
+      <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Authenticate using the newly added user</span>
+        <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+
+          <span class="c1">// Ping the server</span>
+          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">ping</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">pingResult</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="authenticate">
+<h2>authenticate<a class="headerlink" href="#authenticate" title="Permalink to this headline">¶</a></h2>
+<p>Authenticate against MongoDB</p>
+<dl class="function">
+<dt>
+<tt class="descname">authenticate</tt><big>(</big><em>username</em>, <em>password</em>, <em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>username</strong> (<em>string</em>) &#8211; The user name for the authentication.</li>
+<li><strong>password</strong> (<em>string</em>) &#8211; The password for the authentication.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Authenticate against MongoDB Admin user</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Grab a collection object</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Force the creation of the collection by inserting a document</span>
+      <span class="c1">// Collections are not created until the first document is inserted</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Use the admin database for the operation</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+         <span class="c1">// Add the new user to the admin database</span>
+         <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+           <span class="c1">// Authenticate using the newly added user</span>
+           <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+             <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+
+             <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+           <span class="p">});</span>
+         <span class="p">});</span>
+       <span class="p">});</span>
+     <span class="p">});</span>
+   <span class="p">});</span>
+ <span class="p">});</span>
+ <span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="logout">
+<h2>logout<a class="headerlink" href="#logout" title="Permalink to this headline">¶</a></h2>
+<p>Logout current authenticated user</p>
+<dl class="function">
+<dt>
+<tt class="descname">logout</tt><big>(</big><span class="optional">[</span><em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>[options]</strong> (<em>object</em>) &#8211; Optional parameters to the command.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example of how add a user, authenticate and logout</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+  <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Use the admin database for the operation</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Add the new user to the admin database</span>
+      <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Authenticate using the newly added user</span>
+        <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+
+          <span class="c1">// Logout the user</span>
+          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">logout</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">})</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="adduser">
+<h2>addUser<a class="headerlink" href="#adduser" title="Permalink to this headline">¶</a></h2>
+<p>Add a user to the MongoDB server, if the user exists it will
+overwrite the current password</p>
+<dl class="function">
+<dt id="addUser">
+<tt class="descname">addUser</tt><big>(</big><em>username</em>, <em>password</em>, <em>callback</em><big>)</big><a class="headerlink" href="#addUser" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>username</strong> (<em>string</em>) &#8211; The user name for the authentication.</li>
+<li><strong>password</strong> (<em>string</em>) &#8211; The password for the authentication.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example of how to add a user to the admin database</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+  <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Use the admin database for the operation</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Add the new user to the admin database</span>
+      <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Authenticate using the newly added user</span>
+        <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="removeuser">
+<h2>removeUser<a class="headerlink" href="#removeuser" title="Permalink to this headline">¶</a></h2>
+<p>Remove a user from the MongoDB server</p>
+<dl class="function">
+<dt id="removeUser">
+<tt class="descname">removeUser</tt><big>(</big><em>username</em>, <em>callback</em><big>)</big><a class="headerlink" href="#removeUser" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>username</strong> (<em>string</em>) &#8211; The user name for the authentication.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example of how to remove a user from the admin database</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+  <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Use the admin database for the operation</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Add the new user to the admin database</span>
+      <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Authenticate using the newly added user</span>
+        <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+
+          <span class="c1">// Remove the user</span>
+          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">removeUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// Authenticate using the removed user should fail</span>
+            <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+              <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="o">!</span><span class="nx">result</span><span class="p">);</span>
+
+              <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+            <span class="p">});</span>
+          <span class="p">})</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="setprofilinglevel">
+<h2>setProfilingLevel<a class="headerlink" href="#setprofilinglevel" title="Permalink to this headline">¶</a></h2>
+<p>Set the current profiling level of MongoDB</p>
+<dl class="function">
+<dt id="setProfilingLevel">
+<tt class="descname">setProfilingLevel</tt><big>(</big><em>level</em>, <em>callback</em><big>)</big><a class="headerlink" href="#setProfilingLevel" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>level</strong> (<em>string</em>) &#8211; The new profiling level (off, slow_only, all)</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example of how to use the setProfilingInfo
+Use this command to set the Profiling level on the MongoDB server</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+  <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Grab a collection object</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Force the creation of the collection by inserting a document</span>
+      <span class="c1">// Collections are not created until the first document is inserted</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Use the admin database for the operation</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+          <span class="c1">// Add the new user to the admin database</span>
+          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// Authenticate using the newly added user</span>
+            <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">replies</span><span class="p">)</span> <span class="p">{</span>
+
+              <span class="c1">// Set the profiling level to only profile slow queries</span>
+              <span class="nx">adminDb</span><span class="p">.</span><span class="nx">setProfilingLevel</span><span class="p">(</span><span class="s1">&#39;slow_only&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+
+                <span class="c1">// Retrive the profiling level and verify that it&#39;s set to slow_only</span>
+                <span class="nx">adminDb</span><span class="p">.</span><span class="nx">profilingLevel</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;slow_only&#39;</span><span class="p">,</span> <span class="nx">level</span><span class="p">);</span>
+
+                  <span class="c1">// Turn profiling off</span>
+                  <span class="nx">adminDb</span><span class="p">.</span><span class="nx">setProfilingLevel</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+
+                    <span class="c1">// Retrive the profiling level and verify that it&#39;s set to off</span>
+                    <span class="nx">adminDb</span><span class="p">.</span><span class="nx">profilingLevel</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+                      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="nx">level</span><span class="p">);</span>
+
+                      <span class="c1">// Set the profiling level to log all queries</span>
+                      <span class="nx">adminDb</span><span class="p">.</span><span class="nx">setProfilingLevel</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+
+                        <span class="c1">// Retrive the profiling level and verify that it&#39;s set to all</span>
+                        <span class="nx">adminDb</span><span class="p">.</span><span class="nx">profilingLevel</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+                          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="nx">level</span><span class="p">);</span>
+
+                          <span class="c1">// Attempt to set an illegal profiling level</span>
+                          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">setProfilingLevel</span><span class="p">(</span><span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span> <span class="k">instanceof</span> <span class="nb">Error</span><span class="p">);</span>
+                            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s2">&quot;Error: illegal profiling level value medium&quot;</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+
+                            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+                          <span class="p">});</span>
+                        <span class="p">})</span>
+                      <span class="p">});</span>
+                    <span class="p">})</span>
+                  <span class="p">});</span>
+                <span class="p">})</span>
+              <span class="p">});</span>
+            <span class="p">});</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="profilinginfo">
+<h2>profilingInfo<a class="headerlink" href="#profilinginfo" title="Permalink to this headline">¶</a></h2>
+<p>Retrive the current profiling information for MongoDB</p>
+<dl class="function">
+<dt id="profilingInfo">
+<tt class="descname">profilingInfo</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#profilingInfo" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example of how to use the profilingInfo
+Use this command to pull back the profiling information currently set for Mongodb</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+  <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Grab a collection object</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Force the creation of the collection by inserting a document</span>
+      <span class="c1">// Collections are not created until the first document is inserted</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">doc</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Use the admin database for the operation</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+          <span class="c1">// Add the new user to the admin database</span>
+          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// Authenticate using the newly added user</span>
+            <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">replies</span><span class="p">)</span> <span class="p">{</span>
+
+              <span class="c1">// Set the profiling level to all</span>
+              <span class="nx">adminDb</span><span class="p">.</span><span class="nx">setProfilingLevel</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+
+                <span class="c1">// Execute a query command</span>
+                <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">cursor</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">cursor</span><span class="p">.</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+
+                    <span class="c1">// Turn off profiling</span>
+                    <span class="nx">adminDb</span><span class="p">.</span><span class="nx">setProfilingLevel</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">level</span><span class="p">)</span> <span class="p">{</span>
+
+                      <span class="c1">// Retrive the profiling information</span>
+                      <span class="nx">adminDb</span><span class="p">.</span><span class="nx">profilingInfo</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">infos</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">infos</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">==</span> <span class="nb">Array</span><span class="p">);</span>
+                        <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">infos</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">);</span>
+                        <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">infos</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">ts</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">==</span> <span class="nb">Date</span><span class="p">);</span>
+                        <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">infos</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">millis</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">==</span> <span class="nb">Number</span><span class="p">);</span>
+
+                        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+                      <span class="p">});</span>
+                    <span class="p">});</span>
+                  <span class="p">});</span>
+                <span class="p">});</span>
+              <span class="p">});</span>
+            <span class="p">});</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="command">
+<h2>command<a class="headerlink" href="#command" title="Permalink to this headline">¶</a></h2>
+<p>Execute a db command against the Admin database</p>
+<dl class="function">
+<dt>
+<tt class="descname">command</tt><big>(</big><em>command</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>command</strong> (<em>object</em>) &#8211; A command object <cite>{ping:1}</cite>.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; Optional parameters to the command.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Retrieve the buildInfo using the command function</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Use the admin database for the operation</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Add the new user to the admin database</span>
+      <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Authenticate using the newly added user</span>
+        <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+
+          <span class="c1">// Retrive the build information using the admin command</span>
+          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">command</span><span class="p">({</span><span class="nx">buildInfo</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">info</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span> <span class="o">==</span> <span class="kc">null</span><span class="p">);</span>
+
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="validatecollection">
+<h2>validateCollection<a class="headerlink" href="#validatecollection" title="Permalink to this headline">¶</a></h2>
+<p>Validate an existing collection</p>
+<dl class="function">
+<dt id="validateCollection">
+<tt class="descname">validateCollection</tt><big>(</big><em>collectionName</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big><a class="headerlink" href="#validateCollection" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>collectionName</strong> (<em>string</em>) &#8211; The name of the collection to validate.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; Optional parameters to the command.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example of how to use the validateCollection command
+Use this command to check that a collection is valid (not corrupt) and to get various statistics.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+  <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Grab a collection object</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Force the creation of the collection by inserting a document</span>
+      <span class="c1">// Collections are not created until the first document is inserted</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Use the admin database for the operation</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+          <span class="c1">// Add the new user to the admin database</span>
+          <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+            <span class="c1">// Authenticate using the newly added user</span>
+            <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">replies</span><span class="p">)</span> <span class="p">{</span>
+
+              <span class="c1">// Validate the &#39;test&#39; collection</span>
+              <span class="nx">adminDb</span><span class="p">.</span><span class="nx">validateCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">)</span> <span class="p">{</span>
+
+                <span class="c1">// Pre 1.9.1 servers</span>
+                <span class="k">if</span><span class="p">(</span><span class="nx">doc</span><span class="p">.</span><span class="nx">result</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">doc</span><span class="p">.</span><span class="nx">result</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+                  <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">doc</span><span class="p">.</span><span class="nx">result</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/firstExtent/</span><span class="p">)</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                  <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">doc</span><span class="p">.</span><span class="nx">firstExtent</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+                <span class="p">}</span>
+
+                <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+              <span class="p">});</span>
+            <span class="p">});</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="listdatabases">
+<h2>listDatabases<a class="headerlink" href="#listdatabases" title="Permalink to this headline">¶</a></h2>
+<p>List the available databases</p>
+<dl class="function">
+<dt id="listDatabases">
+<tt class="descname">listDatabases</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#listDatabases" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null Returns no result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example of listing all available databases.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+  <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Use the admin database for the operation</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// List all the available databases</span>
+    <span class="nx">adminDb</span><span class="p">.</span><span class="nx">listDatabases</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">dbs</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">dbs</span><span class="p">.</span><span class="nx">databases</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
+
+      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/>
+            </a></p>
+<h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Admin()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#buildinfo">buildInfo</a></li>
+<li><a class="reference internal" href="#profilinglevel">profilingLevel</a></li>
+<li><a class="reference internal" href="#ping">ping</a></li>
+<li><a class="reference internal" href="#authenticate">authenticate</a></li>
+<li><a class="reference internal" href="#logout">logout</a></li>
+<li><a class="reference internal" href="#adduser">addUser</a></li>
+<li><a class="reference internal" href="#removeuser">removeUser</a></li>
+<li><a class="reference internal" href="#setprofilinglevel">setProfilingLevel</a></li>
+<li><a class="reference internal" href="#profilinginfo">profilingInfo</a></li>
+<li><a class="reference internal" href="#command">command</a></li>
+<li><a class="reference internal" href="#validatecollection">validateCollection</a></li>
+<li><a class="reference internal" href="#listdatabases">listDatabases</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3><a href="../contents.html">Core Documentation</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/replicaset.html">Replicasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/collections.html">Collections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/insert.html">Inserting and updating</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/queries.html">Queries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/indexes.html">Indexes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/gridfs.html">GridStore</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api-generated/admin.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, MongoDB Node.JS Team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-7301842-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

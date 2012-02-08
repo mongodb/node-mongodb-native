@@ -1,0 +1,916 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>BSON() &mdash; MongoDB Node.JS Driver 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.0.0 documentation" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="bson">
+<h1>BSON()<a class="headerlink" href="#bson" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>Create a new BSON instance</p>
+<blockquote>
+<div><dl class="class">
+<dt id="BSON">
+<em class="property">class </em><tt class="descname">BSON</tt><big>(</big><big>)</big><a class="headerlink" href="#BSON" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">bson instance of BSON Parser.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="18%" />
+<col width="55%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Constant Name</th>
+<th class="head">Value</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>BSON.BSON_DATA_NUMBER</td>
+<td>1</td>
+<td>Number BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_STRING</td>
+<td>2</td>
+<td>String BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_OBJECT</td>
+<td>3</td>
+<td>Object BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_ARRAY</td>
+<td>4</td>
+<td>Array BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_BINARY</td>
+<td>5</td>
+<td>Binary BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_OID</td>
+<td>7</td>
+<td>ObjectID BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_BOOLEAN</td>
+<td>8</td>
+<td>Boolean BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_DATE</td>
+<td>9</td>
+<td>Date BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_NULL</td>
+<td>10</td>
+<td>null BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_REGEXP</td>
+<td>11</td>
+<td>RegExp BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_CODE</td>
+<td>13</td>
+<td>Code BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_SYMBOL</td>
+<td>14</td>
+<td>Symbol BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_CODE_W_SCOPE</td>
+<td>15</td>
+<td>Code with Scope BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_INT</td>
+<td>16</td>
+<td>32 bit Integer BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_TIMESTAMP</td>
+<td>17</td>
+<td>Timestamp BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_LONG</td>
+<td>18</td>
+<td>Long BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_MIN_KEY</td>
+<td>0xff</td>
+<td>MinKey BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_MAX_KEY</td>
+<td>0x7f</td>
+<td>MaxKey BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_BINARY_SUBTYPE_DEFAULT</td>
+<td>0</td>
+<td>Binary Default Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_BINARY_SUBTYPE_FUNCTION</td>
+<td>1</td>
+<td>Binary Function Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY</td>
+<td>2</td>
+<td>Binary Byte Array Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_BINARY_SUBTYPE_UUID</td>
+<td>3</td>
+<td>Binary UUID Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_BINARY_SUBTYPE_MD5</td>
+<td>4</td>
+<td>Binary MD5 Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_BINARY_SUBTYPE_USER_DEFINED</td>
+<td>128</td>
+<td>Binary User Defined Type</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="bson-calculateobjectsize">
+<h2>BSON.calculateObjectSize<a class="headerlink" href="#bson-calculateobjectsize" title="Permalink to this headline">¶</a></h2>
+<p>Calculate the bson size for a passed in Javascript object.</p>
+<dl class="function">
+<dt id="BSON.calculateObjectSize">
+<tt class="descclassname">BSON.</tt><tt class="descname">calculateObjectSize</tt><big>(</big><em>object</em><span class="optional">[</span>, <em>serializeFunctions</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#BSON.calculateObjectSize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to calculate the BSON byte size for.</li>
+<li><strong>[serializeFunctions]</strong> (<em>boolean</em>) &#8211; serialize all functions in the object <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the number of bytes the BSON object will take up.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON.calculateObjectSize function returning the number of BSON bytes a javascript object needs.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
+<span class="c1">// Calculate the size of the object without serializing the function</span>
+<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
+<span class="c1">// Calculate the size of the object serializing the function</span>
+<span class="nx">size</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="bson-serializewithbufferandindex">
+<h2>BSON.serializeWithBufferAndIndex<a class="headerlink" href="#bson-serializewithbufferandindex" title="Permalink to this headline">¶</a></h2>
+<p>Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.</p>
+<dl class="function">
+<dt id="BSON.serializeWithBufferAndIndex">
+<tt class="descclassname">BSON.</tt><tt class="descname">serializeWithBufferAndIndex</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>buffer</em>, <em>index</em>, <em>serializeFunctions</em><big>)</big><a class="headerlink" href="#BSON.serializeWithBufferAndIndex" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to serialize.</li>
+<li><strong>checkKeys</strong> (<em>boolean</em>) &#8211; the serializer will check if keys are valid.</li>
+<li><strong>buffer</strong> (<em>buffer</em>) &#8211; the Buffer you pre-allocated to store the serialized BSON object.</li>
+<li><strong>index</strong> (<em>number</em>) &#8211; the index in the buffer where we wish to start serializing into.</li>
+<li><strong>serializeFunctions</strong> (<em>boolean</em>) &#8211; serialize the javascript functions <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the new write index in the Buffer.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON.serializeWithBufferAndIndex function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
+<span class="c1">// Calculate the size of the document, no function serialization</span>
+<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+<span class="c1">// Allocate a buffer</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+<span class="c1">// Serialize the object to the buffer, checking keys and not serializing functions</span>
+<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serializeWithBufferAndIndex</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+
+<span class="c1">// Serialize with functions</span>
+<span class="c1">// Calculate the size of the document, no function serialization</span>
+<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Allocate a buffer</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+<span class="c1">// Serialize the object to the buffer, checking keys and not serializing functions</span>
+<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serializeWithBufferAndIndex</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="bson-serialize">
+<h2>BSON.serialize<a class="headerlink" href="#bson-serialize" title="Permalink to this headline">¶</a></h2>
+<p>Serialize a Javascript object.</p>
+<dl class="function">
+<dt id="BSON.serialize">
+<tt class="descclassname">BSON.</tt><tt class="descname">serialize</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>asBuffer</em>, <em>serializeFunctions</em><big>)</big><a class="headerlink" href="#BSON.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to serialize.</li>
+<li><strong>checkKeys</strong> (<em>boolean</em>) &#8211; the serializer will check if keys are valid.</li>
+<li><strong>asBuffer</strong> (<em>boolean</em>) &#8211; return the serialized object as a Buffer object <strong>(ignore)</strong>.</li>
+<li><strong>serializeFunctions</strong> (<em>boolean</em>) &#8211; serialize the javascript functions <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">buffer returns the Buffer object containing the serialized object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON.serialize function returning serialized BSON Buffer object.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
+<span class="c1">// Serialize the object to a buffer, checking keys and not serializing functions</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="bson-deserializestream">
+<h2>BSON.deserializeStream<a class="headerlink" href="#bson-deserializestream" title="Permalink to this headline">¶</a></h2>
+<p>Deserialize stream data as BSON documents.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>evalFunctions</strong> {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.</li>
+<li><strong>cacheFunctions</strong> {Boolean, default:false}, cache evaluated functions for reuse.</li>
+<li><strong>cacheFunctionsCrc32</strong> {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="BSON.deserializeStream">
+<tt class="descclassname">BSON.</tt><tt class="descname">deserializeStream</tt><big>(</big><em>data</em>, <em>startIndex</em>, <em>numberOfDocuments</em>, <em>documents</em>, <em>docStartIndex</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#BSON.deserializeStream" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>buffer</em>) &#8211; the buffer containing the serialized set of BSON documents.</li>
+<li><strong>startIndex</strong> (<em>number</em>) &#8211; the start index in the data Buffer where the deserialization is to start.</li>
+<li><strong>numberOfDocuments</strong> (<em>number</em>) &#8211; number of documents to deserialize.</li>
+<li><strong>documents</strong> (<em>array</em>) &#8211; an array where to store the deserialized documents.</li>
+<li><strong>docStartIndex</strong> (<em>number</em>) &#8211; the index in the documents array from where to start inserting documents.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options used for the deserialization.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the next index in the buffer after deserialization <strong>x</strong> numbers of documents.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON.deserializeStream function returning deserialized Javascript objects.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">);</span> <span class="p">}}</span>
+<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+<span class="c1">// The array holding the number of retuned documents</span>
+<span class="kd">var</span> <span class="nx">documents</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="c1">// Deserialize the object with no eval for the functions</span>
+<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">deserializeStream</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">a</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">func</span><span class="p">);</span>
+
+<span class="c1">// Deserialize the object with eval for the functions caching the functions</span>
+<span class="c1">// The array holding the number of retuned documents</span>
+<span class="kd">var</span> <span class="nx">documents</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="c1">// Deserialize the object with no eval for the functions</span>
+<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">deserializeStream</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">{</span><span class="nx">evalFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">cacheFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">});</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">a</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">func</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="bson-deserialize">
+<h2>BSON.deserialize<a class="headerlink" href="#bson-deserialize" title="Permalink to this headline">¶</a></h2>
+<p>Deserialize data as BSON.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>evalFunctions</strong> {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.</li>
+<li><strong>cacheFunctions</strong> {Boolean, default:false}, cache evaluated functions for reuse.</li>
+<li><strong>cacheFunctionsCrc32</strong> {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="BSON.deserialize">
+<tt class="descclassname">BSON.</tt><tt class="descname">deserialize</tt><big>(</big><em>buffer</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="optional">[</span>, <em>isArray</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#BSON.deserialize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>buffer</strong> (<em>buffer</em>) &#8211; the buffer containing the serialized set of BSON documents.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options used for the deserialization.</li>
+<li><strong>[isArray]</strong> (<em>boolean</em>) &#8211; ignore used for recursive parsing.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">object returns the deserialized Javascript Object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON.deserialize function returning a deserialized Javascript function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">);</span> <span class="p">}}</span>
+<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+<span class="c1">// Deserialize the object with no eval for the functions</span>
+<span class="kd">var</span> <span class="nx">deserializedDoc</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">deserialize</span><span class="p">(</span><span class="nx">buffer</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">func</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
+
+<span class="c1">// Deserialize the object with eval for the functions caching the functions</span>
+<span class="nx">deserializedDoc</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">deserialize</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="p">{</span><span class="nx">evalFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">cacheFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">});</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">func</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="deserialize">
+<h2>deserialize<a class="headerlink" href="#deserialize" title="Permalink to this headline">¶</a></h2>
+<p>Deserialize data as BSON.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>evalFunctions</strong> {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.</li>
+<li><strong>cacheFunctions</strong> {Boolean, default:false}, cache evaluated functions for reuse.</li>
+<li><strong>cacheFunctionsCrc32</strong> {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt>
+<tt class="descname">deserialize</tt><big>(</big><em>buffer</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="optional">[</span>, <em>isArray</em><span class="optional">]</span><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>buffer</strong> (<em>buffer</em>) &#8211; the buffer containing the serialized set of BSON documents.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options used for the deserialization.</li>
+<li><strong>[isArray]</strong> (<em>boolean</em>) &#8211; ignore used for recursive parsing.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">object returns the deserialized Javascript Object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON instance deserialize function returning a deserialized Javascript function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">);</span> <span class="p">}}</span>
+<span class="c1">// Create a BSON parser instance</span>
+<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
+<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+<span class="c1">// Deserialize the object with no eval for the functions</span>
+<span class="kd">var</span> <span class="nx">deserializedDoc</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">deserialize</span><span class="p">(</span><span class="nx">buffer</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">func</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
+
+<span class="c1">// Deserialize the object with eval for the functions caching the functions</span>
+<span class="nx">deserializedDoc</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">deserialize</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="p">{</span><span class="nx">evalFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">cacheFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">});</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">func</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="deserializestream">
+<h2>deserializeStream<a class="headerlink" href="#deserializestream" title="Permalink to this headline">¶</a></h2>
+<p>Deserialize stream data as BSON documents.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>evalFunctions</strong> {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.</li>
+<li><strong>cacheFunctions</strong> {Boolean, default:false}, cache evaluated functions for reuse.</li>
+<li><strong>cacheFunctionsCrc32</strong> {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="deserializeStream">
+<tt class="descname">deserializeStream</tt><big>(</big><em>data</em>, <em>startIndex</em>, <em>numberOfDocuments</em>, <em>documents</em>, <em>docStartIndex</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#deserializeStream" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>buffer</em>) &#8211; the buffer containing the serialized set of BSON documents.</li>
+<li><strong>startIndex</strong> (<em>number</em>) &#8211; the start index in the data Buffer where the deserialization is to start.</li>
+<li><strong>numberOfDocuments</strong> (<em>number</em>) &#8211; number of documents to deserialize.</li>
+<li><strong>documents</strong> (<em>array</em>) &#8211; an array where to store the deserialized documents.</li>
+<li><strong>docStartIndex</strong> (<em>number</em>) &#8211; the index in the documents array from where to start inserting documents.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options used for the deserialization.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the next index in the buffer after deserialization <strong>x</strong> numbers of documents.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON instance deserializeStream function returning deserialized Javascript objects.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">);</span> <span class="p">}}</span>
+<span class="c1">// Create a BSON parser instance</span>
+<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
+<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+<span class="c1">// The array holding the number of retuned documents</span>
+<span class="kd">var</span> <span class="nx">documents</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="c1">// Deserialize the object with no eval for the functions</span>
+<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">deserializeStream</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">a</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">func</span><span class="p">);</span>
+
+<span class="c1">// Deserialize the object with eval for the functions caching the functions</span>
+<span class="c1">// The array holding the number of retuned documents</span>
+<span class="kd">var</span> <span class="nx">documents</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="c1">// Deserialize the object with no eval for the functions</span>
+<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">deserializeStream</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">{</span><span class="nx">evalFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">cacheFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">});</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">a</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">func</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="serialize">
+<h2>serialize<a class="headerlink" href="#serialize" title="Permalink to this headline">¶</a></h2>
+<p>Serialize a Javascript object.</p>
+<dl class="function">
+<dt>
+<tt class="descname">serialize</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>asBuffer</em>, <em>serializeFunctions</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to serialize.</li>
+<li><strong>checkKeys</strong> (<em>boolean</em>) &#8211; the serializer will check if keys are valid.</li>
+<li><strong>asBuffer</strong> (<em>boolean</em>) &#8211; return the serialized object as a Buffer object <strong>(ignore)</strong>.</li>
+<li><strong>serializeFunctions</strong> (<em>boolean</em>) &#8211; serialize the javascript functions <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">buffer returns the Buffer object containing the serialized object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON.serialize function returning serialized BSON Buffer object.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
+<span class="c1">// Create a BSON parser instance</span>
+<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
+<span class="c1">// Serialize the object to a buffer, checking keys and not serializing functions</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="calculateobjectsize">
+<h2>calculateObjectSize<a class="headerlink" href="#calculateobjectsize" title="Permalink to this headline">¶</a></h2>
+<p>Calculate the bson size for a passed in Javascript object.</p>
+<dl class="function">
+<dt id="calculateObjectSize">
+<tt class="descname">calculateObjectSize</tt><big>(</big><em>object</em><span class="optional">[</span>, <em>serializeFunctions</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#calculateObjectSize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to calculate the BSON byte size for.</li>
+<li><strong>[serializeFunctions]</strong> (<em>boolean</em>) &#8211; serialize all functions in the object <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the number of bytes the BSON object will take up.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON.calculateObjectSize function returning the number of BSON bytes a javascript object needs.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
+<span class="c1">// Create a BSON parser instance</span>
+<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
+<span class="c1">// Calculate the size of the object without serializing the function</span>
+<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
+<span class="c1">// Calculate the size of the object serializing the function</span>
+<span class="nx">size</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="serializewithbufferandindex">
+<h2>serializeWithBufferAndIndex<a class="headerlink" href="#serializewithbufferandindex" title="Permalink to this headline">¶</a></h2>
+<p>Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.</p>
+<dl class="function">
+<dt id="serializeWithBufferAndIndex">
+<tt class="descname">serializeWithBufferAndIndex</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>buffer</em>, <em>index</em>, <em>serializeFunctions</em><big>)</big><a class="headerlink" href="#serializeWithBufferAndIndex" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to serialize.</li>
+<li><strong>checkKeys</strong> (<em>boolean</em>) &#8211; the serializer will check if keys are valid.</li>
+<li><strong>buffer</strong> (<em>buffer</em>) &#8211; the Buffer you pre-allocated to store the serialized BSON object.</li>
+<li><strong>index</strong> (<em>number</em>) &#8211; the index in the buffer where we wish to start serializing into.</li>
+<li><strong>serializeFunctions</strong> (<em>boolean</em>) &#8211; serialize the javascript functions <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the new write index in the Buffer.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the usage of BSON.serializeWithBufferAndIndex function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a simple object</span>
+<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
+<span class="c1">// Create a BSON parser instance</span>
+<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
+<span class="c1">// Calculate the size of the document, no function serialization</span>
+<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+<span class="c1">// Allocate a buffer</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+<span class="c1">// Serialize the object to the buffer, checking keys and not serializing functions</span>
+<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serializeWithBufferAndIndex</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+
+<span class="c1">// Serialize with functions</span>
+<span class="c1">// Calculate the size of the document, no function serialization</span>
+<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Allocate a buffer</span>
+<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
+<span class="c1">// Serialize the object to the buffer, checking keys and not serializing functions</span>
+<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serializeWithBufferAndIndex</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+<span class="c1">// Validate the correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/>
+            </a></p>
+<h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">BSON()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#constants">Constants</a></li>
+<li><a class="reference internal" href="#bson-calculateobjectsize">BSON.calculateObjectSize</a></li>
+<li><a class="reference internal" href="#bson-serializewithbufferandindex">BSON.serializeWithBufferAndIndex</a></li>
+<li><a class="reference internal" href="#bson-serialize">BSON.serialize</a></li>
+<li><a class="reference internal" href="#bson-deserializestream">BSON.deserializeStream</a></li>
+<li><a class="reference internal" href="#bson-deserialize">BSON.deserialize</a></li>
+<li><a class="reference internal" href="#deserialize">deserialize</a></li>
+<li><a class="reference internal" href="#deserializestream">deserializeStream</a></li>
+<li><a class="reference internal" href="#serialize">serialize</a></li>
+<li><a class="reference internal" href="#calculateobjectsize">calculateObjectSize</a></li>
+<li><a class="reference internal" href="#serializewithbufferandindex">serializeWithBufferAndIndex</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h3><a href="../contents.html">Core Documentation</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/replicaset.html">Replicasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/collections.html">Collections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/insert.html">Inserting and updating</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/queries.html">Queries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/indexes.html">Indexes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/gridfs.html">GridStore</a></li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api-bson-generated/bson.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, MongoDB Node.JS Team.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-7301842-7']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>
