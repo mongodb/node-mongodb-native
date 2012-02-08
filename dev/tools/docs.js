@@ -3,8 +3,134 @@ var fs = require('fs'),
   parseJS = require('uglify-js').parser,
   ejs = require('ejs'),
   exec = require('child_process').exec,
+  markdown = require('markdown').markdown,
   format = require('util').format;
 
+// -----------------------------------------------------------------------------------------------------
+//
+//  Markdown converter
+//
+// -----------------------------------------------------------------------------------------------------
+
+// Parse markdown to Rich text format
+exports.transformMarkdownToStructuredText = function(markDownText) {
+  // Parse the md file and generate a json tree
+  var jsonTree = markdown.parse(markDownText);
+  var documentLines = [];
+  return convert_tree_to_rs(jsonTree, documentLines).join('\n');
+}
+
+var addLine = function(char, length) {
+  var chars = [];  
+  for(var i = 0; i < length; i++) chars[i] = char;
+  return chars.join('');
+}
+
+var convert_tree_to_rs = function(nodes, documentLines) {
+  if(!Array.isArray(nodes)) throw new Error("Malformed tree structure");
+  // Go through all the tags and render
+  for(var i = 0; i < nodes.length; i++) {
+    var line = nodes[i];
+    
+    if(Array.isArray(line)) {
+      switch(line[0]) {
+        case 'header':
+          // Unpack the parts
+          var options = line[1];
+          var title = line[2];
+          // Add lines to the document
+          if(options.level == 1) {
+            documentLines.push(addLine("=", title.length))
+            documentLines.push(title);
+            documentLines.push(addLine("=", title.length))
+          } else if(options.level == 2) {
+            documentLines.push(addLine("-", title.length))
+            documentLines.push(title);
+            documentLines.push(addLine("-", title.length))
+          }
+          break;
+        case 'para':
+          var paraLines = [];
+          paraLines.push("\n");
+        
+          for(var j = 1; j < line.length; j++) {
+            // bullet list item
+            if(Array.isArray(line[j])) {
+              var subdocs = [];
+              convert_tree_to_rs([line[j]], subdocs);
+              paraLines.push(subdocs.join(''));
+            } else {
+              paraLines.push(line[j]);
+            }
+          }          
+        
+          // Merge the docs in
+          documentLines.push(paraLines.join(' '));
+          break;
+        case 'link':
+          documentLines.push(format("`%s <%s>`_", line[2], line[1].href));
+          break;
+        case 'code_block':
+          // Unpack code block
+          var codeLines = line[1].split("\n");
+          // Format all the lines
+          documentLines.push("  .. code-block:: javascript\n");
+          for(var j = 0; j < codeLines.length; j++) {
+            documentLines.push(format("    %s", codeLines[j]));
+          }
+          
+          documentLines.push("\n");
+          break;
+        case 'bulletlist':
+          // Render the list (line.length - 1)
+          for(var j = 1; j < line.length; j++) {
+            // bullet list item
+            if(Array.isArray(line[j])) {
+              var subdocs = [];
+              convert_tree_to_rs([line[j]], subdocs);
+              documentLines.push(subdocs.join(' '));
+            } else {
+              documentLines.push(line[j]);
+            }
+          }
+          
+          // Add an empty line
+          documentLines.push("\n");          
+          break;
+        case 'listitem':
+          var listitemLines = [];
+          
+          for(var j = 1; j < line.length; j++) {
+            // bullet list item
+            if(Array.isArray(line[j])) {
+              var subdocs = [];
+              convert_tree_to_rs([line[j]], subdocs);
+              listitemLines.push(subdocs.join(' '));
+            } else {
+              listitemLines.push(line[j]);
+            }
+          }          
+          
+          // Merge the docs in
+          documentLines.push(format("  * %s", listitemLines.join(' ')));
+          break;
+        case 'strong':
+          documentLines.push(format("**%s**", line[1]));
+          break;
+        default:
+          break;
+      }      
+    }    
+  }
+  
+  return documentLines;
+}
+
+// -----------------------------------------------------------------------------------------------------
+//
+//  API Doc generation
+//
+// -----------------------------------------------------------------------------------------------------
 // Parses all the files and extracts the dox data for the library
 exports.extractLibraryMetaData = function(sourceFiles) {
   var dataObjects = {};
