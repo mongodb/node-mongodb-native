@@ -27,6 +27,14 @@ API Documentation
   api-generated/index
   api-bson-generated/index
 
+Changelog
+---------
+
+.. toctree::
+  :maxdepth: 1
+
+  changelog/changelog
+
 Indices
 -------
 
