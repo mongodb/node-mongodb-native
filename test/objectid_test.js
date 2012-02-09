@@ -189,7 +189,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(test)
  * Convert a ObjectID into a hex string representation and then back to an ObjectID
  *
  * @_class objectid
- * @_function createFromHexString
+ * @_function ObjectID.createFromHexString
  * @ignore
  */
 exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(test) {
@@ -314,6 +314,19 @@ exports.shouldCorrectlyInsertWithObjectId = function(test) {
       }, 2000);        
     });
   });    
+}
+
+/**
+ * Show the usage of the Objectid createFromTime function
+ *
+ * @_class objectid
+ * @_function ObjectID.createFromTime
+ * @ignore
+ */
+exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(test) {
+  var objectId = ObjectID.createFromTime(1);
+  test.equal("000000010000000000000000", objectId.toHexString());
+  test.done();
 }
 
 /**
