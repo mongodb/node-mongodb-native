@@ -15,8 +15,8 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 var native_parser = (process.env['TEST_NATIVE'] != null);
+var client = null;
 
 /**
  * Retrieve the server information for the current
@@ -26,6 +26,7 @@ var native_parser = (process.env['TEST_NATIVE'] != null);
  */
 exports.setUp = function(callback) {
   var self = exports;  
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -133,6 +134,41 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(test) {
     automatic_connect_client.on("close", closeListener);
     automatic_connect_client.close();
   });    
+}
+
+/**
+ * An example that shows how to force close a db connection so it cannot be reused.
+ *
+ * @_class db
+ * @_function close
+ * @ignore
+ */
+exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Fetch a collection
+    db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb', function(err, collection) {
+
+      // Insert a document
+      collection.insert({a:1}, {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Force close the connection
+        db.close(true, function(err, result) {
+          
+          // Attemp to insert should fail now with correct message 'db closed by application'
+          collection.insert({a:2}, {safe:true}, function(err, result) {
+            test.equal('db closed by application', err.message);
+            test.done();
+          });          
+        });
+      });    
+    });
+  });
 }
 
 /**

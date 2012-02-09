@@ -1,3 +1,8 @@
+0.9.9 
+------------------
+* Added createFromTime method on ObjectID to allow for queries against _id more easily using the timestamp.
+* Db.close(true) now makes connection unusable as it's been force closed by app.
+
 0.9.8-7 2012-02-06
 ------------------
 * Simplified findOne to use the find command instead of the custom code (Issue #498).

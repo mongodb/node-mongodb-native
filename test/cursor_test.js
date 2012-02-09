@@ -12,8 +12,8 @@ var testCase = require('../deps/nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var useSSL = process.env['USE_SSL'] != null ? true : false;
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
 var native_parser = (process.env['TEST_NATIVE'] != null);
+var client = null;
 
 /**
  * Retrieve the server information for the current
@@ -23,6 +23,7 @@ var native_parser = (process.env['TEST_NATIVE'] != null);
  */
 exports.setUp = function(callback) {
   var self = exports;  
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db

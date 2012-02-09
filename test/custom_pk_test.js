@@ -13,7 +13,7 @@ var testCase = require('../deps/nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL, native_parser: (process.env['TEST_NATIVE'] != null) ? true : false}));
+var client = null;
 
 /**
  * Retrieve the server information for the current
@@ -23,6 +23,7 @@ var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: tru
  */
 exports.setUp = function(callback) {
   var self = exports;  
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
