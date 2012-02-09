@@ -91,6 +91,7 @@ var apiClasses2 = [
     {tag:"code", path:"./lib/mongodb/bson/code.js"},
     {tag:"code", path:"./lib/mongodb/bson/db_ref.js"},
     {tag:"double", path:"./lib/mongodb/bson/double.js"},
+    {tag:"minkey", path:"./lib/mongodb/bson/min_key.js"},
     {tag:"maxkey", path:"./lib/mongodb/bson/max_key.js"},
     {tag:"symbol", path:"./lib/mongodb/bson/symbol.js"},
     {tag:"timestamp", path:"./lib/mongodb/bson/timestamp.js"},
