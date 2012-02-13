@@ -24,7 +24,9 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" />
+    <link rel="next" title="Admin()" href="admin.html" />
+    <link rel="prev" title="Db()" href="db.html" /> 
   </head>
   <body>
     <div class="related">
@@ -33,6 +35,12 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="admin.html" title="Admin()"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="db.html" title="Db()"
+             accesskey="P">previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -2862,14 +2870,54 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 
 
 <h3><a href="../contents.html">Core Documentation</a></h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/database.html">Database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/replicaset.html">Replicasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/collections.html">Collections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/insert.html">Inserting and updating</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/queries.html">Queries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/indexes.html">Indexes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/gridfs.html">GridStore</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Collection()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#insert">insert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#remove">remove</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rename">rename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save">save</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#update">update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#distinct">distinct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#count">count</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drop">drop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#findandmodify">findAndModify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#findandremove">findAndRemove</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find">find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#findone">findOne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#createindex">createIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ensureindex">ensureIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#indexinformation">indexInformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dropindex">dropIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dropallindexes">dropAllIndexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reindex">reIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mapreduce">mapReduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#group">group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#options">options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#iscapped">isCapped</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#indexexists">indexExists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geonear">geoNear</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geohaystacksearch">geoHaystackSearch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#indexes">indexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stats">stats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">DBRef()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
 </ul>
 
 <div id="searchbox" style="display: none">
@@ -2890,6 +2938,12 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     <li><a href="../_sources/api-generated/collection.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
+  <h4>Previous page</h4>
+  <p class="topless"><a href="db.html"
+                        title="previous chapter">Db()</a></p>
+  <h4>Next page</h4>
+  <p class="topless"><a href="admin.html"
+                        title="next chapter">Admin()</a></p>
         </div>
       </div>
       <div class="clearer"></div>
@@ -2900,6 +2954,12 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="admin.html" title="Admin()"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="db.html" title="Db()"
+             >previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>

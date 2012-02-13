@@ -24,7 +24,9 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" />
+    <link rel="next" title="Collection()" href="collection.html" />
+    <link rel="prev" title="Node.JS MongoDB Driver Manual Contents" href="../contents.html" /> 
   </head>
   <body>
     <div class="related">
@@ -33,6 +35,12 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="collection.html" title="Collection()"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../contents.html" title="Node.JS MongoDB Driver Manual Contents"
+             accesskey="P">previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -259,12 +267,13 @@
 <p>Close the current db connection, including all the child db instances. Emits close event if no callback is provided.</p>
 <dl class="function">
 <dt>
-<tt class="descname">close</tt><big>(</big><span class="optional">[</span><em>callback</em><span class="optional">]</span><big>)</big></dt>
+<tt class="descname">close</tt><big>(</big><em>[forceClose][, callback]</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>[forceClose]</strong> (<em>boolean</em>) &#8211; connection can never be reused.</li>
 <li><strong>[callback]</strong> (<em>function</em>) &#8211; returns the results.</li>
 </ul>
 </td>
@@ -278,7 +287,44 @@
 
 <p><strong>Examples</strong></p>
 <blockquote>
-<div><p>An example of a simple single server db connection and close function</p>
+<div><p>An example that shows how to force close a db connection so it cannot be reused.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Fetch a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyFailOnRetryDueToAppCloseOfDb&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Insert a document</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="c1">// Force close the connection</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Attemp to insert should fail now with correct message &#39;db closed by application&#39;</span>
+        <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;db closed by application&#39;</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<p>An example of a simple single server db connection and close function</p>
 <div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
     <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
     <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
@@ -2219,7 +2265,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="c1">// Connect to the server</span>
-<span class="nx">Db</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s1">&#39;mongodb://localhost:27017/integration_tests&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+<span class="nx">Db</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s1">&#39;mongodb://localhost:27017/integration_tests&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">useSSL</span> <span class="o">==</span> <span class="kc">true</span> <span class="o">?</span> <span class="s1">&#39;?ssl=true&#39;</span> <span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
   <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
   <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
@@ -2279,14 +2325,57 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 
 
 <h3><a href="../contents.html">Core Documentation</a></h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/database.html">Database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/replicaset.html">Replicasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/collections.html">Collections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/insert.html">Inserting and updating</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/queries.html">Queries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/indexes.html">Indexes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/gridfs.html">GridStore</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Db()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#open">open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">db</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#close">close</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#admin">admin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#collectionsinfo">collectionsInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#collectionnames">collectionNames</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#collection">collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#collections">collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#eval">eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dereference">dereference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logout">logout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#authenticate">authenticate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adduser">addUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#removeuser">removeUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#createcollection">createCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command">command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dropcollection">dropCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#renamecollection">renameCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lasterror">lastError</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#previouserrors">previousErrors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reseterrorhistory">resetErrorHistory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#createindex">createIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ensureindex">ensureIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cursorinfo">cursorInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dropindex">dropIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reindex">reIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#indexinformation">indexInformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dropdatabase">dropDatabase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#db-connect">Db.connect</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">DBRef()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
 </ul>
 
 <div id="searchbox" style="display: none">
@@ -2307,6 +2396,12 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     <li><a href="../_sources/api-generated/db.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
+  <h4>Previous page</h4>
+  <p class="topless"><a href="../contents.html"
+                        title="previous chapter">Node.JS MongoDB Driver Manual Contents</a></p>
+  <h4>Next page</h4>
+  <p class="topless"><a href="collection.html"
+                        title="next chapter">Collection()</a></p>
         </div>
       </div>
       <div class="clearer"></div>
@@ -2317,6 +2412,12 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="collection.html" title="Collection()"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../contents.html" title="Node.JS MongoDB Driver Manual Contents"
+             >previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>

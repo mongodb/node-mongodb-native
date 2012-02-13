@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>DBRef() &mdash; MongoDB Node.JS Driver 0.9.8.7 documentation</title>
+    <title>MinKey() &mdash; MongoDB Node.JS Driver 0.9.8.7 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -24,9 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" />
-    <link rel="next" title="Double()" href="double.html" />
-    <link rel="prev" title="Binary()" href="binary.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,12 +33,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="double.html" title="Double()"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="binary.html" title="Binary()"
-             accesskey="P">previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -50,28 +42,20 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="dbref">
-<h1>DBRef()<a class="headerlink" href="#dbref" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="minkey">
+<h1>MinKey()<a class="headerlink" href="#minkey" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="constructor">
 <h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
-<p>A class representation of the BSON DBRef type.</p>
+<p>A class representation of the BSON MinKey type.</p>
 <blockquote>
 <div><dl class="class">
-<dt id="DBRef">
-<em class="property">class </em><tt class="descname">DBRef</tt><big>(</big><big>)</big><a class="headerlink" href="#DBRef" title="Permalink to this definition">¶</a></dt>
+<dt id="MinKey">
+<em class="property">class </em><tt class="descname">MinKey</tt><big>(</big><big>)</big><a class="headerlink" href="#MinKey" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><strong>namespace</strong> (<em>string</em>) &#8211; the collection name.</li>
-<li><strong>oid</strong> (<em>objectid</em>) &#8211; the reference ObjectID.</li>
-<li><strong>[db]</strong> (<em>string</em>) &#8211; optional db name, if omitted the reference is local to the current db.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dbref</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">minkey</td>
 </tr>
 </tbody>
 </table>
@@ -92,7 +76,7 @@
             </a></p>
 <h3>Page Contents</h3>
 <ul>
-<li><a class="reference internal" href="#">DBRef()</a><ul>
+<li><a class="reference internal" href="#">MinKey()</a><ul>
 <li><a class="reference internal" href="#constructor">Constructor</a></li>
 </ul>
 </li>
@@ -100,7 +84,7 @@
 
 
 <h3><a href="../contents.html">Core Documentation</a></h3>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
@@ -112,10 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="bson.html">BSON()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="objectid.html">ObjectID()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binary.html">Binary()</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">DBRef()</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#constructor">Constructor</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">DBRef()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="long.html">Long()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timestamp.html">Timestamp()</a></li>
@@ -138,15 +119,9 @@
 <script type="text/javascript">$('#searchbox').show(0);</script>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="../_sources/api-bson-generated/code.txt"
+    <li><a href="../_sources/api-bson-generated/minkey.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
-  <h4>Previous page</h4>
-  <p class="topless"><a href="binary.html"
-                        title="previous chapter">Binary()</a></p>
-  <h4>Next page</h4>
-  <p class="topless"><a href="double.html"
-                        title="next chapter">Double()</a></p>
         </div>
       </div>
       <div class="clearer"></div>
@@ -157,12 +132,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="double.html" title="Double()"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="binary.html" title="Binary()"
-             >previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>

@@ -24,7 +24,9 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" />
+    <link rel="next" title="Cursor()" href="cursor.html" />
+    <link rel="prev" title="Collection()" href="collection.html" /> 
   </head>
   <body>
     <div class="related">
@@ -33,6 +35,12 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="cursor.html" title="Cursor()"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="collection.html" title="Collection()"
+             accesskey="P">previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -1023,14 +1031,39 @@ Use this command to check that a collection is valid (not corrupt) and to get va
 
 
 <h3><a href="../contents.html">Core Documentation</a></h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/database.html">Database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/replicaset.html">Replicasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/collections.html">Collections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/insert.html">Inserting and updating</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/queries.html">Queries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/indexes.html">Indexes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/gridfs.html">GridStore</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Admin()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#buildinfo">buildInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#profilinglevel">profilingLevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ping">ping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#authenticate">authenticate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logout">logout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adduser">addUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#removeuser">removeUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setprofilinglevel">setProfilingLevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#profilinginfo">profilingInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command">command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#validatecollection">validateCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#listdatabases">listDatabases</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">DBRef()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
 </ul>
 
 <div id="searchbox" style="display: none">
@@ -1051,6 +1084,12 @@ Use this command to check that a collection is valid (not corrupt) and to get va
     <li><a href="../_sources/api-generated/admin.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
+  <h4>Previous page</h4>
+  <p class="topless"><a href="collection.html"
+                        title="previous chapter">Collection()</a></p>
+  <h4>Next page</h4>
+  <p class="topless"><a href="cursor.html"
+                        title="next chapter">Cursor()</a></p>
         </div>
       </div>
       <div class="clearer"></div>
@@ -1061,6 +1100,12 @@ Use this command to check that a collection is valid (not corrupt) and to get va
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="cursor.html" title="Cursor()"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="collection.html" title="Collection()"
+             >previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>

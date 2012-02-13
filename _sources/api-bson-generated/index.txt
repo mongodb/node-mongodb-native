@@ -9,6 +9,7 @@ Binary JSON API
   binary
   code
   double
+  minkey
   maxkey
   symbol
   timestamp

@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="index.html" />
-    <link rel="next" title="Database" href="markdown-docs/database.html" /> 
+    <link rel="next" title="Db()" href="api-generated/db.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +35,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="markdown-docs/database.html" title="Database"
+          <a href="api-generated/db.html" title="Db()"
              accesskey="N">next</a> |</li>
         <li><a href="#">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
@@ -50,72 +50,283 @@
 <h1>Node.JS MongoDB Driver Manual Contents<a class="headerlink" href="#node-js-mongodb-driver-manual-contents" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/database.html">Database</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/database.html#server-options">Server options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/database.html#socket-options">Socket options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/database.html#db-options">DB options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/database.html#opening-a-database">Opening a database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/database.html#sharing-the-connections-over-multiple-dbs">Sharing the connections over multiple dbs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/database.html#deleting-a-database">Deleting a database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/database.html#custom-primary-keys">Custom primary keys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/db.html">Db()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#open">open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#id1">db</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#close">close</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#admin">admin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#collectionsinfo">collectionsInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#collectionnames">collectionNames</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#collection">collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#collections">collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#eval">eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#dereference">dereference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#logout">logout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#authenticate">authenticate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#adduser">addUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#removeuser">removeUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#createcollection">createCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#command">command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#dropcollection">dropCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#renamecollection">renameCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#lasterror">lastError</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#previouserrors">previousErrors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#reseterrorhistory">resetErrorHistory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#createindex">createIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#ensureindex">ensureIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#cursorinfo">cursorInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#dropindex">dropIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#reindex">reIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#indexinformation">indexInformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#dropdatabase">dropDatabase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html#db-connect">Db.connect</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/replicaset.html">Replicasets</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/replicaset.html#introduction">Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/replicaset.html#driver-usage">Driver usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/replicaset.html#replicaset-options">Replicaset options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/replicaset.html#socket-options">Socket options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/collection.html">Collection()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#insert">insert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#remove">remove</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#rename">rename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#save">save</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#update">update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#distinct">distinct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#count">count</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#drop">drop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#findandmodify">findAndModify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#findandremove">findAndRemove</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#find">find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#findone">findOne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#createindex">createIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#ensureindex">ensureIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#indexinformation">indexInformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#dropindex">dropIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#dropallindexes">dropAllIndexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#reindex">reIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#mapreduce">mapReduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#group">group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#options">options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#iscapped">isCapped</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#indexexists">indexExists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#geonear">geoNear</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#geohaystacksearch">geoHaystackSearch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#indexes">indexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html#stats">stats</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/collections.html">Collections</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#collection-objects">Collection objects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#creating-collections">Creating collections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#creating-collections-options">Creating collections options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#list-existing-collections">List existing collections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#list-collections">List collections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#selecting-collections">Selecting collections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#selecting-collections-options">Selecting collections options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#renaming-collections">Renaming collections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#removing-records-from-collections">Removing records from collections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/collections.html#removing-collections">Removing collections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/admin.html">Admin()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#buildinfo">buildInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#profilinglevel">profilingLevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#ping">ping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#authenticate">authenticate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#logout">logout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#adduser">addUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#removeuser">removeUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#setprofilinglevel">setProfilingLevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#profilinginfo">profilingInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#command">command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#validatecollection">validateCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html#listdatabases">listDatabases</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/insert.html">Inserting and updating</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/insert.html#insert">Insert</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/insert.html#save">Save</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/insert.html#update">Update</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/insert.html#find-and-modify">Find and Modify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/cursor.html">Cursor()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#rewind">rewind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#toarray">toArray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#each">each</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#count">count</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#sort">sort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#limit">limit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#skip">skip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#batchsize">batchSize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#nextobject">nextObject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#explain">explain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#streamrecords">streamRecords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#stream">stream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#close">close</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html#isclosed">isClosed</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/queries.html">Queries</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/queries.html#making-queries-with-find">Making queries with find()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/queries.html#find-first-occurence-with-findone">Find first occurence with findOne()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/queries.html#id-values">_id values</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/queries.html#query-object">Query object</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/queries.html#queries-inside-objects-and-arrays">Queries inside objects and arrays</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/queries.html#query-options">Query options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/queries.html#cursors">Cursors</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/queries.html#counting-matches">Counting matches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/cursorstream.html">CursorStream()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursorstream.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursorstream.html#pause">pause</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursorstream.html#resume">resume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursorstream.html#destroy">destroy</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/indexes.html">Indexes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/indexes.html#create-indexes-with-createindex">Create indexes with createIndex()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/indexes.html#ensure-indexes-with-ensureindex">Ensure indexes with ensureIndex()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/indexes.html#index-field">Index field</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/indexes.html#remove-indexes-with-dropindex">Remove indexes with dropIndex()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/indexes.html#get-index-information-with-indexinformation">Get index information with indexInformation()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/grid.html">Grid()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/grid.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/grid.html#put">put</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/grid.html#get">get</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/grid.html#delete">delete</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/gridfs.html">GridStore</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/gridfs.html#open-gridstore">Open GridStore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/gridfs.html#writing-to-gridstore">Writing to GridStore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/gridfs.html#writing-a-file-to-gridstore">Writing a file to GridStore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/gridfs.html#reading-from-gridstore">Reading from GridStore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/gridfs.html#streaming-from-gridstore">Streaming from GridStore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/gridfs.html#delete-a-gridstore">Delete a GridStore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/gridfs.html#closing-the-gridstore">Closing the GridStore</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/gridfs.html#check-the-existance-of-a-gridstore-file">Check the existance of a GridStore file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="markdown-docs/gridfs.html#seeking-in-a-gridstore">Seeking in a GridStore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/gridstore.html">GridStore()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#properties">Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#open">open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#writefile">writeFile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#write">write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#close">close</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#chunkcollection">chunkCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#unlink">unlink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#collection">collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#readlines">readlines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#rewind">rewind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#read">read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#tell">tell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#seek">seek</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#eof">eof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#getc">getc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#puts">puts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#stream">stream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#gridstore-exist">GridStore.exist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#gridstore-list">GridStore.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#gridstore-read">GridStore.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#gridstore-readlines">GridStore.readlines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html#gridstore-unlink">GridStore.unlink</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/readstream.html">ReadStream()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/readstream.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/readstream.html#pause">pause</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/readstream.html#destroy">destroy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/readstream.html#resume">resume</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/bson.html">BSON()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#bson-calculateobjectsize">BSON.calculateObjectSize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#bson-serializewithbufferandindex">BSON.serializeWithBufferAndIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#bson-serialize">BSON.serialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#bson-deserializestream">BSON.deserializeStream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#bson-deserialize">BSON.deserialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#deserialize">deserialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#deserializestream">deserializeStream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#serialize">serialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#calculateobjectsize">calculateObjectSize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html#serializewithbufferandindex">serializeWithBufferAndIndex</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/objectid.html">ObjectID()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/objectid.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/objectid.html#properties">Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/objectid.html#tohexstring">toHexString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/objectid.html#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/objectid.html#gettimestamp">getTimestamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/objectid.html#objectid-createfromtime">ObjectID.createFromTime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/objectid.html#objectid-createfromhexstring">ObjectID.createFromHexString</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/binary.html">Binary()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/binary.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/binary.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/binary.html#put">put</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/binary.html#write">write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/binary.html#read">read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/binary.html#value">value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/binary.html#length">length</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/code.html">DBRef()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/code.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/double.html">Double()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/double.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/double.html#valueof">valueOf</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/long.html">Long()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#toint">toInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#tonumber">toNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#tojson">toJSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#tostring">toString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#gethighbits">getHighBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#getlowbits">getLowBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#getlowbitsunsigned">getLowBitsUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#getnumbitsabs">getNumBitsAbs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#iszero">isZero</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#isnegative">isNegative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#isodd">isOdd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#notequals">notEquals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#lessthan">lessThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#lessthanorequal">lessThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#greaterthan">greaterThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#greaterthanorequal">greaterThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#compare">compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#negate">negate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#add">add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#subtract">subtract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#multiply">multiply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#div">div</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#modulo">modulo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#not">not</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#and">and</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#or">or</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#xor">xor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#shiftleft">shiftLeft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#shiftright">shiftRight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#shiftrightunsigned">shiftRightUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#long-fromint">Long.fromInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#long-fromnumber">Long.fromNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#long-frombits">Long.fromBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html#long-fromstring">Long.fromString</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/timestamp.html">Timestamp()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#toint">toInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#tonumber">toNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#tojson">toJSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#tostring">toString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#gethighbits">getHighBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#getlowbits">getLowBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#getlowbitsunsigned">getLowBitsUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#getnumbitsabs">getNumBitsAbs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#iszero">isZero</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#isnegative">isNegative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#isodd">isOdd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#notequals">notEquals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#lessthan">lessThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#lessthanorequal">lessThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#greaterthan">greaterThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#greaterthanorequal">greaterThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#compare">compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#negate">negate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#add">add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#subtract">subtract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#multiply">multiply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#div">div</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#modulo">modulo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#not">not</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#and">and</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#or">or</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#xor">xor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#shiftleft">shiftLeft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#shiftright">shiftRight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#shiftrightunsigned">shiftRightUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#timestamp-fromint">Timestamp.fromInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#timestamp-fromnumber">Timestamp.fromNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#timestamp-frombits">Timestamp.fromBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html#timestamp-fromstring">Timestamp.fromString</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/maxkey.html">MaxKey()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/maxkey.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/symbol.html">Symbol()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/symbol.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/symbol.html#valueof">valueOf</a></li>
 </ul>
 </li>
 </ul>
@@ -144,13 +355,23 @@
 
 <h3><a href="#">Core Documentation</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/database.html">Database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/replicaset.html">Replicasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/collections.html">Collections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/insert.html">Inserting and updating</a></li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/queries.html">Queries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/indexes.html">Indexes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="markdown-docs/gridfs.html">GridStore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/code.html">DBRef()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/symbol.html">Symbol()</a></li>
 </ul>
 
 <div id="searchbox" style="display: none">
@@ -172,8 +393,8 @@
            rel="nofollow">Show Source</a></li>
   </ul>
   <h4>Next page</h4>
-  <p class="topless"><a href="markdown-docs/database.html"
-                        title="next chapter">Database</a></p>
+  <p class="topless"><a href="api-generated/db.html"
+                        title="next chapter">Db()</a></p>
         </div>
       </div>
       <div class="clearer"></div>
@@ -185,7 +406,7 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="markdown-docs/database.html" title="Database"
+          <a href="api-generated/db.html" title="Db()"
              >next</a> |</li>
         <li><a href="#">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>

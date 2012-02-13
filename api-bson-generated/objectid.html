@@ -24,7 +24,9 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.8.7 documentation" href="../index.html" />
+    <link rel="next" title="Binary()" href="binary.html" />
+    <link rel="prev" title="BSON()" href="bson.html" /> 
   </head>
   <body>
     <div class="related">
@@ -33,6 +35,12 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="binary.html" title="Binary()"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bson.html" title="BSON()"
+             accesskey="P">previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -237,6 +245,47 @@ default value</p>
 </div>
 </div></blockquote>
 </div>
+<div class="section" id="objectid-createfromtime">
+<h2>ObjectID.createFromTime<a class="headerlink" href="#objectid-createfromtime" title="Permalink to this headline">¶</a></h2>
+<p>Creates an ObjectID from a second based number, with the rest of the ObjectID zeroed out. Used for comparisons or sorting the ObjectID.</p>
+<dl class="function">
+<dt id="ObjectID.createFromTime">
+<tt class="descclassname">ObjectID.</tt><tt class="descname">createFromTime</tt><big>(</big><em>time</em><big>)</big><a class="headerlink" href="#ObjectID.createFromTime" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>time</strong> (<em>number</em>) &#8211; an integer number representing a number of seconds.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">objectid return the created ObjectID</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Show the usage of the Objectid createFromTime function</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">objectId</span> <span class="o">=</span> <span class="nx">ObjectID</span><span class="p">.</span><span class="nx">createFromTime</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s2">&quot;000000010000000000000000&quot;</span><span class="p">,</span> <span class="nx">objectId</span><span class="p">.</span><span class="nx">toHexString</span><span class="p">());</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
 <div class="section" id="objectid-createfromhexstring">
 <h2>ObjectID.createFromHexString<a class="headerlink" href="#objectid-createfromhexstring" title="Permalink to this headline">¶</a></h2>
 <p>Creates an ObjectID from a hex string representation of an ObjectID.</p>
@@ -259,6 +308,32 @@ default value</p>
 </table>
 </dd></dl>
 
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Convert a ObjectID into a hex string representation and then back to an ObjectID</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a new ObjectID</span>
+<span class="kd">var</span> <span class="nx">objectId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
+<span class="c1">// Convert the object id to a hex string</span>
+<span class="kd">var</span> <span class="nx">originalHex</span> <span class="o">=</span> <span class="nx">objectId</span><span class="p">.</span><span class="nx">toHexString</span><span class="p">();</span>
+<span class="c1">// Create a new ObjectID using the createFromHexString function</span>
+<span class="kd">var</span> <span class="nx">newObjectId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">.</span><span class="nx">createFromHexString</span><span class="p">(</span><span class="nx">originalHex</span><span class="p">)</span>
+<span class="c1">// Convert the new ObjectID back into a hex string using the toHexString function</span>
+<span class="kd">var</span> <span class="nx">newHex</span> <span class="o">=</span> <span class="nx">newObjectId</span><span class="p">.</span><span class="nx">toHexString</span><span class="p">();</span>
+<span class="c1">// Compare the two hex strings</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">originalHex</span><span class="p">,</span> <span class="nx">newHex</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
 </div>
 </div>
 
@@ -279,6 +354,7 @@ default value</p>
 <li><a class="reference internal" href="#tohexstring">toHexString</a></li>
 <li><a class="reference internal" href="#equals">equals</a></li>
 <li><a class="reference internal" href="#gettimestamp">getTimestamp</a></li>
+<li><a class="reference internal" href="#objectid-createfromtime">ObjectID.createFromTime</a></li>
 <li><a class="reference internal" href="#objectid-createfromhexstring">ObjectID.createFromHexString</a></li>
 </ul>
 </li>
@@ -286,14 +362,33 @@ default value</p>
 
 
 <h3><a href="../contents.html">Core Documentation</a></h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/database.html">Database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/replicaset.html">Replicasets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/collections.html">Collections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/insert.html">Inserting and updating</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/queries.html">Queries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/indexes.html">Indexes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../markdown-docs/gridfs.html">GridStore</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bson.html">BSON()</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">ObjectID()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#properties">Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tohexstring">toHexString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gettimestamp">getTimestamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#objectid-createfromtime">ObjectID.createFromTime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#objectid-createfromhexstring">ObjectID.createFromHexString</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">DBRef()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symbol.html">Symbol()</a></li>
 </ul>
 
 <div id="searchbox" style="display: none">
@@ -314,6 +409,12 @@ default value</p>
     <li><a href="../_sources/api-bson-generated/objectid.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
+  <h4>Previous page</h4>
+  <p class="topless"><a href="bson.html"
+                        title="previous chapter">BSON()</a></p>
+  <h4>Next page</h4>
+  <p class="topless"><a href="binary.html"
+                        title="next chapter">Binary()</a></p>
         </div>
       </div>
       <div class="clearer"></div>
@@ -324,6 +425,12 @@ default value</p>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="binary.html" title="Binary()"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="bson.html" title="BSON()"
+             >previous</a> |</li>
         <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.8.7 documentation</a> &raquo;</li> 
       </ul>
     </div>
