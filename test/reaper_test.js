@@ -50,7 +50,7 @@ exports.tearDown = function(callback) {
 }
 
 exports.shouldCorrectlySaveUnicodeContainingDocument = function(test) {
-  var reaperClient = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {reaper:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var reaperClient = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {reaper:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   reaperClient.open(function(err, reaperClient) {
     reaperClient._lastReaperTimestamp = (new Date().getTime() - 1000000);
     var con = reaperClient.serverConfig.checkoutReader();

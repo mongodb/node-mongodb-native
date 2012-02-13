@@ -28,14 +28,6 @@ var ensureConnection = function(test, numberOfTries, callback) {
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
   var db = new Db('integration_test_', replSet);
-  // // Print any errors
-  // db.on("error", function(err) {
-  //   console.log("============================= ensureConnection caught error")
-  //   console.dir(err)
-  //   if(err != null && err.stack != null) console.log(err.stack)
-  //   db.close();
-  // })
-
   // Open the db
   db.open(function(err, p_db) {
     // Close connections
@@ -63,7 +55,7 @@ exports.setUp = function(callback) {
   // Create instance of replicaset manager but only for the first call
   if(!serversUp && !noReplicasetStart) {
     serversUp = true;
-    RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
+    RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:0, arbiter_count:1});
     RS.startSet(true, function(err, result) {      
       if(err != null) throw err;
       // Finish setup
@@ -111,7 +103,7 @@ exports['Should Correctly group using replicaset'] = function(test) {
   db.open(function(err, p_db) {
     if(err != null) debug("shouldGroup :: " + inspect(err));
 
-    p_db.createCollection("testgroup", {safe:{w:2, wtimeout:10000}}, function(err, collection) {
+    p_db.createCollection("testgroup_replicaset", {safe:{w:2, wtimeout:10000}}, function(err, collection) {
       if(err != null) debug("shoulGroup :: " + inspect(err));
 
       collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], {safe:{w:2, wtimeout:10000}}, function(err, result) {
@@ -159,7 +151,10 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
       if(parseInt((result.version.replace(/\./g, ''))) >= 176) {
         
         // Create a test collection
-        db.createCollection('test_map_reduce_functions_inline', {safe:{w:2, wtimeout:10000}}, function(err, collection) {
+        db.createCollection('test_map_reduce_functions_inline_map_reduce', {safe:{w:2, wtimeout:10000}}, function(err, collection) {
+          // console.log("==================================================================================")
+          // console.dir(err)
+          
           
           // Insert some test documents
           collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
@@ -171,6 +166,10 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
 
             // Execute map reduce and return results inline
             collection.mapReduce(map, reduce, {out : {inline: 1}}, function(err, results) {
+              // console.log("=============================================================================")
+              // console.dir(err)
+              // console.dir(results)
+              
               test.equal(2, results.length);
               
               db.close();
@@ -207,7 +206,7 @@ exports.shouldFailToDoMapReduceToOutCollection = function(test) {
       if(parseInt((result.version.replace(/\./g, ''))) >= 176) {
         
         // Create a test collection
-        db.createCollection('test_map_reduce_functions_notInline', {safe:{w:2, wtimeout:10000}}, function(err, collection) {
+        db.createCollection('test_map_reduce_functions_notInline_map_reduce', {safe:{w:2, wtimeout:10000}}, function(err, collection) {
           
           // Insert some test documents
           collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {

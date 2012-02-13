@@ -908,7 +908,7 @@ exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = function(test
  * @ignore
  */
 exports.shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments', function(err, collection) {
       // Test return old document on change
@@ -1182,7 +1182,7 @@ exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = functi
  * @ignore
  */
 exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   var running = true;
 
   p_client.open(function(err, p_client) {
@@ -1220,7 +1220,7 @@ exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = function(test) 
  * @ignore
  */
 exports.shouldCorrectlyIterateOverCollection = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   var numberOfSteps = 0;
 
   // Open db connection

@@ -584,7 +584,7 @@ exports.shouldCorrectlyRetrieveAllCollections = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyHandleFailedConnection = function(test) {
-  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27117, {auto_reconnect: false, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 25117, {auto_reconnect: false, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
     test.ok(err != null)
     test.done();

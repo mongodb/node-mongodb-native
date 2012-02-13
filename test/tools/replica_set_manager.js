@@ -93,7 +93,7 @@ ReplicaSetManager.prototype.startSet = function(killall, callback) {
   debug("** Starting a replica set with " + this.count + " nodes");
 
   // Kill all existing mongod instances
-  exec(killall ? 'killall mongod' : '', function(err, stdout, stderr) {
+  exec(killall ? 'killall -9 mongod' : '', function(err, stdout, stderr) {
     var n = 0;
     var tagsIndex = 0;
 
@@ -234,7 +234,7 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
 }
 
 ReplicaSetManager.prototype.killAll = function(callback) {
-  exec('killall mongod', function(err, stdout, stderr) {
+  exec('killall -9 mongod', function(err, stdout, stderr) {
     return callback();
   });  
 }
