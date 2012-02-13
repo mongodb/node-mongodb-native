@@ -1553,6 +1553,80 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = function(test) {
 }
 
 /**
+ * A simple query using find and fields
+ */
+exports.shouldPeformASimpleLimitSkipFindWithFields = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('simple_find_with_fields', function(err, collection) {      
+      test.equal(null, err);
+      
+      // Insert a bunch of documents for the testing
+      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        // Peform a simple find and return all the documents
+        collection.find({a:2}, ['b']).toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(1, docs.length);
+          test.equal(null, docs[0].a);
+          test.equal(2, docs[0].b);
+          
+          // Peform a simple find and return all the documents
+          collection.find({a:2}, {b:1}).toArray(function(err, docs) {
+            test.equal(null, err);
+            test.equal(1, docs.length);
+            test.equal(null, docs[0].a);
+            test.equal(2, docs[0].b);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });  
+}
+
+/**
+ * A simple query using find and fields
+ */
+exports.shouldPeformASimpleLimitSkipFindWithFields2 = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('simple_find_with_fields_2', function(err, collection) {      
+      test.equal(null, err);
+      
+      // Insert a bunch of documents for the testing
+      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        // Peform a simple find and return all the documents
+        collection.find({a:2}, {fields: ['b']}).toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(1, docs.length);
+          test.equal(null, docs[0].a);
+          test.equal(2, docs[0].b);
+          
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });  
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 

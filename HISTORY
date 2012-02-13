@@ -3,6 +3,7 @@
 * Added createFromTime method on ObjectID to allow for queries against _id more easily using the timestamp.
 * Db.close(true) now makes connection unusable as it's been force closed by app.
 * Fixed mapReduce and group functions to correctly send slaveOk on queries.
+* Fixes for find method to correctly work with find(query, fields, callback) (Issue #506).
 
 0.9.8-7 2012-02-06
 ------------------
