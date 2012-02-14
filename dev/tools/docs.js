@@ -11,7 +11,6 @@ var fs = require('fs'),
 //  Markdown converter
 //
 // -----------------------------------------------------------------------------------------------------
-
 // Parse markdown to Rich text format
 var transformMarkdownToStructuredText = exports.transformMarkdownToStructuredText = function(markDownText) {
   // Parse the md file and generate a json tree
@@ -136,27 +135,31 @@ var convert_tree_to_rs = function(nodes, documentLines) {
 }
 
 exports.writeMarkDownFile = function(outputDirectory, articles, templates, options) {
+  // Read all the templates
+  var templateObjects = exports.readAllTemplates(templates);
+
   // Force create the directory for the generated docs
-  exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
-  exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {});
+  exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {
+    exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {
+      // Contains all the names for the index
+      var names = [];
 
-  // Contains all the names for the index
-  var names = [];
+      // Process all the articles
+      for(var i = 0 ; i < articles.length; i++) {
+        // Fetch the article markdown content
+        var article = fs.readFileSync(articles[i].path).toString();
+        // Convert the text into restructured text for sphinx
+        var text = transformMarkdownToStructuredText(article);
+        // Write out the content
+        fs.writeFileSync(format("%s/%s", outputDirectory, articles[i].output.toLowerCase()), text);
+        names.push(articles[i].name.toLowerCase());
+      }
 
-  // Process all the articles
-  for(var i = 0 ; i < articles.length; i++) {
-    // Fetch the article markdown content
-    var article = fs.readFileSync(articles[i].path).toString();
-    // Convert the text into restructured text for sphinx
-    var text = transformMarkdownToStructuredText(article);
-    // Write out the content
-    fs.writeFileSync(format("%s/%s", outputDirectory, articles[i].output.toLowerCase()), text);
-    names.push(articles[i].name.toLowerCase());
-  }
-
-  // Just write out the index
-  var indexContent = ejs.render(templates[options.template], {entries:names, format:format, title:options.title});    
-  fs.writeFileSync(format("%s/%s", outputDirectory, 'index.rst'), indexContent);  
+      // Just write out the index
+      var indexContent = ejs.render(templateObjects[options.template], {entries:names, format:format, title:options.title});    
+      fs.writeFileSync(format("%s/%s", outputDirectory, 'index.rst'), indexContent);        
+    });    
+  });
 }
 
 // -----------------------------------------------------------------------------------------------------
@@ -164,6 +167,23 @@ exports.writeMarkDownFile = function(outputDirectory, articles, templates, optio
 //  API Doc generation
 //
 // -----------------------------------------------------------------------------------------------------
+exports.renderAPIDocs = function(outputDirectory, apiClasses, testClasses, templates, templateDocObjects) {
+  // Force create the directory for the generated docs
+  exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {
+    exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {
+      // Extract meta data from source files
+      var dataObjects = exports.extractLibraryMetaData(apiClasses);
+      // Filter out and prepare the test Objects hash
+      var testObjects = exports.buildTestHash(exports.extractLibraryMetaData(testClasses));
+      // Read all the templates
+      var templateObject = exports.readAllTemplates(templates);
+      // Render all the classes that are decorated
+      exports.renderAllTemplates(outputDirectory, templateObject, dataObjects, testObjects, templateDocObjects);
+    });    
+  }); 
+}
+
+
 // Parses all the files and extracts the dox data for the library
 exports.extractLibraryMetaData = function(sourceFiles) {
   var dataObjects = {};
@@ -310,3 +330,10 @@ exports.readAllTemplates = function(templates) {
   // Return the finished templates
   return finishedTemplates;
 }
+
+// -----------------------------------------------------------------------------------------------------
+//
+//  Pull down github
+//
+// -----------------------------------------------------------------------------------------------------
+

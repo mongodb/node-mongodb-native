@@ -65,7 +65,8 @@
     , "uglify-js": "1.2.5"
     , "ejs": "0.6.1"
     , "nodeunit": "0.6.4"
-	, "markdown": "0.3.1"
+    , "github3": ">=0.3.0"
+	  , "markdown": "0.3.1"
   }
 , "config":         { "native" : false }                    
 , "main":             "./lib/mongodb/index"
