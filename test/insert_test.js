@@ -1112,6 +1112,23 @@ exports['Should Correctly update two fields including a sub field'] = function(t
 }
 
 /**
+ * @ignore
+ */
+exports['Should correctly fail due to duplicate key for _id'] = function(test) {
+  client.createCollection("Should_Correctly_update_two_fields_including_a_sub_field_2", {}, function(err, collection) {
+    collection.insert({_id:1}, {safe:true}, function(err, result) {
+      test.equal(null, err);
+      
+      // Update two fields
+      collection.insert({_id:1}, {safe:true}, function(err, result) {
+        test.ok(err != null);
+        test.done();
+      });
+    })
+  });    
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 

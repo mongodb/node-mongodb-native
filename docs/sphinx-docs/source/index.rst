@@ -27,6 +27,14 @@ API Documentation
   api-generated/index
   api-bson-generated/index
 
+Projects and Libraries using the driver
+---------------------------------------
+
+.. toctree::
+  :maxdepth: 1
+
+  github/github
+
 Changelog
 ---------
 

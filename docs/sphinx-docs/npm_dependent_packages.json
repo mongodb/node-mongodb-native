@@ -248,7 +248,7 @@
   {
     "description" : "file based static website/blog generator",
     "location": "github",
-    "url": "https://github.com/pvorb/node-bread/blob/master/bread.js",
+    "url": "https://github.com/pvorb/node-bread",
     "tag": "webframework"    
   },
   {

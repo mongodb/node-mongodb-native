@@ -4,7 +4,8 @@ var fs = require('fs'),
   ejs = require('ejs'),
   exec = require('child_process').exec,
   markdown = require('markdown').markdown,
-  format = require('util').format;
+  github = require('github3'),
+  format = require('util').format;  
 
 // -----------------------------------------------------------------------------------------------------
 //
@@ -333,7 +334,145 @@ exports.readAllTemplates = function(templates) {
 
 // -----------------------------------------------------------------------------------------------------
 //
-//  Pull down github
+//  Pull down github and generate docs
 //
 // -----------------------------------------------------------------------------------------------------
+exports.generateGithubPackageList = function(inputFile, outputDirectory, templates, tagDescriptions, options) {  
+  if(options == null || options.dontfetch == null) {    
+    // Force create the directory for the generated docs
+    exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {
+      exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {
+        _generateGithubPackageList(inputFile, outputDirectory, templates, tagDescriptions, options);
+      });
+    });    
+  } else {
+    _generateGithubPackageList(inputFile, outputDirectory, templates, tagDescriptions, options);
+  }
+}
+
+var _generateGithubPackageList = function(inputFile, outputDirectory, templates, tagDescriptions, options) {
+  // Set credentials
+  github.setCredentials(user, password);        
+  // Read all the templates
+  var templateObjects = exports.readAllTemplates(templates);
+  // Check the user and password
+  var user = process.env['GITHUB_USER'];
+  var password = process.env['GITHUB_PASSWORD'];
+  // Make sure we have user and password
+  if(user == null && password == null) throw "Please provide a GITHUB_USER and GITHUB_PASSWORD environment variable";
+
+  // Read in the json file
+  var jsonData = fs.readFileSync(inputFile, 'ascii');
+  var objects = JSON.parse(jsonData);
+  var length = objects.length;
+  var totalNumberOfRepos = length;
+  
+  // Iterate over all the repos
+  for(var i = 0; i < length; i++) {
+    // Fetch the object
+    var object = objects[i];
+    // Unpack the object
+    var description = object.description;
+    var location = object.location;
+    var url = object.url;
+    var tag = object.tag;
+    // Unpack the url
+    var urlparts = url.split(/\//);
+    // Chop of the 2 last elements so we can get the parts
+    urlparts = urlparts.slice(urlparts.length - 2)
+    // Unpack url
+    var username = urlparts[0];
+    var repo = urlparts[1];        
+    // Add stuff back to the object
+    object.username = username;
+    object.repo = repo;        
+    // Let's fetch the content
+    if(options == null || options.dontfetch == null) {
+      // Get repo information
+      new function(_repo, _username) {
+        // Get the repo information
+        github.getRepository(_repo, _username, function(err, result) {
+          // Correct the number of remaining repos
+          totalNumberOfRepos = totalNumberOfRepos - 1;
+          // Write the content to disk
+          fs.writeFileSync(format("%s/%s.%s.json", outputDirectory, _repo, _username), JSON.stringify(result, null, 2), 'ascii');
+
+          // If we are done skip to next processing step
+          if(totalNumberOfRepos == 0) {
+            return _processGithub(objects, outputDirectory, templateObjects, tagDescriptions);
+          }
+        });                      
+      }(repo, username)          
+    }
+  }
+  
+  // If don't want to download just skip to processing
+  if(options != null && options.dontfetch) {
+    // Do the processing instead
+    return _processGithub(objects, outputDirectory, templateObjects, tagDescriptions);
+  }
+}
+
+var _processGithub = function(objects, outputDirectory, templates, tagDescriptions) {
+  // Let's read all the json files in and map them to the correct object
+  var directoryListing = fs.readdirSync(outputDirectory);
+  // Iterate over all entries
+  for(var i = 0; i < directoryListing.length; i++) {
+    var file = directoryListing[i];
+    
+    // If we have a json file
+    if(file.indexOf('.json') != -1) {
+      var fileContent = fs.readFileSync(format("%s/%s", outputDirectory, file), 'ascii');
+      // console.dir(fileContent)
+      var fileObject = JSON.parse(fileContent);
+      // Did not retrive document correctly
+      if(fileObject != null) {
+        // Unpack parameters used for matching
+        var username = fileObject.owner.login;
+        var repo = fileObject.name;
+
+        // Map it to the correct object
+        for(var j = 0; j < objects.length; j++) {
+          var object = objects[j];
+
+          // If we match username and repo add to the object
+          if(object.username == username && object.repo == repo) {
+            // Add the content to the object
+            object.content = fileObject;
+          }
+        }        
+      }
+    }
+  }
+  
+  // Group object by tags
+  var objectByTags = {};
+  // Iterate over all the objects
+  for(var i = 0; i < objects.length; i++) {
+    var object = objects[i];
+    var tag = object.tag;
+    
+    if(objectByTags[tag] == null) {
+      objectByTags[tag] = [];
+    }
+    
+    objectByTags[tag].push(object);
+  }
+  
+  // Just write out the index
+  var indexContent = ejs.render(templates['github'], {objectByTags:objectByTags, format:format, tags:tagDescriptions});
+  fs.writeFileSync(format("%s/%s", outputDirectory, 'github.rst'), indexContent);  
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
