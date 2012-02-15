@@ -62,7 +62,7 @@ Web frameworks using MongoDB
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 16:43:58 on 15/1/2012
+           - 20:47:37 on 15/1/2012
          * - **Homepage**
            - http://search.npmjs.org/#/bread
          * - **Url**
@@ -144,7 +144,7 @@ Object Document Modeling Libraries
          * - **Forks**
            - 156
          * - **Watchers**
-           - 1667
+           - 1666
 
 .. topic:: mongo-model
 
@@ -939,7 +939,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 118
          * - **Watchers**
-           - 1483
+           - 1486
 
 Libraries for the connect middleware
 ------------------------------------
@@ -988,7 +988,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 17
          * - **Watchers**
-           - 124
+           - 125
 
 .. topic:: connect-mongo
 
