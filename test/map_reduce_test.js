@@ -215,7 +215,7 @@ exports.shouldPerformSimpleMapReduceFunctions = function(test) {
         var reduce = function(k,vals) { return 1; };
 
         // Peform the map reduce
-        collection.mapReduce(map, reduce, function(err, collection) {
+        collection.mapReduce(map, reduce, {out: "test_map_reduce_output"}, function(err, collection) {
           // Mapreduce returns the temporary collection with the results          
           collection.findOne({'_id':1}, function(err, result) {
             test.equal(1, result.value);
@@ -266,9 +266,15 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
             // Execute map reduce and return results inline
             collection.mapReduce(map, reduce, {out : {inline: 1}}, function(err, results) {
               test.equal(2, results.length);
-              
-              db.close();
-              test.done();
+
+              // Inline is the default
+              collection.mapReduce(map, reduce, function(err, results) {
+                test.equal(2, results.length);
+
+                db.close();
+                test.done();
+              });
+
             });          
           });
         });      
@@ -344,7 +350,7 @@ exports.shouldPerformMapReduceWithStringFunctions = function(test) {
       var map = "function() { emit(this.user_id, 1); }";
       var reduce = "function(k,vals) { return 1; }";
 
-      collection.mapReduce(map, reduce, function(err, collection) {
+      collection.mapReduce(map, reduce, {out: "test_map_reduce_output"}, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
           test.equal(1, result.value);
         });
@@ -368,7 +374,7 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = function(test) {
       var map = function() { emit(this.user_id, 1); };
       var reduce = function(k,vals) { return 1; };
 
-      collection.mapReduce(map, reduce, function(err, collection) {
+      collection.mapReduce(map, reduce, {out: "test_map_reduce_output"}, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
           test.equal(1, result.value);
         });
@@ -391,7 +397,7 @@ exports.shouldPerformMapReduceWithCodeObjects = function(test) {
       var map = new Code("function() { emit(this.user_id, 1); }");
       var reduce = new Code("function(k,vals) { return 1; }");
 
-      collection.mapReduce(map, reduce, function(err, collection) {
+      collection.mapReduce(map, reduce, {out: "test_map_reduce_output"}, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
           test.equal(1, result.value);
         });
@@ -414,7 +420,7 @@ exports.shouldPerformMapReduceWithOptions = function(test) {
       var map = new Code("function() { emit(this.user_id, 1); }");
       var reduce = new Code("function(k,vals) { return 1; }");
 
-      collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
+      collection.mapReduce(map, reduce, {query: {user_id: {$gt:1}}, out: "test_map_reduce_output"}, function(err, collection) {
         collection.count(function(err, count) {
           test.equal(2, count);
 
@@ -441,7 +447,7 @@ exports.shouldHandleMapReduceErrors = function(test) {
       var map = new Code("function() { throw 'error'; }");
       var reduce = new Code("function(k,vals) { throw 'error'; }");
 
-      collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, r) {
+      collection.mapReduce(map, reduce, {query: {user_id: {$gt: 1}}, out: "test_map_reduce_output"}, function(err, r) {
         test.ok(err != null);
         test.done();
       });        
