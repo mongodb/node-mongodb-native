@@ -155,18 +155,21 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
           // Insert some test documents
           collection.insert([{'user_id':1}, {'user_id':2}], {safe:{w:2, wtimeout:10000}}, function(err, r) {
 
-            // Map function
-            var map = function() { emit(this.user_id, 1); };
-            // Reduce function
-            var reduce = function(k,vals) { return 1; };
+            // Ensure replication happened in time
+            setTimeout(function() {
+              // Map function
+              var map = function() { emit(this.user_id, 1); };
+              // Reduce function
+              var reduce = function(k,vals) { return 1; };
 
-            // Execute map reduce and return results inline
-            collection.mapReduce(map, reduce, {out : {inline: 1}}, function(err, results) {
-              test.equal(2, results.length);
+              // Execute map reduce and return results inline
+              collection.mapReduce(map, reduce, {out : {inline: 1}}, function(err, results) {
+                test.equal(2, results.length);
               
-              db.close();
-              test.done();
-            });          
+                db.close();
+                test.done();
+              });          
+            }, 2000);
           });
         });      
       } else {
@@ -203,18 +206,21 @@ exports.shouldFailToDoMapReduceToOutCollection = function(test) {
           // Insert some test documents
           collection.insert([{'user_id':1}, {'user_id':2}], {safe:{w:2, wtimeout:10000}}, function(err, r) {
 
-            // Map function
-            var map = function() { emit(this.user_id, 1); };
-            // Reduce function
-            var reduce = function(k,vals) { return 1; };
+            // Ensure replication happened in time
+            setTimeout(function() {
+              // Map function
+              var map = function() { emit(this.user_id, 1); };
+              // Reduce function
+              var reduce = function(k,vals) { return 1; };
 
-            // Execute map reduce and return results inline
-            collection.mapReduce(map, reduce, {out : {replace:'replacethiscollection'}}, function(err, results) {
-              test.ok(err != null);
+              // Execute map reduce and return results inline
+              collection.mapReduce(map, reduce, {out : {replace:'replacethiscollection'}}, function(err, results) {
+                test.ok(err != null);
               
-              db.close();
-              test.done();
-            });          
+                db.close();
+                test.done();
+              });      
+            }, 2000);                  
           });
         });      
       } else {

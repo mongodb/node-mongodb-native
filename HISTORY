@@ -1,6 +1,7 @@
-0.9.9.1
-----------------
+0.9.9.1 2012-02-15
+------------------
 * Better handling of safe when using some commands such as createIndex, ensureIndex, addUser, removeUser, createCollection.
+* Mapreduce now throws error if out parameter is not specified.
 
 0.9.9 2012-02-13
 ----------------
