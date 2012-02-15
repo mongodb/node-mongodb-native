@@ -1,16 +1,16 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 
-var testCase = require('../../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  nodeunit = require('../../deps/nodeunit'),
+  nodeunit = require('nodeunit'),
   gleak = require('../../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
   ServerManager = require('../../test/tools/server_manager').ServerManager,
-  Step = require("../../deps/step/lib/step");  
+  Step = require("step");  
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null)});

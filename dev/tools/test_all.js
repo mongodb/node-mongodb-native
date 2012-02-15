@@ -1,10 +1,10 @@
-var nodeunit = require('../../deps/nodeunit'),
+var nodeunit = require('nodeunit'),
   debug = require('util').debug,
   inspect = require('util').inspect,
   fs = require('fs'),
   exec = require('child_process').exec,
   spawn = require('child_process').spawn,
-  Step = require('../../deps/step/lib/step'),
+  Step = require('step/lib/step'),
   ServerManager = require('../../test/tools/server_manager').ServerManager,
   ReplicaSetManager = require('../../test/tools/replica_set_manager').ReplicaSetManager;
 

@@ -1,10 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 
-var testCase = require('../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  nodeunit = require('../deps/nodeunit'),
+  nodeunit = require('nodeunit'),
   gleak = require('../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
@@ -16,8 +16,8 @@ var testCase = require('../deps/nodeunit').testCase,
   Timestamp = require('../lib/mongodb/bson/timestamp').Timestamp,
   Long = require('../lib/mongodb/bson/long').Long,
   Collection = mongodb.Collection,
+  Step = require('step'),
   Server = mongodb.Server,
-  Step = require("../deps/step/lib/step"),
   ServerManager = require('./tools/server_manager').ServerManager;  
 
 var MONGODB = 'integration_tests';

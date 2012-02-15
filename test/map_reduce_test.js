@@ -1,10 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 
-var testCase = require('../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  nodeunit = require('../deps/nodeunit'),
+  nodeunit = require('nodeunit'),
   gleak = require('../dev/tools/gleak'),
   ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
   Code = require('../lib/mongodb/bson/code').Code,
@@ -215,7 +215,7 @@ exports.shouldPerformSimpleMapReduceFunctions = function(test) {
         var reduce = function(k,vals) { return 1; };
 
         // Peform the map reduce
-        collection.mapReduce(map, reduce, function(err, collection) {
+        collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
           // Mapreduce returns the temporary collection with the results          
           collection.findOne({'_id':1}, function(err, result) {
             test.equal(1, result.value);
@@ -344,7 +344,7 @@ exports.shouldPerformMapReduceWithStringFunctions = function(test) {
       var map = "function() { emit(this.user_id, 1); }";
       var reduce = "function(k,vals) { return 1; }";
 
-      collection.mapReduce(map, reduce, function(err, collection) {
+      collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
           test.equal(1, result.value);
         });
@@ -368,10 +368,11 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = function(test) {
       var map = function() { emit(this.user_id, 1); };
       var reduce = function(k,vals) { return 1; };
 
-      collection.mapReduce(map, reduce, function(err, collection) {
+      collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
           test.equal(1, result.value);
         });
+        
         collection.findOne({'_id':2}, function(err, result) {
           test.equal(1, result.value);
           test.done();
@@ -391,10 +392,11 @@ exports.shouldPerformMapReduceWithCodeObjects = function(test) {
       var map = new Code("function() { emit(this.user_id, 1); }");
       var reduce = new Code("function(k,vals) { return 1; }");
 
-      collection.mapReduce(map, reduce, function(err, collection) {
+      collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
         collection.findOne({'_id':1}, function(err, result) {
           test.equal(1, result.value);
         });
+        
         collection.findOne({'_id':2}, function(err, result) {
           test.equal(1, result.value);
           test.done();
@@ -414,13 +416,14 @@ exports.shouldPerformMapReduceWithOptions = function(test) {
       var map = new Code("function() { emit(this.user_id, 1); }");
       var reduce = new Code("function(k,vals) { return 1; }");
 
-      collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, collection) {
+      collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}, 'query': {'user_id':{'$gt':1}}}, function(err, collection) {
         collection.count(function(err, count) {
           test.equal(2, count);
 
           collection.findOne({'_id':2}, function(err, result) {
             test.equal(1, result.value);
           });
+          
           collection.findOne({'_id':3}, function(err, result) {
             test.equal(1, result.value);
             test.done();
@@ -441,7 +444,7 @@ exports.shouldHandleMapReduceErrors = function(test) {
       var map = new Code("function() { throw 'error'; }");
       var reduce = new Code("function(k,vals) { throw 'error'; }");
 
-      collection.mapReduce(map, reduce, {'query': {'user_id':{'$gt':1}}}, function(err, r) {
+      collection.mapReduce(map, reduce, {out : {inline: 1}, 'query': {'user_id':{'$gt':1}}}, function(err, r) {
         test.ok(err != null);
         test.done();
       });        

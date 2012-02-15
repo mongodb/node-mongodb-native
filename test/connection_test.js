@@ -1,10 +1,10 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 
-var testCase = require('../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  nodeunit = require('../deps/nodeunit'),
+  nodeunit = require('nodeunit'),
   gleak = require('../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
@@ -13,7 +13,6 @@ var testCase = require('../deps/nodeunit').testCase,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
   ServerManager = require('../test/tools/server_manager').ServerManager,
-  Step = require("../deps/step/lib/step"),
   mongodb = require('../lib/mongodb');
 
 // Test db

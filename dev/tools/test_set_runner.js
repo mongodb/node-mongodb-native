@@ -1,4 +1,4 @@
-var nodeunit = require('../../deps/nodeunit');
+var nodeunit = require('nodeunit');
 
 // Let's parse the argv (ensure we have all the number of parameters)
 if(process.argv.length === 4) {

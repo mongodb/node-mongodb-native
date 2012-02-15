@@ -36,7 +36,7 @@
 // +----------------------+----------------+----------------+----------------+
 var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
-var testCase = require('../../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   gleak = require('../../dev/tools/gleak'),
@@ -44,7 +44,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   Db = require('../../lib/mongodb').Db,
   ReplSetServers = require('../../lib/mongodb').ReplSetServers,
   Server = require('../../lib/mongodb').Server,
-  Step = require("../../deps/step/lib/step");  
+  Step = require("step");  
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;

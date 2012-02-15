@@ -1,3 +1,7 @@
+0.9.9.1
+----------------
+* Better handling of safe when using some commands such as createIndex, ensureIndex, addUser, removeUser, createCollection.
+
 0.9.9 2012-02-13
 ----------------
 * Added createFromTime method on ObjectID to allow for queries against _id more easily using the timestamp.

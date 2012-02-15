@@ -1,18 +1,17 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 
-var testCase = require('../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  nodeunit = require('../deps/nodeunit'),
+  nodeunit = require('nodeunit'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   connect = mongodb.connect,
   gleak = require('../dev/tools/gleak'),
   Script = require('vm'),
   Collection = mongodb.Collection,
-  Server = mongodb.Server,
-  Step = require("../deps/step/lib/step");
+  Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
 var clientUrl = 'mongo://localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');

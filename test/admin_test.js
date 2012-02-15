@@ -5,10 +5,10 @@ var native_parser = (process.env['TEST_NATIVE'] != null);
 /*!
  * Module dependencies.
  */
-var testCase = require('../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  nodeunit = require('../deps/nodeunit'),
+  nodeunit = require('nodeunit'),
   gleak = require('../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,

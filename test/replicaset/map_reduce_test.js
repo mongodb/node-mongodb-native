@@ -1,6 +1,6 @@
 var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
-var testCase = require('../../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   gleak = require('../../dev/tools/gleak'),
@@ -8,7 +8,7 @@ var testCase = require('../../deps/nodeunit').testCase,
   Db = require('../../lib/mongodb').Db,
   ReplSetServers = require('../../lib/mongodb').ReplSetServers,
   Server = require('../../lib/mongodb').Server,
-  Step = require("../../deps/step/lib/step");  
+  Step = require("step");  
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
@@ -152,12 +152,8 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
         
         // Create a test collection
         db.createCollection('test_map_reduce_functions_inline_map_reduce', {safe:{w:2, wtimeout:10000}}, function(err, collection) {
-          // console.log("==================================================================================")
-          // console.dir(err)
-          
-          
           // Insert some test documents
-          collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+          collection.insert([{'user_id':1}, {'user_id':2}], {safe:{w:2, wtimeout:10000}}, function(err, r) {
 
             // Map function
             var map = function() { emit(this.user_id, 1); };
@@ -166,10 +162,6 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
 
             // Execute map reduce and return results inline
             collection.mapReduce(map, reduce, {out : {inline: 1}}, function(err, results) {
-              // console.log("=============================================================================")
-              // console.dir(err)
-              // console.dir(results)
-              
               test.equal(2, results.length);
               
               db.close();
@@ -209,7 +201,7 @@ exports.shouldFailToDoMapReduceToOutCollection = function(test) {
         db.createCollection('test_map_reduce_functions_notInline_map_reduce', {safe:{w:2, wtimeout:10000}}, function(err, collection) {
           
           // Insert some test documents
-          collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+          collection.insert([{'user_id':1}, {'user_id':2}], {safe:{w:2, wtimeout:10000}}, function(err, r) {
 
             // Map function
             var map = function() { emit(this.user_id, 1); };

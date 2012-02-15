@@ -1,12 +1,12 @@
-var testCase = require('../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  nodeunit = require('../deps/nodeunit'),
+  nodeunit = require('nodeunit'),
   gleak = require('../dev/tools/gleak'),
   Db = require('../lib/mongodb').Db,
   Cursor = require('../lib/mongodb').Cursor,
-  Step = require("../deps/step/lib/step"),
   Collection = require('../lib/mongodb').Collection,
+  Step = require('step'),
   fs = require('fs'),
   Server = require('../lib/mongodb').Server;
 

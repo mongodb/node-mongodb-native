@@ -7,7 +7,7 @@ var debug = require('util').debug,
   Connection = require('../../lib/mongodb').Connection,
   Db = require('../../lib/mongodb').Db,
   Server = require('../../lib/mongodb').Server,
-  Step = require("../../deps/step/lib/step");  
+  Step = require("step");  
 
 var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   options = options == null ? {} : options;

@@ -1,6 +1,6 @@
 var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
-var testCase = require('../../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   gleak = require('../../dev/tools/gleak'),

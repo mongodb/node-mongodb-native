@@ -1,17 +1,17 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 
-var testCase = require('../deps/nodeunit').testCase,
+var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  nodeunit = require('../deps/nodeunit'),
+  nodeunit = require('nodeunit'),
   gleak = require('../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
   Long = require('../lib/mongodb/bson/long').Long,
-  Step = require("../deps/step/lib/step"),
+  Step = require("step"),
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
@@ -1109,7 +1109,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = function(test) {
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
   // Establish connection to db  
-  db.open(function(err, db) {    
+  db.open(function(err, db) {
 
     // Crete the collection for the distinct example
     db.createCollection('simple_key_based_distinct', function(err, collection) {
