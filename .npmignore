@@ -1,0 +1,12 @@
+.git*
+.buildinfo
+.mongodb
+docs/
+docs/sphinx-docs
+data/
+dev/
+examples/
+test/
+.DS_Store
+
+

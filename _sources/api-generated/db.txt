@@ -858,10 +858,16 @@ addUser
 
 Add a user to the database.
 
-.. js:function:: addUser(username, password, callback)
+
+
+Options
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
+.. js:function:: addUser(username, password[, options], callback)
 
    :param string username: username.
    :param string password: password.
+   :param object [options]: additional options during update.
    :param function callback: returns the results.
    :returns: null 
 
@@ -907,9 +913,15 @@ removeUser
 
 Remove a user from a database
 
-.. js:function:: removeUser(username, callback)
+
+
+Options
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
+.. js:function:: removeUser(username[, options], callback)
 
    :param string username: username.
+   :param object [options]: additional options during update.
    :param function callback: returns the results.
    :returns: null 
 
@@ -1462,6 +1474,7 @@ Creates an index on the collection.
 
 
 Options
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
@@ -1545,6 +1558,7 @@ Ensures that an index exists, if it does not it creates it
 
 
 Options
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a 
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.

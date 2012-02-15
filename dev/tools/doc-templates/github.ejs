@@ -1,0 +1,76 @@
+==============================================
+Github libraries and projects using the driver
+==============================================
+    
+<%
+var addLine = function(char, length) {
+  var chars = [];  
+  for(var i = 0; i < length; i++) chars[i] = char;
+  return chars.join('');
+}
+
+var keys = Object.keys(objectByTags);
+for(var j = 0; j < keys.length; j++) {
+  var key = keys[j];
+  var entries = objectByTags[key];
+  var title = tags[key] != null ? tags[key] : key;
+  
+%><%= format("%s\n%s\n\n", title, addLine('-', title.length)) %><%  
+  
+  // Iterate over all the objects
+  for(var i = 0; i < entries.length; i++) {
+  // for(var i = 0; i < 1; i++) {
+    var entry = entries[i];
+    var content = entry.content;  
+
+    if(content != null) {
+      // Parse the pushed at date
+      var t = Date.parse(content.pushed_at  );
+      var d = new Date();
+      d.setTime(t);
+
+      // If there is no activity newer than 6 months it's dead
+      var fourMonths = 1000*60*60*24*31*4;
+      var currentDate = (new Date()).getTime() - fourMonths;
+
+      var activityArrow = ".. image:: ../static/active.png";
+      if(t < currentDate) {
+        var activityArrow = ".. image:: ../static/nonactive.png";      
+      }
+
+      // var minutes = 1000 * 60;
+      // var hours = minutes * 60;
+      // var days = hours * 24;
+      // var years = days * 365;
+      // var y = t / years;
+
+      // document.write("It's been: " + y + " years from Jan 1, 1970");
+      // document.write(" to Jul 8, 2005.");
+
+      %><%- format(".. topic:: %s\n\n\    %s\n", content.name, content.description) %><%
+  %>
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - <%- activityArrow %>
+         * - **Last push**
+           - <%= format("%s:%s:%s on %s/%s/%s", d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCDate(), d.getUTCMonth(), d.getUTCFullYear()) %>
+         * - **Homepage**
+           - <%= format("http://%s", content.homepage) %>
+         * - **Url**
+           - <%= content.html_url %>
+         * - **Clone Url**
+           - <%= content.clone_url %>
+         * - **Forks**
+           - <%= content.forks %>
+         * - **Watchers**
+           - <%= content.watchers %>
+
+<%
+    }
+  }  
+}
+
+%>

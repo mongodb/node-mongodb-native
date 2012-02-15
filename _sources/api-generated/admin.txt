@@ -357,10 +357,16 @@ addUser
 Add a user to the MongoDB server, if the user exists it will
 overwrite the current password
 
-.. js:function:: addUser(username, password, callback)
+
+
+Options
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
+.. js:function:: addUser(username, password[, options], callback)
 
    :param string username: The user name for the authentication.
    :param string password: The password for the authentication.
+   :param object [options]: additional options during update.
    :param function callback: Callback function of format `function(err, result) {}`.
    :returns: null Returns no result
 
@@ -417,9 +423,15 @@ removeUser
 
 Remove a user from the MongoDB server
 
-.. js:function:: removeUser(username, callback)
+
+
+Options
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
+.. js:function:: removeUser(username[, options], callback)
 
    :param string username: The user name for the authentication.
+   :param object [options]: additional options during update.
    :param function callback: Callback function of format `function(err, result) {}`.
    :returns: null Returns no result
 

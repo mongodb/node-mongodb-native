@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Admin() &mdash; MongoDB Node.JS Driver 0.9.9 documentation</title>
+    <title>Admin() &mdash; MongoDB Node.JS Driver 0.9.9.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.9',
+        VERSION:     '0.9.9.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.9 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.1 documentation" href="../index.html" />
     <link rel="next" title="Cursor()" href="cursor.html" />
     <link rel="prev" title="Collection()" href="collection.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="collection.html" title="Collection()"
              accesskey="P">previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -443,9 +443,16 @@ instance of the db client</p>
 <h2>addUser<a class="headerlink" href="#adduser" title="Permalink to this headline">¶</a></h2>
 <p>Add a user to the MongoDB server, if the user exists it will
 overwrite the current password</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>safe</strong> {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.</li>
+</ul>
+</dd>
+</dl>
 <dl class="function">
 <dt id="addUser">
-<tt class="descname">addUser</tt><big>(</big><em>username</em>, <em>password</em>, <em>callback</em><big>)</big><a class="headerlink" href="#addUser" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">addUser</tt><big>(</big><em>username</em>, <em>password</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big><a class="headerlink" href="#addUser" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -453,6 +460,7 @@ overwrite the current password</p>
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>username</strong> (<em>string</em>) &#8211; The user name for the authentication.</li>
 <li><strong>password</strong> (<em>string</em>) &#8211; The password for the authentication.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
 <li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
 </ul>
 </td>
@@ -509,15 +517,23 @@ overwrite the current password</p>
 <div class="section" id="removeuser">
 <h2>removeUser<a class="headerlink" href="#removeuser" title="Permalink to this headline">¶</a></h2>
 <p>Remove a user from the MongoDB server</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>safe</strong> {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.</li>
+</ul>
+</dd>
+</dl>
 <dl class="function">
 <dt id="removeUser">
-<tt class="descname">removeUser</tt><big>(</big><em>username</em>, <em>callback</em><big>)</big><a class="headerlink" href="#removeUser" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">removeUser</tt><big>(</big><em>username</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big><a class="headerlink" href="#removeUser" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>username</strong> (<em>string</em>) &#8211; The user name for the authentication.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
 <li><strong>callback</strong> (<em>function</em>) &#8211; Callback function of format <cite>function(err, result) {}</cite>.</li>
 </ul>
 </td>
@@ -1106,7 +1122,7 @@ Use this command to check that a collection is valid (not corrupt) and to get va
         <li class="right" >
           <a href="collection.html" title="Collection()"
              >previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

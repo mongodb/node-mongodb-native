@@ -1,0 +1,15 @@
+==================
+<%- title %>
+==================
+
+.. toctree::
+  :maxdepth: 2
+  
+<%
+  for(var i = 0; i < entries.length; i++) {
+    // Classname
+    var name = entries[i];
+    // Write out the name
+    %><%= format("  %s\n", name) %><%
+  }
+%>

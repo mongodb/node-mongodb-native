@@ -1,0 +1,25 @@
+TODO for jan 4 - 2011
+- Chase down potential memory leak in findAndModify
+- Check compatibility for gridFS between python and js
+- Ensure Gridfs speed is comparable to other solutions
+- Map out python replicaset driver functionality
+
+ACCOMPLISHED jan 4 - 2011
++ Chase down potential memory leak in findAndModify
++ Check compatibility for gridFS between python and js
++ Ensure Gridfs speed is comparable to other solutions
+
+0.9.7.4-dev
+- Amortize documents (only deserialize when accessed)
+- Mongo tests to handle special Mongos situations
+- If a secondary server disappears don't kill the driver connection
+- Check for new servers coming online (a new secondary server etc)
+- http://api.mongodb.org/python/current/api/pymongo/index.html#pymongo.ReadPreference
+
+--------------------------------------------------------------------------------------------* Allow secondary read with no master 
+* Add lowest response time selection of read server for replicaset using a selectable strategy. First one being using the ping command response time
+* Allow execution of multiple commands against the same server connection when having a connection pool
+* Implement tag support for replicasets
+* Change bson c++ parser to use js objects instead of native c++ objects
+* Whole stack benchmark with profiling to locate where the driver spends time
+* Change bson c++ parser to be stackless to look at performance difference

@@ -1905,7 +1905,7 @@ Options
            var reduce = function(k,vals) { return 1; };
      
            // Peform the map reduce
-           collection.mapReduce(map, reduce, function(err, collection) {
+           collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
              // Mapreduce returns the temporary collection with the results          
              collection.findOne({'_id':1}, function(err, result) {
                assert.equal(1, result.value);
@@ -2523,7 +2523,7 @@ Retrieve all the indexes on the collection.
       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
      // Establish connection to db  
-     db.open(function(err, db) {    
+     db.open(function(err, db) {
      
        // Crete the collection for the distinct example
        db.createCollection('simple_key_based_distinct', function(err, collection) {

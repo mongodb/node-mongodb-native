@@ -1,0 +1,402 @@
+0.9.9.1 2012-02-15
+------------------
+* Better handling of safe when using some commands such as createIndex, ensureIndex, addUser, removeUser, createCollection.
+* Mapreduce now throws error if out parameter is not specified.
+
+0.9.9 2012-02-13
+----------------
+* Added createFromTime method on ObjectID to allow for queries against _id more easily using the timestamp.
+* Db.close(true) now makes connection unusable as it's been force closed by app.
+* Fixed mapReduce and group functions to correctly send slaveOk on queries.
+* Fixes for find method to correctly work with find(query, fields, callback) (Issue #506).
+* A fix for connection error handling when using the SSL on MongoDB.
+
+0.9.8-7 2012-02-06
+------------------
+* Simplified findOne to use the find command instead of the custom code (Issue #498).
+* BSON JS parser not also checks for _bsonType variable in case BSON object is in weird scope (Issue #495).
+
+0.9.8-6 2012-02-04
+------------------
+* Removed the check for replicaset change code as it will never work with node.js.
+
+0.9.8-5 2012-02-02
+------------------
+* Added geoNear command to Collection.
+* Added geoHaystackSearch command to Collection.
+* Added indexes command to collection to retrieve the indexes on a Collection.
+* Added stats command to collection to retrieve the statistics on a Collection.
+* Added listDatabases command to admin object to allow retrieval of all available dbs.
+* Changed createCreateIndexCommand to work better with options.
+* Fixed dereference method on Db class to correctly dereference Db reference objects. 
+* Moved connect object onto Db class(Db.connect) as well as keeping backward compatibility.
+* Removed writeBuffer method from gridstore, write handles switching automatically now.
+* Changed readBuffer to read on Gridstore, Gridstore now only supports Binary Buffers no Strings anymore.
+* Moved Long class to bson directory.
+
+0.9.8-4 2012-01-28
+------------------
+* Added reIndex command to collection and db level.
+* Added support for $returnKey, $maxScan, $min, $max, $showDiskLoc, $comment to cursor and find/findOne methods.
+* Added dropDups and v option to createIndex and ensureIndex.
+* Added isCapped method to Collection.
+* Added indexExists method to Collection. 
+* Added findAndRemove method to Collection.
+* Fixed bug for replicaset connection when no active servers in the set.
+* Fixed bug for replicaset connections when errors occur during connection. 
+* Merged in patch for BSON Number handling from Lee Salzman, did some small fixes and added test coverage.
+
+0.9.8-3 2012-01-21
+------------------
+* Workaround for issue with Object.defineProperty (Issue #484)
+* ObjectID generation with date does not set rest of fields to zero (Issue #482)
+
+0.9.8-2 2012-01-20
+------------------
+* Fixed a missing this in the ReplSetServers constructor.
+
+0.9.8-1 2012-01-17
+------------------
+* FindAndModify bug fix for duplicate errors (Issue #481)
+
+0.9.8 2012-01-17
+----------------
+* Replicasets now correctly adjusts to live changes in the replicaset configuration on the servers, reconnecting correctly.
+  - Set the interval for checking for changes setting the replicaSetCheckInterval property when creating the ReplSetServers instance or on db.serverConfig.replicaSetCheckInterval. (default 1000 miliseconds)
+* Fixes formattedOrderClause in collection.js to accept a plain hash as a parameter (Issue #469) https://github.com/tedeh
+* Removed duplicate code for formattedOrderClause and moved to utils module
+* Pass in poolSize for ReplSetServers to set default poolSize for new replicaset members
+* Bug fix for BSON JS deserializer. Isolating the eval functions in separate functions to avoid V8 deoptimizations 
+* Correct handling of illegal BSON messages during deserialization
+* Fixed Infinite loop when reading GridFs file with no chunks (Issue #471)
+* Correctly update existing user password when using addUser (Issue #470)
+
+0.9.7.3-5 2012-01-04
+--------------------
+* Fix for RegExp serialization for 0.4.X where typeof /regexp/ == 'function' vs in 0.6.X typeof /regexp/ == 'object'
+* Don't allow keepAlive and setNoDelay for 0.4.X as it throws errors
+
+0.9.7.3-4 2012-01-04
+--------------------
+* Chased down potential memory leak on findAndModify, Issue #467 (node.js removeAllListeners leaves the key in the _events object, node.js bug on eventlistener?, leads to extremely slow memory leak on listener object)
+* Sanity checks for GridFS performance with benchmark added
+
+0.9.7.3-3 2012-01-04
+--------------------
+* Bug fixes for performance issues going form 0.9.6.X to 0.9.7.X on linux
+* BSON bug fixes for performance
+
+0.9.7.3-2 2012-01-02
+--------------------
+* Fixed up documentation to reflect the preferred way of instantiating bson types
+* GC bug fix for JS bson parser to avoid stop-and-go GC collection
+
+0.9.7.3-1 2012-01-02
+--------------------
+* Fix to make db.bson_serializer and db.bson_deserializer work as it did previously
+
+0.9.7.3 2011-12-30
+--------------------
+* Moved BSON_BINARY_SUBTYPE_DEFAULT from BSON object to Binary object and removed the BSON_BINARY_ prefixes
+* Removed Native BSON types, C++ parser uses JS types (faster due to cost of crossing the JS-C++ barrier for each call)
+* Added build fix for 0.4.X branch of Node.js where GetOwnPropertyNames is not defined in v8
+* Fix for wire protocol parser for corner situation where the message is larger than the maximum socket buffer in node.js (Issue #464, #461, #447)
+* Connection pool status set to connected on poolReady, isConnected returns false on anything but connected status (Issue #455)
+
+0.9.7.2-5 2011-12-22
+--------------------
+* Brand spanking new Streaming Cursor support Issue #458 (https://github.com/christkv/node-mongodb-native/pull/458) thanks to Mr Aaron Heckmann
+
+0.9.7.2-4 2011-12-21
+--------------------
+* Refactoring of callback code to work around performance regression on linux
+* Fixed group function to correctly use the command mode as default
+
+0.9.7.2-3 2011-12-18
+--------------------
+* Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450).
+* Allow for force send query to primary, pass option (read:'primary') on find command. 
+	* ``find({a:1}, {read:'primary'}).toArray(function(err, items) {});``
+
+0.9.7.2-2 2011-12-16
+--------------------
+* Fixes infinite streamRecords QueryFailure fix when using Mongos (Issue #442)
+
+0.9.7.2-1 2011-12-16
+--------------------
+* ~10% perf improvement for ObjectId#toHexString (Issue #448, https://github.com/aheckmann)
+* Only using process.nextTick on errors emitted on callbacks not on all parsing, reduces number of ticks in the driver
+* Changed parsing off bson messages to use process.nextTick to do bson parsing in batches if the message is over 10K as to yield more time to the event look increasing concurrency on big mongoreply messages with multiple documents
+
+0.9.7.2 2011-12-15
+------------------
+* Added SSL support for future version of mongodb (VERY VERY EXPERIMENTAL)
+	* pass in the ssl:true option to the server or replicaset server config to enable
+	* a bug either in mongodb or node.js does not allow for more than 1 connection pr db instance (poolSize:1).
+* Added getTimestamp() method to objectID that returns a date object
+* Added finalize function to collection.group
+	* function group (keys, condition, initial, reduce, finalize, command, callback)
+* Reaper no longer using setTimeout to handle reaping. Triggering is done in the general flow leading to predictable behavior.
+	* reaperInterval, set interval for reaper (default 10000 miliseconds)
+	* reaperTimeout, set timeout for calls (default 30000 miliseconds)
+	* reaper, enable/disable reaper (default false)
+* Work around for issues with findAndModify during high concurrency load, insure that the behavior is the same across the 1.8.X branch and 2.X branch of MongoDb
+* Reworked multiple db's sharing same connection pool to behave correctly on error, timeout and close
+* EnsureIndex command can be executed without a callback (Issue #438)
+* Eval function no accepts options including nolock (Issue #432)
+	* eval(code, parameters, options, callback) (where options = {nolock:true})
+
+0.9.7.1-4 2011-11-27
+--------------------
+* Replaced install.sh with install.js to install correctly on all supported os's
+
+0.9.7.1-3 2011-11-27
+--------------------
+* Fixes incorrect scope for ensureIndex error wrapping (Issue #419) https://github.com/ritch
+
+0.9.7.1-2 2011-11-27
+--------------------
+* Set statistical selection strategy as default for secondary choice.
+
+0.9.7.1-1 2011-11-27
+--------------------
+* Better handling of single server reconnect (fixes some bugs)
+* Better test coverage of single server failure
+* Correct handling of callbacks on replicaset servers when firewall dropping packets, correct reconnect
+
+0.9.7.1 2011-11-24
+------------------
+* Better handling of dead server for single server instances
+* FindOne and find treats selector == null as {}, Issue #403
+* Possible to pass in a strategy for the replicaset to pick secondary reader node 
+	* parameter strategy
+		* ping (default), pings the servers and picks the one with the lowest ping time
+		* statistical, measures each request and pick the one with the lowest mean and std deviation
+* Set replicaset read preference replicaset.setReadPreference()
+	* Server.READ_PRIMARY (use primary server for reads)
+	* Server.READ_SECONDARY (from a secondary server (uses the strategy set))
+	* tags, {object of tags}
+* Added replay of commands issued to a closed connection when the connection is re-established
+* Fix isConnected and close on unopened connections. Issue #409, fix by (https://github.com/sethml)
+* Moved reaper to db.open instead of constructor (Issue #406)
+* Allows passing through of socket connection settings to Server or ReplSetServer under the option socketOptions
+  	* timeout = set seconds before connection times out (default 0)
+	* noDelay = Disables the Nagle algorithm (default true)
+	* keepAlive = Set if keepAlive is used (default 0, which means no keepAlive, set higher than 0 for keepAlive)
+	* encoding = ['ascii', 'utf8', or 'base64'] (default null)
+* Fixes for handling of errors during shutdown off a socket connection
+* Correctly applies socket options including timeout
+* Cleanup of test management code to close connections correctly
+* Handle parser errors better, closing down the connection and emitting an error
+* Correctly emit errors from server.js only wrapping errors that are strings
+
+0.9.7 2011-11-10
+----------------
+* Added priority setting to replicaset manager
+* Added correct handling of passive servers in replicaset
+* Reworked socket code for simpler clearer handling
+* Correct handling of connections in test helpers
+* Added control of retries on failure
+    * control with parameters retryMiliSeconds and numberOfRetries when creating a db instance
+* Added reaper that will timeout and cleanup queries that never return
+	* control with parameters reaperInterval and reaperTimeout when creating a db instance
+* Refactored test helper classes for replicaset tests
+* Allows raw (no bson parser mode for insert, update, remove, find and findOne)
+	* control raw mode passing in option raw:true on the commands
+	* will return buffers with the binary bson objects
+* Fixed memory leak in cursor.toArray
+* Fixed bug in command creation for mongodb server with wrong scope of call
+* Added db(dbName) method to db.js to allow for reuse of connections against other databases
+* Serialization of functions in an object is off by default, override with parameter
+	* serializeFunctions [true/false] on db level, collection level or individual insert/update/findAndModify
+* Added Long.fromString to c++ class and fixed minor bug in the code (Test case for $gt operator on 64-bit integers, Issue #394)
+* FindOne and find now share same code execution and will work in the same manner, Issue #399
+* Fix for tailable cursors, Issue #384
+* Fix for Cursor rewind broken, Issue #389
+* Allow Gridstore.exist to query using regexp, Issue #387, fix by (https://github.com/kaij)
+* Updated documentation on https://github.com/christkv/node-mongodb-native
+* Fixed toJSON methods across all objects for BSON, Binary return Base64 Encoded data
+
+0.9.6-22 2011-10-15
+-------------------
+* Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370
+* Fixed bug in findAndModify that did not throw error on replicaset timeout, Issue #373
+
+0.9.6-21 2011-10-05
+-------------------
+* Reworked reconnect code to work correctly
+* Handling errors in different parts of the code to ensure that it does not lock the connection
+* Consistent error handling for Object.createFromHexString for JS and C++
+
+0.9.6-20 2011-10-04
+-------------------
+* Reworked bson.js parser to get rid off Array.shift() due to it allocating new memory for each call. Speedup varies between 5-15% depending on doc
+* Reworked bson.cc to throw error when trying to serialize js bson types
+* Added MinKey, MaxKey and Double support for JS and C++ parser
+* Reworked socket handling code to emit errors on unparsable messages
+* Added logger option for Db class, lets you pass in a function in the shape 
+	{
+		log : function(message, object) {},
+		error : function(errorMessage, errorObject) {},
+		debug : function(debugMessage, object) {},
+	}
+
+  Usage is new Db(new Server(..), {logger: loggerInstance})
+
+0.9.6-19 2011-09-29
+-------------------
+* Fixing compatibility issues between C++ bson parser and js parser
+* Added Symbol support to C++ parser
+* Fixed socket handling bug for seldom misaligned message from mongodb
+* Correctly handles serialization of functions using the C++ bson parser
+
+0.9.6-18 2011-09-22
+-------------------
+* Fixed bug in waitForConnection that would lead to 100% cpu usage, Issue #352
+
+0.9.6-17 2011-09-21
+-------------------
+* Fixed broken exception test causing bamboo to hang
+* Handling correctly command+lastError when both return results as in findAndModify, Issue #351
+
+0.9.6-16 2011-09-14
+-------------------
+* Fixing a bunch of issues with compatibility with MongoDB 2.0.X branch. Some fairly big changes in behavior from 1.8.X to 2.0.X on the server.
+* Error Connection MongoDB V2.0.0 with Auth=true, Issue #348
+
+0.9.6-15 2011-09-09
+-------------------
+* Fixed issue where pools would not be correctly cleaned up after an error, Issue #345
+* Fixed authentication issue with secondary servers in Replicaset, Issue #334
+* Duplicate replica-set servers when omitting port, Issue #341
+* Fixing findAndModify to correctly work with Replicasets ensuring proper error handling, Issue #336
+* Merged in code from (https://github.com/aheckmann) that checks for global variable leaks
+
+0.9.6-14 2011-09-05
+-------------------
+* Minor fixes for error handling in cursor streaming (https://github.com/sethml), Issue #332
+* Minor doc fixes
+* Some more cursor sort tests added, Issue #333
+* Fixes to work with 0.5.X branch
+* Fix Db not removing reconnect listener from serverConfig, (https://github.com/sbrekken), Issue #337
+* Removed node_events.h includes (https://github.com/jannehietamaki), Issue #339
+* Implement correct safe/strict mode for findAndModify.
+
+0.9.6-13 2011-08-24
+-------------------
+* Db names correctly error checked for illegal characters
+
+0.9.6-12 2011-08-24
+-------------------
+* Nasty bug in GridFS if you changed the default chunk size
+* Fixed error handling bug in findOne
+
+0.9.6-11 2011-08-23
+-------------------
+* Timeout option not correctly making it to the cursor, Issue #320, Fix from (https://github.com/year2013)
+* Fixes for memory leaks when using buffers and C++ parser
+* Fixes to make tests pass on 0.5.X
+* Cleanup of bson.js to remove duplicated code paths
+* Fix for errors occurring in ensureIndex, Issue #326
+* Removing require.paths to make tests work with the 0.5.X branch
+
+0.9.6-10 2011-08-11
+-------------------
+* Specific type Double for capped collections (https://github.com/mbostock), Issue #312
+* Decorating Errors with all all object info from Mongo (https://github.com/laurie71), Issue #308
+* Implementing fixes for mongodb 1.9.1 and higher to make tests pass
+* Admin validateCollection now takes an options argument for you to pass in full option
+* Implemented keepGoing parameter for mongodb 1.9.1 or higher, Issue #310
+* Added test for read_secondary count issue, merged in fix from (https://github.com/year2013), Issue #317
+
+0.9.6-9
+-------
+* Bug fix for bson parsing the key '':'' correctly without crashing
+
+0.9.6-8
+------- 
+* Changed to using node.js crypto library MD5 digest
+* Connect method support documented mongodb: syntax by (https://github.com/sethml)
+* Support Symbol type for BSON, serializes to it's own type Symbol, Issue #302, #288
+* Code object without scope serializing to correct BSON type
+* Lot's of fixes to avoid double callbacks (https://github.com/aheckmann) Issue #304
+* Long deserializes as Number for values in the range -2^53 to 2^53, Issue #305 (https://github.com/sethml)
+* Fixed C++ parser to reflect JS parser handling of long deserialization
+* Bson small optimizations
+
+0.9.6-7 2011-07-13
+------------------
+* JS Bson deserialization bug #287
+
+0.9.6-6 2011-07-12
+------------------
+* FindAndModify not returning error message as other methods Issue #277
+* Added test coverage for $push, $pushAll and $inc atomic operations
+* Correct Error handling for non 12/24 bit ids on Pure JS ObjectID class Issue #276
+* Fixed terrible deserialization bug in js bson code #285
+* Fix by andrewjstone to avoid throwing errors when this.primary not defined
+
+0.9.6-5 2011-07-06
+------------------
+* Rewritten BSON js parser now faster than the C parser on my core2duo laptop
+* Added option full to indexInformation to get all index info Issue #265
+* Passing in ObjectID for new Gridstore works correctly Issue #272
+
+0.9.6-4 2011-07-01
+------------------
+* Added test and bug fix for insert/update/remove without callback supplied
+
+0.9.6-3 2011-07-01
+------------------
+* Added simple grid class called Grid with put, get, delete methods
+* Fixed writeBuffer/readBuffer methods on GridStore so they work correctly
+* Automatic handling of buffers when using write method on GridStore
+* GridStore now accepts a ObjectID instead of file name for write and read methods
+* GridStore.list accepts id option to return of file ids instead of filenames
+* GridStore close method returns document for the file allowing user to reference _id field
+
+0.9.6-2 2011-06-30
+------------------
+* Fixes for reconnect logic for server object (replays auth correctly)
+* More testcases for auth
+* Fixes in error handling for replicaset
+* Fixed bug with safe parameter that would fail to execute safe when passing w or wtimeout
+* Fixed slaveOk bug for findOne method
+* Implemented auth support for replicaset and test cases
+* Fixed error when not passing in rs_name
+
+0.9.6-1 2011-06-25
+------------------
+* Fixes for test to run properly using c++ bson parser
+* Fixes for dbref in native parser (correctly handles ref without db component)
+* Connection fixes for replicasets to avoid runtime conditions in cygwin (https://github.com/vincentcr)
+* Fixes for timestamp in js bson parser (distinct timestamp type now)
+
+0.9.6 2011-06-21
+----------------
+* Worked around npm version handling bug
+* Race condition fix for cygwin (https://github.com/vincentcr)
+
+0.9.5-1 2011-06-21
+------------------
+* Extracted Timestamp as separate class for bson js parser to avoid instanceof problems
+* Fixed driver strict mode issue
+
+0.9.5 2011-06-20
+----------------
+* Replicaset support (failover and reading from secondary servers)
+* Removed ServerPair and ServerCluster
+* Added connection pool functionality
+* Fixed serious bug in C++ bson parser where bytes > 127 would generate 2 byte sequences
+* Allows for forcing the server to assign ObjectID's using the option {forceServerObjectId: true}
+
+0.6.8
+-----
+* Removed multiple message concept from bson
+* Changed db.open(db) to be db.open(err, db)
+
+0.1 2010-01-30
+--------------
+* Initial release support of driver using native node.js interface
+* Supports gridfs specification
+* Supports admin functionality

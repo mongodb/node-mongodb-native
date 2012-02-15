@@ -1,0 +1,1067 @@
+==============================================
+Github libraries and projects using the driver
+==============================================
+    
+Web frameworks using MongoDB
+----------------------------
+
+.. topic:: nwt
+
+    Node Web Toolkit
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 7:11:7 on 9/1/2012
+         * - **Homepage**
+           - http://www.nwtjs.org
+         * - **Url**
+           - https://github.com/nwtjs/nwt
+         * - **Clone Url**
+           - https://github.com/nwtjs/nwt.git
+         * - **Forks**
+           - 2
+         * - **Watchers**
+           - 4
+
+.. topic:: caboose
+
+    Coffeescript-happy express-based server-side MVC framework loosely based on rails
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 22:26:24 on 8/1/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/mattinsler/caboose
+         * - **Clone Url**
+           - https://github.com/mattinsler/caboose.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 4
+
+.. topic:: node-bread
+
+    file based static website/blog generator
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 16:43:58 on 15/1/2012
+         * - **Homepage**
+           - http://search.npmjs.org/#/bread
+         * - **Url**
+           - https://github.com/pvorb/node-bread
+         * - **Clone Url**
+           - https://github.com/pvorb/node-bread.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 1
+
+.. topic:: arrjs
+
+    HTTP and WebSocket application routing
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 17:2:2 on 8/1/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/tjanczuk/arrjs
+         * - **Clone Url**
+           - https://github.com/tjanczuk/arrjs.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 17
+
+Object Document Modeling Libraries
+----------------------------------
+
+.. topic:: noid
+
+    ODM for MongoDB/Node.js with CoffeeScript
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/nonactive.png
+         * - **Last push**
+           - 1:20:59 on 22/11/2010
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/chrisgibson/noid
+         * - **Clone Url**
+           - https://github.com/chrisgibson/noid.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 7
+
+.. topic:: mongoose
+
+    Node.JS MongoDB utility library with ORM-like functionality
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 15:24:47 on 10/1/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/LearnBoost/mongoose
+         * - **Clone Url**
+           - https://github.com/LearnBoost/mongoose.git
+         * - **Forks**
+           - 156
+         * - **Watchers**
+           - 1667
+
+.. topic:: mongo-model
+
+    Model for MongoDB (Node.JS)
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 21:12:48 on 10/1/2012
+         * - **Homepage**
+           - http://http://alexeypetrushin.github.com/mongo-model
+         * - **Url**
+           - https://github.com/alexeypetrushin/mongo-model
+         * - **Clone Url**
+           - https://github.com/alexeypetrushin/mongo-model.git
+         * - **Forks**
+           - 3
+         * - **Watchers**
+           - 23
+
+.. topic:: mongodb-expressions
+
+    MongoDB expressions for fire.js
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 22:19:35 on 29/10/2011
+         * - **Homepage**
+           - http://http://firejs.firebase.co
+         * - **Url**
+           - https://github.com/firebaseco/mongodb-expressions
+         * - **Clone Url**
+           - https://github.com/firebaseco/mongodb-expressions.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 1
+
+.. topic:: leaf
+
+    A MongoDB ORM for Node
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/nonactive.png
+         * - **Last push**
+           - 20:2:4 on 29/7/2010
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/colladow/leaf
+         * - **Clone Url**
+           - https://github.com/colladow/leaf.git
+         * - **Forks**
+           - 2
+         * - **Watchers**
+           - 7
+
+Content Management Systems
+--------------------------
+
+.. topic:: nocr-mongo
+
+    nodejs Content Repository implementation for mongodb
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/nonactive.png
+         * - **Last push**
+           - 19:13:40 on 11/6/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/karacos/nocr-mongo
+         * - **Clone Url**
+           - https://github.com/karacos/nocr-mongo.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 3
+
+.. topic:: calipso
+
+    Calipso is a simple NodeJS content management system based on Express, Connect & Mongoose.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 8:56:17 on 10/1/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/cliftonc/calipso
+         * - **Clone Url**
+           - https://github.com/cliftonc/calipso.git
+         * - **Forks**
+           - 97
+         * - **Watchers**
+           - 717
+
+Grid FS libraries or tools
+--------------------------
+
+.. topic:: nettle
+
+    On-the-fly processing framework for Node.js and MongoDB
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 18:5:14 on 9/1/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/scttnlsn/nettle
+         * - **Clone Url**
+           - https://github.com/scttnlsn/nettle.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 6
+
+Wrapper libraries to ease the use of development or provide simple ODM like behaviours
+--------------------------------------------------------------------------------------
+
+.. topic:: node-mongoskin
+
+    The future layer for node-mongodb-native.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 6:37:1 on 19/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/guileen/node-mongoskin
+         * - **Clone Url**
+           - https://github.com/guileen/node-mongoskin.git
+         * - **Forks**
+           - 18
+         * - **Watchers**
+           - 216
+
+.. topic:: mongoq
+
+    Use mongoDB like this: mongoq('mongodb://localhost/db').collection('users').find().toArray(function(error, docs){});
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 7:17:31 on 19/11/2011
+         * - **Homepage**
+           - http://http://zzdhidden.github.com/mongoq
+         * - **Url**
+           - https://github.com/zzdhidden/mongoq
+         * - **Clone Url**
+           - https://github.com/zzdhidden/mongoq.git
+         * - **Forks**
+           - 3
+         * - **Watchers**
+           - 47
+
+.. topic:: mongolia
+
+    Flexible non-magical layer for the nodejs MongoDB driver
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/nonactive.png
+         * - **Last push**
+           - 14:50:36 on 8/7/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/masylum/mongolia
+         * - **Clone Url**
+           - https://github.com/masylum/mongolia.git
+         * - **Forks**
+           - 7
+         * - **Watchers**
+           - 67
+
+.. topic:: mongojs
+
+    a simple mongo module that implements the mongo api
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 21:9:14 on 23/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/gett/mongojs
+         * - **Clone Url**
+           - https://github.com/gett/mongojs.git
+         * - **Forks**
+           - 8
+         * - **Watchers**
+           - 81
+
+.. topic:: mongode
+
+    Thin wrapper around node-mongodb-native that provides a simpler alternative calling style and provides collection binding.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 21:41:53 on 18/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/milewise/mongode
+         * - **Clone Url**
+           - https://github.com/milewise/mongode.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 33
+
+.. topic:: node-mongodb-wrapper
+
+    A wrapper for node-mongodb-native as close as possible to the command-line javascript driver. Why learn two interfaces?
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 17:2:35 on 19/0/2012
+         * - **Homepage**
+           - http://http://i.tv
+         * - **Url**
+           - https://github.com/idottv/node-mongodb-wrapper
+         * - **Clone Url**
+           - https://github.com/idottv/node-mongodb-wrapper.git
+         * - **Forks**
+           - 5
+         * - **Watchers**
+           - 23
+
+.. topic:: mongodb-async
+
+    Thin & clean async wrapper for mongodb
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 16:43:54 on 7/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/zir/mongodb-async
+         * - **Clone Url**
+           - https://github.com/zir/mongodb-async.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 1
+
+.. topic:: mdoq-mongodb
+
+    simplified mongodb-native api w/ middleware
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 1:53:32 on 29/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/ritch/mdoq-mongodb
+         * - **Clone Url**
+           - https://github.com/ritch/mdoq-mongodb.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 1
+
+.. topic:: ferret
+
+    Adorable mongodb library for node.js
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/nonactive.png
+         * - **Last push**
+           - 15:2:55 on 2/7/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/Coreh/ferret
+         * - **Clone Url**
+           - https://github.com/Coreh/ferret.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 6
+
+.. topic:: easymongo
+
+    Easy MongoDB
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 8:10:6 on 14/1/2012
+         * - **Homepage**
+           - http://http://github.com/meritt/easymongo
+         * - **Url**
+           - https://github.com/meritt/easymongo
+         * - **Clone Url**
+           - https://github.com/meritt/easymongo.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 2
+
+REST api's around MongoDB or resource based libraries
+-----------------------------------------------------
+
+.. topic:: mongodb-rest
+
+    REST Server for MongoDB (using node.js)
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 8:21:59 on 28/10/2011
+         * - **Homepage**
+           - http://www.degrunt.net
+         * - **Url**
+           - https://github.com/tdegrunt/mongodb-rest
+         * - **Clone Url**
+           - https://github.com/tdegrunt/mongodb-rest.git
+         * - **Forks**
+           - 19
+         * - **Watchers**
+           - 111
+
+.. topic:: lazyBum
+
+    Node.js RESTful web framework.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 3:35:54 on 10/11/2011
+         * - **Homepage**
+           - http://http://streetsaheadllc.com
+         * - **Url**
+           - https://github.com/streets-ahead/lazyBum
+         * - **Clone Url**
+           - https://github.com/streets-ahead/lazyBum.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 1
+
+.. topic:: GECK
+
+    A lightweight, resource-based API framework for node.js
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/nonactive.png
+         * - **Last push**
+           - 22:55:44 on 11/7/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/Qard/GECK
+         * - **Clone Url**
+           - https://github.com/Qard/GECK.git
+         * - **Forks**
+           - 2
+         * - **Watchers**
+           - 8
+
+Test helpers and libraries
+--------------------------
+
+.. topic:: mongodb-fixtures
+
+    Fixtures for mongodb
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 11:58:10 on 26/9/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/tdegrunt/mongodb-fixtures
+         * - **Clone Url**
+           - https://github.com/tdegrunt/mongodb-fixtures.git
+         * - **Forks**
+           - 2
+         * - **Watchers**
+           - 2
+
+.. topic:: node-database-cleaner
+
+    The simplest way to clean your database after tests
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 1:42:16 on 7/1/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/emerleite/node-database-cleaner
+         * - **Clone Url**
+           - https://github.com/emerleite/node-database-cleaner.git
+         * - **Forks**
+           - 6
+         * - **Watchers**
+           - 26
+
+Tools or applications to manage your MongoDB's
+----------------------------------------------
+
+.. topic:: mon4mongo
+
+    MongoDB management web server boosted with nodejs & express.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 11:26:34 on 18/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/erhangundogan/mon4mongo
+         * - **Clone Url**
+           - https://github.com/erhangundogan/mon4mongo.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 1
+
+Queue libraries using MongoDB
+-----------------------------
+
+.. topic:: mojo
+
+    Node.js job queue backed by MongoDB
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 17:36:49 on 29/10/2011
+         * - **Homepage**
+           - http://http://wereHamster.github.com/mojo
+         * - **Url**
+           - https://github.com/wereHamster/mojo
+         * - **Clone Url**
+           - https://github.com/wereHamster/mojo.git
+         * - **Forks**
+           - 2
+         * - **Watchers**
+           - 5
+
+.. topic:: karait
+
+    A ridiculously simple queuing system, with clients in various languages, built on top of MongoDB.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 20:21:36 on 4/11/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/bcoe/karait
+         * - **Clone Url**
+           - https://github.com/bcoe/karait.git
+         * - **Forks**
+           - 7
+         * - **Watchers**
+           - 60
+
+Logging libraries or applications
+---------------------------------
+
+.. topic:: logmeup-server
+
+    LogMeUp Server - View any log files real-time in your web browser.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 5:31:41 on 14/1/2012
+         * - **Homepage**
+           - http://http://logmeup.com
+         * - **Url**
+           - https://github.com/jprichardson/logmeup-server
+         * - **Clone Url**
+           - https://github.com/jprichardson/logmeup-server.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 3
+
+.. topic:: nodeEventStore
+
+    EventStore Implementation in node.js
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 10:11:10 on 14/1/2012
+         * - **Homepage**
+           - http://http://kaba-cceac.github.com/nodeEventStore/
+         * - **Url**
+           - https://github.com/KABA-CCEAC/nodeEventStore
+         * - **Clone Url**
+           - https://github.com/KABA-CCEAC/nodeEventStore.git
+         * - **Forks**
+           - 2
+         * - **Watchers**
+           - 15
+
+.. topic:: devnull
+
+    dev/null, a powerful logging module for Node.js.. Because logging to dev/null is fast! <3
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 20:40:20 on 19/11/2011
+         * - **Homepage**
+           - http://dev/null
+         * - **Url**
+           - https://github.com/observing/devnull
+         * - **Clone Url**
+           - https://github.com/observing/devnull.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 13
+
+Monitoring applications or libraries
+------------------------------------
+
+.. topic:: Informant
+
+    A node based server monitor to get real-time status of your ops...
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 21:20:40 on 31/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/base698/Informant
+         * - **Clone Url**
+           - https://github.com/base698/Informant.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 3
+
+General frameworks over MongoDB
+-------------------------------
+
+.. topic:: DJS
+
+    A media sharing framework.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 9:49:41 on 20/9/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/khwang/DJS
+         * - **Clone Url**
+           - https://github.com/khwang/DJS.git
+         * - **Forks**
+           - 4
+         * - **Watchers**
+           - 20
+
+.. topic:: databank
+
+    NoSQL abstraction layer for Node.js
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 22:1:9 on 16/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/evanp/databank
+         * - **Clone Url**
+           - https://github.com/evanp/databank.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 10
+
+Translation libraries or frameworks
+-----------------------------------
+
+.. topic:: dialect-http
+
+    http client to manage your dialect translations
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 1:43:11 on 8/11/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/masylum/dialect-http
+         * - **Clone Url**
+           - https://github.com/masylum/dialect-http.git
+         * - **Forks**
+           - 5
+         * - **Watchers**
+           - 21
+
+.. topic:: dialect
+
+    Translations for nodejs
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 13:50:41 on 29/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/masylum/dialect
+         * - **Clone Url**
+           - https://github.com/masylum/dialect.git
+         * - **Forks**
+           - 12
+         * - **Watchers**
+           - 83
+
+Libraries or Applications for analytics
+---------------------------------------
+
+.. topic:: cube
+
+    Cube: A system for time series visualization.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 18:34:32 on 26/0/2012
+         * - **Homepage**
+           - http://http://square.github.com/cube
+         * - **Url**
+           - https://github.com/square/cube
+         * - **Clone Url**
+           - https://github.com/square/cube.git
+         * - **Forks**
+           - 118
+         * - **Watchers**
+           - 1483
+
+Libraries for the connect middleware
+------------------------------------
+
+.. topic:: connect-session-mongo
+
+    MongoDB Session Storage for Connect Middleware
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/nonactive.png
+         * - **Last push**
+           - 21:22:25 on 13/8/2011
+         * - **Homepage**
+           - http://https://github.com/bartt/connect-session-mongo
+         * - **Url**
+           - https://github.com/bartt/connect-session-mongo
+         * - **Clone Url**
+           - https://github.com/bartt/connect-session-mongo.git
+         * - **Forks**
+           - 2
+         * - **Watchers**
+           - 6
+
+.. topic:: connect-mongodb
+
+    SessionStorage for connect's session middleware
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 13:4:37 on 29/0/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/masylum/connect-mongodb
+         * - **Clone Url**
+           - https://github.com/masylum/connect-mongodb.git
+         * - **Forks**
+           - 17
+         * - **Watchers**
+           - 124
+
+.. topic:: connect-mongo
+
+    MongoDB session store for Connect.
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 18:50:9 on 14/11/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/kcbanner/connect-mongo
+         * - **Clone Url**
+           - https://github.com/kcbanner/connect-mongo.git
+         * - **Forks**
+           - 21
+         * - **Watchers**
+           - 76
+
+Libraries or applications for continous integration
+---------------------------------------------------
+
+.. topic:: concrete
+
+    Simple continuous integration server written with NodeJS and CoffeeScript
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 0:38:27 on 11/1/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/ryankee/concrete
+         * - **Clone Url**
+           - https://github.com/ryankee/concrete.git
+         * - **Forks**
+           - 15
+         * - **Watchers**
+           - 133
+
+Exampe applications
+-------------------
+
+.. topic:: node-mongo-cms
+
+    standard blog written in nodejs (express) and mongodb
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/active.png
+         * - **Last push**
+           - 19:8:38 on 30/9/2011
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/dynamicguy/node-mongo-cms
+         * - **Clone Url**
+           - https://github.com/dynamicguy/node-mongo-cms.git
+         * - **Forks**
+           - 1
+         * - **Watchers**
+           - 1
+

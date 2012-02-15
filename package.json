@@ -1,0 +1,80 @@
+{ "name" :            "mongodb"
+, "description" :     "A node.js driver for MongoDB"
+, "keywords" :        ["mongodb", "mongo", "driver", "db"]
+, "version" :         "0.9.9-1"
+, "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
+, "contributors" :  [ "Aaron Heckmann",
+                      "Christoph Pojer",
+                      "Pau Ramon Revilla",
+                      "Nathan White",
+                      "Emmerman",
+                      "Seth LaForge",
+                      "Boris Filipov",
+                      "Stefan Schärmeli",
+                      "Tedde Lundgren",
+                      "renctan",
+                      "Sergey Ukustov",
+                      "Ciaran Jessup",
+                      "kuno",
+                      "srimonti",
+                      "Erik Abele",
+                      "Pratik Daga",
+                      "Slobodan Utvic",
+                      "Kristina Chodorow",
+                      "Yonathan Randolph",
+                      "Brian Noguchi",
+                      "Sam Epstein",
+                      "James Harrison Fisher",
+                      "Vladimir Dronnikov",
+                      "Ben Hockey",
+                      "Henrik Johansson",
+                      "Simon Weare",
+                      "Alex Gorbatchev",
+                      "Shimon Doodkin",
+                      "Kyle Mueller",
+                      "Eran Hammer-Lahav",
+                      "Marcin Ciszak",
+                      "François de Metz",
+                      "Vinay Pulim",
+                      "nstielau",
+                      "Adam Wiggins",
+                      "entrinzikyl",
+                      "Jeremy Selier",
+                      "Ian Millington",
+                      "Public Keating",
+                      "andrewjstone",
+                      "Christopher Stott",
+                      "Corey Jewett",
+                      "brettkiefer",
+                      "Rob Holland",
+                      "Senmiao Liu",
+                      "heroic",
+                      "gitfy",
+                      "Andrew Stone",
+											"John Le Drew"]
+
+, "repository" :    { "type" :  "git"
+                    , "url" :   "http://github.com/christkv/node-mongodb-native.git" }
+, "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
+                    , "url" :   "http://github.com/christkv/node-mongodb-native/issues" }
+, "os" :            [ "linux"
+                    , "darwin"
+                    , "freebsd" ]
+, "devDependencies": {
+      "dox": "0.1.3"
+    , "uglify-js": "1.2.5"
+    , "ejs": "0.6.1"
+    , "nodeunit": "0.7.3"
+    , "github3": ">=0.3.0"
+	  , "markdown": "0.3.1"
+	  , "gleak": "0.2.3"
+	  , "step": "0.0.5"
+  }
+, "config":         { "native" : false }                    
+, "main":             "./lib/mongodb/index"
+, "directories" :   { "lib" : "./lib/mongodb" }
+, "engines" :       { "node" : ">=0.4.0" }
+, "scripts": { "install" : "node install.js" }
+, "licenses" :    [ { "type" :  "Apache License, Version 2.0"
+                    , "url" :   "http://www.apache.org/licenses/LICENSE-2.0" } ]
+}

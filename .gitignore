@@ -3,3 +3,10 @@
 *.seed
 .project
 .settings
+<<<<<<< HEAD
+=======
+data
+node_modules/
+output
+build
+>>>>>>> efddd763a3fd570178896ad748101797f10ec5b8
