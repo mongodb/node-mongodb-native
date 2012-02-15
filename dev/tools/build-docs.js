@@ -123,10 +123,10 @@ docs.writeMarkDownFile("./docs/sphinx-docs/source/markdown-docs", articles, temp
 // WRITE CHANGELOG TO THE DOCUMENTATION
 // ----------------------------------------------------------------------------
 // Outputdiectory
-var outputDirectory = "./docs/sphinx-docs/source/changelog";
+var outputDirectoryChangelog = "./docs/sphinx-docs/source/changelog";
 // Force create the directory for the generated docs
-exec('rm -rf ' + outputDirectory, function (error, stdout, stderr) {});
-exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {
+exec('rm -rf ' + outputDirectoryChangelog, function (error, stdout, stderr) {});
+exec('mkdir ' + outputDirectoryChangelog, function (error, stdout, stderr) {
   // Read all the templates
   var templateObjects = docs.readAllTemplates(templates);
   // Read the changelog
@@ -134,14 +134,14 @@ exec('mkdir ' + outputDirectory, function (error, stdout, stderr) {
   // Just write out the index
   var content = ejs.render(templateObjects["changelog"], {content:changelog});    
   // Write it out
-  fs.writeFileSync(format("%s/changelog.rst", outputDirectory), content);  
+  fs.writeFileSync(format("%s/changelog.rst", outputDirectoryChangelog), content);  
 });
 
 // ----------------------------------------------------------------------------
 // Generate using the driver pages
 // ----------------------------------------------------------------------------
 // Outputdiectory
-var outputDirectory = "./docs/sphinx-docs/source/github";
+var outputDirectoryGithub = "./docs/sphinx-docs/source/github";
 var inputFile = "./docs/sphinx-docs/npm_dependent_packages.json";
 
 // tag descriptions
@@ -167,7 +167,7 @@ var tagDescriptions = {
 
 // Create the github documents
 // docs.generateGithubPackageList(inputFile, outputDirectory, templates, tagDescriptions, {dontfetch:true});
-docs.generateGithubPackageList(inputFile, outputDirectory, templates, tagDescriptions, {});
+docs.generateGithubPackageList(inputFile, outputDirectoryGithub, templates, tagDescriptions, {});
 
 
 

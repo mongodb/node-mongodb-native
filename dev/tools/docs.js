@@ -31,7 +31,6 @@ var convert_tree_to_rs = function(nodes, documentLines) {
   // Go through all the tags and render
   for(var i = 0; i < nodes.length; i++) {
     var line = nodes[i];
-    // console.dir(line)
     
     if(Array.isArray(line)) {
       switch(line[0]) {
@@ -423,7 +422,6 @@ var _processGithub = function(objects, outputDirectory, templates, tagDescriptio
     // If we have a json file
     if(file.indexOf('.json') != -1) {
       var fileContent = fs.readFileSync(format("%s/%s", outputDirectory, file), 'ascii');
-      // console.dir(fileContent)
       var fileObject = JSON.parse(fileContent);
       // Did not retrive document correctly
       if(fileObject != null) {
