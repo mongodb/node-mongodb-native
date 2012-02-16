@@ -1348,7 +1348,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
     
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
       
           // Fetch basic indexInformation for collection
           db.indexInformation('more_index_information_test', function(err, indexInformation) {
