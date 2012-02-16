@@ -1,0 +1,19 @@
+=============
+Presentations
+=============
+
+
+NYC MongoDB User Group - Schemas for Real Time Analytics with Node.js
+---------------------------------------------------------------------
+Schemas for Real Time Analytics with Node.js - Eric Lubow and Russell Bradberry, SimpleReach
+
+SimpleReach powers the Slide, a recommendation powered content discovery technology for websites. Eric Lublow will discuss how SimpleReach builds schemas in MongoDB and Node.js for powerful, real-time data delivery. Topics will include: 
+
+* Dynamic collection creation
+* Updating (Increments over sets)
+* Schema
+* Next gen schemas for dynamic filters
+
+.. raw:: html
+
+   <iframe width="853" height="480" src="http://www.youtube-nocookie.com/embed/EpCe4qKoH5E" frameborder="0" allowfullscreen></iframe>

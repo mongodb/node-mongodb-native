@@ -18,6 +18,16 @@ Tutorials
 
   api-articles/index
 
+Presentations
+-------------
+
+.. toctree::
+  :maxdepth: 3
+
+  content/nodejsvideo
+  content/awesomeappsvideo
+  content/tutorials
+
 API Documentation
 -----------------
 
