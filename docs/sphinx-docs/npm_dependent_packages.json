@@ -258,6 +258,12 @@
     "tag": "webframework"    
   },
   {
+    "description" : "An awesome blackboard application using node.js, mongoose and mongodb",
+    "location": "github",
+    "url": "https://github.com/gotik/nodejs-blackboard",
+    "tag": "example"    
+  },  
+  {
     "description" : "standard blog written in nodejs (express) and mongodb ",
     "location": "github",
     "url": "https://github.com/dynamicguy/node-mongo-cms",
