@@ -1341,12 +1341,13 @@ exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = function(test) {
 
   // Establish connection to db  
   db.open(function(err, db) {  
-    var store = new Mongo.GridStore(db, new ObjectID( asset.source.toString() ), 'r', {
-        root: 'store'
-    });
-    
-    db.close();
-    test.done();
+    var store = new GridStore(db, new ObjectID( asset.source.toString() ), 'r', {root: 'store'});
+    store.open(function(err, gridStore) {
+      test.equal(null, err);
+      
+      db.close();
+      test.done();      
+    })    
   });
 }
 
