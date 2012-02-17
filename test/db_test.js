@@ -1396,24 +1396,27 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
         db.dropDatabase(function(err, result) {
           test.equal(null, err);
           
-          // Get the admin database
-          db.admin().listDatabases(function(err, dbs) {
-            // Grab the databases
-            dbs = dbs.databases;
-            // Did we find the db
-            var found = false;
-            
-            // Check if we have the db in the list
-            for(var i = 0; i < dbs.length; i++) {
-              if(dbs[i].name == 'integration_tests_to_drop') found = true;
-            }
-            
-            // We should not find the databases
-            test.equal(false, found);
-            
-            db.close();
-            test.done();
-          });          
+          // Ensure db drop is duplicated correctly
+          setTimeout(function() {
+            // Get the admin database
+            db.admin().listDatabases(function(err, dbs) {
+              // Grab the databases
+              dbs = dbs.databases;
+              // Did we find the db
+              var found = false;
+
+              // Check if we have the db in the list
+              for(var i = 0; i < dbs.length; i++) {
+                if(dbs[i].name == 'integration_tests_to_drop') found = true;
+              }
+
+              // We should not find the databases
+              test.equal(false, found);
+
+              db.close();
+              test.done();
+            });            
+          }, 2000)
         });    
       });
     });
