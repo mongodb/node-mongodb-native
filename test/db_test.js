@@ -1427,7 +1427,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyGetErrorDroppingNonExistingDb = function(test) {
-  var db = new Db('integration_tests_to_drop', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27017, 
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
   // Establish connection to db  
