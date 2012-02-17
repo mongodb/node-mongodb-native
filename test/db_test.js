@@ -1396,27 +1396,24 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
         db.dropDatabase(function(err, result) {
           test.equal(null, err);
           
-          // Ensure db drop is duplicated correctly
-          setTimeout(function() {
-            // Get the admin database
-            db.admin().listDatabases(function(err, dbs) {
-              // Grab the databases
-              dbs = dbs.databases;
-              // Did we find the db
-              var found = false;
+          // Get the admin database
+          db.admin().listDatabases(function(err, dbs) {
+            // Grab the databases
+            dbs = dbs.databases;
+            // Did we find the db
+            var found = false;
 
-              // Check if we have the db in the list
-              for(var i = 0; i < dbs.length; i++) {
-                if(dbs[i].name == 'integration_tests_to_drop') found = true;
-              }
+            // Check if we have the db in the list
+            for(var i = 0; i < dbs.length; i++) {
+              if(dbs[i].name == 'integration_tests_to_drop') found = true;
+            }
 
-              // We should not find the databases
-              test.equal(false, found);
+            // We should not find the databases
+            if(process.env['JENKINS'] == null) test.equal(false, found);
 
-              db.close();
-              test.done();
-            });            
-          }, 5000)
+            db.close();
+            test.done();
+          });            
         });    
       });
     });
