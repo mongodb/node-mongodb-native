@@ -1416,7 +1416,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
               db.close();
               test.done();
             });            
-          }, 2000)
+          }, 5000)
         });    
       });
     });
