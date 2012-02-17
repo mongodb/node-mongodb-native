@@ -58,7 +58,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = function(test) {
       collection.find({}, null, {raw:true}).toArray(function(err, items) {
         var objects = [];
         for(var i = 0; i < items.length; i++) {
-          test.ok(items[i] instanceof Buffer);
+          test.ok(Buffer.isBuffer(items[i]));
           objects.push(client.bson.deserialize(items[i]));
         }
         
@@ -68,7 +68,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = function(test) {
         
         // Execute findOne
         collection.findOne({a:1}, {raw:true}, function(err, item) {
-          test.ok(item instanceof Buffer);
+          test.ok(Buffer.isBuffer(item));
           var object = client.bson.deserialize(item);
           test.equal(1, object.a)            
           test.done();
@@ -123,7 +123,7 @@ exports.shouldCorrectlyUpdateDocumentAndReturnRaw = function(test) {
         collection.find({}, {}, {raw:true}).toArray(function(err, items) {
           var objects = [];
           for(var i = 0; i < items.length; i++) {
-            test.ok(items[i] instanceof Buffer);
+            test.ok(Buffer.isBuffer(items[i]));
             objects.push(client.bson.deserialize(items[i]));
           }
           
@@ -161,7 +161,7 @@ exports.shouldCorreclyInsertRawDocumentAndRetrieveThem = function(test) {
       collection.find({}, {}, {raw:true}).toArray(function(err, items) {
         var objects = [];
         for(var i = 0; i < items.length; i++) {
-          test.ok(items[i] instanceof Buffer);
+          test.ok(Buffer.isBuffer(items[i]));
           objects.push(client.bson.deserialize(items[i]));
         }
 
@@ -325,7 +325,7 @@ exports.shouldCorreclyInsertRawDocumentAndRetrieveThemSettingRawAtCollectionLeve
       collection.find({}, {}).toArray(function(err, items) {
         var objects = [];
         for(var i = 0; i < items.length; i++) {
-          test.ok(items[i] instanceof Buffer);
+          test.ok(Buffer.isBuffer(items[i]));
           objects.push(client.bson.deserialize(items[i]));
         }
 
@@ -361,7 +361,7 @@ exports.shouldCorrectlyUpdateDocumentAndReturnRawSettingRawAtCollectionLevel = f
         collection.find({}, {}).toArray(function(err, items) {
           var objects = [];
           for(var i = 0; i < items.length; i++) {
-            test.ok(items[i] instanceof Buffer);
+            test.ok(Buffer.isBuffer(items[i]));
             objects.push(client.bson.deserialize(items[i]));
           }
           
