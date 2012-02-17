@@ -45,7 +45,8 @@ var testClasses = [
     {path:"./test/gridstore/readstream_test.js"},
     {path:"./test/gridstore/grid_test.js"},
     {path:"./test/bson_types_test.js"},
-    {path:"./test/bson/bson_test.js"}
+    {path:"./test/bson/bson_test.js"},
+    {path:"./test/aggregation_framework_test.js"}
   ]
 
 // Read all the templates

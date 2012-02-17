@@ -1,3 +1,9 @@
+0.9.9.2 2012-02-17
+------------------
+* Improved detection of Buffers using Buffer.isBuffer instead of instanceof.
+* Added wrap error around db.dropDatabase to catch all errors (Issue #512)
+* Added aggregate helper to collection, only for MongoDB >= 2.1
+
 0.9.9.1 2012-02-15
 ------------------
 * Better handling of safe when using some commands such as createIndex, ensureIndex, addUser, removeUser, createCollection.
