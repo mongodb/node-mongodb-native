@@ -1,3 +1,8 @@
+Main Documentation site
+=======================
+
+http://christkv.github.com/node-mongodb-native/
+
 Install
 ========
 
