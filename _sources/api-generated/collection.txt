@@ -1413,6 +1413,7 @@ Creates an index on the collection.
 
 
 Options
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a 
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
@@ -1540,6 +1541,7 @@ Ensures that an index exists, if it does not it creates it
 
 
 Options
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a 
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
@@ -2544,6 +2546,158 @@ Retrieve all the indexes on the collection.
              });
            })
          })
+       });
+     });
+
+
+---------
+aggregate
+---------
+
+
+Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.1
+
+.. js:function:: aggregate(pipline, callback)
+
+   :param array pipline: a pipleline containing all the object for the execution.
+   :param function callback: returns matching documents.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Correctly call the aggregation framework using a pipeline in an Array.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       // Some docs for insertion
+       var docs = [{
+           title : "this is my title", author : "bob", posted : new Date() ,
+           pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+           comments : [
+             { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+           ]}];
+      
+       // Validate that we are running on at least version 2.1 of MongoDB
+       db.admin().serverInfo(function(err, result){
+     
+         if(parseInt((result.version.replace(/\./g, ''))) >= 210) {
+           // Create a collection   
+           db.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray', function(err, collection) {
+             // Insert the docs
+             collection.insert(docs, {safe:true}, function(err, result) {
+     
+               // Execute aggregate, notice the pipeline is expressed as an Array
+               collection.aggregate([
+                   { $project : {
+                   	author : 1,
+                   	tags : 1,
+                   }},
+                   { $unwind : "$tags" },
+                   { $group : {
+                   	_id : { tags : 1 },
+                   	authors : { $addToSet : "$author" }
+                   }}
+                 ], function(err, result) {
+                   assert.equal(null, err);
+                   assert.equal('good', result[0]._id.tags);
+                   assert.deepEqual(['bob'], result[0].authors);
+                   assert.equal('fun', result[1]._id.tags);
+                   assert.deepEqual(['bob'], result[1].authors);
+                   
+                   db.close();              
+               });
+             });
+           });
+         } else {
+           db.close();
+           test.done();
+         }
+       });
+     });
+
+  
+  
+  Correctly call the aggregation framework using a pipeline expressed as an argument list.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       // Some docs for insertion
+       var docs = [{
+           title : "this is my title", author : "bob", posted : new Date() ,
+           pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+           comments : [
+             { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+           ]}];
+      
+       // Validate that we are running on at least version 2.1 of MongoDB
+       db.admin().serverInfo(function(err, result){
+     
+         if(parseInt((result.version.replace(/\./g, ''))) >= 210) {
+           // Create a collection   
+           client.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments', function(err, collection) {
+             // Insert the docs
+             collection.insert(docs, {safe:true}, function(err, result) {
+               
+               // Execute aggregate, notice the pipeline is expressed as function call parameters
+               // instead of an Array.
+               collection.aggregate(
+                   { $project : {
+                   	author : 1,
+                   	tags : 1,
+                   }},
+                   { $unwind : "$tags" },
+                   { $group : {
+                   	_id : { tags : 1 },
+                   	authors : { $addToSet : "$author" }
+                   }}
+                 , function(err, result) {
+                   assert.equal(null, err);
+                   assert.equal('good', result[0]._id.tags);
+                   assert.deepEqual(['bob'], result[0].authors);
+                   assert.equal('fun', result[1]._id.tags);
+                   assert.deepEqual(['bob'], result[1].authors);
+                   
+                   db.close();              
+               });
+             });
+           });
+         } else {
+           db.close();
+           test.done();
+         }
        });
      });
 
