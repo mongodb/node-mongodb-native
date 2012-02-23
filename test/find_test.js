@@ -890,10 +890,13 @@ exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = function(test
     // Set up an index to force duplicate index erro
     collection.ensureIndex([['failIndex', 1]], {unique:true}, function(err, index) {
       // Setup a new document
-      collection.insert({'a':2, 'b':2, 'failIndex':1}, function(err, doc) {
+      collection.insert({'a':2, 'b':2, 'failIndex':2}, function(err, doc) {
 
         // Let's attempt to upsert with a duplicate key error
-        collection.findAndModify({'c':2}, [['a', 1]], {'a':10, 'b':10, 'failIndex':1}, {safe:true, upsert:true}, function(err, result) {
+        collection.findAndModify({'c':2}, [['a', 1]], {'a':10, 'b':10, 'failIndex':2}, {safe:true, upsert:true}, function(err, result) {
+          console.log("----------------------------------------------------------")
+          console.dir(err)
+          
           test.equal(null, result);
           test.ok(err.errmsg.match("duplicate key error index"));
           test.done();

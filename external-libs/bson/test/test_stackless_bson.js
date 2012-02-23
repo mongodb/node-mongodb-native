@@ -14,6 +14,8 @@ var Buffer = require('buffer').Buffer,
   MinKey = require('../../../lib/mongodb/bson/bson').MinKey,  
   Timestamp = require('../../../lib/mongodb/bson/bson').Timestamp;
   assert = require('assert');
+
+if(process.env['npm_package_config_native'] != null) return;
  
 console.log("=== EXECUTING TEST_STACKLESS_BSON ===");
 

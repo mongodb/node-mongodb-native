@@ -17,6 +17,8 @@ var sys = require('util'),
   MinKey = require('../../../lib/mongodb/bson/bson').MinKey,  
   Timestamp = require('../../../lib/mongodb/bson/bson').Timestamp;
 
+if(process.env['npm_package_config_native'] != null) return;
+
 sys.puts("=== EXECUTING TEST_FULL_BSON ===");
 
 // Parsers

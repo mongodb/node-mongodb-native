@@ -110,6 +110,25 @@ exports.testConnectBadAuth = function(test) {
 /**
  * @ignore
  */
+exports.testConnectNoOpen = function(test) {
+  var db = connect('mongo://localhost:27017/' + MONGODB, {noOpen:true});
+  test.ok(db != null);
+  test.done();
+};
+
+/**
+ * @ignore
+ */
+exports.testConnectThrowsNoCallbackProvided = function(test) {
+  test.throws(function() {
+    var db = connect('mongo://localhost:27017/' + MONGODB);
+  });
+  test.done();
+};
+
+/**
+ * @ignore
+ */
 exports.testConnectBadUrl = function(test) {
   test.throws(function() {
     connect('mango://localhost:27017/' + MONGODB, function(err, db) {

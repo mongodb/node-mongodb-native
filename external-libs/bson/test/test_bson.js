@@ -18,6 +18,8 @@ var sys = require('util'),
   Timestamp = require('../../../lib/mongodb/bson/bson').Timestamp,  
   assert = require('assert');
  
+if(process.env['npm_package_config_native'] != null) return;
+ 
 sys.puts("=== EXECUTING TEST_BSON ===");
 
 // Should fail due to illegal key
