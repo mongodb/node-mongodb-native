@@ -1,3 +1,7 @@
+0.9.9.4 2012-02-26
+------------------
+* bugfix for findAndModify: Error: corrupt bson message < 5 bytes long (Issue #519)
+
 0.9.9.3 2012-02-23
 ------------------
 * document: save callback arguments are both undefined, (Issue #518)
