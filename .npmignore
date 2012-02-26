@@ -17,4 +17,3 @@ test/
 
 external-libs/bson/build/
 external-libs/bson/build/.wafpickle-7
-external-libs/bson/test/
