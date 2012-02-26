@@ -234,6 +234,24 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = function(
   });
 }
 
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyHandleMultipleDbsFindAndModifies = function(test) {
+  var mongo_server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1, socketOptions: {noDelay:false}});
+  new Db('init_db', mongo_server, {}).open(function (error, db) {
+    var db_instance = db.db('site1');
+    db_instance = db.db('site2');
+    db_instance = db.db('rss');
+
+    db_instance.collection('counters', function(err, collection) {
+      collection.findAndModify({}, {}, {'$inc': {'db': 1}}, {new:true}, function(error, counters){
+        db.close();
+        test.done();
+      });
+    });
+  });  
+},
   
 /**
  * Retrieve the server information for the current
