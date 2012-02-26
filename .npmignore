@@ -2,10 +2,10 @@
 .gitignore
 .buildinfo
 .mongodb
+.DS_Store
 
 HISTORY
 Readme.md
-Makefile
 TODO
 
 docs/
@@ -14,4 +14,7 @@ data/
 dev/
 examples/
 test/
-.DS_Store
+
+external-libs/bson/build/
+external-libs/bson/build/.wafpickle-7
+external-libs/bson/test/
