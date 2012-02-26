@@ -1,6 +1,13 @@
-.git*
+.npmignore
+.gitignore
 .buildinfo
 .mongodb
+
+HISTORY
+Readme.md
+Makefile
+TODO
+
 docs/
 docs/sphinx-docs
 data/
@@ -8,5 +15,3 @@ dev/
 examples/
 test/
 .DS_Store
-
-
