@@ -1470,7 +1470,7 @@ Handle<Value> BSON::CalculateObjectSize(const Arguments &args) {
   // Object size
   uint32_t object_size = 0;
   // Check if we have our argument, calculate size of the object  
-  if(args.Length() == 2) {
+  if(args.Length() >= 2) {
     object_size = BSON::calculate_object_size(bson, args[0], args[1]->BooleanValue());
   } else {
     object_size = BSON::calculate_object_size(bson, args[0], false);
