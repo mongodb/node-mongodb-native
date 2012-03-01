@@ -38,7 +38,7 @@ A simple example of inserting a document.
             // Locate all the entries using find
             collection.find().toArray(function(err, results) {
               test.assertEquals(1, results.length);
-              test.assertTrue(results.a === 2);
+              test.assertTrue(results[0].a === 2);
 
               // Let's close the db
               client.close();
