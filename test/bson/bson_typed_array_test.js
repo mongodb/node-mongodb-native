@@ -119,6 +119,63 @@ exports.tearDown = function(callback) {
  */  
 exports.shouldCorrectlyDeserializeUsingTypedArray = function(test) {
   var motherOfAllDocuments = {
+    'string': '客家话',
+    'array': [1,2,3],
+    'hash': {'a':1, 'b':2},
+    'date': new Date(),
+    'oid': new ObjectID(),
+    'binary': new Binary(new Buffer("hello")),
+    'int': 42,
+    'float': 33.3333,
+    'regexp': /regexp/,
+    'boolean': true,
+    'long': Long.fromNumber(100),
+    'where': new Code('this.a > i', {i:1}),        
+    'dbref': new DBRef('namespace', new ObjectID(), 'integration_tests_'),
+    'minkey': new MinKey(),
+    'maxkey': new MaxKey()    
+  }
+  
+  // Let's serialize it
+  var data = BSONSE.BSON.serialize(motherOfAllDocuments, true, true, false);
+  // Build a typed array
+  var arr = new Uint8Array(new ArrayBuffer(data.length));
+  // Iterate over all the fields and copy
+  for(var i = 0; i < data.length; i++) {
+    arr[i] = data[i]
+  }
+  
+  // Deserialize the object
+  var object = BSONDE.BSON.deserialize(arr);
+  // Asserts
+  test.equal(motherOfAllDocuments.string, object.string);
+  test.deepEqual(motherOfAllDocuments.array, object.array);
+  test.deepEqual(motherOfAllDocuments.date, object.date);
+  test.deepEqual(motherOfAllDocuments.oid.toHexString(), object.oid.toHexString());
+  test.deepEqual(motherOfAllDocuments.binary.length(), object.binary.length());
+  // Assert the values of the binary
+  for(var i = 0; i < motherOfAllDocuments.binary.length(); i++) {
+    test.equal(motherOfAllDocuments.binary.value[i], object.binary[i]);
+  }
+  test.deepEqual(motherOfAllDocuments.int, object.int);
+  test.deepEqual(motherOfAllDocuments.float, object.float);
+  test.deepEqual(motherOfAllDocuments.regexp, object.regexp);
+  test.deepEqual(motherOfAllDocuments.boolean, object.boolean);
+  test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long);
+  test.deepEqual(motherOfAllDocuments.where, object.where);
+  test.deepEqual(motherOfAllDocuments.dbref.oid.toHexString(), object.dbref.oid.toHexString());
+  test.deepEqual(motherOfAllDocuments.dbref.namespace, object.dbref.namespace);
+  test.deepEqual(motherOfAllDocuments.dbref.db, object.dbref.db);
+  test.deepEqual(motherOfAllDocuments.minkey, object.minkey);
+  test.deepEqual(motherOfAllDocuments.maxkey, object.maxkey);
+  test.done();
+}
+
+/**
+ * @ignore
+ */  
+exports.shouldCorrectlySerializeUsingTypedArray = function(test) {
+  var motherOfAllDocuments = {
     'string': 'hello',
     'array': [1,2,3],
     'hash': {'a':1, 'b':2},
@@ -138,16 +195,8 @@ exports.shouldCorrectlyDeserializeUsingTypedArray = function(test) {
   
   // Let's serialize it
   var data = BSONSE.BSON.serialize(motherOfAllDocuments, true, false, false);
-  // Build a typed array
-  var arr = new Uint8Array(new ArrayBuffer(data.length));
-  // Iterate over all the fields and copy
-  for(var i = 0; i < data.length; i++) {
-    arr[i] = data[i]
-  }
-  
-  // Deserialize the object
-  var object = BSONDE.BSON.deserialize(arr);
-  
+  // And deserialize it again
+  var object = BSONSE.BSON.deserialize(data);
   // Asserts
   test.equal(motherOfAllDocuments.string, object.string);
   test.deepEqual(motherOfAllDocuments.array, object.array);
@@ -164,7 +213,9 @@ exports.shouldCorrectlyDeserializeUsingTypedArray = function(test) {
   test.deepEqual(motherOfAllDocuments.boolean, object.boolean);
   test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long);
   test.deepEqual(motherOfAllDocuments.where, object.where);
-  test.deepEqual(motherOfAllDocuments.dbref, object.dbref);
+  test.deepEqual(motherOfAllDocuments.dbref.oid.toHexString(), object.dbref.oid.toHexString());
+  test.deepEqual(motherOfAllDocuments.dbref.namespace, object.dbref.namespace);
+  test.deepEqual(motherOfAllDocuments.dbref.db, object.dbref.db);
   test.deepEqual(motherOfAllDocuments.minkey, object.minkey);
   test.deepEqual(motherOfAllDocuments.maxkey, object.maxkey);
   test.done();
