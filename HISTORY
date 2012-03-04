@@ -1,3 +1,6 @@
+NEEDS LOOKING AT
+- ensureIndex on huge collection blocks when using safe (might need to take the connection out of the pool)
+
 0.9.9.4 2012-02-26
 ------------------
 * bugfix for findAndModify: Error: corrupt bson message < 5 bytes long (Issue #519)

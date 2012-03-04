@@ -4,6 +4,7 @@ var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
+  Step = require('step'),
   gleak = require('../../dev/tools/gleak'),
   ObjectID = require('../../lib/mongodb/bson/objectid').ObjectID,
   Db = mongodb.Db,
@@ -925,6 +926,30 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
   });
 }
 
+// /**
+//  * @ignore
+//  */
+// exports.shouldNotThrowErrorOnClose = function(test) {
+//   var fieldId = new ObjectID();
+//   var gridStore = new GridStore(client, fieldId, "w", {root:'fs'});
+//   gridStore.chunkSize = 1024 * 256;
+//   gridStore.open(function(err, gridStore) {
+//     Step(
+//       function writeData() {
+//         var group = this.group();
+//         for(var i = 0; i < 1000000; i += 5000) {
+//             gridStore.write(new Buffer(5000), group());
+//         }
+//       },
+// 
+//       function doneWithWrite() {
+//         gridStore.close(function(err, result) {
+//           test.done();
+//         });
+//       }
+//     )
+//   });
+// }
 
 /**
  * Retrieve the server information for the current
