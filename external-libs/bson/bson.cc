@@ -1,7 +1,18 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
+
 #include <v8.h>
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
 #include <node.h>
 #include <node_version.h>
 #include <node_buffer.h>
@@ -201,7 +212,7 @@ char *BSON::check_key(Local<String> key) {
   char *error_str = (char *)malloc(256 * sizeof(char));
   // Decode the key
   ssize_t len = DecodeBytes(key, BINARY);
-  ssize_t written = DecodeWrite(key_str, len, key, BINARY);
+  DecodeWrite(key_str, len, key, BINARY);
   *(key_str + key->Utf8Length()) = '\0';
   // Check if we have a valid key
   if(key->Utf8Length() > 0 && *(key_str) == '$') {
@@ -364,14 +375,7 @@ uint32_t BSON::calculate_object_size2(Handle<Value> value) {
   // Controls the flow
   bool done = false;
   bool finished = false;
-  bool isObject = false;
 
-  // Define a local vector that keeps the stack
-  // vector<vector<Local<Value> > > stack;// = new vector<vector<Local<Value> > >(0);
-  
-  // My own stack max of 1024 objects deep
-  Local<Object> *stack[64];
-  
   // Current object we are processing
   Local<Object> currentObject = value->ToObject();
 
@@ -503,185 +507,6 @@ uint32_t BSON::calculate_object_size2(Handle<Value> value) {
   return object_size;
 }
 
-Handle<Value> BSON::BSONSerialize2(const Arguments &args) {
-  HandleScope scope;
-
-  if(args.Length() == 1 && !args[0]->IsObject()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
-  if(args.Length() == 2 && !args[0]->IsObject() && !args[1]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
-  if(args.Length() == 3 && !args[0]->IsObject() && !args[1]->IsBoolean() && !args[2]->IsBoolean()) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
-  if(args.Length() > 3) return VException("One, two or tree arguments required - [object] or [object, boolean] or [object, boolean, boolean]");
-
-  // Calculate the total size of the document in binary form to ensure we only allocate memory once
-  uint32_t object_size = BSON::calculate_object_size2(args[0]);
-  // Allocate the memory needed for the serializtion
-  char *serialized_object = (char *)malloc(object_size * sizeof(char));  
-  // Catch any errors
-  try {
-    // Check if we have a boolean value
-    bool check_key = false;
-    if(args.Length() == 3 && args[1]->IsBoolean()) {
-      check_key = args[1]->BooleanValue();
-    }
-    
-    // Serialize the object
-    BSON::serialize2(serialized_object, 0, Null(), args[0], object_size, check_key);      
-  } catch(char *err_msg) {
-    // Free up serialized object space
-    free(serialized_object);
-    V8::AdjustAmountOfExternalAllocatedMemory(-object_size);
-    // Throw exception with the string
-    Handle<Value> error = VException(err_msg);
-    // free error message
-    free(err_msg);
-    // Return error
-    return error;
-  }
-
-  // Write the object size
-  BSON::write_int32((serialized_object), object_size);  
-
-  // If we have 3 arguments
-  if(args.Length() == 3) {
-    // Local<Boolean> asBuffer = args[2]->ToBoolean();    
-    Buffer *buffer = Buffer::New(serialized_object, object_size);
-    // Release the serialized string
-    free(serialized_object);
-    return scope.Close(buffer->handle_);
-  } else {
-    // Encode the string (string - null termiating character)
-    Local<Value> bin_value = Encode(serialized_object, object_size, BINARY)->ToString();
-    // Return the serialized content
-    return bin_value;    
-  }  
-}
-
-uint32_t BSON::serialize2(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, uint32_t objectSize, bool check_key) {
-  // Scope for method execution
-  HandleScope scope;
-  
-  // Final object size
-  uint32_t object_size = (4 + 1);
-  uint32_t stackIndex = 0;
-  // Controls the flow
-  bool done = false;
-  bool finished = false;
-  bool isObject = false;
-
-  // Define a local vector that keeps the stack
-  // vector<vector<Local<Value> > > stack;// = new vector<vector<Local<Value> > >(0);
-  
-  // My own stack max of 1024 objects deep
-  Local<Object> *stack[64];
-  
-  // Current object we are processing
-  Local<Object> currentObject = value->ToObject();
-  // Current list of object keys
-  #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
-    Local<Array> keys = currentObject->GetPropertyNames();
-  #else
-    Local<Array> keys = currentObject->GetOwnPropertyNames();
-  #endif
-
-  // Contains pointer to keysIndex
-  uint32_t keysIndex = 0;
-  uint32_t keysLength = keys->Length();
-  // Add pointer to start of new object
-  index = index + 4;
-    
-  // printf("=================================================================================\n");      
-  // printf("Start serializing\n");      
-    
-  while(!done) {
-    // If the index is bigger than the number of keys for the object
-    // we finished up the previous object and are ready for the next one
-    if(keysIndex >= keysLength) {
-      #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
-        keys = currentObject->GetPropertyNames();
-      #else
-        keys = currentObject->GetOwnPropertyNames();
-      #endif
-      
-      keysLength = keys->Length();
-    }
-    
-    // Iterate over all the keys
-    while(keysIndex < keysLength) {
-      // Fetch the key name
-      Local<String> name = keys->Get(keysIndex++)->ToString();
-      // Fetch the object related to the key
-      Local<Value> value = currentObject->Get(name);
-
-      // If it's a string
-      if(value->IsString()) {
-        // Save the string at the offset provided
-        *(serialized_object + index) = BSON_DATA_STRING;
-        // Adjust writing position for the first byte
-        index = index + 1;
-        // Convert name to char*
-        ssize_t len = DecodeBytes(name, UTF8);
-        ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
-        // Add null termiation for the string
-        *(serialized_object + index + len) = '\0';    
-        // Adjust the index
-        index = index + len + 1;
-
-        // Write the actual string into the char array
-        Local<String> str = value->ToString();
-        // Let's fetch the int value
-        uint32_t utf8_length = str->Utf8Length();
-        // Write the integer to the char *
-        BSON::write_int32((serialized_object + index), utf8_length + 1);
-        // Adjust the index
-        index = index + 4;
-        // Write string to char in utf8 format
-        written = DecodeWrite((serialized_object + index), utf8_length, str, BINARY);
-        // Add the null termination
-        *(serialized_object + index + utf8_length) = '\0';    
-        // Adjust the index
-        index = index + utf8_length + 1;      
-      }
-    }
-    
-    // If we have finished all the keys
-    if(keysIndex == keysLength) {
-      finished = false;
-    }
-    
-    // Validate the stack
-    if(stackIndex == 0) {
-      // printf("======================================================================== 3\n");
-      done = true;
-     // Set last byte to zero
-     *(serialized_object + objectSize - 1) = 0x00;
-    } else if(finished || keysIndex == keysLength) {
-      // printf("======================================================================== 4\n");
-      // Pop off the stack
-      stackIndex = stackIndex - 1;
-     // Set last byte to zero
-     *(serialized_object + objectSize - 1) = 0x00;
-
-      // Fetch the current object stack
-      // vector<Local<Value> > currentObjectStored = stack.back();
-      // stack.pop_back();
-      // // Unroll the current object
-      // currentObject = currentObjectStored.back()->ToObject();
-      // currentObjectStored.pop_back();
-      // // Unroll the keysIndex
-      // keys = Local<Array>::Cast(currentObjectStored.back()->ToObject());
-      // currentObjectStored.pop_back();
-      // // Unroll the keysIndex
-      // keysIndex = currentObjectStored.back()->ToUint32()->Value();
-      // currentObjectStored.pop_back();      
-      // // Check if we finished up
-      // if(keysIndex == keys->Length()) {
-      //   finished = true;
-      // }
-    }  
-  }
-  
-  return 0;
-}
-
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
@@ -697,7 +522,6 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args) {
   
   // Define pointer to data
   char *data;
-  uint32_t length;      
   Local<Object> obj = args[0]->ToObject();
 
   // Unpack the BSON parser instance
@@ -758,7 +582,7 @@ Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t inDataLength, u
   uint32_t size = BSON::deserialize_int32(data, index);
   
   // If we have an illegal message size
-  if(size < 0 || size > inDataLength) return VException("corrupt bson message");
+  if(size > inDataLength) return VException("corrupt bson message");
 
   // Data length
   uint32_t dataLength = index + size;
@@ -770,8 +594,6 @@ Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t inDataLength, u
   while(index < dataLength) {
     // Read the first to bytes to indicate the type of object we are decoding
     uint8_t type = BSON::deserialize_int8(data, index);    
-    // Handles the internal size of the object
-    uint32_t insert_index = 0;
     // Adjust index to skip type byte
     index = index + 1;
     
@@ -1036,7 +858,6 @@ Handle<Value> BSON::deserialize(BSON *bson, char *data, uint32_t inDataLength, u
 
       // Length variable
       int32_t length_regexp = 0;
-      int32_t start_index = index;
       char chr;
       
       // Locate end of the regexp expression \0
@@ -1601,7 +1422,7 @@ uint32_t BSON::calculate_object_size(BSON *bson, Handle<Value> value, bool seria
       // Get string
       Local<String> str = value->ToObject()->Get(String::New("value"))->ToString();
       // Get the utf8 length
-      uint32_t utf8_length = str->Utf8Length();
+      int utf8_length = str->Utf8Length();
       // Check if we have a utf8 encoded string or not
       if(utf8_length != str->Length()) {
         // Let's calculate the size the string adds, length + type(1 byte) + size(4 bytes)
@@ -1663,6 +1484,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     // Convert name to char*
     ssize_t len = DecodeBytes(name, UTF8);
     ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+		assert(written == len);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -1692,6 +1514,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     // Convert name to char*
     ssize_t len = DecodeBytes(name, UTF8);
     ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+		assert(written == len);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -1739,6 +1562,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     // Convert name to char*
     ssize_t len = DecodeBytes(name, UTF8);
     ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+		assert(written == len);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -1756,6 +1580,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     // Convert name to char*
     ssize_t len = DecodeBytes(name, UTF8);
     ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+		assert(written == len);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -1774,6 +1599,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     // Convert name to char*
     ssize_t len = DecodeBytes(name, UTF8);
     ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+		assert(written == len);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -1790,6 +1616,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     // Convert name to char*
     ssize_t len = DecodeBytes(name, UTF8);
     ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+		assert(written == len);
     // Add null termiation for the string
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
@@ -2011,7 +1838,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
       // Grab the actual string
       Local<String> str = symbolObj->Get(bson->_symbolValueString)->ToString();
       // Let's fetch the int value
-      uint32_t utf8_length = str->Utf8Length();
+      int utf8_length = str->Utf8Length();
   
       // If the Utf8 length is different from the string length then we
       // have a UTF8 encoded string, otherwise write it as ascii
@@ -2076,6 +1903,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
 
         // Write the data into the serialization stream
         ssize_t written = DecodeWrite((serialized_object + index), len, function, UTF8);      
+				assert(written == len);
         // Write \0 for string
         *(serialized_object + index + len) = 0x00;
         // Adjust the index with the length of the function
@@ -2096,6 +1924,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
         
         // Write the data into the serialization stream
         ssize_t written = DecodeWrite((serialized_object + index), len, function, BINARY);      
+				assert(written == len);
         // Write \0 for string
         *(serialized_object + index + len) = 0x00;
         // Adjust the index
@@ -2129,6 +1958,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
       // Convert name to char*
       ssize_t len = DecodeBytes(name, UTF8);
       ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+			assert(written == len);
       // Add null termiation for the string
       *(serialized_object + index + len) = '\0';    
       // Adjust the index
@@ -2166,6 +1996,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
         char *data = (char *)malloc(len + 1);
         *(data + len) = '\0';
         ssize_t written = DecodeWrite(data, len, property_name, UTF8);      
+				assert(written == len);
         // Serialize the content
         index = BSON::serialize(bson, serialized_object, index, property_name, property, check_key, serializeFunctions);      
         // Free up memory of data
@@ -2257,7 +2088,7 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
     return error;
   }
 
-  for(int i = 0; i < object_size; i++) {
+  for(uint32_t i = 0; i < object_size; i++) {
     *(data + index + i) = *(serialized_object + i);
   }
   
