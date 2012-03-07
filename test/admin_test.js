@@ -678,6 +678,56 @@ exports.shouldCorrectlyListAllAvailableDatabases = function(test) {
 }
 
 /**
+ * Retrieve the current server Info
+ *
+ * @_class admin
+ * @_function serverInfo
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieveServerInfo = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+
+    // Drop the current database if it exists to avoid problems
+    db.dropDatabase(function(err, done) {
+
+      // Grab a collection object
+      db.collection('test', function(err, collection) {
+
+        // Force the creation of the collection by inserting a document
+        // Collections are not created until the first document is inserted
+        collection.insert({'a':1}, {safe:true}, function(err, doc) {
+
+          // Use the admin database for the operation
+          db.admin(function(err, adminDb) {
+
+           // Add the new user to the admin database
+           adminDb.addUser('admin', 'admin', function(err, result) {
+
+             // Authenticate using the newly added user
+             adminDb.authenticate('admin', 'admin', function(err, result) {
+               
+               // Retrive the server Info
+               adminDb.serverInfo(function(err, info) {
+                 test.equal(null, err);
+                 test.ok(info != null);
+                 
+                 db.close();
+                 test.done();
+               })
+             });
+           });
+         });
+       });
+     });
+   });
+ });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
