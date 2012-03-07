@@ -289,6 +289,22 @@ exports.shouldHandleAssertionError = function(test) {
     });
   }); 
 }
+
+exports['mixing included and excluded fields should return an error object with message'] = function (test) {
+  client.createCollection('test_error_object_should_include_message', function(err, c) {
+    test.equal(err, null);
+    c.insert({a:2, b: 5}, {safe:true}, function(err, r) {
+      test.equal(err, null);
+      c.findOne({a:2}, {fields: {a:1, b:0}}, function(err) {
+        test.ok(err);
+        test.equal('object', typeof err);
+        var rgx = /You cannot currently mix including and excluding fields/;
+        test.ok(rgx.test(err.message), 'missing error message property');
+        test.done();
+      });
+    });
+  });
+}
   
 /**
  * Retrieve the server information for the current
