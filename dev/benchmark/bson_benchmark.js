@@ -54,13 +54,14 @@ var object = {
 // Number of objects
 var numberOfObjects = 100;
 var bson = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
+console.log("---------------------- 1")
 // Object serialized
-for(var i = 0; i < 100; i++) {
+for(var i = 0; i < 1; i++) {
   objectBSON = bson.serialize(object, null, true)  
 }
 
 // Object serialized
-for(var i = 0; i < 100; i++) {
+for(var i = 0; i < 100000; i++) {
   bson.deserialize(objectBSON);  
 }
 

@@ -151,6 +151,28 @@ exports.shouldCorrectlyClearOutCollection = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyRemoveDocumentUsingRegExp = function(test) {
+  client.createCollection('test_remove_regexp', function(err, r) {
+    client.collection('test_remove_regexp', function(err, collection) {
+      collection.insert({address:'485 7th ave new york'}, {safe:true}, function(err, ids) {
+        // Clear the collection
+        collection.remove({address:/485 7th ave/}, {safe:true}, function(err, result) {
+          test.equal(1, result);
+          
+          collection.count(function(err, count) {
+            test.equal(0, count);
+            // Let's close the db
+            test.done();
+          });
+        });
+      });
+    });
+  });    
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
