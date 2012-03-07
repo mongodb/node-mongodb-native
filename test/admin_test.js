@@ -763,8 +763,6 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = function(test) {
                // Retrive the server Info, returns error if we are not
                // running a replicaset
                adminDb.replSetGetStatus(function(err, info) {
-                 test.ok(err != null);
-                 
                  db.close();
                  test.done();
                })
