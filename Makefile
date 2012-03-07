@@ -1,6 +1,6 @@
 NODE = node
 NPM = npm
-NODEUNIT = deps/nodeunit/bin/nodeunit
+NODEUNIT = node_modules/nodeunit/bin/nodeunit
 DOX = node_modules/dox/bin/dox
 name = all
 
