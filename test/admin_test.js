@@ -681,7 +681,7 @@ exports.shouldCorrectlyListAllAvailableDatabases = function(test) {
  * Retrieve the current server Info
  *
  * @_class admin
- * @_function serverInfo
+ * @_function serverStatus
  * @ignore
  */
 exports.shouldCorrectlyRetrieveServerInfo = function(test) {
@@ -734,7 +734,7 @@ exports.shouldCorrectlyRetrieveServerInfo = function(test) {
  * @_function replSetGetStatus
  * @ignore
  */
-exports.shouldCorrectlyRetrieveServerInfo = function(test) {
+exports.shouldCorrectlyRetrieveReplSetGetStatus = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
