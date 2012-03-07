@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Changelog &mdash; MongoDB Node.JS Driver 0.9.9.3 documentation</title>
+    <title>Changelog &mdash; MongoDB Node.JS Driver 0.9.9.5 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.9.3',
+        VERSION:     '0.9.9.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.3 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.5 documentation" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -33,7 +33,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.3 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -45,29 +45,45 @@
   <div class="section" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.9.9.3 2012-02-23<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.9.9.5 2012-03-07<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Merged in replSetGetStatus helper to admin class (Issue #515, <a class="reference external" href="https://github.com/mojodna">https://github.com/mojodna</a>)</li>
+<li>Merged in serverStatus helper to admin class (Issue #516, <a class="reference external" href="https://github.com/mojodna">https://github.com/mojodna</a>)</li>
+<li>Fixed memory leak in C++ bson parser (Issue #526)</li>
+<li>Fix empty MongoError &amp;quot;message&amp;quot; property (Issue #530, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Cannot save files with the same file name to GridFS (Issue #531)</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>0.9.9.4 2012-02-26<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>bugfix for findAndModify: Error: corrupt bson message &amp;lt; 5 bytes long (Issue #519)</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>0.9.9.3 2012-02-23<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>document: save callback arguments are both undefined, (Issue #518)</li>
 <li>Native BSON parser install error with npm, (Issue #517)</li>
 </ul>
 </div>
-<div class="section" id="id2">
-<h2>0.9.9.2 2012-02-17<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h2>0.9.9.2 2012-02-17<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Improved detection of Buffers using Buffer.isBuffer instead of instanceof.</li>
 <li>Added wrap error around db.dropDatabase to catch all errors (Issue #512)</li>
 <li>Added aggregate helper to collection, only for MongoDB &amp;gt;= 2.1</li>
 </ul>
 </div>
-<div class="section" id="id3">
-<h2>0.9.9.1 2012-02-15<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id5">
+<h2>0.9.9.1 2012-02-15<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Better handling of safe when using some commands such as createIndex, ensureIndex, addUser, removeUser, createCollection.</li>
 <li>Mapreduce now throws error if out parameter is not specified.</li>
 </ul>
 </div>
-<div class="section" id="id4">
-<h2>0.9.9 2012-02-13<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h2>0.9.9 2012-02-13<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Added createFromTime method on ObjectID to allow for queries against _id more easily using the timestamp.</li>
 <li>Db.close(true) now makes connection unusable as it&#8217;s been force closed by app.</li>
@@ -76,21 +92,21 @@
 <li>A fix for connection error handling when using the SSL on MongoDB.</li>
 </ul>
 </div>
-<div class="section" id="id5">
-<h2>0.9.8-7 2012-02-06<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id7">
+<h2>0.9.8-7 2012-02-06<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Simplified findOne to use the find command instead of the custom code (Issue #498).</li>
 <li>BSON JS parser not also checks for _bsonType variable in case BSON object is in weird scope (Issue #495).</li>
 </ul>
 </div>
-<div class="section" id="id6">
-<h2>0.9.8-6 2012-02-04<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id8">
+<h2>0.9.8-6 2012-02-04<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Removed the check for replicaset change code as it will never work with node.js.</li>
 </ul>
 </div>
-<div class="section" id="id7">
-<h2>0.9.8-5 2012-02-02<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id9">
+<h2>0.9.8-5 2012-02-02<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Added geoNear command to Collection.</li>
 <li>Added geoHaystackSearch command to Collection.</li>
@@ -105,8 +121,8 @@
 <li>Moved Long class to bson directory.</li>
 </ul>
 </div>
-<div class="section" id="id8">
-<h2>0.9.8-4 2012-01-28<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id10">
+<h2>0.9.8-4 2012-01-28<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Added reIndex command to collection and db level.</li>
 <li>Added support for $returnKey, $maxScan, $min, $max, $showDiskLoc, $comment to cursor and find/findOne methods.</li>
@@ -119,27 +135,27 @@
 <li>Merged in patch for BSON Number handling from Lee Salzman, did some small fixes and added test coverage.</li>
 </ul>
 </div>
-<div class="section" id="id9">
-<h2>0.9.8-3 2012-01-21<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id11">
+<h2>0.9.8-3 2012-01-21<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Workaround for issue with Object.defineProperty (Issue #484)</li>
 <li>ObjectID generation with date does not set rest of fields to zero (Issue #482)</li>
 </ul>
 </div>
-<div class="section" id="id10">
-<h2>0.9.8-2 2012-01-20<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id12">
+<h2>0.9.8-2 2012-01-20<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixed a missing this in the ReplSetServers constructor.</li>
 </ul>
 </div>
-<div class="section" id="id11">
-<h2>0.9.8-1 2012-01-17<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id13">
+<h2>0.9.8-1 2012-01-17<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>FindAndModify bug fix for duplicate errors (Issue #481)</li>
 </ul>
 </div>
-<div class="section" id="id12">
-<h2>0.9.8 2012-01-17<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id14">
+<h2>0.9.8 2012-01-17<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Replicasets now correctly adjusts to live changes in the replicaset configuration on the servers, reconnecting correctly.
 - Set the interval for checking for changes setting the replicaSetCheckInterval property when creating the ReplSetServers instance or on db.serverConfig.replicaSetCheckInterval. (default 1000 miliseconds)</li>
@@ -152,65 +168,65 @@
 <li>Correctly update existing user password when using addUser (Issue #470)</li>
 </ul>
 </div>
-<div class="section" id="id13">
-<h2>0.9.7.3-5 2012-01-04<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id15">
+<h2>0.9.7.3-5 2012-01-04<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fix for RegExp serialization for 0.4.X where typeof /regexp/ == &#8216;function&#8217; vs in 0.6.X typeof /regexp/ == &#8216;object&#8217;</li>
 <li>Don&#8217;t allow keepAlive and setNoDelay for 0.4.X as it throws errors</li>
 </ul>
 </div>
-<div class="section" id="id14">
-<h2>0.9.7.3-4 2012-01-04<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id16">
+<h2>0.9.7.3-4 2012-01-04<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Chased down potential memory leak on findAndModify, Issue #467 (node.js removeAllListeners leaves the key in the _events object, node.js bug on eventlistener?, leads to extremely slow memory leak on listener object)</li>
 <li>Sanity checks for GridFS performance with benchmark added</li>
 </ul>
 </div>
-<div class="section" id="id15">
-<h2>0.9.7.3-3 2012-01-04<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id17">
+<h2>0.9.7.3-3 2012-01-04<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Bug fixes for performance issues going form 0.9.6.X to 0.9.7.X on linux</li>
 <li>BSON bug fixes for performance</li>
 </ul>
 </div>
-<div class="section" id="id16">
-<h2>0.9.7.3-2 2012-01-02<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id18">
+<h2>0.9.7.3-2 2012-01-02<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixed up documentation to reflect the preferred way of instantiating bson types</li>
 <li>GC bug fix for JS bson parser to avoid stop-and-go GC collection</li>
 </ul>
 </div>
-<div class="section" id="id17">
-<h2>0.9.7.3-1 2012-01-02<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id19">
+<h2>0.9.7.3-1 2012-01-02<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fix to make db.bson_serializer and db.bson_deserializer work as it did previously</li>
 </ul>
 </div>
-<div class="section" id="id18">
-<h2>0.9.7.3 2011-12-30<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id20">
+<h2>0.9.7.3 2011-12-30<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Moved BSON_BINARY_SUBTYPE_DEFAULT from BSON object to Binary object and removed the <a href="#id58"><span class="problematic" id="id59">BSON_BINARY_</span></a> prefixes</li>
+<li>Moved BSON_BINARY_SUBTYPE_DEFAULT from BSON object to Binary object and removed the <a href="#id60"><span class="problematic" id="id61">BSON_BINARY_</span></a> prefixes</li>
 <li>Removed Native BSON types, C++ parser uses JS types (faster due to cost of crossing the JS-C++ barrier for each call)</li>
 <li>Added build fix for 0.4.X branch of Node.js where GetOwnPropertyNames is not defined in v8</li>
 <li>Fix for wire protocol parser for corner situation where the message is larger than the maximum socket buffer in node.js (Issue #464, #461, #447)</li>
 <li>Connection pool status set to connected on poolReady, isConnected returns false on anything but connected status (Issue #455)</li>
 </ul>
 </div>
-<div class="section" id="id19">
-<h2>0.9.7.2-5 2011-12-22<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id21">
+<h2>0.9.7.2-5 2011-12-22<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Brand spanking new Streaming Cursor support Issue #458 (<a class="reference external" href="https://github.com/christkv/node-mongodb-native/pull/458">https://github.com/christkv/node-mongodb-native/pull/458</a>) thanks to Mr Aaron Heckmann</li>
 </ul>
 </div>
-<div class="section" id="id20">
-<h2>0.9.7.2-4 2011-12-21<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id22">
+<h2>0.9.7.2-4 2011-12-21<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Refactoring of callback code to work around performance regression on linux</li>
 <li>Fixed group function to correctly use the command mode as default</li>
 </ul>
 </div>
-<div class="section" id="id21">
-<h2>0.9.7.2-3 2011-12-18<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id23">
+<h2>0.9.7.2-3 2011-12-18<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450).</p>
 </li>
@@ -224,22 +240,22 @@
 </li>
 </ul>
 </div>
-<div class="section" id="id22">
-<h2>0.9.7.2-2 2011-12-16<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id24">
+<h2>0.9.7.2-2 2011-12-16<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixes infinite streamRecords QueryFailure fix when using Mongos (Issue #442)</li>
 </ul>
 </div>
-<div class="section" id="id23">
-<h2>0.9.7.2-1 2011-12-16<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id25">
+<h2>0.9.7.2-1 2011-12-16<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>~10% perf improvement for ObjectId#toHexString (Issue #448, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
 <li>Only using process.nextTick on errors emitted on callbacks not on all parsing, reduces number of ticks in the driver</li>
 <li>Changed parsing off bson messages to use process.nextTick to do bson parsing in batches if the message is over 10K as to yield more time to the event look increasing concurrency on big mongoreply messages with multiple documents</li>
 </ul>
 </div>
-<div class="section" id="id24">
-<h2>0.9.7.2 2011-12-15<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id26">
+<h2>0.9.7.2 2011-12-15<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><dl class="first docutils">
 <dt>Added SSL support for future version of mongodb (VERY VERY EXPERIMENTAL)</dt>
@@ -286,34 +302,34 @@
 </li>
 </ul>
 </div>
-<div class="section" id="id25">
-<h2>0.9.7.1-4 2011-11-27<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id27">
+<h2>0.9.7.1-4 2011-11-27<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Replaced install.sh with install.js to install correctly on all supported os&#8217;s</li>
 </ul>
 </div>
-<div class="section" id="id26">
-<h2>0.9.7.1-3 2011-11-27<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id28">
+<h2>0.9.7.1-3 2011-11-27<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixes incorrect scope for ensureIndex error wrapping (Issue #419) <a class="reference external" href="https://github.com/ritch">https://github.com/ritch</a></li>
 </ul>
 </div>
-<div class="section" id="id27">
-<h2>0.9.7.1-2 2011-11-27<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id29">
+<h2>0.9.7.1-2 2011-11-27<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Set statistical selection strategy as default for secondary choice.</li>
 </ul>
 </div>
-<div class="section" id="id28">
-<h2>0.9.7.1-1 2011-11-27<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id30">
+<h2>0.9.7.1-1 2011-11-27<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Better handling of single server reconnect (fixes some bugs)</li>
 <li>Better test coverage of single server failure</li>
 <li>Correct handling of callbacks on replicaset servers when firewall dropping packets, correct reconnect</li>
 </ul>
 </div>
-<div class="section" id="id29">
-<h2>0.9.7.1 2011-11-24<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id31">
+<h2>0.9.7.1 2011-11-24<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">Better handling of dead server for single server instances</p>
 </li>
@@ -374,8 +390,8 @@
 </li>
 </ul>
 </div>
-<div class="section" id="id30">
-<h2>0.9.7 2011-11-10<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id32">
+<h2>0.9.7 2011-11-10<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">Added priority setting to replicaset manager</p>
 </li>
@@ -442,23 +458,23 @@
 </li>
 </ul>
 </div>
-<div class="section" id="id31">
-<h2>0.9.6-22 2011-10-15<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id33">
+<h2>0.9.6-22 2011-10-15<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370</li>
 <li>Fixed bug in findAndModify that did not throw error on replicaset timeout, Issue #373</li>
 </ul>
 </div>
-<div class="section" id="id32">
-<h2>0.9.6-21 2011-10-05<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id34">
+<h2>0.9.6-21 2011-10-05<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Reworked reconnect code to work correctly</li>
 <li>Handling errors in different parts of the code to ensure that it does not lock the connection</li>
 <li>Consistent error handling for Object.createFromHexString for JS and C++</li>
 </ul>
 </div>
-<div class="section" id="id33">
-<h2>0.9.6-20 2011-10-04<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id35">
+<h2>0.9.6-20 2011-10-04<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h2>
 <ul>
 <li><p class="first">Reworked bson.js parser to get rid off Array.shift() due to it allocating new memory for each call. Speedup varies between 5-15% depending on doc</p>
 </li>
@@ -484,8 +500,8 @@ debug : function(debugMessage, object) {},</p>
 </li>
 </ul>
 </div>
-<div class="section" id="id34">
-<h2>0.9.6-19 2011-09-29<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id36">
+<h2>0.9.6-19 2011-09-29<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixing compatibility issues between C++ bson parser and js parser</li>
 <li>Added Symbol support to C++ parser</li>
@@ -493,28 +509,28 @@ debug : function(debugMessage, object) {},</p>
 <li>Correctly handles serialization of functions using the C++ bson parser</li>
 </ul>
 </div>
-<div class="section" id="id35">
-<h2>0.9.6-18 2011-09-22<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id37">
+<h2>0.9.6-18 2011-09-22<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixed bug in waitForConnection that would lead to 100% cpu usage, Issue #352</li>
 </ul>
 </div>
-<div class="section" id="id36">
-<h2>0.9.6-17 2011-09-21<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id38">
+<h2>0.9.6-17 2011-09-21<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixed broken exception test causing bamboo to hang</li>
 <li>Handling correctly command+lastError when both return results as in findAndModify, Issue #351</li>
 </ul>
 </div>
-<div class="section" id="id37">
-<h2>0.9.6-16 2011-09-14<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id39">
+<h2>0.9.6-16 2011-09-14<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixing a bunch of issues with compatibility with MongoDB 2.0.X branch. Some fairly big changes in behavior from 1.8.X to 2.0.X on the server.</li>
 <li>Error Connection MongoDB V2.0.0 with Auth=true, Issue #348</li>
 </ul>
 </div>
-<div class="section" id="id38">
-<h2>0.9.6-15 2011-09-09<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id40">
+<h2>0.9.6-15 2011-09-09<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixed issue where pools would not be correctly cleaned up after an error, Issue #345</li>
 <li>Fixed authentication issue with secondary servers in Replicaset, Issue #334</li>
@@ -523,8 +539,8 @@ debug : function(debugMessage, object) {},</p>
 <li>Merged in code from (<a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>) that checks for global variable leaks</li>
 </ul>
 </div>
-<div class="section" id="id39">
-<h2>0.9.6-14 2011-09-05<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id41">
+<h2>0.9.6-14 2011-09-05<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Minor fixes for error handling in cursor streaming (<a class="reference external" href="https://github.com/sethml">https://github.com/sethml</a>), Issue #332</li>
 <li>Minor doc fixes</li>
@@ -535,21 +551,21 @@ debug : function(debugMessage, object) {},</p>
 <li>Implement correct safe/strict mode for findAndModify.</li>
 </ul>
 </div>
-<div class="section" id="id40">
-<h2>0.9.6-13 2011-08-24<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id42">
+<h2>0.9.6-13 2011-08-24<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Db names correctly error checked for illegal characters</li>
 </ul>
 </div>
-<div class="section" id="id41">
-<h2>0.9.6-12 2011-08-24<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id43">
+<h2>0.9.6-12 2011-08-24<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Nasty bug in GridFS if you changed the default chunk size</li>
 <li>Fixed error handling bug in findOne</li>
 </ul>
 </div>
-<div class="section" id="id42">
-<h2>0.9.6-11 2011-08-23<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id44">
+<h2>0.9.6-11 2011-08-23<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Timeout option not correctly making it to the cursor, Issue #320, Fix from (<a class="reference external" href="https://github.com/year2013">https://github.com/year2013</a>)</li>
 <li>Fixes for memory leaks when using buffers and C++ parser</li>
@@ -559,8 +575,8 @@ debug : function(debugMessage, object) {},</p>
 <li>Removing require.paths to make tests work with the 0.5.X branch</li>
 </ul>
 </div>
-<div class="section" id="id43">
-<h2>0.9.6-10 2011-08-11<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id45">
+<h2>0.9.6-10 2011-08-11<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Specific type Double for capped collections (<a class="reference external" href="https://github.com/mbostock">https://github.com/mbostock</a>), Issue #312</li>
 <li>Decorating Errors with all all object info from Mongo (<a class="reference external" href="https://github.com/laurie71">https://github.com/laurie71</a>), Issue #308</li>
@@ -570,14 +586,14 @@ debug : function(debugMessage, object) {},</p>
 <li>Added test for read_secondary count issue, merged in fix from (<a class="reference external" href="https://github.com/year2013">https://github.com/year2013</a>), Issue #317</li>
 </ul>
 </div>
-<div class="section" id="id44">
-<h2>0.9.6-9<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id46">
+<h2>0.9.6-9<a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Bug fix for bson parsing the key &#8216;&#8217;:&#8217;&#8217; correctly without crashing</li>
 </ul>
 </div>
-<div class="section" id="id45">
-<h2>0.9.6-8<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id47">
+<h2>0.9.6-8<a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Changed to using node.js crypto library MD5 digest</li>
 <li>Connect method support documented mongodb: syntax by (<a class="reference external" href="https://github.com/sethml">https://github.com/sethml</a>)</li>
@@ -589,14 +605,14 @@ debug : function(debugMessage, object) {},</p>
 <li>Bson small optimizations</li>
 </ul>
 </div>
-<div class="section" id="id46">
-<h2>0.9.6-7 2011-07-13<a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id48">
+<h2>0.9.6-7 2011-07-13<a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>JS Bson deserialization bug #287</li>
 </ul>
 </div>
-<div class="section" id="id47">
-<h2>0.9.6-6 2011-07-12<a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id49">
+<h2>0.9.6-6 2011-07-12<a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>FindAndModify not returning error message as other methods Issue #277</li>
 <li>Added test coverage for $push, $pushAll and $inc atomic operations</li>
@@ -605,22 +621,22 @@ debug : function(debugMessage, object) {},</p>
 <li>Fix by andrewjstone to avoid throwing errors when this.primary not defined</li>
 </ul>
 </div>
-<div class="section" id="id48">
-<h2>0.9.6-5 2011-07-06<a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id50">
+<h2>0.9.6-5 2011-07-06<a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Rewritten BSON js parser now faster than the C parser on my core2duo laptop</li>
 <li>Added option full to indexInformation to get all index info Issue #265</li>
 <li>Passing in ObjectID for new Gridstore works correctly Issue #272</li>
 </ul>
 </div>
-<div class="section" id="id49">
-<h2>0.9.6-4 2011-07-01<a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id51">
+<h2>0.9.6-4 2011-07-01<a class="headerlink" href="#id51" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Added test and bug fix for insert/update/remove without callback supplied</li>
 </ul>
 </div>
-<div class="section" id="id50">
-<h2>0.9.6-3 2011-07-01<a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id52">
+<h2>0.9.6-3 2011-07-01<a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Added simple grid class called Grid with put, get, delete methods</li>
 <li>Fixed writeBuffer/readBuffer methods on GridStore so they work correctly</li>
@@ -630,8 +646,8 @@ debug : function(debugMessage, object) {},</p>
 <li>GridStore close method returns document for the file allowing user to reference _id field</li>
 </ul>
 </div>
-<div class="section" id="id51">
-<h2>0.9.6-2 2011-06-30<a class="headerlink" href="#id51" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id53">
+<h2>0.9.6-2 2011-06-30<a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixes for reconnect logic for server object (replays auth correctly)</li>
 <li>More testcases for auth</li>
@@ -642,8 +658,8 @@ debug : function(debugMessage, object) {},</p>
 <li>Fixed error when not passing in rs_name</li>
 </ul>
 </div>
-<div class="section" id="id52">
-<h2>0.9.6-1 2011-06-25<a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id54">
+<h2>0.9.6-1 2011-06-25<a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Fixes for test to run properly using c++ bson parser</li>
 <li>Fixes for dbref in native parser (correctly handles ref without db component)</li>
@@ -651,22 +667,22 @@ debug : function(debugMessage, object) {},</p>
 <li>Fixes for timestamp in js bson parser (distinct timestamp type now)</li>
 </ul>
 </div>
-<div class="section" id="id53">
-<h2>0.9.6 2011-06-21<a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id55">
+<h2>0.9.6 2011-06-21<a class="headerlink" href="#id55" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Worked around npm version handling bug</li>
 <li>Race condition fix for cygwin (<a class="reference external" href="https://github.com/vincentcr">https://github.com/vincentcr</a>)</li>
 </ul>
 </div>
-<div class="section" id="id54">
-<h2>0.9.5-1 2011-06-21<a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id56">
+<h2>0.9.5-1 2011-06-21<a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Extracted Timestamp as separate class for bson js parser to avoid instanceof problems</li>
 <li>Fixed driver strict mode issue</li>
 </ul>
 </div>
-<div class="section" id="id55">
-<h2>0.9.5 2011-06-20<a class="headerlink" href="#id55" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id57">
+<h2>0.9.5 2011-06-20<a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Replicaset support (failover and reading from secondary servers)</li>
 <li>Removed ServerPair and ServerCluster</li>
@@ -675,15 +691,15 @@ debug : function(debugMessage, object) {},</p>
 <li>Allows for forcing the server to assign ObjectID&#8217;s using the option {forceServerObjectId: true}</li>
 </ul>
 </div>
-<div class="section" id="id56">
-<h2>0.6.8<a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id58">
+<h2>0.6.8<a class="headerlink" href="#id58" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Removed multiple message concept from bson</li>
 <li>Changed db.open(db) to be db.open(err, db)</li>
 </ul>
 </div>
-<div class="section" id="id57">
-<h2>0.1 2010-01-30<a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id59">
+<h2>0.1 2010-01-30<a class="headerlink" href="#id59" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Initial release support of driver using native node.js interface</li>
 <li>Supports gridfs specification</li>
@@ -704,63 +720,65 @@ debug : function(debugMessage, object) {},</p>
 <h3>Page Contents</h3>
 <ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
-<li><a class="reference internal" href="#id1">0.9.9.3 2012-02-23</a></li>
-<li><a class="reference internal" href="#id2">0.9.9.2 2012-02-17</a></li>
-<li><a class="reference internal" href="#id3">0.9.9.1 2012-02-15</a></li>
-<li><a class="reference internal" href="#id4">0.9.9 2012-02-13</a></li>
-<li><a class="reference internal" href="#id5">0.9.8-7 2012-02-06</a></li>
-<li><a class="reference internal" href="#id6">0.9.8-6 2012-02-04</a></li>
-<li><a class="reference internal" href="#id7">0.9.8-5 2012-02-02</a></li>
-<li><a class="reference internal" href="#id8">0.9.8-4 2012-01-28</a></li>
-<li><a class="reference internal" href="#id9">0.9.8-3 2012-01-21</a></li>
-<li><a class="reference internal" href="#id10">0.9.8-2 2012-01-20</a></li>
-<li><a class="reference internal" href="#id11">0.9.8-1 2012-01-17</a></li>
-<li><a class="reference internal" href="#id12">0.9.8 2012-01-17</a></li>
-<li><a class="reference internal" href="#id13">0.9.7.3-5 2012-01-04</a></li>
-<li><a class="reference internal" href="#id14">0.9.7.3-4 2012-01-04</a></li>
-<li><a class="reference internal" href="#id15">0.9.7.3-3 2012-01-04</a></li>
-<li><a class="reference internal" href="#id16">0.9.7.3-2 2012-01-02</a></li>
-<li><a class="reference internal" href="#id17">0.9.7.3-1 2012-01-02</a></li>
-<li><a class="reference internal" href="#id18">0.9.7.3 2011-12-30</a></li>
-<li><a class="reference internal" href="#id19">0.9.7.2-5 2011-12-22</a></li>
-<li><a class="reference internal" href="#id20">0.9.7.2-4 2011-12-21</a></li>
-<li><a class="reference internal" href="#id21">0.9.7.2-3 2011-12-18</a></li>
-<li><a class="reference internal" href="#id22">0.9.7.2-2 2011-12-16</a></li>
-<li><a class="reference internal" href="#id23">0.9.7.2-1 2011-12-16</a></li>
-<li><a class="reference internal" href="#id24">0.9.7.2 2011-12-15</a></li>
-<li><a class="reference internal" href="#id25">0.9.7.1-4 2011-11-27</a></li>
-<li><a class="reference internal" href="#id26">0.9.7.1-3 2011-11-27</a></li>
-<li><a class="reference internal" href="#id27">0.9.7.1-2 2011-11-27</a></li>
-<li><a class="reference internal" href="#id28">0.9.7.1-1 2011-11-27</a></li>
-<li><a class="reference internal" href="#id29">0.9.7.1 2011-11-24</a></li>
-<li><a class="reference internal" href="#id30">0.9.7 2011-11-10</a></li>
-<li><a class="reference internal" href="#id31">0.9.6-22 2011-10-15</a></li>
-<li><a class="reference internal" href="#id32">0.9.6-21 2011-10-05</a></li>
-<li><a class="reference internal" href="#id33">0.9.6-20 2011-10-04</a></li>
-<li><a class="reference internal" href="#id34">0.9.6-19 2011-09-29</a></li>
-<li><a class="reference internal" href="#id35">0.9.6-18 2011-09-22</a></li>
-<li><a class="reference internal" href="#id36">0.9.6-17 2011-09-21</a></li>
-<li><a class="reference internal" href="#id37">0.9.6-16 2011-09-14</a></li>
-<li><a class="reference internal" href="#id38">0.9.6-15 2011-09-09</a></li>
-<li><a class="reference internal" href="#id39">0.9.6-14 2011-09-05</a></li>
-<li><a class="reference internal" href="#id40">0.9.6-13 2011-08-24</a></li>
-<li><a class="reference internal" href="#id41">0.9.6-12 2011-08-24</a></li>
-<li><a class="reference internal" href="#id42">0.9.6-11 2011-08-23</a></li>
-<li><a class="reference internal" href="#id43">0.9.6-10 2011-08-11</a></li>
-<li><a class="reference internal" href="#id44">0.9.6-9</a></li>
-<li><a class="reference internal" href="#id45">0.9.6-8</a></li>
-<li><a class="reference internal" href="#id46">0.9.6-7 2011-07-13</a></li>
-<li><a class="reference internal" href="#id47">0.9.6-6 2011-07-12</a></li>
-<li><a class="reference internal" href="#id48">0.9.6-5 2011-07-06</a></li>
-<li><a class="reference internal" href="#id49">0.9.6-4 2011-07-01</a></li>
-<li><a class="reference internal" href="#id50">0.9.6-3 2011-07-01</a></li>
-<li><a class="reference internal" href="#id51">0.9.6-2 2011-06-30</a></li>
-<li><a class="reference internal" href="#id52">0.9.6-1 2011-06-25</a></li>
-<li><a class="reference internal" href="#id53">0.9.6 2011-06-21</a></li>
-<li><a class="reference internal" href="#id54">0.9.5-1 2011-06-21</a></li>
-<li><a class="reference internal" href="#id55">0.9.5 2011-06-20</a></li>
-<li><a class="reference internal" href="#id56">0.6.8</a></li>
-<li><a class="reference internal" href="#id57">0.1 2010-01-30</a></li>
+<li><a class="reference internal" href="#id1">0.9.9.5 2012-03-07</a></li>
+<li><a class="reference internal" href="#id2">0.9.9.4 2012-02-26</a></li>
+<li><a class="reference internal" href="#id3">0.9.9.3 2012-02-23</a></li>
+<li><a class="reference internal" href="#id4">0.9.9.2 2012-02-17</a></li>
+<li><a class="reference internal" href="#id5">0.9.9.1 2012-02-15</a></li>
+<li><a class="reference internal" href="#id6">0.9.9 2012-02-13</a></li>
+<li><a class="reference internal" href="#id7">0.9.8-7 2012-02-06</a></li>
+<li><a class="reference internal" href="#id8">0.9.8-6 2012-02-04</a></li>
+<li><a class="reference internal" href="#id9">0.9.8-5 2012-02-02</a></li>
+<li><a class="reference internal" href="#id10">0.9.8-4 2012-01-28</a></li>
+<li><a class="reference internal" href="#id11">0.9.8-3 2012-01-21</a></li>
+<li><a class="reference internal" href="#id12">0.9.8-2 2012-01-20</a></li>
+<li><a class="reference internal" href="#id13">0.9.8-1 2012-01-17</a></li>
+<li><a class="reference internal" href="#id14">0.9.8 2012-01-17</a></li>
+<li><a class="reference internal" href="#id15">0.9.7.3-5 2012-01-04</a></li>
+<li><a class="reference internal" href="#id16">0.9.7.3-4 2012-01-04</a></li>
+<li><a class="reference internal" href="#id17">0.9.7.3-3 2012-01-04</a></li>
+<li><a class="reference internal" href="#id18">0.9.7.3-2 2012-01-02</a></li>
+<li><a class="reference internal" href="#id19">0.9.7.3-1 2012-01-02</a></li>
+<li><a class="reference internal" href="#id20">0.9.7.3 2011-12-30</a></li>
+<li><a class="reference internal" href="#id21">0.9.7.2-5 2011-12-22</a></li>
+<li><a class="reference internal" href="#id22">0.9.7.2-4 2011-12-21</a></li>
+<li><a class="reference internal" href="#id23">0.9.7.2-3 2011-12-18</a></li>
+<li><a class="reference internal" href="#id24">0.9.7.2-2 2011-12-16</a></li>
+<li><a class="reference internal" href="#id25">0.9.7.2-1 2011-12-16</a></li>
+<li><a class="reference internal" href="#id26">0.9.7.2 2011-12-15</a></li>
+<li><a class="reference internal" href="#id27">0.9.7.1-4 2011-11-27</a></li>
+<li><a class="reference internal" href="#id28">0.9.7.1-3 2011-11-27</a></li>
+<li><a class="reference internal" href="#id29">0.9.7.1-2 2011-11-27</a></li>
+<li><a class="reference internal" href="#id30">0.9.7.1-1 2011-11-27</a></li>
+<li><a class="reference internal" href="#id31">0.9.7.1 2011-11-24</a></li>
+<li><a class="reference internal" href="#id32">0.9.7 2011-11-10</a></li>
+<li><a class="reference internal" href="#id33">0.9.6-22 2011-10-15</a></li>
+<li><a class="reference internal" href="#id34">0.9.6-21 2011-10-05</a></li>
+<li><a class="reference internal" href="#id35">0.9.6-20 2011-10-04</a></li>
+<li><a class="reference internal" href="#id36">0.9.6-19 2011-09-29</a></li>
+<li><a class="reference internal" href="#id37">0.9.6-18 2011-09-22</a></li>
+<li><a class="reference internal" href="#id38">0.9.6-17 2011-09-21</a></li>
+<li><a class="reference internal" href="#id39">0.9.6-16 2011-09-14</a></li>
+<li><a class="reference internal" href="#id40">0.9.6-15 2011-09-09</a></li>
+<li><a class="reference internal" href="#id41">0.9.6-14 2011-09-05</a></li>
+<li><a class="reference internal" href="#id42">0.9.6-13 2011-08-24</a></li>
+<li><a class="reference internal" href="#id43">0.9.6-12 2011-08-24</a></li>
+<li><a class="reference internal" href="#id44">0.9.6-11 2011-08-23</a></li>
+<li><a class="reference internal" href="#id45">0.9.6-10 2011-08-11</a></li>
+<li><a class="reference internal" href="#id46">0.9.6-9</a></li>
+<li><a class="reference internal" href="#id47">0.9.6-8</a></li>
+<li><a class="reference internal" href="#id48">0.9.6-7 2011-07-13</a></li>
+<li><a class="reference internal" href="#id49">0.9.6-6 2011-07-12</a></li>
+<li><a class="reference internal" href="#id50">0.9.6-5 2011-07-06</a></li>
+<li><a class="reference internal" href="#id51">0.9.6-4 2011-07-01</a></li>
+<li><a class="reference internal" href="#id52">0.9.6-3 2011-07-01</a></li>
+<li><a class="reference internal" href="#id53">0.9.6-2 2011-06-30</a></li>
+<li><a class="reference internal" href="#id54">0.9.6-1 2011-06-25</a></li>
+<li><a class="reference internal" href="#id55">0.9.6 2011-06-21</a></li>
+<li><a class="reference internal" href="#id56">0.9.5-1 2011-06-21</a></li>
+<li><a class="reference internal" href="#id57">0.9.5 2011-06-20</a></li>
+<li><a class="reference internal" href="#id58">0.6.8</a></li>
+<li><a class="reference internal" href="#id59">0.1 2010-01-30</a></li>
 </ul>
 </li>
 </ul>
@@ -815,7 +833,7 @@ debug : function(debugMessage, object) {},</p>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.3 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

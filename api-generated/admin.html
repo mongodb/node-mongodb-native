@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Admin() &mdash; MongoDB Node.JS Driver 0.9.9.3 documentation</title>
+    <title>Admin() &mdash; MongoDB Node.JS Driver 0.9.9.5 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.9.3',
+        VERSION:     '0.9.9.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.3 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.5 documentation" href="../index.html" />
     <link rel="next" title="Cursor()" href="cursor.html" />
     <link rel="prev" title="Collection()" href="collection.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="collection.html" title="Collection()"
              accesskey="P">previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.3 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -146,6 +146,29 @@ instance of the db client</p>
 </pre></div>
 </div>
 </div></blockquote>
+</div>
+<div class="section" id="serverstatus">
+<h2>serverStatus<a class="headerlink" href="#serverstatus" title="Permalink to this headline">¶</a></h2>
+<p>Retrieve this db&#8217;s server status.</p>
+<dl class="function">
+<dt id="serverStatus">
+<tt class="descname">serverStatus</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#serverStatus" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; returns the server status.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="profilinglevel">
 <h2>profilingLevel<a class="headerlink" href="#profilinglevel" title="Permalink to this headline">¶</a></h2>
@@ -1014,6 +1037,84 @@ Use this command to check that a collection is valid (not corrupt) and to get va
 </div>
 </div></blockquote>
 </div>
+<div class="section" id="replsetgetstatus">
+<h2>replSetGetStatus<a class="headerlink" href="#replsetgetstatus" title="Permalink to this headline">¶</a></h2>
+<p>Get ReplicaSet status</p>
+<dl class="function">
+<dt id="replSetGetStatus">
+<tt class="descname">replSetGetStatus</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#replSetGetStatus" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; returns the replica set status (if available).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Retrieve the current replicaset status if the server is running as part of a replicaset</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">4</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Drop the current database if it exists to avoid problems</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Grab a collection object</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Force the creation of the collection by inserting a document</span>
+      <span class="c1">// Collections are not created until the first document is inserted</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// Use the admin database for the operation</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">adminDb</span><span class="p">)</span> <span class="p">{</span>
+
+         <span class="c1">// Add the new user to the admin database</span>
+         <span class="nx">adminDb</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+           <span class="c1">// Authenticate using the newly added user</span>
+           <span class="nx">adminDb</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+             <span class="c1">// Retrive the server Info, returns error if we are not</span>
+             <span class="c1">// running a replicaset</span>
+             <span class="nx">adminDb</span><span class="p">.</span><span class="nx">replSetGetStatus</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">info</span><span class="p">)</span> <span class="p">{</span>
+               <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+
+               <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+             <span class="p">})</span>
+           <span class="p">});</span>
+         <span class="p">});</span>
+       <span class="p">});</span>
+     <span class="p">});</span>
+   <span class="p">});</span>
+ <span class="p">});</span>
+ <span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
 </div>
 
 
@@ -1030,6 +1131,7 @@ Use this command to check that a collection is valid (not corrupt) and to get va
 <li><a class="reference internal" href="#">Admin()</a><ul>
 <li><a class="reference internal" href="#constructor">Constructor</a></li>
 <li><a class="reference internal" href="#buildinfo">buildInfo</a></li>
+<li><a class="reference internal" href="#serverstatus">serverStatus</a></li>
 <li><a class="reference internal" href="#profilinglevel">profilingLevel</a></li>
 <li><a class="reference internal" href="#ping">ping</a></li>
 <li><a class="reference internal" href="#authenticate">authenticate</a></li>
@@ -1041,6 +1143,7 @@ Use this command to check that a collection is valid (not corrupt) and to get va
 <li><a class="reference internal" href="#command">command</a></li>
 <li><a class="reference internal" href="#validatecollection">validateCollection</a></li>
 <li><a class="reference internal" href="#listdatabases">listDatabases</a></li>
+<li><a class="reference internal" href="#replsetgetstatus">replSetGetStatus</a></li>
 </ul>
 </li>
 </ul>
@@ -1053,6 +1156,7 @@ Use this command to check that a collection is valid (not corrupt) and to get va
 <li class="toctree-l1 current"><a class="current reference internal" href="">Admin()</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#constructor">Constructor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#buildinfo">buildInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#serverstatus">serverStatus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#profilinglevel">profilingLevel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ping">ping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#authenticate">authenticate</a></li>
@@ -1064,6 +1168,7 @@ Use this command to check that a collection is valid (not corrupt) and to get va
 <li class="toctree-l2"><a class="reference internal" href="#command">command</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#validatecollection">validateCollection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#listdatabases">listDatabases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#replsetgetstatus">replSetGetStatus</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cursor.html">Cursor()</a></li>
@@ -1122,7 +1227,7 @@ Use this command to check that a collection is valid (not corrupt) and to get va
         <li class="right" >
           <a href="collection.html" title="Collection()"
              >previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.3 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GridStore() &mdash; MongoDB Node.JS Driver 0.9.9.3 documentation</title>
+    <title>GridStore() &mdash; MongoDB Node.JS Driver 0.9.9.5 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.9.3',
+        VERSION:     '0.9.9.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.3 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.5 documentation" href="../index.html" />
     <link rel="next" title="ReadStream()" href="readstream.html" />
     <link rel="prev" title="Grid()" href="grid.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="grid.html" title="Grid()"
              accesskey="P">previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.3 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -65,7 +65,8 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>db</strong> (<em>db</em>) &#8211; A database instance to interact with.</li>
-<li><strong>fileIdObject</strong> (<em>string</em>) &#8211; ObjectID or the name for the file.</li>
+<li><strong>id</strong> (<em>objectid</em>) &#8211; an unique ObjectID for this file</li>
+<li><strong>[filename]</strong> (<em>string</em>) &#8211; optional a filename for this file, no unique constrain on the field</li>
 <li><strong>mode</strong> (<em>string</em>) &#8211; set the mode for this file.</li>
 <li><strong>options</strong> (<em>object</em>) &#8211; optional properties to specify. Recognized keys:</li>
 </ul>
@@ -257,6 +258,70 @@ new one if file does not exist.</p>
           <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
 
           <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<p>A simple example showing how to save a file with a filename allowing for multiple files with the same name</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Create a file and open it</span>
+  <span class="kd">var</span> <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">(),</span> <span class="s2">&quot;test_gs_getc_file&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
+  <span class="nx">gridStore</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Write some content to the file</span>
+    <span class="nx">gridStore</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="s2">&quot;hello, world!&quot;</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Flush the file to GridFS</span>
+      <span class="nx">gridStore</span><span class="p">.</span><span class="nx">close</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">fileData</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+        <span class="c1">// Create another file with same name and and save content to it</span>
+        <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">(),</span> <span class="s2">&quot;test_gs_getc_file&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
+        <span class="nx">gridStore</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
+          <span class="c1">// Write some content to the file</span>
+          <span class="nx">gridStore</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="s2">&quot;hello, world!&quot;</span><span class="p">,</span> <span class="s2">&quot;utf8&quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// Flush the file to GridFS</span>
+            <span class="nx">gridStore</span><span class="p">.</span><span class="nx">close</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">fileData</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+              <span class="c1">// Open the file in read mode using the filename</span>
+              <span class="kd">var</span> <span class="nx">gridStore2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s2">&quot;test_gs_getc_file&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">);</span>
+              <span class="nx">gridStore2</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
+
+                <span class="c1">// Read first character and verify</span>
+                <span class="nx">gridStore</span><span class="p">.</span><span class="nx">getc</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">chr</span><span class="p">)</span> <span class="p">{</span>
+                  <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="nx">chr</span><span class="p">);</span>
+
+                  <span class="c1">// Open the file using an object id</span>
+                  <span class="nx">gridStore2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileData</span><span class="p">.</span><span class="nx">_id</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">);</span>
+                  <span class="nx">gridStore2</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
+
+                    <span class="c1">// Read first character and verify</span>
+                    <span class="nx">gridStore</span><span class="p">.</span><span class="nx">getc</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">chr</span><span class="p">)</span> <span class="p">{</span>
+                      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="nx">chr</span><span class="p">);</span>
+
+                      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+                    <span class="p">})</span>
+                  <span class="p">});</span>
+                <span class="p">});</span>
+              <span class="p">});</span>
+            <span class="p">});</span>
+          <span class="p">});</span>
         <span class="p">});</span>
       <span class="p">});</span>
     <span class="p">});</span>
@@ -2080,7 +2145,7 @@ the given string does not have one.</p>
         <li class="right" >
           <a href="grid.html" title="Grid()"
              >previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.3 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
