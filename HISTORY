@@ -1,9 +1,11 @@
-NEEDS LOOKING AT
+0.9.9.5 2012-03-07
+------------------
 - ensureIndex on huge collection blocks when using safe (might need to take the connection out of the pool)
 - Merged in replSetGetStatus helper to admin class (Issue #515, https://github.com/mojodna)
 - Merged in serverStatus helper to admin class (Issue #516, https://github.com/mojodna)
 - Fixed memory leak in C++ bson parser (Issue #526)
 - Fix empty MongoError "message" property (Issue #530, https://github.com/aheckmann)
+- Cannot save files with the same file name to GridFS (Issue #531)
 
 0.9.9.4 2012-02-26
 ------------------
