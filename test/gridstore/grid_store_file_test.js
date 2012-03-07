@@ -926,30 +926,92 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
   });
 }
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldNotThrowErrorOnClose = function(test) {
-//   var fieldId = new ObjectID();
-//   var gridStore = new GridStore(client, fieldId, "w", {root:'fs'});
-//   gridStore.chunkSize = 1024 * 256;
-//   gridStore.open(function(err, gridStore) {
-//     Step(
-//       function writeData() {
-//         var group = this.group();
-//         for(var i = 0; i < 1000000; i += 5000) {
-//             gridStore.write(new Buffer(5000), group());
-//         }
-//       },
-// 
-//       function doneWithWrite() {
-//         gridStore.close(function(err, result) {
-//           test.done();
-//         });
-//       }
-//     )
-//   });
-// }
+/**
+ * @ignore
+ */
+exports.shouldNotThrowErrorOnClose = function(test) {
+  var fieldId = new ObjectID();
+  var gridStore = new GridStore(client, fieldId, "w", {root:'fs'});
+  gridStore.chunkSize = 1024 * 256;
+  gridStore.open(function(err, gridStore) {
+    Step(
+      function writeData() {
+        var group = this.group();
+        for(var i = 0; i < 1000000; i += 5000) {
+            gridStore.write(new Buffer(5000), group());
+        }
+      },
+
+      function doneWithWrite() {
+        gridStore.close(function(err, result) {
+          test.done();
+        });
+      }
+    )
+  });
+}
+
+/**
+ * A simple example showing how to save a file with a filename allowing for multiple files with the same name
+ *
+ * @_class gridstore
+ * @_function open
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Create a file and open it
+    var gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
+    gridStore.open(function(err, gridStore) {
+      // Write some content to the file
+      gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+        // Flush the file to GridFS
+        gridStore.close(function(err, fileData) {
+          test.equal(null, err);
+          
+          // Create another file with same name and and save content to it
+          gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
+          gridStore.open(function(err, gridStore) {
+            // Write some content to the file
+            gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+              // Flush the file to GridFS
+              gridStore.close(function(err, fileData) {
+                test.equal(null, err);
+                
+                // Open the file in read mode using the filename
+                var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
+                gridStore2.open(function(err, gridStore) {
+                
+                  // Read first character and verify
+                  gridStore.getc(function(err, chr) {
+                    test.equal('h', chr);
+
+                    // Open the file using an object id
+                    gridStore2 = new GridStore(db, fileData._id, "r");
+                    gridStore2.open(function(err, gridStore) {
+
+                      // Read first character and verify
+                      gridStore.getc(function(err, chr) {
+                        test.equal('h', chr);
+
+                        db.close();
+                        test.done();
+                      })
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
 
 /**
  * Retrieve the server information for the current
