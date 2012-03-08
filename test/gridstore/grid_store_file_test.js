@@ -397,6 +397,49 @@ exports.shouldCorrectlySeekWithString = function(test) {
 /**
  * @ignore
  */
+exports.shouldCorrectlySeekAcrossChunks = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  test.expect(2);
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Create a new file
+    var gridStore = new GridStore(db, "test_gs_seek_across_chunks", "w");
+    // Open the file
+    gridStore.open(function(err, gridStore) {
+      var data = new Buffer(gridStore.chunkSize*3)
+      // Write the binary file data to GridFS
+      gridStore.write(data, function(err, gridStore) {
+        // Flush the remaining data to GridFS
+        gridStore.close(function(err, result) {
+          
+          var gridStore = new GridStore(db, "test_gs_seek_across_chunks", "r");
+          // Read in the whole file and check that it's the same content
+          gridStore.open(function(err, gridStore) {
+            gridStore.seek(gridStore.chunkSize+1, function(err, gridStore) {
+              test.equal(null, err);
+              gridStore.tell(function(err, position) {
+                test.equal(gridStore.chunkSize+1, position);
+
+                db.close();
+                test.done();
+              });
+            });
+          });
+
+          setTimeout(function() {
+            test.ok(false, "Didn't complete in expected timeframe");
+            test.done();
+          }, 2000);
+        });
+      });
+    });
+  });
+}
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAppendToFile = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
