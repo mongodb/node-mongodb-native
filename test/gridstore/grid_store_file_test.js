@@ -1,4 +1,4 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('mongodb').native() : require('mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
@@ -401,6 +401,8 @@ exports.shouldCorrectlyAppendToFile = function(test) {
   var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
+      var id = new ObjectID();
+      
       var gridStore = new GridStore(fs_client, "test_gs_append", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello, world!", function(err, gridStore) {
@@ -408,15 +410,15 @@ exports.shouldCorrectlyAppendToFile = function(test) {
 
             var gridStore2 = new GridStore(fs_client, "test_gs_append", "w+");
             gridStore2.open(function(err, gridStore) {
-              gridStore.write(" how are you?", function(err, gridStore) {
-                gridStore.close(function(err, result) {
+              gridStore2.write(" how are you?", function(err, gridStore) {
+                gridStore2.close(function(err, result) {
 
                   fs_client.collection('fs.chunks', function(err, collection) {
                     collection.count(function(err, count) {
                       test.equal(1, count);
 
                       GridStore.read(fs_client, 'test_gs_append', function(err, data) {
-                        test.equal("hello, world! how are you?", data);
+                        test.equal("hello, world! how are you?", data.toString('ascii'));
                         
                         fs_client.close();
                         test.done();

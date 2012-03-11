@@ -1,3 +1,4 @@
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
 var testCase = require('nodeunit').testCase,
@@ -5,11 +6,11 @@ var testCase = require('nodeunit').testCase,
   inspect = require('util').inspect,
   gleak = require('../../dev/tools/gleak'),
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
-  Db = require('../../lib/mongodb').Db,
-  ReplSetServers = require('../../lib/mongodb').ReplSetServers,
+  Db = mongodb.Db,
+  ReplSetServers = mongodb.ReplSetServers,
   PingStrategy = require('../../lib/mongodb/connection/strategies/ping_strategy').PingStrategy,
   StatisticsStrategy = require('../../lib/mongodb/connection/strategies/statistics_strategy').StatisticsStrategy,
-  Server = require('../../lib/mongodb').Server;
+  Server = mongodb.Server;
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
