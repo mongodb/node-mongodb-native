@@ -60,6 +60,9 @@
 , "os" :            [ "linux"
                     , "darwin"
                     , "freebsd" ]
+, "dependencies" : {
+  "bson": "git+https://github.com/christkv/bson.git#master"
+}                    
 , "devDependencies": {
       "dox": "0.1.3"
     , "uglify-js": "1.2.5"

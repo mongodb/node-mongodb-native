@@ -15,8 +15,7 @@ var replicaSetManager = new ReplicaSetManager();
 var files = [];
 var directories = [{dir: __dirname + "/../../test", path: "/test/"}, 
       {dir: __dirname + "/../../test/gridstore", path: "/test/gridstore/"},
-      {dir: __dirname + "/../../test/connection", path: "/test/connection/"},
-      {dir: __dirname + "/../../test/bson", path: "/test/bson/"}];
+      {dir: __dirname + "/../../test/connection", path: "/test/connection/"}];
 
 // Generate a list of tests
 directories.forEach(function(dirEntry) {

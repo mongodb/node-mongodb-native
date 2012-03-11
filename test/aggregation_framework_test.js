@@ -1,4 +1,4 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('mongodb').native() : require('mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 var native_parser = (process.env['TEST_NATIVE'] != null);
 

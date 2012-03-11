@@ -1,4 +1,4 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('mongodb').native() : require('mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 
 var testCase = require('nodeunit').testCase,
@@ -9,12 +9,12 @@ var testCase = require('nodeunit').testCase,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Script = require('vm'),
-  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
-  Binary = require('../lib/mongodb/bson/binary').Binary,
-  Code = require('../lib/mongodb/bson/code').Code,
-  DBRef = require('../lib/mongodb/bson/db_ref').DBRef,
-  Timestamp = require('../lib/mongodb/bson/timestamp').Timestamp,
-  Long = require('../lib/mongodb/bson/long').Long,
+  ObjectID = mongodb.ObjectID,
+  Binary = mongodb.Binary,
+  Code = mongodb.Code,
+  DBRef = mongodb.DBRef,
+  Timestamp = mongodb.Timestamp,
+  Long = mongodb.Long,
   Collection = mongodb.Collection,
   Step = require('step'),
   Server = mongodb.Server,
@@ -71,7 +71,7 @@ var ISODate = function (string) {
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});  
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -603,8 +603,7 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = function(test
          test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-         test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
-         
+         test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);         
          test.done();
        })
      });

@@ -1,16 +1,18 @@
+var mongodb = process.env['TEST_NATIVE'] != null ? require('mongodb').native() : require('mongodb').pure();
+
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
   gleak = require('../../dev/tools/gleak'),
-  Db = require('../../lib/mongodb').Db,
-  ObjectID = require('../../lib/mongodb').ObjectID,
-  Cursor = require('../../lib/mongodb').Cursor,
+  Db = mongodb.Db,
+  ObjectID = mongodb.ObjectID,
+  Cursor = mongodb.Cursor,
   Step = require("step"),
-  Collection = require('../../lib/mongodb').Collection,
-  GridStore = require('../../lib/mongodb').GridStore,
+  Collection = mongodb.Collection,
+  GridStore = mongodb.GridStore,
   fs = require('fs'),
-  Server = require('../../lib/mongodb').Server;
+  Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
 var useSSL = process.env['USE_SSL'] != null ? true : false;

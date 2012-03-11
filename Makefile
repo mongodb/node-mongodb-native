@@ -7,7 +7,7 @@ name = all
 total: build_native
 
 build_native:
-	$(MAKE) -C ./external-libs/bson all
+	# $(MAKE) -C ./external-libs/bson all
 
 build_native_debug:
 	$(MAKE) -C ./external-libs/bson all_debug

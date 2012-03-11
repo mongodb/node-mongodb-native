@@ -1,4 +1,4 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('mongodb').native() : require('mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 
 var testCase = require('nodeunit').testCase,
@@ -9,8 +9,8 @@ var testCase = require('nodeunit').testCase,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
-  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
-  Long = require('../lib/mongodb/bson/long').Long,
+  ObjectID = mongodb.ObjectID,
+  Long = mongodb.Long,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';

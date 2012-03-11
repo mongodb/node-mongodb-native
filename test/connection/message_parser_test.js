@@ -1,5 +1,3 @@
-// var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
-
 var testCase = require('nodeunit').testCase,
   Buffer = require('buffer').Buffer,
   gleak = require('../../dev/tools/gleak'),

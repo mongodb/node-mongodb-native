@@ -1,4 +1,4 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('mongodb').native() : require('mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 
 var testCase = require('nodeunit').testCase,
@@ -7,9 +7,9 @@ var testCase = require('nodeunit').testCase,
   nodeunit = require('nodeunit'),
   gleak = require('../dev/tools/gleak'),
   Db = mongodb.Db,
-  ObjectID = require('../lib/mongodb/bson/objectid').ObjectID,
-  DBRef = require('../lib/mongodb/bson/db_ref').DBRef,
-  Code = require('../lib/mongodb/bson/code').Code,
+  ObjectID = mongodb.ObjectID,
+  DBRef = mongodb.DBRef,
+  Code = mongodb.Code,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server;
