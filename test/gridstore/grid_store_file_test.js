@@ -428,15 +428,16 @@ exports.shouldCorrectlySeekAcrossChunks = function(test) {
             });
           });
 
-          setTimeout(function() {
-            test.ok(false, "Didn't complete in expected timeframe");
-            test.done();
-          }, 2000);
+          // setTimeout(function() {
+          //   test.ok(false, "Didn't complete in expected timeframe");
+          //   test.done();
+          // }, 2000);
         });
       });
     });
   });
 }
+
 /**
  * @ignore
  */
