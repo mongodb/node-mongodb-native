@@ -52,73 +52,17 @@ Updates this binary with byte_value.
 
    :param character byte_value: a single byte we wish to write.
 
-**Examples**
-
-  
-  
-  A simple example showing the usage of the binary put method.
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-     // Create an empty Binary object
-     var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
-     // Write some character to the Binary value
-     binary.put('h');
-     binary.put('e');
-     binary.put('l');
-     binary.put('l');
-     binary.put('o');
-     // Validate the content of the binary
-     assert.equal('hello', binary.toString('ascii'));
-
-
 -----
 write
 -----
 
 
-Writes.
+Writes a buffer or string to the binary.
 
 .. js:function:: write(string, offset)
 
    :param buffer string: a string or buffer to be written to the Binary BSON object.
    :param number offset: specify the binary of where to write the content.
-
-**Examples**
-
-  
-  
-  A simple example showing the usage of the binary write method.
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-     // Create an empty Binary object
-     var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
-     // Write some data to the binary
-     binary.write('hello', 0);
-     // Validate the content of the binary
-     assert.equal('hello', binary.toString('ascii'));
-
 
 ----
 read
@@ -134,34 +78,6 @@ Reads **length** bytes starting at **position**.
    :returns: buffer 
 
 
-**Examples**
-
-  
-  
-  A simple example showing the usage of the binary read method.
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-     // Create an empty Binary object
-     var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
-     // Write some data to the binary
-     binary.write('hello', 0);
-     // Read a couple of characters from the binary
-     var data = binary.read(1, 2);
-     // Validate the content of the binary
-     assert.equal('el', data.toString('ascii'));
-
-
 -----
 value
 -----
@@ -174,32 +90,6 @@ Returns the value of this binary as a string.
    :returns: string 
 
 
-**Examples**
-
-  
-  
-  A simple example showing the usage of the binary value method.
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-     // Create an empty Binary object
-     var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
-     // Write some data to the binary
-     binary.write('hello', 0);
-     // Validate the content of the binary
-     assert.equal('hello', binary.value());
-
-
 ------
 length
 ------
@@ -210,30 +100,4 @@ Length.
 .. js:function:: length()
 
    :returns: number the length of the binary.
-
-
-**Examples**
-
-  
-  
-  A simple example showing the usage of the binary length method.
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-     // Create an empty Binary object
-     var binary = new Binary(new Buffer(''), BSON.BSON_BINARY_SUBTYPE_DEFAULT);
-     // Write some data to the binary
-     binary.write('hello');
-     // Validate the content of the binary
-     assert.equal(5, binary.length());
 

@@ -1009,8 +1009,6 @@ Get ReplicaSet status
                   // Retrive the server Info, returns error if we are not
                   // running a replicaset
                   adminDb.replSetGetStatus(function(err, info) {
-                    assert.ok(err != null);
-                    
                     db.close();
                   })
                 });

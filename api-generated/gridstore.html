@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GridStore() &mdash; MongoDB Node.JS Driver 0.9.9.5 documentation</title>
+    <title>GridStore() &mdash; MongoDB Node.JS Driver 0.9.9.6 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.9.5',
+        VERSION:     '0.9.9.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.5 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.6 documentation" href="../index.html" />
     <link rel="next" title="ReadStream()" href="readstream.html" />
     <link rel="prev" title="Grid()" href="grid.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="grid.html" title="Grid()"
              accesskey="P">previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.5 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.6 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -391,7 +391,7 @@ new one if file does not exist.</p>
 
       <span class="c1">// Read back all the written content and verify the correctness</span>
       <span class="nx">GridStore</span><span class="p">.</span><span class="nx">read</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">fileData</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;hex&#39;</span><span class="p">),</span> <span class="nx">fileData</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;hex&#39;</span><span class="p">))</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;base64&#39;</span><span class="p">),</span> <span class="nx">fileData</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;base64&#39;</span><span class="p">))</span>
         <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">fileSize</span><span class="p">,</span> <span class="nx">fileData</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
 
         <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
@@ -439,7 +439,7 @@ new one if file does not exist.</p>
 
       <span class="c1">// Read back all the written content and verify the correctness</span>
       <span class="nx">GridStore</span><span class="p">.</span><span class="nx">read</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">fileData</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;hex&#39;</span><span class="p">),</span> <span class="nx">fileData</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;hex&#39;</span><span class="p">));</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;base64&#39;</span><span class="p">),</span> <span class="nx">fileData</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;base64&#39;</span><span class="p">));</span>
         <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">fileSize</span><span class="p">,</span> <span class="nx">fileData</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
 
         <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
@@ -1033,7 +1033,7 @@ already exists. This will work properly only if mode was initialized to
             <span class="c1">// Read the entire file</span>
             <span class="nx">gs2</span><span class="p">.</span><span class="nx">read</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">data2</span><span class="p">)</span> <span class="p">{</span>
               <span class="c1">// Compare the file content against the orgiinal</span>
-              <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;hex&#39;</span><span class="p">),</span> <span class="nx">data2</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;hex&#39;</span><span class="p">));</span>
+              <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;base64&#39;</span><span class="p">),</span> <span class="nx">data2</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;base64&#39;</span><span class="p">));</span>
 
               <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
             <span class="p">});</span>
@@ -2145,7 +2145,7 @@ the given string does not have one.</p>
         <li class="right" >
           <a href="grid.html" title="Grid()"
              >previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.5 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.6 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

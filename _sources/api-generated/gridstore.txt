@@ -302,7 +302,7 @@ Stores a file from the file system to the GridFS database.
            
            // Read back all the written content and verify the correctness
            GridStore.read(db, fileId, function(err, fileData) {
-             assert.equal(data.toString('hex'), fileData.toString('hex'))
+             assert.equal(data.toString('base64'), fileData.toString('base64'))
              assert.equal(fileSize, fileData.length);
      
              db.close();
@@ -354,7 +354,7 @@ Stores a file from the file system to the GridFS database.
            
            // Read back all the written content and verify the correctness
            GridStore.read(db, fileId, function(err, fileData) {
-             assert.equal(data.toString('hex'), fileData.toString('hex'));
+             assert.equal(data.toString('base64'), fileData.toString('base64'));
              assert.equal(fileSize, fileData.length);
      
              db.close();
@@ -904,7 +904,7 @@ Retrieves the contents of this file and advances the read/write head. Works with
                  // Read the entire file
                  gs2.read(function(err, data2) {
                    // Compare the file content against the orgiinal
-                   assert.equal(data.toString('hex'), data2.toString('hex'));
+                   assert.equal(data.toString('base64'), data2.toString('base64'));
      
                    db.close();
                  });

@@ -16,7 +16,7 @@ Web frameworks using MongoDB
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:34:41 on 4/2/2012
+           - 2:34:53 on 12/2/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 165
+           - 170
          * - **Watchers**
-           - 1750
+           - 1762
 
 .. topic:: mongo-model
 
@@ -262,7 +262,7 @@ Content Management Systems
          * - **Forks**
            - 106
          * - **Watchers**
-           - 749
+           - 755
 
 Grid FS libraries or tools
 --------------------------
@@ -304,7 +304,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 20:24:20 on 29/1/2012
+           - 18:22:12 on 10/2/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -312,9 +312,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/guileen/node-mongoskin.git
          * - **Forks**
-           - 18
+           - 19
          * - **Watchers**
-           - 231
+           - 239
 
 .. topic:: mongoq
 
@@ -337,7 +337,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 3
          * - **Watchers**
-           - 47
+           - 49
 
 .. topic:: mongolia
 
@@ -383,7 +383,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 8
          * - **Watchers**
-           - 102
+           - 105
 
 .. topic:: mongode
 
@@ -465,7 +465,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:26:43 on 6/2/2012
+           - 5:8:9 on 9/2/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -545,9 +545,9 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 20
+           - 21
          * - **Watchers**
-           - 123
+           - 124
 
 .. topic:: lazyBum
 
@@ -717,7 +717,7 @@ Queue libraries using MongoDB
          * - **Forks**
            - 7
          * - **Watchers**
-           - 61
+           - 62
 
 Logging libraries or applications
 ---------------------------------
@@ -937,9 +937,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 117
+           - 119
          * - **Watchers**
-           - 1530
+           - 1544
 
 Libraries for the connect middleware
 ------------------------------------
@@ -988,7 +988,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 17
          * - **Watchers**
-           - 126
+           - 127
 
 .. topic:: connect-mongo
 
@@ -1009,9 +1009,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 29
+           - 31
          * - **Watchers**
-           - 84
+           - 86
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -1037,7 +1037,7 @@ Libraries or applications for continous integration
          * - **Forks**
            - 16
          * - **Watchers**
-           - 139
+           - 141
 
 Exampe applications
 -------------------
