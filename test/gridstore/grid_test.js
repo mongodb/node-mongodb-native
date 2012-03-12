@@ -73,7 +73,7 @@ exports.shouldPutFileCorrectlyToGridUsingObjectId = function(test) {
     grid.put(originalData, {}, function(err, result) {
       // Fetch the content
       grid.get(result._id, function(err, data) {
-        test.deepEqual(originalData.toString('hex'), data.toString('hex'));
+        test.deepEqual(originalData.toString('base64'), data.toString('base64'));
       
         db.close();
         test.done();

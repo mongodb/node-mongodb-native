@@ -530,7 +530,7 @@ exports.shouldCorrectlyWriteFileToGridStore= function(test) {
   gridStore.open(function(err, gridStore) {
     gridStore.writeFile('./test/gridstore/test_gs_weird_bug.png', function(err, doc) {
       GridStore.read(client, 'test_gs_writing_file', function(err, fileData) {
-        test.equal(data.toString('hex'), fileData.toString('hex'));        
+        test.equal(data.toString('base64'), fileData.toString('base64'));        
         test.equal(fileSize, fileData.length);
         
         // Ensure we have a md5
@@ -556,7 +556,7 @@ exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId= function(test) {
     gridStore.writeFile('./test/gridstore/test_gs_weird_bug.png', function(err, doc) {
       
       GridStore.read(client, doc._id, function(err, fileData) {
-        test.equal(data.toString('hex'), fileData.toString('hex'));
+        test.equal(data.toString('base64'), fileData.toString('base64'));
         test.equal(fileSize, fileData.length);
         
         // Ensure we have a md5
@@ -644,7 +644,7 @@ exports.shouldCorrectlyWriteAndReadJpgImage = function(test) {
               // Read the entire file
               gs2.read(function(err, data2) {
                 // Compare the file content against the orgiinal
-                test.equal(data.toString('hex'), data2.toString('hex'));
+                test.equal(data.toString('base64'), data2.toString('base64'));
 
                 db.close();
                 test.done();
@@ -930,7 +930,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = function(test) 
         
         // Read back all the written content and verify the correctness
         GridStore.read(db, fileId, function(err, fileData) {
-          test.equal(data.toString('hex'), fileData.toString('hex'))
+          test.equal(data.toString('base64'), fileData.toString('base64'))
           test.equal(fileSize, fileData.length);
 
           db.close();
@@ -976,7 +976,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = funct
         
         // Read back all the written content and verify the correctness
         GridStore.read(db, fileId, function(err, fileData) {
-          test.equal(data.toString('hex'), fileData.toString('hex'));
+          test.equal(data.toString('base64'), fileData.toString('base64'));
           test.equal(fileSize, fileData.length);
 
           db.close();

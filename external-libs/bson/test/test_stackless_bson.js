@@ -85,7 +85,7 @@ console.log("time = ", end - start, "ms -", COUNT / ((end - start)/1000), " ops/
 // var _serializedDoc2 = bsonC.serialize2(doc, true, false);
 // console.dir(_serializedDoc1);
 // console.dir(_serializedDoc2);
-// assert.equal(_serializedDoc1.toString('hex'), _serializedDoc2.toString('hex'))
+// assert.equal(_serializedDoc1.toString('base64'), _serializedDoc2.toString('base64'))
 // 
 // 
 // // Benchmark 1

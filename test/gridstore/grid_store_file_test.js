@@ -713,7 +713,11 @@ exports.shouldCorrectlyCalculateMD5 = function(test) {
         var gridStore2 = new GridStore(client, "new-file", "r");
         gridStore2.open(function(err, gridStore) {
           test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
-          gridStore.md5 = "can't do this";
+          try {
+            gridStore.md5 = "can't do this";            
+          } catch(err) {
+            test.ok(err != null);
+          }
           test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
 
           var gridStore2 = new GridStore(client, "new-file", "w");

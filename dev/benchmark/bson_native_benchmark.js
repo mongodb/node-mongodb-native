@@ -97,9 +97,9 @@ console.log(COUNT + "x BSONNative.calculateObjectSize2(object) time = ", end - s
 // console.log("calculate3 = " + calculate3);
 
 console.log("----------------------------------------------------------------------- serialize");
-console.log(serialize1.toString('hex'))
-console.log(serialize2.toString('hex'))
-console.log(serialize3.toString('hex'))
+console.log(serialize1.toString('base64'))
+console.log(serialize2.toString('base64'))
+console.log(serialize3.toString('base64'))
 
 function compare(b1, b2) {
     try {

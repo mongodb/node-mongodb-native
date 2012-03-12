@@ -102,7 +102,7 @@ var serializedDoc = BSONPure.serialize(object, null, true);
 // Read a test doc
 // var bufferData = require('fs').readFileSync("/Users/christiankvalheim/coding/projects/node-mongodb-native/1325633340440_18.txt", 'ascii');
 // Serialized doc
-// var serializedDoc = new Buffer(bufferData, 'hex');
+// var serializedDoc = new Buffer(bufferData, 'base64');
 
 // console.dir(serializedDoc)
 // var index = 0;
@@ -193,14 +193,14 @@ for(var i = 0 ; i < COUNT; i++) {
 
 // console.log("========================================================== serialize")
 // console.log("BSON.serialize :: ")
-// console.dir(BSON.serialize(object).toString('hex'))
+// console.dir(BSON.serialize(object).toString('base64'))
 // console.log("BSONPure.serialize2 :: ")
-// console.dir(BSONPure.serialize2(object2, null, true).toString('hex'))
+// console.dir(BSONPure.serialize2(object2, null, true).toString('base64'))
 // console.dir(BSONPure.serialize2(object2, null, true).toString('ascii'))
 // console.log("BSONPure.serialize :: ")
-// console.dir(BSONPure.serialize(object, null, true).toString('hex'))
+// console.dir(BSONPure.serialize(object, null, true).toString('base64'))
 // console.log("BSONNative.serialize :: ")
-// console.dir(BSONNative.serialize(object2, null, true).toString('hex'))
+// console.dir(BSONNative.serialize(object2, null, true).toString('base64'))
 // console.dir(BSONNative.serialize(object2, null, true).toString('ascii'))
 
 // // Serialize
@@ -212,8 +212,8 @@ for(var i = 0 ; i < COUNT; i++) {
 //   console.log("[" + a[i] + "] = [" + b[i] + "] :: " + (a[i] === b[i] ? 'true' : "FALSE FALSE FALSE"));
 // }
 // 
-// assert.equal(BSONNative.serialize(object2, null, true).toString('hex'), 
-//   BSONPure.serialize2(object2, null, true).toString('hex'))
+// assert.equal(BSONNative.serialize(object2, null, true).toString('base64'), 
+//   BSONPure.serialize2(object2, null, true).toString('base64'))
 // 
 // 
 // start = new Date
