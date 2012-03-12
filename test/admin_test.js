@@ -711,7 +711,7 @@ exports.shouldCorrectlyRetrieveServerInfo = function(test) {
              adminDb.authenticate('admin', 'admin', function(err, result) {
                
                // Retrive the server Info
-               adminDb.serverInfo(function(err, info) {
+               adminDb.serverStatus(function(err, info) {
                  test.equal(null, err);
                  test.ok(info != null);
                  
