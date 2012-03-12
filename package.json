@@ -61,7 +61,7 @@
                     , "darwin"
                     , "freebsd" ]
 , "dependencies" : {
-  "bson": "git+https://github.com/christkv/bson.git#master"
+  "bson": "0.0.4"
 }                    
 , "devDependencies": {
       "dox": "0.1.3"
