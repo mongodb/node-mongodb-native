@@ -1,3 +1,11 @@
+0.9.9.6 2012-03-12
+------------------
+- BSON parser is externalized in it's own repository, currently using git master
+- Fixes for Replicaset connectivity issue (Issue #537)
+- Fixed issues with node 0.4.X vs 0.6.X (Issue #534)
+- Removed SimpleEmitter and replaced with standard EventEmitter
+- GridStore.seek fails to change chunks and call callback when in read mode (Issue #532)
+
 0.9.9.5 2012-03-07
 ------------------
 - Merged in replSetGetStatus helper to admin class (Issue #515, https://github.com/mojodna)
