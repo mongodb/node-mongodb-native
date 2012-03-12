@@ -44,8 +44,11 @@ var testClasses = [
     {path:"./test/gridstore/grid_store_stream_test.js"},
     {path:"./test/gridstore/readstream_test.js"},
     {path:"./test/gridstore/grid_test.js"},
-    {path:"./test/bson_types_test.js"},
-    {path:"./test/bson/bson_test.js"},
+    {path:"./node_modules/bson/test/node/bson_array_test.js"},
+    {path:"./node_modules/bson/test/node/bson_test.js"},
+    {path:"./node_modules/bson/test/node/test_full_bson.js"},
+    {path:"./node_modules/bson/test/node/bson_parser_comparision_test.js"},
+    {path:"./node_modules/bson/test/node/bson_typed_array_test.js"},
     {path:"./test/aggregation_framework_test.js"}
   ]
 
@@ -77,17 +80,17 @@ exec('rm -rf ' + outputDirectory2, function (error, stdout, stderr) {});
 exec('mkdir ' + outputDirectory2, function (error, stdout, stderr) {});
 
 var apiClasses2 = [
-    {tag:"objectid", path:"./lib/mongodb/bson/objectid.js"},
-    {tag:"binary", path:"./lib/mongodb/bson/binary.js"},
-    {tag:"code", path:"./lib/mongodb/bson/code.js"},
-    {tag:"code", path:"./lib/mongodb/bson/db_ref.js"},
-    {tag:"double", path:"./lib/mongodb/bson/double.js"},
-    {tag:"minkey", path:"./lib/mongodb/bson/min_key.js"},
-    {tag:"maxkey", path:"./lib/mongodb/bson/max_key.js"},
-    {tag:"symbol", path:"./lib/mongodb/bson/symbol.js"},
-    {tag:"timestamp", path:"./lib/mongodb/bson/timestamp.js"},
-    {tag:"long", path:"./lib/mongodb/bson/long.js"},
-    {tag:"bson", path:"./lib/mongodb/bson/bson.js"}
+    {tag:"objectid", path:"./node_modules/bson/lib/bson/objectid.js"},
+    {tag:"binary", path:"./node_modules/bson/lib/bson/binary.js"},
+    {tag:"code", path:"./node_modules/bson/lib/bson/code.js"},
+    {tag:"code", path:"./node_modules/bson/lib/bson/db_ref.js"},
+    {tag:"double", path:"./node_modules/bson/lib/bson/double.js"},
+    {tag:"minkey", path:"./node_modules/bson/lib/bson/min_key.js"},
+    {tag:"maxkey", path:"./node_modules/bson/lib/bson/max_key.js"},
+    {tag:"symbol", path:"./node_modules/bson/lib/bson/symbol.js"},
+    {tag:"timestamp", path:"./node_modules/bson/lib/bson/timestamp.js"},
+    {tag:"long", path:"./node_modules/bson/lib/bson/long.js"},
+    {tag:"bson", path:"./node_modules/bson/lib/bson/bson.js"}
   ];
 
 // Render the API docs
