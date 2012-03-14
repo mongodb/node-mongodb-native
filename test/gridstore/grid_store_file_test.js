@@ -413,14 +413,21 @@ exports.shouldCorrectlySeekAcrossChunks = function(test) {
       gridStore.write(data, function(err, gridStore) {
         // Flush the remaining data to GridFS
         gridStore.close(function(err, result) {
-          
+
           var gridStore = new GridStore(db, "test_gs_seek_across_chunks", "r");
           // Read in the whole file and check that it's the same content
           gridStore.open(function(err, gridStore) {
+
+            var timeout = setTimeout(function() {
+              test.ok(false, "Didn't complete in expected timeframe");
+              test.done();
+            }, 2000);
+
             gridStore.seek(gridStore.chunkSize+1, function(err, gridStore) {
               test.equal(null, err);
               gridStore.tell(function(err, position) {
                 test.equal(gridStore.chunkSize+1, position);
+                clearTimeout(timeout);
 
                 db.close();
                 test.done();
@@ -428,10 +435,6 @@ exports.shouldCorrectlySeekAcrossChunks = function(test) {
             });
           });
 
-          // setTimeout(function() {
-          //   test.ok(false, "Didn't complete in expected timeframe");
-          //   test.done();
-          // }, 2000);
         });
       });
     });
