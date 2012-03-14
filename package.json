@@ -59,7 +59,8 @@
                     , "url" :   "http://github.com/christkv/node-mongodb-native/issues" }
 , "os" :            [ "linux"
                     , "darwin"
-                    , "freebsd" ]
+                    , "freebsd"
+                    , "sunos" ]
 , "dependencies" : {
   "bson": "0.0.4"
 }                    
