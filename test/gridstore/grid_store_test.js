@@ -53,7 +53,40 @@ exports.tearDown = function(callback) {
   client.close();
   callback();
 }
-  
+
+/**
+ * @ignore
+ */
+exports.shouldCreateNewGridStoreObject = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  var gs1
+    , gs2
+    , id = new ObjectID()
+    , filename = 'test_create_gridstore';
+  try {
+    var gs = new GridStore(db, id, filename, "w");
+    test.ok(gs instanceof GridStore);
+    test.equals(id, gs.fileId);
+    test.equals(filename, gs.filename);
+  } catch(e) {
+    test.ok(false, "Failed to create GridStore with new");
+  }
+
+  try {
+    var gs = GridStore(db, id, filename, "w");
+    test.ok(gs instanceof GridStore);
+    test.equals(id, gs.fileId);
+    test.equals(filename, gs.filename);
+  } catch(e) {
+    test.ok(false, "Failed to create GridStore without new");
+  }
+
+   db.close();
+   test.done();
+};
+
 /**
  * A simple example showing the usage of the Gridstore.exist method.
  *
