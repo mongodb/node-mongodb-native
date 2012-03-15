@@ -234,7 +234,7 @@ exports.shouldPerformSimpleMapReduceFunctions = function(test) {
 }
 
 /**
- * A simple map reduce example using the inline output type on MongoDB > 1.7.6
+ * A simple map reduce example using the inline output type on MongoDB > 1.7.6 returning the statistics
  *
  * @_class collection
  * @_function mapReduce
@@ -355,6 +355,33 @@ exports.shouldPerformMapReduceWithStringFunctions = function(test) {
           test.done();
         });
       });        
+    });  
+  });
+}
+
+/**
+* Mapreduce tests
+* @ignore
+*/
+exports.shouldForceMapReduceError = function(test) {
+  client.createCollection('test_map_reduce', function(err, collection) {
+    collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+      // String functions
+      var map = "function() { emiddft(this.user_id, 1); }";
+      var reduce = "function(k,vals) { return 1; }";
+
+      // Parse version of server if available
+      client.admin().serverInfo(function(err, result){
+
+        // Only run if the MongoDB version is higher than 1.7.6
+        if(parseInt((result.version.replace(/\./g, ''))) >= 176) {
+
+          collection.mapReduce(map, reduce, {out: {inline : 1}}, function(err, collection) {
+            test.ok(err != null);
+            test.done();
+          });        
+        };
+      });
     });  
   });
 }
