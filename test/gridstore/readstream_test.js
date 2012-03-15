@@ -100,7 +100,9 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = function(test) {
             });
 
             // For each data item
-            stream.on("end", function(item) {});
+            stream.on("end", function(item) {
+              stream.destroy();
+            });
             // When the stream is done
             stream.on("close", function() {
               db.close();
@@ -140,7 +142,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = function(test) {
           // Open the file
           file.open(function(err, file) {            
             // Peform a find to get a cursor
-            var stream = file.stream();
+            var stream = file.stream(true);
 
             // For each data item
             stream.on("data", function(item) {
