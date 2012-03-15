@@ -264,8 +264,9 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
             var reduce = function(k,vals) { return 1; };
 
             // Execute map reduce and return results inline
-            collection.mapReduce(map, reduce, {out : {inline: 1}}, function(err, results) {
+            collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}, function(err, results, stats) {
               test.equal(2, results.length);
+              test.ok(stats != null);
               
               db.close();
               test.done();
