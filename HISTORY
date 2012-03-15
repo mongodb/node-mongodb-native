@@ -1,5 +1,6 @@
 - stats not returned from map reduce with inline results (Issue #542)
 - Re-enable testing of whether or not the callback is called in the multi-chunk seek, fix small GridStore bug (Issue #543, https://github.com/pgebheim)
+- streaming large files from GridFS causes truncation (Issue #540)
 
 0.9.9.6 2012-03-12
 ------------------
