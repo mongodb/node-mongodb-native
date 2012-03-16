@@ -712,6 +712,44 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldThrowDuplicateKeyErrorWhenCreatingIndex = function(test) {
+  client.createCollection('shouldThrowDuplicateKeyErrorWhenCreatingIndex', function(err, collection) {
+    collection.insert([{a:1}, {a:1}], {safe:true}, function(err, result) {
+      test.equal(null, err);
+      
+      collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, indexName) {
+        test.ok(err != null);
+        test.done();
+      });
+    })
+  });    
+}
+
+/**
+ * @ignore
+ */
+exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser, strict:true});
+  // Establish connection to db  
+  db.open(function(err, db) {
+    db.createCollection('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', function(err, collection) {
+      collection.insert([{a:1}, {a:1}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, indexName) {
+          test.ok(err != null);
+          db.close();
+          test.done();
+        });
+      })
+    });    
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
