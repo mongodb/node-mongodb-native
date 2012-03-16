@@ -1442,6 +1442,26 @@ exports.shouldCorrectlyGetErrorDroppingNonExistingDb = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = function(test) {
+  var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    try {
+      db.open(function(err, db) {
+      });
+      
+      test.ok(false);
+    } catch (err) {
+      test.done();
+    }
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
