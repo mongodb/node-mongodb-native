@@ -56,8 +56,7 @@ exports.setUp = function(callback) {
     RS = new ReplicaSetManager({retries:120, 
         arbiter_count:0, 
         secondary_count:1, 
-        passive_count:0,
-        kill_node_wait_time:50000});
+        passive_count:0});
     RS.startSet(true, function(err, result) {      
       if(err != null) throw err;
       // Finish setup
