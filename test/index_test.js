@@ -72,7 +72,7 @@ exports.shouldCreateASimpleIndexOnASingleField = function(test) {
         test.equal(null, err);
         
         // Create an index on the a field
-        collection.createIndex('a', function(err, indexName) {
+        collection.createIndex('a', {safe:true}, function(err, indexName) {
           test.equal("a_1", indexName);
           
           // Peform a query, with explain to show we hit the query
@@ -377,7 +377,7 @@ exports.shouldCorrectlyExtractIndexInformation = function(test) {
   client.createCollection('test_index_information', function(err, collection) {
     collection.insert({a:1}, {safe:true}, function(err, ids) {
       // Create an index on the collection
-      client.createIndex(collection.collectionName, 'a', function(err, indexName) {
+      client.createIndex(collection.collectionName, 'a', {safe:true}, function(err, indexName) {
         test.equal("a_1", indexName);
         // Let's fetch the index information
         client.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -417,7 +417,7 @@ exports.shouldCorrectlyHandleMultipleColumnIndexes = function(test) {
   client.createCollection('test_multiple_index_cols', function(err, collection) {
     collection.insert({a:1}, function(err, ids) {
       // Create an index on the collection
-      client.createIndex(collection.collectionName, [['a', -1], ['b', 1], ['c', -1]], function(err, indexName) {
+      client.createIndex(collection.collectionName, [['a', -1], ['b', 1], ['c', -1]], {safe:true}, function(err, indexName) {
         test.equal("a_-1_b_1_c_-1", indexName);
         // Let's fetch the index information
         client.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -503,7 +503,7 @@ exports.shouldCorrectlyDropIndexes = function(test) {
   client.createCollection('test_drop_indexes', function(err, collection) {
     collection.insert({a:1}, {safe:true}, function(err, ids) {
       // Create an index on the collection
-      client.createIndex(collection.collectionName, 'a', function(err, indexName) {
+      client.createIndex(collection.collectionName, 'a', {safe:true}, function(err, indexName) {
         test.equal("a_1", indexName);
         // Drop all the indexes
         collection.dropAllIndexes(function(err, result) {
@@ -518,6 +518,39 @@ exports.shouldCorrectlyDropIndexes = function(test) {
     })
   });
 }
+
+/**
+ * @ignore
+ */
+exports.shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback = function(test) {
+  client.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
+    
+    try {
+      // insert a doc
+      collection.createIndex({a:1}, {safe:true});
+      test.ok(false);
+    } catch(err) {}      
+
+    test.done();
+  }); 
+}
+
+/**
+ * @ignore
+ */
+exports.shouldThrowErrorOnAttemptingSafeEnsureIndexWithNoCallback = function(test) {
+  client.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
+    
+    try {
+      // insert a doc
+      collection.ensureIndex({a:1}, {safe:true});
+      test.ok(false);
+    } catch(err) {}      
+
+    test.done();
+  }); 
+}
+
 
 /**
  * @ignore

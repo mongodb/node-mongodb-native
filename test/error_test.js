@@ -149,7 +149,7 @@ exports.shouldCorrectlyExecuteLastStatus = function(test) {
                       collection.update({x:1}, {"$set":{x:2}}, {'safe':true}, function(err, document) {
                       });
                     
-                      collection.update({x:1}, {"$set":{x:2}}, {'safe':true});
+                      collection.update({x:1}, {"$set":{x:2}});
 
                       collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, result) {
                         test.equal(0, result);

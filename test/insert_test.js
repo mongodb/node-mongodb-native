@@ -634,9 +634,9 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = function(test) {
   db.open(function(err, client) {
     client.createCollection('test_insert_and_update_no_callback', function(err, collection) {
       // Insert the update
-      collection.insert({i:1}, {safe:true})
+      collection.insert({i:1})
       // Update the record
-      collection.update({i:1}, {"$set":{i:2}}, {safe:true})
+      collection.update({i:1}, {"$set":{i:2}})
     
       // Make sure we leave enough time for mongodb to record the data
       setTimeout(function() {

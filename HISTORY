@@ -2,6 +2,7 @@
 - Re-enable testing of whether or not the callback is called in the multi-chunk seek, fix small GridStore bug (Issue #543, https://github.com/pgebheim)
 - Streaming large files from GridFS causes truncation (Issue #540)
 - Make callback type checks agnostic to V8 context boundaries (Issue #545)
+- Correctly throw error if an attempt is made to execute an insert/update/remove/createIndex/ensureIndex with safe enabled and no callback
 
 0.9.9.6 2012-03-12
 ------------------
