@@ -3,6 +3,7 @@
 - Streaming large files from GridFS causes truncation (Issue #540)
 - Make callback type checks agnostic to V8 context boundaries (Issue #545)
 - Correctly throw error if an attempt is made to execute an insert/update/remove/createIndex/ensureIndex with safe enabled and no callback
+- Db.open throws if the application attemps to call open again without calling close first
 
 0.9.9.6 2012-03-12
 ------------------
