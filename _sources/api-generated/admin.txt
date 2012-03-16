@@ -138,7 +138,7 @@ Retrieve this db's server status.
                 adminDb.authenticate('admin', 'admin', function(err, result) {
                   
                   // Retrive the server Info
-                  adminDb.serverInfo(function(err, info) {
+                  adminDb.serverStatus(function(err, info) {
                     assert.equal(null, err);
                     assert.ok(info != null);
                     
