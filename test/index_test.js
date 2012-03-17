@@ -444,7 +444,7 @@ exports.shouldCorrectlyHandleMultipleColumnIndexes = function(test) {
 exports.shouldCorrectlyHandleUniqueIndex = function(test) {
   // Create a non-unique index and test inserts
   client.createCollection('test_unique_index', function(err, collection) {
-    client.createIndex(collection.collectionName, 'hello', function(err, indexName) {
+    client.createIndex(collection.collectionName, 'hello', {safe:true}, function(err, indexName) {
       // Insert some docs
       collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, errors) {
         // Assert that we have no erros
@@ -454,7 +454,7 @@ exports.shouldCorrectlyHandleUniqueIndex = function(test) {
   
           // Create a unique index and test that insert fails
           client.createCollection('test_unique_index2', function(err, collection) {
-            client.createIndex(collection.collectionName, 'hello', {unique:true}, function(err, indexName) {
+            client.createIndex(collection.collectionName, 'hello', {unique:true, safe:true}, function(err, indexName) {
               // Insert some docs
               collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, ids) {                            
                 test.ok(err != null);
@@ -483,7 +483,7 @@ exports.shouldCorrectlyCreateSubfieldIndex = function(test) {
 
         // Create a unique subfield index and test that insert fails
         client.createCollection('test_index_on_subfield2', function(err, collection) {
-          client.createIndex(collection.collectionName, 'hello.a', true, function(err, indexName) {
+          client.createIndex(collection.collectionName, 'hello.a', {safe:true, unique:true}, function(err, indexName) {
             collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {safe:true}, function(err, ids) {
               // Assert that we have erros
               test.ok(err != null);
@@ -579,7 +579,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = function(test) {
 exports.shouldCorrectlyExecuteEnsureIndex = function(test) {
   client.createCollection('test_ensure_index', function(err, collection) {
     // Create an index on the collection
-    client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
+    client.ensureIndex(collection.collectionName, 'a', {safe:true}, function(err, indexName) {
       test.equal("a_1", indexName);
       // Let's fetch the index information
       client.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -588,7 +588,7 @@ exports.shouldCorrectlyExecuteEnsureIndex = function(test) {
         test.ok(collectionInfo['a_1'] != null);
         test.deepEqual([["a", 1]], collectionInfo['a_1']);
 
-        client.ensureIndex(collection.collectionName, 'a', function(err, indexName) {
+        client.ensureIndex(collection.collectionName, 'a', {safe:true}, function(err, indexName) {
           test.equal("a_1", indexName);
           // Let's fetch the index information
           client.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -612,7 +612,7 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = function(test) {
   client.createCollection('create_and_use_sparse_index_test', function(err, r) {
     client.collection('create_and_use_sparse_index_test', function(err, collection) {
       
-      collection.ensureIndex({title:1}, {sparse:true}, function(err, indexName) {
+      collection.ensureIndex({title:1}, {sparse:true, safe:true}, function(err, indexName) {
         collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {            
           collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
             test.equal(1, items.length);
@@ -638,7 +638,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
   client.admin().serverInfo(function(err, result){
     if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
       client.createCollection('shouldCorrectlyExecuteKeepGoingWithMongodb191OrHigher', function(err, collection) {
-        collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
+        collection.ensureIndex({title:1}, {unique:true, safe:true}, function(err, indexName) {
           collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
             // Force keep going flag, ignoring unique index issue
             collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {safe:true, keepGoing:true}, function(err, result) {
@@ -664,7 +664,7 @@ exports.shouldCorrectlyHandleGeospatialIndexes = function(test) {
     if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
       client.createCollection('geospatial_index_test', function(err, r) {
         client.collection('geospatial_index_test', function(err, collection) {
-          collection.ensureIndex({loc:'2d'}, function(err, indexName) {
+          collection.ensureIndex({loc:'2d'}, {safe:true}, function(err, indexName) {
             collection.insert({'loc': [-100,100]}, {safe:true}, function(err, result) {
               test.equal(err,null);
               collection.insert({'loc': [200,200]}, {safe:true}, function(err, result) {
@@ -690,7 +690,7 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = function(test) {
     if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
       client.createCollection('geospatial_index_altered_test', function(err, r) {
         client.collection('geospatial_index_altered_test', function(err, collection) {
-          collection.ensureIndex({loc:'2d'},{min:0,max:1024}, function(err, indexName) {
+          collection.ensureIndex({loc:'2d'},{min:0,max:1024, safe:true}, function(err, indexName) {
             collection.insert({'loc': [100,100]}, {safe:true}, function(err, result) {
               test.equal(err,null);
               collection.insert({'loc': [200,200]}, {safe:true}, function(err, result) {

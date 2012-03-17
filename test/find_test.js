@@ -464,7 +464,7 @@ exports.shouldCorrectlyPerformFindByWhere = function(test) {
 exports.shouldCorrectlyPerformFindsWithHintTurnedOn = function(test) {
   client.createCollection('test_hint', function(err, collection) {
     collection.insert({'a':1}, {safe:true}, function(err, ids) {
-      client.createIndex(collection.collectionName, "a", function(err, indexName) {
+      client.createIndex(collection.collectionName, "a", {safe:true}, function(err, indexName) {
         collection.find({'a':1}, {'hint':'a'}).toArray(function(err, items) {
           test.equal(1, items.length);
         });

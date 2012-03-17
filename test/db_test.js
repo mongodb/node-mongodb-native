@@ -1023,7 +1023,7 @@ exports.shouldCorrectlyUsePreviousError = function(test) {
       test.equal(null, err);
       
       // Force a unique index
-      collection.ensureIndex({a:1}, {unique:true}, function(err, result) {
+      collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, result) {
         test.equal(null, err);
         
         // Force some errors
@@ -1067,7 +1067,7 @@ exports.shouldCorrectlyUseResetErrorHistory = function(test) {
       test.equal(null, err);
       
       // Force a unique index
-      collection.ensureIndex({a:1}, {unique:true}, function(err, result) {
+      collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, result) {
         test.equal(null, err);
         
         // Force some errors
@@ -1118,7 +1118,7 @@ exports.shouldCreateComplexIndexOnTwoFields = function(test) {
   
         // Create an index on the a field
         db.createIndex('more_complex_index_test', {a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
     
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
@@ -1165,7 +1165,7 @@ exports.shouldCreateComplexEnsureIndex = function(test) {
     
         // Create an index on the a field
         db.ensureIndex('more_complex_ensure_index_test', {a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
       
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
@@ -1257,7 +1257,7 @@ exports.shouldCorrectlyCreateAndDropIndex = function(test) {
     
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
       
           // Drop the index
           db.dropIndex("create_and_drop_an_index", "a_1_b_1", function(err, result) {
@@ -1302,7 +1302,7 @@ exports.shouldCorrectlyForceReindexOnCollection = function(test) {
     
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
 
           // Force a reindex of the collection
           db.reIndex('create_and_drop_all_indexes', function(err, result) {
