@@ -795,7 +795,7 @@ exports['ShouldCorrectlyLocatePostAndIncValues'] = function(test) {
  */
 exports['Should Correctly Handle FindAndModify Duplicate Key Error'] = function(test) {
   client.createCollection('FindAndModifyDuplicateKeyError', function(err, collection) {
-    collection.ensureIndex(['name', 1], {unique:true}, function(err, index) {
+    collection.ensureIndex(['name', 1], {unique:true, safe:true}, function(err, index) {
       // Test return new document on change
       collection.insert([{name:'test1'}, {name:'test2'}], {safe:true}, function(err, doc) {
         // Let's modify the document in place
@@ -888,7 +888,7 @@ exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = function(test) {
 exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = function(test) {
   client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function(err, collection) {
     // Set up an index to force duplicate index erro
-    collection.ensureIndex([['failIndex', 1]], {unique:true}, function(err, index) {
+    collection.ensureIndex([['failIndex', 1]], {unique:true, safe:true}, function(err, index) {
       // Setup a new document
       collection.insert({'a':2, 'b':2, 'failIndex':2}, function(err, doc) {
 
@@ -1259,7 +1259,7 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = function(test) {
       collection.insert([{'login':'user1'}, {'login':'user2'}], {safe:true}, function(err, docs) {
         var id = docs[1]._id;
         // Set an index
-        collection.ensureIndex('login', {unique:true}, function(err, result) {
+        collection.ensureIndex('login', {unique:true, safe:true}, function(err, result) {
           // Attemp to modify document
           collection.findAndModify({_id: id}, [], { $set: {login: 'user1'} }, {}, function(err, user){
             test.ok(err != null);
