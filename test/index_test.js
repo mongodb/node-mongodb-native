@@ -287,7 +287,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
   db.open(function(err, db) {
     
     // Create a collection we want to drop later
-    db.createCollection('create_and_drop_all_indexes', function(err, collection) {      
+    db.createCollection('shouldCorrectlyCreateAndDropAllIndex', function(err, collection) {      
       test.equal(null, err);
   
       // Insert a bunch of documents for the index
@@ -338,7 +338,7 @@ exports.shouldCorrectlyForceReindexOnCollection = function(test) {
   db.open(function(err, db) {
     
     // Create a collection we want to drop later
-    db.createCollection('create_and_drop_all_indexes', function(err, collection) {      
+    db.createCollection('shouldCorrectlyForceReindexOnCollection', function(err, collection) {      
       test.equal(null, err);
   
       // Insert a bunch of documents for the index

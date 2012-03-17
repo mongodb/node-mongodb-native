@@ -37,10 +37,10 @@ var http            = require('http'),
 
                 //get amount of requests done
                 stats.findOne({name: 'reqcount'}, function(err, reqstat) {
-                    if (err | !reqstat) {
-                        res.writeHead(200, {'Content-Type': 'text/plain'});
-                        res.end('Hello World, from server node: ' + os.hostname() + '...\nError #' + err + ', reqstat ' + reqstat);
-                        return console.log('reqstat is null!');
+                    if(err) {
+                      res.writeHead(200, {'Content-Type': 'text/plain'});
+                      res.end('Hello World, from server node: ' + os.hostname() + '...\nError #' + err + ', reqstat ' + reqstat);
+                      return console.log('reqstat is null!');
                     }
                     var reqcount = reqstat.value;
 
