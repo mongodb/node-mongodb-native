@@ -10,7 +10,6 @@ process.stdout.write("==========================================================
 // Check if we want to build the native code
 var build_native = process.env['npm_package_config_native'] != null ? process.env['npm_package_config_native'] : 'false';
 build_native = build_native == 'true' ? true : false;
-
 // If we are building the native bson extension ensure we use gmake if available
 if(build_native) {
   // Check if we need to use gmake
