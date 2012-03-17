@@ -112,7 +112,7 @@ exports.shouldCreateComplexIndexOnTwoFields = function(test) {
   
         // Create an index on the a field
         collection.createIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
     
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
@@ -159,7 +159,7 @@ exports.shouldCreateComplexEnsureIndex = function(test) {
     
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
       
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
@@ -206,7 +206,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
     
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
       
           // Fetch basic indexInformation for collection
           collection.indexInformation(function(err, indexInformation) {
@@ -252,7 +252,7 @@ exports.shouldCorrectlyCreateAndDropIndex = function(test) {
     
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
       
           // Drop the index
           collection.dropIndex("a_1_b_1", function(err, result) {
@@ -297,11 +297,11 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
     
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
 
           // Create an additional index
           collection.ensureIndex({c:1}
-            , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+            , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
       
             // Drop the index
             collection.dropAllIndexes(function(err, result) {
@@ -348,7 +348,7 @@ exports.shouldCorrectlyForceReindexOnCollection = function(test) {
     
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
 
           // Force a reindex of the collection
           collection.reIndex(function(err, result) {
