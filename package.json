@@ -65,7 +65,7 @@
   "bson": "0.0.4"
 }                    
 , "devDependencies": {
-      "dox": "0.1.3"
+      "dox": "0.2.0"
     , "uglify-js": "1.2.5"
     , "ejs": "0.6.1"
     , "nodeunit": "0.7.3"
@@ -78,7 +78,7 @@
 , "main":             "./lib/mongodb/index"
 , "directories" :   { "lib" : "./lib/mongodb" }
 , "engines" :       { "node" : ">=0.4.0" }
-, "scripts": { "test" : "make test" }
+, "scripts": { "test" : "make test_pure" }
 , "licenses" :    [ { "type" :  "Apache License, Version 2.0"
                     , "url" :   "http://www.apache.org/licenses/LICENSE-2.0" } ]
 }

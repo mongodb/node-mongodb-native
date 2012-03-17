@@ -45,6 +45,7 @@ var specifedParameter = function(arguments, param) {
 var junit = specifedParameter(process.argv, '--junit', false);
 var noReplicaSet = specifedParameter(process.argv, '--noreplicaset', false);
 var boot = specifedParameter(process.argv, '--boot', false);
+var nonative = specifedParameter(process.argv, '--nonative', false);
 // Basic default test runner
 var runner = nodeunit.reporters.default;
 var options = { error_prefix: '\u001b[31m',
@@ -145,6 +146,10 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
       },
       
       function runNativeJS() {
+        if(nonative) {
+          return this(null, null);
+        }
+        
         options.suffix = 'native';
         options.native = true;
 

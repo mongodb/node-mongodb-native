@@ -25,6 +25,10 @@ test: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
 	$(NODE) dev/tools/test_all.js --noreplicaset --boot
 
+test_pure: build_native
+	@echo "\n == Run All tests minus replicaset tests=="
+	$(NODE) dev/tools/test_all.js --noreplicaset --boot --noactive
+
 test_junit: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
 	$(NODE) dev/tools/test_all.js --junit --noreplicaset
