@@ -174,7 +174,7 @@ exports.shouldCorrectlyExecuteLastStatus = function(test) {
 exports.shouldFailInsertDueToUniqueIndex = function(test) {
   client.createCollection('test_failing_insert_due_to_unique_index', function(err, r) {
     client.collection('test_failing_insert_due_to_unique_index', function(err, collection) {
-      collection.ensureIndex([['a', 1 ]], true, function(err, indexName) {
+      collection.ensureIndex([['a', 1 ]], {unique:true, safe:true}, function(err, indexName) {
         collection.insert({a:2}, {safe: true}, function(err, r) {
           test.ok(err == null);
           collection.insert({a:2}, {safe: true}, function(err, r) {
@@ -194,7 +194,7 @@ exports.shouldFailInsertDueToUniqueIndexStrict = function(test) {
     error_client.dropCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
       error_client.createCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
         error_client.collection('test_failing_insert_due_to_unique_index_strict', function(err, collection) {
-          collection.ensureIndex([['a', 1 ]], true, function(err, indexName) {
+          collection.ensureIndex([['a', 1 ]], {unique:true, safe:true}, function(err, indexName) {
             collection.insert({a:2}, {safe:true}, function(err, r) {
               test.ok(err == null);
               collection.insert({a:2}, {safe:true}, function(err, r) {
@@ -262,7 +262,7 @@ exports.shouldHandleAssertionError = function(test) {
         collection.findOne(query, function(err, docs) {
           test.ok(err instanceof Error);
           
-          collection.ensureIndex([['a', '2d' ]], true, function(err, indexName) {
+          collection.ensureIndex([['a', '2d' ]], {unique:true, safe:true}, function(err, indexName) {
             test.ok(err == null);
             
             collection.findOne(query, function(err, doc) {
