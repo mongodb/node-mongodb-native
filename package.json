@@ -60,7 +60,8 @@
 , "os" :            [ "linux"
                     , "darwin"
                     , "freebsd"
-                    , "sunos" ]
+                    , "sunos"
+                    , "windows" ]
 , "dependencies" : {
   "bson": "0.0.4"
 }                    
