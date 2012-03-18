@@ -750,6 +750,25 @@ exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = function(test) {
+  // Establish connection to db  
+  client.createCollection('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', function(err, collection) {
+    test.equal(null, err);
+    
+    collection.ensureIndex({loc:'2d'}, {min:200, max:1400, safe:true}, function(err, indexName) {
+      test.equal(null, err);
+
+      collection.insert({loc:[600, 600]}, {safe:true}, function(err, result) {
+        test.equal(null, err);
+        test.done();
+      });
+    });
+  });    
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
