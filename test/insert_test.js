@@ -1128,6 +1128,24 @@ exports['Should correctly fail due to duplicate key for _id'] = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyInsertDocWithCustomId = function(test) {
+  client.createCollection('shouldCorrectlyInsertDocWithCustomId', function(err, collection) {
+    // Insert the update
+    collection.insert({_id:0, test:'hello'}, {safe:true}, function(err, result) {
+      test.equal(null, err);
+      
+      collection.findOne({_id:0}, function(err, item) {
+        test.equal(0, item._id);
+        test.equal('hello', item.test);
+        test.done();
+      });      
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
