@@ -61,7 +61,9 @@
                     , "darwin"
                     , "freebsd"
                     , "sunos"
-                    , "windows" ]
+                    , "windows"
+                    , "win32"
+                    , "win64" ]
 , "dependencies" : {
   "bson": "0.0.4"
 }                    
