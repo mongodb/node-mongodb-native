@@ -57,13 +57,6 @@
                     , "url" :   "http://github.com/christkv/node-mongodb-native.git" }
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
                     , "url" :   "http://github.com/christkv/node-mongodb-native/issues" }
-, "os" :            [ "linux"
-                    , "darwin"
-                    , "freebsd"
-                    , "sunos"
-                    , "windows"
-                    , "win32"
-                    , "win64" ]
 , "dependencies" : {
   "bson": "0.0.4"
 }                    
