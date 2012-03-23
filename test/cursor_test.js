@@ -443,6 +443,66 @@ exports.shouldCorrectlyHandleLimitOnCursor = function(test) {
  * @ignore
  * @api private
  */
+exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = function(test) {
+  client.createCollection('test_cursor_negative_one_limit', function(err, collection) {
+    Step(
+      function insert() {
+        var group = this.group();
+
+        for(var i = 0; i < 10; i++) {
+          collection.save({'x':1}, {safe:true}, group());
+        }
+      }, 
+
+      function finished() {
+        collection.find(function(err, cursor) {
+          cursor.limit(-1, function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(1, items.length);
+              // Let's close the db
+              test.done();
+            });
+          });
+        });
+      }
+    );
+  });
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = function(test) {
+  client.createCollection('test_cursor_any_negative_limit', function(err, collection) {
+    Step(
+      function insert() {
+        var group = this.group();
+
+        for(var i = 0; i < 10; i++) {
+          collection.save({'x':1}, {safe:true}, group());
+        }
+      }, 
+
+      function finished() {
+        collection.find(function(err, cursor) {
+          cursor.limit(-5, function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(5, items.length);
+              // Let's close the db
+              test.done();
+            });
+          });
+        });
+      }
+    );
+  });
+}
+
+/**
+ * @ignore
+ * @api private
+ */
 exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = function(test) {
   client.createCollection('test_limit_exceptions', function(err, collection) {
     collection.insert({'a':1}, {safe:true}, function(err, docs) {});
