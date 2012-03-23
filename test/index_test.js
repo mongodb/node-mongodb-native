@@ -768,6 +768,7 @@ exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = function(test) {
   });    
 }
 
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
