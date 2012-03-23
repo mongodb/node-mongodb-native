@@ -830,10 +830,29 @@ exports['Should correctly handle chained skip and limit on find with toArray'] =
   client.createCollection('skipAndLimitOnFindWithToArray', function(err, collection) {
     collection.insert([{a:1}, {b:2}, {c:3}], {safe:true}, function(err, result) {
       
-      collection.find().skip(1).limit(1).toArray(function(err, items) {
+      collection.find().skip(1).limit(-1).toArray(function(err, items) {
         test.equal(null, err);
         test.equal(1, items.length);
         test.equal(2, items[0].b)
+        test.done();
+      })        
+    });      
+  });      
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly handle chained skip and negative limit on find with toArray'] = function(test) {
+  client.createCollection('skipAndNegativeLimitOnFindWithToArray', function(err, collection) {
+    collection.insert([{a:1}, {b:2}, {c:3}, {d:4}, {e:5}], {safe:true}, function(err, result) {
+      
+      collection.find().skip(1).limit(-3).toArray(function(err, items) {
+        test.equal(null, err);
+        test.equal(3, items.length);
+        test.equal(2, items[0].b)
+        test.equal(3, items[1].c)
+        test.equal(4, items[2].d)
         test.done();
       })        
     });      
