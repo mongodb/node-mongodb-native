@@ -92,20 +92,19 @@ exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = function(tes
   client.createCollection('test_to_a', function(err, collection) {
     test.ok(collection instanceof Collection);
     collection.insert({'a':1}, {safe:true}, function(err, ids) {
-      collection.find({}, function(err, cursor) {
+      var cursor = collection.find({});
+      cursor.toArray(function(err, items) {
+        // Should fail if called again (cursor should be closed)
         cursor.toArray(function(err, items) {
+          test.ok(err instanceof Error);
+          test.equal("Cursor is closed", err.message);
+
           // Should fail if called again (cursor should be closed)
-          cursor.toArray(function(err, items) {
+          cursor.each(function(err, item) {
             test.ok(err instanceof Error);
             test.equal("Cursor is closed", err.message);
-
-            // Should fail if called again (cursor should be closed)
-            cursor.each(function(err, item) {
-              test.ok(err instanceof Error);
-              test.equal("Cursor is closed", err.message);
-              // Let's close the db
-              test.done();
-            });
+            // Let's close the db
+            test.done();
           });
         });
       });
@@ -136,24 +135,23 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(test) {
       collection.insert({'a':1}, {safe:true}, function(err, ids) {
         
         // Grab a cursor
-        collection.find(function(err, cursor) {
+        var cursor = collection.find();
           
-          // Execute the each command, triggers for each document
-          cursor.each(function(err, item) {
+        // Execute the each command, triggers for each document
+        cursor.each(function(err, item) {
+          
+          // If the item is null then the cursor is exhausted/empty and closed
+          if(item == null) {
             
-            // If the item is null then the cursor is exhausted/empty and closed
-            if(item == null) {
-              
-              // Show that the cursor is closed
-              cursor.toArray(function(err, items) {
-                test.ok(err != null);
+            // Show that the cursor is closed
+            cursor.toArray(function(err, items) {
+              test.ok(err != null);
 
-                // Let's close the db
-                test.done();
-                db.close();
-              });
-            };
-          });
+              // Let's close the db
+              test.done();
+              db.close();
+            });
+          };
         });
       });
     });
@@ -167,17 +165,15 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(test) {
 exports.shouldCorrectlyExecuteCursorExplain = function(test) {
   client.createCollection('test_explain', function(err, collection) {
     collection.insert({'a':1}, {safe:true}, function(err, r) {
-      collection.find({'a':1}, function(err, cursor) {
-        cursor.explain(function(err, explaination) {
-          test.ok(explaination.cursor != null);
-          test.ok(explaination.n.constructor == Number);
-          test.ok(explaination.millis.constructor == Number);
-          test.ok(explaination.nscanned.constructor == Number);
+      collection.find({'a':1}).explain(function(err, explaination) {
+        test.ok(explaination.cursor != null);
+        test.ok(explaination.n.constructor == Number);
+        test.ok(explaination.millis.constructor == Number);
+        test.ok(explaination.nscanned.constructor == Number);
 
-          // Let's close the db
-          test.done();
-        });
-      });        
+        // Let's close the db
+        test.done();
+      });
     });
   });
 }
@@ -188,58 +184,53 @@ exports.shouldCorrectlyExecuteCursorExplain = function(test) {
  */
 exports.shouldCorrectlyExecuteCursorCount = function(test) {
   client.createCollection('test_count', function(err, collection) {
-    collection.find(function(err, cursor) {
-      cursor.count(function(err, count) {
-        test.equal(0, count);
+    collection.find().count(function(err, count) {
+      test.equal(0, count);
 
-        Step(
-          function insert() {
-            var group = this.group();
+      Step(
+        function insert() {
+          var group = this.group();
 
-            for(var i = 0; i < 10; i++) {
-              collection.insert({'x':i}, {safe:true}, group());
-            }
-          }, 
-          
-          function finished() {
-            collection.find().count(function(err, count) {
-                test.equal(10, count);
-                test.ok(count.constructor == Number);
-            });
-
-            collection.find({}, {'limit':5}).count(function(err, count) {
-              test.equal(10, count);
-            });
-
-            collection.find({}, {'skip':5}).count(function(err, count) {
-              test.equal(10, count);
-            });
-
-            collection.find(function(err, cursor) {
-              cursor.count(function(err, count) {
-                test.equal(10, count);
-
-                cursor.each(function(err, item) {
-                  if(item == null) {
-                    cursor.count(function(err, count2) {
-                      test.equal(10, count2);
-                      test.equal(count, count2);
-                      // Let's close the db
-                      test.done();
-                    });
-                  }
-                });
-              });
-            });
-
-            client.collection('acollectionthatdoesn', function(err, collection) {
-              collection.count(function(err, count) {
-                test.equal(0, count);
-              });
-            })              
+          for(var i = 0; i < 10; i++) {
+            collection.insert({'x':i}, {safe:true}, group());
           }
-        )
-      });
+        }, 
+        
+        function finished() {
+          collection.find().count(function(err, count) {
+              test.equal(10, count);
+              test.ok(count.constructor == Number);
+          });
+
+          collection.find({}, {'limit':5}).count(function(err, count) {
+            test.equal(10, count);
+          });
+
+          collection.find({}, {'skip':5}).count(function(err, count) {
+            test.equal(10, count);
+          });
+
+          var cursor = collection.find();
+          cursor.count(function(err, count) {
+            test.equal(10, count);
+
+            cursor.each(function(err, item) {
+              if(item == null) {
+                cursor.count(function(err, count2) {
+                  test.equal(10, count2);
+                  test.equal(count, count2);
+                  // Let's close the db
+                  test.done();
+                });
+              }
+            });
+          });
+
+          client.collection('acollectionthatdoesn').count(function(err, count) {
+            test.equal(0, count);
+          });
+        }
+      )
     });
   });
 }
@@ -260,91 +251,54 @@ exports.shouldCorrectlyExecuteSortOnCursor = function(test) {
       }, 
       
       function finished() {
-        collection.find(function(err, cursor) {
-          cursor.sort(['a', 1], function(err, cursor) {
-            test.ok(cursor instanceof Cursor);
-            test.deepEqual(['a', 1], cursor.sortValue);
+        collection.find().sort(['a', 1], function(err, cursor) {
+          test.ok(cursor instanceof Cursor);
+          test.deepEqual(['a', 1], cursor.sortValue);
+        });
+
+        collection.find().sort('a', 1).nextObject(function(err, doc) {
+          test.equal(0, doc.a);
+        });
+
+        collection.find().sort('a', -1).nextObject(function(err, doc) {
+          test.equal(4, doc.a);
+        });
+
+        collection.find().sort('a', "asc").nextObject(function(err, doc) {
+          test.equal(0, doc.a);
+        });
+
+        collection.find().sort([['a', -1], ['b', 1]], function(err, cursor) {
+          test.ok(cursor instanceof Cursor);
+          test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);
+        });
+
+        collection.find().sort('a', 1).sort('a', -1).nextObject(function(err, doc) {
+          test.equal(4, doc.a);
+        });
+
+        collection.find().sort('a', -1).sort('a', 1).nextObject(function(err, doc) {
+          test.equal(0, doc.a);
+        });
+
+        var cursor = collection.find();
+        cursor.nextObject(function(err, doc) {
+          cursor.sort(['a'], function(err, cursor) {
+            test.ok(err instanceof Error);
+            test.equal("Cursor is closed", err.message);  
           });
         });
 
-        collection.find(function(err, cursor) {
-          cursor.sort('a', 1, function(err, cursor) {
-            cursor.nextObject(function(err, doc) {
-              test.equal(0, doc.a);
-            });
-          });
+        var cursor = collection.find().sort('a', 25).nextObject(function(err, doc) {
+          test.ok(err instanceof Error);
+          test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
         });
 
-        collection.find(function(err, cursor) {
-          cursor.sort('a', -1, function(err, cursor) {
-            cursor.nextObject(function(err, doc) {
-              test.equal(4, doc.a);
-            });
-          });
-        });
-
-        collection.find(function(err, cursor) {
-          cursor.sort('a', "asc", function(err, cursor) {
-            cursor.nextObject(function(err, doc) {
-              test.equal(0, doc.a);
-            });
-          });
-        });
-
-        collection.find(function(err, cursor) {
-          cursor.sort([['a', -1], ['b', 1]], function(err, cursor) {
-            test.ok(cursor instanceof Cursor);
-            test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);
-          });
-        });
-
-        collection.find(function(err, cursor) {
-          cursor.sort('a', 1, function(err, cursor) {
-            cursor.sort('a', -1, function(err, cursor) {
-              cursor.nextObject(function(err, doc) {
-                test.equal(4, doc.a);
-              });
-            })
-          });
-        });
-
-        collection.find(function(err, cursor) {
-          cursor.sort('a', -1, function(err, cursor) {
-            cursor.sort('a', 1, function(err, cursor) {
-              cursor.nextObject(function(err, doc) {
-                test.equal(0, doc.a);
-              });
-            })
-          });
-        });
-
-        collection.find(function(err, cursor) {
-          cursor.nextObject(function(err, doc) {
-            cursor.sort(['a'], function(err, cursor) {
-              test.ok(err instanceof Error);
-              test.equal("Cursor is closed", err.message);  
-            });
-          });
-        });
-
-        collection.find(function(err, cursor) {
-          cursor.sort('a', 25, function(err, cursor) {
-            cursor.nextObject(function(err, doc) {
-              test.ok(err instanceof Error);
-              test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
-            });
-          });
-        });
-
-        collection.find(function(err, cursor) {
-          cursor.sort(25, function(err, cursor) {
-            cursor.nextObject(function(err, doc) {
-              test.ok(err instanceof Error);
-              test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
-              // Let's close the db
-              test.done();
-            });
-          });
+        collection.find().sort(25).nextObject(function(err, doc) {
+          test.ok(err instanceof Error);
+          test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+          // Let's close the db
+          test.done();
         });
       }
     );
@@ -425,14 +379,10 @@ exports.shouldCorrectlyHandleLimitOnCursor = function(test) {
           test.equal(10, count);
         });
 
-        collection.find(function(err, cursor) {
-          cursor.limit(5, function(err, cursor) {
-            cursor.toArray(function(err, items) {
-              test.equal(5, items.length);
-              // Let's close the db
-              test.done();
-            });
-          });
+        collection.find().limit(5).toArray(function(err, items) {
+          test.equal(5, items.length);
+          // Let's close the db
+          test.done();
         });
       }
     );
@@ -455,14 +405,10 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = function(test) {
       }, 
 
       function finished() {
-        collection.find(function(err, cursor) {
-          cursor.limit(-1, function(err, cursor) {
-            cursor.toArray(function(err, items) {
-              test.equal(1, items.length);
-              // Let's close the db
-              test.done();
-            });
-          });
+        collection.find().limit(-1).toArray(function(err, items) {
+          test.equal(1, items.length);
+          // Let's close the db
+          test.done();
         });
       }
     );
@@ -485,14 +431,10 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = function(test) {
       }, 
 
       function finished() {
-        collection.find(function(err, cursor) {
-          cursor.limit(-5, function(err, cursor) {
-            cursor.toArray(function(err, items) {
-              test.equal(5, items.length);
-              // Let's close the db
-              test.done();
-            });
-          });
+        collection.find().limit(-5).toArray(function(err, items) {
+          test.equal(5, items.length);
+          // Let's close the db
+          test.done();
         });
       }
     );
@@ -511,6 +453,13 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = function(test) {
         test.ok(err instanceof Error);
         test.equal("limit requires an integer", err.message);
       });
+      
+      try {
+        cursor.limit('not-an-integer');
+        test.ok(false);
+      } catch(err) {
+        test.equal("limit requires an integer", err.message);
+      }
     });
 
     collection.find(function(err, cursor) {
@@ -519,6 +468,13 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = function(test) {
           test.ok(err instanceof Error);
           test.equal("Cursor is closed", err.message);
         });
+
+        try {
+          cursor.limit(1);
+          test.ok(false);
+        } catch(err) {
+          test.equal("Cursor is closed", err.message);
+        }
       });
     });
 
@@ -527,9 +483,15 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = function(test) {
         cursor.limit(1, function(err, cursor) {
           test.ok(err instanceof Error);
           test.equal("Cursor is closed", err.message);
-
           test.done();
         });
+
+        try {
+          cursor.limit(1);
+          test.ok(false);
+        } catch(err) {
+          test.equal("Cursor is closed", err.message);
+        }
       });
     });
   });
@@ -561,24 +523,20 @@ exports.shouldCorrectlySkipRecordsOnCursor = function(test) {
           cursor.toArray(function(err, items) {
             test.equal(10, items.length);
 
-            collection.find(function(err, cursor) {
-              cursor.skip(2, function(err, cursor) {
-                cursor.toArray(function(err, items2) {
-                  test.equal(8, items2.length);
+            collection.find().skip(2).toArray(function(err, items2) {
+              test.equal(8, items2.length);
 
-                  // Check that we have the same elements
-                  var numberEqual = 0;
-                  var sliced = items.slice(2, 10);
+              // Check that we have the same elements
+              var numberEqual = 0;
+              var sliced = items.slice(2, 10);
 
-                  for(var i = 0; i < sliced.length; i++) {
-                    if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                  }
-                  test.equal(8, numberEqual);
+              for(var i = 0; i < sliced.length; i++) {
+                if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+              }
+              test.equal(8, numberEqual);
 
-                  // Let's close the db
-                  test.done();
-                });
-              });
+              // Let's close the db
+              test.done();
             });
           });
         });
@@ -594,30 +552,26 @@ exports.shouldCorrectlySkipRecordsOnCursor = function(test) {
 exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = function(test) {
   client.createCollection('test_skip_exceptions', function(err, collection) {
     collection.insert({'a':1}, {safe:true}, function(err, docs) {});
-    collection.find(function(err, cursor) {
-      cursor.skip('not-an-integer', function(err, cursor) {
+    collection.find().skip('not-an-integer', function(err, cursor) {
+      test.ok(err instanceof Error);
+      test.equal("skip requires an integer", err.message);
+    });
+
+    var cursor = collection.find()
+    cursor.nextObject(function(err, doc) {
+      cursor.skip(1, function(err, cursor) {
         test.ok(err instanceof Error);
-        test.equal("skip requires an integer", err.message);
+        test.equal("Cursor is closed", err.message);
       });
     });
 
-    collection.find(function(err, cursor) {
-      cursor.nextObject(function(err, doc) {
-        cursor.skip(1, function(err, cursor) {
-          test.ok(err instanceof Error);
-          test.equal("Cursor is closed", err.message);
-        });
-      });
-    });
-
-    collection.find(function(err, cursor) {
-      cursor.close(function(err, cursor) {
-        cursor.skip(1, function(err, cursor) {
-          test.ok(err instanceof Error);
-          test.equal("Cursor is closed", err.message);
-          
-          test.done();
-        });
+    var cursor = collection.find()
+    cursor.close(function(err, cursor) {
+      cursor.skip(1, function(err, cursor) {
+        test.ok(err instanceof Error);
+        test.equal("Cursor is closed", err.message);
+        
+        test.done();
       });
     });
   });
@@ -630,33 +584,51 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = function(test) {
 exports.shouldReturnErrorsOnIllegalBatchSizes = function(test) {
   client.createCollection('test_batchSize_exceptions', function(err, collection) {
     collection.insert({'a':1}, {safe:true}, function(err, docs) {});
-    collection.find(function(err, cursor) {
-      cursor.batchSize('not-an-integer', function(err, cursor) {
-        test.ok(err instanceof Error);
-        test.equal("batchSize requires an integer", err.message);
-      });
+    var cursor = collection.find();
+    cursor.batchSize('not-an-integer', function(err, cursor) {
+      test.ok(err instanceof Error);
+      test.equal("batchSize requires an integer", err.message);
     });
+    
+    try {
+      cursor.batchSize('not-an-integer');
+      test.ok(false);
+    } catch (err) {
+      test.equal("batchSize requires an integer", err.message);
+    }
 
-    collection.find(function(err, cursor) {
+    var cursor = collection.find();
+    cursor.nextObject(function(err, doc) {
       cursor.nextObject(function(err, doc) {
-        cursor.nextObject(function(err, doc) {
-          cursor.batchSize(1, function(err, cursor) {
-            test.ok(err instanceof Error);
-            test.equal("Cursor is closed", err.message);
-          });
-        });
-      });
-    });
-
-    collection.find(function(err, cursor) {
-      cursor.close(function(err, cursor) {
         cursor.batchSize(1, function(err, cursor) {
           test.ok(err instanceof Error);
           test.equal("Cursor is closed", err.message);
-          
-          test.done();
         });
+        
+        try {
+          cursor.batchSize(1);
+          test.ok(false);
+        } catch (err) {
+          test.equal("Cursor is closed", err.message);
+        }        
       });
+    });
+
+    var cursor = collection.find()
+    cursor.close(function(err, cursor) {
+      cursor.batchSize(1, function(err, cursor) {
+        test.ok(err instanceof Error);
+        test.equal("Cursor is closed", err.message);
+        
+        test.done();
+      });
+      
+      try {
+        cursor.batchSize(1);
+        test.ok(false);
+      } catch (err) {
+        test.equal("Cursor is closed", err.message);
+      }
     });
   });
 }
@@ -796,30 +768,29 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = function(test) {
     }
 
     collection.insert(docs, {safe:true}, function() {
-      collection.find({}, {batchSize : batchSize, limit : limit}, function(err, cursor) {
-        //1st
+      var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
+      //1st
+      cursor.nextObject(function(err, items) {
+        test.equal(2, cursor.items.length);
+
+        //2nd
         cursor.nextObject(function(err, items) {
-          test.equal(2, cursor.items.length);
+          test.equal(1, cursor.items.length);
 
-          //2nd
+          //3rd
           cursor.nextObject(function(err, items) {
-            test.equal(1, cursor.items.length);
+            test.equal(0, cursor.items.length);
 
-            //3rd
+            //4th
             cursor.nextObject(function(err, items) {
               test.equal(0, cursor.items.length);
 
-              //4th
+              //No more
               cursor.nextObject(function(err, items) {
-                test.equal(0, cursor.items.length);
-
-                //No more
-                cursor.nextObject(function(err, items) {
-                  test.ok(items == null);
-                  test.ok(cursor.isClosed());
-                  
-                  test.done();
-                });
+                test.ok(items == null);
+                test.ok(cursor.isClosed());
+                
+                test.done();
               });
             });
           });
@@ -844,22 +815,21 @@ exports.shouldHandleLimitLessThanBatchSize = function(test) {
     }
 
     collection.insert(docs, {safe:true}, function() {
-      collection.find({}, {batchSize : batchSize, limit : limit}, function(err, cursor) {
-        //1st
+      var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
+      //1st
+      cursor.nextObject(function(err, items) {
+        test.equal(1, cursor.items.length);
+
+        //2nd
         cursor.nextObject(function(err, items) {
-          test.equal(1, cursor.items.length);
+          test.equal(0, cursor.items.length);
 
-          //2nd
+          //No more
           cursor.nextObject(function(err, items) {
-            test.equal(0, cursor.items.length);
+            test.ok(items == null);
+            test.ok(cursor.isClosed());
 
-            //No more
-            cursor.nextObject(function(err, items) {
-              test.ok(items == null);
-              test.ok(cursor.isClosed());
-
-              test.done();
-            });
+            test.done();
           });
         });
       });
@@ -883,31 +853,23 @@ exports.shouldHandleSkipLimitChaining = function(test) {
       }, 
       
       function finished() {
-        collection.find(function(err, cursor) {
-          cursor.toArray(function(err, items) {
-            test.equal(10, items.length);
+        collection.find().toArray(function(err, items) {
+          test.equal(10, items.length);
 
-            collection.find(function(err, cursor) {
-              cursor.limit(5, function(err, cursor) {
-                cursor.skip(3, function(err, cursor) {
-                  cursor.toArray(function(err, items2) {
-                    test.equal(5, items2.length);
+          collection.find().limit(5).skip(3).toArray(function(err, items2) {
+            test.equal(5, items2.length);
 
-                    // Check that we have the same elements
-                    var numberEqual = 0;
-                    var sliced = items.slice(3, 8);
+            // Check that we have the same elements
+            var numberEqual = 0;
+            var sliced = items.slice(3, 8);
 
-                    for(var i = 0; i < sliced.length; i++) {
-                      if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                    }
-                    test.equal(5, numberEqual);
+            for(var i = 0; i < sliced.length; i++) {
+              if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+            }
+            test.equal(5, numberEqual);
 
-                    // Let's close the db
-                    test.done();
-                  });
-                });
-              });
-            });
+            // Let's close the db
+            test.done();
           });
         });
       }
@@ -931,27 +893,23 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = function(test) {
       }, 
       
       function finished() {
-        collection.find(function(err, cursor) {
-          cursor.toArray(function(err, items) {
-            test.equal(10, items.length);
+        collection.find().toArray(function(err, items) {
+          test.equal(10, items.length);
 
-            collection.find(function(err, cursor) {
-              cursor.limit(5).skip(3).toArray(function(err, items2) {
-                test.equal(5, items2.length);
+          collection.find().limit(5).skip(3).toArray(function(err, items2) {
+            test.equal(5, items2.length);
 
-                // Check that we have the same elements
-                var numberEqual = 0;
-                var sliced = items.slice(3, 8);
+            // Check that we have the same elements
+            var numberEqual = 0;
+            var sliced = items.slice(3, 8);
 
-                for(var i = 0; i < sliced.length; i++) {
-                  if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                }
-                test.equal(5, numberEqual);
+            for(var i = 0; i < sliced.length; i++) {
+              if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+            }
+            test.equal(5, numberEqual);
 
-                // Let's close the db
-                test.done();
-              });
-            });
+            // Let's close the db
+            test.done();
           });
         });
       }
@@ -965,12 +923,10 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = function(test) {
  */
 exports.shouldCloseCursorNoQuerySent = function(test) {
   client.createCollection('test_close_no_query_sent', function(err, collection) {
-    collection.find(function(err, cursor) {
-      cursor.close(function(err, cursor) {
-        test.equal(true, cursor.isClosed());
-        // Let's close the db
-        test.done();
-      });
+    collection.find().close(function(err, cursor) {
+      test.equal(true, cursor.isClosed());
+      // Let's close the db
+      test.done();
     });
   });
 }
@@ -999,42 +955,37 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = function(test) {
 
         var total = 0;
         var i = 0;
-        collection.find({}, {}, function(err, cursor) {
-          cursor.each(function(err, item) {                            
-            if(item != null) {
-              total = total + item.a;
-            } else {
-              test.equal(499500, total);
+        var cursor = collection.find({}, {}).each(function(err, item) {                            
+        if(item != null) {
+          total = total + item.a;
+        } else {
+          test.equal(499500, total);
 
-              collection.count(function(err, count) {
-                test.equal(COUNT, count);
-              });
-
-              collection.count(function(err, count) {
-                test.equal(COUNT, count);
-
-                var total2 = 0;
-                collection.find(function(err, cursor) {
-                  cursor.each(function(err, item) {
-                    if(item != null) {
-                      total2 = total2 + item.a;
-                    } else {
-                      test.equal(499500, total2);
-                      collection.count(function(err, count) {
-                        test.equal(COUNT, count);
-                        test.equal(total, total2);
-                        // Let's close the db
-                        test.done();
-                      });
-                    }
-                  });
-                });
-              });
-            }
+          collection.count(function(err, count) {
+            test.equal(COUNT, count);
           });
-        });
-      }
-    )      
+
+          collection.count(function(err, count) {
+            test.equal(COUNT, count);
+
+            var total2 = 0;
+            collection.find().each(function(err, item) {
+              if(item != null) {
+                total2 = total2 + item.a;
+              } else {
+                test.equal(499500, total2);
+                collection.count(function(err, count) {
+                  test.equal(COUNT, count);
+                  test.equal(total, total2);
+                  // Let's close the db
+                  test.done();
+                });
+              }
+            });
+          });
+        }
+      })      
+    })
   });
 }
 
@@ -1060,39 +1011,35 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = function(test) {
         });
 
         var total = 0;
-        collection.find(function(err, cursor) {
-          cursor.each(function(err, item) {
-            if(item != null) {
-              total = total + item.a;
-            } else {
-              test.equal(499500, total);
+        collection.find().each(function(err, item) {
+          if(item != null) {
+            total = total + item.a;
+          } else {
+            test.equal(499500, total);
 
-              collection.count(function(err, count) {
-                test.equal(1000, count);
-              });
+            collection.count(function(err, count) {
+              test.equal(1000, count);
+            });
 
-              collection.count(function(err, count) {
-                test.equal(1000, count);
+            collection.count(function(err, count) {
+              test.equal(1000, count);
 
-                var total2 = 0;
-                collection.find(function(err, cursor) {
-                  cursor.each(function(err, item) {
-                    if(item != null) {
-                      total2 = total2 + item.a;
-                    } else {
-                      test.equal(499500, total2);
-                      collection.count(function(err, count) {
-                        test.equal(1000, count);
-                        test.equal(total, total2);
-                        // Let's close the db
-                        test.done();
-                      });
-                    }
+              var total2 = 0;
+              collection.find().each(function(err, item) {
+                if(item != null) {
+                  total2 = total2 + item.a;
+                } else {
+                  test.equal(499500, total2);
+                  collection.count(function(err, count) {
+                    test.equal(1000, count);
+                    test.equal(total, total2);
+                    // Let's close the db
+                    test.done();
                   });
-                });
+                }
               });
-            }
-          });
+            });
+          }
         });
       }
     )
@@ -1106,15 +1053,14 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = function(test) {
 exports.shouldCloseCursorAfterQueryHasBeenSent = function(test) {
   client.createCollection('test_close_after_query_sent', function(err, collection) {
     collection.insert({'a':1}, {safe:true}, function(err, r) {
-      collection.find({'a':1}, function(err, cursor) {
-        cursor.nextObject(function(err, item) {
-          cursor.close(function(err, cursor) {
-            test.equal(true, cursor.isClosed());
-            // Let's close the db
-            test.done();
-          })
-        });
-      });        
+      var cursor = collection.find({'a':1});
+      cursor.nextObject(function(err, item) {
+        cursor.close(function(err, cursor) {
+          test.equal(true, cursor.isClosed());
+          // Let's close the db
+          test.done();
+        })
+      });
     });
   });
 }

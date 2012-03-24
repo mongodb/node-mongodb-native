@@ -403,22 +403,20 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = function(test) {
                 adminDb.setProfilingLevel('all', function(err, level) {
                   
                   // Execute a query command
-                  collection.find(function(err, cursor) {
-                    cursor.toArray(function(err, items) {
+                  collection.find().toArray(function(err, items) {
 
-                      // Turn off profiling
-                      adminDb.setProfilingLevel('off', function(err, level) {
-                        
-                        // Retrive the profiling information
-                        adminDb.profilingInfo(function(err, infos) {
-                          test.ok(infos.constructor == Array);
-                          test.ok(infos.length >= 1);
-                          test.ok(infos[0].ts.constructor == Date);
-                          test.ok(infos[0].millis.constructor == Number);
-                        
-                          db.close();
-                          test.done();
-                        });
+                    // Turn off profiling
+                    adminDb.setProfilingLevel('off', function(err, level) {
+                      
+                      // Retrive the profiling information
+                      adminDb.profilingInfo(function(err, infos) {
+                        test.ok(infos.constructor == Array);
+                        test.ok(infos.length >= 1);
+                        test.ok(infos[0].ts.constructor == Date);
+                        test.ok(infos[0].millis.constructor == Number);
+                      
+                        db.close();
+                        test.done();
                       });
                     });
                   });
