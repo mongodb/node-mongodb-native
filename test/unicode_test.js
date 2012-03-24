@@ -110,15 +110,13 @@ exports.shouldCorrectlyInsertUnicodeCharacters = function(test) {
     collection.insert({id: 0, text: test_strings[0]}, {safe:true}, function(err, ids) {
       collection.insert({id: 1, text: test_strings[1]}, {safe:true}, function(err, ids) {
         collection.insert({id: 2, text: test_strings[2]}, {safe:true}, function(err, ids) {
-          collection.find(function(err, cursor) {
-            cursor.each(function(err, item) {
-              if(item != null) {
-                test.equal(test_strings[item.id], item.text);
-              } else {
-                test.done();                  
-              }
-            });  
-          });
+          collection.find().each(function(err, item) {
+            if(item != null) {
+              test.equal(test_strings[item.id], item.text);
+            } else {
+              test.done();                  
+            }
+          });  
         });
       });
     });
@@ -149,16 +147,10 @@ exports.shouldCorrectlyHandleUT8KeyNames = function(test) {
   client.createCollection('test_utf8_key_name', function(err, collection) { 
     collection.insert({'šđžčćŠĐŽČĆ':1}, {safe:true}, function(err, ids) { 
           // finished_test({test_utf8_key_name:'ok'}); 
-      collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}, function(err, cursor) { 
-        cursor.toArray(function(err, items) { 
-          // console.log("---------------------------------------------------------------")
-          // console.dir(err)
-          // console.dir(items)
-          // 
-          test.equal(1, items[0]['šđžčćŠĐŽČĆ']); 
-          // Let's close the db 
-          test.done();
-        }); 
+      collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}).toArray(function(err, items) { 
+        test.equal(1, items[0]['šđžčćŠĐŽČĆ']); 
+        // Let's close the db 
+        test.done();
       }); 
     }); 
   }); 

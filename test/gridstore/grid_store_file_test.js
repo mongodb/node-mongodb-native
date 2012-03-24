@@ -91,23 +91,18 @@ exports.shouldCorrectlyWriteASmallPayload = function(test) {
 
         client.collection('fs.files', function(err, collection) {
 
-          collection.find({'filename':'test_gs_small_write'}, function(err, cursor) {
+          collection.find({'filename':'test_gs_small_write'}).toArray(function(err, items) {
+            test.equal(1, items.length);
+            var item = items[0];
+            test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
 
-            cursor.toArray(function(err, items) {
-              test.equal(1, items.length);
-              var item = items[0];
-              test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
+            client.collection('fs.chunks', function(err, collection) {
+              var id = ObjectID.createFromHexString(item._id.toHexString());
 
-              client.collection('fs.chunks', function(err, collection) {
-                var id = ObjectID.createFromHexString(item._id.toHexString());
-
-                collection.find({'files_id':id}, function(err, cursor) {
-                  cursor.toArray(function(err, items) {
-                    test.equal(1, items.length);
-                    test.done();
-                  })
-                });
-              });
+              collection.find({'files_id':id}).toArray(function(err, items) {
+                test.equal(1, items.length);
+                test.done();
+              })
             });
           });
         });
@@ -127,20 +122,16 @@ exports.shouldCorrectlyWriteSmallFileUsingABuffer = function(test) {
     gridStore.write(data, function(err, gridStore) {
       gridStore.close(function(err, result) {
         client.collection('fs.files', function(err, collection) {
-          collection.find({'filename':'test_gs_small_write_with_buffer'}, function(err, cursor) {
-            cursor.toArray(function(err, items) {
-              test.equal(1, items.length);
-              var item = items[0];
-              test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
+          collection.find({'filename':'test_gs_small_write_with_buffer'}).toArray(function(err, items) {
+            test.equal(1, items.length);
+            var item = items[0];
+            test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
 
-              client.collection('fs.chunks', function(err, collection) {
-                collection.find({'files_id':item._id}, function(err, cursor) {
-                  cursor.toArray(function(err, items) {
-                    test.equal(1, items.length);
-                    test.done();
-                  })
-                });
-              });
+            client.collection('fs.chunks', function(err, collection) {
+              collection.find({'files_id':item._id}).toArray(function(err, items) {
+                test.equal(1, items.length);
+                test.done();
+              })
             });
           });
         });
@@ -159,15 +150,13 @@ exports.shouldSaveSmallFileToGridStore = function(test) {
       gridStore.close(function(err, result) {
         client.collection('fs.files', function(err, collection) {
 
-          collection.find({'filename':'test_gs_small_file'}, function(err, cursor) {
-            cursor.toArray(function(err, items) {
-              test.equal(1, items.length);
+          collection.find({'filename':'test_gs_small_file'}).toArray(function(err, items) {
+            test.equal(1, items.length);
 
-              // Read test of the file
-              GridStore.read(client, 'test_gs_small_file', function(err, data) {
-                test.equal('hello world!', data);
-                test.done();
-              });
+            // Read test of the file
+            GridStore.read(client, 'test_gs_small_file', function(err, data) {
+              test.equal('hello world!', data);
+              test.done();
             });
           });
         });

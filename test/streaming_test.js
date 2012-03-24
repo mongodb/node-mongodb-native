@@ -73,22 +73,21 @@ exports.shouldStreamRecordsCallsEndTheRightNumberOfTimes = function(test) {
   client.createCollection('test_stream_records', function(err, collection) {
     test.ok(collection instanceof Collection);
     collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], {safe:true}, function(err, ids) {
-      collection.find({}, {'limit' : 3}, function(err, cursor) {
-        var stream = cursor.streamRecords(function(er,item) {}); 
-        var callsToEnd = 0;
-        stream.on('end', function() { 
-          callsToEnd += 1;
-          test.equal(1, callsToEnd);
-          setTimeout(function() {
-            // Let's close the db
-            if (callsToEnd == 1) {
-              test.done();
-            }
-          }.bind(this), 1000);
-        });
-        
-        stream.on('data',function(data){ /* nothing here */ }); 
+      var cursor = collection.find({}, {'limit' : 3});
+      var stream = cursor.streamRecords(function(er,item) {}); 
+      var callsToEnd = 0;
+      stream.on('end', function() { 
+        callsToEnd += 1;
+        test.equal(1, callsToEnd);
+        setTimeout(function() {
+          // Let's close the db
+          if (callsToEnd == 1) {
+            test.done();
+          }
+        }.bind(this), 1000);
       });
+      
+      stream.on('data',function(data){ /* nothing here */ }); 
     });
   });    
 }
@@ -104,20 +103,19 @@ exports.shouldStreamDocumentsWithLimitForFetching = function(test) {
     test.ok(collection instanceof Collection);
 
     collection.insert(docs, {safe:true}, function(err, ids) {        
-      collection.find({}, function(err, cursor) {
-        // Execute find on all the documents
-        var stream = cursor.streamRecords({fetchSize:1000}); 
-        var callsToEnd = 0;
-        stream.on('end', function() { 
-          test.done();
-        });
+      var cursor = collection.find({});
+      // Execute find on all the documents
+      var stream = cursor.streamRecords({fetchSize:1000}); 
+      var callsToEnd = 0;
+      stream.on('end', function() { 
+        test.done();
+      });
 
-        var callsToData = 0;
-        stream.on('data',function(data){ 
-          callsToData += 1;
-          test.ok(callsToData <= 3000);
-        }); 
-      });        
+      var callsToData = 0;
+      stream.on('data',function(data){ 
+        callsToData += 1;
+        test.ok(callsToData <= 3000);
+      }); 
     });
   });    
 }

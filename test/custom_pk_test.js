@@ -63,13 +63,11 @@ exports.shouldCreateRecordsWithCustomPKFactory = function(test) {
     p_client.dropDatabase(function(err, done) {
       p_client.createCollection('test_custom_key', function(err, collection) {
         collection.insert({'a':1}, {safe:true}, function(err, doc) {
-          collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
-            cursor.toArray(function(err, items) {
-              test.equal(1, items.length);
+          collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}).toArray(function(err, items) {
+            test.equal(1, items.length);
 
-              p_client.close();
-              test.done();
-            });
+            p_client.close();
+            test.done();
           });
         });
       });
