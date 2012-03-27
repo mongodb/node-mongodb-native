@@ -626,6 +626,46 @@ exports.shouldCorrectlyPerformWorkingFiledRead = function(test) {
 /**
  * @ignore
  */
+exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = function(test) {
+  // Create a new file
+  var gridStore = new GridStore(client, null, "w");
+  
+  // This shouldnt have to be set higher than the file...
+  gridStore.chunkSize = 40960;
+
+  // Open the file
+  gridStore.open(function(err, gridStore) {
+    var file = fs.createReadStream('./test/gridstore/test_gs_working_field_read.pdf');
+    var dataSize = 0;
+    
+    // Write the binary file data to GridFS
+    file.on('data', function (chunk) {
+      dataSize += chunk.length;
+            
+      gridStore.write(chunk, function(err, gridStore) {
+        if(err) {           
+          test.ok(false);
+        }
+      });
+    });
+
+    file.on('close', function () {
+      // Flush the remaining data to GridFS
+      gridStore.close(function(err, result) {
+        // Read in the whole file and check that it's the same content
+        GridStore.read(client, result._id, function(err, fileData) {
+          var data = fs.readFileSync('./test/gridstore/test_gs_working_field_read.pdf');
+          test.equal(data.toString('base64'), fileData.toString('base64'));
+          test.done();
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyReadAndWriteFile = function(test) {
   var gridStore = new GridStore(client, "test_gs_weird_bug", "w");
   var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png", 'binary');
@@ -1383,7 +1423,6 @@ exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = function(test) {
     })    
   });
 }
-
 
 /**
  * Retrieve the server information for the current
