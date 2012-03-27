@@ -1055,48 +1055,53 @@ exports.tearDown = function(callback) {
 //     });
 //   });
 // }
-// 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlySafeFileUsingIntAsIdKey = function(test) {
-//   var gridStore = new GridStore(client, 500, "test_gs_small_write", "w");
-//   gridStore.open(function(err, gridStore) {
-//     
-//     gridStore.write("hello world!", function(err, gridStore) {
-// 
-//       gridStore.close(function(err, result) {
-// 
-//         client.collection('fs.files', function(err, collection) {
-// 
-//           collection.find({'filename':'test_gs_small_write'}).toArray(function(err, items) {
-//             test.equal(1, items.length);
-//             var item = items[0];
-//             test.ok(typeof item._id == 'number');
-// 
-//             client.collection('fs.chunks', function(err, collection) {
-// 
-//               collection.find({'files_id':item._id}).toArray(function(err, items) {
-//                 test.equal(null, err);
-//                 test.equal(1, items.length);
-// 
-//                 // Read the file
-//                 var gridStore = new GridStore(client, 500, "test_gs_small_write", "r");
-//                 gridStore.open(function(err, gridStore) {
-//                   gridStore.read(function(err, data) {
-//                     test.equal(null, err);
-//                     test.equal('hello world!', data.toString('ascii'));
-//                     test.done();
-//                   })
-//                 });
-//               })
-//             });
-//           });
-//         });
-//       });
-//     });
-//   });
-// }
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlySafeFileUsingIntAsIdKey = function(test) {
+  var gridStore = new GridStore(client, 500, "test_gs_small_write", "w");
+  gridStore.open(function(err, gridStore) {
+    
+    gridStore.write("hello world!", function(err, gridStore) {
+
+      gridStore.close(function(err, result) {
+
+        client.collection('fs.files', function(err, collection) {
+
+          collection.find({'filename':'test_gs_small_write'}).toArray(function(err, items) {
+            test.equal(1, items.length);
+            var item = items[0];
+            test.ok(typeof item._id == 'number');
+
+            client.collection('fs.chunks', function(err, collection) {
+
+              collection.find({'files_id':item._id}).toArray(function(err, items) {
+                test.equal(null, err);
+                test.equal(1, items.length);
+
+                // Read the file
+                var gridStore = new GridStore(client, 500, "test_gs_small_write", "r");
+                gridStore.open(function(err, gridStore) {
+                  gridStore.read(function(err, data) {
+                    test.equal(null, err);
+                    test.equal('hello world!', data.toString('ascii'));
+
+                    GridStore.read(client, 500, function(err, data) {
+                      test.equal(null, err);
+                      test.equal('hello world!', data.toString('ascii'));
+                      test.done();
+                    })
+                  })
+                });
+              })
+            });
+          });
+        });
+      });
+    });
+  });
+}
 
 /**
  * @ignore
@@ -1116,13 +1121,10 @@ exports.shouldCorrectlyReadWithPositionOffset = function(test) {
         gridStore = new GridStore(client, Long.fromNumber(100), "test_gs_small_write", "r");
         gridStore.open(function(err, gridStore) {
           // Seek to middle
-          gridStore.seek(5, function(err, gridStore) {
+          gridStore.seek(1024*256 + 6, function(err, gridStore) {
             // Read
-            gridStore.read(function(err, data) {
-              console.log("----------------------------------------------------")
-              console.dir(err)
-              console.dir(data.toString())
-              
+            gridStore.read(5, function(err, data) {
+              test.equal('world', data.toString('ascii'))
               test.done();              
             })            
           });          
