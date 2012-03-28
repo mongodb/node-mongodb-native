@@ -9,6 +9,7 @@ var testCase = require('nodeunit').testCase,
   ObjectID = mongodb.ObjectID,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
+  Long = mongodb.Long,
   Collection = mongodb.Collection,
   GridStore = mongodb.GridStore,
   Chunk = mongodb.Chunk,
@@ -1053,6 +1054,119 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
       });
     });
   });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlySafeFileUsingIntAsIdKey = function(test) {
+  var gridStore = new GridStore(client, 500, "test_gs_small_write", "w");
+  gridStore.open(function(err, gridStore) {
+    
+    gridStore.write("hello world!", function(err, gridStore) {
+
+      gridStore.close(function(err, result) {
+
+        client.collection('fs.files', function(err, collection) {
+
+          collection.find({'filename':'test_gs_small_write'}).toArray(function(err, items) {
+            test.equal(1, items.length);
+            var item = items[0];
+            test.ok(typeof item._id == 'number');
+
+            client.collection('fs.chunks', function(err, collection) {
+
+              collection.find({'files_id':item._id}).toArray(function(err, items) {
+                test.equal(null, err);
+                test.equal(1, items.length);
+
+                // Read the file
+                var gridStore = new GridStore(client, 500, "test_gs_small_write", "r");
+                gridStore.open(function(err, gridStore) {
+                  gridStore.read(function(err, data) {
+                    test.equal(null, err);
+                    test.equal('hello world!', data.toString('ascii'));
+
+                    GridStore.read(client, 500, function(err, data) {
+                      test.equal(null, err);
+                      test.equal('hello world!', data.toString('ascii'));
+                      test.done();
+                    })
+                  })
+                });
+              })
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyReadWithPositionOffset = function(test) {
+  // Massive data Buffer
+  var data = new Buffer(1024*512);
+  // Set some data in the buffer at a point we want to read in the next chunk
+  data.write('Hello world!', 1024*256);
+  
+  var gridStore = new GridStore(client, Long.fromNumber(100), "test_gs_small_write", "w");
+  gridStore.open(function(err, gridStore) {    
+    gridStore.write(data, function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        
+        // Reopen the gridstore in read only mode, seek and then attempt read
+        gridStore = new GridStore(client, Long.fromNumber(100), "test_gs_small_write", "r");
+        gridStore.open(function(err, gridStore) {
+          // Seek to middle
+          gridStore.seek(1024*256 + 6, function(err, gridStore) {
+            // Read
+            gridStore.read(5, function(err, data) {
+              test.equal('world', data.toString('ascii'))
+              test.done();              
+            })            
+          });          
+        });        
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyWrite = function(test) {
+  var mystr = '';
+  var sizestr = 1024*25;
+  for( var j = 0; j < sizestr; j++ ) {
+      mystr = mystr + '+';
+  }
+
+  var fname = 'test_large_str';
+  var my_chunkSize = 1024*10
+  GridStore.unlink(client, fname, function(err, gs) {
+    var gs = new GridStore(client, fname, "w");
+    gs.chunkSize = my_chunkSize;
+    gs.open(function(err, gs) {
+      gs.write(mystr, function(err, gs) {
+        gs.close(function(err, gs) {
+
+          var gs2 = new GridStore(client, fname, "r");
+          gs2.open(function(err, gs) {
+            gs2.seek(0, function() {
+              gs2.read(function(err, datar) {
+                test.equal(mystr.length, datar.length);
+                test.equal(mystr, datar.toString('ascii'));
+                test.done();
+              });
+            });
+          });   
+        });
+      });
+    });
+  });  
 }
 
 /**

@@ -191,9 +191,11 @@ exports.shouldCorrectlyExecuteGridStoreList = function(test) {
 
   // Establish connection to db  
   db.open(function(err, db) {
+    // Our file id
+    var fileId = new ObjectID();
     
     // Open a file for writing
-    var gridStore = new GridStore(db, "foobar2", "w");
+    var gridStore = new GridStore(db, fileId, "foobar2", "w");
     gridStore.open(function(err, gridStore) {
       
       // Write some content to the file
@@ -243,8 +245,10 @@ exports.shouldCorrectlyExecuteGridStoreList = function(test) {
             test.ok(items.length >= 0);
             test.ok(!found);
 
+            // Specify seperate id
+            var fileId2 = new ObjectID();
             // Write another file to GridFS
-            var gridStore2 = new GridStore(db, "foobar3", "w");
+            var gridStore2 = new GridStore(db, fileId2, "foobar3", "w");
             gridStore2.open(function(err, gridStore) {
               // Write the content
               gridStore2.write('my file', function(err, gridStore) {
@@ -621,6 +625,175 @@ exports.shouldCorrectlyPerformWorkingFiledRead = function(test) {
       });
     });
   });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = function(test) {
+  // Create a new file
+  var gridStore = new GridStore(client, null, "w");
+  
+  // This shouldnt have to be set higher than the file...
+  gridStore.chunkSize = 40960;
+
+  // Open the file
+  gridStore.open(function(err, gridStore) {
+    var file = fs.createReadStream('./test/gridstore/test_gs_working_field_read.pdf');
+    var dataSize = 0;
+    
+    // Write the binary file data to GridFS
+    file.on('data', function (chunk) {
+      dataSize += chunk.length;
+            
+      gridStore.write(chunk, function(err, gridStore) {
+        if(err) {           
+          test.ok(false);
+        }
+      });
+    });
+
+    file.on('close', function () {
+      // Flush the remaining data to GridFS
+      gridStore.close(function(err, result) {
+        // Read in the whole file and check that it's the same content
+        GridStore.read(client, result._id, function(err, fileData) {
+          var data = fs.readFileSync('./test/gridstore/test_gs_working_field_read.pdf');
+          test.equal(data.toString('base64'), fileData.toString('base64'));
+          test.done();
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyPerformWorkingFiledWithBigFile = function(test) {
+  // Prepare fake big file
+  var data = fs.readFileSync("./test/gridstore/test_gs_working_field_read.pdf", 'binary');
+  // Write the data multiple times
+  var fd = fs.openSync("./test_gs_working_field_read.tmp", 'w');
+  // Write the data 10 times to create a big file
+  for(var i = 0; i < 10; i++) {
+    fs.writeSync(fd, data);
+  }
+  // Close the file
+  fs.close(fd);
+  
+  // Create a new file
+  var gridStore = new GridStore(client, null, "w");
+  
+  // This shouldnt have to be set higher than the file...
+  gridStore.chunkSize = 80960;
+
+  // Open the file
+  gridStore.open(function(err, gridStore) {
+    var file = fs.createReadStream('./test_gs_working_field_read.tmp');
+    var dataSize = 0;
+    
+    // Write the binary file data to GridFS
+    file.on('data', function (chunk) {
+      dataSize += chunk.length;
+            
+      gridStore.write(chunk, function(err, gridStore) {
+        if(err) {           
+          test.ok(false);
+        }
+      });
+    });
+
+    file.on('close', function () {
+      // Flush the remaining data to GridFS
+      gridStore.close(function(err, result) {
+        // Read in the whole file and check that it's the same content
+        GridStore.read(client, result._id, function(err, fileData) {
+          var data = fs.readFileSync('./test_gs_working_field_read.tmp');
+          // for(var i = 0; i < data.length; i++) {
+          //   // console.dir(data[i] + " = " + fileData[i] + "::" + (data[i] == fileData[i]))
+          //   if(!(data[i] == fileData[i])) {
+          //     console.log("--------------------- not equal from byte :: "+ i)
+          //     console.dir(data[i] + " = " + fileData[i] + "::" + (data[i] == fileData[i]))
+          //   }
+          // }
+          
+          // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+          // console.log("data.length :: " + data.length)
+          // console.log("fileData.length :: " + fileData.length)
+          
+          test.equal(data.toString('base64'), fileData.toString('base64'));
+          test.done();
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes = function(test) {
+  // Prepare fake big file
+  var data = fs.readFileSync("./test/gridstore/test_gs_working_field_read.pdf", 'binary');
+  // Write the data multiple times
+  var fd = fs.openSync("./test_gs_working_field_read.tmp", 'w');
+  // Write the data 10 times to create a big file
+  for(var i = 0; i < 10; i++) {
+    fs.writeSync(fd, data);
+  }
+  // Close the file
+  fs.close(fd);
+  // File Size
+  var fileSize = fs.statSync('./test_gs_working_field_read.tmp').size;
+
+  var executeTest = function(_chunkSize, _test, callback) {
+    // Create a new file
+    var gridStore = new GridStore(client, null, "w");
+
+    // This shouldnt have to be set higher than the file...
+    gridStore.chunkSize = _chunkSize;
+
+    // Open the file
+    gridStore.open(function(err, gridStore) {
+      var file = fs.createReadStream('./test_gs_working_field_read.tmp');
+      var dataSize = 0;
+
+      // Write the binary file data to GridFS
+      file.on('data', function (chunk) {
+        dataSize += chunk.length;
+
+        gridStore.write(chunk, function(err, gridStore) {
+          if(err) {           
+            test.ok(false);
+          }
+        });
+      });
+
+      file.on('close', function () {
+        // Flush the remaining data to GridFS
+        gridStore.close(function(err, result) {
+          // Read in the whole file and check that it's the same content
+          GridStore.read(client, result._id, function(err, fileData) {
+            var data = fs.readFileSync('./test_gs_working_field_read.tmp');
+            _test.equal(data.toString('base64'), fileData.toString('base64'));
+            callback(null, null);
+          });
+        });
+      });
+    });    
+  }
+  
+  // Execute big chunk size
+  executeTest(80960, test, function(err, result) {    
+    // Execute small chunk size
+    executeTest(5000, test, function(err, result) {    
+      // Execute chunksize larger than file
+      executeTest(fileSize+100, test, function(err, result) {    
+        test.done();
+      });
+    });
+  });  
 }
 
 /**
@@ -1383,7 +1556,6 @@ exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = function(test) {
     })    
   });
 }
-
 
 /**
  * Retrieve the server information for the current
