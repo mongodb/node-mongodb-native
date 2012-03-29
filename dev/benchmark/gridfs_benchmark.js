@@ -1,15 +1,16 @@
-var Db = require('../lib/mongodb').Db,
-  Server = require('../lib/mongodb').Server,
-  ObjectID = require('../lib/mongodb').ObjectID,
-  GridStore = require('../lib/mongodb').GridStore;
+var Db = require('../../lib/mongodb').Db,
+  Server = require('../../lib/mongodb').Server,
+  ObjectID = require('../../lib/mongodb').ObjectID,
+  GridStore = require('../../lib/mongodb').GridStore;
 
 var Mongolian = require('mongolian');
 var COUNT = 1000;
 var currentWritingIndex = 0;
 var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1, native_parser:true});
+var server2 = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1, native_parser:true});
 
 // Read in the test file
-var fileData = require('fs').readFileSync("./test/gridstore/iya_logo_final_bw.jpg");
+var fileData = require('fs').readFileSync("../../test/gridstore/iya_logo_final_bw.jpg");
 
 // ------------------------------------------------------------------------------
 // TEST MONGODB NATIVE
@@ -19,7 +20,7 @@ new Db('gridfs_benchmark', server, {}).open(function(err, new_client) {
   new_client.dropDatabase(function(err, result) {
     new_client.close();
 
-    new Db('gridfs_benchmark', server, {}).open(function(err, client) {
+    new Db('gridfs_benchmark', server2, {}).open(function(err, client) {
       // Start Time
       var startTime = new Date().getTime();
       
@@ -27,7 +28,7 @@ new Db('gridfs_benchmark', server, {}).open(function(err, new_client) {
       for(var i = 0; i < COUNT; i++) {
         var gridStore = new GridStore(client, "foobar" + i, "w");
         gridStore.open(function(err, gridStore) {
-          gridStore.writeBuffer(fileData, true, function(err, gridStore) {
+          gridStore.write(fileData, true, function(err, gridStore) {
             // Update current write index
             currentWritingIndex = currentWritingIndex + 1;
           

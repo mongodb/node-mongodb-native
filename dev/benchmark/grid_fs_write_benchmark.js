@@ -1,7 +1,7 @@
-var Db = require('../lib/mongodb').Db,
-  Server = require('../lib/mongodb').Server,
-  ObjectID = require('../lib/mongodb').ObjectID,
-  GridStore = require('../lib/mongodb').GridStore;
+var Db = require('../../lib/mongodb').Db,
+  Server = require('../../lib/mongodb').Server,
+  ObjectID = require('../../lib/mongodb').ObjectID,
+  GridStore = require('../../lib/mongodb').GridStore;
 
 var simulated_buffer = new Buffer(1024*1000*10).toString();
 
