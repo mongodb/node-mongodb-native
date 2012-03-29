@@ -3,6 +3,8 @@
 - Fix for reading a GridStore from arbitrary, non-chunk aligned offsets, added test (Issue #563, https://github.com/subroutine)
 - Modified limitRequest to allow negative limits to pass through to Mongo, added test (Issue #561)
 - Corrupt GridFS files when chunkSize < fileSize, fixed concurrency issue (Issue #555)
+- Handle dead tailable cursors (Issue #568, https://github.com/aheckmann)
+- Connection pools handles closing themselves down and clearing the state
 
 0.9.9.7 2012-03-16
 ------------------
