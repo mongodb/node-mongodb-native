@@ -46,7 +46,6 @@ exports['Should correctly fail due to no server'] = function(test) {
 
   // Add event handler that will fire when it fails
   connectionPool.on("error", function(err, connection) {
-    test.equal(0, connectionPool.connections.length)
     test.equal(0, connectionPool.openConnections.length)
     test.done();
   });
