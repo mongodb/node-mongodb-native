@@ -1953,6 +1953,71 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
 }
 
 /**
+ *
+ */
+exports.shouldCloseDeadTailableCursors = function (test) {
+  // http://www.mongodb.org/display/DOCS/Tailable+Cursors
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  db.open(function(err, db) {
+
+    var options = { capped: true, size: 8 };
+    db.createCollection('test_if_dead_tailable_cursors_close', options, function(err, collection) {
+      test.equal(null, err);
+
+      var insertId = 0
+      function insert (cb) {
+        if (insert.ran) insert.ran++;
+        else insert.ran = 1;
+
+        var docs = []
+        for(var end = insertId+1; insertId < end+80; insertId++) {
+          docs.push({id:insertId})
+        }
+        collection.insert(docs, {safe:true}, function(err, ids) {
+          test.equal(null, err);
+          cb && cb();
+        })
+      }
+
+      var lastId = 0
+        , closed = false;
+
+      insert(function query () {
+        var conditions = { id: { $gte: lastId }};
+        var stream = collection.find(conditions, { tailable: true }).stream();
+
+        stream.on('data', function (doc) {
+          lastId = doc.id;
+          // kill the cursor on the server by inserting enough more
+          // docs to overwrite the last one returned. this should
+          // force the stream to close.
+          if (insertId == lastId+1) insert();
+        });
+
+        stream.on('error', function (err) {
+          // shouldn't happen
+          test.equal(null, err);
+        });
+
+        stream.on('close', function () {
+          // this is what we need
+          closed = true;
+        });
+      });
+
+      setTimeout(function () {
+        db.close();
+        test.equal(2, insert.ran);
+        test.equal(true, closed);
+        test.done();
+      }, 800);
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 

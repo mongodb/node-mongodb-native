@@ -12,7 +12,7 @@ var BSON = require('../../lib/mongodb').BSONPure.BSON,
   ObjectID = require('../../lib/mongodb').BSONPure.ObjectID;
 
 // Open the db connection
-new Db('hammer_db', new Server("127.0.0.1", 27018, {auto_reconnect: true, poolSize: 20}), {native_parser: false}).open(function(err, db) {
+new Db('hammer_db', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 20}), {native_parser: false}).open(function(err, db) {
   db.dropCollection('hammer_collection', function(err, result) {
     db.admin().authenticate('admin', 'admin', function(err, result) {
       var i = 0;
@@ -69,7 +69,7 @@ new Db('hammer_db', new Server("127.0.0.1", 27018, {auto_reconnect: true, poolSi
             })
           })
         }      
-      }, 0);          
+      }, 1000);          
     })
   });
 });
