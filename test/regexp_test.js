@@ -54,12 +54,10 @@ exports.shouldCorrectlyInsertSimpleRegExpDocument = function(test) {
 
   client.createCollection('test_regex', function(err, collection) {
     collection.insert({'b':regexp}, {safe:true}, function(err, ids) {
-      collection.find({}, {'fields': ['b']}, function(err, cursor) {
-        cursor.toArray(function(err, items) {
-          test.equal(("" + regexp), ("" + items[0].b));
-          // Let's close the db
-          test.done();
-        });
+      collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
+        test.equal(("" + regexp), ("" + items[0].b));
+        // Let's close the db
+        test.done();
       });
     });
   });
@@ -70,12 +68,10 @@ exports.shouldCorrectlyInsertSimpleUTF8Regexp = function(test) {
 
   client.createCollection('test_utf8_regex', function(err, collection) {
     collection.insert({'b':regexp}, {safe:true}, function(err, ids) {
-      collection.find({}, {'fields': ['b']}, function(err, cursor) {
-        cursor.toArray(function(err, items) {
-          test.equal(("" + regexp), ("" + items[0].b));
-          // Let's close the db
-          test.done();
-        });
+      collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
+        test.equal(("" + regexp), ("" + items[0].b));
+        // Let's close the db
+        test.done();
       });
     });
   });    

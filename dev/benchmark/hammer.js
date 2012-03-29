@@ -28,7 +28,7 @@ new Db('hammer_db', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSi
           // Execute an insert
           db.collection('hammer_collection', function(err, collection) {
             collection.insert(randomDoc(), {safe:false}, function(err, result) {
-              // debug("---------------------------------------- INSERT")
+              debug("---------------------------------------- INSERT")
             });
           });
         } else if(command == 2) {
@@ -69,7 +69,7 @@ new Db('hammer_db', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSi
             })
           })
         }      
-      }, 0);          
+      }, 1000);          
     })
   });
 });

@@ -71,24 +71,20 @@ exports.shouldCorrectlyPerformSimpleFind = function(test) {
         doc2 = docs[1]
 
         // Ensure correct insertion testing via the cursor and the count function
-        collection.find(function(err, cursor) {
-          cursor.toArray(function(err, documents) {
-            test.equal(2, documents.length);
+        collection.find().toArray(function(err, documents) {
+          test.equal(2, documents.length);
 
-            collection.count(function(err, count) {
-              test.equal(2, count);
+          collection.count(function(err, count) {
+            test.equal(2, count);
 
-              // Fetch values by selection
-              collection.find({'a': doc1.a}, function(err, cursor) {
-                cursor.toArray(function(err, documents) {
-                  test.equal(1, documents.length);
-                  test.equal(doc1.a, documents[0].a);
-                  // Let's close the db
-                  test.done();
-                });
-              });
+            // Fetch values by selection
+            collection.find({'a': doc1.a}).toArray(function(err, documents) {
+              test.equal(1, documents.length);
+              test.equal(doc1.a, documents[0].a);
+              // Let's close the db
+              test.done();
             });
-          })
+          });
         });          
       });
     });
@@ -830,10 +826,29 @@ exports['Should correctly handle chained skip and limit on find with toArray'] =
   client.createCollection('skipAndLimitOnFindWithToArray', function(err, collection) {
     collection.insert([{a:1}, {b:2}, {c:3}], {safe:true}, function(err, result) {
       
-      collection.find().skip(1).limit(1).toArray(function(err, items) {
+      collection.find().skip(1).limit(-1).toArray(function(err, items) {
         test.equal(null, err);
         test.equal(1, items.length);
         test.equal(2, items[0].b)
+        test.done();
+      })        
+    });      
+  });      
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly handle chained skip and negative limit on find with toArray'] = function(test) {
+  client.createCollection('skipAndNegativeLimitOnFindWithToArray', function(err, collection) {
+    collection.insert([{a:1}, {b:2}, {c:3}, {d:4}, {e:5}], {safe:true}, function(err, result) {
+      
+      collection.find().skip(1).limit(-3).toArray(function(err, items) {
+        test.equal(null, err);
+        test.equal(3, items.length);
+        test.equal(2, items[0].b)
+        test.equal(3, items[1].c)
+        test.equal(4, items[2].d)
         test.done();
       })        
     });      
@@ -988,15 +1003,11 @@ exports['Should correctly return record with 64-bit id'] = function(test) {
       test.ok(err == null);
 
       // Select record with id of 133118461172916225 using $gt directive
-      collection.find({id: {$gt:  lowerId}}, {}, function(err, cur) {
+      collection.find({id: {$gt:  lowerId}}, {}).toArray(function(err, arr) {
         test.ok(err == null);
-
-        cur.toArray(function(err, arr) {
-          test.ok(err == null);
-          test.equal(arr.length, 1, 'Selecting record via $gt directive on 64-bit integer should return a record with higher Id')
-          test.equal(arr[0].id.toString(), '133118461172916225', 'Returned Id should be equal to 133118461172916225')
-          test.done()
-        });
+        test.equal(arr.length, 1, 'Selecting record via $gt directive on 64-bit integer should return a record with higher Id')
+        test.equal(arr[0].id.toString(), '133118461172916225', 'Returned Id should be equal to 133118461172916225')
+        test.done()
       });
     });
   });
@@ -1132,26 +1143,22 @@ exports.shouldCorrectlyExecuteMultipleFindsInParallel = function(test) {
       // Test return old document on change
       collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
         collection.find({"user_id":"4e9fc8d55883d90100000003","lc_status":{"$ne":"deleted"},"owner_rating":{"$exists":false}}, 
-          {"skip":0,"limit":10,"sort":{"updated":-1}}, function(err, cursor) {
-          cursor.count(function(err, count) {
-            numberOfOperations = numberOfOperations + 1;
-            if(numberOfOperations == 2) {
-              test.done();
-              p_client.close();
-            }
-          })  
-        });
+          {"skip":0,"limit":10,"sort":{"updated":-1}}).count(function(err, count) {
+          numberOfOperations = numberOfOperations + 1;
+          if(numberOfOperations == 2) {
+            test.done();
+            p_client.close();
+          }
+        })  
 
         collection.find({"user_id":"4e9fc8d55883d90100000003","lc_status":{"$ne":"deleted"},"owner_rating":{"$exists":false}}, 
-          {"skip":0,"limit":10,"sort":{"updated":-1}}, function(err, cursor) {
-          cursor.count(function(err, count) {
-            numberOfOperations = numberOfOperations + 1;
-            if(numberOfOperations == 2) {
-              test.done();
-              p_client.close();
-            }
-          })  
-        });
+          {"skip":0,"limit":10,"sort":{"updated":-1}}).count(function(err, count) {
+          numberOfOperations = numberOfOperations + 1;
+          if(numberOfOperations == 2) {
+            test.done();
+            p_client.close();
+          }
+        })  
       });
     });
   });
@@ -1231,18 +1238,17 @@ exports.shouldCorrectlyIterateOverCollection = function(test) {
         collection.insert({a:1, b:2, c:{d:3, f:'sfdsffffffffffffffffffffffffffffff'}});
       }      
       
-      collection.find({}, {}, function(err,cursor) {
-         cursor.count(function(err,count) {
-           cursor.each(function(err, obj) {
-             if (obj == null) {
-               p_client.close();
-               test.equal(1000, numberOfSteps);
-               test.done();
-             } else {
-               numberOfSteps = numberOfSteps + 1;
-             }               
-           });
-         });
+      var cursor = collection.find({}, {});
+      cursor.count(function(err,count) {
+        cursor.each(function(err, obj) {
+         if (obj == null) {
+           p_client.close();
+           test.equal(1000, numberOfSteps);
+           test.done();
+         } else {
+           numberOfSteps = numberOfSteps + 1;
+         }               
+        });
       });
     });    
   });

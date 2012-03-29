@@ -279,15 +279,13 @@ exports.shouldForceMongoDbServerToAssignId = function(test) {
                 collection.count(function(err, count) {
                   test.equal(1001, count);
                   // Locate all the entries using find
-                  collection.find(function(err, cursor) {
-                    cursor.toArray(function(err, results) {
-                      test.equal(1001, results.length);
-                      test.ok(results[0] != null);
-  
-                      client.close();
-                      // Let's close the db
-                      test.done();
-                    });
+                  collection.find().toArray(function(err, results) {
+                    test.equal(1001, results.length);
+                    test.ok(results[0] != null);
+
+                    client.close();
+                    // Let's close the db
+                    test.done();
                   });
                 });
               });
@@ -335,14 +333,12 @@ exports.shouldCorrectlyPerformBasicInsert = function(test) {
               collection.count(function(err, count) {
                 test.equal(1001, count);
                 // Locate all the entries using find
-                collection.find(function(err, cursor) {
-                  cursor.toArray(function(err, results) {
-                    test.equal(1001, results.length);
-                    test.ok(results[0] != null);
+                collection.find().toArray(function(err, results) {
+                  test.equal(1001, results.length);
+                  test.ok(results[0] != null);
 
-                    // Let's close the db
-                    test.done();
-                  });
+                  // Let's close the db
+                  test.done();
                 });
               });
             });
@@ -367,18 +363,16 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = function(test) {
         });
 
         // Let's ensure we have both documents
-        collection.find(function(err, cursor) {
-          cursor.toArray(function(err, docs) {
-            test.equal(2, docs.length);
-            var results = [];
-            // Check that we have all the results we want
-            docs.forEach(function(doc) {
-              if(doc.a == 1 || doc.a == 2) results.push(1);
-            });
-            test.equal(2, results.length);
-            // Let's close the db
-            test.done();
+        collection.find().toArray(function(err, docs) {
+          test.equal(2, docs.length);
+          var results = [];
+          // Check that we have all the results we want
+          docs.forEach(function(doc) {
+            if(doc.a == 1 || doc.a == 2) results.push(1);
           });
+          test.equal(2, results.length);
+          // Let's close the db
+          test.done();
         });
       });
     });
@@ -398,12 +392,10 @@ exports.shouldCorrectlyExecuteSaveInsertUpdate= function(test) {
           { upsert: true, safe:true},
 
           function() {
-            collection.find(function(e, c) {
-              c.toArray(function(e, a) {
-                test.equal(3, a.length)
-                test.done();
-              });
-            });              
+            collection.find().toArray(function(e, a) {
+              test.equal(3, a.length)
+              test.done();
+            });
           }
         );          
       });        
@@ -738,18 +730,17 @@ exports.shouldCorrectlyPerformSafeInsert = function(test) {
         });
 
 
-        collection.find({}, {}, function(err, cursor) {
-          var counter = 0;
+        var cursor = collection.find({}, {});
+        var counter = 0;
 
-          cursor.each(function(err, doc) {
-            if(doc == null) {
-              test.equal(3, counter);            
-              test.done();
-            } else {
-              counter = counter + 1;
-            }          
-          });
-        });          
+        cursor.each(function(err, doc) {
+          if(doc == null) {
+            test.equal(3, counter);            
+            test.done();
+          } else {
+            counter = counter + 1;
+          }          
+        });
       }
     )          
   })

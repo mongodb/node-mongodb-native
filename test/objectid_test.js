@@ -242,13 +242,11 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = function(test) {
     date.setUTCSeconds(30);
 
     collection.insert({'_id':date}, {safe:true}, function(err, ids) {
-      collection.find({'_id':date}, function(err, cursor) {
-        cursor.toArray(function(err, items) {
-          test.equal(("" + date), ("" + items[0]._id));
+      collection.find({'_id':date}).toArray(function(err, items) {
+        test.equal(("" + date), ("" + items[0]._id));
 
-          // Let's close the db
-          test.done();
-        });
+        // Let's close the db
+        test.done();
       });
     });
   });
