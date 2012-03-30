@@ -1137,6 +1137,21 @@ exports.shouldCorrectlyInsertDocWithCustomId = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldFailDueToInsertBeingBiggerThanMaxDocumentSizeAllowed = function(test) {
+  var binary = new Binary(new Buffer(client.serverConfig.checkoutWriter().maxBsonSize + 100));
+  // Create a collection
+  client.createCollection('shouldFailDueToInsertBeingBiggerThanMaxDocumentSizeAllowed', function(err, collection) {
+    collection.insert({doc:binary}, {safe:true}, function(err, result) {      
+      test.ok(err != null);
+      test.equal(null, result);
+      test.done();
+    });
+  });  
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
