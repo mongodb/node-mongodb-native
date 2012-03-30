@@ -1,5 +1,5 @@
 .DS_Store
-*.swp
+*.sw*
 *.seed
 *.tmp
 .project
