@@ -27,6 +27,8 @@ var http            = require('http'),
 
         db.collection('stats', function(statsErr, stats) {
             if (statsErr) return console.log('error opening stats %o', err);
+            stats.remove();
+            stats.insert({reqcount:0})
 
             //create server
             http.createServer(function (req, res) {

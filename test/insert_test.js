@@ -1137,6 +1137,44 @@ exports.shouldCorrectlyInsertDocWithCustomId = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldFailDueToInsertBeingBiggerThanMaxDocumentSizeAllowed = function(test) {
+  var binary = new Binary(new Buffer(client.serverConfig.checkoutWriter().maxBsonSize + 100));
+  // Create a collection
+  client.createCollection('shouldFailDueToInsertBeingBiggerThanMaxDocumentSizeAllowed', function(err, collection) {
+    collection.insert({doc:binary}, {safe:true}, function(err, result) {      
+      test.ok(err != null);
+      test.equal(null, result);
+      test.done();
+    });
+  });  
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = function(test) {
+  client.createCollection('shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne', function(err, collection) {
+    // Upsert a new doc
+    collection.update({a:1}, {a:1}, {upsert:true, safe:true}, function(err, result, status) {
+      test.equal(1, result);
+      test.equal(false, status.updatedExisting);
+      test.equal(1, status.n);
+      test.ok(status.upserted != null);      
+      
+      // Upsert an existing doc
+      collection.update({a:1}, {a:1}, {upsert:true, safe:true}, function(err, result, status) {
+        test.equal(1, result);
+        test.equal(true, status.updatedExisting);
+        test.equal(1, status.n);
+        test.done();
+      });
+    });
+  });    
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
