@@ -27,35 +27,41 @@ var http            = require('http'),
 
         db.collection('stats', function(statsErr, stats) {
             if (statsErr) return console.log('error opening stats %o', err);
-            stats.remove();
-            stats.insert({reqcount:0})
-
-            //create server
-            http.createServer(function (req, res) {
-                if (req.url !== '/') {
-                    res.end();
-                    return console.log('invalid request performed');
-                }
-
-                //get amount of requests done
-                stats.findOne({name: 'reqcount'}, function(err, reqstat) {
-                    if(err) {
-                      res.writeHead(200, {'Content-Type': 'text/plain'});
-                      res.end('Hello World, from server node: ' + os.hostname() + '...\nError #' + err + ', reqstat ' + reqstat);
-                      return console.log('reqstat is null!');
+            stats.remove({}, {safe:true}, function(err, result) {
+              console.log("================================================================")
+              console.dir(err)
+              
+              stats.insert({name:'reqcount', value:0}, {safe:true}, function(err, result) {
+                console.log("================================================================")
+                console.dir(err)
+                //create server
+                http.createServer(function (req, res) {
+                    if (req.url !== '/') {
+                        res.end();
+                        return console.log('invalid request performed');
                     }
-                    var reqcount = reqstat.value;
 
-                    //write to client
-                    res.writeHead(200, {'Content-Type': 'text/plain'});
-                    res.end('Hello World, from server node: ' + os.hostname() + '...\nThis is visit #' + reqcount);
-                });
+                    //get amount of requests done
+                    stats.findOne({name: 'reqcount'}, function(err, reqstat) {
+                        if(err) {
+                          res.writeHead(200, {'Content-Type': 'text/plain'});
+                          res.end('Hello World, from server node: ' + os.hostname() + '...\nError #' + err + ', reqstat ' + reqstat);
+                          return console.log('reqstat is null!');
+                        }
+                        var reqcount = reqstat.value;
 
-                //increment amount of requests
-                console.log('incrementing request by 1!');
-                stats.update({name: 'reqcount'}, {'$inc': {value: 1}}, {upsert: true});
+                        //write to client
+                        res.writeHead(200, {'Content-Type': 'text/plain'});
+                        res.end('Hello World, from server node: ' + os.hostname() + '...\nThis is visit #' + reqcount);
+                    });
 
-            }).listen(8000);
+                    //increment amount of requests
+                    console.log('incrementing request by 1!');
+                    stats.update({name: 'reqcount'}, {'$inc': {value: 1}}, {upsert: true});
+
+                }).listen(8000);                
+              });              
+            });
 
             console.log('Server running at port 8000');
         });
