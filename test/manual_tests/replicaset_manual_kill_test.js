@@ -15,7 +15,8 @@ var http            = require('http'),
         ],
         {
             rs_name: 'testappset',
-            read_secondary: true
+            read_secondary: true,
+            ha:true
         }
     );
 
