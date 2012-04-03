@@ -7,6 +7,7 @@
 - Connection pools handles closing themselves down and clearing the state
 - Check bson size of documents against maxBsonSize and throw client error instead of server error, (Issue #553)
 - Returning update status document at the end of the callback for updates, (Issue #569)
+- Refactor use of Arguments object to gain performance (Issue #574, https://github.com/AaronAsAChimp)
 
 0.9.9.7 2012-03-16
 ------------------
