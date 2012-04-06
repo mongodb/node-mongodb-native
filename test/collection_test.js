@@ -401,11 +401,11 @@ exports.shouldCorrectlyExecuteIndexExists = function(test) {
   db.open(function(err, db) {
     
     // Create a test collection that we are getting the options back from
-    db.createCollection('test_collection_index_exists', function(err, collection) {
+    db.createCollection('test_collection_index_exists', {safe:true}, function(err, collection) {
       test.equal(null, err);
 
       // Create an index on the collection
-      collection.createIndex('a', function(err, indexName) {
+      collection.createIndex('a', {safe:true}, function(err, indexName) {
         
         // Let's test to check if a single index exists
         collection.indexExists("a_1", function(err, result) {
