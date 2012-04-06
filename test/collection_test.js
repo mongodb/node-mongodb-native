@@ -1115,11 +1115,11 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = function(test) {
     db.createCollection('simple_key_based_distinct', function(err, collection) {
       
       // Create a geo 2d index
-      collection.ensureIndex({loc:"2d"}, function(err, result) {
+      collection.ensureIndex({loc:"2d"}, {safe:true}, function(err, result) {
         test.equal(null, err);
         
         // Create a simple single field index
-        collection.ensureIndex({a:1}, function(err, result) {
+        collection.ensureIndex({a:1}, {safe:true}, function(err, result) {
           test.equal(null, err);
 
           // List all of the indexes on the collection
