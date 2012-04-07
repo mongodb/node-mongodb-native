@@ -1175,6 +1175,30 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = function(
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyPerformLargeTextInsert = function(test) {
+  client.createCollection('shouldCorrectlyPerformLargeTextInsert', function(err, collection) {
+    // Create large string, insert and then retrive
+    var string = "";
+    // Create large text field
+    for(var i = 0; i < 50000; i++) {
+      string = string + "a";
+    }
+    
+    collection.insert({a:1, string:string}, {safe:true}, function(err, result) {
+      test.equal(null, err);
+      
+      collection.findOne({a:1}, function(err, doc) {
+        test.equal(null, err);
+        test.equal(50000, doc.string.length);        
+        test.done();
+      });
+    });    
+  });    
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
