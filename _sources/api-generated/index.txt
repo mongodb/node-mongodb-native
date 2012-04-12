@@ -13,3 +13,5 @@ Driver API
   gridstore
   readstream
   grid
+  server
+  replset
