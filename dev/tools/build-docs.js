@@ -19,7 +19,9 @@ var apiClasses = [
     {tag:"cursorstream", path:"./lib/mongodb/cursorstream.js"},
     {tag:"gridstore", path:"./lib/mongodb/gridfs/gridstore.js"},
     {tag:"readstream", path:"./lib/mongodb/gridfs/readstream.js"},
-    {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"}
+    {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"},
+    {tag:"server", path:"./lib/mongodb/connection/server.js"},
+    {tag:"replset", path:"./lib/mongodb/connection/repl_set.js"}
   ];
   
 // All test files 
