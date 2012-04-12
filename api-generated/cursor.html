@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Cursor() &mdash; MongoDB Node.JS Driver 0.9.9.7 documentation</title>
+    <title>Cursor() &mdash; MongoDB Node.JS Driver 0.9.9.8 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.9.7',
+        VERSION:     '0.9.9.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.7 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.8 documentation" href="../index.html" />
     <link rel="next" title="CursorStream()" href="cursorstream.html" />
     <link rel="prev" title="Admin()" href="admin.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="admin.html" title="Admin()"
              accesskey="P">previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.7 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.8 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -318,23 +318,22 @@ for making sure that the entire result can fit the memory.</p>
     <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">ids</span><span class="p">)</span> <span class="p">{</span>
 
       <span class="c1">// Grab a cursor</span>
-      <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">cursor</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">cursor</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">();</span>
 
-        <span class="c1">// Execute the each command, triggers for each document</span>
-        <span class="nx">cursor</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Execute the each command, triggers for each document</span>
+      <span class="nx">cursor</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
 
-          <span class="c1">// If the item is null then the cursor is exhausted/empty and closed</span>
-          <span class="k">if</span><span class="p">(</span><span class="nx">item</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// If the item is null then the cursor is exhausted/empty and closed</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">item</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
 
-            <span class="c1">// Show that the cursor is closed</span>
-            <span class="nx">cursor</span><span class="p">.</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
-              <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+          <span class="c1">// Show that the cursor is closed</span>
+          <span class="nx">cursor</span><span class="p">.</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
 
-              <span class="c1">// Let&#39;s close the db</span>
-              <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-            <span class="p">});</span>
-          <span class="p">};</span>
-        <span class="p">});</span>
+            <span class="c1">// Let&#39;s close the db</span>
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">};</span>
       <span class="p">});</span>
     <span class="p">});</span>
   <span class="p">});</span>
@@ -485,14 +484,14 @@ for making sure that the entire result can fit the memory.</p>
 <p>Sets the limit parameter of this cursor to the given value.</p>
 <dl class="function">
 <dt>
-<tt class="descname">limit</tt><big>(</big><em>limit</em>, <em>callback</em><big>)</big></dt>
+<tt class="descname">limit</tt><big>(</big><em>limit</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>limit</strong> (<em>number</em>) &#8211; the new limit.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
+<li><strong>[callback]</strong> (<em>function</em>) &#8211; this optional callback will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
 </ul>
 </td>
 </tr>
@@ -549,14 +548,14 @@ for making sure that the entire result can fit the memory.</p>
 <p>Sets the skip parameter of this cursor to the given value.</p>
 <dl class="function">
 <dt>
-<tt class="descname">skip</tt><big>(</big><em>skip</em>, <em>callback</em><big>)</big></dt>
+<tt class="descname">skip</tt><big>(</big><em>skip</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>skip</strong> (<em>number</em>) &#8211; the new skip value.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain an error object when the skip value given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
+<li><strong>[callback]</strong> (<em>function</em>) &#8211; this optional callback will be called after executing this method. The first parameter will contain an error object when the skip value given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
 </ul>
 </td>
 </tr>
@@ -613,14 +612,14 @@ for making sure that the entire result can fit the memory.</p>
 <p>Sets the batch size parameter of this cursor to the given value.</p>
 <dl class="function">
 <dt id="batchSize">
-<tt class="descname">batchSize</tt><big>(</big><em>batchSize</em>, <em>callback</em><big>)</big><a class="headerlink" href="#batchSize" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">batchSize</tt><big>(</big><em>batchSize</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#batchSize" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>batchSize</strong> (<em>number</em>) &#8211; the new batch size.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain an error object when the batchSize given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
+<li><strong>[callback]</strong> (<em>function</em>) &#8211; this optional callback will be called after executing this method. The first parameter will contain an error object when the batchSize given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
 </ul>
 </td>
 </tr>
@@ -1201,7 +1200,7 @@ long it took the database to process it.</p>
         <li class="right" >
           <a href="admin.html" title="Admin()"
              >previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.7 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.8 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

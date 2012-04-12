@@ -2,6 +2,19 @@
 Changelog
 =========
 
+0.9.9.8 2012-04-12
+------------------
+- _id=0 is being turned into an ObjectID (Issue #551)
+- fix for error in GridStore write method (Issue #559)
+- Fix for reading a GridStore from arbitrary, non-chunk aligned offsets, added test (Issue #563, https://github.com/subroutine)
+- Modified limitRequest to allow negative limits to pass through to Mongo, added test (Issue #561)
+- Corrupt GridFS files when chunkSize &lt; fileSize, fixed concurrency issue (Issue #555)
+- Handle dead tailable cursors (Issue #568, https://github.com/aheckmann)
+- Connection pools handles closing themselves down and clearing the state
+- Check bson size of documents against maxBsonSize and throw client error instead of server error, (Issue #553)
+- Returning update status document at the end of the callback for updates, (Issue #569)
+- Refactor use of Arguments object to gain performance (Issue #574, https://github.com/AaronAsAChimp)
+
 0.9.9.7 2012-03-16
 ------------------
 - Stats not returned from map reduce with inline results (Issue #542)

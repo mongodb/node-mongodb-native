@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GridStore() &mdash; MongoDB Node.JS Driver 0.9.9.7 documentation</title>
+    <title>GridStore() &mdash; MongoDB Node.JS Driver 0.9.9.8 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.9.9.7',
+        VERSION:     '0.9.9.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.7 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 0.9.9.8 documentation" href="../index.html" />
     <link rel="next" title="ReadStream()" href="readstream.html" />
     <link rel="prev" title="Grid()" href="grid.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="grid.html" title="Grid()"
              accesskey="P">previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.7 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.8 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -1676,9 +1676,11 @@ the given string does not have one.</p>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Our file id</span>
+  <span class="kd">var</span> <span class="nx">fileId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
 
   <span class="c1">// Open a file for writing</span>
-  <span class="kd">var</span> <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s2">&quot;foobar2&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId</span><span class="p">,</span> <span class="s2">&quot;foobar2&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
   <span class="nx">gridStore</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="c1">// Write some content to the file</span>
@@ -1728,8 +1730,10 @@ the given string does not have one.</p>
           <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">items</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">);</span>
           <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="o">!</span><span class="nx">found</span><span class="p">);</span>
 
+          <span class="c1">// Specify seperate id</span>
+          <span class="kd">var</span> <span class="nx">fileId2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
           <span class="c1">// Write another file to GridFS</span>
-          <span class="kd">var</span> <span class="nx">gridStore2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s2">&quot;foobar3&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
+          <span class="kd">var</span> <span class="nx">gridStore2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">fileId2</span><span class="p">,</span> <span class="s2">&quot;foobar3&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
           <span class="nx">gridStore2</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
             <span class="c1">// Write the content</span>
             <span class="nx">gridStore2</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="s1">&#39;my file&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
@@ -2145,7 +2149,7 @@ the given string does not have one.</p>
         <li class="right" >
           <a href="grid.html" title="Grid()"
              >previous</a> |</li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.7 documentation</a> &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 0.9.9.8 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

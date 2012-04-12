@@ -475,6 +475,103 @@ Options
    :returns: null 
 
 
+**Examples**
+
+  
+  
+  Example of a simple document save with safe set to false
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Fetch the collection
+       db.collection("save_a_simple_document", function(err, collection) {
+         
+         // Save a document with no safe option
+         collection.save({hello:'world'});
+         
+         // Wait for a second
+         setTimeout(function() {
+           
+           // Find the saved document
+           collection.findOne({hello:'world'}, function(err, item) {
+             assert.equal(null, err);
+             assert.equal('world', item.hello);
+             db.close();
+           });        
+         }, 1000);      
+       });    
+     });
+
+  
+  
+  Example of a simple document save and then resave with safe set to true
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Fetch the collection
+       db.collection("save_a_simple_document_modify_it_and_resave_it", function(err, collection) {
+         
+         // Save a document with no safe option
+         collection.save({hello:'world'}, {safe:true}, function(err, result) {
+     
+           // Find the saved document
+           collection.findOne({hello:'world'}, function(err, item) {
+             assert.equal(null, err);
+             assert.equal('world', item.hello);
+             
+             // Update the document
+             item['hello2'] = 'world2';
+             
+             // Save the item with the additional field
+             collection.save(item, {safe:true}, function(err, result) {
+               
+               // Find the changed document
+               collection.findOne({hello:'world'}, function(err, item) {
+                 assert.equal(null, err);
+                 assert.equal('world', item.hello);
+                 assert.equal('world2', item.hello2);              
+                 
+                 db.close();
+               });
+             });           
+           });        
+         });
+       });    
+     });
+
+
 ------
 update
 ------
@@ -499,6 +596,144 @@ Options
    :returns: null 
 
 
+**Examples**
+
+  
+  
+  Example of a simple document update with safe set to false on an existing document
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Get a collection
+       db.collection('update_a_simple_document', function(err, collection) {
+         
+         // Insert a document, then update it
+         collection.insert({a:1}, {safe:true}, function(err, doc) {
+           
+           // Update the document with an atomic operator
+           collection.update({a:1}, {$set:{b:2}});
+           
+           // Wait for a second then fetch the document
+           setTimeout(function() {
+             
+             // Fetch the document that we modified
+             collection.findOne({a:1}, function(err, item) {
+               assert.equal(null, err);
+               assert.equal(1, item.a);
+               assert.equal(2, item.b);
+               db.close();
+             });          
+           }, 1000);
+         })
+       });
+     });
+
+  
+  
+  Example of a simple document update using upsert (the document will be inserted if it does not exist)
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Get a collection
+       db.collection('update_a_simple_document_upsert', function(err, collection) {      
+     
+         // Update the document using an upsert operation, ensuring creation if it does not exist
+         collection.update({a:1}, {b:2, a:1}, {upsert:true, safe:true}, function(err, result) {
+           assert.equal(null, err);
+           assert.equal(1, result);
+           
+           // Fetch the document that we modified and check if it got inserted correctly
+           collection.findOne({a:1}, function(err, item) {
+             assert.equal(null, err);
+             assert.equal(1, item.a);
+             assert.equal(2, item.b);
+             db.close();
+           });          
+         });
+       });
+     });
+
+  
+  
+  Example of an update across multiple documents using the multi option.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Get a collection
+       db.collection('update_a_simple_document_multi', function(err, collection) {      
+         
+         // Insert a couple of documentations
+         collection.insert([{a:1, b:1}, {a:1, b:2}], {safe:true}, function(err, result) {
+           
+           // Update multiple documents using the multi option
+           collection.update({a:1}, {$set:{b:0}}, {safe:true, multi:true}, function(err, numberUpdated) {
+             assert.equal(null, err);
+             assert.equal(2, numberUpdated);
+             
+             // Fetch all the documents and verify that we have changed the b value
+             collection.find().toArray(function(err, items) {
+               assert.equal(null, err);
+               assert.equal(1, items[0].a);
+               assert.equal(0, items[0].b);
+               assert.equal(1, items[1].a);
+               assert.equal(0, items[1].b);
+               
+               db.close();
+             });
+           })        
+         });
+       });
+     });
+
+
 --------
 distinct
 --------
@@ -512,6 +747,92 @@ The distinct command returns returns a list of distinct values for the given key
    :param object [query]: option query to narrow the returned objects.
    :param function callback: must be provided.
    :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of running the distinct command against a collection
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {    
+     
+       // Crete the collection for the distinct example
+       db.createCollection('simple_key_based_distinct', function(err, collection) {
+     
+         // Insert documents to perform distinct against
+         collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+           {a:2, b:{c:'a'}}, {a:3}, {a:3}], {safe:true}, function(err, ids) {
+             
+           // Peform a distinct query against the a field
+           collection.distinct('a', function(err, docs) {
+             assert.deepEqual([0, 1, 2, 3], docs.sort());
+     
+             // Perform a distinct query against the sub-field b.c
+             collection.distinct('b.c', function(err, docs) {
+               assert.deepEqual(['a', 'b', 'c'], docs.sort());
+     
+               db.close();
+             });
+           });
+         })
+       });
+     });
+
+  
+  
+  Example of running the distinct command against a collection with a filter query
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {    
+     
+       // Crete the collection for the distinct example
+       db.createCollection('simple_key_based_distinct_sub_query_filter', function(err, collection) {
+     
+         // Insert documents to perform distinct against
+         collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+           {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], {safe:true}, function(err, ids) {
+             
+           // Peform a distinct query with a filter against the documents
+           collection.distinct('a', {c:1}, function(err, docs) {
+             assert.deepEqual([5], docs.sort());
+     
+             db.close();
+           });
+         })
+       });
+     });
 
 
 -----
@@ -528,6 +849,54 @@ Count number of matching documents in the db to a query.
    :returns: null 
 
 
+**Examples**
+
+  
+  
+  Example of running simple count commands against a collection.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {    
+     
+       // Crete the collection for the distinct example
+       db.createCollection('simple_count_example', function(err, collection) {
+     
+         // Insert documents to perform distinct against
+         collection.insert([{a:1}, {a:2}, {a:3}, {a:4, b:1}], {safe:true}, function(err, ids) {
+           
+           // Perform a total count command
+           collection.count(function(err, count) {
+             assert.equal(null, err);
+             assert.equal(4, count);
+             
+             // Peform a partial account where b=1
+             collection.count({b:1}, function(err, count) {
+               assert.equal(null, err);
+               assert.equal(1, count);            
+               
+               db.close();
+             });          
+           });
+         });
+       });
+     });
+
+
 ----
 drop
 ----
@@ -539,6 +908,61 @@ Drop the collection
 
    :param function [callback]: provide a callback to be notified when command finished executing
    :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of a simple document save and then resave with safe set to true
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('test_other_drop', function(err, collection) {
+         assert.equal(null, err);
+         
+         // Drop the collection
+         collection.drop(function(err, reply) {        
+     
+           // Ensure we don't have the collection in the set of names
+           db.collectionNames(function(err, replies) {
+             
+             var found = false;
+             // For each collection in the list of collection names in this db look for the
+             // dropped collection
+             replies.forEach(function(document) {
+               if(document.name == "test_other_drop") {
+                 found = true;
+                 return;
+               }
+             });
+     
+             // Ensure the collection is not found
+             assert.equal(false, found);
+     
+             // Let's close the db
+             db.close();
+           });
+         });
+       });    
+     });
 
 
 -------------
@@ -1085,7 +1509,7 @@ Options
      
            // Create an index on the a field
            collection.createIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
        
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
@@ -1169,7 +1593,7 @@ Options
        
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
          
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
@@ -1245,7 +1669,7 @@ Options
        
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
          
              // Fetch basic indexInformation for collection
              collection.indexInformation(function(err, indexInformation) {
@@ -1315,7 +1739,7 @@ Drops an index from this collection.
        
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
          
              // Drop the index
              collection.dropIndex("a_1_b_1", function(err, result) {
@@ -1387,7 +1811,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
      db.open(function(err, db) {
        
        // Create a collection we want to drop later
-       db.createCollection('create_and_drop_all_indexes', function(err, collection) {      
+       db.createCollection('shouldCorrectlyForceReindexOnCollection', function(err, collection) {      
          assert.equal(null, err);
      
          // Insert a bunch of documents for the index
@@ -1397,7 +1821,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
        
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
      
              // Force a reindex of the collection
              collection.reIndex(function(err, result) {
@@ -1423,7 +1847,7 @@ mapReduce
 ---------
 
 
-Run Map Reduce across a collection.
+Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
 
 
 
@@ -1768,6 +2192,47 @@ Returns the options of the collection.
    :returns: null 
 
 
+**Examples**
+
+  
+  
+  An example returning the options for a collection.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Create a test collection that we are getting the options back from
+       db.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {
+         assert.ok(collection instanceof Collection);
+         assert.equal('test_collection_options', collection.collectionName);
+     
+         // Let's fetch the collection options
+         collection.options(function(err, options) {
+           assert.equal(true, options.capped);
+           assert.equal(1024, options.size);
+           assert.equal("test_collection_options", options.create);
+     
+           db.close();
+         });
+       });    
+     });
+
+
 --------
 isCapped
 --------
@@ -1779,6 +2244,45 @@ Returns if the collection is a capped collection
 
    :param function callback: returns if collection is capped.
    :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example showing how to establish if it's a capped collection
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Create a test collection that we are getting the options back from
+       db.createCollection('test_collection_is_capped', {'capped':true, 'size':1024}, function(err, collection) {
+         assert.ok(collection instanceof Collection);
+         assert.equal('test_collection_is_capped', collection.collectionName);
+     
+         // Let's fetch the collection options
+         collection.isCapped(function(err, capped) {
+           assert.equal(true, capped);
+     
+           db.close();
+         });
+       });    
+     });
 
 
 -----------
@@ -1793,6 +2297,58 @@ Checks if one or more indexes exist on the collection
    :param string indexNames: check if one or more indexes exist on the collection.
    :param function callback: returns if the indexes exist.
    :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example showing the use of the indexExists function for a single index name and a list of index names.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Create a test collection that we are getting the options back from
+       db.createCollection('test_collection_index_exists', {safe:true}, function(err, collection) {
+         assert.equal(null, err);
+     
+         // Create an index on the collection
+         collection.createIndex('a', {safe:true}, function(err, indexName) {
+           
+           // Let's test to check if a single index exists
+           collection.indexExists("a_1", function(err, result) {
+             assert.equal(true, result);
+     
+             // Let's test to check if multiple indexes are available
+             collection.indexExists(["a_1", "_id_"], function(err, result) {
+               assert.equal(true, result);
+     
+               // Check if a non existing index exists
+               collection.indexExists("c_1", function(err, result) {
+                 assert.equal(false, result);
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });    
+     });
 
 
 -------
@@ -1946,6 +2502,53 @@ Retrieve all the indexes on the collection.
 
    :param function callback: returns index information.
    :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of retrieving a collections indexes
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+     
+       // Crete the collection for the distinct example
+       db.createCollection('simple_key_based_distinct', function(err, collection) {
+         
+         // Create a geo 2d index
+         collection.ensureIndex({loc:"2d"}, {safe:true}, function(err, result) {
+           assert.equal(null, err);
+           
+           // Create a simple single field index
+           collection.ensureIndex({a:1}, {safe:true}, function(err, result) {
+             assert.equal(null, err);
+     
+             // List all of the indexes on the collection
+             collection.indexes(function(err, indexes) {
+               assert.equal(3, indexes.length);
+               
+               db.close();            
+             });
+           })
+         })
+       });
+     });
 
 
 ---------
@@ -2117,4 +2720,45 @@ Options
    :param objects [options]: options for the map reduce job.
    :param function callback: returns statistical information for the collection.
    :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of retrieving a collections stats
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {    
+     
+       // Crete the collection for the distinct example
+       db.createCollection('collection_stats_test', function(err, collection) {
+         
+           // Insert some documents
+           collection.insert([{a:1}, {hello:'world'}], {safe:true}, function(err, result) {
+             
+             // Retrieve the statistics for the collection
+             collection.stats(function(err, stats) {
+               assert.equal(2, stats.count);
+               
+               db.close();            
+             });          
+           });      
+       });
+     });
 

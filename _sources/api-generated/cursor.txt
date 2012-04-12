@@ -231,23 +231,22 @@ for making sure that the entire result can fit the memory.
          collection.insert({'a':1}, {safe:true}, function(err, ids) {
            
            // Grab a cursor
-           collection.find(function(err, cursor) {
+           var cursor = collection.find();
              
-             // Execute the each command, triggers for each document
-             cursor.each(function(err, item) {
+           // Execute the each command, triggers for each document
+           cursor.each(function(err, item) {
+             
+             // If the item is null then the cursor is exhausted/empty and closed
+             if(item == null) {
                
-               // If the item is null then the cursor is exhausted/empty and closed
-               if(item == null) {
-                 
-                 // Show that the cursor is closed
-                 cursor.toArray(function(err, items) {
-                   assert.ok(err != null);
+               // Show that the cursor is closed
+               cursor.toArray(function(err, items) {
+                 assert.ok(err != null);
      
-                   // Let's close the db
-                   db.close();
-                 });
-               };
-             });
+                 // Let's close the db
+                 db.close();
+               });
+             };
            });
          });
        });
@@ -390,10 +389,10 @@ limit
 
 Sets the limit parameter of this cursor to the given value.
 
-.. js:function:: limit(limit, callback)
+.. js:function:: limit(limit[, callback])
 
    :param number limit: the new limit.
-   :param function callback: this will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :param function [callback]: this optional callback will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
    :returns: cursor an instance of this object.
 
 
@@ -448,10 +447,10 @@ skip
 
 Sets the skip parameter of this cursor to the given value.
 
-.. js:function:: skip(skip, callback)
+.. js:function:: skip(skip[, callback])
 
    :param number skip: the new skip value.
-   :param function callback: this will be called after executing this method. The first parameter will contain an error object when the skip value given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :param function [callback]: this optional callback will be called after executing this method. The first parameter will contain an error object when the skip value given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
    :returns: cursor an instance of this object.
 
 
@@ -506,10 +505,10 @@ batchSize
 
 Sets the batch size parameter of this cursor to the given value.
 
-.. js:function:: batchSize(batchSize, callback)
+.. js:function:: batchSize(batchSize[, callback])
 
    :param number batchSize: the new batch size.
-   :param function callback: this will be called after executing this method. The first parameter will contain an error object when the batchSize given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :param function [callback]: this optional callback will be called after executing this method. The first parameter will contain an error object when the batchSize given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
    :returns: cursor an instance of this object.
 
 

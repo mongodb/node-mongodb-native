@@ -725,21 +725,19 @@ Retrive the current profiling information for MongoDB
                    adminDb.setProfilingLevel('all', function(err, level) {
                      
                      // Execute a query command
-                     collection.find(function(err, cursor) {
-                       cursor.toArray(function(err, items) {
+                     collection.find().toArray(function(err, items) {
      
-                         // Turn off profiling
-                         adminDb.setProfilingLevel('off', function(err, level) {
-                           
-                           // Retrive the profiling information
-                           adminDb.profilingInfo(function(err, infos) {
-                             assert.ok(infos.constructor == Array);
-                             assert.ok(infos.length >= 1);
-                             assert.ok(infos[0].ts.constructor == Date);
-                             assert.ok(infos[0].millis.constructor == Number);
-                           
-                             db.close();
-                           });
+                       // Turn off profiling
+                       adminDb.setProfilingLevel('off', function(err, level) {
+                         
+                         // Retrive the profiling information
+                         adminDb.profilingInfo(function(err, infos) {
+                           assert.ok(infos.constructor == Array);
+                           assert.ok(infos.length >= 1);
+                           assert.ok(infos[0].ts.constructor == Date);
+                           assert.ok(infos[0].millis.constructor == Number);
+                         
+                           db.close();
                          });
                        });
                      });

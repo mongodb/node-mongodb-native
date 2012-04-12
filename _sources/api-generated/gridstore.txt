@@ -1503,9 +1503,11 @@ Gets the list of files stored in the GridFS.
      
      // Establish connection to db  
      db.open(function(err, db) {
+       // Our file id
+       var fileId = new ObjectID();
        
        // Open a file for writing
-       var gridStore = new GridStore(db, "foobar2", "w");
+       var gridStore = new GridStore(db, fileId, "foobar2", "w");
        gridStore.open(function(err, gridStore) {
          
          // Write some content to the file
@@ -1555,8 +1557,10 @@ Gets the list of files stored in the GridFS.
                assert.ok(items.length >= 0);
                assert.ok(!found);
      
+               // Specify seperate id
+               var fileId2 = new ObjectID();
                // Write another file to GridFS
-               var gridStore2 = new GridStore(db, "foobar3", "w");
+               var gridStore2 = new GridStore(db, fileId2, "foobar3", "w");
                gridStore2.open(function(err, gridStore) {
                  // Write the content
                  gridStore2.write('my file', function(err, gridStore) {
