@@ -1,7 +1,7 @@
 Main Documentation site
 =======================
 
-[Documentation](http://christkv.github.com/node-mongodb-native/)
+[Documentation](http://mongodb.github.com/node-mongodb-native/)
 
 Install
 ========
