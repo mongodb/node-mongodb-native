@@ -29,7 +29,7 @@ db.open(function(err, client) {
 
 			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{safe:true}, function(err, object) {
 				if (err) {
-					console.warn('findAndModify response ', err.message); // returns error if no matching object found
+					console.warn('findAndModify error response ', err.message); // returns error if no matching object found
 				} else {
 					console.log('findAndModify response', object);
 				}
