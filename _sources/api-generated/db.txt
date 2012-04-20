@@ -2003,10 +2003,15 @@ Connect to MongoDB using a url as documented at
 
 www.mongodb.org/display/DOCS/Connections
 
-.. js:function:: Db.connect(url, options, callback)
+
+
+Options
+ - **uri_decode_auth** {Boolean, default:false} uri decode the user name and password for authentication
+
+.. js:function:: Db.connect(url[, options], callback)
 
    :param string url: connection url for MongoDB.
-   :param object options: additional options not covered by the url.
+   :param object [options]: optional options for insert command
    :param function callback: callback returns the initialized db.
    :returns: null 
 

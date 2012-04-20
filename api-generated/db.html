@@ -2251,16 +2251,23 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <h2>Db.connect<a class="headerlink" href="#db-connect" title="Permalink to this headline">¶</a></h2>
 <p>Connect to MongoDB using a url as documented at</p>
 <p>www.mongodb.org/display/DOCS/Connections</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>uri_decode_auth</strong> {Boolean, default:false} uri decode the user name and password for authentication</li>
+</ul>
+</dd>
+</dl>
 <dl class="function">
 <dt id="Db.connect">
-<tt class="descclassname">Db.</tt><tt class="descname">connect</tt><big>(</big><em>url</em>, <em>options</em>, <em>callback</em><big>)</big><a class="headerlink" href="#Db.connect" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">Db.</tt><tt class="descname">connect</tt><big>(</big><em>url</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big><a class="headerlink" href="#Db.connect" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>url</strong> (<em>string</em>) &#8211; connection url for MongoDB.</li>
-<li><strong>options</strong> (<em>object</em>) &#8211; additional options not covered by the url.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; optional options for insert command</li>
 <li><strong>callback</strong> (<em>function</em>) &#8211; callback returns the initialized db.</li>
 </ul>
 </td>

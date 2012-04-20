@@ -1,0 +1,28 @@
+=======
+ReplSet
+=======
+
+------------------
+Constructor
+------------------
+
+
+ReplSet constructor provides replicaset functionality
+
+
+  .. js:class:: ReplSet
+
+   :param array list: of server objects participating in the replicaset. 
+   :param object [options]: additional options for the collection.
+
+
+Options
+ - **ha** {Boolean, default:false}, turn on high availability.
+ - **haInterval** {Number, default:2000}, time between each replicaset status check.
+ - **reconnectWait** {Number, default:1000}, time to wait in miliseconds before attempting reconnect.
+ - **retries** {Number, default:30}, number of times to attempt a replicaset reconnect.
+ - **rs_name** {String}, the name of the replicaset to connect to. 
+ - **readPreference** {String}, the prefered read preference (Server.READ_PRIMARY, Server.READ_SECONDARY, Server.READ_SECONDARY_ONLY).
+ - **read_secondary** {Boolean, deprecated}, allow reads from secondary.
+ - **strategy** {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)
+
