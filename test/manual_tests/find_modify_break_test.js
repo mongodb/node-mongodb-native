@@ -2,7 +2,7 @@ var mongodb = require("../../lib/mongodb"),
 	request = true;
 
 var db = new mongodb.Db('test_db', new mongodb.Server("127.0.0.1", 27017, {
-	auto_reconnect: false
+	auto_reconnect: true
 }), {});
 
 // listen on error
@@ -27,7 +27,7 @@ db.open(function(err, client) {
 
 			console.log('findAndModify request (should not be last)');
 
-			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{safe:true}, function(err, object) {
+			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{safe:true, upsert:true}, function(err, object) {
 				if (err) {
 					console.warn('findAndModify error response ', err.message); // returns error if no matching object found
 				} else {
@@ -37,8 +37,10 @@ db.open(function(err, client) {
 				// no more out standing request
 				request = false;
 
-				// on result does it again
-				findAndModifyLoop();
+        process.nextTick(function() {
+  				// on result does it again
+  				findAndModifyLoop();          
+        })
 			});
 		};
 
