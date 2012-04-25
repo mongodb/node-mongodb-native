@@ -1,3 +1,9 @@
+1.0.0 2012-04-25
+----------------
+- Fixes to handling of failover on server error
+- Only emits error messages if there are error listeners to avoid uncaught events
+- Server.isConnected using the server state variable not the connection pool state
+
 0.9.9.8 2012-04-12
 ------------------
 - _id=0 is being turned into an ObjectID (Issue #551)
