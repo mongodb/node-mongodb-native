@@ -238,7 +238,7 @@ And then there was CRUD
           var doc2 = {mykey:2, docs:[{doc1:1}]};
     
           collection.insert(doc2, {safe:true}, function(err, result) {
-            collection.update({mykey:2}, {$push:{docs:{doc2:1}}, {safe:true}, function(err, result) {});
+            collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {safe:true}, function(err, result) {});
           });
         });
       };
