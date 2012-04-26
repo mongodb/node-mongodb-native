@@ -54,9 +54,9 @@
 											"John Le Drew"]
 
 , "repository" :    { "type" :  "git"
-                    , "url" :   "http://github.com/christkv/node-mongodb-native.git" }
+                    , "url" :   "http://github.com/mongodb/node-mongodb-native.git" }
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
-                    , "url" :   "http://github.com/christkv/node-mongodb-native/issues" }
+                    , "url" :   "http://github.com/mongodb/node-mongodb-native/issues" }
 , "dependencies" : {
   "bson": "0.0.4"
 }                    
