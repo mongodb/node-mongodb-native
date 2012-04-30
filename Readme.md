@@ -97,7 +97,7 @@ The C++ parser uses the js objects both for serialization and deserialization.
 GitHub information
 ========
 
-The source code is available at http://github.com/christkv/node-mongodb-native.
+The source code is available at http://github.com/mongodb/node-mongodb-native.
 You can either clone the repository or download a tarball of the latest release.
 
 Once you have the source you can test the driver by running
@@ -119,11 +119,11 @@ GridStore
 
 The GridStore class allows for storage of binary files in mongoDB using the mongoDB defined files and chunks collection definition.
 
-For more information have a look at [Gridstore](https://github.com/christkv/node-mongodb-native/blob/master/docs/gridfs.md)
+For more information have a look at [Gridstore](https://github.com/mongodb/node-mongodb-native/blob/master/docs/gridfs.md)
 
 Replicasets
 ===========
-For more information about how to connect to a replicaset have a look at [Replicasets](https://github.com/christkv/node-mongodb-native/blob/master/docs/replicaset.md)
+For more information about how to connect to a replicaset have a look at [Replicasets](https://github.com/mongodb/node-mongodb-native/blob/master/docs/replicaset.md)
 
 Primary Key Factories
 --------
@@ -187,8 +187,8 @@ Documentation
 ========
 
 If this document doesn't answer your questions, see the source of
-[Collection](https://github.com/christkv/node-mongodb-native/blob/master/lib/mongodb/collection.js)
-or [Cursor](https://github.com/christkv/node-mongodb-native/blob/master/lib/mongodb/cursor.js),
+[Collection](https://github.com/mongodb/node-mongodb-native/blob/master/lib/mongodb/collection.js)
+or [Cursor](https://github.com/mongodb/node-mongodb-native/blob/master/lib/mongodb/cursor.js),
 or the documentation at MongoDB for query and update formats.
 
 Find
