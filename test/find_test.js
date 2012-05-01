@@ -640,7 +640,8 @@ exports.shouldCorrectlyFindAndModifyDocument = function(test) {
         // Test return old document on change
         collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
           // Let's modify the document in place
-          collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result) {
+          collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result, object) {
+            console.dir(object)
             test.equal(2, result.a);
             test.equal(2, result.b);
 
@@ -1631,6 +1632,43 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = function(test) {
     });
   });  
 }
+
+/**
+ * A simple query with a different batchSize
+ */
+exports.shouldPerformQueryWithBatchSizeDifferentToStandard = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.createCollection('shouldPerformQueryWithBatchSizeDifferentToStandard', function(err, collection) {      
+      test.equal(null, err);
+      
+      var docs = [];      
+      for(var i = 0; i < 1000; i++) {
+        docs.push({a:i});
+      }
+      
+      // Insert a bunch of documents for the testing
+      collection.insert(docs, {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        // Peform a simple find and return all the documents
+        collection.find({}, {batchSize:1000}).toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(1000, docs.length);
+          
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });  
+}
+
 
 /**
  * Retrieve the server information for the current
