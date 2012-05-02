@@ -13,6 +13,7 @@ var testCase = require('nodeunit').testCase,
   Double = mongodb.Double,
   MinKey = mongodb.MinKey,
   MaxKey = mongodb.MaxKey,
+  BinaryParser = mongodb.BinaryParser,
   Timestamp = mongodb.Timestamp,
   Long = mongodb.Long,
   ObjectID = mongodb.ObjectID,
@@ -49,9 +50,16 @@ exports.tearDown = function(callback) {
 
 exports['Should Correctly Generate an Insert Command'] = function(test) {
   var full_collection_name = "db.users";
-  var insert_command = new InsertCommand({bson: new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey])}, full_collection_name);
+  var insert_command = new InsertCommand({bson: new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey])}, full_collection_name, false, {keepGoing:true});
   insert_command.add({name: 'peter pan'});
   insert_command.add({name: 'monkey king'});
+  // console.dir(insert_command.toBinary())
+  // // BinaryParser.
+  // var b = insert_command.toBinary();
+  // for(var i = 0 ; i < b.length; i++) {
+  //   console.log("[" + i + "] = [" + b[i] +"]");
+  // }
+  
   // assert the length of the binary
   test.equal(81, insert_command.toBinary().length);
   test.done();
@@ -59,13 +67,17 @@ exports['Should Correctly Generate an Insert Command'] = function(test) {
 
 exports['Should Correctly Generate an Update Command'] = function(test) {
   var full_collection_name = "db.users";
-  var flags = UpdateCommand.DB_UPSERT;
   var selector = {name: 'peter pan'};
-  var document = {name: 'peter pan junior'};
+  var document = {$set: {value:1}};
   // Create the command
-  var update_command = new UpdateCommand({bson: new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey])}, full_collection_name, selector, document, flags);
+  var update_command = new UpdateCommand({bson: new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey])}, full_collection_name, selector, document, {upsert:1});
+
+  // var b = update_command.toBinary();
+  // for(var i = 0 ; i < b.length; i++) {
+  //   console.log("[" + i + "] = [" + b[i] +"]");
+  // }
   // assert the length of the binary
-  test.equal(90, update_command.toBinary().length);
+  test.equal(85, update_command.toBinary().length);
   test.done();
 }
 

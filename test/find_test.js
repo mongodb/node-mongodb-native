@@ -1669,6 +1669,27 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = function(test) {
   });  
 }
 
+/**
+ * A simple query with a different batchSize
+ */
+exports.shouldQueryCurrentOperation = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.collection('$cmd.sys.inprog', function(err, collection) {      
+      // Peform a simple find and return all the documents
+      collection.find({}).toArray(function(err, docs) {
+        test.ok(Array.isArray(docs[0].inprog));
+        db.close();
+        test.done();
+      });
+    });
+  });  
+}
 
 /**
  * Retrieve the server information for the current
