@@ -2051,6 +2051,7 @@ exports.execCursorLevelMapReduce = function(test) {
         // Retrieve all the documents in the collection
         collection.find().mapReduce(function(i, output, next){ 
 	  output.push(i.b[0] + i.b[1]); 
+          next();
         }, function(output){
           test.equal(1, output.length, 'Cursor-level mapReduce fails');
           test.equal(3, output[0], 'Cursor-level mapReduce fails');
