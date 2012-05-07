@@ -641,7 +641,6 @@ exports.shouldCorrectlyFindAndModifyDocument = function(test) {
         collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
           // Let's modify the document in place
           collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result, object) {
-            console.dir(object)
             test.equal(2, result.a);
             test.equal(2, result.b);
 

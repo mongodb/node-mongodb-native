@@ -127,6 +127,24 @@ exports['Should Correctly Generate a Query Command'] = function(test) {
   test.done();
 }
 
+// exports['Should Correctly Generate a isMaster command'] = function(test) {
+//   var full_collection_name = "admin.$cmd";
+//   var options = QueryCommand.OPTS_NO_CURSOR_TIMEOUT;
+//   var numberToSkip = 0;
+//   var numberToReturn = -1;
+//   var query = {ismaster:1};
+//   var query_command = new QueryCommand({bson: new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey])}, full_collection_name, options, numberToSkip, numberToReturn, query, null);
+//   for(var i = 0; i < query_command.toBinary().length; i++) {
+//     console.log(query_command.toBinary()[i])
+//   }
+//   // // assert the length of the binary
+//   // test.equal(62, query_command.toBinary().length);
+//   // // Generate command with return field filter
+//   // query_command = new QueryCommand({bson: new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey])}, full_collection_name, options, numberToSkip, numberToReturn, query, { a : 1, b : 1, c : 1});
+//   // test.equal(88, query_command.toBinary().length);
+//   test.done();
+// }
+
 /**
  * Retrieve the server information for the current
  * instance of the db client

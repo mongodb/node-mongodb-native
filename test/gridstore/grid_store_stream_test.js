@@ -227,6 +227,52 @@ exports.shouldCorrectlyReadFileUsingStream = function(test) {
     });
   });
 }
+
+/**
+ * A simple example showing how to pipe a file stream through from gridfs to a file
+ *
+ * @_class gridstore
+ * @_function stream
+ * @ignore
+ */
+exports.shouldCorrectlyPipeAGridFsToAfile = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    // Open a file for writing
+    var gridStoreWrite = new GridStore(db, "test_gs_read_stream_pipe", "w");
+    gridStoreWrite.writeFile("./test/gridstore/test_gs_weird_bug.png", function(err, result) {      
+      // Open the gridStore for reading and pipe to a file
+      var gridStore = new GridStore(db, "test_gs_read_stream_pipe", "r");
+      gridStore.open(function(err, gridStore) {
+        // Grab the read stream
+        var stream = gridStore.stream(true);
+        // When the stream is finished close the database
+        stream.on("end", function(err) {          
+          // Read the original content
+          var originalData = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
+          // Ensure we are doing writing before attempting to open the file
+          fs.readFile("./test_gs_weird_bug_streamed.tmp", function(err, streamedData) {
+            // Compare the data
+            test.deepEqual(originalData, streamedData);
+            
+            // Close the database
+            db.close();
+            test.done();          
+          });
+        })
+
+        // Create a file write stream
+        var fileStream = fs.createWriteStream("./test_gs_weird_bug_streamed.tmp");
+        // Pipe out the data
+        stream.pipe(fileStream);
+      })
+    })
+  });
+}
+
   
 /** 
  * @ignore
