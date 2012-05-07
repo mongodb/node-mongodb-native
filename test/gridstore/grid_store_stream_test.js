@@ -242,7 +242,7 @@ exports.shouldCorrectlyPipeAGridFsToAfile = function(test) {
   // Establish connection to db  
   db.open(function(err, db) {
     // Open a file for writing
-    var gridStoreWrite = new GridStore(db, "test_gs_read_stream_pipe", "w");
+    var gridStoreWrite = new GridStore(db, "test_gs_read_stream_pipe", "w", {chunkSize:1024});
     gridStoreWrite.writeFile("./test/gridstore/test_gs_weird_bug.png", function(err, result) {      
       // Open the gridStore for reading and pipe to a file
       var gridStore = new GridStore(db, "test_gs_read_stream_pipe", "r");
