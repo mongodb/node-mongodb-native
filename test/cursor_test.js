@@ -2030,6 +2030,39 @@ exports.noGlobalsLeaked = function(test) {
 }
 
 /**
+ * An example showing the information returned by cursor-level map-reduce.
+ *
+ * @_class cursor
+ * @_function toArray
+ */
+exports.execCursorLevelMapReduce = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection to hold our documents
+    db.createCollection('test_array', function(err, collection) {
+      
+      // Insert a test document
+      collection.insert({'b':[1, 2, 3]}, {safe:true}, function() {
+        
+        // Retrieve all the documents in the collection
+        collection.find().mapReduce(function(i, output, next){ 
+	  output.push(i.b[0] + i.b[1]); 
+          next();
+        }, function(output){
+          test.equal(1, output.length, 'Cursor-level mapReduce fails');
+          test.equal(3, output[0], 'Cursor-level mapReduce fails');
+          test.done();
+        });
+      });
+    });  
+  });  
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 

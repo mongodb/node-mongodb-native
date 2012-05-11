@@ -196,7 +196,7 @@ Find
 
 The find method is actually a factory method to create
 Cursor objects. A Cursor lazily uses the connection the first time
-you call `nextObject`, `each`, or `toArray`.
+you call `nextObject`, `each`, `toArray` or `mapReduce`.
 
 The basic operation on a cursor is the `nextObject` method
 that fetches the next matching document from the database. The convenience
@@ -210,6 +210,12 @@ Signatures:
     cursor.nextObject(function(err, doc) {});
     cursor.each(function(err, doc) {});
     cursor.toArray(function(err, docs) {});
+
+    //Read next element from the cursor and pass it as doc parameter.
+    //Document can be mapped and reduced into the output document.
+    //After reducing the function should call next() function and moves to the next document.
+    cursor.mapReduce(function(doc, output, next) {}, function(output) {});
+    cursor.mapReduce(function(doc, output, next) {}, new Array(), function(output) {});
 
     cursor.rewind()  // reset the cursor to its initial state.
 
