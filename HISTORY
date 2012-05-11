@@ -2,6 +2,7 @@
 ----------------
 - Passing back getLastError object as 3rd parameter on findAndModify command.
 - Fixed a bunch of performance regressions in objectId and cursor.
+- Fixed issue #600 allowing for single document delete to be passed in remove command.
 
 1.0.0 2012-04-25
 ----------------
