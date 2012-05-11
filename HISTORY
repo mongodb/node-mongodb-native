@@ -1,6 +1,7 @@
 1.0.1
 ----------------
 - Passing back getLastError object as 3rd parameter on findAndModify command.
+- Fixed a bunch of performance regressions in objectId and cursor.
 
 1.0.0 2012-04-25
 ----------------
