@@ -173,6 +173,29 @@ exports.shouldCorrectlyRemoveDocumentUsingRegExp = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyRemoveOnlyFirstDocument = function(test) {
+  client.createCollection('shouldCorrectlyRemoveOnlyFirstDocument', function(err, r) {
+    client.collection('shouldCorrectlyRemoveOnlyFirstDocument', function(err, collection) {
+      collection.insert([{a:1}, {a:1}, {a:1}, {a:1}], {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        // Remove the first
+        collection.remove({a:1}, {safe:true, simple:true}, function(err, number) {
+          test.equal(1, number);
+          
+          collection.find({a:1}).count(function(err, result) {
+            test.equal(3, result);
+            test.done();
+          });
+        });
+      });
+    });
+  });    
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
