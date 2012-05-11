@@ -242,6 +242,7 @@ Removes documents specified by <code>selector</code> from the db.
 
 Options
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+ - **single** {Boolean, default:false}, removes the first document found.
 
 .. js:function:: remove([selector][, options], [callback])
 
