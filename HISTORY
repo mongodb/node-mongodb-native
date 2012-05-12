@@ -1,4 +1,4 @@
-1.0.1
+1.0.1 2012-05-12
 ----------------
 - Passing back getLastError object as 3rd parameter on findAndModify command.
 - Fixed a bunch of performance regressions in objectId and cursor.

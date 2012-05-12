@@ -182,7 +182,7 @@ exports.shouldCorrectlyRemoveOnlyFirstDocument = function(test) {
         test.equal(null, err);
         
         // Remove the first
-        collection.remove({a:1}, {safe:true, simple:true}, function(err, number) {
+        collection.remove({a:1}, {safe:true, single:true}, function(err, number) {
           test.equal(1, number);
           
           collection.find({a:1}).count(function(err, result) {
