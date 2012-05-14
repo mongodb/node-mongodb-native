@@ -126,13 +126,22 @@ exports.shouldContinueToQueryWithPrimaryNodeSteppedDown = function(test) {
               if (err) {
                 console.log("============================= caught error");
                 console.dir(err);
-                if (err.stack != null) console.log(err.stack);
-              }
-              test.ok(err == null);
-              test.ok(doc == null);
 
-              p_db.close();
-              test.done();
+								collection.findOne(function (err, doc) {
+									test.equal(null, err);
+		              test.ok(doc == null);	
+									
+		              p_db.close();
+		              test.done();
+	                // if (err.stack != null) console.log(err.stack);
+								});
+              } else {
+	              test.ok(err == null);
+	              test.ok(doc == null);	
+
+	              p_db.close();
+	              test.done();
+							}
             });
           });
         });
