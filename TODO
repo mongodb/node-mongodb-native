@@ -1,2 +1,4 @@
 TODO
-- Add url format information for Db.connect to documentation
+- Mongos connection
+- Gridfs streaming node.js read/write
+- toBson methods on serializer to allow for simpler serialization of complex objects

@@ -19,6 +19,7 @@ var ServerManager = exports.ServerManager = function(options) {
   this.auth = options['auth'] != null ? options['auth'] : false; 
   this.ssl = options['ssl'] != null ? options['ssl'] : false; 
   this.purgedirectories = options['purgedirectories'] != null ? options['purgedirectories'] : true;
+  this.configServer = options['configserver'] != null ? options['configserver'] : false;
 
   // Server status values
   this.up = false;
@@ -33,12 +34,9 @@ ServerManager.prototype.start = function(killall, callback) {
   callback = args.pop();
   killall = args.length ? args.shift() : true;  
   // Create start command
-  var startCmd = generateStartCmd(this, {log_path: self.log_path, 
+  var startCmd = generateStartCmd(this, {configserver:self.configServer, log_path: self.log_path, 
     db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl});
     
-  // console.log("----------------------------------------------------------------------- start")
-  // console.log(startCmd)
-  
   exec(killall ? 'killall mongod' : '', function(err, stdout, stderr) {
     if(self.purgedirectories) {
       // Remove directory
@@ -128,10 +126,11 @@ var getPath = function(self, name) {
 // Generate start command
 var generateStartCmd = function(self, options) {
   // Create boot command
-  var startCmd = "mongod --noprealloc --logpath '" + options['log_path'] + "' " +
+  var startCmd = "mongod --noprealloc --smallfiles --logpath '" + options['log_path'] + "' " +
       " --dbpath " + options['db_path'] + " --port " + options['port'] + " --fork";
-  startCmd = options['journal'] ? startCmd + "  --journal" : startCmd;
-  startCmd = options['auth'] ? startCmd + "  --auth" : startCmd;
+  startCmd = options['journal'] ? startCmd + " --journal" : startCmd;
+  startCmd = options['auth'] ? startCmd + " --auth" : startCmd;
+  startCmd = options['configserver'] ? startCmd + " --configsvr" : startCmd;
   // If we have ssl defined set up with test certificate
   if(options['ssl']) {
     var path = getPath(self, '../test/certificates');

@@ -15,7 +15,7 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.startPort = options["start_port"] || 30000;
   this.ports = [];
   this.name = options["name"] != null ? options["name"] : "replica-set-foo";
-  this.host = options["host"] != null ? options["host"] : "127.0.0.1";
+  this.host = options["host"] != null ? options["host"] : "localhost";
   this.retries = options["retries"] != null ? options["retries"] : 60;
   this.config = {"_id": this.name, "version": 1, "members": []};
   this.durable = options["durable"] != null ? options["durable"] : false;

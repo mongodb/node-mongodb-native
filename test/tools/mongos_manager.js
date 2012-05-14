@@ -8,38 +8,38 @@ var debug = require('util').debug,
   Db = require('../../lib/mongodb').Db,
   Server = require('../../lib/mongodb').Server;
   
-var ShardingManager = exports.ShardingManager = function(options) {
+var MongosManager = exports.MongosManager = function(options) {
   options = options == null ? {} : options;
   // Basic unpack values
   this.path = path.resolve("data");
-  this.port = options["start_port"] != null ? options["start_port"] : 27017;  
-  this.number_of_sharding_servers = options["number_of_sharding_servers"] != null ? options["number_of_sharding_servers"] : 2;
-  this.number_of_config_servers = options["number_of_config_servers"] != null ? options["number_of_config_servers"] : 1;
+  this.port = options["start_port"] != null ? options["start_port"] : 50000;  
   this.db_path = getPath(this, "data-" + this.port);
   this.log_path = getPath(this, "log-" + this.port);
-  this.journal = options["journal"] != null ? options["journal"] : false;   
-  this.auth = options['auth'] != null ? options['auth'] : false; 
-  this.ssl = options['ssl'] != null ? options['ssl'] : false; 
+  this.pidfilepath = this.db_path;
+  this.configServer = options['configservers'] != null ? options['configservers'] : null;
   this.purgedirectories = options['purgedirectories'] != null ? options['purgedirectories'] : true;
-
+  if(this.configServer == null) throw new Error("one or tree config servers needed in an array");
+ 
   // Server status values
   this.up = false;
   this.pid = null;
 }
 
 // Start up the server instance
-ShardingManager.prototype.start = function(killall, callback) {
+MongosManager.prototype.start = function(killall, callback) {
   var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
   callback = args.pop();
   killall = args.length ? args.shift() : true;  
   // Create start command
-  var startCmd = generateStartCmd(this, {log_path: self.log_path, 
-    db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl});
+  var startCmd = generateStartCmd(this, {pidfilepath:self.pidfilepath, configserver:self.configServer, log_path: self.log_path, 
+    db_path: self.db_path, port: self.port, ssl:self.ssl});
     
-  // Purge function for the data directory
-  var purgeFunction = function() {
+  // console.log("------------------------------------------------------------------------------")
+  // console.log(startCmd)
+    
+  exec(killall ? 'killall mongos' : '', function(err, stdout, stderr) {
     if(self.purgedirectories) {
       // Remove directory
       exec("rm -rf " + self.db_path, function(err, stdout, stderr) {
@@ -61,7 +61,7 @@ ShardingManager.prototype.start = function(killall, callback) {
           setTimeout(function() {        
             // Mark server as running
             self.up = true;
-            self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
+            self.pid = fs.readFileSync(path.join(self.db_path, "mongos.lock"), 'ascii').trim();
             // Callback
             callback();
           }, 500);
@@ -69,7 +69,7 @@ ShardingManager.prototype.start = function(killall, callback) {
       });        
     } else {
       // Ensure we remove the lock file as we are not purging the directory
-      fs.unlinkSync(path.join(self.db_path, "mongod.lock"));
+      fs.unlinkSync(path.join(self.db_path, "mongos.lock"));
       
       // Start up mongod process
       var mongodb = exec(startCmd,
@@ -83,24 +83,15 @@ ShardingManager.prototype.start = function(killall, callback) {
       setTimeout(function() {        
         // Mark server as running
         self.up = true;
-        self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
+        self.pid = fs.readFileSync(path.join(self.db_path, "mongos.lock"), 'ascii').trim();
         // Callback
         callback();
       }, 5000);      
     }
-  }
-  
-  // If we specified kill all the instances do that then purge the directories
-  if(killall) {
-    this.killAll(function() {
-      purgeFunction();
-    });
-  } else {
-    purgeFunction();
-  }
+  });
 }
 
-ShardingManager.prototype.stop = function(signal, callback) {
+MongosManager.prototype.stop = function(signal, callback) {
   var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
@@ -108,12 +99,15 @@ ShardingManager.prototype.stop = function(signal, callback) {
   signal = args.length ? args.shift() : 2;  
   // Stop the server
   var command = "kill -" + signal + " " + self.pid;
+	console.log("--------------------------------------------- STOP")
+	console.log(command)
+
   // Kill process
   exec(command,
     function (error, stdout, stderr) {
       // console.log('stdout: ' + stdout);
       // console.log('stderr: ' + stderr);
-      if (error != null) {
+      if (error !== null) {
         console.log('exec error: ' + error);
       }
 
@@ -123,13 +117,9 @@ ShardingManager.prototype.stop = function(signal, callback) {
   });    
 }
 
-ShardingManager.prototype.killAll = function(callback) {
-	// Kill all mongos instances
-  exec('killall mongos', function(err, stdout, stderr) {
-    // Kill all mongod instances
-    exec('killall mongod', function(err, stdout, stderr) {
-      callback(null, null);
-    });
+MongosManager.prototype.killAll = function(callback) {
+  exec('killall mongod', function(err, stdout, stderr) {
+    callback(null, null);
   });
 }
 
@@ -141,10 +131,9 @@ var getPath = function(self, name) {
 // Generate start command
 var generateStartCmd = function(self, options) {
   // Create boot command
-  var startCmd = "mongod --noprealloc --logpath '" + options['log_path'] + "' " +
-      " --dbpath " + options['db_path'] + " --port " + options['port'] + " --fork";
-  startCmd = options['journal'] ? startCmd + "  --journal" : startCmd;
-  startCmd = options['auth'] ? startCmd + "  --auth" : startCmd;
+  var startCmd = "mongos --logpath '" + options['log_path'] + "' " +
+      " --port " + options['port'] + " --fork --pidfilepath " + options['pidfilepath'] + "/mongos.lock";
+  startCmd = options['configserver'] ? startCmd + " --configdb " + options['configserver'].join(",") : startCmd;
   // If we have ssl defined set up with test certificate
   if(options['ssl']) {
     var path = getPath(self, '../test/certificates');
