@@ -42,22 +42,6 @@ exports.setUp = function(callback) {
   Shard.start(function(err, result) {
     callback();
   });
-  
-  // // Create instance of replicaset manager but only for the first call
-  // if(!serversUp && !noReplicasetStart) {
-  //   serversUp = true;
-  //   RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
-  //   RS.startSet(true, function(err, result) {      
-  //     if(err != null) throw err;
-  //     // Finish setup
-  //     callback();      
-  //   });      
-  // } else {    
-  //   RS.restartKilledNodes(function(err, result) {
-  //     if(err != null) throw err;
-  //     callback();        
-  //   })
-  // }
 }
 
 /**
@@ -67,16 +51,9 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
-  callback();
-  // numberOfTestsRun = numberOfTestsRun - 1;
-  // if(numberOfTestsRun == 0) {
-  //   // Finished kill all instances
-  //   RS.killAll(function() {
-  //     callback();              
-  //   })
-  // } else {
-  //   callback();            
-  // }  
+	Shard.killAll(function() {
+  	callback();
+	});
 }
 
 // /**

@@ -39,7 +39,7 @@ MongosManager.prototype.start = function(killall, callback) {
   // console.log("------------------------------------------------------------------------------")
   // console.log(startCmd)
     
-  exec(killall ? 'killall mongos' : '', function(err, stdout, stderr) {
+  exec(killall ? 'killall -9 mongos' : '', function(err, stdout, stderr) {
     if(self.purgedirectories) {
       // Remove directory
       exec("rm -rf " + self.db_path, function(err, stdout, stderr) {
@@ -116,7 +116,7 @@ MongosManager.prototype.stop = function(signal, callback) {
 }
 
 MongosManager.prototype.killAll = function(callback) {
-  exec('killall mongod', function(err, stdout, stderr) {
+  exec('killall -9 mongos', function(err, stdout, stderr) {
     callback(null, null);
   });
 }

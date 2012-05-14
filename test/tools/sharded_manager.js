@@ -1,6 +1,7 @@
 var ReplicaSetManager = require('./replica_set_manager').ReplicaSetManager,
   ServerManager = require('./server_manager').ServerManager,
   MongosManager = require('./mongos_manager').MongosManager,
+  exec = require('child_process').exec,
   Db = require('../../lib/mongodb').Db,
   Server = require('../../lib/mongodb').Server;
 
@@ -97,6 +98,15 @@ ShardedManager.prototype.start = function(callback) {
         });                  
       });
     });
+  });
+}
+
+// Kill everything
+ShardedManager.prototype.killAll = function(callback) {
+  exec('killall -9 mongod', function(err, stdout, stderr) {
+	  exec('killall -9 mongos', function(err, stdout, stderr) {
+    	callback(null, null);
+		});
   });
 }
 
