@@ -17,7 +17,6 @@ var ReplicaSetManager = require('./replica_set_manager').ReplicaSetManager,
 //
 var ShardedManager = function ShardedManager(options) {  
   options = options == null ? {} : options;
-
   // Number of config servers
   this.numberOfConfigServers = options["numberOfConfigServers"] != null ? options["numberOfConfigServers"] : 1;
   if(this.numberOfConfigServers != 1 && this.numberOfConfigServers != 3) throw new Error("Only 1 or 3 config servers can be used");
@@ -102,13 +101,26 @@ ShardedManager.prototype.start = function(callback) {
 }
 
 // Kills the first server
-ShardedManager.prototype.killMongoS = function(port, callback) {	
+ShardedManager.prototype.killMongoS = function(port, callback) {		
 	// Locate the server instance and kill it
 	for(var i = 0; i < this.mongosProxies.length; i++) {
 		var proxy = this.mongosProxies[i];
 		// If it's the right one kill it
 		if(proxy.port == port) {
 			proxy.stop(9, callback);
+		}
+	}
+}
+
+// Restart a specific mongos server
+ShardedManager.prototype.restartMongoS = function(port, callback) {
+	// Locate the server instance and kill it
+	for(var i = 0; i < this.mongosProxies.length; i++) {
+		var proxy = this.mongosProxies[i];
+		
+		// If it's the right one restart it		
+		if(proxy.port == port) {
+			proxy.start(false, callback);
 		}
 	}
 }
@@ -147,18 +159,23 @@ var setupShards = function(self, callback) {
 
 var startMongosProxies = function(self, callback) {
   if(self.mongosProxies.length == 0) throw new Error("need at least one mongos server");  
+	// Set up only the first to kill all
+	var killAll = true;
   // Boot up the number of config servers needed
   var mongosProxiesToStart = self.numberOfMongosServers;  
   // Boot up mongos proxies
   for(var i = 0; i < self.mongosProxies.length; i++) {
     // Start server
-    self.mongosProxies[i].start(false, function(err, result) {
+    self.mongosProxies[i].start(killAll, function(err, result) {		
       mongosProxiesToStart = mongosProxiesToStart - 1;
       
       if(mongosProxiesToStart == 0) {
         callback(null);          
       }
     });
+
+		// Set killall to false
+		killAll = false;
   }  
 }
 

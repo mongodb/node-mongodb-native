@@ -99,9 +99,7 @@ MongosManager.prototype.stop = function(signal, callback) {
   signal = args.length ? args.shift() : 2;  
   // Stop the server
   var command = "kill -" + signal + " " + self.pid;
-	console.log("--------------------------------------------- STOP")
-	console.log(command)
-
+	// console.log(command)
   // Kill process
   exec(command,
     function (error, stdout, stderr) {

@@ -115,7 +115,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
   var mongos = new Mongos([
       new Server("localhost", 50000, { auto_reconnect: true }),
       new Server("localhost", 50001, { auto_reconnect: true })
-    ])
+    ], {ha:true})
   
   // Connect using the mongos connections
   var db = new Db('integration_test_', mongos);
@@ -134,16 +134,48 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
 				
 				// Attempt another insert
 				collection.insert({test:2}, {safe:true}, function(err, result) {
-					console.log("-------------------------------------------------------------------")
-					console.dir(err)
-					console.dir(result)
-					
-					
-					
-					// test.equal(null, err);
+					test.equal(null, err);
+					test.equal(1, db.serverConfig.downServers.length);
 								
-					db.close();
-			    test.done();
+					// Restart the other mongos
+					Shard.restartMongoS(50000, function(err, result) {
+						
+						// Wait for the ha process to pick up the existing new server
+						setTimeout(function() {
+							test.equal(0, db.serverConfig.downServers.length);
+
+							// Kill the mongos proxy
+							Shard.killMongoS(50001, function(err, result) {
+								// Attempt another insert
+								collection.insert({test:3}, {safe:true}, function(err, result) {
+									test.equal(null, err);
+									test.equal(1, db.serverConfig.downServers.length);
+
+									// Restart the other mongos
+									Shard.restartMongoS(50001, function(err, result) {
+										// Wait for the ha process to pick up the existing new server
+										setTimeout(function() {
+											// Kill the mongos proxy
+											Shard.killMongoS(50000, function(err, result) {
+												// Attempt another insert
+												collection.insert({test:4}, {safe:true}, function(err, result) {
+													test.equal(null, err);
+
+													// Wait for the ha process to pick up the existing new server
+													setTimeout(function() {
+														test.equal(1, db.serverConfig.downServers.length);
+
+														db.close();
+												    test.done();							
+													}, 5000);										
+												});
+											});													
+										}, 10000);
+									});
+								});
+							});
+						}, 10000)						
+					});								
 				})
 			})			
 		});
