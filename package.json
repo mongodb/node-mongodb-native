@@ -1,7 +1,7 @@
 { "name" :            "mongodb"
 , "description" :     "A node.js driver for MongoDB"
 , "keywords" :        ["mongodb", "mongo", "driver", "db"]
-, "version" :         "1.0.1"
+, "version" :         "1.1.0"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  [ "Aaron Heckmann",
                       "Christoph Pojer",
@@ -58,13 +58,13 @@
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
                     , "url" :   "http://github.com/mongodb/node-mongodb-native/issues" }
 , "dependencies" : {
-  "bson": "0.0.5"
+  "bson": "0.0.6"
 }                    
 , "devDependencies": {
       "dox": "0.2.0"
     , "uglify-js": "1.2.5"
     , "ejs": "0.6.1"
-    , "nodeunit": "0.7.3"
+    , "nodeunit": "0.7.4"
     , "github3": ">=0.3.0"
 	  , "markdown": "0.3.1"
 	  , "gleak": "0.2.3"

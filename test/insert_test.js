@@ -1199,6 +1199,27 @@ exports.shouldCorrectlyPerformLargeTextInsert = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = function(test) {
+  client.createCollection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON', function(err, collection) {
+    // Create document with toBSON method
+		var doc = {a:1, b:1};
+		doc.toBSON = function() { return {c:this.a}};
+    
+    collection.insert(doc, {safe:true}, function(err, result) {
+      test.equal(null, err);
+      
+      collection.findOne({c:1}, function(err, doc) {
+        test.equal(null, err);
+        test.deepEqual(1, doc.c);
+        test.done();
+      });
+    });    
+  });    
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
