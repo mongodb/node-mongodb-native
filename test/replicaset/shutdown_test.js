@@ -97,62 +97,6 @@ exports.tearDown = function(callback) {
 /**
  * @ignore
  */
-exports.shouldContinueToQueryWithPrimaryNodeSteppedDown = function(test) {
-  var replSet = new ReplSetServers( [ 
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
-    {rs_name:RS.name, read_secondary:true}
-  );
-
-  ensureConnection(test, retries, function(err) {
-    test.ok(err == null);
-    
-    new Db('integration_test_', replSet).open(function(err, p_db) {    
-      test.ok(err == null);
-      test.equal(true, p_db.serverConfig.isConnected());
-      
-      p_db.createCollection('empty', function (err, collection) {
-        // Run a simple query
-        collection.findOne(function (err, doc) {
-          test.ok(err == null);
-          test.ok(doc == null);
-
-          // Step down primary server
-          RS.stepDownPrimary(function (err, result) {
-            // Run a simple query
-            collection.findOne(function (err, doc) {
-              if (err) {
-                console.log("============================= caught error");
-                console.dir(err);
-
-								collection.findOne(function (err, doc) {
-									test.equal(null, err);
-		              test.ok(doc == null);	
-									
-		              p_db.close();
-		              test.done();
-	                // if (err.stack != null) console.log(err.stack);
-								});
-              } else {
-	              test.ok(err == null);
-	              test.ok(doc == null);	
-
-	              p_db.close();
-	              test.done();
-							}
-            });
-          });
-        });
-      });
-    });        
-  });
-}
-
-/**
- * @ignore
- */
 exports.shouldContinueToQueryWithPrimaryNodeShutdown = function(test) {
   var replSet = new ReplSetServers( [ 
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
