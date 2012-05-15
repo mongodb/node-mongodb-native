@@ -3,6 +3,10 @@
 - Added Mongos connection type with a fallback list for mongos proxies, supports ha (off by default) and will attempt to reconnect to failed proxies.
 - Documents can now have a toBSON method that lets the user control the serialization behavior for documents being saved.
 
+1.0.2 2012-05-15
+----------------
+- Reconnect functionality for replicaset fix for mongodb 2.0.5
+
 1.0.1 2012-05-12
 ----------------
 - Passing back getLastError object as 3rd parameter on findAndModify command.
