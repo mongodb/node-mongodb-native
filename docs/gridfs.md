@@ -1,7 +1,7 @@
 GridStore
 ======
 
-GridFS is a scalable MongoDB *filesystem* for storing and retrieving large files. The default limit for a MongoDB record is 16MB, so to store data that is larger than this limit, GridFS can be used. GridFS shards the data into smaller chunks automatically. See [MongoDB documentation](http://www.mongodb.org/display/DOCS/GridFS+Specification) for details.
+GridFS is a scalable MongoDB *filesystem* for storing and retrieving large files. The default limit for a MongoDB record is 16MB, so to store data that is larger than this limit, GridFS can be used. GridFS shards the data into smaller chunks automatically.  See [MongoDB documentation](http://www.mongodb.org/display/DOCS/GridFS+Specification) for details.
 
 GridStore is a single file inside GridFS that can be managed by the script.
 
@@ -15,7 +15,7 @@ Where
 
   * `db` is the database object
   * `filename` is the name of the file in GridFS that needs to be accessed/created
-  * `mode` indicated the operaion, can be one of:
+  * `mode` indicated the operation, can be one of:
     * "r" (Read): Looks for the file information in fs.files collection, or creates a new id for this object. 
     * "w" (Write): Erases all chunks if the file already exist. 
     * "w+" (Append): Finds the last chunk, and keeps writing after it. 
@@ -59,17 +59,17 @@ Writing can be done with `write`
     
 where `data` is a `Buffer` or a string, callback gets two parameters - an error object (if error occured) and result value which indicates if the write was successful or not.
 
-While the GridStore is not closed,  every write is appended to the opened GridStore.
+While the GridStore is not closed, every write is appended to the opened GridStore.
 
 ## Writing a file to GridStore
 
-This functions opens the gridstore, streams the contents of the file into gridstore, and closes the gridstore.
+This function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.
 
     gs.writeFile( file, callback )
     
 where
 
-  * `file` is a file descriptior, or a string file path
+  * `file` is a file descriptor, or a string file path
   * `callback` is a function with two parameters - error object (if error occured) and the GridStore object.
 
 
@@ -104,7 +104,7 @@ GridStore files can be unlinked with `unlink`
 
 Where
 
-  * `db` is the databse object
+  * `db` is the database object
   * `name` is either the name of a GridStore object or an array of GridStore object names
   * `callback` is the callback function
 
