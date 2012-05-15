@@ -140,14 +140,28 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
                             test.equal(1, results[1].a);
                             test.equal(1, results[1].value);
                             
-                            // Correctly handle illegal function when using the EVAL method
-                            collection.group([], {}, {}, "5 ++ 5", false, function(err, results) {
-                              test.ok(err instanceof Error);
-                              test.ok(err.message != null);
-
-                              db.close();
-                              test.done();
-                            });                          
+                            // Use a Code object to select the keys used to group by
+                            var keyf = new Code(function(doc) { return {a: doc.a}; });
+                            collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}
+                              , function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
+                              // Results                        
+                              results.sort(function(a, b) { return b.count - a.count; });
+                              test.equal(2, results[0].count);
+                              test.equal(2, results[0].a);
+                              test.equal(4, results[0].value);
+                              test.equal(1, results[1].count);
+                              test.equal(1, results[1].a);
+                              test.equal(1, results[1].value);
+                              
+                              // Correctly handle illegal function when using the EVAL method
+                              collection.group([], {}, {}, "5 ++ 5", false, function(err, results) {
+                                test.ok(err instanceof Error);
+                                test.ok(err.message != null);
+  
+                                db.close();
+                                test.done();
+                              });
+                            });
                           });
                         });
                       });
