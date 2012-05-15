@@ -2,6 +2,8 @@
 ----------------
 - Added Mongos connection type with a fallback list for mongos proxies, supports ha (off by default) and will attempt to reconnect to failed proxies.
 - Documents can now have a toBSON method that lets the user control the serialization behavior for documents being saved.
+- Gridstore instance object now works as a readstream or writestream (thanks to code from Aaron heckmann (https://github.com/aheckmann/gridfs-stream))
+- Fix gridfs readstream (Issue #607, https://github.com/tedeh)
 
 1.0.2 2012-05-15
 ----------------
