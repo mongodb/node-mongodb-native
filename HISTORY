@@ -4,6 +4,8 @@
 - Documents can now have a toBSON method that lets the user control the serialization behavior for documents being saved.
 - Gridstore instance object now works as a readstream or writestream (thanks to code from Aaron heckmann (https://github.com/aheckmann/gridfs-stream))
 - Fix gridfs readstream (Issue #607, https://github.com/tedeh)
+- Added disableDriverBSONSizeCheck property to Server.js for people who wish to push the inserts to the limit (Issue #609)
+- Fixed bug where collection.group keyf given as Code is processed as a regular object (Issue #608, https://github.com/rrusso2007)
 
 1.0.2 2012-05-15
 ----------------
