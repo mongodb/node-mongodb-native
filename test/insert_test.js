@@ -1220,6 +1220,38 @@ exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldAttempToForceBsonSize = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL, disableDriverBSONSizeCheck:true}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {    
+    db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
+      // var doc = {a:1, b:new Binary(new Buffer(16777216)/5)}
+      var doc = [
+        {a:1, b:new Binary(new Buffer(16777216/2))},
+        {a:1, b:new Binary(new Buffer(16777216/2))},
+        {a:1, b:new Binary(new Buffer(16777216/2))},
+      ]    
+    
+      collection.insert(doc, {safe:true}, function(err, result) {
+        test.equal(null, err);
+      
+        collection.findOne({a:1}, function(err, doc) {
+          test.equal(null, err);
+          test.deepEqual(1, doc.a);
+
+          db.close();
+          test.done();
+        });
+      });    
+    });    
+  })
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
