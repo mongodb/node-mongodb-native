@@ -1252,6 +1252,31 @@ exports.shouldAttempToForceBsonSize = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyUseCustomObjectToUpdateDocument = function(test) {
+  client.createCollection('shouldCorrectlyExecuteSaveInsertUpdate', function(err, collection) {
+    collection.insert({a:{b:{c:1}}}, {safe:true}, function(err, result) {
+      test.equal(null, err);
+      
+      // Dynamically build query
+      var query = {};
+      query['a'] = {};
+      query.a['b'] = {};
+      query.a.b['c'] = 1;
+      
+      // Update document
+      collection.update(query, {$set: {'a.b.d':1}}, {safe:true}, function(err, numberUpdated) {
+        test.equal(null, err);
+        test.equal(1, numberUpdated);
+        
+        test.done();
+      });
+    })
+  });    
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
