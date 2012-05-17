@@ -1,4 +1,4 @@
-Main Documentation site
+Up to date documentation
 =======================
 
 [Documentation](http://mongodb.github.com/node-mongodb-native/)
@@ -291,8 +291,7 @@ Update; update and insert (upsert)
 
 The update operation will update the first document that matches your query
 (or all documents that match if you use `multi:true`).
-If `safe:true`, `upsert` is not set, and no documents match, your callback
-will be given an error.
+If `safe:true`, `upsert` is not set, and no documents match, your callback will return 0 documents updated.
 
 See the [MongoDB docs](http://www.mongodb.org/display/DOCS/Updating) for
 the modifier (`$inc`, `$set`, `$push`, etc.) formats.
@@ -397,7 +396,7 @@ Aaron Heckmann, Christoph Pojer, Pau Ramon Revilla, Nathan White, Emmerman, Seth
 License
 ========
 
- Copyright 2009 - 2010 Christian Amor Kvalheim.
+ Copyright 2009 - 2012 Christian Amor Kvalheim.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
