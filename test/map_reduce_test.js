@@ -281,12 +281,15 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
             collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}, function(err, results, stats) {
               test.equal(2, results.length);
               test.ok(stats != null);
-              
-              db.close();
-              test.done();
-            });          
+
+              collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}, function(err, results, stats) {
+                test.ok(stats != null);
+                db.close();
+                test.done();
+              });
+            });
           });
-        });      
+        });
       } else {
         test.done();
       }
