@@ -56,33 +56,36 @@ exports.tearDown = function(callback) {
 	});
 }
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
-//   // Set up mongos connection
-//   var mongos = new Mongos([
-//       new Server("localhost", 50000, { auto_reconnect: true }),
-//       new Server("localhost", 50001, { auto_reconnect: true })
-//     ])
-//   
-//   // Connect using the mongos connections
-//   var db = new Db('integration_test_', mongos);
-//   db.open(function(err, db) {
-// 		test.equal(null, err);
-// 		test.ok(db != null);
-// 	
-// 		// Perform a simple insert into a collection
-// 		var collection = db.collection("shard_test");
-// 		// Insert a simple doc
-// 		collection.insert({test:1}, {safe:true}, function(err, result) {
-// 			test.equal(null, err);
-// 			
-// 			db.close();
-// 	    test.done();
-// 		});
-//   });  
-// }
+/**
+ * A Simple example off connecting to Mongos with a list of alternative proxies.
+ *
+ * @_class db
+ * @_function open
+ */
+exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
+  // Set up mongos connection
+  var mongos = new Mongos([
+      new Server("localhost", 50000, { auto_reconnect: true }),
+      new Server("localhost", 50001, { auto_reconnect: true })
+    ])
+  
+  // Connect using the mongos connections
+  var db = new Db('integration_test_', mongos);
+  db.open(function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+  
+    // Perform a simple insert into a collection
+    var collection = db.collection("shard_test");
+    // Insert a simple doc
+    collection.insert({test:1}, {safe:true}, function(err, result) {
+      test.equal(null, err);
+      
+      db.close();
+      test.done();
+    });
+  });  
+}
 
 /**
  * @ignore

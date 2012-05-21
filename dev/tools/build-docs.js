@@ -21,6 +21,7 @@ var apiClasses = [
     {tag:"readstream", path:"./lib/mongodb/gridfs/readstream.js"},
     {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"},
     {tag:"server", path:"./lib/mongodb/connection/server.js"},
+    {tag:"mongos", path:"./lib/mongodb/connection/mongos.js"},
     {tag:"replset", path:"./lib/mongodb/connection/repl_set.js"}
   ];
   
@@ -37,6 +38,7 @@ var testClasses = [
     {path:"./test/index_test.js"},
     {path:"./test/geo_search_test.js"},
     {path:"./test/replicaset/connect_test.js"},
+    {path:"./test/sharded/simple_sharded_setup_test.js"},
     {path:"./test/connect_test.js"},
     {path:"./test/multiple_dbs_on_connection_pool_test.js"},
     {path:"./test/cursor_test.js"},

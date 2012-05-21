@@ -2,13 +2,16 @@
 ----------------
 - Added Mongos connection type with a fallback list for mongos proxies, supports ha (off by default) and will attempt to reconnect to failed proxies.
 - Documents can now have a toBSON method that lets the user control the serialization behavior for documents being saved.
-- Gridstore instance object now works as a readstream or writestream (thanks to code from Aaron heckmann (https://github.com/aheckmann/gridfs-stream))
-- Fix gridfs readstream (Issue #607, https://github.com/tedeh)
-- Added disableDriverBSONSizeCheck property to Server.js for people who wish to push the inserts to the limit (Issue #609)
-- Fixed bug where collection.group keyf given as Code is processed as a regular object (Issue #608, https://github.com/rrusso2007)
-- Case mismatch between driver's ObjectID and mongo's ObjectId, allow both (Issue #618)
-- Add proper error handling to gridfs (Issue #615, https://github.com/aheckmann)
-- 
+- Gridstore instance object now works as a readstream or writestream (thanks to code from Aaron heckmann (https://github.com/aheckmann/gridfs-stream)).
+- Fix gridfs readstream (Issue #607, https://github.com/tedeh).
+- Added disableDriverBSONSizeCheck property to Server.js for people who wish to push the inserts to the limit (Issue #609).
+- Fixed bug where collection.group keyf given as Code is processed as a regular object (Issue #608, https://github.com/rrusso2007).
+- Case mismatch between driver's ObjectID and mongo's ObjectId, allow both (Issue #618).
+- Cleanup map reduce (Issue #614, https://github.com/aheckmann).
+- Add proper error handling to gridfs (Issue #615, https://github.com/aheckmann).
+- Ensure cursor is using same connection for all operations to avoid potential jump of servers when using replicasets.
+- Date identification handled correctly in bson js parser when running in vm context.
+- Documentation updates
 
 1.0.2 2012-05-15
 ----------------
