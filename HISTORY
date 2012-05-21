@@ -6,6 +6,9 @@
 - Fix gridfs readstream (Issue #607, https://github.com/tedeh)
 - Added disableDriverBSONSizeCheck property to Server.js for people who wish to push the inserts to the limit (Issue #609)
 - Fixed bug where collection.group keyf given as Code is processed as a regular object (Issue #608, https://github.com/rrusso2007)
+- Case mismatch between driver's ObjectID and mongo's ObjectId, allow both (Issue #618)
+- Add proper error handling to gridfs (Issue #615, https://github.com/aheckmann)
+- 
 
 1.0.2 2012-05-15
 ----------------
