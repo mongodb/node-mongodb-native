@@ -104,25 +104,31 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = function(test) {
     // Open a file for writing
     var gridStore = new GridStore(db, null, "w");    
     gridStore.open(function(err, gridStore) {
+      test.equal(null, err);
       
       // Writing some content to the file
       gridStore.write("hello world!", function(err, gridStore) {
+        test.equal(null, err);
         
         // Flush the file to GridFS
         gridStore.close(function(err, result) {          
+          test.equal(null, err);
           
           // Check if the file exists using the id returned from the close function
           GridStore.exist(db, result._id, function(err, result) {
+            test.equal(null, err);
             test.equal(true, result);
           })
 
           // Show that the file does not exist for a random ObjectID
           GridStore.exist(db, new ObjectID(), function(err, result) {
+            test.equal(null, err);
             test.equal(false, result);
           });
           
           // Show that the file does not exist for a different file root
           GridStore.exist(db, result._id, 'another_root', function(err, result) {
+            test.equal(null, err);
             test.equal(false, result);
 
             db.close();
@@ -632,7 +638,7 @@ exports.shouldCorrectlyPerformWorkingFiledRead = function(test) {
  */
 exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = function(test) {
   // Create a new file
-  var gridStore = new GridStore(client, null, "w");
+  var gridStore = new GridStore(client, "test.txt", null, "w");
   
   // This shouldnt have to be set higher than the file...
   gridStore.chunkSize = 40960;
@@ -710,18 +716,6 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = function(test) {
         // Read in the whole file and check that it's the same content
         GridStore.read(client, result._id, function(err, fileData) {
           var data = fs.readFileSync('./test_gs_working_field_read.tmp');
-          // for(var i = 0; i < data.length; i++) {
-          //   // console.dir(data[i] + " = " + fileData[i] + "::" + (data[i] == fileData[i]))
-          //   if(!(data[i] == fileData[i])) {
-          //     console.log("--------------------- not equal from byte :: "+ i)
-          //     console.dir(data[i] + " = " + fileData[i] + "::" + (data[i] == fileData[i]))
-          //   }
-          // }
-          
-          // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-          // console.log("data.length :: " + data.length)
-          // console.log("fileData.length :: " + fileData.length)
-          
           test.equal(data.toString('base64'), fileData.toString('base64'));
           test.done();
         });
@@ -1554,6 +1548,26 @@ exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = function(test) {
       db.close();
       test.done();      
     })    
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlySetFilenameForGridstoreOpen = function(test) {
+  var gridStore = new GridStore(client, "test_gs_read_length", "w");
+  gridStore.open(function(err, gridStore) {
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        // Open the gridstore
+        gridStore = new GridStore(client, "test_gs_read_length", "r");
+        gridStore.open(function(err, gridStore) {
+          test.equal(null, err);
+          test.equal("test_gs_read_length", gridStore.filename);
+          test.done();
+        });
+      });
+    });
   });
 }
 
