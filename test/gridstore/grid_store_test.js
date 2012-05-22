@@ -1555,12 +1555,13 @@ exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = function(test) {
  * @ignore
  */
 exports.shouldCorrectlySetFilenameForGridstoreOpen = function(test) {
-  var gridStore = new GridStore(client, "test_gs_read_length", "w");
+  var id = new ObjectID();
+  var gridStore = new GridStore(client, id, "test_gs_read_length", "w");
   gridStore.open(function(err, gridStore) {
     gridStore.write("hello world!", function(err, gridStore) {
       gridStore.close(function(err, result) {
         // Open the gridstore
-        gridStore = new GridStore(client, "test_gs_read_length", "r");
+        gridStore = new GridStore(client, id, "r");
         gridStore.open(function(err, gridStore) {
           test.equal(null, err);
           test.equal("test_gs_read_length", gridStore.filename);
