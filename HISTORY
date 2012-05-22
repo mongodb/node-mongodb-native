@@ -12,6 +12,7 @@
 - Ensure cursor is using same connection for all operations to avoid potential jump of servers when using replicasets.
 - Date identification handled correctly in bson js parser when running in vm context.
 - Documentation updates
+- GridStore filename not set on read (Issue #621)
 
 1.0.2 2012-05-15
 ----------------
