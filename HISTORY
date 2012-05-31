@@ -14,6 +14,7 @@
 - Documentation updates
 - GridStore filename not set on read (Issue #621)
 - Optimizations on the C++ bson parser to fix a potential memory leak and avoid non-needed calls
+- Added support for awaitdata for tailable cursors
 
 1.0.2 2012-05-15
 ----------------
