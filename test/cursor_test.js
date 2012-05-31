@@ -1953,7 +1953,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
 }
 
 /**
- *
+ * @ignore
  */
 exports.shouldCloseDeadTailableCursors = function (test) {
   // http://www.mongodb.org/display/DOCS/Tailable+Cursors
@@ -2015,6 +2015,33 @@ exports.shouldCloseDeadTailableCursors = function (test) {
       }, 800);
     });
   });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldAwaitData = function (test) {
+  // http://www.mongodb.org/display/DOCS/Tailable+Cursors
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 2, ssl:useSSL}), {native_parser: native_parser});
+
+  db.open(function(err, db) {
+    var options = { capped: true, size: 8};
+    db.createCollection('should_await_data', options, function(err, collection) {
+      // Enter a single document
+      for(var i = 0; i < 1; i++) {
+        collection.insert({a:i});
+      }
+      
+      // Create cursor with awaitdata, and timeout after the period specified
+      collection.find({}, {tailable:true, awaitdata:true}).each(function(err, result) {
+        if(err != null) {
+          db.close();
+          test.done();          
+        }
+      });
+    });
+  })
 }
 
 /**
