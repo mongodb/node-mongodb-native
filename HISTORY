@@ -15,6 +15,9 @@
 - GridStore filename not set on read (Issue #621)
 - Optimizations on the C++ bson parser to fix a potential memory leak and avoid non-needed calls
 - Added support for awaitdata for tailable cursors (Issue #624)
+- Implementing read preference setting at collection and cursor level
+   * collection.find().setReadPreference(Server.READ_SECONDARY)
+   * db.collection("some", {readPreference:Server.READ_SECONDARY_ONLY})  
 
 1.0.2 2012-05-15
 ----------------

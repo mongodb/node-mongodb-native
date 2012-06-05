@@ -33,9 +33,9 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
-  serverManager.killAll(function(err, result) {
+  // serverManager.killAll(function(err, result) {
     callback();
-  });
+  // });
 }
 
 exports.shouldCorrectlyAuthenticate = function(test) {
@@ -131,11 +131,11 @@ exports.shouldCorrectlyAuthenticate = function(test) {
       test.ok(result2);
       
       db1.collection('stuff', function(err, collection) {
-        collection.insert({a:2}, {safe:true}, self.parallel());
+        collection.insert({a:2}, {safe:{j:true}}, self.parallel());
       });        
       
       db2.collection('stuff', function(err, collection) {
-        collection.insert({a:2}, {safe:true}, self.parallel());
+        collection.insert({a:2}, {safe:{j:true}}, self.parallel());
       });                
     },
     
@@ -151,7 +151,6 @@ exports.shouldCorrectlyAuthenticate = function(test) {
     function reconnectAndVerifyThatAuthIsAutomaticallyApplied() {
       var self = this;
       db1.collection('stuff', function(err, collection) {
-        
         collection.find({}).toArray(function(err, items) {
           test.ok(err == null);
           test.equal(1, items.length);

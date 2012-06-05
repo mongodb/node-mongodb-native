@@ -132,37 +132,27 @@ exports.shouldRetrieveCorrectCountAfterInsertionReconnect = function(test) {
             setTimeout(function() {
               // Kill the primary
               RS.killPrimary(function(node) {
+                p_db.collection('testsets', function(err, collection) {
+                  if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
-                // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect :: 0")
-                // Ensure valid connection
-                // Do inserts
-                // ensureConnection(test, retries, function(err, p_db) {
-                //   // debug("=========================================== shouldRetrieveCorrectCountAfterInsertionReconnect :: 1")
-                //   if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
-                //   test.ok(err == null);
-
-                  p_db.collection('testsets', function(err, collection) {
+                  collection.insert({a:30}, {safe:true}, function(err, r) {  
                     if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
-                    collection.insert({a:30}, {safe:true}, function(err, r) {  
+                    collection.insert({a:40}, {safe:true}, function(err, r) {
                       if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
-                      collection.insert({a:40}, {safe:true}, function(err, r) {
+                      // Execute count
+                      collection.count(function(err, c) {
                         if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
 
-                        // Execute count
-                        collection.count(function(err, c) {
-                          if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
+                        test.equal(3, c);
 
-                          test.equal(3, c);
-
-                          p_db.close();
-                          test.done();          
-                        });
+                        p_db.close();
+                        test.done();          
                       });
                     });
                   });
-                // });        
+                });
               });              
             }, 2000);
           })

@@ -216,7 +216,7 @@ exports.shouldFailToDoMapReduceToOutCollection = function(test) {
 
               // Execute map reduce and return results inline
               collection.mapReduce(map, reduce, {out : {replace:'replacethiscollection'}}, function(err, results) {
-                test.ok(err != null);
+                test.equal(null, err);
               
                 db.close();
                 test.done();
