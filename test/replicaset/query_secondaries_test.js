@@ -238,6 +238,8 @@ exports.shouldAllowToForceReadWithPrimary = function(test) {
         // Get documents
         cursor.toArray(function(err, items) {
           test.equal(1, items.length);
+          console.dir(items)
+          
           test.equal(1, items[0].a);
           p_db.close();
           test.done();
