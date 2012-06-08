@@ -19,6 +19,8 @@
    * collection.find().setReadPreference(Server.READ_SECONDARY)
    * db.collection("some", {readPreference:Server.READ_SECONDARY_ONLY})  
 - Replicaset now returns when the master is discovered on db.open and lets the rest of the connections happen asynchronous.
+  - ReplSet/ReplSetServers emits "fullsetup" when all servers have been connected to
+- Prevent callback from executing more than once in getMore function (Issue #631, https://github.com/shankar0306)
 
 1.0.2 2012-05-15
 ----------------
