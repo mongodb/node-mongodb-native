@@ -201,12 +201,12 @@ exports['Connection to replicaset with primary read preference'] = function(test
   
   // Create db instance
   var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
-  // Connect to the db
-  db.open(function(err, p_db) {
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
     // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
-    var checkoutWriterMethod = p_db.serverConfig._state.master.checkoutWriter;
+    var checkoutWriterMethod = db.serverConfig._state.master.checkoutWriter;
     // Set up checkoutWriter to catch correct write request
-    p_db.serverConfig._state.master.checkoutWriter = function() {
+    db.serverConfig._state.master.checkoutWriter = function() {
       executedCorrectly = true;
       return checkoutWriterMethod.apply(this);
     }
@@ -217,10 +217,14 @@ exports['Connection to replicaset with primary read preference'] = function(test
       collection.find().toArray(function(err, items) {
         // Does not get called or we don't care
         test.ok(executedCorrectly);
-        p_db.close();
+        db.close();
         test.done();
       });
     });
+  });
+  // Connect to the db
+  db.open(function(err, p_db) {
+    db = p_db;
   });
 }
 
@@ -238,30 +242,34 @@ exports['Connection to replicaset with secondary read preference with no seconda
   
     // Create db instance
     var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
-    // Connect to the db
-    db.open(function(err, p_db) {
+    // Trigger test once whole set is up
+    replSet.on("fullsetup", function() {
       // Rip out secondaries forcing an attempt to read from the primary
-      p_db.serverConfig._state.secondaries = {};
+      db.serverConfig._state.secondaries = {};
 
       // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
-      var checkoutWriterMethod = p_db.serverConfig._state.master.checkoutWriter;
+      var checkoutWriterMethod = db.serverConfig._state.master.checkoutWriter;
       // Set up checkoutWriter to catch correct write request
-      p_db.serverConfig._state.master.checkoutWriter = function() {        
-        var r = checkoutWriterMethod.apply(p_db.serverConfig._state.master);
+      db.serverConfig._state.master.checkoutWriter = function() {        
+        var r = checkoutWriterMethod.apply(db.serverConfig._state.master);
         test.equal(servers.primary.host, r.socketOptions.host);
         test.equal(servers.primary.port, r.socketOptions.port);
         return r;
       }
     
       // Grab the collection
-      p_db.collection("read_preference_replicaset_test_0", function(err, collection) {
+      db.collection("read_preference_replicaset_test_0", function(err, collection) {
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().toArray(function(err, items) {
           // Does not get called or we don't care
-          p_db.close();
+          db.close();
           test.done();
         });
       });
+    });
+    // Connect to the db
+    db.open(function(err, p_db) {
+      db = p_db;
     });
   });
 }
@@ -280,22 +288,26 @@ exports['Connection to replicaset with secondary only read preference no seconda
   
     // Create db instance
     var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
-    // Connect to the db
-    db.open(function(err, p_db) {
+    // Trigger test once whole set is up
+    replSet.on("fullsetup", function() {
       // Rip out secondaries forcing an attempt to read from the primary
-      p_db.serverConfig._state.secondaries = {};
+      db.serverConfig._state.secondaries = {};
     
       // Grab the collection
-      p_db.collection("read_preference_replicaset_test_0", function(err, collection) {
+      db.collection("read_preference_replicaset_test_0", function(err, collection) {
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().toArray(function(err, items) {
           test.ok(err != null);
           test.equal("no open connections", err.message);
           // Does not get called or we don't care
-          p_db.close();
+          db.close();
           test.done();
         });
       });
+    });
+    // Connect to the db
+    db.open(function(err, p_db) {
+      db = p_db;
     });
   });
 }
@@ -317,29 +329,33 @@ exports['Connection to replicaset with secondary only read preference should ret
   
     // Create db instance
     var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
-    // Connect to the db
-    db.open(function(err, p_db) {        
+    // Trigger test once whole set is up
+    replSet.on("fullsetup", function() {
       // Let's set up all the secondaries
-      var keys = Object.keys(p_db.serverConfig._state.secondaries);
+      var keys = Object.keys(db.serverConfig._state.secondaries);
       
       // Set up checkoutReaders
       for(var i = 0; i < keys.length; i++) {
-        var checkoutReader = p_db.serverConfig._state.secondaries[keys[i]].checkoutReader;
-        p_db.serverConfig._state.secondaries[keys[i]].checkoutReader = function() {
+        var checkoutReader = db.serverConfig._state.secondaries[keys[i]].checkoutReader;
+        db.serverConfig._state.secondaries[keys[i]].checkoutReader = function() {
           executedCorrectly = true;
         }
       }
       
       // Grab the collection
-      p_db.collection("read_preference_replicaset_test_0", function(err, collection) {
+      db.collection("read_preference_replicaset_test_0", function(err, collection) {
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().toArray(function(err, items) {
           // Does not get called or we don't care
           test.ok(executedCorrectly);
-          p_db.close();
+          db.close();
           test.done();
         });
       });
+    });
+    // Connect to the db
+    db.open(function(err, p_db) {   
+      db = p_db;     
     });
   });
 }
@@ -361,45 +377,49 @@ exports['Connection to replicaset with secondary read preference should return s
   
     // Create db instance
     var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
-    // Connect to the db
-    db.open(function(err, p_db) {        
+    // Trigger test once whole set is up
+    replSet.on("fullsetup", function() {
       // Let's set up all the secondaries
-      var keys = Object.keys(p_db.serverConfig._state.secondaries);
+      var keys = Object.keys(db.serverConfig._state.secondaries);
       
       // Set up checkoutReaders
       for(var i = 0; i < keys.length; i++) {
-        var checkoutReader = p_db.serverConfig._state.secondaries[keys[i]].checkoutReader;
-        p_db.serverConfig._state.secondaries[keys[i]].checkoutReader = function() {
+        var checkoutReader = db.serverConfig._state.secondaries[keys[i]].checkoutReader;
+        db.serverConfig._state.secondaries[keys[i]].checkoutReader = function() {
           executedCorrectly = true;
           return checkoutReader.apply(this);
         }
       }
       
       // Grab the collection
-      p_db.collection("read_preference_replicaset_test_0", function(err, collection) {
+      db.collection("read_preference_replicaset_test_0", function(err, collection) {
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().toArray(function(err, items) {
           // Does not get called or we don't care
           test.ok(executedCorrectly);
-          p_db.close();
+          db.close();
           test.done();
         });
       });
     });
+    // Connect to the db
+    db.open(function(err, p_db) {        
+      db = p_db;
+    });
   });
 }
 
-// /**
-//  * Retrieve the server information for the current
-//  * instance of the db client
-//  * 
-//  * @ignore
-//  */
-// exports.noGlobalsLeaked = function(test) {
-//   var leaks = gleak.detectNew();
-//   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-//   test.done();
-// }
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+exports.noGlobalsLeaked = function(test) {
+  var leaks = gleak.detectNew();
+  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+  test.done();
+}
 
 /**
  * Retrieve the server information for the current

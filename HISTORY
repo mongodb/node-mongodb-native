@@ -18,6 +18,7 @@
 - Implementing read preference setting at collection and cursor level
    * collection.find().setReadPreference(Server.READ_SECONDARY)
    * db.collection("some", {readPreference:Server.READ_SECONDARY_ONLY})  
+- Replicaset now returns when the master is discovered on db.open and lets the rest of the connections happen asynchronous.
 
 1.0.2 2012-05-15
 ----------------

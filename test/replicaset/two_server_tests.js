@@ -43,6 +43,24 @@ var ensureConnection = function(test, numberOfTries, callback) {
   })            
 }
 
+var waitForReplicaset = function(callback) {    
+  // Replica configuration
+  var replSet = new ReplSetServers([ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+    ], {});
+    
+  var db = new Db('integration_test_', replSet);    
+  replSet.on("fullsetup", function() {
+    db.close();
+    callback();
+  });
+  
+  db.open(function(err, p_db) {
+    db = p_db;
+  });
+}
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
@@ -53,18 +71,17 @@ exports.setUp = function(callback) {
   // Create instance of replicaset manager but only for the first call
   if(!serversUp && !noReplicasetStart) {
     serversUp = true;
-    RS = new ReplicaSetManager({retries:120, 
-        arbiter_count:0, 
-        secondary_count:1, 
-        passive_count:0});
-    RS.startSet(true, function(err, result) {      
+    RS = new ReplicaSetManager({retries:120, arbiter_count:0, secondary_count:1, passive_count:0});
+    RS.startSet(true, function(err, result) { 
       if(err != null) throw err;
       // Finish setup
+      // waitForReplicaset(callback);
       callback();      
     });      
   } else {    
     RS.restartKilledNodes(function(err, result) {
       if(err != null) throw err;
+      // waitForReplicaset(callback);
       callback();        
     })
   }
@@ -93,30 +110,34 @@ exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
   var replSet = new ReplSetServers( [ 
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      // new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ], 
+
     {rs_name:RS.name, read_secondary:false}
   );
 
   // Insert some data
   var db = new Db('integration_test_', replSet);
+  // // Trigger test once whole set is up
+  // replSet.on("fullsetup", function() {
+  // });
+  
   db.open(function(err, p_db) {
-    // Check if we got an error
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+    db = p_db;
 
     // Drop collection on replicaset
-    p_db.dropCollection('testsets', function(err, r) {
+    db.dropCollection('testsets', function(err, r) {
       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
       // Recreate collection on replicaset
-      p_db.createCollection('testsets', function(err, collection) {
+      db.createCollection('testsets', function(err, collection) {
         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:1, wtimeout: 10000}}, function(err, r) {            
           // Execute a findAndModify
-          collection.findAndModify({'a':20}, [['a', 1]], {'$set':{'b':3}}, {'new':true, safe: {w:7, wtimeout: 10000}}, function(err, updated_doc) {
+          collection.findAndModify({'a':20}, [['a', 1]], {'$set':{'b':3}}, {'new':true, safe: {w:7, wtimeout: 1000}}, function(err, updated_doc) {
             test.equal('timeout', err.err)
             test.equal(true, err.wtimeout)
-            p_db.close();        
+            db.close();        
             test.done();
           });              
         });

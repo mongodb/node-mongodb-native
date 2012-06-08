@@ -54,6 +54,25 @@ var ensureConnection = function(test, numberOfTries, callback) {
   })            
 }
 
+var waitForReplicaset = function(callback) {    
+  // Replica configuration
+  var replSet = new ReplSetServers([ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ], {});
+    
+  var db = new Db('integration_test_', replSet);    
+  replSet.on("fullsetup", function() {
+    db.close();
+    callback();
+  });
+  
+  db.open(function(err, p_db) {
+    db = p_db;
+  });
+}
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
@@ -67,13 +86,12 @@ exports.setUp = function(callback) {
     RS = new ReplicaSetManager({retries:120, passive_count:0, secondary_count:2, tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]});    
     RS.startSet(true, function(err, result) {      
       if(err != null) throw err;
-      // Finish setup
-      callback();      
+      waitForReplicaset(callback);      
     });      
   } else {    
     RS.restartKilledNodes(function(err, result) {
       if(err != null) throw err;
-      callback();        
+      waitForReplicaset(callback);
     })
   }
 }
@@ -107,9 +125,10 @@ exports['Should Correctly Connect With Default Replicaset And Insert Document Fo
   );
 
   var db = new Db('integration_test_', replSet);
-  db.open(function(err, p_db) {
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
     // Recreate collection on replicaset
-    p_db.createCollection('testsets', function(err, collection) {
+    db.createCollection('testsets', function(err, collection) {
       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
       
       // Insert a dummy document
@@ -119,12 +138,16 @@ exports['Should Correctly Connect With Default Replicaset And Insert Document Fo
         
         // Do a read for the value
         collection.findOne({a:20}, function(err, item) {
-          p_db.close();
+          db.close();
           test.equal(20, item.a);
           test.done();
         })
       });
     });      
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
   })    
 }
 
@@ -142,7 +165,8 @@ exports['Should Honor setReadPreference primary'] = function(test) {
   replSet.setReadPreference(Server.READ_PRIMARY);
   // Open the database
   var db = new Db('integration_test_', replSet);
-  db.open(function(err, p_db) {
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
     // Checkout a reader and make sure it's the primary
     var reader = replSet.checkoutReader();
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
@@ -154,8 +178,12 @@ exports['Should Honor setReadPreference primary'] = function(test) {
     var primaryAddress = replSet._state.master.host + ":" + replSet._state.master.port;
     test.equal(primaryAddress, readerAddress);
     // End test and close db
-    p_db.close();
+    db.close();
     test.done();
+  });
+  
+  db.open(function(err, p_db) {
+    db = p_db;
   })    
 }
 
@@ -173,7 +201,8 @@ exports['Should Honor setReadPreference secondary'] = function(test) {
   replSet.setReadPreference(Server.READ_SECONDARY);
   // Open the database
   var db = new Db('integration_test_', replSet);
-  db.open(function(err, p_db) {
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
     // Checkout a reader and make sure it's the primary
     var reader = replSet.checkoutReader();
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
@@ -184,8 +213,12 @@ exports['Should Honor setReadPreference secondary'] = function(test) {
     // Check that it's in the list of primary servers
     test.ok(replSet._state.secondaries[readerAddress] != null);
     // End test and close db
-    p_db.close();
+    db.close();
     test.done();
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
   })    
 }
 
@@ -203,7 +236,8 @@ exports['Should correctly cleanup connection with tags'] = function(test) {
   replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
   // Open the database
   var db = new Db('integration_test_', replSet);
-  db.open(function(err, p_db) {
+
+  replSet.on("fullsetup", function() {
     // Checkout a reader and make sure it's the primary
     var reader = replSet.checkoutWriter();
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
@@ -215,8 +249,12 @@ exports['Should correctly cleanup connection with tags'] = function(test) {
     test.equal(1, replSet._state.byTags['dc1']['ny'].length);
     test.equal(1, replSet._state.byTags['dc2']['sf'].length);
     // End test and close db
-    p_db.close();
+    db.close();
     test.done();
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
   })        
 }
 
@@ -232,17 +270,24 @@ exports['Should Honor setReadPreference tag'] = function(test) {
   
   // Set read preference
   replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
-  // Open the database
+  // Create db object
   var db = new Db('integration_test_', replSet);
-  db.open(function(err, p_db) {
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
     // Checkout a reader and make sure it's the primary
     var reader = replSet.checkoutReader();
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
     // Locate server instance associated with this id
-    var serverInstance = replSet._state.addresses[readerAddress];      
+    var serverInstance = replSet._state.addresses[readerAddress];
+    // Check cleanup successful 
     test.deepEqual({ dc2: 'sf' }, serverInstance.tags)
-    p_db.close();
+    db.close();
     test.done();
+  });
+  
+  // Open the database
+  db.open(function(err, p_db) {
+    db = p_db;
   })    
 },
 
@@ -260,7 +305,8 @@ exports['Should Correctly Collect ping information from servers'] = function(tes
   replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
-  db.open(function(err, p_db) {
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
     setTimeout(function() {
       var keys = Object.keys(replSet._state.addresses);
       for(var i = 0; i < keys.length; i++) {
@@ -271,9 +317,13 @@ exports['Should Correctly Collect ping information from servers'] = function(tes
         test.ok(server.queryStats.standardDeviation >= 0);
       }
       
-      p_db.close();        
+      db.close();        
       test.done();
     }, 5000)
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
   })    
 }
 
@@ -291,8 +341,9 @@ exports['Should correctly pick a ping strategy for secondary'] = function(test) 
   replSet.setReadPreference(Server.READ_SECONDARY);
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
-  db.open(function(err, p_db) {
-    p_db.createCollection('testsets3', function(err, collection) {
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
+    db.createCollection('testsets3', function(err, collection) {
       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
       
       // Insert a bunch of documents
@@ -302,11 +353,15 @@ exports['Should correctly pick a ping strategy for secondary'] = function(test) 
         collection.find().toArray(function(err, items) {
           test.equal(null, err);
           test.equal(4, items.length);
-          p_db.close();        
+          db.close();        
           test.done();
         });
       });
     });
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
   })    
 }
 
@@ -327,8 +382,9 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
   replSet.setReadPreference(Server.READ_SECONDARY);
   // Open the database
   var db = new Db('integration_test_', replSet);
-  db.open(function(err, p_db) {
-    p_db.createCollection('testsets2', function(err, collection) {
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
+    db.createCollection('testsets2', function(err, collection) {
       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
       
       // Insert a bunch of documents
@@ -351,7 +407,7 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
                 totalNumberOfStrategyEntries += server.queryStats.numDataValues;
               }
           
-              p_db.close();        
+              db.close();        
               test.equal(4, totalNumberOfStrategyEntries);
               test.done();
             });
@@ -359,6 +415,10 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
         });
       });
     });
+  });
+  
+  db.open(function(err, p_db) {
+    db = p_db;
   })    
 },
 
