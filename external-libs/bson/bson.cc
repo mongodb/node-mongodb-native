@@ -2079,7 +2079,6 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
   } catch(char *err_msg) {
     // Free up serialized object space
     free(serialized_object);
-    V8::AdjustAmountOfExternalAllocatedMemory(-object_size);
     // Throw exception with the string
     Handle<Value> error = VException(err_msg);
     // free error message
@@ -2091,7 +2090,8 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
   for(uint32_t i = 0; i < object_size; i++) {
     *(data + index + i) = *(serialized_object + i);
   }
-  
+  free(serialized_object);
+
   return scope.Close(Uint32::New(index + object_size - 1));
 }
 
