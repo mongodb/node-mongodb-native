@@ -21,6 +21,7 @@
 - Replicaset now returns when the master is discovered on db.open and lets the rest of the connections happen asynchronous.
   - ReplSet/ReplSetServers emits "fullsetup" when all servers have been connected to
 - Prevent callback from executing more than once in getMore function (Issue #631, https://github.com/shankar0306)
+- Corrupt bson messages now errors out to all callbacks and closes up connections correctly, Issue #634
 
 1.0.2 2012-05-15
 ----------------

@@ -1017,24 +1017,28 @@ exports['Should correctly return record with 64-bit id'] = function(test) {
  * @ignore
  */
 exports['Should Correctly find a Document using findOne excluding _id field'] = function(test) {
-  client.createCollection('Should_Correctly_find_a_Document_using_findOne_excluding__id_field', function(err, collection) {
-    var doc = {_id : new ObjectID(), a:1, c:2}
-    // insert doc
-    collection.insert(doc, {safe:true}, function(err, result) {
-      // Get one document, excluding the _id field
-      collection.findOne({a:1}, {fields:{'_id': 0}}, function(err, item) {
-        test.equal(null, item._id);
-        test.equal(1, item.a);
-        test.equal(2, item.c);          
-
-        collection.find({a:1}, {fields:{'_id':0}}).toArray(function(err, items) {
-          var item = items[0]
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  p_client.open(function(err, p_client) {
+    client.createCollection('Should_Correctly_find_a_Document_using_findOne_excluding__id_field', function(err, collection) {
+      var doc = {_id : new ObjectID(), a:1, c:2}
+      // insert doc
+      collection.insert(doc, {safe:true}, function(err, result) {
+        // Get one document, excluding the _id field
+        collection.findOne({a:1}, {fields:{'_id': 0}}, function(err, item) {
           test.equal(null, item._id);
           test.equal(1, item.a);
           test.equal(2, item.c);          
-          test.done();
+
+          collection.find({a:1}, {fields:{'_id':0}}).toArray(function(err, items) {
+            var item = items[0]
+            test.equal(null, item._id);
+            test.equal(1, item.a);
+            test.equal(2, item.c);          
+            p_client.close();
+            test.done();
+          })
         })
-      })
+      });
     });
   });
 }
