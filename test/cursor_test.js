@@ -2030,7 +2030,7 @@ exports.shouldAwaitData = function (test) {
     db.createCollection('should_await_data', options, function(err, collection) {
       collection.insert({a:1}, {safe:true}, function(err, result) {
         // Create cursor with awaitdata, and timeout after the period specified
-        collection.find({}, {tailable:true, awaitdata:true}).each(function(err, result) {
+        collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
           if(err != null) {
             db.close();
             test.done();          
