@@ -1695,6 +1695,38 @@ exports.shouldQueryCurrentOperation = function(test) {
 }
 
 /**
+ * A simple query with negative limit
+ */
+exports.shouldCorrectlyPerformNegativeLimit = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a collection we want to drop later
+    db.collection('shouldCorrectlyPerformNegativeLimit', function(err, collection) {      
+      var docs = [];
+      for(var i = 0; i < 1000; i++) {
+        docs.push({a:1, b:"helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld"})
+      }
+      
+      // Insert a bunch of documents
+      collection.insert(docs, {safe:true}, function(err, result) {
+        // Peform a simple find and return all the documents
+        collection.find({}).limit(-10).toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(10, docs.length);
+
+          db.close();
+          test.done();
+        });        
+      });      
+    });
+  });  
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
