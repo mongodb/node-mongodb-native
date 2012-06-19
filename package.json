@@ -69,6 +69,7 @@
 	  , "markdown": "0.3.1"
 	  , "gleak": "0.2.3"
 	  , "step": "0.0.5"
+	  , "async": "0.1.22"
   }
 , "config":         { "native" : false }                    
 , "main":             "./lib/mongodb/index"
