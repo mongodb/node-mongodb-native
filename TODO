@@ -1,4 +1,5 @@
 TODO
-- Mongos connection
-- Gridfs streaming node.js read/write
-- toBson methods on serializer to allow for simpler serialization of complex objects
+- Mongos connection DONE
+- Gridfs streaming node.js read/write DONE
+- toBson methods on serializer to allow for simpler serialization of complex objects DONE
+- Refactor admin.js to use authdb passthrough
