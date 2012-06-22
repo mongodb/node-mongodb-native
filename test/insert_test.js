@@ -851,16 +851,24 @@ exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = function(test) {
   var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
     db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions', function(err, collection) {
-      collection.insert({a:1});
-      collection.update({a:1}, {a:2});
-      collection.remove({a:2});
-      
-      collection.count(function(err, count) {
-        test.equal(0, count);
-      
-        db.close();
-        test.done();
-      })
+      collection.insert({a:1}, {safe:true}, function(err, result) {
+        test.equal(null, err);
+        
+        collection.update({a:1}, {a:2}, {safe:true}, function(err, result) {
+          test.equal(null, err);
+          
+          collection.remove({a:2}, {safe:true}, function(err, result) {
+            test.equal(null, err);
+            
+            collection.count(function(err, count) {
+              test.equal(0, count);
+
+              db.close();
+              test.done();
+            })
+          });
+        });
+      });      
     });      
   });
 }

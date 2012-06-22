@@ -629,7 +629,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = function(test) {
             test.ok(result);
             
             // Remove the user
-            adminDb.removeUser('admin', function(err, result) {
+            adminDb.removeUser('admin', function(err, result) {              
               
               // Authenticate using the removed user should fail
               adminDb.authenticate('admin', 'admin', function(err, result) {
