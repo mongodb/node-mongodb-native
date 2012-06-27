@@ -1285,6 +1285,16 @@ exports.shouldCorrectlyUseCustomObjectToUpdateDocument = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldExecuteInsertWithNoCallbackAndWriteConcern = function(test) {
+  client.createCollection('shouldExecuteInsertWithNoCallbackAndWriteConcern', function(err, collection) {
+    collection.insert({a:{b:{c:1}}});
+    test.done();
+  });    
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  * 
