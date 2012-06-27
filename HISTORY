@@ -25,6 +25,7 @@
 - Replica set member status update when primary changes bug (Issue #635, https://github.com/alinsilvian)
 - Fixed auth to work better when multiple connections are involved.
 - Default connection pool size increased to 10 connections.
+- Fixes for the ReadStream class to work properly with 0.8 of Node.js
 
 1.0.2 2012-05-15
 ----------------
