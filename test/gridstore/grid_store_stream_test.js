@@ -254,7 +254,7 @@ exports.shouldCorrectlyPipeAGridFsToAfile = function(test) {
           // Read the original content
           var originalData = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
           // Ensure we are doing writing before attempting to open the file
-          fs.readFile("./test_gs_weird_bug_streamed.tmp", function(err, streamedData) {
+          fs.readFile("./test_gs_weird_bug_streamed.tmp", function(err, streamedData) {                      
             // Compare the data
             test.deepEqual(originalData, streamedData);
             
