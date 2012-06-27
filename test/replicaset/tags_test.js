@@ -289,138 +289,45 @@ exports['Should Honor setReadPreference tag'] = function(test) {
   db.open(function(err, p_db) {
     db = p_db;
   })    
-},
-
-exports['Should Correctly Collect ping information from servers'] = function(test) {
-  // Replica configuration
-  var replSet = new ReplSetServers([ 
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
-    {}
-  );
-  
-  // Set read preference
-  replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
-  // Open the database
-  var db = new Db('integration_test_', replSet, {recordQueryStats:true});
-  // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
-    setTimeout(function() {
-      var keys = Object.keys(replSet._state.addresses);
-      for(var i = 0; i < keys.length; i++) {
-        var server = replSet._state.addresses[keys[i]];
-        test.ok(server.queryStats.numDataValues >= 0);
-        test.ok(server.queryStats.mean >= 0);
-        test.ok(server.queryStats.variance >= 0);
-        test.ok(server.queryStats.standardDeviation >= 0);
-      }
-      
-      db.close();        
-      test.done();
-    }, 5000)
-  });
-
-  db.open(function(err, p_db) {
-    db = p_db;
-  })    
 }
 
-exports['Should correctly pick a ping strategy for secondary'] = function(test) {
-  // Replica configuration
-  var replSet = new ReplSetServers([ 
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
-    {}
-  );
-  
-  // Set read preference
-  replSet.setReadPreference(Server.READ_SECONDARY);
-  // Open the database
-  var db = new Db('integration_test_', replSet, {recordQueryStats:true});
-  // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
-    db.createCollection('testsets3', function(err, collection) {
-      if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
-      
-      // Insert a bunch of documents
-      collection.insert([{a:20}, {b:30}, {c:40}, {d:50}], {safe: {w:'majority'}}, function(err, r) {            
-        
-        // Select all documents
-        collection.find().toArray(function(err, items) {
-          test.equal(null, err);
-          test.equal(4, items.length);
-          db.close();        
-          test.done();
-        });
-      });
-    });
-  });
-
-  db.open(function(err, p_db) {
-    db = p_db;
-  })    
+/**
+ *  
+ *  Tags with read preferences  
+ *
+ **/
+exports['Primary read preference with tag set'] = function(test) {
+  // // Replica configuration
+  // var replSet = new ReplSetServers([ 
+  //     new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+  //     new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //     new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+  //   ], 
+  //   {}
+  // );
+  // 
+  // // Set read preference
+  // replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
+  // // Create db object
+  // var db = new Db('integration_test_', replSet);
+  // // Trigger test once whole set is up
+  // replSet.on("fullsetup", function() {
+  //   // Checkout a reader and make sure it's the primary
+  //   var reader = replSet.checkoutReader();
+  //   var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
+  //   // Locate server instance associated with this id
+  //   var serverInstance = replSet._state.addresses[readerAddress];
+  //   // Check cleanup successful 
+  //   test.deepEqual({ dc2: 'sf' }, serverInstance.tags)
+  //   db.close();
+    test.done();
+  // });
+  // 
+  // // Open the database
+  // db.open(function(err, p_db) {
+  //   db = p_db;
+  // })    
 }
-
-exports['Should correctly pick a statistics strategy for secondary'] = function(test) {
-  // Replica configuration
-  var replSet = new ReplSetServers([ 
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
-    {strategy:'statistical'}
-  );
-  
-  // Ensure we have the right strategy
-  test.ok(replSet.strategyInstance instanceof StatisticsStrategy);
-  
-  // Set read preference
-  replSet.setReadPreference(Server.READ_SECONDARY);
-  // Open the database
-  var db = new Db('integration_test_', replSet);
-  // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
-    db.createCollection('testsets2', function(err, collection) {
-      if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
-      
-      // Insert a bunch of documents
-      collection.insert([{a:20}, {b:30}, {c:40}, {d:50}], {safe: {w:'majority'}}, function(err, r) {            
-        
-        // Select all documents
-        collection.find().toArray(function(err, items) {
-          collection.find().toArray(function(err, items) {
-            collection.find().toArray(function(err, items) {
-              test.equal(null, err);
-              test.equal(4, items.length);
-              
-              // Total number of entries done
-              var totalNumberOfStrategyEntries = 0;
-          
-              // Check that we have correct strategy objects
-              var keys = Object.keys(replSet._state.secondaries);
-              for(var i = 0; i < keys.length; i++) {
-                var server = replSet._state.secondaries[keys[i]];
-                totalNumberOfStrategyEntries += server.queryStats.numDataValues;
-              }
-          
-              db.close();        
-              test.equal(4, totalNumberOfStrategyEntries);
-              test.done();
-            });
-          });
-        });
-      });
-    });
-  });
-  
-  db.open(function(err, p_db) {
-    db = p_db;
-  })    
-},
 
 /**
  * Retrieve the server information for the current
