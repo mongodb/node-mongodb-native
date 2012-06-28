@@ -208,10 +208,15 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
 
   // Insert some data
   var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
+  // var p_db = null;
+  // // Trigger test once whole set is up
+  // replSet.on("fullsetup", function() {
+  // });
+  
   // Open db
   db.open(function(err, p_db) {
-    // Check if we got an error
-    if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+    // // Check if we got an error
+    // if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
     // Drop collection on replicaset
     p_db.dropCollection('shouldCorrectlyInsertAfterPrimaryComesBackUp', function(err, r) {
@@ -220,34 +225,37 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
       p_db.createCollection('shouldCorrectlyInsertAfterPrimaryComesBackUp', function(err, collection) {
         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
         // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {            
+        collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {            
           // Kill the primary
-          RS.killPrimary(2, {killNodeWaitTime:0}, function(node) {
+          RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
             // Attempt insert (should fail)
             collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-              test.ok(err != null)
 
               if(err != null) {
                 collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {                      
-                  
                   // Peform a count
                   collection.count(function(err, count) {
-
                     test.equal(2, count);
                     p_db.close();
                     test.done();
                   });
                 });                                          
               } else {
-                p_db.close();
-                test.ok(false)
-                test.done();                          
+                collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {                      
+                  // Peform a count
+                  collection.count(function(err, count) {
+                    test.equal(2, count);
+                    p_db.close();
+                    test.done();
+                  });
+                });                                          
               }
             });
           });
         });
       });
     });
+    // p_db = _p_db;
   });
 }
 
@@ -285,11 +293,9 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {            
           // Kill the primary
-          RS.killPrimary(2, {killNodeWaitTime:0}, function(node) {
+          RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
             // Ok let's execute same query a couple of times
-            collection.find({}).toArray(function(err, items) {
-              test.ok(err != null);
-              
+            collection.find({}).toArray(function(err, items) {              
               collection.find({}).toArray(function(err, items) {
                 test.ok(err == null);
                 test.equal(1, items.length);
@@ -368,61 +374,55 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
                       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));                            
                       // Contains the results
                       var results = [];
-                    
-                      // Just wait for the results
-                      // setTimeout(function() {
-                        // Ensure the connection
-                        // ensureConnection(test, retries, function(err, p_db) {
+
+                      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+                
+                      // Get the collection
+                      p_db.collection('shouldWorkCorrectlyWithInserts', function(err, collection) {
+                        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+                
+                        collection.find().each(function(err, item) {
                           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                    
-                          // Get the collection
-                          p_db.collection('shouldWorkCorrectlyWithInserts', function(err, collection) {
-                            if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                    
-                            collection.find().each(function(err, item) {
+                
+                          if(item == null) {
+                            // Ensure we have the correct values
+                            test.equal(6, results.length);
+                            [20, 30, 40, 50, 60, 70].forEach(function(a) {
+                              test.equal(1, results.filter(function(element) {
+                                return element.a == a;
+                              }).length);
+                            });                                    
+                                                      
+                            // Run second check
+                            collection.save({a:80}, {safe:true}, function(err, r) {
                               if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                    
-                              if(item == null) {
+                                                      
+                              collection.find().toArray(function(err, items) {
+                                if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+                                                                                            
                                 // Ensure we have the correct values
-                                test.equal(6, results.length);
-                                [20, 30, 40, 50, 60, 70].forEach(function(a) {
-                                  test.equal(1, results.filter(function(element) {
-                                    return element.a == a;
-                                  }).length);
-                                });                                    
-                                                          
-                                // Run second check
-                                collection.save({a:80}, {safe:true}, function(err, r) {
-                                  if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                                                          
-                                  collection.find().toArray(function(err, items) {
-                                    if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+                                test.equal(7, items.length);
+                                
+                                // Sort items by a
+                                items = items.sort(function(a,b) { return a.a > b.a});
+                                // Test all items
+                                test.equal(20, items[0].a);
+                                test.equal(30, items[1].a);
+                                test.equal(40, items[2].a);
+                                test.equal(50, items[3].a);
+                                test.equal(60, items[4].a);
+                                test.equal(70, items[5].a);
+                                test.equal(80, items[6].a);
                                                                                                 
-                                    // Ensure we have the correct values
-                                    test.equal(7, items.length);
-                                    
-                                    // Sort items by a
-                                    items = items.sort(function(a,b) { return a.a > b.a});
-                                    // Test all items
-                                    test.equal(20, items[0].a);
-                                    test.equal(30, items[1].a);
-                                    test.equal(40, items[2].a);
-                                    test.equal(50, items[3].a);
-                                    test.equal(60, items[4].a);
-                                    test.equal(70, items[5].a);
-                                    test.equal(80, items[6].a);
-                                                                                                    
-                                    p_db.close();
-                                    test.done();                                                    
-                                  });
-                                });                                    
-                              } else {
-                                results.push(item);
-                              }
-                            });
-                          });
-                        // });                            
-                      // }, 5000);                          
+                                p_db.close();
+                                test.done();                                                    
+                              });
+                            });                                    
+                          } else {
+                            results.push(item);
+                          }
+                        });
+                      });
                     })
                   }                      
                 );
