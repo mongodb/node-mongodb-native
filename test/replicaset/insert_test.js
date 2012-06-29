@@ -207,17 +207,9 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
 
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
-  // var p_db = null;
-  // // Trigger test once whole set is up
-  // replSet.on("fullsetup", function() {
-  // });
-  
+  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});  
   // Open db
   db.open(function(err, p_db) {
-    // // Check if we got an error
-    // if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
     // Drop collection on replicaset
     p_db.dropCollection('shouldCorrectlyInsertAfterPrimaryComesBackUp', function(err, r) {
       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
