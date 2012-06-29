@@ -669,7 +669,9 @@ exports.shouldCorrectlyHandleGeospatialIndexes = function(test) {
               test.equal(err,null);
               collection.insert({'loc': [200,200]}, {safe:true}, function(err, result) {
                 err = err ? err : {};
-                test.equal(err.err,"point not in interval of [ -180, 180 )");
+                test.ok(err.err.indexOf("point not in interval of") != -1);
+                test.ok(err.err.indexOf("-180") != -1);
+                test.ok(err.err.indexOf("180") != -1);
                 test.done();
               });
             });
@@ -697,7 +699,9 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = function(test) {
                 test.equal(err,null);
                 collection.insert({'loc': [-200,-200]}, {safe:true}, function(err, result) {
                   err = err ? err : {};
-                  test.equal(err.err,"point not in interval of [ 0, 1024 )");
+                  test.ok(err.err.indexOf("point not in interval of") != -1);
+                  test.ok(err.err.indexOf("0") != -1);
+                  test.ok(err.err.indexOf("1024") != -1);
                   test.done();
                 });
               });
