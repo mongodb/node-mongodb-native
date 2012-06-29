@@ -145,8 +145,8 @@ ReplicaSetManager.prototype.initiate = function(callback) {
   // Get master connection
   self.getConnection(function(err, connection) {    
     if(err != null) return callback(err, null);
-    // console.log("-------------------------------------------------------- config")
-    // console.dir(self.config)
+    console.log("-------------------------------------------------------- config")
+    console.dir(self.config)
     // Set replica configuration
     connection.admin().command({replSetInitiate:self.config}, function(err, result) {
       // Close connection
