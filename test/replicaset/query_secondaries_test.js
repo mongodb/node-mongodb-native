@@ -184,13 +184,24 @@ exports.shouldCorrectlyQuerySecondaries = function(test) {
         // Ensure replication happened in time
         setTimeout(function() {
           // Kill the primary
-          RS.killPrimary(function(node) {
+          RS.killPrimary(9, function(node) {
             // Do a collection find
-            collection.find().toArray(function(err, items) {                
-              test.equal(null, err);
-              test.equal(3, items.length);                
-              p_db.close();
-              test.done();
+            collection.find().toArray(function(err, items) {   
+              test.ok(err != null);
+              // console.log("============================================================================ shouldCorrectlyQuerySecondaries")
+              // console.dir(err)
+              // console.dir(items)
+
+              collection.find().toArray(function(err, items) {                
+                // console.log("============================================================================ shouldCorrectlyQuerySecondaries 1")
+                // console.dir(err)
+                // console.dir(items)
+
+                test.equal(null, err);
+                test.equal(3, items.length);                
+                p_db.close();
+                test.done();
+              });
             });            
           });
         }, 2000);

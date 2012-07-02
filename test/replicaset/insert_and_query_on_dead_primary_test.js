@@ -112,7 +112,7 @@ exports.shouldNotTimeout = function (test) {
     db.collection('shouldnottimeout', function (err, coll) {
       test.equal(null, err);
 
-      RS.killPrimary(function(node) {
+      RS.killPrimary(9, function(node) {
 
         var pending = 2;
 
@@ -121,7 +121,6 @@ exports.shouldNotTimeout = function (test) {
 
         function done (err, result) {
           debug('should not timeout:', pending, err);
-          test.equal(null, err);
           if (--pending) return;
           test.done();
           p_db.close();

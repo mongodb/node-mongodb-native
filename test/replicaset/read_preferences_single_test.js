@@ -1,39 +1,3 @@
-// Read Preference behaviour based on Python driver by A. Jesse Jiryu Davis
-// https://github.com/mongodb/mongo-python-driver/blob/master/pymongo/__init__.py
-// +----------------------+--------------------------------------------------+
-// |    Connection type   |                 Read Preference                  |
-// +======================+================+================+================+
-// |                      |`PRIMARY`       |`SECONDARY`     |`SECONDARY_ONLY`|
-// +----------------------+----------------+----------------+----------------+
-// |Connection to a single|Queries are     |Queries are     |Same as         |
-// |host.                 |allowed if the  |allowed if the  |`SECONDARY`     |
-// |                      |connection is to|connection is to|                |
-// |                      |the replica set |the replica set |                |
-// |                      |primary.        |primary or a    |                |
-// |                      |                |secondary.      |                |
-// +----------------------+----------------+----------------+----------------+
-// |Connection to a       |Queries are sent|Queries are     |Same as         |
-// |mongos.               |to the primary  |distributed     |`SECONDARY`     |
-// |                      |of a shard.     |among shard     |                |
-// |                      |                |secondaries.    |                |
-// |                      |                |Queries are sent|                |
-// |                      |                |to the primary  |                |
-// |                      |                |if no           |                |
-// |                      |                |secondaries are |                |
-// |                      |                |available.      |                |
-// |                      |                |                |                |
-// +----------------------+----------------+----------------+----------------+
-// |ReplicaSetConnection  |Queries are sent|Queries are     |Queries are     |
-// |                      |to the primary  |distributed     |never sent to   |
-// |                      |of the replica  |among replica   |the replica set |
-// |                      |set.            |set secondaries.|primary. An     |
-// |                      |                |Queries are sent|exception is    |
-// |                      |                |to the primary  |raised if no    |
-// |                      |                |if no           |secondary is    |
-// |                      |                |secondaries are |available.      |
-// |                      |                |available.      |                |
-// |                      |                |                |                |
-// +----------------------+----------------+----------------+----------------+
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
 var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
@@ -170,18 +134,6 @@ exports.tearDown = function(callback) {
   }  
 }
 
-// +----------------------+--------------------------------------------------+
-// |    Connection type   |                 Read Preference                  |
-// +======================+================+================+================+
-// |                      |`PRIMARY`       |`SECONDARY`     |`SECONDARY_ONLY`|
-// +----------------------+----------------+----------------+----------------+
-// |Connection to a single|Queries are     |Queries are     |Same as         |
-// |host.                 |allowed if the  |allowed if the  |`SECONDARY`     |
-// |                      |connection is to|connection is to|                |
-// |                      |the replica set |the replica set |                |
-// |                      |primary.        |primary or a    |                |
-// |                      |                |secondary.      |                |
-// +----------------------+----------------+----------------+----------------+  
 exports['Connection to a arbiter host with primary preference should give error'] = function(test) {
   // Fetch all the identity servers
   identifyServers(RS, 'integration_test_', function(err, servers) {
@@ -284,7 +236,7 @@ exports['Connection to a single secondary host with different read preferences']
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().toArray(function(err, items) {
           test.ok(err instanceof Error);
-          test.equal("Read preference is primary and server is not master", err.message);
+          test.equal("Read preference is Server.PRIMARY and server is not master", err.message);
           p_db.close();
 
           // Connect to the db

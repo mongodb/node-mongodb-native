@@ -123,16 +123,16 @@ exports.shouldContinueToQueryWithPrimaryNodeShutdown = function(test) {
           RS.killPrimary(function (err, result) {
             // Run a simple query
             collection.findOne(function (err, doc) {
-              if (err) {
-                console.log("============================= caught error");
-                console.dir(err);
-                if (err.stack != null) console.log(err.stack);
-              }
-              test.ok(err == null);
-              test.ok(doc == null);
+              test.ok(err != null);
 
-              p_db.close();
-              test.done();
+              // Run a simple query
+              collection.findOne(function (err, doc) {
+                test.ok(err == null);
+                test.ok(doc == null);
+
+                p_db.close();
+                test.done();
+              });
             });
           });
         });
