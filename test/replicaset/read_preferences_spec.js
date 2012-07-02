@@ -188,7 +188,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
     // Read with no secondaries available
     connection = db.serverConfig.checkoutReader(Server.SECONDARY);
     // No connection should be found
-    test.equal(null, connection);
+    test.equal("No replica set secondary available for query with ReadPreference SECONDARY", connection.message);
 
     // Return the set to the correct state
     db.serverConfig._state.secondaries = secondaries;
@@ -242,32 +242,28 @@ exports['Should Correctly Use Server.NEAREST read preference'] = function(test) 
   replSet.on("fullsetup", function() {
     // Wait for a bit, let ping happen
     setTimeout(function() {
-      var lowestPingTime = 1000000;
-      var lowestPingTimeServer = null;
-      var keys = Object.keys(db.serverConfig._state.addresses);
-
-      for(var i = 0; i < keys.length; i++) {
-        var server = db.serverConfig._state.addresses[keys[i]];
-        // Get the lowest ping time
-        if(server.runtimeStats['pingMs'] < lowestPingTime) {
-          lowestPingTime = server.runtimeStats['pingMs'];
-          lowestPingTimeServer = server;
-        }
-      }
-
-      // Build a list of all secondary connections
-      var keys = Object.keys(db.serverConfig._state.secondaries);
-      var connections = [];
-
-      for(var i = 0; i < keys.length; i++) {
-        connections = connections.concat(db.serverConfig._state.secondaries[keys[i]].allRawConnections());
-      }
-
       // Fetch my nearest
       var connection = db.serverConfig.checkoutReader(Server.NEAREST);
 
+      // All candidate servers
+      var candidateServers = [];
+
+      // Add all secondaries
+      var keys = Object.keys(db.serverConfig._state.secondaries);
+      for(var i = 0; i < keys.length; i++) {
+        candidateServers.push(db.serverConfig._state.secondaries[keys[i]]);
+      }
+
+      // Sort by ping time
+      candidateServers.sort(function(a, b) {
+        return a.runtimeStats['pingMs'] > b.runtimeStats['pingMs'];
+      });
+
+      // Get all the connections
+      var connections = candidateServers[0].allRawConnections();
+
       // verify that we have picked the lowest connection
-      test.ok(locateConnection(connection, lowestPingTimeServer.allRawConnections()));      
+      test.ok(locateConnection(connection, connections));      
 
       // Should not be null
       test.ok(connection != null);
@@ -277,33 +273,26 @@ exports['Should Correctly Use Server.NEAREST read preference'] = function(test) 
       var master = db.serverConfig._state.master;
       db.serverConfig._state.master = null;
 
-      // Find fastest secondary
-      var lowestPingTime = 1000000;
-      var lowestPingTimeServer = null;
-      var keys = Object.keys(db.serverConfig._state.secondaries);
-
-      for(var i = 0; i < keys.length; i++) {
-        var server = db.serverConfig._state.secondaries[keys[i]];
-        // Get the lowest ping time
-        if(server.runtimeStats['pingMs'] < lowestPingTime) {
-          lowestPingTime = server.runtimeStats['pingMs'];
-          lowestPingTimeServer = server;
-        }
-      }
-
-      var connections = [];
-      var keys = Object.keys(db.serverConfig._state.secondaries);
-
-      for(var i = 0; i < keys.length; i++) {
-        var server = db.serverConfig._state.secondaries[keys[i]];
-
-        if(server.runtimeStats['pingMs'] == lowestPingTime) {
-          connections = connections.concat(server.allRawConnections());
-        }
-      }
-
       // Fetch a secondary
       connection = db.serverConfig.checkoutReader(Server.NEAREST);
+
+      // All candidate servers
+      var candidateServers = [];
+
+      // Add all secondaries
+      var keys = Object.keys(db.serverConfig._state.secondaries);
+      for(var i = 0; i < keys.length; i++) {
+        candidateServers.push(db.serverConfig._state.secondaries[keys[i]]);
+      }
+
+      // Sort by ping time
+      candidateServers.sort(function(a, b) {
+        return a.runtimeStats['pingMs'] > b.runtimeStats['pingMs'];
+      });
+
+      // Get all the connections
+      var connections = candidateServers[0].allRawConnections();
+
       // verify that we have picked the lowest connection
       test.ok(locateConnection(connection, connections));
 
@@ -390,55 +379,217 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
       // Clean up
       db.serverConfig._state.master = master;
 
-      // /**
-      //  * Read using SECONDARY
-      //  **/
+      /**
+       * Read using SECONDARY
+       **/
 
-      // // Read with secondaries available
-      // connection = db.serverConfig.checkoutReader(Server.SECONDARY);
+      // Read with secondaries available
+      connection = db.serverConfig.checkoutReader(Server.SECONDARY, {"dc2":"sf"});
+      // Locate connection
+      test.ok(locateConnection(connection, connections));
 
-      // // Locate connection
-      // test.ok(locateConnection(connection, connections));
+      //
+      // Remove the secondaries, we should now fail
+      var secondaries = db.serverConfig._state.secondaries;
+      db.serverConfig._state.secondaries = {};
 
-      // //
-      // // Remove the secondaries, we should now fail
-      // var secondaries = db.serverConfig._state.secondaries;
-      // db.serverConfig._state.secondaries = {};
+      // Read with no secondaries available and tag preferences
+      connection = db.serverConfig.checkoutReader(Server.SECONDARY, {"dc2":"sf"});
+      test.equal("No replica set member available for query with ReadPreference secondary and tags {\"dc2\":\"sf\"}", connection.message);
 
-      // // Read with no secondaries available
-      // connection = db.serverConfig.checkoutReader(Server.SECONDARY);
-      // // No connection should be found
-      // test.equal(null, connection);
+      // Read with no secondaries available and no tags
+      connection = db.serverConfig.checkoutReader(Server.SECONDARY);
+      test.equal("No replica set secondary available for query with ReadPreference SECONDARY", connection.message);
 
-      // // Return the set to the correct state
-      // db.serverConfig._state.secondaries = secondaries;
+      // Return the set to the correct state
+      db.serverConfig._state.secondaries = secondaries;
 
-      // /**
-      //  * Read using SECONDARY_PREFERRED
-      //  **/
+      /**
+       * Read using SECONDARY_PREFERRED
+       **/
 
-      // // Read with secondaries available
-      // connection = db.serverConfig.checkoutReader(Server.SECONDARY_PREFERRED);
-      // // Locate connection
-      // test.ok(locateConnection(connection, connections));
+      // Read with secondaries available
+      connection = db.serverConfig.checkoutReader(Server.SECONDARY_PREFERRED, {"dc2":"sf"});
+      // Locate connection
+      test.ok(locateConnection(connection, connections));
 
-      // //
-      // // Remove the secondaries, we should now return the primary
-      // var secondaries = db.serverConfig._state.secondaries;
-      // db.serverConfig._state.secondaries = {};
+      //
+      // Remove the secondaries, we should now return the primary
+      var secondaries = db.serverConfig._state.secondaries;
+      db.serverConfig._state.secondaries = {};
 
-      // // Read with secondaries available
-      // connection = db.serverConfig.checkoutReader(Server.SECONDARY_PREFERRED);
+      // Read with secondaries available
+      connection = db.serverConfig.checkoutReader(Server.SECONDARY_PREFERRED, {"dc2":"sf"});
 
-      // // Locate connection
-      // test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));    
+      // Locate connection
+      test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));    
 
-      // // Return the set to the correct state
-      // db.serverConfig._state.secondaries = secondaries;
+      // Return the set to the correct state
+      db.serverConfig._state.secondaries = secondaries;
 
-      // // Finish up test
-      // test.done();
-      // db.close();
+      // Finish up test
+      test.done();
+      db.close();      
+    }, 5000);
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
+  })    
+}
+
+exports['Should Correctly Use Server.NEAREST read preference with tags'] = function(test) {
+  // Replica configuration
+  var replSet = new ReplSetServers([ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ], 
+    {strategy:'ping'}
+  );
+  
+  // Open the database
+  var db = new Db('integration_test_', replSet, {recordQueryStats:true});
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
+    // Wait for a bit, let ping happen
+    setTimeout(function() {
+      // Fetch my nearest
+      var connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc2":"sf"});
+
+      // Build a list of all secondary connections
+      var keys = Object.keys(db.serverConfig._state.secondaries);
+      var connections = [];
+
+      for(var i = 0; i < keys.length; i++) {
+        if(db.serverConfig._state.secondaries[keys[i]].tags["dc2"] == "sf") {
+          connections = connections.concat(db.serverConfig._state.secondaries[keys[i]].allRawConnections());          
+        }
+      }
+
+      // verify that we have picked the lowest connection correctly taged server
+      test.ok(locateConnection(connection, connections));      
+
+      // Pick out of two nearest servers
+      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc1":"ny"});
+
+      // All candidate servers
+      var candidateServers = [];
+
+      // Build a list of all secondary connections
+      keys = Object.keys(db.serverConfig._state.secondaries);
+      connections = [];
+
+      for(var i = 0; i < keys.length; i++) {
+        if(db.serverConfig._state.secondaries[keys[i]].tags["dc1"] == "ny") {
+          candidateServers.push(db.serverConfig._state.secondaries[keys[i]]);
+        }
+      }
+
+      // Sort by ping time
+      candidateServers.sort(function(a, b) {
+        return a.runtimeStats['pingMs'] > b.runtimeStats['pingMs'];
+      });
+
+      // Get all the connections
+      connections = candidateServers[0].allRawConnections();
+      // verify that we have picked the lowest connection correctly taged server
+      test.ok(locateConnection(connection, connections));      
+
+      // No server available
+      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc5":"ny"});
+
+      // Validate no connection available
+      test.equal("No replica set members available for query", connection.message);
+
+      // Error if no strategy instance
+      db.serverConfig.strategyInstance = null;
+
+      // No server available
+      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc5":"ny"});
+      test.equal("A strategy for calculating nearness must be enabled such as ping or statistical", connection.message);
+
+      // Finish up test
+      test.done();
+      db.close();      
+    }, 5000);
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
+  })    
+}
+
+exports['Should Correctly Use Server.NEAREST read preference with tags and statistical strategy'] = function(test) {
+  // Replica configuration
+  var replSet = new ReplSetServers([ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ], 
+    {strategy:'statistical'}
+  );
+  
+  // Open the database
+  var db = new Db('integration_test_', replSet, {recordQueryStats:true});
+  // Trigger test once whole set is up
+  replSet.on("fullsetup", function() {
+    // Wait for a bit, let ping happen
+    setTimeout(function() {
+      // Fetch my nearest
+      var connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc2":"sf"});
+
+      // Build a list of all secondary connections
+      var keys = Object.keys(db.serverConfig._state.secondaries);
+      var connections = [];
+
+      for(var i = 0; i < keys.length; i++) {
+        if(db.serverConfig._state.secondaries[keys[i]].tags["dc2"] == "sf") {
+          connections = connections.concat(db.serverConfig._state.secondaries[keys[i]].allRawConnections());          
+        }
+      }
+
+      // verify that we have picked the lowest connection correctly taged server
+      test.ok(locateConnection(connection, connections));      
+
+      // Pick out of two nearest servers
+      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc1":"ny"});
+
+      // All candidate servers
+      var candidateServers = [];
+
+      // Build a list of all secondary connections
+      keys = Object.keys(db.serverConfig._state.secondaries);
+      connections = [];
+
+      for(var i = 0; i < keys.length; i++) {
+        if(db.serverConfig._state.secondaries[keys[i]].tags["dc1"] == "ny") {
+          candidateServers.push(db.serverConfig._state.secondaries[keys[i]]);
+        }
+      }
+
+      // Sort by ping time
+      candidateServers.sort(function(a, b) {
+        return a.runtimeStats['pingMs'] > b.runtimeStats['pingMs'];
+      });
+
+      // Get all the connections
+      connections = candidateServers[0].allRawConnections();
+      // verify that we have picked the lowest connection correctly taged server
+      test.ok(locateConnection(connection, connections));      
+
+      // No server available
+      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc5":"ny"});
+
+      // Validate no connection available
+      test.equal("No replica set members available for query", connection.message);
+
+      // Error if no strategy instance
+      db.serverConfig.strategyInstance = null;
+
+      // No server available
+      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc5":"ny"});
+      test.equal("A strategy for calculating nearness must be enabled such as ping or statistical", connection.message);
 
       // Finish up test
       test.done();
