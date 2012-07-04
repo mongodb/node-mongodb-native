@@ -1,5 +1,18 @@
-TODO
-- Mongos connection DONE
-- Gridfs streaming node.js read/write DONE
-- toBson methods on serializer to allow for simpler serialization of complex objects DONE
+DONE
+- Mongos connection
+- Gridfs streaming node.js read/write
+- toBson methods on serializer to allow for simpler serialization of complex objects
 - Refactor admin.js to use authdb passthrough
+- Aggregation helper
+
+IN PROCESS
+- Read preferences for Mongos and Replicaset according to spec
+
+TODO
+- Ensure correct behavior of url string with spec
+- Merge in outstanding bug fixes
+- Attempt to get bson C++ patch in
+- Write TTL collection tests for 2.2
+- https://github.com/mongodb/node-mongodb-native/issues/648
+- https://github.com/mongodb/node-mongodb-native/pull/646
+- https://github.com/mongodb/node-mongodb-native/issues/640
