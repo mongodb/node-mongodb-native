@@ -8,6 +8,7 @@ var testCase = require('nodeunit').testCase,
   ShardedManager = require('../tools/sharded_manager').ShardedManager,
   Db = mongodb.Db,
   Mongos = mongodb.Mongos,
+  ReadPreference = mongodb.ReadPreference,
   Server = mongodb.Server;
 
 // Keep instance of ReplicaSetManager
@@ -51,24 +52,23 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
-  // Shard.killAll(function() {
+  Shard.killAll(function() {
     callback();
-  // });
+  });
 }
 
 /**
  * A Simple example off connecting to Mongos with a list of alternative proxies.
  *
- * @_class db
- * @_function open
+ * @ignore
  */
-exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
+exports['Should correctly perform a Mongos secondary read using the read preferences'] = function(test) {
   // Set up mongos connection
   var mongos = new Mongos([
       new Server("localhost", 50000, { auto_reconnect: true }),
       new Server("localhost", 50001, { auto_reconnect: true })
     ])
-  
+
   // Connect using the mongos connections
   var db = new Db('integration_test_', mongos);
   db.open(function(err, db) {
@@ -81,9 +81,22 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
     collection.insert({test:1}, {safe:true}, function(err, result) {
       test.equal(null, err);
 
-      collection.findOne({test:1}, {}, {readPreference:Server.PRIMARY}, function(err, item) {
+      var save = db._executeQueryCommand;
+      db._executeQueryCommand = function(db_command, options, callback) {
+        var _callback = function(err, result, r) {
+          // Check correct read preference object
+          test.deepEqual({'$query':{test:1}, '$readPreference':{mode:'secondary'}}, db_command.query);
+          // Continue call
+          callback(err, result, r);
+        }
+
+        save.apply(db, [db_command, options, _callback]);
+      }
+
+      collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY)}, function(err, item) {
         test.equal(null, err);
         test.equal(1, item.test);
+
         db.close();
         test.done();
       })      
@@ -92,15 +105,17 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
 }
 
 /**
+ * A Simple example off connecting to Mongos with a list of alternative proxies.
+ *
  * @ignore
  */
-exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = function(test) {
+exports['Should correctly fail a Mongos read using a unsupported read preference'] = function(test) {
   // Set up mongos connection
   var mongos = new Mongos([
       new Server("localhost", 50000, { auto_reconnect: true }),
       new Server("localhost", 50001, { auto_reconnect: true })
-    ], {ha:true})
-  
+    ])
+
   // Connect using the mongos connections
   var db = new Db('integration_test_', mongos);
   db.open(function(err, db) {
@@ -108,75 +123,43 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
     test.ok(db != null);
   
     // Perform a simple insert into a collection
-    var collection = db.collection("shard_test2");
+    var collection = db.collection("shard_test");
     // Insert a simple doc
     collection.insert({test:1}, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
-      // Kill the mongos proxy
-      Shard.killMongoS(50000, function(err, result) {
-        
-        // Attempt another insert
-        collection.insert({test:2}, {safe:true}, function(err, result) {
-          test.equal(null, err);
-          test.equal(1, db.serverConfig.downServers.length);
-                
-          // Restart the other mongos
-          Shard.restartMongoS(50000, function(err, result) {
-            
-            // Wait for the ha process to pick up the existing new server
-            setTimeout(function() {
-              test.equal(0, db.serverConfig.downServers.length);
 
-              // Kill the mongos proxy
-              Shard.killMongoS(50001, function(err, result) {
-                // Attempt another insert
-                collection.insert({test:3}, {safe:true}, function(err, result) {
-                  test.equal(null, err);
-                  test.equal(1, db.serverConfig.downServers.length);
+      var save = db._executeQueryCommand;
+      db._executeQueryCommand = function(db_command, options, callback) {
+        var _callback = function(err, result, r) {
+          // Check correct read preference object
+          test.deepEqual({'$query':{test:1}, '$readPreference':{mode:'notsupported'}}, db_command.query);
+          // Continue call
+          callback(err, result, r);
+        }
 
-                  // Restart the other mongos
-                  Shard.restartMongoS(50001, function(err, result) {
-                    // Wait for the ha process to pick up the existing new server
-                    setTimeout(function() {
-                      // Kill the mongos proxy
-                      Shard.killMongoS(50000, function(err, result) {
-                        // Attempt another insert
-                        collection.insert({test:4}, {safe:true}, function(err, result) {
-                          test.equal(null, err);
+        save.apply(db, [db_command, options, _callback]);
+      }
 
-                          // Wait for the ha process to pick up the existing new server
-                          setTimeout(function() {
-                            test.equal(1, db.serverConfig.downServers.length);
-
-                            db.close();
-                            test.done();              
-                          }, 5000);                   
-                        });
-                      });                         
-                    }, 10000);
-                  });
-                });
-              });
-            }, 10000)           
-          });               
-        })
+      collection.findOne({test:1}, {}, {readPreference:new ReadPreference('notsupported')}, function(err, item) {
+        test.ok(err != null);
+        db.close();
+        test.done();
       })      
     });
   });  
 }
 
-// /**
-//  * Retrieve the server information for the current
-//  * instance of the db client
-//  * 
-//  * @ignore
-//  */
-// exports.noGlobalsLeaked = function(test) {
-//   var leaks = gleak.detectNew();
-//   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-//   test.done();
-// }
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ * 
+ * @ignore
+ */
+exports.noGlobalsLeaked = function(test) {
+  var leaks = gleak.detectNew();
+  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
+  test.done();
+}
 
 /**
  * Retrieve the server information for the current
