@@ -7,6 +7,7 @@ var testCase = require('nodeunit').testCase,
   gleak = require('../../dev/tools/gleak'),
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = mongodb.Db,
+  ReadPreference = mongodb.ReadPreference,
   ReplSetServers = mongodb.ReplSetServers,
   PingStrategy = require('../../lib/mongodb/connection/strategies/ping_strategy').PingStrategy,
   StatisticsStrategy = require('../../lib/mongodb/connection/strategies/statistics_strategy').StatisticsStrategy,
@@ -133,7 +134,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
      * Read using PRIMARY
      **/
 
-    var connection = db.serverConfig.checkoutReader(Server.PRIMARY);
+    var connection = db.serverConfig.checkoutReader(ReadPreference.PRIMARY);
     // Locate connection
     test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));
         
@@ -143,7 +144,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
 
     //
     // Read using PRIMARY_PREFERRED, pick the primary
-    connection = db.serverConfig.checkoutReader(Server.PRIMARY_PREFERRED);
+    connection = db.serverConfig.checkoutReader(ReadPreference.PRIMARY_PREFERRED);
     // Locate connection
     test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));
     
@@ -154,7 +155,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
 
     //
     // Read from secondary when primary not available
-    connection = db.serverConfig.checkoutReader(Server.PRIMARY_PREFERRED);
+    connection = db.serverConfig.checkoutReader(ReadPreference.PRIMARY_PREFERRED);
 
     // Build a list of all secondary connections
     var keys = Object.keys(db.serverConfig._state.secondaries);
@@ -175,7 +176,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
      **/
 
     // Read with secondaries available
-    connection = db.serverConfig.checkoutReader(Server.SECONDARY);
+    connection = db.serverConfig.checkoutReader(ReadPreference.SECONDARY);
 
     // Locate connection
     test.ok(locateConnection(connection, connections));
@@ -186,7 +187,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
     db.serverConfig._state.secondaries = {};
 
     // Read with no secondaries available
-    connection = db.serverConfig.checkoutReader(Server.SECONDARY);
+    connection = db.serverConfig.checkoutReader(ReadPreference.SECONDARY);
     // No connection should be found
     test.equal("No replica set secondary available for query with ReadPreference SECONDARY", connection.message);
 
@@ -198,7 +199,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
      **/
 
     // Read with secondaries available
-    connection = db.serverConfig.checkoutReader(Server.SECONDARY_PREFERRED);
+    connection = db.serverConfig.checkoutReader(ReadPreference.SECONDARY_PREFERRED);
     // Locate connection
     test.ok(locateConnection(connection, connections));
 
@@ -208,7 +209,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
     db.serverConfig._state.secondaries = {};
 
     // Read with secondaries available
-    connection = db.serverConfig.checkoutReader(Server.SECONDARY_PREFERRED);
+    connection = db.serverConfig.checkoutReader(ReadPreference.SECONDARY_PREFERRED);
 
     // Locate connection
     test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));    
@@ -226,7 +227,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
   })    
 }
 
-exports['Should Correctly Use Server.NEAREST read preference'] = function(test) {
+exports['Should Correctly Use ReadPreference.NEAREST read preference'] = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -243,7 +244,7 @@ exports['Should Correctly Use Server.NEAREST read preference'] = function(test) 
     // Wait for a bit, let ping happen
     setTimeout(function() {
       // Fetch my nearest
-      var connection = db.serverConfig.checkoutReader(Server.NEAREST);
+      var connection = db.serverConfig.checkoutReader(ReadPreference.NEAREST);
 
       // All candidate servers
       var candidateServers = [];
@@ -274,7 +275,7 @@ exports['Should Correctly Use Server.NEAREST read preference'] = function(test) 
       db.serverConfig._state.master = null;
 
       // Fetch a secondary
-      connection = db.serverConfig.checkoutReader(Server.NEAREST);
+      connection = db.serverConfig.checkoutReader(ReadPreference.NEAREST);
 
       // All candidate servers
       var candidateServers = [];
@@ -331,7 +332,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
        * Read using PRIMARY
        **/
 
-      var connection = db.serverConfig.checkoutReader(Server.PRIMARY, {"dc1":"ny"});
+      var connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.PRIMARY, {"dc1":"ny"}));
       // Validate the error
       test.ok(connection instanceof Error);
       test.equal("PRIMARY cannot be combined with tags", connection.message);
@@ -342,7 +343,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
 
       //
       // Read using PRIMARY_PREFERRED, pick the primary
-      connection = db.serverConfig.checkoutReader(Server.PRIMARY_PREFERRED, {"dc1":"ny"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.PRIMARY_PREFERRED, {"dc1":"ny"}));
       // Locate connection
       test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));
       
@@ -353,7 +354,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
 
       //
       // Read from secondary when primary not available
-      connection = db.serverConfig.checkoutReader(Server.PRIMARY_PREFERRED, {"dc2":"sf"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.PRIMARY_PREFERRED, {"dc2":"sf"}));
 
       // Build a list of all secondary connections
       var keys = Object.keys(db.serverConfig._state.secondaries);
@@ -370,7 +371,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
 
       //
       // Read from secondary when primary not available
-      connection = db.serverConfig.checkoutReader(Server.PRIMARY_PREFERRED, {"dc3":"sf"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.PRIMARY_PREFERRED, {"dc3":"sf"}));
 
       // Validate the error
       test.ok(connection instanceof Error);
@@ -384,7 +385,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
        **/
 
       // Read with secondaries available
-      connection = db.serverConfig.checkoutReader(Server.SECONDARY, {"dc2":"sf"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY, {"dc2":"sf"}));
       // Locate connection
       test.ok(locateConnection(connection, connections));
 
@@ -394,11 +395,11 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
       db.serverConfig._state.secondaries = {};
 
       // Read with no secondaries available and tag preferences
-      connection = db.serverConfig.checkoutReader(Server.SECONDARY, {"dc2":"sf"});
+      connection = db.serverConfig.checkoutReader(ReadPreference.SECONDARY, {"dc2":"sf"});
       test.equal("No replica set member available for query with ReadPreference secondary and tags {\"dc2\":\"sf\"}", connection.message);
 
       // Read with no secondaries available and no tags
-      connection = db.serverConfig.checkoutReader(Server.SECONDARY);
+      connection = db.serverConfig.checkoutReader(ReadPreference.SECONDARY);
       test.equal("No replica set secondary available for query with ReadPreference SECONDARY", connection.message);
 
       // Return the set to the correct state
@@ -409,7 +410,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
        **/
 
       // Read with secondaries available
-      connection = db.serverConfig.checkoutReader(Server.SECONDARY_PREFERRED, {"dc2":"sf"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY_PREFERRED, {"dc2":"sf"}));
       // Locate connection
       test.ok(locateConnection(connection, connections));
 
@@ -419,7 +420,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
       db.serverConfig._state.secondaries = {};
 
       // Read with secondaries available
-      connection = db.serverConfig.checkoutReader(Server.SECONDARY_PREFERRED, {"dc2":"sf"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY_PREFERRED, {"dc2":"sf"}));
 
       // Locate connection
       test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));    
@@ -438,7 +439,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
   })    
 }
 
-exports['Should Correctly Use Server.NEAREST read preference with tags'] = function(test) {
+exports['Should Correctly Use ReadPreference.NEAREST read preference with tags'] = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -455,7 +456,7 @@ exports['Should Correctly Use Server.NEAREST read preference with tags'] = funct
     // Wait for a bit, let ping happen
     setTimeout(function() {
       // Fetch my nearest
-      var connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc2":"sf"});
+      var connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc2":"sf"}));
 
       // Build a list of all secondary connections
       var keys = Object.keys(db.serverConfig._state.secondaries);
@@ -471,7 +472,7 @@ exports['Should Correctly Use Server.NEAREST read preference with tags'] = funct
       test.ok(locateConnection(connection, connections));      
 
       // Pick out of two nearest servers
-      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc1":"ny"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc1":"ny"}));
 
       // All candidate servers
       var candidateServers = [];
@@ -497,7 +498,7 @@ exports['Should Correctly Use Server.NEAREST read preference with tags'] = funct
       test.ok(locateConnection(connection, connections));      
 
       // No server available
-      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc5":"ny"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc5":"ny"}));
 
       // Validate no connection available
       test.equal("No replica set members available for query", connection.message);
@@ -506,7 +507,7 @@ exports['Should Correctly Use Server.NEAREST read preference with tags'] = funct
       db.serverConfig.strategyInstance = null;
 
       // No server available
-      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc5":"ny"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc5":"ny"}));
       test.equal("A strategy for calculating nearness must be enabled such as ping or statistical", connection.message);
 
       // Finish up test
@@ -520,7 +521,7 @@ exports['Should Correctly Use Server.NEAREST read preference with tags'] = funct
   })    
 }
 
-exports['Should Correctly Use Server.NEAREST read preference with tags and statistical strategy'] = function(test) {
+exports['Should Correctly Use ReadPreference.NEAREST read preference with tags and statistical strategy'] = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([ 
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -537,7 +538,7 @@ exports['Should Correctly Use Server.NEAREST read preference with tags and stati
     // Wait for a bit, let ping happen
     setTimeout(function() {
       // Fetch my nearest
-      var connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc2":"sf"});
+      var connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc2":"sf"}));
 
       // Build a list of all secondary connections
       var keys = Object.keys(db.serverConfig._state.secondaries);
@@ -553,7 +554,7 @@ exports['Should Correctly Use Server.NEAREST read preference with tags and stati
       test.ok(locateConnection(connection, connections));      
 
       // Pick out of two nearest servers
-      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc1":"ny"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc1":"ny"}));
 
       // All candidate servers
       var candidateServers = [];
@@ -579,7 +580,7 @@ exports['Should Correctly Use Server.NEAREST read preference with tags and stati
       test.ok(locateConnection(connection, connections));      
 
       // No server available
-      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc5":"ny"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc5":"ny"}));
 
       // Validate no connection available
       test.equal("No replica set members available for query", connection.message);
@@ -588,7 +589,7 @@ exports['Should Correctly Use Server.NEAREST read preference with tags and stati
       db.serverConfig.strategyInstance = null;
 
       // No server available
-      connection = db.serverConfig.checkoutReader(Server.NEAREST, {"dc5":"ny"});
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc5":"ny"}));
       test.equal("A strategy for calculating nearness must be enabled such as ping or statistical", connection.message);
 
       // Finish up test

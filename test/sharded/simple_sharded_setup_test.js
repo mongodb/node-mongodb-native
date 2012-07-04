@@ -8,6 +8,7 @@ var testCase = require('nodeunit').testCase,
   ShardedManager = require('../tools/sharded_manager').ShardedManager,
   Db = mongodb.Db,
   Mongos = mongodb.Mongos,
+  ReadPreference = mongodb.ReadPreference,
   Server = mongodb.Server;
 
 // Keep instance of ReplicaSetManager
@@ -81,11 +82,26 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
     collection.insert({test:1}, {safe:true}, function(err, result) {
       test.equal(null, err);
 
-      collection.findOne({test:1}, {}, {readPreference:Server.PRIMARY}, function(err, item) {
-        test.equal(null, err);
-        test.equal(1, item.test);
-        db.close();
-        test.done();
+      collection.findOne({test:1}, {}, {readPreference:Server.SECONDARY}, function(err, item) {
+        console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        console.dir(err)
+        console.dir(item)
+
+        collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY)}, function(err, item) {
+          console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+          console.dir(err)
+          console.dir(item)
+
+          // test.equal(null, err);
+          // test.equal(1, item.test);
+          db.close();
+          test.done();
+        })      
+
+        // test.equal(null, err);
+        // test.equal(1, item.test);
+        // db.close();
+        // test.done();
       })      
     });
   });  

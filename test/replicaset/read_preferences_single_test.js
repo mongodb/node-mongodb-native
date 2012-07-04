@@ -7,6 +7,7 @@ var testCase = require('nodeunit').testCase,
   gleak = require('../../dev/tools/gleak'),
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = mongodb.Db,
+  ReadPreference = mongodb.ReadPreference,
   ReplSetServers = mongodb.ReplSetServers,
   Server = mongodb.Server,
   Step = require("step");  
@@ -235,6 +236,9 @@ exports['Connection to a single secondary host with different read preferences']
       p_db.collection("read_preference_single_test_1", function(err, collection) {
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().toArray(function(err, items) {
+          console.log("==================================================================================")
+          console.dir(err)
+
           test.ok(err instanceof Error);
           test.equal("Read preference is Server.PRIMARY and server is not master", err.message);
           p_db.close();

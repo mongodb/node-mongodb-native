@@ -7,6 +7,7 @@ var testCase = require('nodeunit').testCase,
   gleak = require('../../dev/tools/gleak'),
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = mongodb.Db,
+  ReadPreference = mongodb.ReadPreference,
   ReplSetServers = mongodb.ReplSetServers,
   Server = mongodb.Server,
   Step = require("step");  
@@ -141,7 +142,7 @@ exports['Connection to replicaset with primary read preference'] = function(test
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ], 
-    {rs_name:RS.name, readPreference:Server.PRIMARY}
+    {rs_name:RS.name, readPreference:ReadPreference.PRIMARY}
   );
   
   // Execute flag
@@ -185,7 +186,7 @@ exports['Connection to replicaset with secondary read preference with no seconda
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
         new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
       ], 
-      {rs_name:RS.name, readPreference:Server.SECONDARY_PREFERRED}
+      {rs_name:RS.name, readPreference:ReadPreference.SECONDARY_PREFERRED}
     );
   
     // Create db instance
@@ -231,7 +232,7 @@ exports['Connection to replicaset with secondary only read preference no seconda
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
         new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
       ], 
-      {rs_name:RS.name, readPreference:Server.SECONDARY}
+      {rs_name:RS.name, readPreference:ReadPreference.SECONDARY}
     );
   
     // Create db instance
@@ -269,7 +270,7 @@ exports['Connection to replicaset with secondary only read preference should ret
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
         new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
       ], 
-      {rs_name:RS.name, readPreference:Server.SECONDARY}
+      {rs_name:RS.name, readPreference:ReadPreference.SECONDARY}
     );
     
     // Execute flag
@@ -317,7 +318,7 @@ exports['Connection to replicaset with secondary read preference should return s
         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
         new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
       ], 
-      {rs_name:RS.name, readPreference:Server.SECONDARY_PREFERRED}
+      {rs_name:RS.name, readPreference:ReadPreference.SECONDARY_PREFERRED}
     );
     
     // Execute flag

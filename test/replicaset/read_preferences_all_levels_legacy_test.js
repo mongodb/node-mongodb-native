@@ -162,13 +162,13 @@ exports['Set read preference at collection level using collection method'] = fun
     }
     
     // Grab the collection
-    db.collection("read_preferences_all_levels_0", {readPreference:new ReadPreference(ReadPreference.SECONDARY)}, function(err, collection) {
+    db.collection("read_preferences_all_levels_0", {readPreference:Server.READ_SECONDARY_ONLY}, function(err, collection) {
       // Attempt to read (should fail due to the server not being a primary);
       var cursor = collection.find()
       cursor.toArray(function(err, items) {
         // Does not get called or we don't care
         test.ok(executedCorrectlyRead);
-        test.equal(ReadPreference.SECONDARY, cursor.read.mode)
+        test.equal(Server.READ_SECONDARY_ONLY, cursor.read)
         p_db.close();
         test.done();
       });
@@ -203,13 +203,13 @@ exports['Set read preference at collection level using createCollection method']
     }
     
     // Grab the collection
-    db.createCollection("read_preferences_all_levels_0", {readPreference:new ReadPreference(ReadPreference.SECONDARY)}, function(err, collection) {
+    db.createCollection("read_preferences_all_levels_0", {readPreference:Server.READ_SECONDARY_ONLY}, function(err, collection) {
       var cursor = collection.find();
       // Attempt to read (should fail due to the server not being a primary);
       cursor.toArray(function(err, items) {
         // Does not get called or we don't care
         test.ok(executedCorrectlyRead);
-        test.equal(ReadPreference.SECONDARY, cursor.read.mode)
+        test.equal(Server.READ_SECONDARY_ONLY, cursor.read)
         p_db.close();
         test.done();
       });
@@ -245,9 +245,9 @@ exports['Set read preference at cursor level'] = function(test) {
     }
     
     // Grab the collection
-    p_db.collection("read_preferences_all_levels_1", {}, function(err, collection) {
+    db.collection("read_preferences_all_levels_1", {}, function(err, collection) {
       // Attempt to read (should fail due to the server not being a primary);
-      collection.find().setReadPreference(new ReadPreference(ReadPreference.SECONDARY)).toArray(function(err, items) {
+      collection.find().setReadPreference(Server.READ_SECONDARY_ONLY).toArray(function(err, items) {
         // Does not get called or we don't care
         test.ok(executedCorrectlyRead);
         p_db.close();
@@ -290,7 +290,7 @@ exports['Attempt to change read preference at cursor level after object read'] =
         test.equal(null, err);
         
         // Set up cursor
-        var cursor = collection.find().setReadPreference(new ReadPreference(ReadPreference.SECONDARY));
+        var cursor = collection.find().setReadPreference(Server.READ_SECONDARY_ONLY);
         cursor.each(function(err, result) {
           if(result == null) {
             test.equal(executedCorrectlyRead, true);
@@ -299,14 +299,14 @@ exports['Attempt to change read preference at cursor level after object read'] =
             test.done();            
           } else {
             // Try to change the read preference it should not work as the query was executed
-            cursor.setReadPreference(new ReadPreference(ReadPreference.PRIMARY));
+            cursor.setReadPreference(Server.READ_PRIMARY);
             // With callback
-            cursor.setReadPreference(new ReadPreference(ReadPreference.PRIMARY), function(err) {
+            cursor.setReadPreference(Server.READ_PRIMARY, function(err) {
               test.ok(err != null)              
             })
 
             // Assert it's the same
-            test.equal(ReadPreference.SECONDARY, cursor.read.mode);
+            test.equal(Server.READ_SECONDARY_ONLY, cursor.read);            
           }
         })
       })
