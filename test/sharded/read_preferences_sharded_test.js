@@ -58,8 +58,6 @@ exports.tearDown = function(callback) {
 }
 
 /**
- * A Simple example off connecting to Mongos with a list of alternative proxies.
- *
  * @ignore
  */
 exports['Should correctly perform a Mongos secondary read using the read preferences'] = function(test) {
@@ -105,8 +103,6 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
 }
 
 /**
- * A Simple example off connecting to Mongos with a list of alternative proxies.
- *
  * @ignore
  */
 exports['Should correctly fail a Mongos read using a unsupported read preference'] = function(test) {
@@ -141,6 +137,49 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
       }
 
       collection.findOne({test:1}, {}, {readPreference:new ReadPreference('notsupported')}, function(err, item) {
+        test.ok(err != null);
+        db.close();
+        test.done();
+      })      
+    });
+  });  
+}
+
+/**
+ * @ignore
+ */
+exports['Should fail a Mongos secondary read using the read preference and tags that dont exist'] = function(test) {
+  // Set up mongos connection
+  var mongos = new Mongos([
+      new Server("localhost", 50000, { auto_reconnect: true }),
+      new Server("localhost", 50001, { auto_reconnect: true })
+    ])
+
+  // Connect using the mongos connections
+  var db = new Db('integration_test_', mongos);
+  db.open(function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+  
+    // Perform a simple insert into a collection
+    var collection = db.collection("shard_test");
+    // Insert a simple doc
+    collection.insert({test:1}, {safe:true}, function(err, result) {
+      test.equal(null, err);
+
+      var save = db._executeQueryCommand;
+      db._executeQueryCommand = function(db_command, options, callback) {
+        var _callback = function(err, result, r) {
+          // Check correct read preference object
+          test.deepEqual({'$query':{test:1}, '$readPreference':{mode:'secondary', tags: [{dc:'sf',s:"1"},{dc:'ma',s:"2"}]}}, db_command.query);
+          // Continue call
+          callback(err, result, r);
+        }
+
+        save.apply(db, [db_command, options, _callback]);
+      }
+
+      collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{dc:'sf',s:"1"},{dc:'ma',s:"2"}])}, function(err, item) {
         test.ok(err != null);
         db.close();
         test.done();
