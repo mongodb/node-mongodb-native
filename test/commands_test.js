@@ -120,10 +120,10 @@ exports['Should Correctly Generate a Query Command'] = function(test) {
   var query = {name:'peter pan'};
   var query_command = new QueryCommand({bson: new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey])}, full_collection_name, options, numberToSkip, numberToReturn, query, null);
   // assert the length of the binary
-  test.equal(75, query_command.toBinary().length);
+  test.equal(62, query_command.toBinary().length);
   // Generate command with return field filter
   query_command = new QueryCommand({bson: new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey])}, full_collection_name, options, numberToSkip, numberToReturn, query, { a : 1, b : 1, c : 1});
-  test.equal(101, query_command.toBinary().length);
+  test.equal(88, query_command.toBinary().length);
   test.done();
 }
 

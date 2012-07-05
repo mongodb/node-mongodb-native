@@ -198,8 +198,8 @@ exports.shouldCorrectlyExecuteCursorCount = function(test) {
         
         function finished() {
           collection.find().count(function(err, count) {
-              test.equal(10, count);
-              test.ok(count.constructor == Number);
+            test.equal(10, count);
+            test.ok(count.constructor == Number);
           });
 
           collection.find({}, {'limit':5}).count(function(err, count) {

@@ -1253,6 +1253,8 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = function(t
           });
         })
       }); 
+    } else {
+      test.done();
     }
   })
 }
@@ -1290,6 +1292,8 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(test) 
           });
         })
       }); 
+    } else {
+      test.done();
     }
   })
 }
