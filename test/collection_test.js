@@ -1223,15 +1223,52 @@ exports.shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback = function(test) {
 /**
  * @ignore
  */
-exports.shouldCorrectlyCreateTTLCollectionWithIndex = function(test) {
+exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = function(test) {
   // Parse version of server if available
   client.admin().serverInfo(function(err, result){
     
     // Only run if the MongoDB version is higher than 1.7.6
     if(parseInt((result.version.replace(/\./g, ''))) >= 212) {
 
-      client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndex', function(err, collection) {        
+      client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex', function(err, collection) {        
         collection.ensureIndex({createdAt:1}, {expireAfterSeconds:1, safe:true}, function(err, result) {
+          test.equal(null, err);
+
+          // Insert a document with a date
+          collection.insert({a:1, createdAt:new Date()}, {safe:true}, function(err, result) {
+            test.equal(null, err);
+
+            collection.indexInformation({full:true}, function(err, indexes) {
+              test.equal(null, err);
+
+              for(var i = 0; i < indexes.length; i++) {
+                if(indexes[i].name == "createdAt_1") {
+                  test.equal(1, indexes[i].expireAfterSeconds);
+                  break;
+                }
+              }
+
+              test.done();
+            });
+          });
+        })
+      }); 
+    }
+  })
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(test) {
+  // Parse version of server if available
+  client.admin().serverInfo(function(err, result){
+    
+    // Only run if the MongoDB version is higher than 1.7.6
+    if(parseInt((result.version.replace(/\./g, ''))) >= 212) {
+
+      client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex', {}, function(err, collection) {        
+        collection.createIndex({createdAt:1}, {expireAfterSeconds:1, safe:true}, function(err, result) {
           test.equal(null, err);
 
           // Insert a document with a date
