@@ -32,11 +32,16 @@ exports.setUp = function(callback) {
     configPortRangeSet:40000,
     // Two mongos proxies to ensure correct failover
     numberOfMongosServers:2,
-    mongosRangeSet:50000,
+    mongosRangeSet:50000,    
     // Collection and shard key setup
     db:"sharded_test_db",
     collection:"sharded_test_db_collection",
-    shardKey: "_id"      
+    shardKey: "_id",      
+    // Additional settings
+    replicasetOptions: [
+      {tags: [{"dc1":"ny"}, {"dc2":"sf"}]},
+      {tags: [{"dc1":"ny"}, {"dc2":"sf"}]}
+    ]
   })
     
   // Start the shard
@@ -76,7 +81,7 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test");
     // Insert a simple doc
-    collection.insert({test:1}, {safe:true}, function(err, result) {
+    collection.insert({test:1}, {safe:{w:2, wtimeout:10000}}, function(err, result) {
       test.equal(null, err);
 
       var save = db._executeQueryCommand;
@@ -121,7 +126,7 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test");
     // Insert a simple doc
-    collection.insert({test:1}, {safe:true}, function(err, result) {
+    collection.insert({test:1}, {safe:{w:2, wtimeout:10000}}, function(err, result) {
       test.equal(null, err);
 
       var save = db._executeQueryCommand;
@@ -164,7 +169,7 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test");
     // Insert a simple doc
-    collection.insert({test:1}, {safe:true}, function(err, result) {
+    collection.insert({test:1}, {safe:{w:2, wtimeout:10000}}, function(err, result) {
       test.equal(null, err);
 
       var save = db._executeQueryCommand;
@@ -181,6 +186,51 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
 
       collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{dc:'sf',s:"1"},{dc:'ma',s:"2"}])}, function(err, item) {
         test.ok(err != null);
+        db.close();
+        test.done();
+      })      
+    });
+  });  
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly read from a tagged secondary using Mongos'] = function(test) {
+  // Set up mongos connection
+  var mongos = new Mongos([
+      new Server("localhost", 50000, { auto_reconnect: true }),
+      new Server("localhost", 50001, { auto_reconnect: true })
+    ])
+
+  // Connect using the mongos connections
+  var db = new Db('integration_test_', mongos);
+  db.open(function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+  
+    // Perform a simple insert into a collection
+    var collection = db.collection("shard_test");
+    // Insert a simple doc
+    collection.insert({test:1}, {safe:{w:2, wtimeout:10000}}, function(err, result) {
+      test.equal(null, err);
+
+      var save = db._executeQueryCommand;
+      db._executeQueryCommand = function(db_command, options, callback) {
+        var _callback = function(err, result, r) {
+          // Check correct read preference object
+          test.deepEqual({'$query':{test:1}, '$readPreference':{mode:'secondary', tags: [{"dc2":"sf"}, {"dc1":"ny"}]}}, db_command.query);
+          // Continue call
+          callback(err, result, r);
+        }
+
+        save.apply(db, [db_command, options, _callback]);
+      }
+
+      collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{"dc2":"sf"}, {"dc1":"ny"}])}, function(err, item) {
+        test.equal(null, err);
+        test.equal(1, item.test);
+
         db.close();
         test.done();
       })      

@@ -39,6 +39,9 @@ var ShardedManager = function ShardedManager(options) {
   this.collection = options["collection"] != null ? options["collection"] : "sharded_test_db_collection";
   // Key to shard on
   this.shardKey = options["shardKey"] != null ? options["shardKey"] : "_id";
+
+  // Additional settings for each replicaset
+  this.replicasetOptionsArray = options["replicasetOptions"] != null ? options["replicasetOptions"] : [];
   
   // Build a the replicaset instances
   this.replicasetManagers = [];
@@ -55,8 +58,20 @@ var ShardedManager = function ShardedManager(options) {
   
   // Sets up the replicaset managers
   for(var i = 0; i < this.numberOfReplicaSets; i++) {
+    var replicasetSettings = {name:("repl_set" + i), start_port:replStarPort, retries:120, secondary_count:1, passive_count:0, arbiter_count:1};
+  
+    // If we have options merge them in
+    if(this.replicasetOptionsArray.length >= (i + 1)) {
+      var additionalOptions = this.replicasetOptionsArray[i];
+
+      // Iterate over all the options and merge them in
+      for(var key in additionalOptions) {
+        replicasetSettings[key] = additionalOptions[key];
+      }
+    }
+
     // Add a replicaset manager
-    this.replicasetManagers.push(new ReplicaSetManager({name:("repl_set" + i), start_port:replStarPort, retries:120, secondary_count:1, passive_count:0, arbiter_count:1}));
+    this.replicasetManagers.push(new ReplicaSetManager(replicasetSettings));
     // Add a bunch of numbers to the port
     replStarPort = replStarPort + 10;
   }
