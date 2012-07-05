@@ -27,6 +27,7 @@
 - Default connection pool size increased to 10 connections.
 - Fixes for the ReadStream class to work properly with 0.8 of Node.js
 - Added explain function support to aggregation helper
+- Added socketTimeoutMS and connectTimeoutMS to socket options for repl_set.js and server.js
 
 1.0.2 2012-05-15
 ----------------

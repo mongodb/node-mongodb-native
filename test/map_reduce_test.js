@@ -500,6 +500,47 @@ exports.shouldHandleMapReduceErrors = function(test) {
 /**
 * @ignore
 */
+exports.shouldSaveDataToDifferentDbFromMapreduce = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db  
+  db.open(function(err, db) {
+    
+    // Create a test collection
+    db.createCollection('test_map_reduce_functions', function(err, collection) {
+      
+      // Insert some documents to perform map reduce over
+      collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+
+        // Map function
+        var map = function() { emit(this.user_id, 1); };
+        // Reduce function
+        var reduce = function(k,vals) { return 1; };
+
+        // Peform the map reduce
+        collection.mapReduce(map, reduce, {out: {replace : 'tempCollection', db: "outputCollectionDb"}}, function(err, collection) {
+
+          // Mapreduce returns the temporary collection with the results          
+          collection.findOne({'_id':1}, function(err, result) {
+            test.equal(1, result.value);
+          
+            collection.findOne({'_id':2}, function(err, result) {
+              test.equal(1, result.value);
+              
+              db.close();
+              test.done();
+            });
+          });
+        });        
+      });  
+    });
+  });
+}
+
+/**
+* @ignore
+*/
 exports.shouldCorrectlyReturnNestedKeys = function(test) {
   var start = new Date().setTime(new Date().getTime() - 10000);
   var end = new Date().setTime(new Date().getTime() + 10000);
