@@ -11,6 +11,8 @@ DONE
 - Write TTL collection tests for 2.2
 
 TODO
+- Ensure closest pick for MongoS failover
+- Proper Error handling (no mixing of mongos and mongod instances in mongos MongoS class, same for replicaset seeds in ReplSet)
 - Attempt to get bson C++ patch in
 - Update all documentation
 - Update to new look and feel for documentation based on mongo docs
