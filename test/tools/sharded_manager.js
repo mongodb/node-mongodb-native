@@ -16,19 +16,19 @@ var ReplicaSetManager = require('./replica_set_manager').ReplicaSetManager,
 // collection: collection to shard
 // shardKey: the collection shard key
 //
-var ShardedManager = function ShardedManager(options) {  
+var ShardedManager = function ShardedManager(options) {
   options = options == null ? {} : options;
   // Number of config servers
   this.numberOfConfigServers = options["numberOfConfigServers"] != null ? options["numberOfConfigServers"] : 1;
   if(this.numberOfConfigServers != 1 && this.numberOfConfigServers != 3) throw new Error("Only 1 or 3 config servers can be used");
   // Config Servers port range
   this.configPortRangeSet = options["configPortRangeSet"] != null ? options["configPortRangeSet"] : 40000;
-  
+
   // Number of replicasets in the sharded setup
   this.numberOfReplicaSets = options["numberOfReplicaSets"] != null ? options["numberOfReplicaSets"] : 1;
   // Number of mongo's in the sharded setup
   this.numberOfMongosServers = options["numberOfMongosServers"] != null ? options["numberOfMongosServers"] : 1;
-  
+
   // Set the replicasetPortRange
   this.replPortRangeSet = options["replPortRangeSet"] != null ? options["replPortRangeSet"] : 30000;
   // Set up mongos port range
@@ -42,24 +42,24 @@ var ShardedManager = function ShardedManager(options) {
 
   // Additional settings for each replicaset
   this.replicasetOptionsArray = options["replicasetOptions"] != null ? options["replicasetOptions"] : [];
-  
+
   // Build a the replicaset instances
   this.replicasetManagers = [];
   this.configServers = [];
   this.mongosProxies = [];
-  
+
   // Set up the server
   var replStarPort = this.replPortRangeSet;
   var configStartPort = this.configPortRangeSet;
   var mongosStartPort = this.mongosRangeSet;
-  
+
   // List of config server urls
   var mongosServerUrls = [];
-  
+
   // Sets up the replicaset managers
   for(var i = 0; i < this.numberOfReplicaSets; i++) {
     var replicasetSettings = {name:("repl_set" + i), start_port:replStarPort, retries:120, secondary_count:1, passive_count:0, arbiter_count:1};
-  
+
     // If we have options merge them in
     if(this.replicasetOptionsArray.length >= (i + 1)) {
       var additionalOptions = this.replicasetOptionsArray[i];
@@ -75,7 +75,7 @@ var ShardedManager = function ShardedManager(options) {
     // Add a bunch of numbers to the port
     replStarPort = replStarPort + 10;
   }
-  
+
   // Set up config servers
   for(var i = 0; i < this.numberOfConfigServers; i++) {
     // Add a server manager
@@ -85,7 +85,7 @@ var ShardedManager = function ShardedManager(options) {
     // Set up the config
     configStartPort = configStartPort + 1;
   }
-  
+
   // console.log("-------------------------------------------------------------------")
   // console.dir(mongosServerUrls)
 
@@ -106,11 +106,11 @@ ShardedManager.prototype.start = function(callback) {
     // Start the config servers
     startConfigServers(self, function(err, result) {
       // Start the mongos proxies
-      startMongosProxies(self, function(err, result) {        
+      startMongosProxies(self, function(err, result) {
         // Setup shard
         setupShards(self, function(err, result) {
-          callback();          
-        });                  
+          callback();
+        });
       });
     });
   });
@@ -126,7 +126,7 @@ ShardedManager.prototype.killAll = function(callback) {
 }
 
 // Kills the first server
-ShardedManager.prototype.killMongoS = function(port, callback) {		
+ShardedManager.prototype.killMongoS = function(port, callback) {
 	// Locate the server instance and kill it
 	for(var i = 0; i < this.mongosProxies.length; i++) {
 		var proxy = this.mongosProxies[i];
@@ -142,8 +142,8 @@ ShardedManager.prototype.restartMongoS = function(port, callback) {
 	// Locate the server instance and kill it
 	for(var i = 0; i < this.mongosProxies.length; i++) {
 		var proxy = this.mongosProxies[i];
-		
-		// If it's the right one restart it		
+
+		// If it's the right one restart it
 		if(proxy.port == port) {
 			proxy.start(false, callback);
 		}
@@ -151,12 +151,14 @@ ShardedManager.prototype.restartMongoS = function(port, callback) {
 }
 
 var setupShards = function(self, callback) {
-  if(self.mongosProxies.length == 0) throw new Error("need at least one mongos server");  
+  if(self.mongosProxies.length == 0) throw new Error("need at least one mongos server");
   // Set up the db connection
   var db = new Db("admin", new Server("localhost", self.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {});
   db.open(function(err, db) {
+    // console.log("=================================================================")
+    // console.dir(err)
     var numberOfShardsToAdd = self.numberOfReplicaSets;
-    
+
     for(var i = 0; i < self.numberOfReplicaSets; i++) {
       // Generate a replicaset url to add it as a shard
       var command = self.replicasetManagers[i].name + "/localhost:" + self.replicasetManagers[i].startPort;
@@ -175,54 +177,54 @@ var setupShards = function(self, callback) {
           if(numberOfShardsToAdd == 0) {
             db.close();
             callback(null);
-          }          
+          }
         }
       });
-    }    
-  })  
+    }
+  })
 }
 
 var startMongosProxies = function(self, callback) {
-  if(self.mongosProxies.length == 0) throw new Error("need at least one mongos server");  
+  if(self.mongosProxies.length == 0) throw new Error("need at least one mongos server");
 	// Set up only the first to kill all
 	var killAll = true;
   // Boot up the number of config servers needed
-  var mongosProxiesToStart = self.numberOfMongosServers;  
+  var mongosProxiesToStart = self.numberOfMongosServers;
   // Boot up mongos proxies
   for(var i = 0; i < self.mongosProxies.length; i++) {
     // Start server
-    self.mongosProxies[i].start(killAll, function(err, result) {		
+    self.mongosProxies[i].start(killAll, function(err, result) {
       mongosProxiesToStart = mongosProxiesToStart - 1;
-      
+
       if(mongosProxiesToStart == 0) {
-        callback(null);          
+        callback(null);
       }
     });
 
 		// Set killall to false
 		killAll = false;
-  }  
+  }
 }
 
 var startConfigServers = function(self, callback) {
-  if(self.configServers.length == 0) throw new Error("need at least one config server");  
+  if(self.configServers.length == 0) throw new Error("need at least one config server");
   // Boot up the number of config servers needed
-  var configServersToStart = self.numberOfConfigServers;  
+  var configServersToStart = self.numberOfConfigServers;
   // Boot up config servers
   for(var i = 0; i < self.configServers.length; i++) {
     // Start server
     self.configServers[i].start(false, function(err, result) {
       configServersToStart = configServersToStart - 1;
-      
+
       if(configServersToStart == 0) {
-        callback(null);          
+        callback(null);
       }
     });
   }
 }
 
 var startReplicasetServers = function(self, callback) {
-  if(self.replicasetManagers.length == 0) throw new Error("need at least one replicaset server");  
+  if(self.replicasetManagers.length == 0) throw new Error("need at least one replicaset server");
   // Bot up the repliaset servers
   var replicasetsToStart = self.numberOfReplicaSets;
 
@@ -231,13 +233,13 @@ var startReplicasetServers = function(self, callback) {
     // Start a replicaset
     self.replicasetManagers[i].startSet(true, function(err, result) {
       replicasetsToStart = replicasetsToStart - 1;
-      
+
       // Replicasets are up and running
-      if(replicasetsToStart == 0) {        
-        callback(null);          
+      if(replicasetsToStart == 0) {
+        callback(null);
       }
     });
-  }  
+  }
 }
 
 exports.ShardedManager = ShardedManager;

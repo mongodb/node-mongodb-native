@@ -19,7 +19,7 @@ var Shard = Shard == null ? null : Shard;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
@@ -36,9 +36,9 @@ exports.setUp = function(callback) {
     // Collection and shard key setup
     db:"sharded_test_db",
     collection:"sharded_test_db_collection",
-    shardKey: "_id"      
+    shardKey: "_id"
   })
-    
+
   // Start the shard
   Shard.start(function(err, result) {
     callback();
@@ -48,7 +48,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -75,7 +75,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
-  
+
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test");
     // Insert a simple doc
@@ -88,9 +88,9 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
 
         db.close();
         test.done();
-      })      
+      })
     });
-  });  
+  });
 }
 
 /**
@@ -102,30 +102,30 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
       new Server("localhost", 50000, { auto_reconnect: true }),
       new Server("localhost", 50001, { auto_reconnect: true })
     ], {ha:true})
-  
+
   // Connect using the mongos connections
   var db = new Db('integration_test_', mongos);
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
-  
+
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test2");
     // Insert a simple doc
     collection.insert({test:1}, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       // Kill the mongos proxy
       Shard.killMongoS(50000, function(err, result) {
-        
+
         // Attempt another insert
         collection.insert({test:2}, {safe:true}, function(err, result) {
           test.equal(null, err);
           test.equal(1, db.serverConfig.downServers.length);
-                
+
           // Restart the other mongos
           Shard.restartMongoS(50000, function(err, result) {
-            
+
             // Wait for the ha process to pick up the existing new server
             setTimeout(function() {
               test.equal(0, db.serverConfig.downServers.length);
@@ -152,26 +152,26 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
                             test.equal(1, db.serverConfig.downServers.length);
 
                             db.close();
-                            test.done();              
-                          }, 5000);                   
+                            test.done();
+                          }, 5000);
                         });
-                      });                         
+                      });
                     }, 10000);
                   });
                 });
               });
-            }, 10000)           
-          });               
+            }, 10000)
+          });
         })
-      })      
+      })
     });
-  });  
+  });
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -183,7 +183,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
