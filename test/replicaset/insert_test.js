@@ -9,7 +9,7 @@ var testCase = require('nodeunit').testCase,
   Db = mongodb.Db,
   ReplSetServers = mongodb.ReplSetServers,
   Server = mongodb.Server,
-  Step = require("step");  
+  Step = require("step");
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
@@ -18,21 +18,21 @@ var RS = RS == null ? null : RS;
 
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {rs_name:RS.name}
   );
-  
+
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
   var db = new Db('integration_test_', replSet);
   // Open the db
   db.open(function(err, p_db) {
     // Close connections
-    db.close();    
+    db.close();
     // Process result
     if(err != null) {
       // Wait for a sec and retry
@@ -42,14 +42,14 @@ var ensureConnection = function(test, numberOfTries, callback) {
       }, 1000);
     } else {
       return callback(null, p_db);
-    }    
-  })            
+    }
+  })
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
@@ -57,15 +57,15 @@ exports.setUp = function(callback) {
   if(!serversUp && !noReplicasetStart) {
     serversUp = true;
     RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
-    RS.startSet(true, function(err, result) {      
+    RS.startSet(true, function(err, result) {
       if(err != null) throw err;
       // Finish setup
-      callback();      
-    });      
-  } else {    
+      callback();
+    });
+  } else {
     RS.restartKilledNodes(function(err, result) {
       if(err != null) throw err;
-      callback();        
+      callback();
     })
   }
 }
@@ -73,7 +73,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -81,21 +81,21 @@ exports.tearDown = function(callback) {
   if(numberOfTestsRun == 0) {
     // Finished kill all instances
     RS.killAll(function() {
-      callback();              
+      callback();
     })
   } else {
-    callback();            
-  }  
+    callback();
+  }
 }
 
 exports.shouldCorrectlyWaitForReplicationToServersOnInserts = function(test) {
   // debug("=========================================== shouldWorkCorrectlyWithInserts")
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {rs_name:RS.name}
   );
 
@@ -110,10 +110,10 @@ exports.shouldCorrectlyWaitForReplicationToServersOnInserts = function(test) {
       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
       // Recreate collection on replicaset
       p_db.createCollection('shouldCorrectlyWaitForReplicationToServersOnInserts', function(err, collection) {
-        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
+        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
         // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {            
-          test.equal(null, err);            
+        collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+          test.equal(null, err);
           test.done();
           p_db.close();
         });
@@ -125,11 +125,11 @@ exports.shouldCorrectlyWaitForReplicationToServersOnInserts = function(test) {
 exports.shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts = function(test) {
   // debug("=========================================== shouldWorkCorrectlyWithInserts")
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {rs_name:RS.name}
   );
 
@@ -144,9 +144,9 @@ exports.shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts = function(t
       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
       // Recreate collection on replicaset
       p_db.createCollection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts', function(err, collection) {
-        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
+        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
         // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:7, wtimeout: 10000}}, function(err, r) {            
+        collection.insert({a:20}, {safe: {w:7, wtimeout: 10000}}, function(err, r) {
           test.equal('timeout', err.err);
           test.equal(true, err.wtimeout);
           test.done();
@@ -159,11 +159,11 @@ exports.shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts = function(t
 
 exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {rs_name:RS.name}
   );
 
@@ -178,9 +178,9 @@ exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
       // Recreate collection on replicaset
       p_db.createCollection('shouldCorrectlyExecuteSafeFindAndModify', function(err, collection) {
-        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
+        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {            
+        collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
           // Execute a safe insert with replication to two servers
           collection.findAndModify({'a':20}, [['a', 1]], {'$set':{'b':3}}, {new:true, safe: {w:2, wtimeout: 10000}}, function(err, result) {
             test.equal(20, result.a);
@@ -196,18 +196,18 @@ exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
 
 exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     // {rs_name:RS.name, socketOptions:{timeout:30000}}
     {rs_name:RS.name}
   );
 
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});  
+  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
   // Open db
   db.open(function(err, p_db) {
     // Drop collection on replicaset
@@ -215,32 +215,32 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
       // Recreate collection on replicaset
       p_db.createCollection('shouldCorrectlyInsertAfterPrimaryComesBackUp', function(err, collection) {
-        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
+        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {            
+        collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
           // Kill the primary
           RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
             // Attempt insert (should fail)
             collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
 
               if(err != null) {
-                collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {                      
+                collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
                   // Peform a count
                   collection.count(function(err, count) {
                     test.equal(2, count);
                     p_db.close();
                     test.done();
                   });
-                });                                          
+                });
               } else {
-                collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {                      
+                collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
                   // Peform a count
                   collection.count(function(err, count) {
                     test.equal(2, count);
                     p_db.close();
                     test.done();
                   });
-                });                                          
+                });
               }
             });
           });
@@ -254,11 +254,11 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
 exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
   // debug("=========================================== shouldWorkCorrectlyWithInserts")
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {rs_name:RS.name}
   );
 
@@ -281,13 +281,14 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
       // Recreate collection on replicaset
       p_db.createCollection('shouldCorrectlyQueryAfterPrimaryComesBackUp', function(err, collection) {
-        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
+        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {            
+        collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {
           // Kill the primary
           RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
+            console.log("============================================================= KILL")
             // Ok let's execute same query a couple of times
-            collection.find({}).toArray(function(err, items) {              
+            collection.find({}).toArray(function(err, items) {
               test.ok(err != null);
               test.equal("connection closed", err.message);
 
@@ -322,11 +323,11 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
 exports.shouldWorkCorrectlyWithInserts = function(test) {
   // debug("=========================================== shouldWorkCorrectlyWithInserts")
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {rs_name:RS.name}
   );
 
@@ -340,23 +341,23 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
       // Recreate collection on replicaset
       p_db.createCollection('shouldWorkCorrectlyWithInserts', function(err, collection) {
         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-        
+
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {
           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-          
+
           // Execute a count
           collection.count(function(err, c) {
             if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-            
+
             test.equal(1, c);
-            
+
             // Kill the primary
             RS.killPrimary(function(node) {
               if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-        
+
               test.ok(err == null);
-        
+
               // p_db.collection('shouldWorkCorrectlyWithInserts', {safe:true}, function(err, collection) {
               p_db.collection('shouldWorkCorrectlyWithInserts', function(err, collection) {
                 if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
@@ -370,24 +371,24 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
                     collection.save({a:60}, {safe:{w:2, wtimeout: 10000}}, group());
                     collection.save({a:70}, {safe:{w:2, wtimeout: 10000}}, group());
                   },
-                              
-                  function finishUp(err, values) {   
+
+                  function finishUp(err, values) {
                     if(err != null) console.log(err.stack)
                     // Restart the old master and wait for the sync to happen
                     RS.restartKilledNodes(function(err, result) {
-                      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));                            
+                      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
                       // Contains the results
                       var results = [];
 
                       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                
+
                       // Get the collection
                       p_db.collection('shouldWorkCorrectlyWithInserts', function(err, collection) {
                         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                
+
                         collection.find().each(function(err, item) {
                           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                
+
                           if(item == null) {
                             // Ensure we have the correct values
                             test.equal(6, results.length);
@@ -395,18 +396,18 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
                               test.equal(1, results.filter(function(element) {
                                 return element.a == a;
                               }).length);
-                            });                                    
-                                                      
+                            });
+
                             // Run second check
                             collection.save({a:80}, {safe:true}, function(err, r) {
                               if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                                                      
+
                               collection.find().toArray(function(err, items) {
                                 if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-                                                                                            
+
                                 // Ensure we have the correct values
                                 test.equal(7, items.length);
-                                
+
                                 // Sort items by a
                                 items = items.sort(function(a,b) { return a.a > b.a});
                                 // Test all items
@@ -417,18 +418,18 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
                                 test.equal(60, items[4].a);
                                 test.equal(70, items[5].a);
                                 test.equal(80, items[6].a);
-                                                                                                
+
                                 p_db.close();
-                                test.done();                                                    
+                                test.done();
                               });
-                            });                                    
+                            });
                           } else {
                             results.push(item);
                           }
                         });
                       });
                     })
-                  }                      
+                  }
                 );
               });
             });
@@ -436,13 +437,13 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
         })
       });
     });
-  })                
+  })
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -454,7 +455,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
