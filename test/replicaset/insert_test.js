@@ -16,36 +16,6 @@ var serversUp = false;
 var retries = 120;
 var RS = RS == null ? null : RS;
 
-var ensureConnection = function(test, numberOfTries, callback) {
-  // Replica configuration
-  var replSet = new ReplSetServers( [
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ],
-    {rs_name:RS.name}
-  );
-
-  if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
-
-  var db = new Db('integration_test_', replSet);
-  // Open the db
-  db.open(function(err, p_db) {
-    // Close connections
-    db.close();
-    // Process result
-    if(err != null) {
-      // Wait for a sec and retry
-      setTimeout(function() {
-        numberOfTries = numberOfTries - 1;
-        ensureConnection(test, numberOfTries, callback);
-      }, 1000);
-    } else {
-      return callback(null, p_db);
-    }
-  })
-}
-
 /**
  * Retrieve the server information for the current
  * instance of the db client
@@ -53,6 +23,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
  * @ignore
  */
 exports.setUp = function(callback) {
+  // console.log("================================================================ setUp")
   // Create instance of replicaset manager but only for the first call
   if(!serversUp && !noReplicasetStart) {
     serversUp = true;
@@ -77,6 +48,7 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
+  // console.log("================================================================ tearDown")
   numberOfTestsRun = numberOfTestsRun - 1;
   if(numberOfTestsRun == 0) {
     // Finished kill all instances
@@ -252,7 +224,6 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
 }
 
 exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
-  // debug("=========================================== shouldWorkCorrectlyWithInserts")
   // Replica configuration
   var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -271,6 +242,7 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
     if(err != null && err.stack != null) console.log(err.stack)
     db.close();
   })
+
   // Open db
   db.open(function(err, p_db) {
     // Check if we got an error
@@ -286,30 +258,25 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
         collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {
           // Kill the primary
           RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
-            console.log("============================================================= KILL")
+            console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 0")
             // Ok let's execute same query a couple of times
             collection.find({}).toArray(function(err, items) {
+              console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 1")
               test.ok(err != null);
               test.equal("connection closed", err.message);
 
               collection.find({}).toArray(function(err, items) {
+                console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 2")
                 test.ok(err != null);
-                // console.log("================================================================== 1")
-                // console.dir(err)
-                // console.dir(items)
-
-                // test.ok(err == null);
-                // test.equal(1, items.length);
 
                 collection.find({}).toArray(function(err, items) {
-                  // console.log("================================================================== 2")
-                  // console.dir(err)
-                  // console.dir(items)
-
+                  console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 3")
                   test.ok(err == null);
                   test.equal(1, items.length);
-                  p_db.close();
-                  test.done();
+                  console.log("================================== dbCLOSE")
+                  db.close(function() {
+                    test.done();
+                  });
                 });
               });
             });

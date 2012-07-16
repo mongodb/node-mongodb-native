@@ -503,7 +503,7 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
   // Get the node
   if(self.mongods[node] != null) {
     var intervalId = setInterval(function() {
-      var connection = new Db("replicaset_test", new Server(self.host, self.mongods[node]["port"], {ssl:self.ssl}));
+      var connection = new Db("replicaset_test", new Server(self.host, self.mongods[node]["port"], {ssl:self.ssl, poolSize:1}));
       connection.open(function(err, db) {
         if(err == null && !done) {
           // Set done
