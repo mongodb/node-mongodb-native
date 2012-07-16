@@ -20,11 +20,11 @@ var client = null;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
+  var self = exports;
   client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
@@ -41,7 +41,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -59,29 +59,29 @@ exports.tearDown = function(callback) {
  * @_function toArray
  */
 exports.shouldCorrectlyExecuteToArray = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection to hold our documents
     db.createCollection('test_array', function(err, collection) {
-      
+
       // Insert a test document
       collection.insert({'b':[1, 2, 3]}, {safe:true}, function(err, ids) {
-        
+
         // Retrieve all the documents in the collection
         collection.find().toArray(function(err, documents) {
-          test.equal(1, documents.length);          
+          test.equal(1, documents.length);
           test.deepEqual([1, 2, 3], documents[0].b);
 
           db.close();
           test.done();
         });
       });
-    });  
-  });  
+    });
+  });
 }
 
 /**
@@ -120,29 +120,29 @@ exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = function(tes
  * @ignore
  */
 exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection
     db.createCollection('test_to_a_after_each', function(err, collection) {
-      test.equal(null, err);      
+      test.equal(null, err);
       test.ok(collection instanceof Collection);
-      
+
       // Insert a document in the collection
       collection.insert({'a':1}, {safe:true}, function(err, ids) {
-        
+
         // Grab a cursor
         var cursor = collection.find();
-          
+
         // Execute the each command, triggers for each document
         cursor.each(function(err, item) {
-          
+
           // If the item is null then the cursor is exhausted/empty and closed
           if(item == null) {
-            
+
             // Show that the cursor is closed
             cursor.toArray(function(err, items) {
               test.ok(err != null);
@@ -194,8 +194,8 @@ exports.shouldCorrectlyExecuteCursorCount = function(test) {
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i}, {safe:true}, group());
           }
-        }, 
-        
+        },
+
         function finished() {
           collection.find().count(function(err, count) {
             test.equal(10, count);
@@ -248,8 +248,8 @@ exports.shouldCorrectlyExecuteSortOnCursor = function(test) {
         for(var i = 0; i < 5; i++) {
           collection.insert({'a':i}, {safe:true}, group());
         }
-      }, 
-      
+      },
+
       function finished() {
         collection.find().sort(['a', 1], function(err, cursor) {
           test.ok(cursor instanceof Cursor);
@@ -285,7 +285,7 @@ exports.shouldCorrectlyExecuteSortOnCursor = function(test) {
         cursor.nextObject(function(err, doc) {
           cursor.sort(['a'], function(err, cursor) {
             test.ok(err instanceof Error);
-            test.equal("Cursor is closed", err.message);  
+            test.equal("Cursor is closed", err.message);
           });
         });
 
@@ -318,8 +318,8 @@ exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = function(test) {
         for(var i = 0; i < 2; i++) {
           collection.save({'x':1}, {safe:true}, group());
         }
-      }, 
-      
+      },
+
       function finished() {
         collection.find(function(err, cursor) {
           test.throws(function () {
@@ -328,7 +328,7 @@ exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = function(test) {
           test.done();
         });
       }
-    )        
+    )
   });
 }
 
@@ -345,9 +345,9 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = function(test) {
         for(var i = 0; i < 2; i++) {
           collection.save({'x':1}, {safe:true}, group());
         }
-      }, 
-      
-      function finished() {  
+      },
+
+      function finished() {
         collection.find(function(err, cursor) {
           test.throws(function () {
             cursor.each();
@@ -372,8 +372,8 @@ exports.shouldCorrectlyHandleLimitOnCursor = function(test) {
         for(var i = 0; i < 10; i++) {
           collection.save({'x':1}, {safe:true}, group());
         }
-      }, 
-      
+      },
+
       function finished() {
         collection.find().count(function(err, count) {
           test.equal(10, count);
@@ -402,7 +402,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = function(test) {
         for(var i = 0; i < 10; i++) {
           collection.save({'x':1}, {safe:true}, group());
         }
-      }, 
+      },
 
       function finished() {
         collection.find().limit(-1).toArray(function(err, items) {
@@ -428,7 +428,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = function(test) {
         for(var i = 0; i < 10; i++) {
           collection.save({'x':1}, {safe:true}, group());
         }
-      }, 
+      },
 
       function finished() {
         collection.find().limit(-5).toArray(function(err, items) {
@@ -453,7 +453,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = function(test) {
         test.ok(err instanceof Error);
         test.equal("limit requires an integer", err.message);
       });
-      
+
       try {
         cursor.limit('not-an-integer');
         test.ok(false);
@@ -510,8 +510,8 @@ exports.shouldCorrectlySkipRecordsOnCursor = function(test) {
         for(var i = 0; i < 10; i++) {
           collection.insert({'x':i}, {safe:true}, group());
         }
-      }, 
-      
+      },
+
       function finished() {
         collection.find(function(err, cursor) {
           cursor.count(function(err, count) {
@@ -570,7 +570,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = function(test) {
       cursor.skip(1, function(err, cursor) {
         test.ok(err instanceof Error);
         test.equal("Cursor is closed", err.message);
-        
+
         test.done();
       });
     });
@@ -589,7 +589,7 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = function(test) {
       test.ok(err instanceof Error);
       test.equal("batchSize requires an integer", err.message);
     });
-    
+
     try {
       cursor.batchSize('not-an-integer');
       test.ok(false);
@@ -604,13 +604,13 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = function(test) {
           test.ok(err instanceof Error);
           test.equal("Cursor is closed", err.message);
         });
-        
+
         try {
           cursor.batchSize(1);
           test.ok(false);
         } catch (err) {
           test.equal("Cursor is closed", err.message);
-        }        
+        }
       });
     });
 
@@ -619,10 +619,10 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = function(test) {
       cursor.batchSize(1, function(err, cursor) {
         test.ok(err instanceof Error);
         test.equal("Cursor is closed", err.message);
-        
+
         test.done();
       });
-      
+
       try {
         cursor.batchSize(1);
         test.ok(false);
@@ -687,7 +687,7 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = function(test) {
                     cursor.nextObject(function(err, items) {
                       test.ok(items == null);
                       test.ok(cursor.isClosed());
-                      
+
                       test.done();
                     });
                   });
@@ -741,7 +741,7 @@ exports.shouldCorrectlyHandleBatchSize = function(test) {
                 cursor.nextObject(function(err, items) {
                   test.ok(items == null);
                   test.ok(cursor.isClosed());
-                  
+
                   test.done();
                 });
               });
@@ -789,7 +789,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = function(test) {
               cursor.nextObject(function(err, items) {
                 test.ok(items == null);
                 test.ok(cursor.isClosed());
-                
+
                 test.done();
               });
             });
@@ -850,8 +850,8 @@ exports.shouldHandleSkipLimitChaining = function(test) {
         for(var i = 0; i < 10; i++) {
           collection.insert({'x':1}, {safe:true}, group());
         }
-      }, 
-      
+      },
+
       function finished() {
         collection.find().toArray(function(err, items) {
           test.equal(10, items.length);
@@ -873,7 +873,7 @@ exports.shouldHandleSkipLimitChaining = function(test) {
           });
         });
       }
-    )      
+    )
   });
 }
 
@@ -890,8 +890,8 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = function(test) {
         for(var i = 0; i < 10; i++) {
           collection.insert({'x':1}, {safe:true}, group());
         }
-      }, 
-      
+      },
+
       function finished() {
         collection.find().toArray(function(err, items) {
           test.equal(10, items.length);
@@ -937,17 +937,17 @@ exports.shouldCloseCursorNoQuerySent = function(test) {
  */
 exports.shouldCorrectlyRefillViaGetMoreCommand = function(test) {
   var COUNT = 1000;
-  
+
   client.createCollection('test_refill_via_get_more', function(err, collection) {
     Step(
       function insert() {
         var group = this.group();
 
-        for(var i = 0; i < COUNT; i++) { 
-          collection.save({'a': i}, {safe:true}, group()); 
+        for(var i = 0; i < COUNT; i++) {
+          collection.save({'a': i}, {safe:true}, group());
         }
-      }, 
-      
+      },
+
       function finished() {
         collection.count(function(err, count) {
           test.equal(COUNT, count);
@@ -955,7 +955,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = function(test) {
 
         var total = 0;
         var i = 0;
-        var cursor = collection.find({}, {}).each(function(err, item) {                            
+        var cursor = collection.find({}, {}).each(function(err, item) {
         if(item != null) {
           total = total + item.a;
         } else {
@@ -984,7 +984,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = function(test) {
             });
           });
         }
-      })      
+      })
     })
   });
 }
@@ -1000,11 +1000,11 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = function(test) {
       function insert() {
         var group = this.group();
 
-        for(var i = 0; i < 1000; i++) { 
-          collection.save({'a': i}, {safe:true}, group()); 
+        for(var i = 0; i < 1000; i++) {
+          collection.save({'a': i}, {safe:true}, group());
         }
-      }, 
-      
+      },
+
       function finished() {
         collection.count(function(err, count) {
           test.equal(1000, count);
@@ -1097,7 +1097,7 @@ exports.shouldCorrectlyCountWithFieldsUsingExclude = function(test) {
       collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
         test.equal(1, items.length);
         test.equal(2, items[0].a);
-        test.equal(null, items[0].x);            
+        test.equal(null, items[0].x);
         test.done();
       });
     });
@@ -1110,7 +1110,7 @@ exports.shouldCorrectlyCountWithFieldsUsingExclude = function(test) {
  */
 exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = function(test) {
   var docs = [];
-  
+
   for(var i = 0; i < 1; i++) {
     var d = new Date().getTime() + i*1000;
     docs[i] = {createdAt:new Date(d)};
@@ -1126,12 +1126,12 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = function(test) {
 
       // Find with sort
       collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
-        if (err) logger.error("error in collection_info.find: " + err);            
-        test.equal(1, items.length);            
+        if (err) logger.error("error in collection_info.find: " + err);
+        test.equal(1, items.length);
         test.done();
-      })                    
-    })        
-  });    
+      })
+    })
+  });
 }
 
 /**
@@ -1140,7 +1140,7 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = function(test) {
  */
 exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = function(test) {
   var docs = [];
-  
+
   for(var i = 0; i < 5000; i++) {
     var d = new Date().getTime() + i*1000;
     docs[i] = {createdAt:new Date(d)};
@@ -1151,20 +1151,20 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = func
     // ensure index of createdAt index
     collection.ensureIndex({createdAt:1}, function(err, indexName) {
       test.equal(null, err);
-      
+
       // insert all docs
       collection.insert(docs, {safe:true}, function(err, result) {
         test.equal(null, err);
 
         // Find with sort
         collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
-          if (err) logger.error("error in collection_info.find: " + err);            
-          test.equal(5000, items.length);            
+          if (err) logger.error("error in collection_info.find: " + err);
+          test.equal(5000, items.length);
           test.done();
-        })                    
-      })        
-    });      
-  });    
+        })
+      })
+    });
+  });
 }
 
 /**
@@ -1174,13 +1174,13 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = func
  * @_function rewind
  */
 exports['Should correctly rewind and restart cursor'] = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     var docs = [];
-  
+
     // Insert 100 documents with some data
     for(var i = 0; i < 100; i++) {
       var d = new Date().getTime() + i*1000;
@@ -1190,29 +1190,29 @@ exports['Should correctly rewind and restart cursor'] = function(test) {
     // Create collection
     db.createCollection('Should_correctly_rewind_and_restart_cursor', function(err, collection) {
       test.equal(null, err);
-    
+
       // insert all docs
       collection.insert(docs, {safe:true}, function(err, result) {
         test.equal(null, err);
-      
-        // Grab a cursor using the find 
+
+        // Grab a cursor using the find
         var cursor = collection.find({});
         // Fetch the first object off the cursor
         cursor.nextObject(function(err, item) {
           test.equal(0, item.a)
           // Rewind the cursor, resetting it to point to the start of the query
           cursor.rewind();
-          
+
           // Grab the first object again
           cursor.nextObject(function(err, item) {
             test.equal(0, item.a)
-            
+
             db.close();
             test.done();
           })
         })
-      })        
-    });        
+      })
+    });
   });
 }
 
@@ -1222,7 +1222,7 @@ exports['Should correctly rewind and restart cursor'] = function(test) {
  */
 exports['Should correctly execute count on cursor'] = function(test) {
   var docs = [];
-  
+
   for(var i = 0; i < 1000; i++) {
     var d = new Date().getTime() + i*1000;
     docs[i] = {'a':i, createdAt:new Date(d)};
@@ -1231,7 +1231,7 @@ exports['Should correctly execute count on cursor'] = function(test) {
   // Create collection
   client.createCollection('Should_correctly_execute_count_on_cursor', function(err, collection) {
     test.equal(null, err);
-    
+
     // insert all docs
     collection.insert(docs, {safe:true}, function(err, result) {
       test.equal(null, err);
@@ -1251,9 +1251,9 @@ exports['Should correctly execute count on cursor'] = function(test) {
             })
           }
         });
-      })        
-    })        
-  });        
+      })
+    })
+  });
 }
 
 /**
@@ -1530,16 +1530,16 @@ exports['cursor stream pipe']= function(test) {
  * @ignore
  */
 exports.shouldCorrectlyUseCursorCountFunction = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
 
     // Creat collection
     db.createCollection('cursor_count_collection', function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert some docs
       collection.insert([{a:1}, {a:2}], {safe:true}, function(err, docs) {
         test.equal(null, err);
@@ -1548,7 +1548,7 @@ exports.shouldCorrectlyUseCursorCountFunction = function(test) {
         collection.find().count(function(err, count) {
           test.equal(null, err);
           test.equal(2, count);
-          
+
           db.close();
           test.done();
         })
@@ -1565,20 +1565,20 @@ exports.shouldCorrectlyUseCursorCountFunction = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyPeformSimpleSorts = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection
     db.createCollection('simple_sort_collection', function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert some documents we can sort on
       collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
         test.equal(null, err);
-        
+
         // Do normal ascending sort
         collection.find().sort([['a', 1]]).nextObject(function(err, item) {
           test.equal(null, err);
@@ -1586,14 +1586,14 @@ exports.shouldCorrectlyPeformSimpleSorts = function(test) {
 
           // Do normal descending sort
           collection.find().sort([['a', -1]]).nextObject(function(err, item) {
-            test.equal(null, err);     
+            test.equal(null, err);
             test.equal(3, item.a);
 
             db.close();
             test.done();
-          });          
-        });        
-      });      
+          });
+        });
+      });
     });
   });
 }
@@ -1606,20 +1606,20 @@ exports.shouldCorrectlyPeformSimpleSorts = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection
     db.createCollection('simple_limit_collection', function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert some documents we can sort on
       collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
         test.equal(null, err);
-        
+
         // Limit to only one document returned
         collection.find().limit(1).toArray(function(err, items) {
           test.equal(null, err);
@@ -1627,8 +1627,8 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
 
           db.close();
           test.done();
-        });        
-      });      
+        });
+      });
     });
   });
 }
@@ -1641,20 +1641,20 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyPeformSkipOnCursor = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection
     db.createCollection('simple_skip_collection', function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert some documents we can sort on
       collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
         test.equal(null, err);
-        
+
         // Skip one document
         collection.find().skip(1).nextObject(function(err, item) {
           test.equal(null, err);
@@ -1662,14 +1662,14 @@ exports.shouldCorrectlyPeformSkipOnCursor = function(test) {
 
           db.close();
           test.done();
-        });        
-      });      
+        });
+      });
     });
   });
 }
 
 /**
- * A simple example showing the use of batchSize on the cursor, batchSize only regulates how many 
+ * A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
  * documents are returned for each batch using the getMoreCommand against the MongoDB server
  *
  * @_class cursor
@@ -1677,20 +1677,20 @@ exports.shouldCorrectlyPeformSkipOnCursor = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyPeformBatchSizeOnCursor = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection
     db.createCollection('simple_batch_size_collection', function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert some documents we can sort on
       collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
         test.equal(null, err);
-        
+
         // Do normal ascending sort
         collection.find().batchSize(1).nextObject(function(err, item) {
           test.equal(null, err);
@@ -1698,8 +1698,8 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = function(test) {
 
           db.close();
           test.done();
-        });        
-      });      
+        });
+      });
     });
   });
 }
@@ -1712,20 +1712,20 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyPeformNextObjectOnCursor = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection
     db.createCollection('simple_next_object_collection', function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert some documents we can sort on
       collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
         test.equal(null, err);
-        
+
         // Do normal ascending sort
         collection.find().nextObject(function(err, item) {
           test.equal(null, err);
@@ -1733,8 +1733,8 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = function(test) {
 
           db.close();
           test.done();
-        });        
-      });      
+        });
+      });
     });
   });
 }
@@ -1747,28 +1747,28 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyPeformSimpleExplainCursor = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection
     db.createCollection('simple_explain_collection', function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert some documents we can sort on
       collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
         test.equal(null, err);
-        
+
         // Do normal ascending sort
         collection.find().explain(function(err, explaination) {
           test.equal(null, err);
 
           db.close();
           test.done();
-        });        
-      });      
+        });
+      });
     });
   });
 }
@@ -1781,14 +1781,14 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = function(test) {
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheStreamRecords = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a lot of documents to insert
-    var docs = []  
+    var docs = []
     for(var i = 0; i < 100; i++) {
       docs.push({'a':i})
     }
@@ -1798,21 +1798,21 @@ exports.shouldStreamDocumentsUsingTheStreamRecords = function(test) {
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {        
+      collection.insert(docs, {safe:true}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().streamRecords({fetchSize:1000});
 
         // Execute find on all the documents
-        stream.on('end', function() { 
+        stream.on('end', function() {
           db.close();
           test.done();
         });
 
-        stream.on('data', function(data) { 
+        stream.on('data', function(data) {
           test.ok(data != null);
-        }); 
+        });
       });
-    });    
+    });
   });
 }
 
@@ -1824,14 +1824,14 @@ exports.shouldStreamDocumentsUsingTheStreamRecords = function(test) {
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheStreamFunction = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a lot of documents to insert
-    var docs = []  
+    var docs = []
     for(var i = 0; i < 100; i++) {
       docs.push({'a':i})
     }
@@ -1841,21 +1841,21 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = function(test) {
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {        
+      collection.insert(docs, {safe:true}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
         // Execute find on all the documents
-        stream.on('close', function() { 
+        stream.on('close', function() {
           db.close();
           test.done();
         });
 
-        stream.on('data', function(data) { 
+        stream.on('data', function(data) {
           test.ok(data != null);
-        }); 
+        });
       });
-    });    
+    });
   });
 }
 
@@ -1867,14 +1867,14 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = function(test) {
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheCloseFunction = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a lot of documents to insert
-    var docs = []  
+    var docs = []
     for(var i = 0; i < 100; i++) {
       docs.push({'a':i})
     }
@@ -1884,24 +1884,24 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(test) {
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {        
+      collection.insert(docs, {safe:true}, function(err, ids) {
         // Peform a find to get a cursor
         var cursor = collection.find();
-        
+
         // Fetch the first object
         cursor.nextObject(function(err, object) {
           test.equal(null, err);
-          
+
           // Close the cursor, this is the same as reseting the query
           cursor.close(function(err, result) {
             test.equal(null, err);
-              
+
             db.close();
             test.done();
-          });          
+          });
         });
       });
-    });    
+    });
   });
 }
 
@@ -1913,14 +1913,14 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(test) {
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a lot of documents to insert
-    var docs = []  
+    var docs = []
     for(var i = 0; i < 100; i++) {
       docs.push({'a':i})
     }
@@ -1930,25 +1930,25 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {        
+      collection.insert(docs, {safe:true}, function(err, ids) {
         // Peform a find to get a cursor
         var cursor = collection.find();
-        
+
         // Fetch the first object
         cursor.nextObject(function(err, object) {
           test.equal(null, err);
-          
+
           // Close the cursor, this is the same as reseting the query
           cursor.close(function(err, result) {
             test.equal(null, err);
             test.equal(true, cursor.isClosed());
-              
+
             db.close();
             test.done();
-          });          
+          });
         });
       });
-    });    
+    });
   });
 }
 
@@ -2033,18 +2033,43 @@ exports.shouldAwaitData = function (test) {
         collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
           if(err != null) {
             db.close();
-            test.done();          
+            test.done();
           }
-        });          
+        });
       });
     });
   })
 }
 
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlySortDates = function (test) {
+//   var collection = client.collection('shouldCorrectlySortDates');
+//   var numberOfInserts = 5;
+
+//   var id = setInterval(function() {
+//     numberOfInserts--;
+//     collection.insert({username:1, date:new Date()});
+
+//     if(numberOfInserts == 0) {
+//       clearInterval(id);
+
+//       // Query
+//       collection.find({username:1}).sort([['date', 'desc']]).toArray(function(err, items) {
+//         console.log("----------------------------------------------------------")
+//         console.dir(err)
+//         console.dir(items)
+//         test.done()
+//       });
+//     }
+//   }, 500);
+// }
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -2056,7 +2081,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;

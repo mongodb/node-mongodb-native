@@ -7,17 +7,17 @@ var debug = require('util').debug,
   Connection = require('../../lib/mongodb').Connection,
   Db = require('../../lib/mongodb').Db,
   Server = require('../../lib/mongodb').Server;
-  
+
 var ServerManager = exports.ServerManager = function(options) {
   options = options == null ? {} : options;
   // Basic unpack values
   this.path = path.resolve("data");
-  this.port = options["start_port"] != null ? options["start_port"] : 27017;  
+  this.port = options["start_port"] != null ? options["start_port"] : 27017;
   this.db_path = getPath(this, "data-" + this.port);
   this.log_path = getPath(this, "log-" + this.port);
-  this.journal = options["journal"] != null ? options["journal"] : false;   
-  this.auth = options['auth'] != null ? options['auth'] : false; 
-  this.ssl = options['ssl'] != null ? options['ssl'] : false; 
+  this.journal = options["journal"] != null ? options["journal"] : false;
+  this.auth = options['auth'] != null ? options['auth'] : false;
+  this.ssl = options['ssl'] != null ? options['ssl'] : false;
   this.purgedirectories = options['purgedirectories'] != null ? options['purgedirectories'] : true;
   this.configServer = options['configserver'] != null ? options['configserver'] : false;
 
@@ -32,16 +32,16 @@ ServerManager.prototype.start = function(killall, callback) {
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
   callback = args.pop();
-  killall = args.length ? args.shift() : true;  
+  killall = args.length ? args.shift() : true;
   // Create start command
-  var startCmd = generateStartCmd(this, {configserver:self.configServer, log_path: self.log_path, 
+  var startCmd = generateStartCmd(this, {configserver:self.configServer, log_path: self.log_path,
     db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl});
-    
+
   exec(killall ? 'killall -9 mongod' : '', function(err, stdout, stderr) {
     if(self.purgedirectories) {
       // Remove directory
       exec("rm -rf " + self.db_path, function(err, stdout, stderr) {
-        if(err != null) return callback(err, null);    
+        if(err != null) return callback(err, null);
         // Create directory
         exec("mkdir -p " + self.db_path, function(err, stdout, stderr) {
           if(err != null) return callback(err, null);
@@ -56,19 +56,19 @@ ServerManager.prototype.start = function(killall, callback) {
           });
 
           // Wait for a half a second then save the pids
-          setTimeout(function() {        
+          setTimeout(function() {
             // Mark server as running
             self.up = true;
             self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
             // Callback
             callback();
           }, 500);
-        });    
-      });        
+        });
+      });
     } else {
       // Ensure we remove the lock file as we are not purging the directory
       fs.unlinkSync(path.join(self.db_path, "mongod.lock"));
-      
+
       // Start up mongod process
       var mongodb = exec(startCmd,
         function (error, stdout, stderr) {
@@ -78,13 +78,13 @@ ServerManager.prototype.start = function(killall, callback) {
       });
 
       // Wait for a half a second then save the pids
-      setTimeout(function() {        
+      setTimeout(function() {
         // Mark server as running
         self.up = true;
         self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
         // Callback
         callback();
-      }, 5000);      
+      }, 5000);
     }
   });
 }
@@ -94,7 +94,7 @@ ServerManager.prototype.stop = function(signal, callback) {
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
   callback = args.pop();
-  signal = args.length ? args.shift() : 2;  
+  signal = args.length ? args.shift() : 2;
   // Stop the server
   var command = "kill -" + signal + " " + self.pid;
   // Kill process
@@ -109,7 +109,7 @@ ServerManager.prototype.stop = function(signal, callback) {
       self.up = false;
       // Wait for a second
       setTimeout(callback, 1000);
-  });    
+  });
 }
 
 ServerManager.prototype.killAll = function(callback) {
