@@ -88,13 +88,35 @@ exports.shouldCorrectlyCallCloseEvent = function(test) {
   client.once("close", function(err) {
     closedCalled = true;
   })
-  // Start server
+
   var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
+  // Kill the server
   serverManager.killAll(function() {
 
+    // Restart the server
     serverManager.start(true, function() {
       test.equal(true, closedCalled);
       test.done();
+    });
+  });
+}
+
+exports.shouldCorrectlyReconnectOnNonExistingServer = function(test) {
+  // Start server
+  var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
+  // Kill the server
+  serverManager.killAll(function() {
+    var _client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+    _client.open(function(err, __client) {
+      test.ok(err != null);
+      // Restart the server
+      serverManager.start(true, function() {
+        _client.open(function(err, __client) {
+          test.ok(err == null);
+          _client.close();
+          test.done();
+        });
+      });
     });
   });
 }

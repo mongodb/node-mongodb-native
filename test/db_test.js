@@ -21,11 +21,11 @@ var client = null;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
+  var self = exports;
   client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
@@ -42,7 +42,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -59,7 +59,7 @@ exports.tearDown = function(callback) {
 exports.shouldCorrectlyHandleIllegalDbNames = function(test) {
   // Assert rename
   try {
-    new Db(5);         
+    new Db(5);
   } catch(err) {
     test.ok(err instanceof Error);
     test.equal("database name must be a string", err.message);
@@ -69,9 +69,9 @@ exports.shouldCorrectlyHandleIllegalDbNames = function(test) {
     new Db("");
   } catch(err) {
     test.ok(err instanceof Error);
-    test.equal("database name cannot be the empty string", err.message);              
+    test.equal("database name cannot be the empty string", err.message);
   }
-  
+
   try {
     new Db("te$t", function(err, collection) {});
   } catch(err) {
@@ -101,10 +101,10 @@ exports.shouldCorrectlyHandleIllegalDbNames = function(test) {
   } catch(err) {
     test.equal("database names cannot contain the character ' '", err.message);
   }
-  
+
   test.done();
 }
-  
+
 /**
  * @ignore
  */
@@ -129,11 +129,11 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(test) {
         });
       });
     };
-    
+
     // Add listener to close event
     automatic_connect_client.on("close", closeListener);
     automatic_connect_client.close();
-  });    
+  });
 }
 
 /**
@@ -144,29 +144,29 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Fetch a collection
     db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb', function(err, collection) {
 
       // Insert a document
       collection.insert({a:1}, {safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         // Force close the connection
         db.close(true, function(err, result) {
-          
+
           // Attemp to insert should fail now with correct message 'db closed by application'
           collection.insert({a:2}, {safe:true}, function(err, result) {
             test.equal('db closed by application', err.message);
             test.done();
-          });          
+          });
         });
-      });    
+      });
     });
   });
 }
@@ -179,23 +179,23 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyExecuteEvalFunctions = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Evaluate a function on the server with the parameter 3 passed in
-    db.eval('function (x) {return x;}', [3], function(err, result) {      
+    db.eval('function (x) {return x;}', [3], function(err, result) {
       test.equal(3, result);
     });
-  
+
     // Evaluate a function on the server with the parameter 3 passed in no lock aquired for eval
     // on server
     db.eval('function (x) {return x;}', [3], {nolock:true}, function(err, result) {
       test.equal(3, result);
     });
-    
+
     // Evaluate a function on the server that writes to a server collection
     db.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
       // Locate the entry
@@ -205,38 +205,38 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(test) {
         });
       });
     });
-    
+
     // Evaluate a function with 2 parameters passed in
     db.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
       test.equal(5, result);
     });
-    
+
     // Evaluate a function with no parameters passed in
     db.eval('function () {return 5;}', function(err, result) {
       test.equal(5, result);
     });
-    
+
     // Evaluate a statement
     db.eval('2 + 3;', function(err, result) {
       test.equal(5, result);
     });
-    
+
     // Evaluate a statement using the code object
     db.eval(new Code("2 + 3;"), function(err, result) {
       test.equal(5, result);
     });
-    
+
     // Evaluate a statement using the code object including a scope
     db.eval(new Code("return i;", {'i':2}), function(err, result) {
       test.equal(2, result);
     });
-    
+
     // Evaluate a statement using the code object including a scope
     db.eval(new Code("i + 3;", {'i':2}), function(err, result) {
       test.equal(5, result);
       test.done();
     });
-    
+
     // Evaluate an illegal statement
     db.eval("5 ++ 5;", function(err, result) {
       test.ok(err instanceof Error);
@@ -244,7 +244,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(test) {
       // Let's close the db
       test.done();
     });
-    
+
     db.close();
     test.done();
   });
@@ -291,7 +291,7 @@ exports.shouldCorrectlyDereferenceDbRef = function(test) {
                 });
               });
             });
-          });  
+          });
         })
       })
     })
@@ -306,19 +306,19 @@ exports.shouldCorrectlyDereferenceDbRef = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRenameCollection = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
-    
+  // Establish connection to db
+  db.open(function(err, db) {
+
     // Open a couple of collections
     db.createCollection('test_rename_collection', function(err, collection1) {
-      db.createCollection('test_rename_collection2', function(err, collection2) {        
+      db.createCollection('test_rename_collection2', function(err, collection2) {
 
         // Attemp to rename a collection to a number
         try {
-          collection1.rename(5, function(err, collection) {});         
+          collection1.rename(5, function(err, collection) {});
         } catch(err) {
           test.ok(err instanceof Error);
           test.equal("collection name must be a String", err.message);
@@ -329,7 +329,7 @@ exports.shouldCorrectlyRenameCollection = function(test) {
           collection1.rename("", function(err, collection) {});
         } catch(err) {
           test.ok(err instanceof Error);
-          test.equal("collection names cannot be empty", err.message);              
+          test.equal("collection names cannot be empty", err.message);
         }
 
         // Attemp to rename a collection to an illegal name including the character $
@@ -370,12 +370,12 @@ exports.shouldCorrectlyRenameCollection = function(test) {
           collection1.rename('test_rename_collection2', function(err, collection) {
             test.ok(err instanceof Error);
             test.ok(err.message.length > 0);
-    
+
             // Attemp to rename the first collection to a name that does not exist
             // this will be succesful
             collection1.rename('test_rename_collection3', function(err, collection) {
               test.equal("test_rename_collection3", collection.collectionName);
-    
+
               // Ensure that the collection is pointing to the new one
               collection1.count(function(err, count) {
                 test.equal(2, count);
@@ -398,13 +398,13 @@ exports.shouldCorrectlyRenameCollection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     db.close();
     test.done();
   });
@@ -418,17 +418,17 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Close the connection with a callback that is optional
     db.close(function(err, result) {
       test.equal(null, err);
-            
+
       test.done();
     });
   });
@@ -442,17 +442,17 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Create a collection
     db.createCollection('test_collections_info', function(err, r) {
       test.equal(null, err);
-      
+
       // Return the information of a single collection name
       db.collectionsInfo("test_collections_info").toArray(function(err, items) {
         test.equal(1, items.length);
@@ -468,7 +468,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
             test.done();
           });
         })
-      });      
+      });
     });
   });
 }
@@ -481,17 +481,17 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Create a collection
     db.createCollection('test_collections_info', function(err, r) {
       test.equal(null, err);
-      
+
       // Return the information of a single collection name
       db.collectionNames("test_collections_info", function(err, items) {
         test.equal(1, items.length);
@@ -503,7 +503,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
           db.close();
           test.done();
         });
-      });      
+      });
     });
   });
 }
@@ -516,36 +516,36 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyAccessACollection = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Grab a collection without a callback no safe mode
     var col1 = db.collection('test_correctly_access_collections');
-    
+
     // Grab a collection with a callback but no safe operation
     db.collection('test_correctly_access_collections', function(err, col2) {
       test.equal(null, err);
-      
+
       // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
       db.collection('test_correctly_access_collections', {safe:true}, function(err, col3) {
         test.ok(err != null);
-        
+
         // Create the collection
         db.createCollection('test_correctly_access_collections', function(err, result) {
 
           // Retry to get the collection, should work as it's now created
           db.collection('test_correctly_access_collections', {safe:true}, function(err, col3) {
             test.equal(null, err);
-          
+
             db.close();
-            test.done();        
+            test.done();
           });
-        });        
-      });      
+        });
+      });
     });
   });
 }
@@ -558,13 +558,13 @@ exports.shouldCorrectlyAccessACollection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveAllCollections = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-        
+
     // Create the collection
     db.createCollection('test_correctly_access_collections', function(err, result) {
 
@@ -572,11 +572,11 @@ exports.shouldCorrectlyRetrieveAllCollections = function(test) {
       db.collections(function(err, collections) {
         test.equal(null, err);
         test.ok(collections.length > 0);
-      
+
         db.close();
-        test.done();        
+        test.done();
       });
-    });        
+    });
   });
 }
 
@@ -613,7 +613,7 @@ exports.shouldCorrectlyResaveDBRef = function(test) {
 
               collection.save(child, {save : true}, function(err) {
                 test.ifError(err); //Child node with dbref resaved!
-                
+
                 collection.findOne({'parent' : new DBRef("test_resave_dbref",  parent._id)},
                   function(err, child) {
                     test.ifError(err);
@@ -627,7 +627,7 @@ exports.shouldCorrectlyResaveDBRef = function(test) {
     });
   });
 },
-  
+
 /**
  * An example of dereferencing values.
  *
@@ -636,11 +636,11 @@ exports.shouldCorrectlyResaveDBRef = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyDereferenceDbRefExamples = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
 
     // Get a second db
@@ -648,22 +648,22 @@ exports.shouldCorrectlyDereferenceDbRefExamples = function(test) {
 
     // Create a dereference example
     secondDb.createCollection('test_deref_examples', function(err, collection) {
-      
+
       // Insert a document in the collection
       collection.insert({'a':1}, {safe:true}, function(err, ids) {
-        
+
         // Let's build a db reference and resolve it
         var dbRef = new DBRef('test_deref_examples', ids[0]._id, 'integration_tests_2');
-        
+
         // Resolve it including a db resolve
-        db.dereference(dbRef, function(err, item) {          
+        db.dereference(dbRef, function(err, item) {
           test.equal(1, item.a);
 
           // Let's build a db reference and resolve it
           var dbRef = new DBRef('test_deref_examples', ids[0]._id);
 
           // Simple local resolve
-          secondDb.dereference(dbRef, function(err, item) {          
+          secondDb.dereference(dbRef, function(err, item) {
             test.equal(1, item.a);
 
             db.close();
@@ -683,17 +683,17 @@ exports.shouldCorrectlyDereferenceDbRefExamples = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyLogoutFromTheDatabase = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
 
     // Add a user to the database
     db.addUser('user', 'name', function(err, result) {
       test.equal(null, err);
-      
+
       // Authenticate
       db.authenticate('user', 'name', function(err, result) {
         test.equal(true, result);
@@ -701,11 +701,11 @@ exports.shouldCorrectlyLogoutFromTheDatabase = function(test) {
         // Logout the db
         db.logout(function(err, result) {
           test.equal(true, result);
-          
+
           db.close();
           test.done();
-        });        
-      });      
+        });
+      });
     });
   });
 }
@@ -718,24 +718,24 @@ exports.shouldCorrectlyLogoutFromTheDatabase = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
 
     // Add a user to the database
     db.addUser('user', 'name', function(err, result) {
       test.equal(null, err);
-      
+
       // Authenticate
       db.authenticate('user', 'name', function(err, result) {
         test.equal(true, result);
 
         db.close();
         test.done();
-      });      
+      });
     });
   });
 }
@@ -748,17 +748,17 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
 
     // Add a user to the database
     db.addUser('user', 'name', function(err, result) {
       test.equal(null, err);
-      
+
       db.close();
       test.done();
     });
@@ -773,17 +773,17 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyAddAndRemoveUser = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
 
     // Add a user to the database
     db.addUser('user', 'name', function(err, result) {
       test.equal(null, err);
-      
+
       // Authenticate
       db.authenticate('user', 'name', function(err, result) {
         test.equal(true, result);
@@ -794,7 +794,7 @@ exports.shouldCorrectlyAddAndRemoveUser = function(test) {
 
           // Remove the user from the db
           db.removeUser('user', function(err, result) {
-                        
+
             // Authenticate
             db.authenticate('user', 'name', function(err, result) {
               test.equal(false, result);
@@ -803,8 +803,8 @@ exports.shouldCorrectlyAddAndRemoveUser = function(test) {
               test.done();
             });
           });
-        });        
-      });      
+        });
+      });
     });
   });
 }
@@ -817,24 +817,24 @@ exports.shouldCorrectlyAddAndRemoveUser = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyCreateACollection = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Create a capped collection with a maximum of 1000 documents
     db.createCollection("a_simple_collection", {capped:true, size:10000, max:1000, safe:true}, function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert a document in the capped collection
       collection.insert({a:1}, {safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         db.close();
         test.done();
-      });      
+      });
     });
   });
 }
@@ -847,17 +847,17 @@ exports.shouldCorrectlyCreateACollection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyExecuteACommandAgainstTheServer = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Execute ping against the server
     db.command({ping:1}, function(err, result) {
       test.equal(null, err);
-      
+
       // Create a capped collection with a maximum of 1000 documents
       db.createCollection("a_simple_create_drop_collection", {capped:true, size:10000, max:1000, safe:true}, function(err, collection) {
         test.equal(null, err);
@@ -873,14 +873,14 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = function(test) {
             // Verify that the collection is gone
             db.collectionNames("a_simple_create_drop_collection", function(err, names) {
               test.equal(0, names.length);
-              
+
               db.close();
               test.done();
             });
           });
-        });      
+        });
       });
-    });    
+    });
   });
 }
 
@@ -892,20 +892,20 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Execute ping against the server
     db.command({ping:1}, function(err, result) {
       test.equal(null, err);
-      
+
       db.close();
       test.done();
-    });    
+    });
   });
 }
 
@@ -917,33 +917,33 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = function(test) 
  * @ignore
  */
 exports.shouldCorrectlyRenameACollection = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Create a collection
     db.createCollection("simple_rename_collection", {safe:true}, function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert a document in the collection
       collection.insert({a:1}, {safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         // Rename the collection
         db.renameCollection("simple_rename_collection", "simple_rename_collection_2", function(err, collection2) {
-          test.equal(null, err);          
-          
+          test.equal(null, err);
+
           // Retrieve the number of documents from the collection
           collection2.count(function(err, count) {
             test.equal(1, count);
-            
+
             // Verify that the collection is gone
             db.collectionNames("simple_rename_collection", function(err, names) {
               test.equal(0, names.length);
-              
+
               // Verify that the new collection exists
               db.collectionNames("simple_rename_collection_2", function(err, names) {
                 test.equal(1, names.length);
@@ -952,9 +952,9 @@ exports.shouldCorrectlyRenameACollection = function(test) {
                 test.done();
               });
             });
-          });          
+          });
         });
-      });      
+      });
     });
   });
 }
@@ -967,17 +967,17 @@ exports.shouldCorrectlyRenameACollection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyUseLastError = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Create a collection
     db.createCollection("simple_rename_collection", {safe:true}, function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert a document in the collection
       collection.insert({a:1}, function(err, result) {
         test.equal(null, err);
@@ -986,19 +986,19 @@ exports.shouldCorrectlyUseLastError = function(test) {
         db.lastError(function(err, result) {
           test.equal(null, err);
           test.equal(null, result[0].err);
-          
+
           // Pick a specific connection and execute lastError against it
           var connection = db.serverConfig.checkoutWriter();
           // Execute lastError
           db.lastError({}, {connection:connection}, function(err, result) {
             test.equal(null, err);
             test.equal(null, result[0].err);
-            
+
             db.close();
             test.done();
-          });                    
+          });
         });
-      });      
+      });
     });
   });
 }
@@ -1011,24 +1011,24 @@ exports.shouldCorrectlyUseLastError = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyUsePreviousError = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Create a collection
     db.createCollection("simple_previous_error_coll", {safe:true}, function(err, collection) {
       test.equal(null, err);
-      
+
       // Force a unique index
       collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         // Force some errors
         collection.insert([{a:1}, {a:1}, {a:1}, {a:2}], function(err, result) {
-          
+
           // Pick a specific connection and execute lastError against it
           var connection = db.serverConfig.checkoutWriter();
 
@@ -1040,8 +1040,8 @@ exports.shouldCorrectlyUsePreviousError = function(test) {
 
             db.close();
             test.done();
-          });          
-        });        
+          });
+        });
       });
     });
   });
@@ -1055,29 +1055,29 @@ exports.shouldCorrectlyUsePreviousError = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyUseResetErrorHistory = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     test.equal(null, err);
-    
+
     // Create a collection
     db.createCollection("simple_reset_error_history_coll", {safe:true}, function(err, collection) {
       test.equal(null, err);
-      
+
       // Force a unique index
       collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         // Force some errors
-        collection.insert([{a:1}, {a:1}, {a:1}, {a:2}], function(err, result) {                    
+        collection.insert([{a:1}, {a:1}, {a:1}, {a:2}], function(err, result) {
           // Pick a specific connection and execute lastError against it
           var connection = db.serverConfig.checkoutWriter();
 
           // Reset the error history
           db.resetErrorHistory({connection:connection}, function(err, result) {
-            
+
             // Execute previousErrors and validate that there are no errors left
             db.previousErrors({connection:connection}, function(err, result) {
               test.equal(null, err);
@@ -1086,9 +1086,9 @@ exports.shouldCorrectlyUseResetErrorHistory = function(test) {
 
               db.close();
               test.done();
-            });          
+            });
           });
-        });        
+        });
       });
     });
   });
@@ -1101,30 +1101,30 @@ exports.shouldCorrectlyUseResetErrorHistory = function(test) {
  * @_function createIndex
  */
 exports.shouldCreateComplexIndexOnTwoFields = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-  
+
     // Create a collection we want to drop later
-    db.createCollection('more_complex_index_test', function(err, collection) {      
+    db.createCollection('more_complex_index_test', function(err, collection) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-  
+
         // Create an index on the a field
         db.createIndex('more_complex_index_test', {a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-    
+
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
             test.equal(null, err);
             test.equal(4, items.length);
-      
+
             // Peform a query, with explain to show we hit the query
             collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
               test.equal(null, err);
@@ -1148,30 +1148,30 @@ exports.shouldCreateComplexIndexOnTwoFields = function(test) {
  * @_function ensureIndex
  */
 exports.shouldCreateComplexEnsureIndex = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
 
     // Create a collection we want to drop later
-    db.createCollection('more_complex_ensure_index_test', function(err, collection) {      
+    db.createCollection('more_complex_ensure_index_test', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Create an index on the a field
         db.ensureIndex('more_complex_ensure_index_test', {a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-      
+
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
             test.equal(null, err);
             test.equal(4, items.length);
-        
+
             // Peform a query, with explain to show we hit the query
             collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
               test.equal(null, err);
@@ -1195,22 +1195,22 @@ exports.shouldCreateComplexEnsureIndex = function(test) {
  * @_function cursorInfo
  */
 exports.shouldCorrectlyReturnCursorInformation = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
 
     // Create a collection we want to drop later
-    db.createCollection('cursor_information_collection', function(err, collection) {      
+    db.createCollection('cursor_information_collection', function(err, collection) {
       test.equal(null, err);
-  
+
       // Create a bunch of documents so we can force the creation of a cursor
-      var docs = [];      
+      var docs = [];
       for(var i = 0; i < 1000; i++) {
         docs.push({a:'hello world hello world hello world hello world hello world hello world hello world hello world'});
       }
-  
+
       // Insert a bunch of documents for the index
       collection.insert(docs, {safe:true}, function(err, result) {
         test.equal(null, err);
@@ -1219,15 +1219,15 @@ exports.shouldCorrectlyReturnCursorInformation = function(test) {
         var cursor = collection.find({}, {batchSize:10});
         cursor.nextObject(function(err, item) {
           test.equal(null, err);
-          
+
           // Let's grab the information about the cursors on the database
           db.cursorInfo(function(err, cursorInformation) {
             test.ok(cursorInformation.totalOpen > 0);
-            
+
             db.close();
             test.done();
-          });          
-        });    
+          });
+        });
       });
     });
   });
@@ -1240,36 +1240,36 @@ exports.shouldCorrectlyReturnCursorInformation = function(test) {
  * @_function dropIndex
  */
 exports.shouldCorrectlyCreateAndDropIndex = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection we want to drop later
-    db.createCollection('create_and_drop_an_index', function(err, collection) {      
+    db.createCollection('create_and_drop_an_index', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-      
+
           // Drop the index
           db.dropIndex("create_and_drop_an_index", "a_1_b_1", function(err, result) {
             test.equal(null, err);
-        
+
             // Verify that the index is gone
-            collection.indexInformation(function(err, indexInformation) {              
+            collection.indexInformation(function(err, indexInformation) {
               test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
               test.equal(null, indexInformation.a_1_b_1);
 
               db.close();
-              test.done();              
+              test.done();
             });
           });
         });
@@ -1285,21 +1285,21 @@ exports.shouldCorrectlyCreateAndDropIndex = function(test) {
  * @_function reIndex
  */
 exports.shouldCorrectlyForceReindexOnCollection = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection we want to drop later
-    db.createCollection('create_and_drop_all_indexes', function(err, collection) {      
+    db.createCollection('create_and_drop_all_indexes', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
@@ -1308,14 +1308,14 @@ exports.shouldCorrectlyForceReindexOnCollection = function(test) {
           db.reIndex('create_and_drop_all_indexes', function(err, result) {
             test.equal(null, err);
             test.equal(true, result);
-        
+
             // Verify that the index is gone
             collection.indexInformation(function(err, indexInformation) {
               test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
               test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
 
               db.close();
-              test.done();              
+              test.done();
             });
           });
         });
@@ -1331,25 +1331,25 @@ exports.shouldCorrectlyForceReindexOnCollection = function(test) {
  * @_function indexInformation
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection we want to drop later
-    db.createCollection('more_index_information_test', function(err, collection) {      
+    db.createCollection('more_index_information_test', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-      
+
           // Fetch basic indexInformation for collection
           db.indexInformation('more_index_information_test', function(err, indexInformation) {
             test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
@@ -1361,7 +1361,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
               test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
               db.close();
-              test.done();              
+              test.done();
             });
           });
         });
@@ -1377,25 +1377,25 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
  * @_function dropDatabase
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
-  var db = new Db('integration_tests_to_drop', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests_to_drop', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection
-    db.createCollection('more_index_information_test', function(err, collection) {      
+    db.createCollection('more_index_information_test', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Let's drop the database
         db.dropDatabase(function(err, result) {
           test.equal(null, err);
-          
+
           // Wait to seconds to let it replicate across
           setTimeout(function() {
             // Get the admin database
@@ -1415,9 +1415,9 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
 
               db.close();
               test.done();
-            });                        
-          }, 2000);          
-        });    
+            });
+          }, 2000);
+        });
       });
     });
   });
@@ -1427,10 +1427,10 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyGetErrorDroppingNonExistingDb = function(test) {
-  var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     var _db = db.db("nonexistingdb");
     // Let's drop the database
@@ -1440,7 +1440,7 @@ exports.shouldCorrectlyGetErrorDroppingNonExistingDb = function(test) {
 
       db.close();
       test.done();
-    });    
+    });
   });
 }
 
@@ -1448,15 +1448,15 @@ exports.shouldCorrectlyGetErrorDroppingNonExistingDb = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = function(test) {
-  var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     try {
       db.open(function(err, db) {
       });
-      
+
       test.ok(false);
     } catch (err) {
       test.done();
@@ -1468,15 +1468,15 @@ exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyReconnectWhenError = function(test) {
-  var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27088, 
+  var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27088,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, _db) {
     test.ok(err != null);
-    
+
     db.open(function(err, _db) {
       test.ok(err != null);
-      
+
       test.done();
     })
   });
@@ -1485,7 +1485,7 @@ exports.shouldCorrectlyReconnectWhenError = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -1497,7 +1497,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
