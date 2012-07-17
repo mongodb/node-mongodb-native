@@ -9,7 +9,7 @@ var testCase = require('nodeunit').testCase,
   Db = mongodb.Db,
   ReplSetServers = mongodb.ReplSetServers,
   Server = mongodb.Server,
-  Step = require("step");  
+  Step = require("step");
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
@@ -18,14 +18,14 @@ var RS = RS == null ? null : RS;
 
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {rs_name:RS.name}
   );
-  
+
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
   var db = new Db('integration_test_', replSet);
@@ -39,23 +39,23 @@ var ensureConnection = function(test, numberOfTries, callback) {
       }, 1000);
     } else {
       return callback(null, p_db);
-    }    
-  })            
+    }
+  })
 }
 
-var waitForReplicaset = function(callback) {    
+var waitForReplicaset = function(callback) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
     ], {});
-    
-  var db = new Db('integration_test_', replSet);    
+
+  var db = new Db('integration_test_', replSet);
   replSet.on("fullsetup", function() {
     db.close();
     callback();
   });
-  
+
   db.open(function(err, p_db) {
     db = p_db;
   });
@@ -64,7 +64,7 @@ var waitForReplicaset = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
@@ -72,17 +72,17 @@ exports.setUp = function(callback) {
   if(!serversUp && !noReplicasetStart) {
     serversUp = true;
     RS = new ReplicaSetManager({retries:120, arbiter_count:0, secondary_count:1, passive_count:0});
-    RS.startSet(true, function(err, result) { 
+    RS.startSet(true, function(err, result) {
       if(err != null) throw err;
       // Finish setup
       // waitForReplicaset(callback);
-      callback();      
-    });      
-  } else {    
+      callback();
+    });
+  } else {
     RS.restartKilledNodes(function(err, result) {
       if(err != null) throw err;
       // waitForReplicaset(callback);
-      callback();        
+      callback();
     })
   }
 }
@@ -90,7 +90,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -98,19 +98,19 @@ exports.tearDown = function(callback) {
   if(numberOfTestsRun == 0) {
     // Finished kill all instances
     RS.killAll(function() {
-      callback();              
+      callback();
     })
   } else {
-    callback();            
-  }  
+    callback();
+  }
 }
-  
+
 exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-    ], 
+    ],
 
     {rs_name:RS.name, read_secondary:false}
   );
@@ -120,7 +120,7 @@ exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
   // // Trigger test once whole set is up
   // replSet.on("fullsetup", function() {
   // });
-  
+
   db.open(function(err, p_db) {
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
     db = p_db;
@@ -130,26 +130,26 @@ exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
       // Recreate collection on replicaset
       db.createCollection('testsets', function(err, collection) {
-        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));  
+        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:1, wtimeout: 10000}}, function(err, r) {            
+        collection.insert({a:20}, {safe: {w:1, wtimeout: 10000}}, function(err, r) {
           // Execute a findAndModify
           collection.findAndModify({'a':20}, [['a', 1]], {'$set':{'b':3}}, {'new':true, safe: {w:7, wtimeout: 1000}}, function(err, updated_doc) {
             test.equal('timeout', err.err)
             test.equal(true, err.wtimeout)
-            db.close();        
+            db.close();
             test.done();
-          });              
+          });
         });
       });
     });
   });
-} 
+}
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -161,7 +161,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;

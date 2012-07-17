@@ -19,14 +19,14 @@ var RS = RS == null ? null : RS;
 
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {rs_name:RS.name}
   );
-  
+
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
   var db = new Db('integration_test_', replSet);
@@ -37,9 +37,9 @@ var ensureConnection = function(test, numberOfTries, callback) {
     if(err != null && err.stack != null) console.log(err.stack)
     db.close();
   })
-  
+
   // Open the db
-  db.open(function(err, p_db) {    
+  db.open(function(err, p_db) {
     db.close();
 
     if(err != null) {
@@ -50,24 +50,24 @@ var ensureConnection = function(test, numberOfTries, callback) {
       }, 3000);
     } else {
       return callback(null);
-    }    
-  })            
+    }
+  })
 }
 
-var waitForReplicaset = function(callback) {    
+var waitForReplicaset = function(callback) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ], {});
-    
-  var db = new Db('integration_test_', replSet);    
+
+  var db = new Db('integration_test_', replSet);
   replSet.on("fullsetup", function() {
     db.close();
     callback();
   });
-  
+
   db.open(function(err, p_db) {
     db = p_db;
   });
@@ -76,19 +76,19 @@ var waitForReplicaset = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
   // Create instance of replicaset manager but only for the first call
   if(!serversUp && !noReplicasetStart) {
     serversUp = true;
-    RS = new ReplicaSetManager({retries:120, passive_count:0, secondary_count:2, tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]});    
-    RS.startSet(true, function(err, result) {      
+    RS = new ReplicaSetManager({retries:120, passive_count:0, secondary_count:2, tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]});
+    RS.startSet(true, function(err, result) {
       if(err != null) throw err;
-      waitForReplicaset(callback);      
-    });      
-  } else {    
+      waitForReplicaset(callback);
+    });
+  } else {
     RS.restartKilledNodes(function(err, result) {
       if(err != null) throw err;
       waitForReplicaset(callback);
@@ -99,7 +99,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -107,20 +107,20 @@ exports.tearDown = function(callback) {
   if(numberOfTestsRun == 0) {
     // Finished kill all instances
     RS.killAll(function() {
-      callback();              
+      callback();
     })
   } else {
-    callback();            
-  }  
+    callback();
+  }
 }
 
 exports['Should Correctly Connect With Default Replicaset And Insert Document For Tag Dc:NY'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {}
   );
 
@@ -129,13 +129,13 @@ exports['Should Correctly Connect With Default Replicaset And Insert Document Fo
   replSet.on("fullsetup", function() {
     // Recreate collection on replicaset
     db.createCollection('testsets', function(err, collection) {
-      if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
-      
+      if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
+
       // Insert a dummy document
-      collection.insert({a:20}, {safe: {w:'majority'}}, function(err, r) {            
+      collection.insert({a:20}, {safe: {w:'majority'}}, function(err, r) {
         // Should have no error
         test.equal(null, err);
-        
+
         // Do a read for the value
         collection.findOne({a:20}, function(err, item) {
           db.close();
@@ -143,24 +143,24 @@ exports['Should Correctly Connect With Default Replicaset And Insert Document Fo
           test.done();
         })
       });
-    });      
+    });
   });
 
   db.open(function(err, p_db) {
     db = p_db;
-  })    
+  })
 }
 
 exports['Should Honor setReadPreference primary'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {}
   );
-  
+
   // Set read preference
   replSet.setReadPreference(Server.READ_PRIMARY);
   // Open the database
@@ -171,7 +171,7 @@ exports['Should Honor setReadPreference primary'] = function(test) {
     var reader = replSet.checkoutReader();
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
     // Locate server instance associated with this id
-    var serverInstance = replSet._state.addresses[readerAddress];      
+    var serverInstance = replSet._state.addresses[readerAddress];
     // Check that it's the primary instance
     test.equal(true, serverInstance.master);
     // Check that it's in the list of primary servers
@@ -181,22 +181,22 @@ exports['Should Honor setReadPreference primary'] = function(test) {
     db.close();
     test.done();
   });
-  
+
   db.open(function(err, p_db) {
     db = p_db;
-  })    
+  })
 }
 
 exports['Should Honor setReadPreference secondary'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {}
   );
-  
+
   // Set read preference
   replSet.setReadPreference(Server.READ_SECONDARY);
   // Open the database
@@ -207,7 +207,7 @@ exports['Should Honor setReadPreference secondary'] = function(test) {
     var reader = replSet.checkoutReader();
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
     // Locate server instance associated with this id
-    var serverInstance = replSet._state.addresses[readerAddress];      
+    var serverInstance = replSet._state.addresses[readerAddress];
     // Check that it's the primary instance
     test.equal(false, serverInstance.master);
     // Check that it's in the list of primary servers
@@ -219,19 +219,19 @@ exports['Should Honor setReadPreference secondary'] = function(test) {
 
   db.open(function(err, p_db) {
     db = p_db;
-  })    
+  })
 }
 
 exports['Should correctly cleanup connection with tags'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {}
   );
-  
+
   // Set read preference
   replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
   // Open the database
@@ -242,10 +242,10 @@ exports['Should correctly cleanup connection with tags'] = function(test) {
     var reader = replSet.checkoutWriter();
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
     // Locate server instance associated with this id
-    var serverInstance = replSet._state.addresses[readerAddress];      
+    var serverInstance = replSet._state.addresses[readerAddress];
     // Force cleanup of byTags
     ReplSetServers._cleanupTags(serverInstance, replSet._state.byTags);
-    // Check cleanup successful 
+    // Check cleanup successful
     test.equal(1, replSet._state.byTags['dc1']['ny'].length);
     test.equal(1, replSet._state.byTags['dc2']['sf'].length);
     // End test and close db
@@ -255,19 +255,19 @@ exports['Should correctly cleanup connection with tags'] = function(test) {
 
   db.open(function(err, p_db) {
     db = p_db;
-  })        
+  })
 }
 
 exports['Should Honor setReadPreference tag'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {}
   );
-  
+
   // Set read preference
   replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
   // Create db object
@@ -279,60 +279,22 @@ exports['Should Honor setReadPreference tag'] = function(test) {
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
     // Locate server instance associated with this id
     var serverInstance = replSet._state.addresses[readerAddress];
-    // Check cleanup successful 
+    // Check cleanup successful
     test.deepEqual({ dc2: 'sf' }, serverInstance.tags)
     db.close();
     test.done();
   });
-  
+
   // Open the database
   db.open(function(err, p_db) {
     db = p_db;
-  })    
-}
-
-/**
- *  
- *  Tags with read preferences  
- *
- **/
-exports['Primary read preference with tag set'] = function(test) {
-  // // Replica configuration
-  // var replSet = new ReplSetServers([ 
-  //     new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-  //     new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-  //     new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-  //   ], 
-  //   {}
-  // );
-  // 
-  // // Set read preference
-  // replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
-  // // Create db object
-  // var db = new Db('integration_test_', replSet);
-  // // Trigger test once whole set is up
-  // replSet.on("fullsetup", function() {
-  //   // Checkout a reader and make sure it's the primary
-  //   var reader = replSet.checkoutReader();
-  //   var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
-  //   // Locate server instance associated with this id
-  //   var serverInstance = replSet._state.addresses[readerAddress];
-  //   // Check cleanup successful 
-  //   test.deepEqual({ dc2: 'sf' }, serverInstance.tags)
-  //   db.close();
-    test.done();
-  // });
-  // 
-  // // Open the database
-  // db.open(function(err, p_db) {
-  //   db = p_db;
-  // })    
+  })
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -344,7 +306,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
