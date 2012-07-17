@@ -94,6 +94,34 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
 }
 
 /**
+ *
+ * @ignore
+ */
+exports.shouldCorrectlyEmitOpenEvent = function(test) {
+  // Set up mongos connection
+  var mongos = new Mongos([
+      new Server("localhost", 50000, { auto_reconnect: true }),
+      new Server("localhost", 50001, { auto_reconnect: true })
+    ])
+
+  var openCalled = false;
+  // Connect using the mongos connections
+  var db = new Db('integration_test_', mongos);
+  db.once("open", function(_err, _db) {
+    openCalled = true;
+  })
+
+  db.open(function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+    test.equal(true, openCalled);
+
+    db.close();
+    test.done();
+  });
+}
+
+/**
  * @ignore
  */
 exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = function(test) {

@@ -84,7 +84,14 @@ exports.shouldThrowErrorDueToSharedConnectionUsage = function(test) {
 
 exports.shouldCorrectlyCallCloseEvent = function(test) {
   var closedCalled = false;
-  // Add a listener
+  var openCalled = false
+
+  // Add a open listener
+  client.once("open", function(err) {
+    openCalled = true;
+  })
+
+  // Add a close listener
   client.once("close", function(err) {
     closedCalled = true;
   })
@@ -96,7 +103,13 @@ exports.shouldCorrectlyCallCloseEvent = function(test) {
     // Restart the server
     serverManager.start(true, function() {
       test.equal(true, closedCalled);
-      test.done();
+
+      // Attempt to connect again
+      client.open(function(err, result) {
+        test.equal(null, err)
+        test.equal(true, openCalled);
+        test.done();
+      })
     });
   });
 }

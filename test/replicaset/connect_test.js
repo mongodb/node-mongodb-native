@@ -499,6 +499,36 @@ exports.shouldCorrectlyConnect = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyEmitOpenSignalAndFullSetSignal = function(test) {
+  var openCalled = false;
+  // Replica configuration
+  var replSet = new ReplSetServers( [
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ],
+    {rs_name:RS.name}
+  );
+
+  var db = new Db('integration_test_', replSet);
+  db.once("open", function(_err, _db) {
+    openCalled = true;
+  });
+
+  db.once("fullsetup", function(_err, _db) {
+    test.equal(true, openCalled);
+
+    // Close and cleanup
+    db.close();
+    test.done();
+  })
+
+  db.open(function(err, p_db) {})
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
