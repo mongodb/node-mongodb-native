@@ -205,9 +205,9 @@ Replicaset improvements and changes
   * **socketTimeoutMS:**  set the timeout for established connections to the mongod or mongos instance.
 
 
--------------------------------
-High availability on by default
--------------------------------
+---------------------------------
+High availability "on" by default
+---------------------------------
 
  The high availability code has been rewritten to run outside a setTimeout allowing for better control and handling. It's also on by default now. It can be disabled using the following settings on the ReplSet class.
 
@@ -232,7 +232,9 @@ Better stream support for GridFS
   .. code-block:: javascript
 
     var mongo = require('mongodb'),
+      fs = require('fs'),
       Server = mongo.Server,
+      GridStore = mongo.GridStore,
       Db = mongo.Db;
     
     var db = new Db(new Server("localhost", 27017, {auto_reconnect:true}));
@@ -262,7 +264,9 @@ Better stream support for GridFS
   .. code-block:: javascript
 
     var mongo = require('mongodb'),
+      fs = require('fs'),
       Server = mongo.Server,
+      GridStore = mongo.GridStore,
       Db = mongo.Db;
     
     var db = new Db(new Server("localhost", 27017, {auto_reconnect:true}));
@@ -285,4 +289,33 @@ Better stream support for GridFS
         gridStore.pipe(fileStream);
       });
     })
+
+
+-------------
+toBSON method
+-------------
+
+ If in an object now has a toBSON function it will be called to for custom serialization of the object instance. This can be used to just serialize wanted fields. Deserializing is not affected by this and the application is responsible for deflating objects again.
+
+
+
+ A simple example below
+
+
+  .. code-block:: javascript
+
+    var customObject = {
+        a:1
+        b:2
+        toBSON: function() {
+          return {a:this.a}
+        }
+      }
+
+
+-------------------
+Other minor changes
+-------------------
+  * Connection pool is not set to 5 by default override if there is need for either a bigger or smaller pool pr node process.
+  * Gridfs now ensure an index on the chunks collection on file_id.
 
