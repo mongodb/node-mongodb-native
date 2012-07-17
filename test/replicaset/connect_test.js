@@ -521,7 +521,7 @@ exports.shouldCorrectlyEmitOpenSignalAndFullSetSignal = function(test) {
     test.equal(true, openCalled);
 
     // Close and cleanup
-    db.close();
+    _db.close();
     test.done();
   })
 

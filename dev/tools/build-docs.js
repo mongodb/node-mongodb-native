@@ -24,8 +24,8 @@ var apiClasses = [
     {tag:"mongos", path:"./lib/mongodb/connection/mongos.js"},
     {tag:"replset", path:"./lib/mongodb/connection/repl_set.js"}
   ];
-  
-// All test files 
+
+// All test files
 var testClasses = [
     {path:"./test/admin_test.js"},
     {path:"./test/objectid_test.js"},
@@ -103,13 +103,23 @@ docs.renderAPIDocs(outputDirectory2, apiClasses2, testClasses, templates, {index
 // ----------------------------------------------------------------------------
 // PROCESS MARKDOWN DOCUMENTS TO STRUCTURED TEXT
 // ----------------------------------------------------------------------------
+// Transform the versionb based content
+var articles = [
+    {name:"AnIntroductionTo1_1And2_2", output:"AnIntroductionTo1_1And2_2.rst", path:"./docs/articles/AnIntroductionTo1_1And2_2.md"}
+  ];
+
+// Tranform the markdown to restructured text
+docs.writeMarkDownFile("./docs/sphinx-docs/source/driver-articles", articles, templates,
+  {title:'Updates', template:'index'});
+
 // Transform the tutorials
 var articles = [
     {name:"NodeKOArticle1", output:"NodeKOArticle1.rst", path:"./docs/articles/NodeKOArticle1.md"},
     {name:"NodeKOArticle2", output:"NodeKOArticle2.rst", path:"./docs/articles/NodeKOArticle2.md"}
   ];
+
 // Tranform the markdown to restructured text
-docs.writeMarkDownFile("./docs/sphinx-docs/source/api-articles", articles, templates, 
+docs.writeMarkDownFile("./docs/sphinx-docs/source/api-articles", articles, templates,
   {title:'Articles', template:'index'});
 
 // Transform the tutorials
@@ -124,7 +134,7 @@ var articles = [
   ];
 
 // Tranform the markdown to restructured text
-docs.writeMarkDownFile("./docs/sphinx-docs/source/markdown-docs", articles, templates, 
+docs.writeMarkDownFile("./docs/sphinx-docs/source/markdown-docs", articles, templates,
   {title:'Using the driver', template:'index_no_header'});
 
 // ----------------------------------------------------------------------------
@@ -140,9 +150,9 @@ exec('mkdir ' + outputDirectoryChangelog, function (error, stdout, stderr) {
   // Read the changelog
   var changelog = fs.readFileSync('./HISTORY').toString();
   // Just write out the index
-  var content = ejs.render(templateObjects["changelog"], {content:changelog});    
+  var content = ejs.render(templateObjects["changelog"], {content:changelog});
   // Write it out
-  fs.writeFileSync(format("%s/changelog.rst", outputDirectoryChangelog), content);  
+  fs.writeFileSync(format("%s/changelog.rst", outputDirectoryChangelog), content);
 });
 
 // ----------------------------------------------------------------------------
@@ -170,7 +180,7 @@ var tagDescriptions = {
   analytics: "Libraries or Applications for analytics",
   connect: "Libraries for the connect middleware",
   continuosintegration: "Libraries or applications for continous integration",
-  example: "Exampe applications"  
+  example: "Exampe applications"
 }
 
 // Create the github documents

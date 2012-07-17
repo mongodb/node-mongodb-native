@@ -24,7 +24,7 @@
 - Corrupt bson messages now errors out to all callbacks and closes up connections correctly, Issue #634
 - Replica set member status update when primary changes bug (Issue #635, https://github.com/alinsilvian)
 - Fixed auth to work better when multiple connections are involved.
-- Default connection pool size increased to 10 connections.
+- Default connection pool size increased to 5 connections.
 - Fixes for the ReadStream class to work properly with 0.8 of Node.js
 - Added explain function support to aggregation helper
 - Added socketTimeoutMS and connectTimeoutMS to socket options for repl_set.js and server.js
