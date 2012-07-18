@@ -2041,30 +2041,54 @@ exports.shouldAwaitData = function (test) {
   })
 }
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlySortDates = function (test) {
-//   var collection = client.collection('shouldCorrectlySortDates');
-//   var numberOfInserts = 5;
+/**
+ * @ignore
+ */
+exports.shouldCorrectExecuteExplainHonoringLimit = function (test) {
+  var docs = []
+  docs[0] = { "_keywords" : [ "compact", "ii2gd", "led", "24-48v", "presse-etoupe", "bexbgl1d24483", "flash", "48v", "eexd", "feu", "presse", "compris", "rouge", "etoupe", "iic", "ii2gdeexdiict5", "red", "aet" ]};
+  docs[1] = { "_keywords" : [ "reducteur", "06212", "d20/16", "manch", "d20", "manchon", "ard", "sable", "irl", "red" ]};
+  docs[2] = { "_keywords" : [ "reducteur", "06214", "manch", "d25/20", "d25", "manchon", "ard", "sable", "irl", "red" ]};
+  docs[3] = { "_keywords" : [ "bar", "rac", "boite", "6790178", "50-240/4-35", "240", "branch", "coulee", "ddc", "red", "ip2x" ]};
+  docs[4] = { "_keywords" : [ "bar", "ip2x", "boite", "6790158", "ddi", "240", "branch", "injectee", "50-240/4-35?", "red" ]};
+  docs[5] = { "_keywords" : [ "bar", "ip2x", "boite", "6790179", "coulee", "240", "branch", "sdc", "50-240/4-35?", "red", "rac" ]};
+  docs[6] = { "_keywords" : [ "bar", "ip2x", "boite", "6790159", "240", "branch", "injectee", "50-240/4-35?", "sdi", "red" ]};
+  docs[7] = { "_keywords" : [ "6000", "r-6000", "resin", "high", "739680", "red", "performance", "brd", "with", "ribbon", "flanges" ]};
+  docs[8] = { "_keywords" : [ "804320", "for", "paint", "roads", "brd", "red" ]};
+  docs[9] = { "_keywords" : [ "38mm", "padlock", "safety", "813594", "brd", "red" ]};
+  docs[10] = { "_keywords" : [ "114551", "r6900", "for", "red", "bmp71", "brd", "ribbon" ]};
+  docs[11] = { "_keywords" : [ "catena", "diameter", "621482", "rings", "brd", "legend", "red", "2mm" ]};
+  docs[12] = { "_keywords" : [ "catena", "diameter", "621491", "rings", "5mm", "brd", "legend", "red" ]};
+  docs[13] = { "_keywords" : [ "catena", "diameter", "621499", "rings", "3mm", "brd", "legend", "red" ]};
+  docs[14] = { "_keywords" : [ "catena", "diameter", "621508", "rings", "5mm", "brd", "legend", "red" ]};
+  docs[15] = { "_keywords" : [ "insert", "for", "cable", "3mm", "carrier", "621540", "blank", "brd", "ademark", "red" ]};
+  docs[16] = { "_keywords" : [ "insert", "for", "cable", "621544", "3mm", "carrier", "brd", "ademark", "legend", "red" ]};
+  docs[17] = { "_keywords" : [ "catena", "diameter", "6mm", "621518", "rings", "brd", "legend", "red" ]};
+  docs[18] = { "_keywords" : [ "catena", "diameter", "621455", "8mm", "rings", "brd", "legend", "red" ]};
+  docs[19] = { "_keywords" : [ "catena", "diameter", "621464", "rings", "5mm", "brd", "legend", "red" ]};
 
-//   var id = setInterval(function() {
-//     numberOfInserts--;
-//     collection.insert({username:1, date:new Date()});
+  // Insert all the docs
+  var collection = client.collection('shouldCorrectExecuteExplainHonoringLimit');
+  collection.insert(docs, {safe:true}, function(err, result) {
+    test.equal(null, err);
 
-//     if(numberOfInserts == 0) {
-//       clearInterval(id);
+    collection.ensureIndex({_keywords:1}, {safe:true}, function(err, result) {
+      test.equal(null, err);
 
-//       // Query
-//       collection.find({username:1}).sort([['date', 'desc']]).toArray(function(err, items) {
-//         console.log("----------------------------------------------------------")
-//         console.dir(err)
-//         console.dir(items)
-//         test.done()
-//       });
-//     }
-//   }, 500);
-// }
+      // collection.find({_keywords:'red'},{}).limit(10).explain(function(err, result) {
+      collection.find({_keywords:'red'}, {}, {explain:true}).limit(10).toArray(function(err, result) {
+        test.equal(10, result[0].n);
+        test.equal(10, result[0].nscanned);
+
+        collection.find({_keywords:'red'},{}).limit(10).explain(function(err, result) {
+          test.equal(10, result.n);
+          test.equal(10, result.nscanned);
+          test.done();
+        });
+      });
+    });
+  })
+}
 
 /**
  * Retrieve the server information for the current
