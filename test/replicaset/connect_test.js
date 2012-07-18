@@ -8,6 +8,7 @@ var testCase = require('nodeunit').testCase,
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = mongodb.Db,
   ReplSetServers = mongodb.ReplSetServers,
+  Mongos = mongodb.Mongos,
   Server = mongodb.Server;
 
 // Keep instance of ReplicaSetManager
@@ -108,6 +109,22 @@ exports.shouldThrowErrorDueToSharedConnectionUsage = function(test) {
   try {
     var db = new Db(MONGODB, replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
     var db1 = new Db(MONGODB, replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+  } catch(err) {
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldThrowErrorDueToMongosConnectionUsage = function(test) {
+  try {
+    var replSet = new ReplSetServers([
+        new Server('localhost', 28390, { auto_reconnect: true } ),
+        new Server('localhost', 28391, { auto_reconnect: true } ),
+        new Mongos([new Server('localhost', 28392, { auto_reconnect: true } )])
+      ]
+    );
   } catch(err) {
     test.done();
   }
