@@ -17,11 +17,11 @@ var client = null;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
+  var self = exports;
   client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
@@ -38,7 +38,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -51,14 +51,14 @@ exports.tearDown = function(callback) {
 
 /**
  * Test the authentication method for the user
- * 
+ *
  * @ignore
  */
 exports.shouldCorrectlyAuthenticate = function(test) {
   var user_name = 'spongebob';
   var password = 'squarepants';
 
-  client.authenticate('admin', 'admin', function(err, replies) {      
+  client.authenticate('admin', 'admin', function(err, replies) {
     test.ok(err instanceof Error);
     test.ok(!replies);
 
@@ -70,12 +70,12 @@ exports.shouldCorrectlyAuthenticate = function(test) {
         test.done();
       });
     });
-  });    
+  });
 }
 
 /**
  * Test the authentication method for the user
- * 
+ *
  * @ignore
  */
 exports.shouldCorrectlyReAuthorizeReconnectedConnections = function(test) {
@@ -91,14 +91,14 @@ exports.shouldCorrectlyReAuthorizeReconnectedConnections = function(test) {
         // Execute authentication
         p_client.authenticate(user_name, password, function(err, replies) {
           test.ok(err == null);
-                  
+
           // Kill a connection to force a reconnect
           p_client.serverConfig.close();
-                
+
           p_client.createCollection('shouldCorrectlyReAuthorizeReconnectedConnections', function(err, collection) {
             collection.insert({a:1}, {safe:true}, function(err, r) {
               collection.insert({a:2}, {safe:true}, function(err, r) {
-                collection.insert({a:3}, {safe:true}, function(err, r) {                                        
+                collection.insert({a:3}, {safe:true}, function(err, r) {
                   collection.count(function(err, count) {
                     test.equal(3, count);
                     p_client.close();
@@ -108,10 +108,10 @@ exports.shouldCorrectlyReAuthorizeReconnectedConnections = function(test) {
               })
             })
           });
-        });            
+        });
       });
     });
-  });    
+  });
 }
 
 exports.shouldCorrectlyAddAndRemoveUser = function(test) {
@@ -140,7 +140,7 @@ exports.shouldCorrectlyAddAndRemoveUser = function(test) {
         });
       });
     });
-  });    
+  });
 }
 
 // run this last
@@ -153,7 +153,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -165,7 +165,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
