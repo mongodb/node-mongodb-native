@@ -20,14 +20,14 @@ var RS = RS == null ? null : RS;
 
 var ensureConnection = function(test, numberOfTries, callback) {
   // Replica configuration
-  var replSet = new ReplSetServers( [ 
+  var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {rs_name:RS.name}
   );
-  
+
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
   var db = new Db('integration_test_', replSet);
@@ -38,9 +38,9 @@ var ensureConnection = function(test, numberOfTries, callback) {
     if(err != null && err.stack != null) console.log(err.stack)
     db.close();
   })
-  
+
   // Open the db
-  db.open(function(err, p_db) {    
+  db.open(function(err, p_db) {
     db.close();
 
     if(err != null) {
@@ -51,24 +51,24 @@ var ensureConnection = function(test, numberOfTries, callback) {
       }, 3000);
     } else {
       return callback(null);
-    }    
-  })            
+    }
+  })
 }
 
-var waitForReplicaset = function(callback) {    
+var waitForReplicaset = function(callback) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ], {});
-    
-  var db = new Db('integration_test_', replSet);    
+
+  var db = new Db('integration_test_', replSet);
   replSet.on("fullsetup", function() {
     db.close();
     callback();
   });
-  
+
   db.open(function(err, p_db) {
     db = p_db;
   });
@@ -77,19 +77,19 @@ var waitForReplicaset = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
   // Create instance of replicaset manager but only for the first call
   if(!serversUp && !noReplicasetStart) {
     serversUp = true;
-    RS = new ReplicaSetManager({retries:120, passive_count:0, secondary_count:2, tags:[{"dc1":"ny", "rack": "1", "slow": "true"}, {"dc1":"ny", "rack": "2"}, {"dc2":"sf"}]});    
-    RS.startSet(true, function(err, result) {      
+    RS = new ReplicaSetManager({retries:120, passive_count:0, secondary_count:2, tags:[{"dc1":"ny", "rack": "1", "slow": "true"}, {"dc1":"ny", "rack": "2"}, {"dc2":"sf"}]});
+    RS.startSet(true, function(err, result) {
       if(err != null) throw err;
-      waitForReplicaset(callback);      
-    });      
-  } else {    
+      waitForReplicaset(callback);
+    });
+  } else {
     RS.restartKilledNodes(function(err, result) {
       if(err != null) throw err;
       waitForReplicaset(callback);
@@ -100,7 +100,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -108,28 +108,28 @@ exports.tearDown = function(callback) {
   if(numberOfTestsRun == 0) {
     // Finished kill all instances
     RS.killAll(function() {
-      callback();              
+      callback();
     })
   } else {
-    callback();            
-  }  
+    callback();
+  }
 }
 
 exports['Should Correctly Checkout Readers'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {}
   );
-  
+
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
   replSet.on("fullsetup", function() {
-    
+
     /**
      * Read using PRIMARY
      **/
@@ -137,7 +137,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
     var connection = db.serverConfig.checkoutReader(ReadPreference.PRIMARY);
     // Locate connection
     test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));
-        
+
     /**
      * Read using PRIMARY_PREFERRED
      **/
@@ -147,8 +147,8 @@ exports['Should Correctly Checkout Readers'] = function(test) {
     connection = db.serverConfig.checkoutReader(ReadPreference.PRIMARY_PREFERRED);
     // Locate connection
     test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));
-    
-    // 
+
+    //
     // Remove the access to the primary
     var master = db.serverConfig._state.master;
     db.serverConfig._state.master = null;
@@ -212,7 +212,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
     connection = db.serverConfig.checkoutReader(ReadPreference.SECONDARY_PREFERRED);
 
     // Locate connection
-    test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));    
+    test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));
 
     // Return the set to the correct state
     db.serverConfig._state.secondaries = secondaries;
@@ -224,19 +224,19 @@ exports['Should Correctly Checkout Readers'] = function(test) {
 
   db.open(function(err, p_db) {
     db = p_db;
-  })    
+  })
 }
 
 exports['Should Correctly Use ReadPreference.NEAREST read preference'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {strategy:'ping'}
   );
-  
+
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
@@ -264,12 +264,12 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference'] = functio
       var connections = candidateServers[0].allRawConnections();
 
       // verify that we have picked the lowest connection
-      test.ok(locateConnection(connection, connections));      
+      test.ok(locateConnection(connection, connections));
 
       // Should not be null
       test.ok(connection != null);
 
-      // 
+      //
       // Remove the access to the primary
       var master = db.serverConfig._state.master;
       db.serverConfig._state.master = null;
@@ -305,29 +305,29 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference'] = functio
 
       // Finish up test
       test.done();
-      db.close();      
+      db.close();
     }, 5000);
   });
 
   db.open(function(err, p_db) {
     db = p_db;
-  })    
+  })
 }
 
 exports['Should Correctly Use Preferences by tags no strategy'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ]);
-  
+
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
   replSet.on("fullsetup", function() {
     // Wait for a bit, let ping happen
-    setTimeout(function() {    
+    setTimeout(function() {
       /**
        * Read using PRIMARY
        **/
@@ -346,8 +346,8 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
       connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.PRIMARY_PREFERRED, {"dc1":"ny"}));
       // Locate connection
       test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));
-      
-      // 
+
+      //
       // Remove the access to the primary
       var master = db.serverConfig._state.master;
       db.serverConfig._state.master = null;
@@ -362,7 +362,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
 
       for(var i = 0; i < keys.length; i++) {
         if(db.serverConfig._state.secondaries[keys[i]].tags["dc2"] == "sf") {
-          connections = connections.concat(db.serverConfig._state.secondaries[keys[i]].allRawConnections());          
+          connections = connections.concat(db.serverConfig._state.secondaries[keys[i]].allRawConnections());
         }
       }
 
@@ -410,7 +410,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
        **/
 
       // Read with secondaries available
-      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY_PREFERRED, {"dc2":"sf"}));
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY_PREFERRED, [{"nothing":"done"}, {"dc2":"sf"}]));
       // Locate connection
       test.ok(locateConnection(connection, connections));
 
@@ -423,32 +423,32 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
       connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY_PREFERRED, {"dc2":"sf"}));
 
       // Locate connection
-      test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));    
+      test.ok(locateConnection(connection, db.serverConfig._state.master.allRawConnections()));
 
       // Return the set to the correct state
       db.serverConfig._state.secondaries = secondaries;
 
       // Finish up test
       test.done();
-      db.close();      
+      db.close();
     }, 5000);
   });
 
   db.open(function(err, p_db) {
     db = p_db;
-  })    
+  })
 }
 
 exports['Should Correctly Use ReadPreference.NEAREST read preference with tags'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {strategy:'ping'}
   );
-  
+
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
@@ -464,12 +464,12 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags']
 
       for(var i = 0; i < keys.length; i++) {
         if(db.serverConfig._state.secondaries[keys[i]].tags["dc2"] == "sf") {
-          connections = connections.concat(db.serverConfig._state.secondaries[keys[i]].allRawConnections());          
+          connections = connections.concat(db.serverConfig._state.secondaries[keys[i]].allRawConnections());
         }
       }
 
       // verify that we have picked the lowest connection correctly taged server
-      test.ok(locateConnection(connection, connections));      
+      test.ok(locateConnection(connection, connections));
 
       // Pick out of two nearest servers
       connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc1":"ny"}));
@@ -495,7 +495,7 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags']
       // Get all the connections
       connections = candidateServers[0].allRawConnections();
       // verify that we have picked the lowest connection correctly taged server
-      test.ok(locateConnection(connection, connections));      
+      test.ok(locateConnection(connection, connections));
 
       // No server available
       connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc5":"ny"}));
@@ -512,25 +512,25 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags']
 
       // Finish up test
       test.done();
-      db.close();      
+      db.close();
     }, 5000);
   });
 
   db.open(function(err, p_db) {
     db = p_db;
-  })    
+  })
 }
 
 exports['Should Correctly Use ReadPreference.NEAREST read preference with tags and statistical strategy'] = function(test) {
   // Replica configuration
-  var replSet = new ReplSetServers([ 
+  var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
+    ],
     {strategy:'statistical'}
   );
-  
+
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
@@ -546,12 +546,12 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags a
 
       for(var i = 0; i < keys.length; i++) {
         if(db.serverConfig._state.secondaries[keys[i]].tags["dc2"] == "sf") {
-          connections = connections.concat(db.serverConfig._state.secondaries[keys[i]].allRawConnections());          
+          connections = connections.concat(db.serverConfig._state.secondaries[keys[i]].allRawConnections());
         }
       }
 
       // verify that we have picked the lowest connection correctly taged server
-      test.ok(locateConnection(connection, connections));      
+      test.ok(locateConnection(connection, connections));
 
       // Pick out of two nearest servers
       connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc1":"ny"}));
@@ -577,7 +577,7 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags a
       // Get all the connections
       connections = candidateServers[0].allRawConnections();
       // verify that we have picked the lowest connection correctly taged server
-      test.ok(locateConnection(connection, connections));      
+      test.ok(locateConnection(connection, connections));
 
       // No server available
       connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc5":"ny"}));
@@ -594,13 +594,13 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags a
 
       // Finish up test
       test.done();
-      db.close();      
+      db.close();
     }, 5000);
   });
 
   db.open(function(err, p_db) {
     db = p_db;
-  })    
+  })
 }
 
 var locateConnection = function(connection, connections) {
@@ -609,15 +609,15 @@ var locateConnection = function(connection, connections) {
     if(connections[i].id == connection.id) {
       return true;
     }
-  }  
-  
+  }
+
   return false;
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -629,7 +629,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
