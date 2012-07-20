@@ -64,7 +64,7 @@ Pauses this stream, then no farther events will be fired.
        // File id
        var fileId = new ObjectID();
        // Create a file
-       var file = new GridStore(db, fileId, "w");
+       var file = new GridStore(db, fileId, "w", {chunk_size:5});
        file.open(function(err, file) {      
          // Write some content and flush to disk
          file.write('Hello world', function(err, file) {        
@@ -83,15 +83,12 @@ Pauses this stream, then no farther events will be fired.
                  assert.equal(false, stream.paused);
                  // Pause stream
                  stream.pause();
-                 // Check if cursor is paused
-                 assert.equal(true, stream.paused);         
-     
                  // Restart the stream after 1 miliscecond
                  setTimeout(function() {
                    stream.resume();
                    // Check if cursor is paused
                    assert.equal(false, stream.paused);
-                 }, 1);          
+                 }, 100);          
                });
      
                // For each data item
@@ -211,18 +208,25 @@ Resumes this stream.
        // File id
        var fileId = new ObjectID();
        // Create a file
-       var file = new GridStore(db, fileId, "w");
+       var file = new GridStore(db, fileId, "w", {chunk_size:5});
        file.open(function(err, file) {      
          // Write some content and flush to disk
-         file.write('Hello world', function(err, file) {        
+         var fileBody = 'Hello world';
+         file.write(fileBody, function(err, file) {        
            file.close(function(err, result) {
-             
              // Let's create a read file
              file = new GridStore(db, fileId, "r");
+     
              // Open the file
              file.open(function(err, file) {            
                // Peform a find to get a cursor
                var stream = file.stream(true);
+     
+               // Pause the stream initially
+               stream.pause();
+     
+               // Save read content here
+               var fileBuffer = '';
      
                // For each data item
                stream.on("data", function(item) {
@@ -231,22 +235,30 @@ Resumes this stream.
                  // Pause stream
                  stream.pause();
                  // Check if cursor is paused
-                 assert.equal(true, stream.paused);         
+                 // assert.equal(true, stream.paused);         
+     
+                 fileBuffer += item.toString('utf8');
      
                  // Restart the stream after 1 miliscecond
                  setTimeout(function() {
                    stream.resume();
                    // Check if cursor is paused
                    assert.equal(false, stream.paused);
-                 }, 1);          
+                 }, 100);
                });
      
                // For each data item
-               stream.on("end", function(item) {});
+               stream.on("end", function(item) {
+               });
                // When the stream is done
                stream.on("close", function() {
+                 // Have we received the same file back?
+                 assert.equal(fileBuffer, fileBody);
                  db.close();          
                });        
+     
+               // Resume the stream
+               stream.resume();
              });
            });        
          });      

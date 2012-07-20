@@ -1,0 +1,23 @@
+========
+Mongos()
+========
+
+------------------
+Constructor
+------------------
+
+
+Mongos constructor provides a connection to a mongos proxy including failover to additional servers
+
+
+  .. js:class:: Mongos()
+
+   :param array list: of mongos server objects
+   :param object [options]: additional options for the mongos connection
+
+
+Options
+ - **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
+ - **ha** {Boolean, default:true}, turn on high availability, attempts to reconnect to down proxies
+ - **haInterval** {Number, default:2000}, time between each replicaset status check.
+

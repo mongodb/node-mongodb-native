@@ -23,7 +23,7 @@ Returns a stream interface for the **cursor**.
 Events
  - **data** {function(item) {}} the data event triggers when a document is ready.
  - **error** {function(err) {}} the error event triggers if an error happens.
- - **end** {function() {}} the end event triggers when there is no more documents available.
+ - **close** {function() {}} the end event triggers when there is no more documents available.
 
 
 -----

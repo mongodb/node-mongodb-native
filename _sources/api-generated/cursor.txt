@@ -8,7 +8,7 @@ Constructor
 
 
 Constructor for a cursor object that handles all the operations on query result
-using find. This cursor object is unidirectional and cannot traverse backwards. Clients should not be creating a cursor directly, 
+using find. This cursor object is unidirectional and cannot traverse backwards. Clients should not be creating a cursor directly,
 but use find to acquire a cursor.
 
 
@@ -26,6 +26,7 @@ but use find to acquire a cursor.
    :param boolean snapshot: Snapshot mode assures no duplicates are returned.
    :param boolean timeout: allow the query to timeout.
    :param boolean tailable: allow the cursor to be tailable.
+   :param boolean awaitdata: allow the cursor to wait for data, only applicable for tailable cursor.
    :param number batchSize: the number of the subset of results to request the database to return for every request. This should initially be greater than 1 otherwise the database will automatically close the cursor. The batch size can be set to 1 with cursorInstance.batchSize after performing the initial query to the database.
    :param boolean raw: return all query documents as raw buffers (default false).
    :param boolean read: specify override of read from source (primary/secondary).
@@ -35,6 +36,9 @@ but use find to acquire a cursor.
    :param number max: set index bounds.
    :param boolean showDiskLoc: show disk location of results.
    :param string comment: you can put a $comment field on a query to make looking in the profiler logs simpler.
+   :param boolean awaitdata: allow the cursor to wait for data, only applicable for tailable cursor.
+   :param number numberOfRetries: if using awaidata specifies the number of times to retry on timeout.
+   :param string dbName: override the default dbName.
 
 
 
@@ -60,7 +64,7 @@ tailable, batchSizeValue, skipValue and limits are preserved.
 
 .. js:function:: rewind()
 
-   :returns: cursor returns itself with rewind applied. 
+   :returns: cursor returns itself with rewind applied.
 
 
 **Examples**
@@ -81,10 +85,10 @@ tailable, batchSizeValue, skipValue and limits are preserved.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        var docs = [];
      
@@ -97,28 +101,28 @@ tailable, batchSizeValue, skipValue and limits are preserved.
        // Create collection
        db.createCollection('Should_correctly_rewind_and_restart_cursor', function(err, collection) {
          assert.equal(null, err);
-       
+     
          // insert all docs
          collection.insert(docs, {safe:true}, function(err, result) {
            assert.equal(null, err);
-         
-           // Grab a cursor using the find 
+     
+           // Grab a cursor using the find
            var cursor = collection.find({});
            // Fetch the first object off the cursor
            cursor.nextObject(function(err, item) {
              assert.equal(0, item.a)
              // Rewind the cursor, resetting it to point to the start of the query
              cursor.rewind();
-             
+     
              // Grab the first object again
              cursor.nextObject(function(err, item) {
                assert.equal(0, item.a)
-               
+     
                db.close();
              })
            })
-         })        
-       });        
+         })
+       });
      });
 
 
@@ -129,7 +133,7 @@ toArray
 
 Returns an array of documents. The caller is responsible for making sure that there
 is enough memory to store the results. Note that the array only contain partial
-results when this cursor had been previouly accessed. In that case, 
+results when this cursor had been previouly accessed. In that case,
 cursor.rewind() can be used to reset the cursor.
 
 .. js:function:: toArray(callback)
@@ -156,28 +160,28 @@ cursor.rewind() can be used to reset the cursor.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection to hold our documents
        db.createCollection('test_array', function(err, collection) {
-         
+     
          // Insert a test document
          collection.insert({'b':[1, 2, 3]}, {safe:true}, function(err, ids) {
-           
+     
            // Retrieve all the documents in the collection
            collection.find().toArray(function(err, documents) {
-             assert.equal(1, documents.length);          
+             assert.equal(1, documents.length);
              assert.deepEqual([1, 2, 3], documents[0].b);
      
              db.close();
            });
          });
-       });  
-     });  
+       });
+     });
 
 
 ----
@@ -216,29 +220,29 @@ for making sure that the entire result can fit the memory.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection
        db.createCollection('test_to_a_after_each', function(err, collection) {
-         assert.equal(null, err);      
+         assert.equal(null, err);
          assert.ok(collection instanceof Collection);
-         
+     
          // Insert a document in the collection
          collection.insert({'a':1}, {safe:true}, function(err, ids) {
-           
+     
            // Grab a cursor
            var cursor = collection.find();
-             
+     
            // Execute the each command, triggers for each document
            cursor.each(function(err, item) {
-             
+     
              // If the item is null then the cursor is exhausted/empty and closed
              if(item == null) {
-               
+     
                // Show that the cursor is closed
                cursor.toArray(function(err, items) {
                  assert.ok(err != null);
@@ -284,16 +288,16 @@ Determines how many result the query for this cursor will return
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
      
        // Creat collection
        db.createCollection('cursor_count_collection', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert some docs
          collection.insert([{a:1}, {a:2}], {safe:true}, function(err, docs) {
            assert.equal(null, err);
@@ -302,7 +306,7 @@ Determines how many result the query for this cursor will return
            collection.find().count(function(err, count) {
              assert.equal(null, err);
              assert.equal(2, count);
-             
+     
              db.close();
            })
          });
@@ -350,20 +354,20 @@ Sets the sort parameter of this cursor to the given value.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection
        db.createCollection('simple_sort_collection', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert some documents we can sort on
          collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
            assert.equal(null, err);
-           
+     
            // Do normal ascending sort
            collection.find().sort([['a', 1]]).nextObject(function(err, item) {
              assert.equal(null, err);
@@ -371,13 +375,13 @@ Sets the sort parameter of this cursor to the given value.
      
              // Do normal descending sort
              collection.find().sort([['a', -1]]).nextObject(function(err, item) {
-               assert.equal(null, err);     
+               assert.equal(null, err);
                assert.equal(3, item.a);
      
                db.close();
-             });          
-           });        
-         });      
+             });
+           });
+         });
        });
      });
 
@@ -414,30 +418,44 @@ Sets the limit parameter of this cursor to the given value.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection
        db.createCollection('simple_limit_collection', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert some documents we can sort on
          collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
            assert.equal(null, err);
-           
+     
            // Limit to only one document returned
            collection.find().limit(1).toArray(function(err, items) {
              assert.equal(null, err);
              assert.equal(1, items.length);
      
              db.close();
-           });        
-         });      
+           });
+         });
        });
      });
+
+
+-----------------
+setReadPreference
+-----------------
+
+
+Sets the read preference for the cursor
+
+.. js:function:: setReadPreference(the[, callback])
+
+   :param string the: read preference for the cursor, one of Server.READ_PRIMARY, Server.READ_SECONDARY, Server.READ_SECONDARY_ONLY
+   :param function [callback]: this optional callback will be called after executing this method. The first parameter will contain an error object when the read preference given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :returns: cursor an instance of this object.
 
 
 ----
@@ -472,28 +490,28 @@ Sets the skip parameter of this cursor to the given value.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection
        db.createCollection('simple_skip_collection', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert some documents we can sort on
          collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
            assert.equal(null, err);
-           
+     
            // Skip one document
            collection.find().skip(1).nextObject(function(err, item) {
              assert.equal(null, err);
              assert.equal(2, item.a);
      
              db.close();
-           });        
-         });      
+           });
+         });
        });
      });
 
@@ -516,7 +534,7 @@ Sets the batch size parameter of this cursor to the given value.
 
   
   
-  A simple example showing the use of batchSize on the cursor, batchSize only regulates how many 
+  A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
   documents are returned for each batch using the getMoreCommand against the MongoDB server
 
   .. code-block:: javascript
@@ -531,28 +549,28 @@ Sets the batch size parameter of this cursor to the given value.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection
        db.createCollection('simple_batch_size_collection', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert some documents we can sort on
          collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
            assert.equal(null, err);
-           
+     
            // Do normal ascending sort
            collection.find().batchSize(1).nextObject(function(err, item) {
              assert.equal(null, err);
              assert.equal(1, item.a);
      
              db.close();
-           });        
-         });      
+           });
+         });
        });
      });
 
@@ -586,28 +604,28 @@ Gets the next document from the cursor.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection
        db.createCollection('simple_next_object_collection', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert some documents we can sort on
          collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
            assert.equal(null, err);
-           
+     
            // Do normal ascending sort
            collection.find().nextObject(function(err, item) {
              assert.equal(null, err);
              assert.equal(1, item.a);
      
              db.close();
-           });        
-         });      
+           });
+         });
        });
      });
 
@@ -642,27 +660,27 @@ long it took the database to process it.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection
        db.createCollection('simple_explain_collection', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert some documents we can sort on
          collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
            assert.equal(null, err);
-           
+     
            // Do normal ascending sort
            collection.find().explain(function(err, explaination) {
              assert.equal(null, err);
      
              db.close();
-           });        
-         });      
+           });
+         });
        });
      });
 
@@ -711,14 +729,14 @@ Events
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a lot of documents to insert
-       var docs = []  
+       var docs = []
        for(var i = 0; i < 100; i++) {
          docs.push({'a':i})
        }
@@ -728,20 +746,20 @@ Events
          assert.equal(null, err);
      
          // Insert documents into collection
-         collection.insert(docs, {safe:true}, function(err, ids) {        
+         collection.insert(docs, {safe:true}, function(err, ids) {
            // Peform a find to get a cursor
            var stream = collection.find().streamRecords({fetchSize:1000});
      
            // Execute find on all the documents
-           stream.on('end', function() { 
+           stream.on('end', function() {
              db.close();
            });
      
-           stream.on('data', function(data) { 
+           stream.on('data', function(data) {
              assert.ok(data != null);
-           }); 
+           });
          });
-       });    
+       });
      });
 
 
@@ -775,14 +793,14 @@ Returns a Node ReadStream interface for this cursor.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a lot of documents to insert
-       var docs = []  
+       var docs = []
        for(var i = 0; i < 100; i++) {
          docs.push({'a':i})
        }
@@ -792,20 +810,20 @@ Returns a Node ReadStream interface for this cursor.
          assert.equal(null, err);
      
          // Insert documents into collection
-         collection.insert(docs, {safe:true}, function(err, ids) {        
+         collection.insert(docs, {safe:true}, function(err, ids) {
            // Peform a find to get a cursor
            var stream = collection.find().stream();
      
            // Execute find on all the documents
-           stream.on('close', function() { 
+           stream.on('close', function() {
              db.close();
            });
      
-           stream.on('data', function(data) { 
+           stream.on('data', function(data) {
              assert.ok(data != null);
-           }); 
+           });
          });
-       });    
+       });
      });
 
 
@@ -840,14 +858,14 @@ Close the cursor.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a lot of documents to insert
-       var docs = []  
+       var docs = []
        for(var i = 0; i < 100; i++) {
          docs.push({'a':i})
        }
@@ -857,23 +875,23 @@ Close the cursor.
          assert.equal(null, err);
      
          // Insert documents into collection
-         collection.insert(docs, {safe:true}, function(err, ids) {        
+         collection.insert(docs, {safe:true}, function(err, ids) {
            // Peform a find to get a cursor
            var cursor = collection.find();
-           
+     
            // Fetch the first object
            cursor.nextObject(function(err, object) {
              assert.equal(null, err);
-             
+     
              // Close the cursor, this is the same as reseting the query
              cursor.close(function(err, result) {
                assert.equal(null, err);
-                 
+     
                db.close();
-             });          
+             });
            });
          });
-       });    
+       });
      });
 
 
@@ -907,14 +925,14 @@ Check if the cursor is closed or open.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a lot of documents to insert
-       var docs = []  
+       var docs = []
        for(var i = 0; i < 100; i++) {
          docs.push({'a':i})
        }
@@ -924,23 +942,23 @@ Check if the cursor is closed or open.
          assert.equal(null, err);
      
          // Insert documents into collection
-         collection.insert(docs, {safe:true}, function(err, ids) {        
+         collection.insert(docs, {safe:true}, function(err, ids) {
            // Peform a find to get a cursor
            var cursor = collection.find();
-           
+     
            // Fetch the first object
            cursor.nextObject(function(err, object) {
              assert.equal(null, err);
-             
+     
              // Close the cursor, this is the same as reseting the query
              cursor.close(function(err, result) {
                assert.equal(null, err);
                assert.equal(true, cursor.isClosed());
-                 
+     
                db.close();
-             });          
+             });
            });
          });
-       });    
+       });
      });
 

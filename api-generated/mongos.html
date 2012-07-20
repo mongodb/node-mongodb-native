@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>&lt;no title&gt; &mdash; MongoDB Node.JS Driver 1.1.0 documentation</title>
+    <title>Mongos() &mdash; MongoDB Node.JS Driver 1.1.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -45,16 +45,40 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="collections.html">Collections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gridfs.html">GridStore</a></li>
-<li class="toctree-l1"><a class="reference internal" href="indexes.html">Indexes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="insert.html">Inserting and updating</a></li>
-<li class="toctree-l1"><a class="reference internal" href="queries.html">Queries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="replicaset.html">Replicasets</a></li>
+  <div class="section" id="mongos">
+<h1>Mongos()<a class="headerlink" href="#mongos" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>Mongos constructor provides a connection to a mongos proxy including failover to additional servers</p>
+<blockquote>
+<div><dl class="class">
+<dt id="Mongos">
+<em class="property">class </em><tt class="descname">Mongos</tt><big>(</big><big>)</big><a class="headerlink" href="#Mongos" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>list</strong> (<em>array</em>) &#8211; of mongos server objects</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options for the mongos connection</li>
 </ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>socketOptions</strong> {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))</li>
+<li><strong>ha</strong> {Boolean, default:true}, turn on high availability, attempts to reconnect to down proxies</li>
+<li><strong>haInterval</strong> {Number, default:2000}, time between each replicaset status check.</li>
+</ul>
+</dd>
+</dl>
+</div>
 </div>
 
 
@@ -65,6 +89,10 @@
         <div class="sphinxsidebarwrapper">
 <h3>Contents</h3>
 <ul>
+<li><a class="reference internal" href="#">Mongos()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+</ul>
+</li>
 </ul>
 
 
@@ -73,14 +101,14 @@
 </ul>
 <h3>Manual</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>

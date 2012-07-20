@@ -17,6 +17,42 @@ Create a new ObjectID instance
 
 
 
+-----------
+toHexString
+-----------
+
+
+Return the ObjectID id as a 24 byte hex string representation
+
+.. js:function:: toHexString()
+
+   :returns: string return the 24 byte hex string representation.
+
+
+**Examples**
+
+  
+  
+  Generate a 24 character hex string representation of the ObjectID
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a new ObjectID
+     var objectId = new ObjectID();  
+     // Verify that the hex string is 24 characters long
+     assert.equal(24, objectId.toHexString().length);
+
+
 ------
 equals
 ------

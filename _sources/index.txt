@@ -8,8 +8,17 @@ Usage
 .. toctree::
   :maxdepth: 1
 
-  markdown-docs/index  
-  
+  markdown-docs/index
+
+Driver Updates
+--------------
+
+.. toctree::
+  :maxdepth: 3
+
+  driver-articles/index
+
+
 Tutorials
 ---------
 
@@ -62,7 +71,7 @@ There are two main places to learn about MongoDB itself. I've included links bel
 
 There are also some very good books out these days
 
-  * `MongoDB: The Definitive Guide <http://www.amazon.com/MongoDB-Definitive-Guide-Kristina-Chodorow/dp/1449381561/ref=sr_1_1?ie=UTF8&qid=1329392515&sr=8-1>`_ 
+  * `MongoDB: The Definitive Guide <http://www.amazon.com/MongoDB-Definitive-Guide-Kristina-Chodorow/dp/1449381561/ref=sr_1_1?ie=UTF8&qid=1329392515&sr=8-1>`_
   * `MongoDB in Action <http://www.amazon.com/MongoDB-Action-Kyle-Banker/dp/1935182870/ref=sr_1_2?ie=UTF8&qid=1329392515&sr=8-2>`_
   * `The Definitive Guide to MongoDB: The NoSQL Database for Cloud and Desktop Computing <http://www.amazon.com/Definitive-Guide-MongoDB-Database-Computing/dp/1430230517/ref=sr_1_3?ie=UTF8&qid=1329392515&sr=8-3>`_
   * `50 Tips and Tricks for MongoDB Developers <http://www.amazon.com/50-Tips-Tricks-MongoDB-Developers/dp/1449304613/ref=sr_1_4?ie=UTF8&qid=1329392515&sr=8-4>`_

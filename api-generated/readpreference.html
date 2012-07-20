@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>&lt;no title&gt; &mdash; MongoDB Node.JS Driver 1.1.0 documentation</title>
+    <title>ReadPreference() &mdash; MongoDB Node.JS Driver 1.1.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -45,16 +45,45 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="collections.html">Collections</a></li>
-<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gridfs.html">GridStore</a></li>
-<li class="toctree-l1"><a class="reference internal" href="indexes.html">Indexes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="insert.html">Inserting and updating</a></li>
-<li class="toctree-l1"><a class="reference internal" href="queries.html">Queries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="replicaset.html">Replicasets</a></li>
+  <div class="section" id="readpreference">
+<h1>ReadPreference()<a class="headerlink" href="#readpreference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>A class representation of the Read Preference.</p>
+<blockquote>
+<div><dl class="class">
+<dt id="ReadPreference">
+<em class="property">class </em><tt class="descname">ReadPreference</tt><big>(</big><big>)</big><a class="headerlink" href="#ReadPreference" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>the</strong> (<em>string</em>) &#8211; read preference type</li>
+<li><strong>tags</strong> (<em>object</em>) &#8211; </li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">readpreference</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
+<dl class="docutils">
+<dt>Read Preferences</dt>
+<dd><ul class="first last simple">
+<li><strong>ReadPreference.PRIMARY</strong>, Read from primary only. All operations produce an error (throw an exception where applicable) if primary is unavailable. Cannot be combined with tags (This is the default.).</li>
+<li><strong>ReadPreference.PRIMARY_PREFERRED</strong>, Read from primary if available, otherwise a secondary.</li>
+<li><strong>ReadPreference.SECONDARY</strong>, Read from secondary if available, otherwise error.</li>
+<li><strong>ReadPreference.SECONDARY_PREFERRED</strong>, Read from a secondary if available, otherwise read from the primary.</li>
+<li><strong>ReadPreference.NEAREST</strong>, All modes read from among the nearest candidates, but unlike other modes, NEAREST will include both the primary and all secondaries in the random selection.</li>
+</ul>
+</dd>
+</dl>
+</div>
 </div>
 
 
@@ -65,6 +94,10 @@
         <div class="sphinxsidebarwrapper">
 <h3>Contents</h3>
 <ul>
+<li><a class="reference internal" href="#">ReadPreference()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+</ul>
+</li>
 </ul>
 
 
@@ -73,14 +106,14 @@
 </ul>
 <h3>Manual</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>

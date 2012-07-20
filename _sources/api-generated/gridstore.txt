@@ -29,7 +29,7 @@ Modes
 
 Options
  - **root** {String}, root collection to use. Defaults to **{GridStore.DEFAULT_ROOT_COLLECTION}**.
- - **chunk_type** {String}, mime type of the file. Defaults to **{GridStore.DEFAULT_CONTENT_TYPE}**.
+ - **content_type** {String}, mime type of the file. Defaults to **{GridStore.DEFAULT_CONTENT_TYPE}**.
  - **chunk_size** {Number}, size for the chunk. Defaults to **{Chunk.DEFAULT_CHUNK_SIZE}**.
  - **metadata** {Object}, arbitrary data the user wants to store.
 
@@ -96,21 +96,21 @@ new one if file does not exist.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Create a new instance of the gridstore
        var gridStore = new GridStore(db, 'ourexamplefiletowrite.txt', 'w');
      
        // Open the file
        gridStore.open(function(err, gridStore) {
-         
+     
          // Write some data to the file
          gridStore.write('bar', function(err, gridStore) {
            assert.equal(null, err);
-           
+     
            // Close (Flushes the data to MongoDB)
            gridStore.close(function(err, result) {
              assert.equal(null, err);
@@ -143,24 +143,24 @@ new one if file does not exist.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
        var fileId = new ObjectID();
-       
+     
        // Create a new instance of the gridstore
        var gridStore = new GridStore(db, fileId, 'w');
      
        // Open the file
        gridStore.open(function(err, gridStore) {
-         
+     
          // Write some data to the file
          gridStore.write('bar', function(err, gridStore) {
            assert.equal(null, err);
-           
+     
            // Close (Flushes the data to MongoDB)
            gridStore.close(function(err, result) {
              assert.equal(null, err);
@@ -278,17 +278,17 @@ Stores a file from the file system to the GridFS database.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
        var fileId = new ObjectID();
      
        // Open a new file
        var gridStore = new GridStore(db, fileId, 'w');
-       
+     
        // Read the filesize of file on disk (provide your own)
        var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
        // Read the buffered data for comparision reasons
@@ -296,10 +296,10 @@ Stores a file from the file system to the GridFS database.
      
        // Open the new file
        gridStore.open(function(err, gridStore) {
-         
+     
          // Write the file to gridFS
          gridStore.writeFile('./test/gridstore/test_gs_weird_bug.png', function(err, doc) {
-           
+     
            // Read back all the written content and verify the correctness
            GridStore.read(db, fileId, function(err, fileData) {
              assert.equal(data.toString('base64'), fileData.toString('base64'))
@@ -327,17 +327,17 @@ Stores a file from the file system to the GridFS database.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
        var fileId = new ObjectID();
      
        // Open a new file
        var gridStore = new GridStore(db, fileId, 'w');
-       
+     
        // Read the filesize of file on disk (provide your own)
        var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
        // Read the buffered data for comparision reasons
@@ -348,85 +348,16 @@ Stores a file from the file system to the GridFS database.
      
        // Open the new file
        gridStore.open(function(err, gridStore) {
-         
+     
          // Write the file to gridFS using the file handle
          gridStore.writeFile(fd, function(err, doc) {
-           
+     
            // Read back all the written content and verify the correctness
            GridStore.read(db, fileId, function(err, fileData) {
              assert.equal(data.toString('base64'), fileData.toString('base64'));
              assert.equal(fileSize, fileData.length);
      
              db.close();
-           });
-         });
-       });
-     });
-
-
------
-write
------
-
-
-Writes some data. This method will work properly only if initialized with mode "w" or "w+".
-
-.. js:function:: write(data[, close], callback)
-
-   :param string data: the data to write.
-   :param boolean [close]: closes this file after writing if set to true.
-   :param function callback: this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
-   :returns: null 
-
-
-**Examples**
-
-  
-  
-  A simple example showing how to use the write command with strings and Buffers.
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
-     
-     // Establish connection to db  
-     db.open(function(err, db) {
-       // Our file ID
-       var fileId = new ObjectID();
-     
-       // Open a new file
-       var gridStore = new GridStore(db, fileId, 'w');
-       
-       // Open the new file
-       gridStore.open(function(err, gridStore) {
-         
-         // Write a text string
-         gridStore.write('Hello world', function(err, gridStore) {
-           
-           // Write a buffer
-           gridStore.write(new Buffer('Buffer Hello world'), function(err, gridStore) {
-     
-             // Close the 
-             gridStore.close(function(err, result) {
-               
-               // Read back all the written content and verify the correctness
-               GridStore.read(db, fileId, function(err, fileData) {
-                 assert.equal('Hello worldBuffer Hello world', fileData.toString());
-     
-                 db.close();
-               });
-             });
            });
          });
        });
@@ -466,27 +397,27 @@ already exists. This will work properly only if mode was initialized to
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
        var fileId = new ObjectID();
      
        // Open a new file
        var gridStore = new GridStore(db, fileId, 'w');
-       
+     
        // Open the new file
        gridStore.open(function(err, gridStore) {
-         
+     
          // Write a text string
          gridStore.write('Hello world', function(err, gridStore) {
-           
-           // Close the 
+     
+           // Close the
            gridStore.close(function(err, result) {
              assert.equal(err, null);
-                       
+     
              db.close();
            });
          });
@@ -525,27 +456,27 @@ Retrieve this file's chunks collection.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
        var fileId = new ObjectID();
      
        // Open a new file
        var gridStore = new GridStore(db, fileId, 'w');
-       
+     
        // Open the new file
        gridStore.open(function(err, gridStore) {
-         
+     
          // Access the Chunk collection
          gridStore.chunkCollection(function(err, collection) {
            assert.equal(err, null);
            assert.ok(collection instanceof Collection);
-           
+     
            db.close();
-         });      
+         });
        });
      });
 
@@ -581,34 +512,34 @@ Deletes all the chunks of this file in the database.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
        var fileId = new ObjectID();
      
        // Open a new file
        var gridStore = new GridStore(db, fileId, 'w');
-       
+     
        // Open the new file
        gridStore.open(function(err, gridStore) {
-         
+     
          // Write a text string
          gridStore.write('Hello world', function(err, gridStore) {
-           
-           // Close the 
+     
+           // Close the
            gridStore.close(function(err, result) {
              assert.equal(err, null);
-             
+     
              // Open the file again and unlin it
              new GridStore(db, fileId, 'r').open(function(err, gridStore) {
-               
+     
                // Unlink the file
                gridStore.unlink(function(err, result) {
                  assert.equal(null, err);
-                 
+     
                  // Verify that the file no longer exists
                  GridStore.exist(db, fileId, function(err, result) {
                    assert.equal(null, err);
@@ -616,8 +547,8 @@ Deletes all the chunks of this file in the database.
      
                    db.close();
                  });
-               });            
-             });                    
+               });
+             });
            });
          });
        });
@@ -655,27 +586,27 @@ Retrieves the file collection associated with this object.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
        var fileId = new ObjectID();
      
        // Open a new file
        var gridStore = new GridStore(db, fileId, 'w');
-       
+     
        // Open the new file
        gridStore.open(function(err, gridStore) {
-         
+     
          // Access the Chunk collection
          gridStore.collection(function(err, collection) {
            assert.equal(err, null);
            assert.ok(collection instanceof Collection);
-           
+     
            db.close();
-         });      
+         });
        });
      });
 
@@ -712,10 +643,10 @@ Reads the data of this file.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
        var fileId = new ObjectID();
@@ -741,9 +672,9 @@ Reads the data of this file.
                  // Open file for reading
                  gridStore = new GridStore(db, fileId, 'r');
                  gridStore.open(function(err, gridStore) {
-                   
+     
                    // Read all the lines and verify correctness
-                   gridStore.readlines(function(err, lines) {                  
+                   gridStore.readlines(function(err, lines) {
                      assert.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
      
                      db.close();
@@ -879,10 +810,10 @@ Retrieves the contents of this file and advances the read/write head. Works with
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Read in the content of a file
        var data = fs.readFileSync('./test/gridstore/iya_logo_final_bw.jpg');
@@ -894,7 +825,7 @@ Retrieves the contents of this file and advances the read/write head. Works with
          gs.write(data, function(err, gs) {
            // Flush to the GridFS
            gs.close(function(err, gs) {
-           
+     
              // Define the file we wish to read
              var gs2 = new GridStore(db, "test", "r");
              // Open the file
@@ -1274,28 +1205,28 @@ the given string does not have one.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Open a file for writing
-       var gridStore = new GridStore(db, "test_gs_puts_and_readlines", "w");    
+       var gridStore = new GridStore(db, "test_gs_puts_and_readlines", "w");
        gridStore.open(function(err, gridStore) {
-         
+     
          // Write a line to the file using the puts method
          gridStore.puts("line one", function(err, gridStore) {
-           
+     
            // Flush the file to GridFS
            gridStore.close(function(err, result) {
-             
+     
              // Read in the entire contents
              GridStore.read(db, 'test_gs_puts_and_readlines', function(err, data) {
                assert.equal("line one\n", data.toString());
      
                db.close();
              });
-           });        
+           });
          });
        });
      });
@@ -1426,7 +1357,7 @@ Events
              // Read the original content
              var originalData = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
              // Ensure we are doing writing before attempting to open the file
-             fs.readFile("./test_gs_weird_bug_streamed.tmp", function(err, streamedData) {
+             fs.readFile("./test_gs_weird_bug_streamed.tmp", function(err, streamedData) {                      
                // Compare the data
                assert.deepEqual(originalData, streamedData);
                
@@ -1478,34 +1409,40 @@ Checks if a file exists in the database.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Open a file for writing
-       var gridStore = new GridStore(db, null, "w");    
+       var gridStore = new GridStore(db, null, "w");
        gridStore.open(function(err, gridStore) {
-         
+         assert.equal(null, err);
+     
          // Writing some content to the file
          gridStore.write("hello world!", function(err, gridStore) {
-           
+           assert.equal(null, err);
+     
            // Flush the file to GridFS
-           gridStore.close(function(err, result) {          
-             
+           gridStore.close(function(err, result) {
+             assert.equal(null, err);
+     
              // Check if the file exists using the id returned from the close function
              GridStore.exist(db, result._id, function(err, result) {
+               assert.equal(null, err);
                assert.equal(true, result);
              })
      
              // Show that the file does not exist for a random ObjectID
              GridStore.exist(db, new ObjectID(), function(err, result) {
+               assert.equal(null, err);
                assert.equal(false, result);
              });
-             
+     
              // Show that the file does not exist for a different file root
              GridStore.exist(db, result._id, 'another_root', function(err, result) {
+               assert.equal(null, err);
                assert.equal(false, result);
      
                db.close();
@@ -1549,23 +1486,23 @@ Gets the list of files stored in the GridFS.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file id
        var fileId = new ObjectID();
-       
+     
        // Open a file for writing
        var gridStore = new GridStore(db, fileId, "foobar2", "w");
        gridStore.open(function(err, gridStore) {
-         
+     
          // Write some content to the file
          gridStore.write("hello world!", function(err, gridStore) {
            // Flush to GridFS
            gridStore.close(function(err, result) {
-             
+     
              // List the existing files
              GridStore.list(db, function(err, items) {
                var found = false;
@@ -1576,7 +1513,7 @@ Gets the list of files stored in the GridFS.
                assert.ok(items.length >= 1);
                assert.ok(found);
              });
-           
+     
              // List the existing files but return only the file ids
              GridStore.list(db, {id:true}, function(err, items) {
                var found = false;
@@ -1585,7 +1522,7 @@ Gets the list of files stored in the GridFS.
                });
      
                assert.ok(items.length >= 1);
-             });          
+             });
      
              // List the existing files in a specific root collection
              GridStore.list(db, 'fs', function(err, items) {
@@ -1617,7 +1554,7 @@ Gets the list of files stored in the GridFS.
                  gridStore2.write('my file', function(err, gridStore) {
                    // Flush to GridFS
                    gridStore.close(function(err, result) {
-                     
+     
                      // List all the available files and verify that our files are there
                      GridStore.list(db, function(err, items) {
                        var found = false;
@@ -1631,7 +1568,7 @@ Gets the list of files stored in the GridFS.
                        assert.ok(items.length >= 2);
                        assert.ok(found);
                        assert.ok(found2);
-                     
+     
                        db.close();
                      });
                    });
@@ -1691,10 +1628,10 @@ This method has the following signatures
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Create a new file
        var gridStore = new GridStore(db, null, "w");
@@ -1707,7 +1644,7 @@ This method has the following signatures
          gridStore.write(data, function(err, gridStore) {
            // Flush the remaining data to GridFS
            gridStore.close(function(err, result) {
-             
+     
              // Read in the whole file and check that it's the same content
              GridStore.read(client, result._id, function(err, fileData) {
                assert.equal(data.length, fileData.length);
@@ -1755,10 +1692,10 @@ Reads the data of this file.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
        var fileId = new ObjectID();
@@ -1828,22 +1765,22 @@ Deletes the chunks and metadata information of a file from GridFS.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 1}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Open a new file for writing
        var gridStore = new GridStore(db, "test_gs_unlink", "w");
        gridStore.open(function(err, gridStore) {
-         
+     
          // Write some content
          gridStore.write("hello, world!", function(err, gridStore) {
-           
+     
            // Flush file to GridFS
            gridStore.close(function(err, result) {
-             
+     
              // Verify the existance of the fs.files document
              db.collection('fs.files', function(err, collection) {
                collection.count(function(err, count) {
@@ -1858,7 +1795,7 @@ Deletes the chunks and metadata information of a file from GridFS.
      
                  // Unlink the file (removing it)
                  GridStore.unlink(db, 'test_gs_unlink', function(err, gridStore) {
-                   
+     
                    // Verify that fs.files document is gone
                    db.collection('fs.files', function(err, collection) {
                      collection.count(function(err, count) {
@@ -1870,7 +1807,7 @@ Deletes the chunks and metadata information of a file from GridFS.
                    db.collection('fs.chunks', function(err, collection) {
                      collection.count(function(err, count) {
                        assert.equal(0, count);
-                       
+     
                        db.close();
                      })
                    });
@@ -1881,4 +1818,93 @@ Deletes the chunks and metadata information of a file from GridFS.
          });
        });
      });
+
+
+-----
+write
+-----
+
+
+Writes some data. This method will work properly only if initialized with mode "w" or "w+".
+
+.. js:function:: write(data[, close], callback)
+
+   :param string data: the data to write.
+   :param boolean [close]: closes this file after writing if set to true.
+   :param function callback: this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing how to use the write command with strings and Buffers.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+     
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write a text string
+         gridStore.write('Hello world', function(err, gridStore) {
+     
+           // Write a buffer
+           gridStore.write(new Buffer('Buffer Hello world'), function(err, gridStore) {
+     
+             // Close the
+             gridStore.close(function(err, result) {
+     
+               // Read back all the written content and verify the correctness
+               GridStore.read(db, fileId, function(err, fileData) {
+                 assert.equal('Hello worldBuffer Hello world', fileData.toString());
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+-----
+pause
+-----
+
+
+pause
+
+.. js:function:: pause()
+
+
+------
+resume
+------
+
+
+resume
+
+.. js:function:: resume()
 

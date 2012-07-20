@@ -372,19 +372,19 @@ Renames the collection.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
-     db.open(function(err, db) {    
-       
+     // Establish connection to db
+     db.open(function(err, db) {
+     
        // Open a couple of collections
        db.createCollection('test_rename_collection', function(err, collection1) {
-         db.createCollection('test_rename_collection2', function(err, collection2) {        
+         db.createCollection('test_rename_collection2', function(err, collection2) {
      
            // Attemp to rename a collection to a number
            try {
-             collection1.rename(5, function(err, collection) {});         
+             collection1.rename(5, function(err, collection) {});
            } catch(err) {
              assert.ok(err instanceof Error);
              assert.equal("collection name must be a String", err.message);
@@ -395,7 +395,7 @@ Renames the collection.
              collection1.rename("", function(err, collection) {});
            } catch(err) {
              assert.ok(err instanceof Error);
-             assert.equal("collection names cannot be empty", err.message);              
+             assert.equal("collection names cannot be empty", err.message);
            }
      
            // Attemp to rename a collection to an illegal name including the character $
@@ -436,12 +436,12 @@ Renames the collection.
              collection1.rename('test_rename_collection2', function(err, collection) {
                assert.ok(err instanceof Error);
                assert.ok(err.message.length > 0);
-       
+     
                // Attemp to rename the first collection to a name that does not exist
                // this will be succesful
                collection1.rename('test_rename_collection3', function(err, collection) {
                  assert.equal("test_rename_collection3", collection.collectionName);
-       
+     
                  // Ensure that the collection is pointing to the new one
                  collection1.count(function(err, count) {
                    assert.equal(2, count);
@@ -740,12 +740,18 @@ distinct
 --------
 
 
-The distinct command returns returns a list of distinct values for the given key across a collection. 
+The distinct command returns returns a list of distinct values for the given key across a collection.
 
-.. js:function:: distinct(key[, query], callback)
+
+
+Options
+ - **readPreference** {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
+
+.. js:function:: distinct(key[, query], [options], callback)
 
    :param string key: key to run distinct against.
    :param object [query]: option query to narrow the returned objects.
+   :param object [options]: additional options during update.
    :param function callback: must be provided.
    :returns: null 
 
@@ -843,9 +849,15 @@ count
 
 Count number of matching documents in the db to a query.
 
-.. js:function:: count([query], callback)
+
+
+Options
+ - **readPreference** {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
+
+.. js:function:: count([query][, options], callback)
 
    :param object [query]: query to filter by before performing count.
+   :param object [options]: additional options during update.
    :param function callback: must be provided.
    :returns: null 
 
@@ -1165,6 +1177,7 @@ Options
  - **snapshot** {Boolean, default:false}, snapshot query.
  - **timeout** {Boolean, default:false}, specify if the cursor can timeout.
  - **tailable** {Boolean, default:false}, specify if the cursor is tailable.
+ - **awaitdata** {Boolean, default:false} allow the cursor to wait for data, only applicable for tailable cursor.
  - **batchSize** {Number, default:0}, set the batchSize for the getMoreCommand when iterating over the query results.
  - **returnKey** {Boolean, default:false}, only return the index key.
  - **maxScan** {Number}, Limit the number of items to scan.
@@ -1173,7 +1186,8 @@ Options
  - **showDiskLoc** {Boolean, default:false}, Show disk location of results.
  - **comment** {String}, You can put a $comment field on a query to make looking in the profiler logs simpler.
  - **raw** {Boolean, default:false}, Return all BSON documents as Raw Buffer documents.
- - **read** {Boolean, default:false}, Tell the query to read from a secondary server.
+ - **readPreference** {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
+ - **numberOfRetries** {Number, default:1}, if using awaidata specifies the number of times to retry on timeout.
 
 .. js:function:: find(query[, options], [callback])
 
@@ -1349,7 +1363,7 @@ Options
  - **showDiskLoc** {Boolean, default:false}, Show disk location of results.
  - **comment** {String}, You can put a $comment field on a query to make looking in the profiler logs simpler.
  - **raw** {Boolean, default:false}, Return all BSON documents as Raw Buffer documents.
- - **read** {Boolean, default:false}, Tell the query to read from a secondary server.
+ - **readPreference** {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
 
 .. js:function:: findOne(query[, options], [callback])
 
@@ -1414,7 +1428,7 @@ Creates an index on the collection.
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
@@ -1542,7 +1556,7 @@ Ensures that an index exists, if it does not it creates it
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
@@ -1862,6 +1876,7 @@ Options
  - **scope** {Object}, can pass in variables that can be access from map/reduce/finalize.
  - **jsMode** {Boolean, default:false}, it is possible to make the execution stay in JS. Provided in MongoDB > 2.0.X.
  - **verbose** {Boolean, default:false}, provide statistics on job execution time.
+ - **readPreference** {String, only for inline results}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
 
 .. js:function:: mapReduce(map, reduce[, options], callback)
 
@@ -1967,11 +1982,14 @@ Options
                collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}, function(err, results, stats) {
                  assert.equal(2, results.length);
                  assert.ok(stats != null);
-                 
-                 db.close();
-               });          
+     
+                 collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}, function(err, results, stats) {
+                   assert.ok(stats != null);
+                   db.close();
+                 });
+               });
              });
-           });      
+           });
          } else {
            test.done();
          }
@@ -2047,14 +2065,20 @@ group
 
 Run a group command across a collection
 
-.. js:function:: group(keys, condition, initial, reduce, finalize, command, callback)
+
+
+Options
+ - **readPreference** {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
+
+.. js:function:: group(keys, condition, initial, reduce, finalize, command[, options], callback)
 
    :param object keys: an object, array or function expressing the keys to group by.
    :param object condition: an optional condition that must be true for a row to be considered.
-   :param object initial: initial value of the aggregation counter object. 
+   :param object initial: initial value of the aggregation counter object.
    :param function reduce: the reduce function aggregates (reduces) the objects iterated
    :param function finalize: an optional function to be run on each item in the result set just before the item is returned.
    :param boolean command: specify if you wish to run using the internal group command or using eval, default is true.
+   :param object [options]: additional options during update.
    :param function callback: returns the results.
    :returns: null 
 
@@ -2158,13 +2182,27 @@ Run a group command across a collection
                                assert.equal(1, results[1].a);
                                assert.equal(1, results[1].value);
                                
-                               // Correctly handle illegal function when using the EVAL method
-                               collection.group([], {}, {}, "5 ++ 5", false, function(err, results) {
-                                 assert.ok(err instanceof Error);
-                                 assert.ok(err.message != null);
+                               // Use a Code object to select the keys used to group by
+                               var keyf = new Code(function(doc) { return {a: doc.a}; });
+                               collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}
+                                 , function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
+                                 // Results                        
+                                 results.sort(function(a, b) { return b.count - a.count; });
+                                 assert.equal(2, results[0].count);
+                                 assert.equal(2, results[0].a);
+                                 assert.equal(4, results[0].value);
+                                 assert.equal(1, results[1].count);
+                                 assert.equal(1, results[1].a);
+                                 assert.equal(1, results[1].value);
+                                 
+                                 // Correctly handle illegal function when using the EVAL method
+                                 collection.group([], {}, {}, "5 ++ 5", false, function(err, results) {
+                                   assert.ok(err instanceof Error);
+                                   assert.ok(err.message != null);
      
-                                 db.close();
-                               });                          
+                                   db.close();
+                                 });
+                               });
                              });
                            });
                          });
@@ -2369,6 +2407,7 @@ Options
  - **spherical** {Boolean, default:false}, perform query using a spherical model.
  - **uniqueDocs** {Boolean, default:false}, the closest location in a document to the center of the search region will always be returned MongoDB > 2.X.
  - **includeLocs** {Boolean, default:false}, include the location data fields in the top level of the results MongoDB > 2.X.
+ - **readPreference** {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
 
 .. js:function:: geoNear(x, y[, options], callback)
 
@@ -2437,6 +2476,7 @@ Options
  - **maxDistance** {Number}, include results up to maxDistance from the point.
  - **search** {Object}, filter the results by a query.
  - **limit** {Number}, max number of results to return.
+ - **readPreference** {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
 
 .. js:function:: geoHaystackSearch(x, y[, options], callback)
 
@@ -2559,9 +2599,16 @@ aggregate
 
 Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.1
 
-.. js:function:: aggregate(pipline, callback)
 
-   :param array pipline: a pipleline containing all the object for the execution.
+
+Options
+ - **readPreference** {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
+ - **explain** {Boolean}, return the query plan for the aggregation pipeline instead of the results.
+
+.. js:function:: aggregate(array[, options], callback)
+
+   :param array array: containing all the aggregation framework commands for the execution.
+   :param object [options]: additional options during update.
    :param function callback: returns matching documents.
    :returns: null 
 
@@ -2663,7 +2710,7 @@ Execute an aggregation framework pipeline against the collection, needs MongoDB 
            comments : [
              { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
            ]}];
-      
+     
        // Validate that we are running on at least version 2.1 of MongoDB
        db.admin().serverInfo(function(err, result){
      
@@ -2672,26 +2719,20 @@ Execute an aggregation framework pipeline against the collection, needs MongoDB 
            client.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments', function(err, collection) {
              // Insert the docs
              collection.insert(docs, {safe:true}, function(err, result) {
-               
                // Execute aggregate, notice the pipeline is expressed as function call parameters
                // instead of an Array.
                collection.aggregate(
                    { $project : {
                    	author : 1,
-                   	tags : 1,
+                   	tags : 1
                    }},
                    { $unwind : "$tags" },
                    { $group : {
-                   	_id : { tags : 1 },
-                   	authors : { $addToSet : "$author" }
+                    _id : { tags : 1 },
+                    authors : { $addToSet : "$author" }
                    }}
                  , function(err, result) {
-                   assert.equal(null, err);
-                   assert.equal('good', result[0]._id.tags);
-                   assert.deepEqual(['bob'], result[0].authors);
-                   assert.equal('fun', result[1]._id.tags);
-                   assert.deepEqual(['bob'], result[1].authors);
-                   
+                   assert.ok(err != null);                
                    db.close();              
                });
              });
@@ -2715,10 +2756,11 @@ Get all the collection statistics.
 
 Options
  - **scale** {Number}, divide the returned sizes by scale value.
+ - **readPreference** {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
 
 .. js:function:: stats([options], callback)
 
-   :param objects [options]: options for the map reduce job.
+   :param objects [options]: options for the stats command.
    :param function callback: returns statistical information for the collection.
    :returns: null 
 

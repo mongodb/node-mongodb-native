@@ -231,9 +231,8 @@ ping
 
 Ping the MongoDB server and retrieve results
 
-.. js:function:: ping([options], callback)
+.. js:function:: ping(callback)
 
-   :param object [options]: Optional parameters to the command. 
    :param function callback: Callback function of format `function(err, result) {}`.
    :returns: null Returns no result
 
@@ -366,7 +365,7 @@ Logout current authenticated user
 
 .. js:function:: logout([options], callback)
 
-   :param object [options]: Optional parameters to the command. 
+   :param object [options]: Optional parameters to the command.
    :param function callback: Callback function of format `function(err, result) {}`.
    :returns: null Returns no result
 
@@ -546,7 +545,7 @@ Options
                assert.ok(result);
                
                // Remove the user
-               adminDb.removeUser('admin', function(err, result) {
+               adminDb.removeUser('admin', function(err, result) {              
                  
                  // Authenticate using the removed user should fail
                  adminDb.authenticate('admin', 'admin', function(err, result) {
@@ -761,7 +760,7 @@ Execute a db command against the Admin database
 .. js:function:: command(command[, options], callback)
 
    :param object command: A command object `{ping:1}`.
-   :param object [options]: Optional parameters to the command. 
+   :param object [options]: Optional parameters to the command.
    :param function callback: Callback function of format `function(err, result) {}`.
    :returns: null Returns no result
 
@@ -826,7 +825,7 @@ Validate an existing collection
 .. js:function:: validateCollection(collectionName[, options], callback)
 
    :param string collectionName: The name of the collection to validate.
-   :param object [options]: Optional parameters to the command. 
+   :param object [options]: Optional parameters to the command.
    :param function callback: Callback function of format `function(err, result) {}`.
    :returns: null Returns no result
 

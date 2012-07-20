@@ -1,0 +1,545 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Mongo Driver and Mongo DB 2.2 Features &mdash; MongoDB Node.JS Driver 1.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.1.0 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mongo-driver-and-mongo-db-2-2-features">
+<h1>Mongo Driver and Mongo DB 2.2 Features<a class="headerlink" href="#mongo-driver-and-mongo-db-2-2-features" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div>For Mongo DB there are multiple new features and improvements in the driver. This include Mongos failover support, authentication, replicaset support, read preferences and aggregation. Let&#8217;s move throught the different new features starting with.</div></blockquote>
+<div class="section" id="read-preferences">
+<h2>Read preferences<a class="headerlink" href="#read-preferences" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Read preferences is now backed by a specification and is more consistent across drivers. With read preferences you can control from where your Reads are happing in a Replicaset and from Mongo DB also in a shard. Let&#8217;s go through the different types of read Preferences that are available and what they mean.</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>ReadPreference.PRIMARY:</strong>  Read from primary only. All operations produce an error (throw an exception where applicable) if primary is unavailable. Cannot be combined with tags  <strong>(This is the default.)</strong></li>
+<li><strong>ReadPreference.PRIMARY_PREFERRED:</strong>  Read from primary if available, otherwise a secondary.</li>
+<li><strong>ReadPreference.SECONDARY:</strong>  Read from secondary if available, otherwise error.</li>
+<li><strong>ReadPreference.SECONDARY_PREFERRED:</strong>  Read from a secondary if available, otherwise read from the primary.</li>
+<li><strong>ReadPreference.NEAREST:</strong>  All modes read from among the nearest candidates, but unlike other modes, NEAREST will include both the primary and all secondaries in the random selection. The name NEAREST is chosen to emphasize its use, when latency is most important. For I/O-bound users who want to distribute reads across all members evenly regardless of ping time, set secondaryAcceptableLatencyMS very high. See &#8220;Ping Times&#8221; below.  <strong>A strategy must be enabled on the ReplSet instance to use NEAREST as it requires intermittent setTimeout events, see Db class documentation</strong></li>
+</ul>
+</div></blockquote>
+<p>Additionally you can now use tags with all the read preferences to actively choose specific sets of servers in a replicatset or sharded system located in different data centers. The rules are fairly simple as outline below. A server member matches a tag set if its tags match all the tags in the set. For example, a member tagged  <strong>{ dc: &#8216;ny&#8217;, rack: 2, size: &#8216;large&#8217; }</strong>  matches the tag set  <strong>{ dc: &#8216;ny&#8217;, rack: 2 }</strong> . A member&#8217;s extra tags don&#8217;t affect whether it&#8217;s a match.</p>
+<p>Using a read preference is very simple. Below are some examples using it at the db level, collection level and individual query level as well as an example using tags.</p>
+<p>Below is a simple example using readpreferences at the db level.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
+  <span class="nx">ReplSet</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">ReplSet</span><span class="p">,</span>
+  <span class="nx">ReadPreference</span> <span class="o">=</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">ReadPreference</span><span class="p">,</span>
+  <span class="nx">Db</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Db</span><span class="p">;</span>
+
+<span class="c1">// Replica configuration</span>
+<span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSet</span><span class="p">(</span> <span class="p">[</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
+  <span class="p">],</span> <span class="p">{</span><span class="nx">rs_name</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// Instantiate a new db object</span>
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;exampleDb&#39;</span><span class="p">,</span> <span class="nx">replSet</span><span class="p">,</span> <span class="p">{</span><span class="nx">readPreference</span><span class="o">:</span> <span class="nx">ReadPreference</span><span class="p">.</span><span class="nx">SECONDARY_PREFERRED</span><span class="p">});</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;We are connected&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Below is a simple example using readpreferences at the collection level.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
+  <span class="nx">ReplSet</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">ReplSet</span><span class="p">,</span>
+  <span class="nx">ReadPreference</span> <span class="o">=</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">ReadPreference</span><span class="p">,</span>
+  <span class="nx">Db</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Db</span><span class="p">;</span>
+
+<span class="c1">// Replica configuration</span>
+<span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSet</span><span class="p">(</span> <span class="p">[</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
+  <span class="p">],</span> <span class="p">{</span><span class="nx">rs_name</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// Instantiate a new db object</span>
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;exampleDb&#39;</span><span class="p">,</span> <span class="nx">replSet</span><span class="p">);</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;We are connected&quot;</span><span class="p">);</span>
+
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;somecollection&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">readPreference</span><span class="o">:</span> <span class="nx">ReadPreference</span><span class="p">.</span><span class="nx">SECONDARY_PREFERRED</span><span class="p">});</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({}).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Done reading from secondary if available</span>
+    <span class="p">})</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Below is a simple example using readpreferences at the query level.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
+  <span class="nx">ReplSet</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">ReplSet</span><span class="p">,</span>
+  <span class="nx">ReadPreference</span> <span class="o">=</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">ReadPreference</span><span class="p">,</span>
+  <span class="nx">Db</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Db</span><span class="p">;</span>
+
+<span class="c1">// Replica configuration</span>
+<span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSet</span><span class="p">(</span> <span class="p">[</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
+  <span class="p">],</span> <span class="p">{</span><span class="nx">rs_name</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// Instantiate a new db object</span>
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;exampleDb&#39;</span><span class="p">,</span> <span class="nx">replSet</span><span class="p">);</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;We are connected&quot;</span><span class="p">);</span>
+
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;somecollection&#39;</span><span class="p">);</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({}).</span><span class="nx">setReadPreference</span><span class="p">(</span><span class="k">new</span> <span class="nx">ReadPreference</span><span class="p">(</span><span class="nx">ReadPreference</span><span class="p">.</span><span class="nx">SECONDARY_PREFERRED</span><span class="p">)).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Done reading from secondary if available</span>
+    <span class="p">})</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Below is a simple example using a readpreference with tags at the query level. This example will pick from the set of servers tagged with  <strong>dc1:ny</strong> .</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
+  <span class="nx">ReplSet</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">ReplSet</span><span class="p">,</span>
+  <span class="nx">ReadPreference</span> <span class="o">=</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">ReadPreference</span><span class="p">,</span>
+  <span class="nx">Db</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Db</span><span class="p">;</span>
+
+<span class="c1">// Replica configuration</span>
+<span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSet</span><span class="p">(</span> <span class="p">[</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
+  <span class="p">],</span> <span class="p">{</span><span class="nx">rs_name</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// Instantiate a new db object</span>
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;exampleDb&#39;</span><span class="p">,</span> <span class="nx">replSet</span><span class="p">);</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;We are connected&quot;</span><span class="p">);</span>
+
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;somecollection&#39;</span><span class="p">);</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({}).</span><span class="nx">setReadPreference</span><span class="p">(</span><span class="k">new</span> <span class="nx">ReadPreference</span><span class="p">(</span><span class="nx">ReadPreference</span><span class="p">.</span><span class="nx">SECONDARY_PREFERRED</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;dc1&quot;</span><span class="o">:</span><span class="s2">&quot;ny&quot;</span><span class="p">})).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Done reading from secondary if available</span>
+    <span class="p">})</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="mongos">
+<h2>Mongos<a class="headerlink" href="#mongos" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>There is now a seperate Server type for Mongos that handles not only Mongos read preferences for Mongo DB but also failover and picking the nearest Mongos proxy to your application. To use simply do</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
+  <span class="nx">Mongos</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Mongos</span><span class="p">,</span>
+  <span class="nx">Db</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Db</span><span class="p">;</span>
+
+<span class="c1">// Set up mongos connection</span>
+<span class="kd">var</span> <span class="nx">mongos</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Mongos</span><span class="p">([</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">50000</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">50001</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">})</span>
+  <span class="p">])</span>
+
+<span class="c1">// Instantiate a new db object</span>
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;exampleDb&#39;</span><span class="p">,</span> <span class="nx">server</span><span class="p">);</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;We are connected&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Read preferences also work with Mongos from Mongo DB 2.2 or higher allowing you to create more complex deployment setups.</p>
+</div></blockquote>
+</div>
+<div class="section" id="replicaset-improvements-and-changes">
+<h2>Replicaset improvements and changes<a class="headerlink" href="#replicaset-improvements-and-changes" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Replicasets now return to the driver when a primary has been identified allowing for faster connect time meaning the application does not have to wait for the whole set to be identified before being able to run. That said any secondary queries using read preference  <strong>ReadPreference.SECONDARY</strong>  might fail until at least one secondary is up. To aid in development of layers above the driver now emits to new events.</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>open</strong>  is emitted when the driver is ready to be used.</li>
+<li><strong>fullsetup</strong>  is emitted once the whole replicaset is up and running</li>
+</ul>
+</div></blockquote>
+<p>To ensure better control over timeouts when attempting to connect to replicaset members that might be down there is now two timeout settings.</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>connectTimeoutMS:</strong>  set the timeout for the intial connect to the mongod or mongos instance.</li>
+<li><strong>socketTimeoutMS:</strong>  set the timeout for established connections to the mongod or mongos instance.</li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="high-availability-on-by-default">
+<h2>High availability &#8220;on&#8221; by default<a class="headerlink" href="#high-availability-on-by-default" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>The high availability code has been rewritten to run outside a setTimeout allowing for better control and handling. It&#8217;s also on by default now. It can be disabled using the following settings on the ReplSet class.</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>ha</strong>  {Boolean, default:true}, turn on high availability.</li>
+<li><strong>haInterval</strong>  {Number, default:2000}, time between each replicaset status check.</li>
+</ul>
+</div></blockquote>
+<p>This allows the driver to discover new replicaset members or replicaset members who left the set and then returned.</p>
+</div></blockquote>
+</div>
+<div class="section" id="better-stream-support-for-gridfs">
+<h2>Better stream support for GridFS<a class="headerlink" href="#better-stream-support-for-gridfs" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>GridFS now supports the streaming api&#8217;s for node allowing you to pipe content either into or out of a Gridstore object making it easy to work with other streaming api&#8217;s available.</p>
+<p>A simple example is shown below for how to stream from a file on disk to a gridstore object.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
+  <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
+  <span class="nx">Server</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Server</span><span class="p">,</span>
+  <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">GridStore</span><span class="p">,</span>
+  <span class="nx">Db</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Db</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span><span class="kc">true</span><span class="p">}));</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Set up gridStore</span>
+  <span class="kd">var</span> <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span> <span class="s2">&quot;test_stream_write&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
+  <span class="c1">// Create a file reader stream to an object</span>
+  <span class="kd">var</span> <span class="nx">fileStream</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">createReadStream</span><span class="p">(</span><span class="s2">&quot;./test/gridstore/test_gs_working_field_read.pdf&quot;</span><span class="p">);</span>
+  <span class="nx">gridStore</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Just read the content and compare to the raw binary</span>
+    <span class="nx">GridStore</span><span class="p">.</span><span class="nx">read</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span> <span class="s2">&quot;test_stream_write&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridData</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">fileData</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s2">&quot;./test/gridstore/test_gs_working_field_read.pdf&quot;</span><span class="p">);</span>
+      <span class="nx">test</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">(</span><span class="nx">fileData</span><span class="p">,</span> <span class="nx">gridData</span><span class="p">);</span>
+      <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
+    <span class="p">})</span>
+  <span class="p">});</span>
+
+  <span class="c1">// Pipe it through to the gridStore</span>
+  <span class="nx">fileStream</span><span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">gridStore</span><span class="p">);</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>A simple example is shown below for how to stream from a gridfs file to a file on disk.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
+  <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
+  <span class="nx">Server</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Server</span><span class="p">,</span>
+  <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">GridStore</span><span class="p">,</span>
+  <span class="nx">Db</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Db</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span><span class="kc">true</span><span class="p">}));</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Set up gridStore</span>
+  <span class="kd">var</span> <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span> <span class="s2">&quot;test_stream_write_2&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">);</span>
+  <span class="nx">gridStore</span><span class="p">.</span><span class="nx">writeFile</span><span class="p">(</span><span class="s2">&quot;./test/gridstore/test_gs_working_field_read.pdf&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Open a readable gridStore</span>
+    <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span> <span class="s2">&quot;test_stream_write_2&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">);</span>
+    <span class="c1">// Create a file write stream</span>
+    <span class="kd">var</span> <span class="nx">fileStream</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">createWriteStream</span><span class="p">(</span><span class="s2">&quot;./test_stream_write_2.tmp&quot;</span><span class="p">);</span>
+    <span class="nx">fileStream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Read the temp file and compare</span>
+      <span class="kd">var</span> <span class="nx">compareData</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s2">&quot;./test_stream_write_2.tmp&quot;</span><span class="p">);</span>
+      <span class="kd">var</span> <span class="nx">originalData</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s2">&quot;./test/gridstore/test_gs_working_field_read.pdf&quot;</span><span class="p">);</span>
+      <span class="nx">test</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">(</span><span class="nx">originalData</span><span class="p">,</span> <span class="nx">compareData</span><span class="p">);</span>
+      <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
+    <span class="p">})</span>
+    <span class="c1">// Pipe out the data</span>
+    <span class="nx">gridStore</span><span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">fileStream</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="tobson-method">
+<h2>toBSON method<a class="headerlink" href="#tobson-method" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>If in an object now has a toBSON function it will be called to for custom serialization of the object instance. This can be used to just serialize wanted fields. Deserializing is not affected by this and the application is responsible for deflating objects again.</p>
+<p>A simple example below</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">customObject</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">a</span><span class="o">:</span><span class="mi">1</span>
+    <span class="nx">b</span><span class="o">:</span><span class="mi">2</span>
+    <span class="nx">toBSON</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="k">this</span><span class="p">.</span><span class="nx">a</span><span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+</div>
+<div class="section" id="other-minor-changes">
+<h2>Other minor changes<a class="headerlink" href="#other-minor-changes" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>Connection pool is not set to 5 by default override if there is need for either a bigger or smaller pool pr node process.</li>
+<li>Gridfs now ensure an index on the chunks collection on file_id.</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Mongo Driver and Mongo DB 2.2 Features</a><ul>
+<li><a class="reference internal" href="#read-preferences">Read preferences</a></li>
+<li><a class="reference internal" href="#mongos">Mongos</a></li>
+<li><a class="reference internal" href="#replicaset-improvements-and-changes">Replicaset improvements and changes</a></li>
+<li><a class="reference internal" href="#high-availability-on-by-default">High availability &#8220;on&#8221; by default</a></li>
+<li><a class="reference internal" href="#better-stream-support-for-gridfs">Better stream support for GridFS</a></li>
+<li><a class="reference internal" href="#tobson-method">toBSON method</a></li>
+<li><a class="reference internal" href="#other-minor-changes">Other minor changes</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">DBRef()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scaa+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2011, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-7301842-8']);
+  _gaq.push(['_setDomainName', 'mongodb.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

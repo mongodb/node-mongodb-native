@@ -12,17 +12,48 @@ ReplSet constructor provides replicaset functionality
 
   .. js:class:: ReplSet
 
-   :param array list: of server objects participating in the replicaset. 
-   :param object [options]: additional options for the collection.
+   :param array list: of server objects participating in the replicaset.
+   :param object [options]: additional options for the replicaset connection.
 
 
 Options
- - **ha** {Boolean, default:false}, turn on high availability.
+ - **ha** {Boolean, default:true}, turn on high availability.
  - **haInterval** {Number, default:2000}, time between each replicaset status check.
  - **reconnectWait** {Number, default:1000}, time to wait in miliseconds before attempting reconnect.
  - **retries** {Number, default:30}, number of times to attempt a replicaset reconnect.
- - **rs_name** {String}, the name of the replicaset to connect to. 
- - **readPreference** {String}, the prefered read preference (Server.READ_PRIMARY, Server.READ_SECONDARY, Server.READ_SECONDARY_ONLY).
- - **read_secondary** {Boolean, deprecated}, allow reads from secondary.
+ - **rs_name** {String}, the name of the replicaset to connect to.
+ - **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
+ - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  - **strategy** {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)
+ - **secondaryAcceptableLatencyMS** {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
+
+
+-------
+_isUsed
+-------
+
+
+Return the used state
+
+.. js:function:: _isUsed()
+
+
+----------------
+_checkReplicaSet
+----------------
+
+
+@ignore
+
+.. js:function:: _checkReplicaSet()
+
+
+-------------------
+_validateReplicaset
+-------------------
+
+
+@ignore
+
+.. js:function:: _validateReplicaset()
 

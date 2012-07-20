@@ -2,7 +2,47 @@
 Changelog
 =========
 
-1.0.1
+1.1.0
+----------------
+- Added Mongos connection type with a fallback list for mongos proxies, supports ha (off by default) and will attempt to reconnect to failed proxies.
+- Documents can now have a toBSON method that lets the user control the serialization behavior for documents being saved.
+- Gridstore instance object now works as a readstream or writestream (thanks to code from Aaron heckmann (https://github.com/aheckmann/gridfs-stream)).
+- Fix gridfs readstream (Issue #607, https://github.com/tedeh).
+- Added disableDriverBSONSizeCheck property to Server.js for people who wish to push the inserts to the limit (Issue #609).
+- Fixed bug where collection.group keyf given as Code is processed as a regular object (Issue #608, https://github.com/rrusso2007).
+- Case mismatch between driver's ObjectID and mongo's ObjectId, allow both (Issue #618).
+- Cleanup map reduce (Issue #614, https://github.com/aheckmann).
+- Add proper error handling to gridfs (Issue #615, https://github.com/aheckmann).
+- Ensure cursor is using same connection for all operations to avoid potential jump of servers when using replicasets.
+- Date identification handled correctly in bson js parser when running in vm context.
+- Documentation updates
+- GridStore filename not set on read (Issue #621)
+- Optimizations on the C++ bson parser to fix a potential memory leak and avoid non-needed calls
+- Added support for awaitdata for tailable cursors (Issue #624)
+- Implementing read preference setting at collection and cursor level
+   * collection.find().setReadPreference(Server.READ_SECONDARY)
+   * db.collection(&quot;some&quot;, {readPreference:Server.READ_SECONDARY_ONLY})
+- Replicaset now returns when the master is discovered on db.open and lets the rest of the connections happen asynchronous.
+  - ReplSet/ReplSetServers emits &quot;fullsetup&quot; when all servers have been connected to
+- Prevent callback from executing more than once in getMore function (Issue #631, https://github.com/shankar0306)
+- Corrupt bson messages now errors out to all callbacks and closes up connections correctly, Issue #634
+- Replica set member status update when primary changes bug (Issue #635, https://github.com/alinsilvian)
+- Fixed auth to work better when multiple connections are involved.
+- Default connection pool size increased to 5 connections.
+- Fixes for the ReadStream class to work properly with 0.8 of Node.js
+- Added explain function support to aggregation helper
+- Added socketTimeoutMS and connectTimeoutMS to socket options for repl_set.js and server.js
+- Fixed addUser to correctly handle changes in 2.2 for getLastError authentication required
+- Added index to gridstore chunks on file_id (Issue #649, https://github.com/jacobbubu)
+- Fixed Always emit db events (Issue #657)
+- Close event not correctly resets DB openCalled variable to allow reconnect
+- Added open event on connection established for replicaset, mongos and server
+
+1.0.2 2012-05-15
+----------------
+- Reconnect functionality for replicaset fix for mongodb 2.0.5
+
+1.0.1 2012-05-12
 ----------------
 - Passing back getLastError object as 3rd parameter on findAndModify command.
 - Fixed a bunch of performance regressions in objectId and cursor.
@@ -97,7 +137,7 @@ Changelog
 * Added stats command to collection to retrieve the statistics on a Collection.
 * Added listDatabases command to admin object to allow retrieval of all available dbs.
 * Changed createCreateIndexCommand to work better with options.
-* Fixed dereference method on Db class to correctly dereference Db reference objects. 
+* Fixed dereference method on Db class to correctly dereference Db reference objects.
 * Moved connect object onto Db class(Db.connect) as well as keeping backward compatibility.
 * Removed writeBuffer method from gridstore, write handles switching automatically now.
 * Changed readBuffer to read on Gridstore, Gridstore now only supports Binary Buffers no Strings anymore.
@@ -109,10 +149,10 @@ Changelog
 * Added support for $returnKey, $maxScan, $min, $max, $showDiskLoc, $comment to cursor and find/findOne methods.
 * Added dropDups and v option to createIndex and ensureIndex.
 * Added isCapped method to Collection.
-* Added indexExists method to Collection. 
+* Added indexExists method to Collection.
 * Added findAndRemove method to Collection.
 * Fixed bug for replicaset connection when no active servers in the set.
-* Fixed bug for replicaset connections when errors occur during connection. 
+* Fixed bug for replicaset connections when errors occur during connection.
 * Merged in patch for BSON Number handling from Lee Salzman, did some small fixes and added test coverage.
 
 0.9.8-3 2012-01-21
@@ -135,7 +175,7 @@ Changelog
 * Fixes formattedOrderClause in collection.js to accept a plain hash as a parameter (Issue #469) https://github.com/tedeh
 * Removed duplicate code for formattedOrderClause and moved to utils module
 * Pass in poolSize for ReplSetServers to set default poolSize for new replicaset members
-* Bug fix for BSON JS deserializer. Isolating the eval functions in separate functions to avoid V8 deoptimizations 
+* Bug fix for BSON JS deserializer. Isolating the eval functions in separate functions to avoid V8 deoptimizations
 * Correct handling of illegal BSON messages during deserialization
 * Fixed Infinite loop when reading GridFs file with no chunks (Issue #471)
 * Correctly update existing user password when using addUser (Issue #470)
@@ -184,7 +224,7 @@ Changelog
 0.9.7.2-3 2011-12-18
 --------------------
 * Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450).
-* Allow for force send query to primary, pass option (read:'primary') on find command. 
+* Allow for force send query to primary, pass option (read:'primary') on find command.
 	* ``find({a:1}, {read:'primary'}).toArray(function(err, items) {});``
 
 0.9.7.2-2 2011-12-16
@@ -237,7 +277,7 @@ Changelog
 ------------------
 * Better handling of dead server for single server instances
 * FindOne and find treats selector == null as {}, Issue #403
-* Possible to pass in a strategy for the replicaset to pick secondary reader node 
+* Possible to pass in a strategy for the replicaset to pick secondary reader node
 	* parameter strategy
 		* ping (default), pings the servers and picks the one with the lowest ping time
 		* statistical, measures each request and pick the one with the lowest mean and std deviation
@@ -303,7 +343,7 @@ Changelog
 * Reworked bson.cc to throw error when trying to serialize js bson types
 * Added MinKey, MaxKey and Double support for JS and C++ parser
 * Reworked socket handling code to emit errors on unparsable messages
-* Added logger option for Db class, lets you pass in a function in the shape 
+* Added logger option for Db class, lets you pass in a function in the shape
 	{
 		log : function(message, object) {},
 		error : function(errorMessage, errorObject) {},
@@ -383,7 +423,7 @@ Changelog
 * Bug fix for bson parsing the key '':'' correctly without crashing
 
 0.9.6-8
-------- 
+-------
 * Changed to using node.js crypto library MD5 digest
 * Connect method support documented mongodb: syntax by (https://github.com/sethml)
 * Support Symbol type for BSON, serializes to it's own type Symbol, Issue #302, #288

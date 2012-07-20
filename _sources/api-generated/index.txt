@@ -14,4 +14,6 @@ Driver API
   readstream
   grid
   server
+  mongos
   replset
+  readpreference
