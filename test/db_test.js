@@ -1483,6 +1483,31 @@ exports.shouldCorrectlyReconnectWhenError = function(test) {
 }
 
 /**
+ * An example showing how to retrieve the db statistics
+ *
+ * @_class db
+ * @_function stats
+ * @ignore
+ */
+exports.shouldCorrectlyRetrieveDbStats = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    test.equal(null, err);
+
+    db.stats(function(err, stats) {
+      test.equal(null, err);
+      test.ok(stats != null);
+
+      db.close();
+      test.done();
+    })
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
