@@ -106,8 +106,6 @@ exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = functio
     db.open(function(err, db) {
       // Add an error handler
       db.on("error", function(err) {
-        console.log("----------------------------------------------- received error")
-        console.dir(err)
         errs.push(err);
       });
 
