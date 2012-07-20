@@ -10,7 +10,7 @@ var testCase = require('nodeunit').testCase,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
   ServerManager = require('../../test/tools/server_manager').ServerManager,
-  Step = require("step");  
+  Step = require("step");
 
 var MONGODB = 'integration_tests';
 var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
@@ -19,17 +19,17 @@ var serverManager = null;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  callback();      
+  callback();
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -45,7 +45,7 @@ exports.shouldCorrectlyKeepInsertingDocumentsWhenServerDiesAndComesUp = function
   // Start server
   serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
   serverManager.start(true, function() {
-    db1.open(function(err, db) {        
+    db1.open(function(err, db) {
       // Startup the insert of documents
       var intervalId = setInterval(function() {
         db.collection('inserts', function(err, collection) {
@@ -56,11 +56,11 @@ exports.shouldCorrectlyKeepInsertingDocumentsWhenServerDiesAndComesUp = function
             // Save errors
             if(err != null) errs.push(err);
             if(err == null) {
-              docs.push(result[0]);                
+              docs.push(result[0]);
             }
           })
-        });        
-      }, 500);        
+        });
+      }, 500);
 
       // Wait for a second and then kill the server
       setTimeout(function() {
@@ -82,14 +82,14 @@ exports.shouldCorrectlyKeepInsertingDocumentsWhenServerDiesAndComesUp = function
                   test.ok(docs.length > 0);
                   test.ok(insertDocs.length > 0);
                   // Finish up
-                  test.done();                  
+                  test.done();
                 });
               }, 5000)
             })
           }, 1000);
         });
       }, 3000);
-    })      
+    })
   });
 }
 
@@ -103,7 +103,7 @@ exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = functio
   // Start server
   serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
   serverManager.start(true, function() {
-    db.open(function(err, db) {        
+    db.open(function(err, db) {
       // Add an error handler
       db.on("error", function(err) {
         console.log("----------------------------------------------- received error")
@@ -115,7 +115,7 @@ exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = functio
         var doc = {timestamp:new Date().getTime(), a:1};
         collection.insert(doc, {safe:true}, function(err, result) {
           test.equal(null, err);
-          
+
           // Kill server instance
           serverManager.stop(9, function(err, result) {
             // Attemp insert (should timeout)
@@ -123,7 +123,7 @@ exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = functio
             collection.insert(doc, {safe:true}, function(err, result) {
               test.ok(err != null);
               test.equal(null, result);
-              
+
               // Restart server
               serverManager = new ServerManager({auth:false, purgedirectories:false, journal:true});
               serverManager.start(true, function() {
@@ -135,11 +135,11 @@ exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = functio
                     test.equal(1, items[0].b);
                     db.close();
                     test.done();
-                  });                    
-                });                  
-              });                
-            });              
-          });            
+                  });
+                });
+              });
+            });
+          });
         })
       });
     });
@@ -149,7 +149,7 @@ exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = functio
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
