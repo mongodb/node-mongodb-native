@@ -18,7 +18,7 @@ var testCase = require('nodeunit').testCase,
   Collection = mongodb.Collection,
   Step = require('step'),
   Server = mongodb.Server,
-  ServerManager = require('./tools/server_manager').ServerManager;  
+  ServerManager = require('./tools/server_manager').ServerManager;
 
 var MONGODB = 'integration_tests';
 var client = null;
@@ -31,7 +31,7 @@ var native_parser = (process.env['TEST_NATIVE'] != null);
  */
 var ISODate = function (string) {
   var match;
-  
+
 	if (typeof string.getTime === "function")
 		return string;
 	else if (match = string.match(/^(\d{4})(-(\d{2})(-(\d{2})(T(\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|((\+|-)(\d{2}):(\d{2}))))?)?)?$/)) {
@@ -66,12 +66,12 @@ var ISODate = function (string) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});  
+  var self = exports;
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -87,7 +87,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -106,31 +106,29 @@ exports.tearDown = function(callback) {
  * @ignore
  */
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Fetch a collection to insert document into
-    db.collection("simple_document_insert_collection_no_safe", function(err, collection) {
-      
-      // Insert a single document
-      collection.insert({hello:'world_no_safe'});
-      
-      // Wait for a second before finishing up, to ensure we have written the item to disk
-      setTimeout(function() {
-        
-        // Fetch the document
-        collection.findOne({hello:'world_no_safe'}, function(err, item) {
-          test.equal(null, err);
-          test.equal('world_no_safe', item.hello);
-          test.done();
-          db.close();
-        })
-      }, 1000);      
-    });
-  });              
+    var collection = db.collection("simple_document_insert_collection_no_safe");
+    // Insert a single document
+    collection.insert({hello:'world_no_safe'});
+
+    // Wait for a second before finishing up, to ensure we have written the item to disk
+    setTimeout(function() {
+
+      // Fetch the document
+      collection.findOne({hello:'world_no_safe'}, function(err, item) {
+        test.equal(null, err);
+        test.equal('world_no_safe', item.hello);
+        test.done();
+        db.close();
+      })
+    }, 1000);
+  });
 }
 
 /**
@@ -141,30 +139,30 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = func
  * @ignore
  */
 exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Fetch a collection to insert document into
     db.collection("batch_document_insert_collection_safe", function(err, collection) {
-      
+
       // Insert a single document
       collection.insert([{hello:'world_safe1'}
         , {hello:'world_safe2'}], {safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         // Fetch the document
         collection.findOne({hello:'world_safe2'}, function(err, item) {
           test.equal(null, err);
           test.equal('world_safe2', item.hello);
           test.done();
           db.close();
-        })        
+        })
       });
     });
-  });              
+  });
 }
 
 /**
@@ -175,30 +173,30 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Fetch a collection to insert document into
     db.collection("simple_document_insert_with_function_safe", function(err, collection) {
-      
+
       // Insert a single document
       collection.insert({hello:'world'
         , func:function() {}}, {safe:true, serializeFunctions:true}, function(err, result) {
         test.equal(null, err);
-        
+
         // Fetch the document
         collection.findOne({hello:'world'}, function(err, item) {
           test.equal(null, err);
           test.ok("function() {}", item.code);
           test.done();
           db.close();
-        })        
+        })
       });
     });
-  });              
+  });
 }
 
 /**
@@ -209,21 +207,21 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(t
  * @ignore
  */
 exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Only run the rest of the code if we have a mongodb server with version >= 1.9.1
     db.admin().serverInfo(function(err, result){
-      
+
       // Ensure we are running at least MongoDB v1.9.1
       if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
 
         // Create a collection
         client.createCollection('keepGoingExample', function(err, collection) {
-          
+
           // Add an unique index to title to force errors in the batch insert
           collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
 
@@ -240,16 +238,16 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
                 collection.count(function(err, count) {
                   test.equal(3, count);
                   db.close();
-                  test.done();        
+                  test.done();
                 })
               });
             });
           });
-        });      
+        });
       } else {
         db.close();
-        test.done();      
-      }      
+        test.done();
+      }
     });
   });
 }
@@ -263,16 +261,16 @@ exports.shouldForceMongoDbServerToAssignId = function(test) {
   db.open(function(err, client) {
     client.createCollection('test_insert2', function(err, r) {
       client.collection('test_insert2', function(err, collection) {
-  
+
         Step(
           function inserts() {
             var group = this.group();
-            
+
             for(var i = 1; i < 1000; i++) {
               collection.insert({c:i}, {safe:true}, group());
-            }            
+            }
           },
-          
+
           function done(err, result) {
             collection.insert({a:2}, {safe:true}, function(err, r) {
               collection.insert({a:3}, {safe:true}, function(err, r) {
@@ -289,12 +287,12 @@ exports.shouldForceMongoDbServerToAssignId = function(test) {
                   });
                 });
               });
-            });            
+            });
           }
-        )  
+        )
       });
-    });    
-  });    
+    });
+  });
 }
 
 /**
@@ -321,12 +319,12 @@ exports.shouldCorrectlyPerformBasicInsert = function(test) {
       Step(
         function inserts() {
           var group = this.group();
-          
+
           for(var i = 1; i < 1000; i++) {
             collection.insert({c:i}, {safe:true}, group());
-          }            
+          }
         },
-        
+
         function done(err, result) {
           collection.insert({a:2}, {safe:true}, function(err, r) {
             collection.insert({a:3}, {safe:true}, function(err, r) {
@@ -342,11 +340,11 @@ exports.shouldCorrectlyPerformBasicInsert = function(test) {
                 });
               });
             });
-          });            
+          });
         }
-      )  
+      )
     });
-  });    
+  });
 }
 
 /**
@@ -376,7 +374,7 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = function(test) {
         });
       });
     });
-  });    
+  });
 }
 
 /**
@@ -397,10 +395,10 @@ exports.shouldCorrectlyExecuteSaveInsertUpdate= function(test) {
               test.done();
             });
           }
-        );          
-      });        
+        );
+      });
     });
-  });    
+  });
 }
 
 /**
@@ -418,7 +416,7 @@ exports.shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument = function(
         test.deepEqual(doc.a, result.a);
         test.deepEqual(doc.b, result.b);
         test.done();
-      });        
+      });
     });
   });
 }
@@ -448,11 +446,11 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = function(test) {
       'regexp': /regexp/,
       'boolean': true,
       'long': date.getTime(),
-      'where': new Code('this.a > i', {i:1}),        
+      'where': new Code('this.a > i', {i:1}),
       'dbref': new DBRef('namespace', oid, 'integration_tests_')
     }
 
-    collection.insert(motherOfAllDocuments, {safe:true}, function(err, docs) {      
+    collection.insert(motherOfAllDocuments, {safe:true}, function(err, docs) {
       collection.findOne(function(err, doc) {
         // Assert correct deserialization of the values
         test.equal(motherOfAllDocuments.string, doc.string);
@@ -464,7 +462,7 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = function(test) {
         test.equal(date.getTime(), doc.date.getTime());
         test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
         test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
-          
+
         test.equal(motherOfAllDocuments.int, doc.int);
         test.equal(motherOfAllDocuments.long, doc.long);
         test.equal(motherOfAllDocuments.float, doc.float);
@@ -472,10 +470,10 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = function(test) {
         test.equal(motherOfAllDocuments.boolean, doc.boolean);
         test.equal(motherOfAllDocuments.where.code, doc.where.code);
         test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
-          
+
         test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
         test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-        test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);          
+        test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
         test.done();
       })
     });
@@ -520,7 +518,7 @@ exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext= function(tes
                   test.equal("somestring", doc.settings.thisOneWorks);
                   test.equal("test", doc.settings.block[0]);
 
-                  // Let's close the db                    
+                  // Let's close the db
                   db.close();
                   test.done();
                 });
@@ -558,8 +556,8 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = function(test
       "motherOfAllDocuments['where'] = new mongo.Code('this.a > i', {i:1});" +
       "motherOfAllDocuments['dbref'] = new mongo.DBRef('namespace', motherOfAllDocuments['oid'], 'integration_tests_');";
 
-    var context = { 
-      motherOfAllDocuments : {}, 
+    var context = {
+      motherOfAllDocuments : {},
       mongo:{
         ObjectID:ObjectID,
         Binary:Binary,
@@ -567,7 +565,7 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = function(test
         DBRef:DBRef
       },
       date:date};
-      
+
     // Execute function in context
     Script.runInNewContext(scriptCode, context, "testScript");
     // sys.puts(sys.inspect(context.motherOfAllDocuments))
@@ -595,7 +593,7 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = function(test
          test.equal(motherOfAllDocuments.where.scope['i'], doc.where.scope.i);
          test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
          test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
-         test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);         
+         test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
          test.done();
        })
      });
@@ -611,11 +609,11 @@ exports.shouldCorrectlyDoToJsonForLongValue = function(test) {
 
     collection.insert([{value: Long.fromNumber(32222432)}], {safe:true}, function(err, ids) {
       collection.findOne({}, function(err, item) {
-        test.equal(32222432, item.value);          
+        test.equal(32222432, item.value);
         test.done();
       });
     });
-  });        
+  });
 }
 
 /**
@@ -629,7 +627,7 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = function(test) {
       collection.insert({i:1})
       // Update the record
       collection.update({i:1}, {"$set":{i:2}})
-    
+
       // Make sure we leave enough time for mongodb to record the data
       setTimeout(function() {
         // Locate document
@@ -637,8 +635,8 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = function(test) {
           test.equal(2, item.i)
 
           client.close();
-          test.done();            
-        });                
+          test.done();
+        });
       }, 100)
     })
   });
@@ -648,11 +646,11 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = function(test) {
  * @ignore
  */
 exports.shouldInsertAndQueryTimestamp = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     db.createCollection('test_insert_and_query_timestamp', function(err, collection) {
       // Insert the update
       collection.insert({i:Timestamp.fromNumber(100), j:Long.fromNumber(200)}, {safe:true}, function(err, r) {
@@ -665,7 +663,7 @@ exports.shouldInsertAndQueryTimestamp = function(test) {
 
           db.close();
           test.done();
-        });                
+        });
       });
     });
   });
@@ -683,7 +681,7 @@ exports.shouldCorrectlyInsertAndQueryUndefined = function(test) {
         test.equal(null, item.i)
 
         test.done();
-      });        
+      });
     })
   })
 }
@@ -714,12 +712,12 @@ exports.shouldCorrectlyPerformSafeInsert = function(test) {
     Step(
       function inserts() {
         var group = this.group();
-        
+
         for(var i = 0; i < fixtures.length; i++) {
           collection.insert(fixtures[i], {safe:true}, group());
-        }          
+        }
       },
-      
+
       function done() {
         collection.count(function(err, count) {
           test.equal(3, count);
@@ -735,14 +733,14 @@ exports.shouldCorrectlyPerformSafeInsert = function(test) {
 
         cursor.each(function(err, doc) {
           if(doc == null) {
-            test.equal(3, counter);            
+            test.equal(3, counter);
             test.done();
           } else {
             counter = counter + 1;
-          }          
+          }
         });
       }
-    )          
+    )
   })
 }
 
@@ -756,11 +754,11 @@ exports.shouldThrowErrorIfSerializingFunction = function(test) {
     collection.insert({i:1, z:func }, {safe:true, serializeFunctions:true}, function(err, result) {
       collection.findOne({_id:result[0]._id}, function(err, object) {
         test.equal(func.toString(), object.z.code);
-        test.equal(1, object.i);          
+        test.equal(1, object.i);
         test.done();
-      })        
+      })
     })
-  })    
+  })
 }
 
 /**
@@ -786,8 +784,8 @@ exports.shouldCorrectlyInsertDocumentWithUUID = function(test) {
             test.done();
           });
         });
-      })              
-    });     
+      })
+    });
   });
 }
 
@@ -803,11 +801,11 @@ exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = function(test) {
 
         collection.update({ '_id': "12345678123456781234567812345678" }, { '$set': { 'field': 0 }}, function(err, numberOfUpdates) {
           test.equal(null, err);
-          test.equal(1, numberOfUpdates);            
-          
+          test.equal(1, numberOfUpdates);
+
           db.close();
           test.done();
-        });                
+        });
       });
     });
   });
@@ -837,11 +835,11 @@ exports.shouldCorrectlyInsertDBRefWithDbNotDefined = function(test) {
           test.equal(doc._id.toString(), items[2].ref.oid.toString());
           test.equal(MONGODB, items[2].ref.db);
 
-          test.done();          
-        })          
+          test.done();
+        })
       });
     });
-  });    
+  });
 }
 
 /**
@@ -853,13 +851,13 @@ exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = function(test) {
     db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions', function(err, collection) {
       collection.insert({a:1}, {safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         collection.update({a:1}, {a:2}, {safe:true}, function(err, result) {
           test.equal(null, err);
-          
+
           collection.remove({a:2}, {safe:true}, function(err, result) {
             test.equal(null, err);
-            
+
             collection.count(function(err, count) {
               test.equal(0, count);
 
@@ -868,8 +866,8 @@ exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = function(test) {
             })
           });
         });
-      });      
-    });      
+      });
+    });
   });
 }
 
@@ -883,7 +881,7 @@ exports.shouldCorrectlyExecuteMultipleFetches = function(test) {
   // Execute query
   db.open(function(err, db) {
     db.collection('shouldCorrectlyExecuteMultipleFetches', function(err, collection) {
-      collection.insert({addresses:{localPart:'ralph'}}, {safe:true}, function(err, result) {          
+      collection.insert({addresses:{localPart:'ralph'}}, {safe:true}, function(err, result) {
         // Let's find our user
         collection.findOne({"addresses.localPart" : to}, function( err, doc ) {
           test.equal(null, err);
@@ -891,9 +889,9 @@ exports.shouldCorrectlyExecuteMultipleFetches = function(test) {
 
           db.close();
           test.done();
-       });                
+       });
       });
-    });      
+    });
   });
 }
 
@@ -907,9 +905,9 @@ exports.shouldCorrectlyFailWhenNoObjectToUpdate= function(test) {
         test.equal(0, result);
         test.done();
       }
-    );          
-  });    
-}  
+    );
+  });
+}
 
 /**
  * @ignore
@@ -923,17 +921,17 @@ exports['Should correctly insert object and retrieve it when containing array an
    "links" : [
      "http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
    ]
-  }    
+  }
 
   client.createCollection('Should_correctly_insert_object_and_retrieve_it_when_containing_array_and_IsoDate', function(err, collection) {
     collection.insert(doc, {safe:true}, function(err, result) {
       test.ok(err == null);
-      
+
       collection.findOne(function(err, item) {
         test.ok(err == null);
         test.deepEqual(doc, item);
         test.done();
-      });        
+      });
     });
   });
 }
@@ -951,17 +949,17 @@ exports['Should correctly insert object with timestamps'] = function(test) {
      "http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/"
    ],
    "timestamp2" : new Timestamp(33333),
-  }    
+  }
 
   client.createCollection('Should_correctly_insert_object_with_timestamps', function(err, collection) {
     collection.insert(doc, {safe:true}, function(err, result) {
       test.ok(err == null);
-      
+
       collection.findOne(function(err, item) {
         test.ok(err == null);
         test.deepEqual(doc, item);
         test.done();
-      });        
+      });
     });
   });
 }
@@ -973,14 +971,14 @@ exports['Should fail on insert due to key starting with $'] = function(test) {
   var doc = {
    "_id" : new ObjectID("4e886e687ff7ef5e00000162"),
    "$key" : "foreign",
-  }    
+  }
 
   client.createCollection('Should_fail_on_insert_due_to_key_starting_with', function(err, collection) {
     collection.insert(doc, {safe:true}, function(err, result) {
       test.ok(err != null);
       test.done();
-    });        
-  });    
+    });
+  });
 }
 
 /**
@@ -991,12 +989,12 @@ exports['Should Correctly allow for control of serialization of functions on com
     str : "String",
     func : function() {}
   }
-  
+
   client.createCollection("Should_Correctly_allow_for_control_of_serialization_of_functions_on_command_level", function(err, collection) {
     test.ok(err == null);
-    
+
     collection.insert(doc, {safe:true}, function(err, result) {
-      
+
       collection.update({str:"String"}, {$set:{c:1, d:function(){}}}, {safe:true, serializeFunctions:false}, function(err, result) {
         test.equal(1, result);
 
@@ -1022,13 +1020,13 @@ exports['Should Correctly allow for control of serialization of functions on col
     str : "String",
     func : function() {}
   }
-  
+
   client.createCollection("Should_Correctly_allow_for_control_of_serialization_of_functions_on_collection_level", {serializeFunctions:true}, function(err, collection) {
     test.ok(err == null);
-    
+
     collection.insert(doc, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       collection.findOne({str : "String"}, function(err, item) {
         test.ok(item.func instanceof Code);
         test.done();
@@ -1045,13 +1043,13 @@ exports['Should Correctly allow for using a Date object as _id'] = function(test
     _id : new Date(),
     str : 'hello'
   }
-  
+
   client.createCollection("Should_Correctly_allow_for_using_a_Date_object_as__id", {serializeFunctions:true}, function(err, collection) {
     test.ok(err == null);
 
     collection.insert(doc, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       collection.findOne({str : "hello"}, function(err, item) {
         test.ok(item._id instanceof Date);
         test.done();
@@ -1066,38 +1064,38 @@ exports['Should Correctly allow for using a Date object as _id'] = function(test
 exports['Should Correctly fail to update returning 0 results'] = function(test) {
   client.createCollection("Should_Correctly_fail_to_update_returning_0_results", {serializeFunctions:true}, function(err, collection) {
     test.ok(err == null);
-    
+
     collection.update({a:1}, {$set: {a:1}}, {safe:true}, function(err, numberOfUpdated) {
       test.equal(0, numberOfUpdated);
       test.done();
     });
-  });    
+  });
 }
 
 /**
  * @ignore
  */
 exports['Should Correctly update two fields including a sub field'] = function(test) {
-  var doc = { 
+  var doc = {
     _id: new ObjectID(),
-    Prop1: 'p1', 
-    Prop2: 'p2', 
-    More: { 
-      Sub1: 's1', 
-      Sub2: 's2', 
-      Sub3: 's3' 
-    } 
+    Prop1: 'p1',
+    Prop2: 'p2',
+    More: {
+      Sub1: 's1',
+      Sub2: 's2',
+      Sub3: 's3'
+    }
   }
-  
+
   client.createCollection("Should_Correctly_update_two_fields_including_a_sub_field", {}, function(err, collection) {
     collection.insert(doc, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       // Update two fields
       collection.update({_id:doc._id}, {$set:{Prop1:'p1_2', 'More.Sub2':'s2_2'}}, {safe:true}, function(err, numberOfUpdatedDocs) {
         test.equal(null, err);
         test.equal(1, numberOfUpdatedDocs);
-        
+
         collection.findOne({_id:doc._id}, function(err, item) {
           test.equal(null, err);
           test.equal('p1_2', item.Prop1);
@@ -1106,7 +1104,7 @@ exports['Should Correctly update two fields including a sub field'] = function(t
         })
       });
     })
-  });    
+  });
 }
 
 /**
@@ -1116,14 +1114,14 @@ exports['Should correctly fail due to duplicate key for _id'] = function(test) {
   client.createCollection("Should_Correctly_update_two_fields_including_a_sub_field_2", {}, function(err, collection) {
     collection.insert({_id:1}, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       // Update two fields
       collection.insert({_id:1}, {safe:true}, function(err, result) {
         test.ok(err != null);
         test.done();
       });
     })
-  });    
+  });
 }
 
 /**
@@ -1134,12 +1132,12 @@ exports.shouldCorrectlyInsertDocWithCustomId = function(test) {
     // Insert the update
     collection.insert({_id:0, test:'hello'}, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       collection.findOne({_id:0}, function(err, item) {
         test.equal(0, item._id);
         test.equal('hello', item.test);
         test.done();
-      });      
+      });
     });
   });
 }
@@ -1151,12 +1149,12 @@ exports.shouldFailDueToInsertBeingBiggerThanMaxDocumentSizeAllowed = function(te
   var binary = new Binary(new Buffer(client.serverConfig.checkoutWriter().maxBsonSize + 100));
   // Create a collection
   client.createCollection('shouldFailDueToInsertBeingBiggerThanMaxDocumentSizeAllowed', function(err, collection) {
-    collection.insert({doc:binary}, {safe:true}, function(err, result) {      
+    collection.insert({doc:binary}, {safe:true}, function(err, result) {
       test.ok(err != null);
       test.equal(null, result);
       test.done();
     });
-  });  
+  });
 }
 
 /**
@@ -1169,8 +1167,8 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = function(
       test.equal(1, result);
       test.equal(false, status.updatedExisting);
       test.equal(1, status.n);
-      test.ok(status.upserted != null);      
-      
+      test.ok(status.upserted != null);
+
       // Upsert an existing doc
       collection.update({a:1}, {a:1}, {upsert:true, safe:true}, function(err, result, status) {
         test.equal(1, result);
@@ -1179,7 +1177,7 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = function(
         test.done();
       });
     });
-  });    
+  });
 }
 
 /**
@@ -1193,17 +1191,17 @@ exports.shouldCorrectlyPerformLargeTextInsert = function(test) {
     for(var i = 0; i < 50000; i++) {
       string = string + "a";
     }
-    
+
     collection.insert({a:1, string:string}, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       collection.findOne({a:1}, function(err, doc) {
         test.equal(null, err);
-        test.equal(50000, doc.string.length);        
+        test.equal(50000, doc.string.length);
         test.done();
       });
-    });    
-  });    
+    });
+  });
 }
 
 /**
@@ -1214,39 +1212,39 @@ exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = function(test) {
     // Create document with toBSON method
 		var doc = {a:1, b:1};
 		doc.toBSON = function() { return {c:this.a}};
-    
+
     collection.insert(doc, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       collection.findOne({c:1}, function(err, doc) {
         test.equal(null, err);
         test.deepEqual(1, doc.c);
         test.done();
       });
-    });    
-  });    
+    });
+  });
 }
 
 /**
  * @ignore
  */
 exports.shouldAttempToForceBsonSize = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL, disableDriverBSONSizeCheck:true}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
     db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
       // var doc = {a:1, b:new Binary(new Buffer(16777216)/5)}
       var doc = [
         {a:1, b:new Binary(new Buffer(16777216/2))},
         {a:1, b:new Binary(new Buffer(16777216/2))},
         {a:1, b:new Binary(new Buffer(16777216/2))},
-      ]    
-    
+      ]
+
       collection.insert(doc, {safe:true}, function(err, result) {
         test.equal(null, err);
-      
+
         collection.findOne({a:1}, function(err, doc) {
           test.equal(null, err);
           test.deepEqual(1, doc.a);
@@ -1254,8 +1252,8 @@ exports.shouldAttempToForceBsonSize = function(test) {
           db.close();
           test.done();
         });
-      });    
-    });    
+      });
+    });
   })
 }
 
@@ -1266,22 +1264,22 @@ exports.shouldCorrectlyUseCustomObjectToUpdateDocument = function(test) {
   client.createCollection('shouldCorrectlyExecuteSaveInsertUpdate', function(err, collection) {
     collection.insert({a:{b:{c:1}}}, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       // Dynamically build query
       var query = {};
       query['a'] = {};
       query.a['b'] = {};
       query.a.b['c'] = 1;
-      
+
       // Update document
       collection.update(query, {$set: {'a.b.d':1}}, {safe:true}, function(err, numberUpdated) {
         test.equal(null, err);
         test.equal(1, numberUpdated);
-        
+
         test.done();
       });
     })
-  });    
+  });
 }
 
 /**
@@ -1291,13 +1289,13 @@ exports.shouldExecuteInsertWithNoCallbackAndWriteConcern = function(test) {
   client.createCollection('shouldExecuteInsertWithNoCallbackAndWriteConcern', function(err, collection) {
     collection.insert({a:{b:{c:1}}});
     test.done();
-  });    
+  });
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -1309,7 +1307,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;

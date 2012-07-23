@@ -16,8 +16,8 @@
 - Optimizations on the C++ bson parser to fix a potential memory leak and avoid non-needed calls
 - Added support for awaitdata for tailable cursors (Issue #624)
 - Implementing read preference setting at collection and cursor level
-   * collection.find().setReadPreference(Server.READ_SECONDARY)
-   * db.collection("some", {readPreference:Server.READ_SECONDARY_ONLY})
+   * collection.find().setReadPreference(Server.SECONDARY_PREFERRED)
+   * db.collection("some", {readPreference:Server.SECONDARY})
 - Replicaset now returns when the master is discovered on db.open and lets the rest of the connections happen asynchronous.
   - ReplSet/ReplSetServers emits "fullsetup" when all servers have been connected to
 - Prevent callback from executing more than once in getMore function (Issue #631, https://github.com/shankar0306)
