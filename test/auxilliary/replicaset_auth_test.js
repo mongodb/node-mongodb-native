@@ -231,7 +231,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
 
 exports.shouldCorrectlyAuthenticateAndEnsureIndex = function(test) {
   var replSet = new ReplSetServers( [
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
     ],
     {rs_name:RS.name}
