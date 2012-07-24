@@ -18,11 +18,11 @@ var client = null;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
+  var self = exports;
   client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
@@ -39,7 +39,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -58,10 +58,10 @@ exports.tearDown = function(callback) {
  * @ignore
  */
 exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     // Some docs for insertion
     var docs = [{
@@ -70,12 +70,12 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(tes
         comments : [
           { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
         ]}];
-   
+
     // Validate that we are running on at least version 2.1 of MongoDB
     db.admin().serverInfo(function(err, result){
 
       if(parseInt((result.version.replace(/\./g, ''))) >= 210) {
-        // Create a collection   
+        // Create a collection
         db.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray', function(err, collection) {
           // Insert the docs
           collection.insert(docs, {safe:true}, function(err, result) {
@@ -97,9 +97,9 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(tes
                 test.deepEqual(['bob'], result[0].authors);
                 test.equal('fun', result[1]._id.tags);
                 test.deepEqual(['bob'], result[1].authors);
-                
+
                 db.close();
-                test.done();              
+                test.done();
             });
           });
         });
@@ -119,10 +119,10 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(tes
  * @ignore
  */
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     // Some docs for insertion
     var docs = [{
@@ -136,7 +136,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
     db.admin().serverInfo(function(err, result){
 
       if(parseInt((result.version.replace(/\./g, ''))) >= 210) {
-        // Create a collection   
+        // Create a collection
         client.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments', function(err, collection) {
           // Insert the docs
           collection.insert(docs, {safe:true}, function(err, result) {
@@ -153,9 +153,75 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
                  authors : { $addToSet : "$author" }
                 }}
               , function(err, result) {
-                test.ok(err != null);                
+                test.equal(null, err);
+                test.equal('good', result[0]._id.tags);
+                test.deepEqual(['bob'], result[0].authors);
+                test.equal('fun', result[1]._id.tags);
+                test.deepEqual(['bob'], result[1].authors);
+
                 db.close();
-                test.done();              
+                test.done();
+            });
+          });
+        });
+      } else {
+        db.close();
+        test.done();
+      }
+    });
+  });
+}
+
+/**
+ * Correctly call the aggregation framework using a pipeline expressed as an argument list.
+ *
+ * @_class collection
+ * @_function aggregate
+ * @ignore
+ */
+exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingleObject = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    // Some docs for insertion
+    var docs = [{
+        title : "this is my title", author : "bob", posted : new Date() ,
+        pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+        comments : [
+          { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+        ]}];
+
+    // Validate that we are running on at least version 2.1 of MongoDB
+    db.admin().serverInfo(function(err, result){
+
+      if(parseInt((result.version.replace(/\./g, ''))) >= 210) {
+        // Create a collection
+        client.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments', function(err, collection) {
+          // Insert the docs
+          collection.insert(docs, {safe:true}, function(err, result) {
+            // Execute aggregate, notice the pipeline is expressed as function call parameters
+            // instead of an Array.
+            collection.aggregate(
+                { $project : {
+                  author : 1,
+                  tags : 1
+                }},
+                { $unwind : "$tags" },
+                { $group : {
+                 _id : { tags : 1 },
+                 authors : { $addToSet : "$author" }
+                }}
+              , function(err, result) {
+                test.equal(null, err);
+                test.equal('good', result[0]._id.tags);
+                test.deepEqual(['bob'], result[0].authors);
+                test.equal('fun', result[1]._id.tags);
+                test.deepEqual(['bob'], result[1].authors);
+
+                db.close();
+                test.done();
             });
           });
         });
@@ -178,10 +244,10 @@ exports.shouldCorrectlyFailAndReturnError = function(test) {
       comments : [
         { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
       ]}];
-   
+
   client.admin().serverInfo(function(err, result){
     if(parseInt((result.version.replace(/\./g, ''))) >= 210) {
-      // Create a collection   
+      // Create a collection
       client.createCollection('shouldCorrectlyFailAndReturnError', function(err, collection) {
         // Insert the docs
         collection.insert(docs, {safe:true}, function(err, result) {
@@ -198,7 +264,7 @@ exports.shouldCorrectlyFailAndReturnError = function(test) {
               }}
             , function(err, result) {
               test.ok(err != null);
-              test.done();              
+              test.done();
           });
         });
       });
@@ -208,53 +274,53 @@ exports.shouldCorrectlyFailAndReturnError = function(test) {
   });
 }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyExecuteAggregationWithExplain = function(test) {
-  // Some docs for insertion
-  var docs = [{
-      title : "this is my title", author : "bob", posted : new Date() ,
-      pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
-      comments : [
-        { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
-      ]}];
-   
-  client.admin().serverInfo(function(err, result){
-    if(parseInt((result.version.replace(/\./g, ''))) >= 210) {
-      // Create a collection   
-      client.createCollection('shouldCorrectlyExecuteAggregationWithExplain', function(err, collection) {
-        // Insert the docs
-        collection.insert(docs, {safe:true}, function(err, result) {
-          // Execute aggregate
-          collection.aggregate(
-              [{ $project : {
-              	author : 1,
-              	tags : 1,
-              }},
-              { $unwind : "$tags" },
-              { $group : {
-              	_id : { tags : 1 },
-              	authors : { $addToSet : "$author" }
-              }}],
-              {explain:true}
-            , function(err, result) {
-              test.equal(null, err);
-              test.ok(result['serverPipeline'] != null);
-              test.done();              
-          });
-        });
-      });
-    } else {
-      test.done();
-    }
-  });
-}
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyExecuteAggregationWithExplain = function(test) {
+//   // Some docs for insertion
+//   var docs = [{
+//       title : "this is my title", author : "bob", posted : new Date() ,
+//       pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+//       comments : [
+//         { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+//       ]}];
+
+//   client.admin().serverInfo(function(err, result){
+//     if(parseInt((result.version.replace(/\./g, ''))) >= 210) {
+//       // Create a collection
+//       client.createCollection('shouldCorrectlyExecuteAggregationWithExplain', function(err, collection) {
+//         // Insert the docs
+//         collection.insert(docs, {safe:true}, function(err, result) {
+//           // Execute aggregate
+//           collection.aggregate(
+//               [{ $project : {
+//               	author : 1,
+//               	tags : 1,
+//               }},
+//               { $unwind : "$tags" },
+//               { $group : {
+//               	_id : { tags : 1 },
+//               	authors : { $addToSet : "$author" }
+//               }}],
+//               {explain:true}
+//             , function(err, result) {
+//               test.equal(null, err);
+//               test.ok(result['serverPipeline'] != null);
+//               test.done();
+//           });
+//         });
+//       });
+//     } else {
+//       test.done();
+//     }
+//   });
+// }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -266,7 +332,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
