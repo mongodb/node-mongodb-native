@@ -567,7 +567,7 @@ ReplicaSetManager.prototype.startCmd = function(n) {
   this.mongods[n]["start"] = this.durable ? this.mongods[n]["start"] + " --dur" : this.mongods[n]["start"];
 
   if(this.auth) {
-    this.mongods[n]["start"] = this.auth ? this.mongods[n]["start"] + " --keyFile " + this.keyPath : this.mongods[n]["start"];
+    this.mongods[n]["start"] = this.auth ? this.mongods[n]["start"] + " --auth --keyFile " + this.keyPath : this.mongods[n]["start"];
   }
 
   // If we have ssl defined set up with test certificate
