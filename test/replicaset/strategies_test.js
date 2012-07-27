@@ -63,7 +63,7 @@ var waitForReplicaset = function(callback) {
     ], {});
     
   var db = new Db('integration_test_', replSet);    
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     db.close();
     callback();
   });
@@ -129,7 +129,7 @@ exports['Should Correctly Collect ping information from servers'] = function(tes
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     setTimeout(function() {
       var keys = Object.keys(replSet._state.addresses);
       for(var i = 0; i < keys.length; i++) {
@@ -165,7 +165,7 @@ exports['Should correctly pick a ping strategy for secondary'] = function(test) 
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     db.createCollection('testsets3', function(err, collection) {
       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
       
@@ -206,7 +206,7 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
   // Open the database
   var db = new Db('integration_test_', replSet);
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     db.createCollection('testsets2', function(err, collection) {
       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));  
       
@@ -221,8 +221,7 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
               test.equal(4, items.length);
               
               // Total number of entries done
-              var totalNumberOfStrategyEntries = 0;
-          
+              var totalNumberOfStrategyEntries = 0;          
               // Check that we have correct strategy objects
               var keys = Object.keys(replSet._state.secondaries);
               for(var i = 0; i < keys.length; i++) {
@@ -231,7 +230,7 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
               }
           
               db.close();        
-              test.equal(4, totalNumberOfStrategyEntries);
+              test.equal(6, totalNumberOfStrategyEntries);
               test.done();
             });
           });

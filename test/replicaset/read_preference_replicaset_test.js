@@ -154,7 +154,7 @@ exports['Connection to replicaset with primary read preference'] = function(test
   // Create db instance
   var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
     var checkoutWriterMethod = db.serverConfig._state.master.checkoutWriter;
     // Set up checkoutWriter to catch correct write request
@@ -198,7 +198,7 @@ exports['Connection to replicaset with secondary read preference with no seconda
     // Create db instance
     var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
     // Trigger test once whole set is up
-    replSet.on("fullsetup", function() {
+    db.on("fullsetup", function() {
       // Rip out secondaries forcing an attempt to read from the primary
       db.serverConfig._state.secondaries = {};
 
@@ -249,7 +249,7 @@ exports['Connection to replicaset with secondary only read preference no seconda
   // Create db instance
   var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     // Rip out secondaries forcing an attempt to read from the primary
     db.serverConfig._state.secondaries = {};
 
@@ -293,7 +293,7 @@ exports['Connection to replicaset with secondary only read preference should ret
     // Create db instance
     var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
     // Trigger test once whole set is up
-    replSet.on("fullsetup", function() {
+    db.on("fullsetup", function() {
       // Let's set up all the secondaries
       var keys = Object.keys(db.serverConfig._state.secondaries);
 
@@ -344,7 +344,7 @@ exports['Connection to replicaset with secondary read preference should return s
     // Create db instance
     var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
     // Trigger test once whole set is up
-    replSet.on("fullsetup", function() {
+    db.on("fullsetup", function() {
       // Let's set up all the secondaries
       var keys = Object.keys(db.serverConfig._state.secondaries);
 

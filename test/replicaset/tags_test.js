@@ -63,7 +63,7 @@ var waitForReplicaset = function(callback) {
     ], {});
 
   var db = new Db('integration_test_', replSet);
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     db.close();
     callback();
   });
@@ -126,7 +126,7 @@ exports['Should Correctly Connect With Default Replicaset And Insert Document Fo
 
   var db = new Db('integration_test_', replSet);
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     // Recreate collection on replicaset
     db.createCollection('testsets', function(err, collection) {
       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
@@ -166,7 +166,7 @@ exports['Should Honor setReadPreference primary'] = function(test) {
   // Open the database
   var db = new Db('integration_test_', replSet);
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     // Checkout a reader and make sure it's the primary
     var reader = replSet.checkoutReader();
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
@@ -202,7 +202,7 @@ exports['Should Honor setReadPreference secondary'] = function(test) {
   // Open the database
   var db = new Db('integration_test_', replSet);
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     // Checkout a reader and make sure it's the primary
     var reader = replSet.checkoutReader();
     var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];

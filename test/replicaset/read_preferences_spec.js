@@ -64,7 +64,7 @@ var waitForReplicaset = function(callback) {
     ], {});
 
   var db = new Db('integration_test_', replSet);
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     db.close();
     callback();
   });
@@ -128,7 +128,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
 
     /**
      * Read using PRIMARY
@@ -240,7 +240,7 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference'] = functio
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     // Wait for a bit, let ping happen
     setTimeout(function() {
       // Fetch my nearest
@@ -325,7 +325,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     // Wait for a bit, let ping happen
     setTimeout(function() {
       /**
@@ -452,7 +452,7 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags']
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     // Wait for a bit, let ping happen
     setTimeout(function() {
       // Fetch my nearest
@@ -534,7 +534,7 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags a
   // Open the database
   var db = new Db('integration_test_', replSet, {recordQueryStats:true});
   // Trigger test once whole set is up
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     // Wait for a bit, let ping happen
     setTimeout(function() {
       // Fetch my nearest

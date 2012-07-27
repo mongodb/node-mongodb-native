@@ -51,7 +51,7 @@ var waitForReplicaset = function(callback) {
     ], {});
 
   var db = new Db('integration_test_', replSet);
-  replSet.on("fullsetup", function() {
+  db.on("fullsetup", function() {
     db.close();
     callback();
   });
@@ -117,10 +117,6 @@ exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
 
   // Insert some data
   var db = new Db('integration_test_', replSet);
-  // // Trigger test once whole set is up
-  // replSet.on("fullsetup", function() {
-  // });
-
   db.open(function(err, p_db) {
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
     db = p_db;
