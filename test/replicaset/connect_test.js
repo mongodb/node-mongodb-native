@@ -532,12 +532,10 @@ exports.shouldCorrectlyEmitOpenSignalAndFullSetSignal = function(test) {
 
   var db = new Db('integration_test_', replSet);
   db.once("open", function(_err, _db) {
-    console.log("================================== OPEN")
     openCalled = true;
   });
 
   db.once("fullsetup", function(_err, _db) {
-    console.log("================================== FULLSETUP")
     test.equal(true, openCalled);
 
     // Close and cleanup
