@@ -33,6 +33,7 @@
 - Fixed Always emit db events (Issue #657)
 - Close event not correctly resets DB openCalled variable to allow reconnect
 - Added open event on connection established for replicaset, mongos and server
+- Much faster BSON C++ parser thanks to Lucasfilm Singapore.
 
 1.0.2 2012-05-15
 ----------------
