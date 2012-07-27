@@ -230,9 +230,6 @@ exports.shouldCorrectlyConnectWithDefaultReplicasetAndSocketOptionsSet = functio
   var db = new Db('integration_test_', replSet);
   db.open(function(err, p_db) {
     test.equal(null, err);
-    console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    console.dir(db.serverConfig.checkoutWriter())
-    
     test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
     test.done();
     p_db.close();
@@ -535,10 +532,12 @@ exports.shouldCorrectlyEmitOpenSignalAndFullSetSignal = function(test) {
 
   var db = new Db('integration_test_', replSet);
   db.once("open", function(_err, _db) {
+    console.log("================================== OPEN")
     openCalled = true;
   });
 
   db.once("fullsetup", function(_err, _db) {
+    console.log("================================== FULLSETUP")
     test.equal(true, openCalled);
 
     // Close and cleanup
