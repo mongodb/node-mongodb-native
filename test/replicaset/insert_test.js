@@ -74,17 +74,19 @@ exports.shouldCorrectlyWaitForReplicationToServersOnInserts = function(test) {
   // Insert some data
   var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
   db.open(function(err, p_db) {
-    // Check if we got an error
-    if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
-
+    console.log("---------------------------------------------------------------------------- 0")
     // Drop collection on replicaset
     p_db.dropCollection('shouldCorrectlyWaitForReplicationToServersOnInserts', function(err, r) {
-      if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
+      console.log("---------------------------------------------------------------------------- 1")
       // Recreate collection on replicaset
       p_db.createCollection('shouldCorrectlyWaitForReplicationToServersOnInserts', function(err, collection) {
-        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
+        console.log("---------------------------------------------------------------------------- 2")
+        console.dir(err)
+        console.dir(collection)
+        
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+          console.log("---------------------------------------------------------------------------- 3")
           test.equal(null, err);
           test.done();
           p_db.close();
@@ -190,24 +192,33 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+          console.log("------------------------------------------------------------------------------- 0")
           // Kill the primary
           RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
+            console.log("------------------------------------------------------------------------------- 1")
             // Attempt insert (should fail)
             collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+              console.log("------------------------------------------------------------------------------- 2")
 
               if(err != null) {
+                console.log("------------------------------------------------------------------------------- 3")
                 collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+                  console.log("------------------------------------------------------------------------------- 3:1")
                   // Peform a count
                   collection.count(function(err, count) {
+                    console.log("------------------------------------------------------------------------------- 3:2")
                     test.equal(2, count);
                     p_db.close();
                     test.done();
                   });
                 });
               } else {
+                console.log("------------------------------------------------------------------------------- 4")
                 collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+                  console.log("------------------------------------------------------------------------------- 4:1")
                   // Peform a count
                   collection.count(function(err, count) {
+                    console.log("------------------------------------------------------------------------------- 4:2")
                     test.equal(2, count);
                     p_db.close();
                     test.done();
