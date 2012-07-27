@@ -4,6 +4,7 @@
 *.tmp
 .project
 .settings
+.tm_properties
 data
 node_modules/
 output

@@ -16,33 +16,36 @@ var replSet = new ReplSetServers([
 ], {rs_name:'replica-set-foo'});
 
 var client = new Db(databasename, replSet, {native_parser: false});
-client.open(function(err, db_p) {
-  if (err){
-    console.log('ERR:'+err);
-    console.log('DB:'+db_p);
-  }
+client.on("fullsetup", function(err, result) {
+	if (err){
+	  console.log('ERR:'+err);
+	  console.log('DB:'+db_p);
+	}
 
-  client.authenticate(username, password, function(err, replies) {
-    if (err){
-      console.log('ERR AUTH:'+err);
-      console.log('replies:'+replies);
-    }
+	client.authenticate(username, password, function(err, replies) {
+	  if (err){
+	    console.log('ERR AUTH:'+err);
+	    console.log('replies:'+replies);
+	  }
         
-    // var ensureIndexOptions = { unique: true, safe: true, background: true };    
-    var ensureIndexOptions = { unique: true, safe: false, background: true };    
-    // Just cleanup
-    client.collection('userconfirm').ensureIndex({ 'confirmcode':1 }, ensureIndexOptions, function(err, item){
-      if(err){
-        console.log('Userconfirm ensure index failed:'+err);
-      }
+	  // var ensureIndexOptions = { unique: true, safe: true, background: true };    
+	  var ensureIndexOptions = { unique: true, safe: false, background: true };    
+	  // Just cleanup
+	  client.collection('userconfirm').ensureIndex({ 'confirmcode':1 }, ensureIndexOptions, function(err, item){
+	    if(err){
+	      console.log('Userconfirm ensure index failed:'+err);
+	    }
 
-      client.collection('session').ensureIndex({ 'sid': 1 }, ensureIndexOptions, function(err, res){
-        if(err){
-          console.log('Session ensure index failed'+err);
-        }
+	    client.collection('session').ensureIndex({ 'sid': 1 }, ensureIndexOptions, function(err, res){
+	      if(err){
+	        console.log('Session ensure index failed'+err);
+	      }
 
-        client.close();
-      });
-    });
-  });
+	      client.close();
+	    });
+	  });
+	});	
+})
+
+client.open(function(err, db_p) {
 });
