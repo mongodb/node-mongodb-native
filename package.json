@@ -51,7 +51,8 @@
                       "heroic",
                       "gitfy",
                       "Andrew Stone",
-											"John Le Drew"]
+											"John Le Drew",
+                      "Lucasfilm Singapore"]
 
 , "repository" :    { "type" :  "git"
                     , "url" :   "http://github.com/mongodb/node-mongodb-native.git" }

@@ -235,6 +235,9 @@ A simple example below
         }
       }
 
+## Much faster BSON C++ parser
+Thanks to the awesome people at Lucasfilm Singapore we have a new BSON C++ serializer/deserializer that performs on average 40-50% faster than the current implementation.
+
 ## Other minor changes
 * Connection pool is not set to 5 by default override if there is need for either a bigger or smaller pool pr node process.
 * Gridfs now ensure an index on the chunks collection on file_id.
