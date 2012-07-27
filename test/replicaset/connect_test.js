@@ -64,6 +64,7 @@ exports.setUp = function(callback) {
   if(!serversUp && !noReplicasetStart) {
     serversUp = true;
     RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
+    // RS = new ReplicaSetManager({retries:120, secondary_count:1, passive_count:0, arbiter_count:0});
     RS.startSet(true, function(err, result) {
       if(err != null) throw err;
       // Finish setup
@@ -158,39 +159,39 @@ exports.shouldCorrectlyHandleErrorWhenNoServerUpInReplicaset = function(test) {
 exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([
-      new Server('localhost', 30000, { auto_reconnect: true } ),
-      new Server('localhost', 30001, { auto_reconnect: true } ),
-      new Server('localhost', 30002, { auto_reconnect: true } )
+      new Server('localhost', 30000, { auto_reconnect: true } )
+      // new Server('localhost', 30001, { auto_reconnect: true } ),
+      // new Server('localhost', 30002, { auto_reconnect: true } )
     ]
   );
-
+  
   var db = new Db('integration_test_', replSet);
   db.open(function(err, p_db) {
     test.equal(null, err);
-    test.done();
     p_db.close();
+    test.done();
   });
 }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
-  // Replica configuration
-  var replSet = new ReplSetServers([
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ]
-  );
-
-  var db = new Db('integration_test_', replSet);
-  db.open(function(err, p_db) {
-    test.equal(null, err);
-    test.done();
-    p_db.close();
-  });
-}
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
+//   // Replica configuration
+//   var replSet = new ReplSetServers([
+//       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+//       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+//       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+//     ]
+//   );
+// 
+//   var db = new Db('integration_test_', replSet);
+//   db.open(function(err, p_db) {
+//     test.equal(null, err);
+//     test.done();
+//     p_db.close();
+//   });
+// }
 
 /**
  * @ignore
@@ -229,6 +230,9 @@ exports.shouldCorrectlyConnectWithDefaultReplicasetAndSocketOptionsSet = functio
   var db = new Db('integration_test_', replSet);
   db.open(function(err, p_db) {
     test.equal(null, err);
+    console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    console.dir(db.serverConfig.checkoutWriter())
+    
     test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
     test.done();
     p_db.close();
