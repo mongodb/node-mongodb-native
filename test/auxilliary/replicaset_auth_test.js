@@ -240,8 +240,8 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = function(test) {
   var db = new Db(MONGODB, replSet, {native_parser: false});
   db.open(function(err, db_p) {
     if (err){
-    console.log('ERR:'+err);
-    console.log('DB:'+db_p);
+      console.log('ERR:'+err);
+      console.log('DB:'+db_p);
     }
 
     db_p.addUser('test', 'test', function(err, result) {
@@ -258,7 +258,7 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = function(test) {
 
         db_p.collection('userconfirm', function( err, result ){
           if (err){
-          console.log('Collection ERR:'+err);
+            console.log('Collection ERR:'+err);
           }
 
           var userconfirm = result;
