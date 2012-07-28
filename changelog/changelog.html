@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Changelog &mdash; MongoDB Node.JS Driver 1.1.0 documentation</title>
+    <title>Changelog &mdash; MongoDB Node.JS Driver 1.1.2 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.1.0',
+        VERSION:     '1.1.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.1.0 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.1.2 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.2 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -48,9 +48,9 @@
   <div class="section" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>1.1.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>1.1.2<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <ul>
-<li><p class="first">Added Mongos connection type with a fallback list for mongos proxies, supports ha (off by default) and will attempt to reconnect to failed proxies.</p>
+<li><p class="first">Added Mongos connection type with a fallback list for mongos proxies, supports ha (on by default) and will attempt to reconnect to failed proxies.</p>
 </li>
 <li><p class="first">Documents can now have a toBSON method that lets the user control the serialization behavior for documents being saved.</p>
 </li>
@@ -83,8 +83,8 @@
 <li><dl class="first docutils">
 <dt>Implementing read preference setting at collection and cursor level</dt>
 <dd><ul class="first last simple">
-<li>collection.find().setReadPreference(Server.READ_SECONDARY)</li>
-<li>db.collection(&amp;quot;some&amp;quot;, {readPreference:Server.READ_SECONDARY_ONLY})</li>
+<li>collection.find().setReadPreference(Server.SECONDARY_PREFERRED)</li>
+<li>db.collection(&amp;quot;some&amp;quot;, {readPreference:Server.SECONDARY})</li>
 </ul>
 </dd>
 </dl>
@@ -117,6 +117,10 @@
 <li><p class="first">Close event not correctly resets DB openCalled variable to allow reconnect</p>
 </li>
 <li><p class="first">Added open event on connection established for replicaset, mongos and server</p>
+</li>
+<li><p class="first">Much faster BSON C++ parser thanks to Lucasfilm Singapore.</p>
+</li>
+<li><p class="first">Refactoring of replicaset connection logic to simplify the code.</p>
 </li>
 </ul>
 </div>
@@ -851,7 +855,7 @@ debug : function(debugMessage, object) {},</p>
 <h3>Contents</h3>
 <ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
-<li><a class="reference internal" href="#id1">1.1.0</a></li>
+<li><a class="reference internal" href="#id1">1.1.2</a></li>
 <li><a class="reference internal" href="#id2">1.0.2 2012-05-15</a></li>
 <li><a class="reference internal" href="#id3">1.0.1 2012-05-12</a></li>
 <li><a class="reference internal" href="#id4">1.0.0 2012-04-25</a></li>
@@ -1073,7 +1077,7 @@ debug : function(debugMessage, object) {},</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.2 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

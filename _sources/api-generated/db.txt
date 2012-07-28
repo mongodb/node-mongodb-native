@@ -102,9 +102,9 @@ Initialize the database connection.
 
      // Replica configuration
      var replSet = new ReplSetServers([
-         new Server('localhost', 30000, { auto_reconnect: true } ),
-         new Server('localhost', 30001, { auto_reconnect: true } ),
-         new Server('localhost', 30002, { auto_reconnect: true } )
+         new Server('localhost', 30000, { auto_reconnect: true } )
+         // new Server('localhost', 30001, { auto_reconnect: true } ),
+         // new Server('localhost', 30002, { auto_reconnect: true } )
        ]
      );
      
@@ -113,6 +113,8 @@ Initialize the database connection.
        assert.equal(null, err);
        p_db.close();
      });
+     }
+     
 
   
   
@@ -142,7 +144,7 @@ Initialize the database connection.
      // Create db instance
      var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
      // Trigger test once whole set is up
-     replSet.on("fullsetup", function() {
+     db.on("fullsetup", function() {
        // Rip out secondaries forcing an attempt to read from the primary
        db.serverConfig._state.secondaries = {};
      
@@ -1957,6 +1959,7 @@ Retrieves this collections index info.
 
 Options
  - **full** {Boolean, default:false}, returns the full raw index information.
+ - **readPreference** {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
 
 .. js:function:: indexInformation(collectionName[, options], callback)
 

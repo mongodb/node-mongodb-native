@@ -2,9 +2,9 @@
 Changelog
 =========
 
-1.1.0
+1.1.2
 ----------------
-- Added Mongos connection type with a fallback list for mongos proxies, supports ha (off by default) and will attempt to reconnect to failed proxies.
+- Added Mongos connection type with a fallback list for mongos proxies, supports ha (on by default) and will attempt to reconnect to failed proxies.
 - Documents can now have a toBSON method that lets the user control the serialization behavior for documents being saved.
 - Gridstore instance object now works as a readstream or writestream (thanks to code from Aaron heckmann (https://github.com/aheckmann/gridfs-stream)).
 - Fix gridfs readstream (Issue #607, https://github.com/tedeh).
@@ -20,8 +20,8 @@ Changelog
 - Optimizations on the C++ bson parser to fix a potential memory leak and avoid non-needed calls
 - Added support for awaitdata for tailable cursors (Issue #624)
 - Implementing read preference setting at collection and cursor level
-   * collection.find().setReadPreference(Server.READ_SECONDARY)
-   * db.collection(&quot;some&quot;, {readPreference:Server.READ_SECONDARY_ONLY})
+   * collection.find().setReadPreference(Server.SECONDARY_PREFERRED)
+   * db.collection(&quot;some&quot;, {readPreference:Server.SECONDARY})
 - Replicaset now returns when the master is discovered on db.open and lets the rest of the connections happen asynchronous.
   - ReplSet/ReplSetServers emits &quot;fullsetup&quot; when all servers have been connected to
 - Prevent callback from executing more than once in getMore function (Issue #631, https://github.com/shankar0306)
@@ -37,6 +37,8 @@ Changelog
 - Fixed Always emit db events (Issue #657)
 - Close event not correctly resets DB openCalled variable to allow reconnect
 - Added open event on connection established for replicaset, mongos and server
+- Much faster BSON C++ parser thanks to Lucasfilm Singapore.
+- Refactoring of replicaset connection logic to simplify the code.
 
 1.0.2 2012-05-15
 ----------------
