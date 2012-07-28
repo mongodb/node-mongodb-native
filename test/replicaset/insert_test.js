@@ -185,21 +185,15 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-          console.log("--------------------------------------------------------------------------- 0")
           // Kill the primary
           RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
-            console.log("--------------------------------------------------------------------------- 1")
             // Attempt insert (should fail)
             collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-              console.log("--------------------------------------------------------------------------- 2")
 
               if(err != null) {
-                console.log("--------------------------------------------------------------------------- 3")
                 collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-                  console.log("--------------------------------------------------------------------------- 4")
                   // Peform a count
                   collection.count(function(err, count) {
-                    console.log("--------------------------------------------------------------------------- 5")
                     test.equal(2, count);
                     p_db.close();
                     test.done();
