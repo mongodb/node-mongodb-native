@@ -313,6 +313,13 @@ toBSON method
       }
 
 
+---------------------------
+Much faster BSON C++ parser
+---------------------------
+
+ Thanks to the awesome people at Lucasfilm Singapore we have a new BSON C++ serializer/deserializer that performs on average 40-50% faster than the current implementation.
+
+
 -------------------
 Other minor changes
 -------------------
