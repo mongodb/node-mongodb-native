@@ -92,9 +92,13 @@ this returns a new `db` instance that shares the connections off the previous in
 To delete a database you need a pointer to it first. Deletion can be done with method `dropDatabase`.
 
     db_connector.open(function(err, db){
-        db.dropDatabase()
+		if (err) { throw err; }
+        db.dropDatabase(function(err) {
+			if (err) { throw err; }
+			console.log("database has been dropped!");
+		});
     });
-    
+
 ## Custom primary keys
 
 Every record in the database has an unique primary key called `_id`. Default primary keys are 12 byte hashes but a custom key generator can be used for something else. If you set `_id` "by hand" when inserting records then you can use whatever you want, primary key factory generates `_id` values only for records without ones.
