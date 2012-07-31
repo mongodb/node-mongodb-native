@@ -40,6 +40,7 @@ exports.tearDown = function(callback) {
 }
 
 exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(test) {
+  if(process.env['JENKINS']) return test.done();
   var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
@@ -152,6 +153,7 @@ exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(test) {
 }
 
 exports.shouldCorrectlyAuthenticate = function(test) {
+  if(process.env['JENKINS']) return test.done();
   var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});

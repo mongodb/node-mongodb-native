@@ -83,6 +83,7 @@ exports.shouldThrowErrorDueToSharedConnectionUsage = function(test) {
 }
 
 exports.shouldCorrectlyCallCloseEvent = function(test) {
+  if(process.env['JENKINS']) return test.done();
   var closedCalled = false;
   var openCalled = false
 
@@ -115,6 +116,7 @@ exports.shouldCorrectlyCallCloseEvent = function(test) {
 }
 
 exports.shouldCorrectlyReconnectOnNonExistingServer = function(test) {
+  if(process.env['JENKINS']) return test.done();
   // Start server
   var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
   // Kill the server

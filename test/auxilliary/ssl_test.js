@@ -37,6 +37,7 @@ exports.tearDown = function(callback) {
 }
 
 exports.shouldCorrectlyCommunicateUsingSSLSocket = function(test) {
+  if(process.env['JENKINS']) return test.done();
   var db1 = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:4, ssl:ssl}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   // All inserted docs
   var docs = [];
