@@ -46,6 +46,7 @@ var junit = specifedParameter(process.argv, '--junit', false);
 var noReplicaSet = specifedParameter(process.argv, '--noreplicaset', false);
 var boot = specifedParameter(process.argv, '--boot', false);
 var nonative = specifedParameter(process.argv, '--nonative', false);
+var nokill = specifedParameter(process.argv, '--nokill', false);
 // Basic default test runner
 var runner = nodeunit.reporters.default;
 var options = { error_prefix: '\u001b[31m',
@@ -74,8 +75,12 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
     Step(
       // Start the single server
       function startSingleServer() {
-        if(boot) {          
-          serverManager.start(true, {purgedirectories:true}, this);          
+        if(boot) {   
+          if(!nokill) {
+            serverManager.start(true, {purgedirectories:true}, this);                      
+          } else {
+            this(null, null);
+          }
         } else {
           this(null, null);
         }
@@ -111,11 +116,15 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
 
       function done() {
         if(boot) {          
-          // Kill all mongod server
-          replicaSetManager.killAll(function() {
-            // Force exit
-            process.exit();
-          })
+          if(!nokill) {
+            // Kill all mongod server
+            replicaSetManager.killAll(function() {
+              // Force exit
+              process.exit();
+            })
+          } else {
+            process.exit();            
+          }
         } else {
           process.exit();
         }
@@ -125,7 +134,7 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
     // Execute without replicaset tests
     Step(
       function startSingleServer() {
-        if(boot) {          
+        if(!nokill) {
           serverManager.start(true, {purgedirectories:true}, this);
         } else {
           this(null, null);
@@ -166,11 +175,15 @@ exec('rm -rf ./output', function(err, stdout, stderr) {
       
       function done() {
         if(boot) {          
-          // Kill all mongod server
-          replicaSetManager.killAll(function() {
-            // Force exit
+          if(!nokill) {
+            // Kill all mongod server
+            replicaSetManager.killAll(function() {
+              // Force exit
+              process.exit();
+            })
+          } else {            
             process.exit();
-          })
+          }
         } else {
           process.exit();
         }
