@@ -35,7 +35,7 @@ test_junit: build_native
 
 test_junit_2: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
-	$(NODE) dev/tools/test_all.js --junit --noreplicaset --boot
+	$(NODE) dev/tools/test_all.js --junit --noreplicaset --nokill
 
 test_nodeunit_pure:
 	@echo "\n == Execute Test Suite using Pure JS BSON Parser == "
