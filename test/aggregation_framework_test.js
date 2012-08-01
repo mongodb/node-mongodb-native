@@ -84,17 +84,14 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(tes
             collection.aggregate([
                 { $project : {
                 	author : 1,
-                	tags : 1,
+                	tags : 1
                 }},
                 { $unwind : "$tags" },
                 { $group : {
-                	_id : { tags : 1 },
+                	_id : {tags : "$tags"},
                 	authors : { $addToSet : "$author" }
                 }}
               ], function(err, result) {
-                console.log("===========================================================")
-                console.dir(err)
-                console.dir(result)
                 test.equal(null, err);
                 test.equal('good', result[0]._id.tags);
                 test.deepEqual(['bob'], result[0].authors);
