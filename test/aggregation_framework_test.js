@@ -92,6 +92,9 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(tes
                 	authors : { $addToSet : "$author" }
                 }}
               ], function(err, result) {
+                console.log("===========================================================")
+                console.dir(err)
+                console.dir(result)
                 test.equal(null, err);
                 test.equal('good', result[0]._id.tags);
                 test.deepEqual(['bob'], result[0].authors);
