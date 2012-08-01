@@ -149,8 +149,8 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
                 }},
                 { $unwind : "$tags" },
                 { $group : {
-                 _id : { tags : 1 },
-                 authors : { $addToSet : "$author" }
+                	_id : {tags : "$tags"},
+                	authors : { $addToSet : "$author" }
                 }}
               , function(err, result) {
                 test.equal(null, err);
@@ -205,13 +205,13 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
             // instead of an Array.
             collection.aggregate(
                 { $project : {
-                  author : 1,
-                  tags : 1
+                	author : 1,
+                	tags : 1
                 }},
                 { $unwind : "$tags" },
                 { $group : {
-                 _id : { tags : 1 },
-                 authors : { $addToSet : "$author" }
+                	_id : {tags : "$tags"},
+                	authors : { $addToSet : "$author" }
                 }}
               , function(err, result) {
                 test.equal(null, err);
