@@ -477,9 +477,15 @@ collectionNames
 
 Get the list of all collection names for the specified db
 
-.. js:function:: collectionNames([collectionName], callback)
+
+
+Options
+ - **namesOnly** {String, default:false}, Return only the full collection namespace.
+
+.. js:function:: collectionNames([collectionName][, options], callback)
 
    :param string [collectionName]: the collection name we wish to filter by.
+   :param object [options]: additional options during update.
    :param function callback: returns option results.
    :returns: null 
 

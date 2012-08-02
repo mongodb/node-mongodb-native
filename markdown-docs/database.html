@@ -168,7 +168,11 @@
 <div><p>To delete a database you need a pointer to it first. Deletion can be done with method  <tt class="docutils literal"><span class="pre">dropDatabase</span></tt> .</p>
 <blockquote>
 <div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db_connector</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">){</span>
-    <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span> <span class="p">}</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">dropDatabase</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span> <span class="p">}</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;database has been dropped!&quot;</span><span class="p">);</span>
+    <span class="p">});</span>
 <span class="p">});</span>
 </pre></div>
 </div>

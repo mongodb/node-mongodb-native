@@ -934,7 +934,7 @@ operators and update instead for more efficient operations.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[query]</strong> (<em>object</em>) &#8211; query to filter by before performing count.</li>
-<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during count.</li>
 <li><strong>callback</strong> (<em>function</em>) &#8211; must be provided.</li>
 </ul>
 </td>
@@ -2869,11 +2869,11 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
           <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">([</span>
               <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
                    <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-                   <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+                   <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
               <span class="p">}},</span>
               <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
               <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
-                   <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span> <span class="p">},</span>
+                   <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
                    <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
               <span class="p">}}</span>
             <span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
@@ -2936,8 +2936,8 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
               <span class="p">}},</span>
               <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
               <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
-               <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span> <span class="p">},</span>
-               <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+                   <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+                   <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
               <span class="p">}}</span>
             <span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
               <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
@@ -2994,13 +2994,13 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
           <span class="c1">// instead of an Array.</span>
           <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">(</span>
               <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
-                <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+                   <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+                   <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
               <span class="p">}},</span>
               <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
               <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
-               <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span> <span class="p">},</span>
-               <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+                   <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+                   <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
               <span class="p">}}</span>
             <span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
               <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>

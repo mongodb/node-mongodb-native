@@ -143,7 +143,11 @@ Deleting a database
   .. code-block:: javascript
 
     db_connector.open(function(err, db){
-        db.dropDatabase()
+    	if (err) { throw err; }
+        db.dropDatabase(function(err) {
+    		if (err) { throw err; }
+    		console.log("database has been dropped!");
+    	});
     });
 
 

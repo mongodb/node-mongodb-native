@@ -557,15 +557,23 @@
 <div class="section" id="collectionnames">
 <h2>collectionNames<a class="headerlink" href="#collectionnames" title="Permalink to this headline">¶</a></h2>
 <p>Get the list of all collection names for the specified db</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>namesOnly</strong> {String, default:false}, Return only the full collection namespace.</li>
+</ul>
+</dd>
+</dl>
 <dl class="function">
 <dt id="collectionNames">
-<tt class="descname">collectionNames</tt><big>(</big><span class="optional">[</span><em>collectionName</em><span class="optional">]</span>, <em>callback</em><big>)</big><a class="headerlink" href="#collectionNames" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">collectionNames</tt><big>(</big><em>[collectionName][, options], callback</em><big>)</big><a class="headerlink" href="#collectionNames" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[collectionName]</strong> (<em>string</em>) &#8211; the collection name we wish to filter by.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
 <li><strong>callback</strong> (<em>function</em>) &#8211; returns option results.</li>
 </ul>
 </td>

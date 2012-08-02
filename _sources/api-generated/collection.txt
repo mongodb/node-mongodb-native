@@ -855,7 +855,7 @@ Options
 .. js:function:: count([query][, options], callback)
 
    :param object [query]: query to filter by before performing count.
-   :param object [options]: additional options during update.
+   :param object [options]: additional options during count.
    :param function callback: must be provided.
    :returns: null 
 
@@ -2654,11 +2654,11 @@ Options
                collection.aggregate([
                    { $project : {
                    	author : 1,
-                   	tags : 1,
+                   	tags : 1
                    }},
                    { $unwind : "$tags" },
                    { $group : {
-                   	_id : { tags : 1 },
+                   	_id : {tags : "$tags"},
                    	authors : { $addToSet : "$author" }
                    }}
                  ], function(err, result) {
@@ -2725,8 +2725,8 @@ Options
                    }},
                    { $unwind : "$tags" },
                    { $group : {
-                    _id : { tags : 1 },
-                    authors : { $addToSet : "$author" }
+                   	_id : {tags : "$tags"},
+                   	authors : { $addToSet : "$author" }
                    }}
                  , function(err, result) {
                    assert.equal(null, err);
@@ -2787,13 +2787,13 @@ Options
                // instead of an Array.
                collection.aggregate(
                    { $project : {
-                     author : 1,
-                     tags : 1
+                   	author : 1,
+                   	tags : 1
                    }},
                    { $unwind : "$tags" },
                    { $group : {
-                    _id : { tags : 1 },
-                    authors : { $addToSet : "$author" }
+                   	_id : {tags : "$tags"},
+                   	authors : { $addToSet : "$author" }
                    }}
                  , function(err, result) {
                    assert.equal(null, err);
