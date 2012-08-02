@@ -149,14 +149,20 @@ exports.shouldCorrectExecuteBasicCollectionMethods = function(test) {
         if(document.name == "integration_tests_.test_collection_methods") found = true;
       });
       test.ok(true, found);
-      // Rename the collection and check that it's gone
-      client.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
-        test.equal(null, err);
-        // Drop the collection and check that it's gone
-        client.dropCollection("test_collection_methods2", function(err, result) {
-          test.equal(true, result);
-          test.done();
-        })
+
+      // Let's check that the collection was created correctly
+      client.collectionNames({namesOnly:true}, function(err, names) {
+        test.ok(typeof names[0] == 'string');
+
+        // Rename the collection and check that it's gone
+        client.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
+          test.equal(null, err);
+          // Drop the collection and check that it's gone
+          client.dropCollection("test_collection_methods2", function(err, result) {
+            test.equal(true, result);
+            test.done();
+          })
+        });
       });
     });
   })    
