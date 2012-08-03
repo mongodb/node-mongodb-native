@@ -322,6 +322,6 @@ Other useful methods on the Gridstore object
 ---------------
 Links and stuff
 ---------------
-  * `The driver examples, good starting point for basic usage <https://github.com/christkv/node-mongodb-native/tree/master/examples>`_
-  * `All the integration tests, they have tons of different usage cases <https://github.com/christkv/node-mongodb-native/tree/master/test>`_
+  * `The driver examples, good starting point for basic usage <https://github.com/mongodb/node-mongodb-native/tree/master/examples>`_
+  * `All the integration tests, they have tons of different usage cases <https://github.com/mongodb/node-mongodb-native/tree/master/test>`_
 

@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 21:50:49 on 1/7/2012
+           - 21:41:30 on 2/7/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 228
+           - 229
          * - **Watchers**
-           - 2204
+           - 2207
 
 .. topic:: mongo-model
 
@@ -262,7 +262,7 @@ Content Management Systems
          * - **Forks**
            - 132
          * - **Watchers**
-           - 894
+           - 895
 
 Grid FS libraries or tools
 --------------------------
@@ -337,7 +337,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 3
          * - **Watchers**
-           - 49
+           - 50
 
 .. topic:: mongolia
 
@@ -547,7 +547,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 34
          * - **Watchers**
-           - 163
+           - 164
 
 .. topic:: lazyBum
 
@@ -939,7 +939,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 180
          * - **Watchers**
-           - 2058
+           - 2061
 
 Libraries for the connect middleware
 ------------------------------------
@@ -986,9 +986,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/masylum/connect-mongodb.git
          * - **Forks**
-           - 39
+           - 40
          * - **Watchers**
-           - 169
+           - 171
 
 .. topic:: connect-mongo
 

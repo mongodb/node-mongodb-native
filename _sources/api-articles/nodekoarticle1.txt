@@ -417,8 +417,8 @@ Time to Query
 ---------------
 Links and stuff
 ---------------
-  * `The driver examples, good starting point for basic usage <https://github.com/christkv/node-mongodb-native/tree/master/examples>`_
-  * `All the integration tests, they have tons of different usage cases <https://github.com/christkv/node-mongodb-native/tree/master/test>`_
+  * `The driver examples, good starting point for basic usage <https://github.com/mongodb/node-mongodb-native/tree/master/examples>`_
+  * `All the integration tests, they have tons of different usage cases <https://github.com/mongodb/node-mongodb-native/tree/master/test>`_
   * `The Mongo DB wiki pages such as the advanced query link <http://www.mongodb.org/display/DOCS/Advanced+Queries>`_
-  * `A silly simple location based application using Express JS and Mongo DB <https://github.com/christkv/mongodb-hamburg>`_
+  * `A silly simple location based application using Express JS and Mongo DB <https://github.com/christkv/mongodb-presentation>`_
 
