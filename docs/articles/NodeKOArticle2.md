@@ -191,8 +191,8 @@ There are some other methods that are useful
 This should be plenty to get you on your way building your first GridFS based application. As in the previous article the following links might be useful for you. Good luck and have fun.
 
 ## Links and stuff
-* [The driver examples, good starting point for basic usage](https://github.com/christkv/node-mongodb-native/tree/master/examples)
-* [All the integration tests, they have tons of different usage cases](https://github.com/christkv/node-mongodb-native/tree/master/test)
+* [The driver examples, good starting point for basic usage](https://github.com/mongodb/node-mongodb-native/tree/master/examples)
+* [All the integration tests, they have tons of different usage cases](https://github.com/mongodb/node-mongodb-native/tree/master/test)
 
 
 

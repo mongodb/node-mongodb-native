@@ -249,10 +249,10 @@ This is special supported function to retrieve just one specific document bypass
 That's pretty much it for the quick intro on how to use the database. I have also included a list of links to where to go to find more information and also a sample crude location application I wrote using express JS and mongo DB.
 
 ## Links and stuff
-* [The driver examples, good starting point for basic usage](https://github.com/christkv/node-mongodb-native/tree/master/examples)
-* [All the integration tests, they have tons of different usage cases](https://github.com/christkv/node-mongodb-native/tree/master/test)
+* [The driver examples, good starting point for basic usage](https://github.com/mongodb/node-mongodb-native/tree/master/examples)
+* [All the integration tests, they have tons of different usage cases](https://github.com/mongodb/node-mongodb-native/tree/master/test)
 * [The Mongo DB wiki pages such as the advanced query link](http://www.mongodb.org/display/DOCS/Advanced+Queries)
-* [A silly simple location based application using Express JS and Mongo DB](https://github.com/christkv/mongodb-hamburg)
+* [A silly simple location based application using Express JS and Mongo DB](https://github.com/christkv/mongodb-presentation)
 
 
 
