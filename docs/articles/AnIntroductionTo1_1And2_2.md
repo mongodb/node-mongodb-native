@@ -140,9 +140,54 @@ There is now a seperate Server type for Mongos that handles not only Mongos read
       if(!err) {
         console.log("We are connected");
       }
+
+      db.close();
     });
 
 Read preferences also work with Mongos from Mongo DB 2.2 or higher allowing you to create more complex deployment setups.
+
+## Aggregation framework helper
+The MongoDB aggregation framework provides a means to calculate aggregate values without having to use map-reduce. While map-reduce is powerful, using map-reduce is more difficult than necessary for many simple aggregation tasks, such as totaling or averaging field values.
+
+The driver supports the aggregation framework by adding a helper at the collection level to execute an aggregation pipeline against the documents in that collection. Below is a simple example of using the aggregation framework to perform a group by tags.
+
+    var mongo = require('mongodb'),
+      Server = mongo.Server,
+      Db = mongo.Db;
+
+    // Some docs for insertion
+    var docs = [{
+        title : "this is my title", author : "bob", posted : new Date() ,
+        pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+        comments : [
+          { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+        ]}];
+
+    var db = new Db(new Server('localhost', 27017));
+    db.open(function(err, db) {
+      // Create a collection
+      db.createCollection('test', function(err, collection) {
+        // Insert the docs
+        collection.insert(docs, {safe:true}, function(err, result) {
+
+          // Execute aggregate, notice the pipeline is expressed as an Array
+          collection.aggregate([
+              { $project : {
+                author : 1,
+                tags : 1
+              }},
+              { $unwind : "$tags" },
+              { $group : {
+                _id : {tags : "$tags"},
+                authors : { $addToSet : "$author" }
+              }}
+            ], function(err, result) {
+              console.dir(result);
+              db.close();
+          });
+        });
+      });
+    });
 
 ## Replicaset improvements and changes
 Replicasets now return to the driver when a primary has been identified allowing for faster connect time meaning the application does not have to wait for the whole set to be identified before being able to run. That said any secondary queries using read preference **ReadPreference.SECONDARY** might fail until at least one secondary is up. To aid in development of layers above the driver now emits to new events.
