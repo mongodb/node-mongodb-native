@@ -21,11 +21,11 @@ var client = null;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
+  var self = exports;
   client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
@@ -42,7 +42,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -61,30 +61,30 @@ exports.tearDown = function(callback) {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocument = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Fetch the collection
     db.collection("save_a_simple_document", function(err, collection) {
-      
+
       // Save a document with no safe option
       collection.save({hello:'world'});
-      
+
       // Wait for a second
       setTimeout(function() {
-        
+
         // Find the saved document
         collection.findOne({hello:'world'}, function(err, item) {
           test.equal(null, err);
           test.equal('world', item.hello);
           db.close();
           test.done();
-        });        
-      }, 1000);      
-    });    
+        });
+      }, 1000);
+    });
   });
 }
 
@@ -96,15 +96,15 @@ exports.shouldCorrectlySaveASimpleDocument = function(test) {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Fetch the collection
     db.collection("save_a_simple_document_modify_it_and_resave_it", function(err, collection) {
-      
+
       // Save a document with no safe option
       collection.save({hello:'world'}, {safe:true}, function(err, result) {
 
@@ -112,26 +112,26 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = function(test) {
         collection.findOne({hello:'world'}, function(err, item) {
           test.equal(null, err);
           test.equal('world', item.hello);
-          
+
           // Update the document
           item['hello2'] = 'world2';
-          
+
           // Save the item with the additional field
           collection.save(item, {safe:true}, function(err, result) {
-            
+
             // Find the changed document
             collection.findOne({hello:'world'}, function(err, item) {
               test.equal(null, err);
               test.equal('world', item.hello);
-              test.equal('world2', item.hello2);              
-              
+              test.equal('world2', item.hello2);
+
               db.close();
               test.done();
             });
-          });           
-        });        
+          });
+        });
       });
-    });    
+    });
   });
 }
 
@@ -165,7 +165,7 @@ exports.shouldCorrectExecuteBasicCollectionMethods = function(test) {
         });
       });
     });
-  })    
+  })
 }
 
 /**
@@ -178,7 +178,7 @@ exports.shouldAccessToCollections = function(test) {
       // Insert test documents (creates collections)
       client.collection('test.spiderman', function(err, spiderman_collection) {
         spiderman_collection.insert({foo:5}, {safe:true}, function(err, r) {
-          
+
           client.collection('test.mario', function(err, mario_collection) {
             mario_collection.insert({bar:0}, {safe:true}, function(err, r) {
               // Assert collections
@@ -197,13 +197,13 @@ exports.shouldAccessToCollections = function(test) {
                 test.ok(found_mario);
                 test.ok(!found_does_not_exist);
                 test.done();
-              });                
+              });
             });
           });
         });
       });
     });
-  });    
+  });
 }
 
 /**
@@ -229,7 +229,7 @@ exports.shouldCorrectlyDropCollection = function(test) {
         test.done();
       });
     });
-  });    
+  });
 }
 
 /**
@@ -240,22 +240,22 @@ exports.shouldCorrectlyDropCollection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyDropCollectionWithDropFunction = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
 
     // Create a collection we want to drop later
     db.createCollection('test_other_drop', function(err, collection) {
       test.equal(null, err);
-      
+
       // Drop the collection
-      collection.drop(function(err, reply) {        
+      collection.drop(function(err, reply) {
 
         // Ensure we don't have the collection in the set of names
         db.collectionNames(function(err, replies) {
-          
+
           var found = false;
           // For each collection in the list of collection names in this db look for the
           // dropped collection
@@ -274,7 +274,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = function(test) {
           test.done();
         });
       });
-    });    
+    });
   });
 }
 
@@ -303,11 +303,11 @@ exports.shouldCorrectlyRetriveCollectionNames = function(test) {
             test.ok(found2);
             // Let's close the db
             test.done();
-          });            
+          });
         })
       });
     });
-  });    
+  });
 }
 
 /**
@@ -330,7 +330,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
         test.done();
       });
     });
-  });    
+  });
 }
 
 /**
@@ -340,12 +340,12 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
  * @_function options
  */
 exports.shouldCorrectlyRetriveCollectionOptions = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a test collection that we are getting the options back from
     db.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {
       test.ok(collection instanceof Collection);
@@ -360,7 +360,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = function(test) {
         db.close();
         test.done();
       });
-    });    
+    });
   });
 }
 
@@ -371,12 +371,12 @@ exports.shouldCorrectlyRetriveCollectionOptions = function(test) {
  * @_function isCapped
  */
 exports.shouldCorrectlyExecuteIsCapped = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a test collection that we are getting the options back from
     db.createCollection('test_collection_is_capped', {'capped':true, 'size':1024}, function(err, collection) {
       test.ok(collection instanceof Collection);
@@ -389,7 +389,7 @@ exports.shouldCorrectlyExecuteIsCapped = function(test) {
         db.close();
         test.done();
       });
-    });    
+    });
   });
 }
 
@@ -400,19 +400,19 @@ exports.shouldCorrectlyExecuteIsCapped = function(test) {
  * @_function indexExists
  */
 exports.shouldCorrectlyExecuteIndexExists = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a test collection that we are getting the options back from
     db.createCollection('test_collection_index_exists', {safe:true}, function(err, collection) {
       test.equal(null, err);
 
       // Create an index on the collection
       collection.createIndex('a', {safe:true}, function(err, indexName) {
-        
+
         // Let's test to check if a single index exists
         collection.indexExists("a_1", function(err, result) {
           test.equal(true, result);
@@ -431,7 +431,7 @@ exports.shouldCorrectlyExecuteIndexExists = function(test) {
           });
         });
       });
-    });    
+    });
   });
 }
 
@@ -441,13 +441,13 @@ exports.shouldCorrectlyExecuteIndexExists = function(test) {
 exports.shouldEnsureStrictAccessCollection = function(test) {
   var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   test.equal(true, error_client.strict);
-  
+
   error_client.open(function(err, error_client) {
     error_client.collection('does-not-exist', function(err, collection) {
       test.ok(err instanceof Error);
       test.equal("Collection does-not-exist does not exist. Currently in strict mode.", err.message);
     });
-      
+
     error_client.createCollection('test_strict_access_collection', function(err, collection) {
       error_client.collection('test_strict_access_collection', function(err, collection) {
         test.ok(collection instanceof Collection);
@@ -487,7 +487,7 @@ exports.shouldPerformStrictCreateCollection = function(test) {
       });
     });
   });
-} 
+}
 
 /**
  * @ignore
@@ -495,7 +495,7 @@ exports.shouldPerformStrictCreateCollection = function(test) {
 exports.shouldFailToInsertDueToIllegalKeys = function(test) {
   client.createCollection('test_invalid_key_names', function(err, collection) {
     // Legal inserts
-    collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}], {safe:true}, function(err, r) {        
+    collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}], {safe:true}, function(err, r) {
       // Illegal insert for key
       collection.insert({'$hello':'world'}, {safe:true}, function(err, doc) {
         test.ok(err instanceof Error);
@@ -535,7 +535,7 @@ exports.shouldFailToInsertDueToIllegalKeys = function(test) {
             })
           })
         });
-      });          
+      });
     });
   });
 }
@@ -547,27 +547,27 @@ exports.shouldFailDueToIllegalCollectionNames = function(test) {
   client.collection(5, function(err, collection) {
     test.equal("collection name must be a String", err.message);
   });
-  
+
   client.collection("", function(err, collection) {
     test.equal("collection names cannot be empty", err.message);
   });
-  
+
   client.collection("te$t", function(err, collection) {
-    test.equal("collection names must not contain '$'", err.message);        
+    test.equal("collection names must not contain '$'", err.message);
   });
 
   client.collection(".test", function(err, collection) {
-    test.equal("collection names must not start or end with '.'", err.message);        
+    test.equal("collection names must not start or end with '.'", err.message);
   });
 
   client.collection("test.", function(err, collection) {
-    test.equal("collection names must not start or end with '.'", err.message);        
+    test.equal("collection names must not start or end with '.'", err.message);
   });
 
   client.collection("test..t", function(err, collection) {
     test.equal("collection names cannot be empty", err.message);
-    test.done();        
-  });  
+    test.done();
+  });
 }
 
 /**
@@ -600,16 +600,16 @@ exports.shouldCorrectlyExecuteSave = function(test) {
 
           collection.count(function(err, count) {
             test.equal(1, count);
-          
+
             collection.findOne(function(err, doc3) {
               test.equal('world', doc3.hello);
-              
+
               doc3.hello = 'mike';
-          
+
               collection.save(doc3, {safe:true}, function(err, doc4) {
                 collection.count(function(err, count) {
                   test.equal(1, count);
-          
+
                   collection.findOne(function(err, doc5) {
                     test.equal('mike', doc5.hello);
 
@@ -642,11 +642,11 @@ exports.shouldCorrectlySaveDocumentWithLongValue = function(test) {
         test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
         // Let's close the db
         test.done();
-      });        
+      });
     });
   });
 }
-  
+
 /**
  * @ignore
  */
@@ -676,7 +676,7 @@ exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = function(test) {
       });
     });
   });
-} 
+}
 
 /**
  * @ignore
@@ -685,34 +685,34 @@ exports.shouldCorrectlyPerformUpsert = function(test) {
   client.createCollection('test_should_correctly_do_upsert', function(err, collection) {
     var id = new ObjectID(null)
     var doc = {_id:id, a:1};
-  
+
     Step(
       function test1() {
-        var self = this;        
+        var self = this;
 
         collection.update({"_id":id}, doc, {upsert:true, safe:true}, function(err, result) {
-          test.equal(null, err);        
+          test.equal(null, err);
           test.equal(1, result);
 
           collection.findOne({"_id":id}, self);
-        });          
+        });
       },
-      
+
       function test2(err, doc) {
         var self = this;
         test.equal(1, doc.a);
 
         id = new ObjectID(null)
         doc = {_id:id, a:2};
-        
+
         collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, result) {
           test.equal(null, err);
           test.equal(1, result);
-          
+
           collection.findOne({"_id":id}, self);
-        });          
+        });
       },
-      
+
       function test3(err, doc2) {
         var self = this;
         test.equal(2, doc2.a);
@@ -720,14 +720,14 @@ exports.shouldCorrectlyPerformUpsert = function(test) {
         collection.update({"_id":id}, doc2, {safe:true, upsert:true}, function(err, result) {
           test.equal(null, err);
           test.equal(1, result);
-        
+
           collection.findOne({"_id":id}, function(err, doc) {
             test.equal(2, doc.a);
-            test.done();                        
+            test.done();
           });
         });
-      }        
-    );                  
+      }
+    );
   });
 }
 
@@ -754,24 +754,24 @@ exports.shouldCorrectlyUpdateWithNoDocs = function(test) {
  * @_function update
  */
 exports.shouldCorrectlyUpdateASimpleDocument = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Get a collection
     db.collection('update_a_simple_document', function(err, collection) {
-      
+
       // Insert a document, then update it
       collection.insert({a:1}, {safe:true}, function(err, doc) {
-        
+
         // Update the document with an atomic operator
         collection.update({a:1}, {$set:{b:2}});
-        
+
         // Wait for a second then fetch the document
         setTimeout(function() {
-          
+
           // Fetch the document that we modified
           collection.findOne({a:1}, function(err, item) {
             test.equal(null, err);
@@ -779,7 +779,7 @@ exports.shouldCorrectlyUpdateASimpleDocument = function(test) {
             test.equal(2, item.b);
             db.close();
             test.done();
-          });          
+          });
         }, 1000);
       })
     });
@@ -794,20 +794,20 @@ exports.shouldCorrectlyUpdateASimpleDocument = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyUpsertASimpleDocument = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Get a collection
-    db.collection('update_a_simple_document_upsert', function(err, collection) {      
+    db.collection('update_a_simple_document_upsert', function(err, collection) {
 
       // Update the document using an upsert operation, ensuring creation if it does not exist
       collection.update({a:1}, {b:2, a:1}, {upsert:true, safe:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result);
-        
+
         // Fetch the document that we modified and check if it got inserted correctly
         collection.findOne({a:1}, function(err, item) {
           test.equal(null, err);
@@ -815,7 +815,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = function(test) {
           test.equal(2, item.b);
           db.close();
           test.done();
-        });          
+        });
       });
     });
   });
@@ -829,23 +829,23 @@ exports.shouldCorrectlyUpsertASimpleDocument = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyUpdateMultipleDocuments = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Get a collection
-    db.collection('update_a_simple_document_multi', function(err, collection) {      
-      
+    db.collection('update_a_simple_document_multi', function(err, collection) {
+
       // Insert a couple of documentations
       collection.insert([{a:1, b:1}, {a:1, b:2}], {safe:true}, function(err, result) {
-        
+
         // Update multiple documents using the multi option
         collection.update({a:1}, {$set:{b:0}}, {safe:true, multi:true}, function(err, numberUpdated) {
           test.equal(null, err);
           test.equal(2, numberUpdated);
-          
+
           // Fetch all the documents and verify that we have changed the b value
           collection.find().toArray(function(err, items) {
             test.equal(null, err);
@@ -853,11 +853,11 @@ exports.shouldCorrectlyUpdateMultipleDocuments = function(test) {
             test.equal(0, items[0].b);
             test.equal(1, items[1].a);
             test.equal(0, items[1].b);
-            
+
             db.close();
             test.done();
           });
-        })        
+        })
       });
     });
   });
@@ -871,11 +871,11 @@ exports.shouldCorrectlyUpdateMultipleDocuments = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexes = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
 
     // Crete the collection for the distinct example
     db.createCollection('simple_key_based_distinct', function(err, collection) {
@@ -883,7 +883,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = function(test) {
       // Insert documents to perform distinct against
       collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}], {safe:true}, function(err, ids) {
-          
+
         // Peform a distinct query against the a field
         collection.distinct('a', function(err, docs) {
           test.deepEqual([0, 1, 2, 3], docs.sort());
@@ -909,11 +909,11 @@ exports.shouldCorrectlyHandleDistinctIndexes = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
 
     // Crete the collection for the distinct example
     db.createCollection('simple_key_based_distinct_sub_query_filter', function(err, collection) {
@@ -921,7 +921,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = function(test) 
       // Insert documents to perform distinct against
       collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], {safe:true}, function(err, ids) {
-          
+
         // Peform a distinct query with a filter against the documents
         collection.distinct('a', {c:1}, function(err, docs) {
           test.deepEqual([5], docs.sort());
@@ -942,31 +942,31 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = function(test) 
  * @ignore
  */
 exports.shouldCorrectlyDoSimpleCountExamples = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
 
     // Crete the collection for the distinct example
     db.createCollection('simple_count_example', function(err, collection) {
 
       // Insert documents to perform distinct against
       collection.insert([{a:1}, {a:2}, {a:3}, {a:4, b:1}], {safe:true}, function(err, ids) {
-        
+
         // Perform a total count command
         collection.count(function(err, count) {
           test.equal(null, err);
           test.equal(4, count);
-          
+
           // Peform a partial account where b=1
           collection.count({b:1}, function(err, count) {
             test.equal(null, err);
-            test.equal(1, count);            
-            
+            test.equal(1, count);
+
             db.close();
             test.done();
-          });          
+          });
         });
       });
     });
@@ -989,11 +989,11 @@ exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = function(test) {
       collection.update({i:1}, {"$set":{i:2}}, {safe:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result);
-      
+
         // Remove safely
         collection.remove({}, {safe:true}, function(err, result) {
-          test.equal(null, err);            
-          
+          test.equal(null, err);
+
           test.done();
         });
       });
@@ -1010,7 +1010,7 @@ exports.shouldPerformMultipleSaves = function(test) {
         name: 'amit',
         text: 'some text'
      };
-     
+
      //insert new user
      collection.save(doc, {safe:true}, function(err, r) {
        collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
@@ -1028,24 +1028,24 @@ exports.shouldPerformMultipleSaves = function(test) {
             test.done();
            })
          }
-       });         
+       });
      })
   });
 }
-  
+
 /**
  * @ignore
  */
 exports.shouldCorrectlySaveDocumentWithNestedArray = function(test) {
   var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
-    db.createCollection("save_error_on_save_test", function(err, collection) {      
+    db.createCollection("save_error_on_save_test", function(err, collection) {
       // Create unique index for username
       collection.createIndex([['username', 1]], true, function(err, result) {
         var doc = {
           email: 'email@email.com',
           encrypted_password: 'password',
-          friends: 
+          friends:
             [ '4db96b973d01205364000006',
               '4db94a1948a683a176000001',
               '4dc77b24c5ba38be14000002' ],
@@ -1056,25 +1056,25 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = function(test) {
           username: 'amit' };
         //insert new user
         collection.save(doc, {safe:true}, function(err, doc) {
-        
+
             collection.find({}).limit(1).toArray(function(err, users) {
-              test.equal(null, err);        
+              test.equal(null, err);
               var user = users[0]
               user.friends.splice(1,1)
 
               collection.save(user, function(err, doc) {
-                test.equal(null, err);    
+                test.equal(null, err);
 
                 // Update again
                 collection.update({_id:new ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, safe:true}, function(err, result) {
                   test.equal(null, err);
-                  test.equal(1, result);                
-                  
+                  test.equal(1, result);
+
                   db.close();
                   test.done();
-                });             
+                });
               });
-            });        
+            });
         });
       })
     });
@@ -1092,16 +1092,16 @@ exports.shouldPeformCollectionRemoveWithNoCallback = function(test) {
            collection.remove({a:1}, {safe:true}, function() {
              // Let's perform a count
              collection.count(function(err, count) {
-               test.equal(null, err);    
+               test.equal(null, err);
                test.equal(2, count);
                test.done();
-             });               
-           })             
+             });
+           })
          });
        });
     });
   });
-},  
+},
 
 /**
  * Example of retrieving a collections indexes
@@ -1111,19 +1111,19 @@ exports.shouldPeformCollectionRemoveWithNoCallback = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRetriveACollectionsIndexes = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
 
     // Crete the collection for the distinct example
     db.createCollection('simple_key_based_distinct', function(err, collection) {
-      
+
       // Create a geo 2d index
       collection.ensureIndex({loc:"2d"}, {safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         // Create a simple single field index
         collection.ensureIndex({a:1}, {safe:true}, function(err, result) {
           test.equal(null, err);
@@ -1131,9 +1131,9 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = function(test) {
           // List all of the indexes on the collection
           collection.indexes(function(err, indexes) {
             test.equal(3, indexes.length);
-            
+
             db.close();
-            test.done();            
+            test.done();
           });
         })
       })
@@ -1149,26 +1149,26 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyReturnACollectionsStats = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
-  db.open(function(err, db) {    
+  // Establish connection to db
+  db.open(function(err, db) {
 
     // Crete the collection for the distinct example
     db.createCollection('collection_stats_test', function(err, collection) {
-      
+
         // Insert some documents
         collection.insert([{a:1}, {hello:'world'}], {safe:true}, function(err, result) {
-          
+
           // Retrieve the statistics for the collection
           collection.stats(function(err, stats) {
             test.equal(2, stats.count);
-            
+
             db.close();
-            test.done();            
-          });          
-        });      
+            test.done();
+          });
+        });
     });
   });
 }
@@ -1178,20 +1178,20 @@ exports.shouldCorrectlyReturnACollectionsStats = function(test) {
  */
 exports.shouldThrowErrorOnAttemptingSafeRemoveWithNoCallback = function(test) {
   client.createCollection('shouldThrowErrorOnAttemptingSafeRemoveWithNoCallback', function(err, collection) {
-    
+
     // insert a doc
     collection.insert({a:1}, {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       // attemp a safe remove with no callback (should throw)
       try {
         collection.remove({a:1}, {safe:true})
         test.ok(false);
-      } catch(err) {}      
+      } catch(err) {}
 
       test.done();
-    });    
-  }); 
+    });
+  });
 }
 
 /**
@@ -1199,15 +1199,15 @@ exports.shouldThrowErrorOnAttemptingSafeRemoveWithNoCallback = function(test) {
  */
 exports.shouldThrowErrorOnAttemptingSafeInsertWithNoCallback = function(test) {
   client.createCollection('shouldThrowErrorOnAttemptingSafeInsertWithNoCallback', function(err, collection) {
-    
+
     try {
       // insert a doc
       collection.insert({a:1}, {safe:true});
       test.ok(false);
-    } catch(err) {}      
+    } catch(err) {}
 
     test.done();
-  }); 
+  });
 }
 
 /**
@@ -1215,15 +1215,15 @@ exports.shouldThrowErrorOnAttemptingSafeInsertWithNoCallback = function(test) {
  */
 exports.shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback = function(test) {
   client.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
-    
+
     try {
       // insert a doc
       collection.update({a:1}, {$set:{b:1}}, {safe:true, upsert:true});
       test.ok(false);
-    } catch(err) {}      
+    } catch(err) {}
 
     test.done();
-  }); 
+  });
 }
 
 /**
@@ -1232,11 +1232,11 @@ exports.shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback = function(test) {
 exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = function(test) {
   // Parse version of server if available
   client.admin().serverInfo(function(err, result){
-    
+
     // Only run if the MongoDB version is higher than 1.7.6
     if(parseInt((result.version.replace(/\./g, ''))) >= 212) {
 
-      client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex', function(err, collection) {        
+      client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex', function(err, collection) {
         collection.ensureIndex({createdAt:1}, {expireAfterSeconds:1, safe:true}, function(err, result) {
           test.equal(null, err);
 
@@ -1258,7 +1258,7 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = function(t
             });
           });
         })
-      }); 
+      });
     } else {
       test.done();
     }
@@ -1271,11 +1271,11 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = function(t
 exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(test) {
   // Parse version of server if available
   client.admin().serverInfo(function(err, result){
-    
+
     // Only run if the MongoDB version is higher than 1.7.6
     if(parseInt((result.version.replace(/\./g, ''))) >= 212) {
 
-      client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex', {}, function(err, collection) {        
+      client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex', {}, function(err, collection) {
         collection.createIndex({createdAt:1}, {expireAfterSeconds:1, safe:true}, function(err, result) {
           test.equal(null, err);
 
@@ -1297,7 +1297,7 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(test) 
             });
           });
         })
-      }); 
+      });
     } else {
       test.done();
     }
@@ -1307,7 +1307,7 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(test) 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -1319,7 +1319,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
