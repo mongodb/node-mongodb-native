@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Mongo Driver and Mongo DB 2.2 Features &mdash; MongoDB Node.JS Driver 1.1.2 documentation</title>
+    <title>Mongo Driver and Mongo DB 2.2 Features &mdash; MongoDB Node.JS Driver 1.1.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.1.2',
+        VERSION:     '1.1.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.1.2 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.1.3 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.2 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.3 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -202,11 +202,61 @@
   <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;We are connected&quot;</span><span class="p">);</span>
   <span class="p">}</span>
+
+  <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
 <span class="p">});</span>
 </pre></div>
 </div>
 </div></blockquote>
 <p>Read preferences also work with Mongos from Mongo DB 2.2 or higher allowing you to create more complex deployment setups.</p>
+</div></blockquote>
+</div>
+<div class="section" id="aggregation-framework-helper">
+<h2>Aggregation framework helper<a class="headerlink" href="#aggregation-framework-helper" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>The MongoDB aggregation framework provides a means to calculate aggregate values without having to use map-reduce. While map-reduce is powerful, using map-reduce is more difficult than necessary for many simple aggregation tasks, such as totaling or averaging field values.</p>
+<p>The driver supports the aggregation framework by adding a helper at the collection level to execute an aggregation pipeline against the documents in that collection. Below is a simple example of using the aggregation framework to perform a group by tags.</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
+  <span class="nx">Server</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Server</span><span class="p">,</span>
+  <span class="nx">Db</span> <span class="o">=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Db</span><span class="p">;</span>
+
+<span class="c1">// Some docs for insertion</span>
+<span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
+    <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
+    <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
+      <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
+    <span class="p">]}];</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Insert the docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Execute aggregate, notice the pipeline is expressed as an Array</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">([</span>
+          <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+          <span class="p">}},</span>
+          <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+            <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+          <span class="p">}}</span>
+        <span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">console</span><span class="p">.</span><span class="nx">dir</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
 </div></blockquote>
 </div>
 <div class="section" id="replicaset-improvements-and-changes">
@@ -352,6 +402,7 @@
 <li><a class="reference internal" href="#">Mongo Driver and Mongo DB 2.2 Features</a><ul>
 <li><a class="reference internal" href="#read-preferences">Read preferences</a></li>
 <li><a class="reference internal" href="#mongos">Mongos</a></li>
+<li><a class="reference internal" href="#aggregation-framework-helper">Aggregation framework helper</a></li>
 <li><a class="reference internal" href="#replicaset-improvements-and-changes">Replicaset improvements and changes</a></li>
 <li><a class="reference internal" href="#high-availability-on-by-default">High availability &#8220;on&#8221; by default</a></li>
 <li><a class="reference internal" href="#better-stream-support-for-gridfs">Better stream support for GridFS</a></li>
@@ -514,7 +565,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.2 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.3 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
