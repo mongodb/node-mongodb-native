@@ -52,9 +52,9 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
-  // Shard.killAll(function() {
+  Shard.killAll(function() {
     callback();
-  // });
+  });
 }
 
 /**
@@ -83,30 +83,24 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(test)
 
     var collection = db.collection("shard_all_operations_test");
     collection.insert(docs, {safe:{w:1, wtimeout:1000}}, function(err, result) {
-      console.log("---------------------------------- 0")
       test.equal(null, err);
 
       // Perform an update
       collection.update({a:0}, {$set: {c:1}}, {safe:true}, function(err, result) {
-        console.log("---------------------------------- 1")
         test.equal(null, err);
         var numberOfRecords = 0;
 
         // Perform a find and each
         collection.find().each(function(err, item) {
           if(err) console.dir(err)
-          // test.equal(null, err);
 
           if(item == null) {
-            console.log("---------------------------------- 2 :: " + numberOfRecords)
+            test.equal(1000, numberOfRecords);
 
             // Perform a find and each
             collection.find().toArray(function(err, items) {
               if(err) console.dir(err)
-              // test.equal(null, err);
-
-              console.log("---------------------------------- 3 :: " + items.length)
-
+              test.equal(1000, items.length);
 
               db.close();
               test.done();
@@ -117,35 +111,8 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(test)
         });
       });
     });
-
-    // // Perform a simple insert into a collection
-    // var collection = db.collection("shard_test");
-    // // Insert a simple doc
-    // collection.insert({test:1}, {safe:true}, function(err, result) {
-    //   test.equal(null, err);
-
-    //   collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY)}, function(err, item) {
-    //     test.equal(null, err);
-    //     test.equal(1, item.test);
-
-    //     db.close();
-    //     test.done();
-    //   })
-    // });
   });
 }
-
-// /**
-//  * Retrieve the server information for the current
-//  * instance of the db client
-//  *
-//  * @ignore
-//  */
-// exports.noGlobalsLeaked = function(test) {
-//   var leaks = gleak.detectNew();
-//   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-//   test.done();
-// }
 
 /**
  * Retrieve the server information for the current
