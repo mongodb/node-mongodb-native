@@ -205,9 +205,12 @@ exports.shouldCorrectlyConnectWithDefaultReplicaset = function(test) {
     ],
     {}
   );
+  test.equal(true, replSet.connectArbiter);
 
   var db = new Db('integration_test_', replSet);
+  test.equal(true, db.serverConfig.connectArbiter);
   db.open(function(err, p_db) {
+    test.equal(1, replSet.arbiters.length);
     test.equal(null, err);
     test.done();
     p_db.close();
@@ -235,6 +238,29 @@ exports.shouldCorrectlyConnectWithDefaultReplicasetAndSocketOptionsSet = functio
     p_db.close();
   })
 }
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyConnectWithConnectArbiterFalse = function(test) {
+  // Replica configuration
+  var replSet = new ReplSetServers([
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+    ],
+    {connectArbiter:false}
+  );
+  test.equal(false, replSet.connectArbiter);
+
+  var db = new Db('integration_test_', replSet);
+  test.equal(false, db.serverConfig.connectArbiter);
+  db.open(function(err, p_db) {
+    test.equal(0, replSet.arbiters.length);
+    test.equal(null, err);
+    test.equal(false, db.serverConfig.connectArbiter);
+    test.done();
+    p_db.close();
+  });
+};
 
 /**
  * @ignore
