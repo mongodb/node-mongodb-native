@@ -164,7 +164,7 @@ exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
       // new Server('localhost', 30002, { auto_reconnect: true } )
     ]
   );
-  
+
   var db = new Db('integration_test_', replSet);
   db.open(function(err, p_db) {
     test.equal(null, err);
@@ -184,7 +184,7 @@ exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
 //       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
 //     ]
 //   );
-// 
+//
 //   var db = new Db('integration_test_', replSet);
 //   db.open(function(err, p_db) {
 //     test.equal(null, err);
@@ -459,7 +459,7 @@ exports.shouldCorrectlyConnect = function(test) {
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ],
-    {rs_name:RS.name}
+    {rs_name:RS.name, connectArbiter:true}
   );
 
   // Replica configuration
@@ -468,7 +468,7 @@ exports.shouldCorrectlyConnect = function(test) {
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ],
-    {rs_name:RS.name}
+    {rs_name:RS.name, connectArbiter:true}
   );
 
   var db = new Db('integration_test_', replSet );
