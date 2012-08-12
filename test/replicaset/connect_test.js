@@ -159,9 +159,9 @@ exports.shouldCorrectlyHandleErrorWhenNoServerUpInReplicaset = function(test) {
 exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([
-      new Server('localhost', 30000, { auto_reconnect: true } )
-      // new Server('localhost', 30001, { auto_reconnect: true } ),
-      // new Server('localhost', 30002, { auto_reconnect: true } )
+      new Server('localhost', 30000, { auto_reconnect: true } ),
+      new Server('localhost', 30001, { auto_reconnect: true } ),
+      new Server('localhost', 30002, { auto_reconnect: true } )
     ]
   );
 
