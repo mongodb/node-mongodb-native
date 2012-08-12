@@ -1,4 +1,4 @@
-1.1.2 2012-07-28
+1.1.4 2012-08-12
 ----------------
 - Added Mongos connection type with a fallback list for mongos proxies, supports ha (on by default) and will attempt to reconnect to failed proxies.
 - Documents can now have a toBSON method that lets the user control the serialization behavior for documents being saved.
@@ -35,6 +35,8 @@
 - Added open event on connection established for replicaset, mongos and server
 - Much faster BSON C++ parser thanks to Lucasfilm Singapore.
 - Refactoring of replicaset connection logic to simplify the code.
+- Add `options.connectArbiter` to decide connect arbiters or not (Issue #675)
+- Minor optimization for findAndModify when not using j,w or fsync for safe
 
 1.0.2 2012-05-15
 ----------------
