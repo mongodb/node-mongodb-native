@@ -81,6 +81,7 @@
 <li><strong>readPreference</strong> {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 <li><strong>strategy</strong> {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)</li>
 <li><strong>secondaryAcceptableLatencyMS</strong> {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)</li>
+<li><strong>connectArbiter</strong> {Boolean, default:true}, connect arbiter servers or not.</li>
 </ul>
 </dd>
 </dl>

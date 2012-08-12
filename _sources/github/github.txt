@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 235
+           - 236
          * - **Watchers**
-           - 2228
+           - 2229
 
 .. topic:: mongo-model
 
@@ -262,7 +262,7 @@ Content Management Systems
          * - **Forks**
            - 135
          * - **Watchers**
-           - 900
+           - 899
 
 Grid FS libraries or tools
 --------------------------
@@ -547,7 +547,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 35
          * - **Watchers**
-           - 164
+           - 165
 
 .. topic:: lazyBum
 
@@ -939,7 +939,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 181
          * - **Watchers**
-           - 2073
+           - 2071
 
 Libraries for the connect middleware
 ------------------------------------

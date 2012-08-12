@@ -173,9 +173,9 @@
 
 <span class="c1">// Replica configuration</span>
 <span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSetServers</span><span class="p">([</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">30000</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
-    <span class="c1">// new Server(&#39;localhost&#39;, 30001, { auto_reconnect: true } ),</span>
-    <span class="c1">// new Server(&#39;localhost&#39;, 30002, { auto_reconnect: true } )</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">30000</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">30001</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">30002</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
   <span class="p">]</span>
 <span class="p">);</span>
 
