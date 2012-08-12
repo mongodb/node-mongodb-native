@@ -2,6 +2,7 @@
 *.sw*
 *.seed
 *.tmp
+*.log
 .project
 .settings
 .tm_properties
