@@ -100,29 +100,6 @@ Web frameworks using MongoDB
 Object Document Modeling Libraries
 ----------------------------------
 
-.. topic:: noid
-
-    ODM for MongoDB/Node.js with CoffeeScript
-
-      .. list-table::
-         :widths: 25 85
-         :header-rows: 0
-
-         * - **Activity Level**
-           - .. image:: ../static/nonactive.png
-         * - **Last push**
-           - 1:20:59 on 22/11/2010
-         * - **Homepage**
-           - http://
-         * - **Url**
-           - https://github.com/chrisgibson/noid
-         * - **Clone Url**
-           - https://github.com/chrisgibson/noid.git
-         * - **Forks**
-           - 2
-         * - **Watchers**
-           - 8
-
 .. topic:: mongoose
 
     Node.JS MongoDB utility library with ORM-like functionality
@@ -134,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 15:3:3 on 11/7/2012
+           - 17:26:18 on 13/7/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 236
+           - 237
          * - **Watchers**
-           - 2229
+           - 2237
 
 .. topic:: mongo-model
 
@@ -288,7 +265,7 @@ Grid FS libraries or tools
          * - **Forks**
            - 1
          * - **Watchers**
-           - 8
+           - 9
 
 Wrapper libraries to ease the use of development or provide simple ODM like behaviours
 --------------------------------------------------------------------------------------
@@ -314,7 +291,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 5
          * - **Watchers**
-           - 42
+           - 41
 
 .. topic:: mongoq
 
@@ -394,7 +371,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 5:14:49 on 11/3/2012
          * - **Homepage**
@@ -547,7 +524,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 35
          * - **Watchers**
-           - 165
+           - 166
 
 .. topic:: lazyBum
 
@@ -620,29 +597,6 @@ Test helpers and libraries
            - 2
          * - **Watchers**
            - 3
-
-.. topic:: node-database-cleaner
-
-    The simplest way to clean your database after tests
-
-      .. list-table::
-         :widths: 25 85
-         :header-rows: 0
-
-         * - **Activity Level**
-           - .. image:: ../static/active.png
-         * - **Last push**
-           - 12:35:16 on 7/4/2012
-         * - **Homepage**
-           - http://
-         * - **Url**
-           - https://github.com/emerleite/node-database-cleaner
-         * - **Clone Url**
-           - https://github.com/emerleite/node-database-cleaner.git
-         * - **Forks**
-           - 7
-         * - **Watchers**
-           - 32
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -841,7 +795,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 5
          * - **Watchers**
-           - 22
+           - 23
 
 .. topic:: databank
 
@@ -937,9 +891,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 181
+           - 182
          * - **Watchers**
-           - 2071
+           - 2072
 
 Libraries for the connect middleware
 ------------------------------------
@@ -978,7 +932,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 7:46:51 on 11/5/2012
+           - 17:45:52 on 12/7/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -1011,7 +965,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 42
          * - **Watchers**
-           - 141
+           - 143
 
 Libraries or applications for continous integration
 ---------------------------------------------------
