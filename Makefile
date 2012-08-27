@@ -7,19 +7,6 @@ name = all
 total: build_native
 
 build_native:
-	# $(MAKE) -C ./external-libs/bson all
-
-build_native_debug:
-	$(MAKE) -C ./external-libs/bson all_debug
-
-build_native_clang:
-	$(MAKE) -C ./external-libs/bson clang
-
-build_native_clang_debug:
-	$(MAKE) -C ./external-libs/bson clang_debug
-
-clean_native:
-	$(MAKE) -C ./external-libs/bson clean
 
 test: build_native
 	@echo "\n == Run All tests minus replicaset tests=="
@@ -41,16 +28,13 @@ test_nodeunit_pure:
 	@echo "\n == Execute Test Suite using Pure JS BSON Parser == "
 	@$(NODEUNIT) test/ test/gridstore test/bson
 
-test_js:
-	@$(NODEUNIT) $(TESTS)
-
 test_nodeunit_replicaset_pure:
 	@echo "\n == Execute Test Suite using Pure JS BSON Parser == "
 	@$(NODEUNIT) test/replicaset
 
 test_nodeunit_native:
 	@echo "\n == Execute Test Suite using Native BSON Parser == "
-	@TEST_NATIVE=TRUE $(NODEUNIT) test/ test/gridstore test/bson	
+	@TEST_NATIVE=TRUE $(NODEUNIT) test/ test/gridstore test/bson
 
 test_nodeunit_replicaset_native:
 	@echo "\n == Execute Test Suite using Native BSON Parser == "

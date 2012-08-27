@@ -1,5 +1,8 @@
 1.1.5
--
+- Fix for eval on replicaset Issue #684
+- Use helpful error msg when native parser not compiled (Issue #685, https://github.com/aheckmann)
+- Arbiter connect hotfix (Issue #681, https://github.com/fengmk2)
+- Upgraded bson parser to 0.1.2 using gyp, deprecated support for node 0.4.X
 
 1.1.4 2012-08-12
 ----------------
