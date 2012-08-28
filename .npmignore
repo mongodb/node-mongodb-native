@@ -3,7 +3,7 @@
 .buildinfo
 .mongodb
 .DS_Store
-*,tmp
+*.tmp
 
 HISTORY
 Readme.md
