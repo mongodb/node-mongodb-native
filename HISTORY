@@ -4,6 +4,8 @@
 - Arbiter connect hotfix (Issue #681, https://github.com/fengmk2)
 - Upgraded bson parser to 0.1.2 using gyp, deprecated support for node 0.4.X
 - Added name parameter to createIndex/ensureIndex to be able to override index names larger than 128 bytes
+- Added exhaust option for find for feature completion (not recommended for normal use)
+- Added tailableRetryInterval to find for tailable cursors to allow to control getMore retry time interval
 
 1.1.4 2012-08-12
 ----------------
