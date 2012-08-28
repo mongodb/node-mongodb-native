@@ -18,11 +18,11 @@ var client = null;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
+  var self = exports;
   client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
@@ -39,7 +39,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -57,28 +57,28 @@ exports.tearDown = function(callback) {
  * @_function createIndex
  */
 exports.shouldCreateASimpleIndexOnASingleField = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection we want to drop later
-    db.createCollection('simple_index_test', function(err, collection) {      
+    db.createCollection('simple_index_test', function(err, collection) {
       test.equal(null, err);
-      
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         // Create an index on the a field
         collection.createIndex('a', {safe:true}, function(err, indexName) {
           test.equal("a_1", indexName);
-          
+
           // Peform a query, with explain to show we hit the query
           collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
             test.deepEqual([[2, 2]], explanation[0].indexBounds.a);
-            
+
             db.close();
             test.done();
           });
@@ -95,30 +95,30 @@ exports.shouldCreateASimpleIndexOnASingleField = function(test) {
  * @_function createIndex
  */
 exports.shouldCreateComplexIndexOnTwoFields = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-  
+
     // Create a collection we want to drop later
-    db.createCollection('more_complex_index_test', function(err, collection) {      
+    db.createCollection('more_complex_index_test', function(err, collection) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-  
+
         // Create an index on the a field
         collection.createIndex({a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-    
+
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
             test.equal(null, err);
             test.equal(4, items.length);
-      
+
             // Peform a query, with explain to show we hit the query
             collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
               test.equal(null, err);
@@ -142,30 +142,30 @@ exports.shouldCreateComplexIndexOnTwoFields = function(test) {
  * @_function ensureIndex
  */
 exports.shouldCreateComplexEnsureIndex = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
 
     // Create a collection we want to drop later
-    db.createCollection('more_complex_ensure_index_test', function(err, collection) {      
+    db.createCollection('more_complex_ensure_index_test', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-      
+
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
             test.equal(null, err);
             test.equal(4, items.length);
-        
+
             // Peform a query, with explain to show we hit the query
             collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
               test.equal(null, err);
@@ -189,25 +189,25 @@ exports.shouldCreateComplexEnsureIndex = function(test) {
  * @_function indexInformation
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection we want to drop later
-    db.createCollection('more_index_information_test', function(err, collection) {      
+    db.createCollection('more_index_information_test', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-      
+
           // Fetch basic indexInformation for collection
           collection.indexInformation(function(err, indexInformation) {
             test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
@@ -219,7 +219,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
               test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
               db.close();
-              test.done();              
+              test.done();
             });
           });
         });
@@ -235,36 +235,36 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
  * @_function dropIndex
  */
 exports.shouldCorrectlyCreateAndDropIndex = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection we want to drop later
-    db.createCollection('create_and_drop_an_index', function(err, collection) {      
+    db.createCollection('create_and_drop_an_index', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-      
+
           // Drop the index
           collection.dropIndex("a_1_b_1", function(err, result) {
             test.equal(null, err);
-        
+
             // Verify that the index is gone
-            collection.indexInformation(function(err, indexInformation) {              
+            collection.indexInformation(function(err, indexInformation) {
               test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
               test.equal(null, indexInformation.a_1_b_1);
 
               db.close();
-              test.done();              
+              test.done();
             });
           });
         });
@@ -280,21 +280,21 @@ exports.shouldCorrectlyCreateAndDropIndex = function(test) {
  * @_function dropIndexes
  */
 exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection we want to drop later
-    db.createCollection('shouldCorrectlyCreateAndDropAllIndex', function(err, collection) {      
+    db.createCollection('shouldCorrectlyCreateAndDropAllIndex', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
@@ -302,19 +302,19 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
           // Create an additional index
           collection.ensureIndex({c:1}
             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-      
+
             // Drop the index
             collection.dropAllIndexes(function(err, result) {
               test.equal(null, err);
-        
+
               // Verify that the index is gone
-              collection.indexInformation(function(err, indexInformation) {              
+              collection.indexInformation(function(err, indexInformation) {
                 test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
                 test.equal(null, indexInformation.a_1_b_1);
                 test.equal(null, indexInformation.c_1);
 
                 db.close();
-                test.done();              
+                test.done();
               });
             });
           });
@@ -331,21 +331,21 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
  * @_function reIndex
  */
 exports.shouldCorrectlyForceReindexOnCollection = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a collection we want to drop later
-    db.createCollection('shouldCorrectlyForceReindexOnCollection', function(err, collection) {      
+    db.createCollection('shouldCorrectlyForceReindexOnCollection', function(err, collection) {
       test.equal(null, err);
-  
+
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
         test.equal(null, err);
-    
+
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
           , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
@@ -354,14 +354,14 @@ exports.shouldCorrectlyForceReindexOnCollection = function(test) {
           collection.reIndex(function(err, result) {
             test.equal(null, err);
             test.equal(true, result);
-        
+
             // Verify that the index is gone
-            collection.indexInformation(function(err, indexInformation) {              
+            collection.indexInformation(function(err, indexInformation) {
               test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
               test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
 
               db.close();
-              test.done();              
+              test.done();
             });
           });
         });
@@ -407,7 +407,7 @@ exports.shouldCorrectlyExtractIndexInformation = function(test) {
         });
       });
     })
-  });    
+  });
 }
 
 /**
@@ -435,7 +435,7 @@ exports.shouldCorrectlyHandleMultipleColumnIndexes = function(test) {
         });
       });
     });
-  });    
+  });
 }
 
 /**
@@ -451,22 +451,22 @@ exports.shouldCorrectlyHandleUniqueIndex = function(test) {
         client.error(function(err, errors) {
           test.equal(1, errors.length);
           test.equal(null, errors[0].err);
-  
+
           // Create a unique index and test that insert fails
           client.createCollection('test_unique_index2', function(err, collection) {
             client.createIndex(collection.collectionName, 'hello', {unique:true, safe:true}, function(err, indexName) {
               // Insert some docs
-              collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, ids) {                            
+              collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, ids) {
                 test.ok(err != null);
                 test.equal(11000, err.code);
                 test.done();
               });
             });
-          });    
+          });
         });
       });
     });
-  });  
+  });
 }
 
 /**
@@ -490,10 +490,10 @@ exports.shouldCorrectlyCreateSubfieldIndex = function(test) {
               test.done();
             });
           });
-        });    
+        });
       });
     });
-  });  
+  });
 }
 
 /**
@@ -524,15 +524,15 @@ exports.shouldCorrectlyDropIndexes = function(test) {
  */
 exports.shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback = function(test) {
   client.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
-    
+
     try {
       // insert a doc
       collection.createIndex({a:1}, {safe:true});
       test.ok(false);
-    } catch(err) {}      
+    } catch(err) {}
 
     test.done();
-  }); 
+  });
 }
 
 /**
@@ -540,15 +540,15 @@ exports.shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback = function(tes
  */
 exports.shouldThrowErrorOnAttemptingSafeEnsureIndexWithNoCallback = function(test) {
   client.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
-    
+
     try {
       // insert a doc
       collection.ensureIndex({a:1}, {safe:true});
       test.ok(false);
-    } catch(err) {}      
+    } catch(err) {}
 
     test.done();
-  }); 
+  });
 }
 
 
@@ -603,7 +603,7 @@ exports.shouldCorrectlyExecuteEnsureIndex = function(test) {
       });
     });
   })
-}  
+}
 
 /**
  * @ignore
@@ -611,9 +611,9 @@ exports.shouldCorrectlyExecuteEnsureIndex = function(test) {
 exports.shouldCorrectlyCreateAndUseSparseIndex = function(test) {
   client.createCollection('create_and_use_sparse_index_test', function(err, r) {
     client.collection('create_and_use_sparse_index_test', function(err, collection) {
-      
+
       collection.ensureIndex({title:1}, {sparse:true, safe:true}, function(err, indexName) {
-        collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {            
+        collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
           collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
             test.equal(1, items.length);
             test.equal("Sarah", items[0].name);
@@ -625,12 +625,12 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = function(test) {
               test.done();
             })
           })
-        });          
+        });
       })
     })
-  })    
+  })
 }
-  
+
 /**
  * @ignore
  */
@@ -644,15 +644,15 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
             collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {safe:true, keepGoing:true}, function(err, result) {
               collection.count(function(err, count) {
                 test.equal(3, count);
-                test.done();        
+                test.done();
               })
             });
           });
         });
-      });      
+      });
     } else {
-      test.done();      
-    }      
+      test.done();
+    }
   });
 }
 
@@ -675,13 +675,13 @@ exports.shouldCorrectlyHandleGeospatialIndexes = function(test) {
                 test.done();
               });
             });
-           });   
+           });
         });
       });
     } else {
-      test.done();      
-    }      
-  });        
+      test.done();
+    }
+  });
 }
 
 /**
@@ -706,13 +706,13 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = function(test) {
                 });
               });
             });
-           });   
+           });
         });
-      });    
+      });
     } else {
-      test.done();      
-    }      
-  });        
+      test.done();
+    }
+  });
 }
 
 /**
@@ -722,34 +722,34 @@ exports.shouldThrowDuplicateKeyErrorWhenCreatingIndex = function(test) {
   client.createCollection('shouldThrowDuplicateKeyErrorWhenCreatingIndex', function(err, collection) {
     collection.insert([{a:1}, {a:1}], {safe:true}, function(err, result) {
       test.equal(null, err);
-      
+
       collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, indexName) {
         test.ok(err != null);
         test.done();
       });
     })
-  });    
+  });
 }
 
 /**
  * @ignore
  */
 exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser, strict:true});
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     db.createCollection('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', function(err, collection) {
       collection.insert([{a:1}, {a:1}], {safe:true}, function(err, result) {
         test.equal(null, err);
-        
+
         collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, indexName) {
           test.ok(err != null);
           db.close();
           test.done();
         });
       })
-    });    
+    });
   });
 }
 
@@ -757,10 +757,10 @@ exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = function(test) {
-  // Establish connection to db  
+  // Establish connection to db
   client.createCollection('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', function(err, collection) {
     test.equal(null, err);
-    
+
     collection.ensureIndex({loc:'2d'}, {min:200, max:1400, safe:true}, function(err, indexName) {
       test.equal(null, err);
 
@@ -769,14 +769,33 @@ exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = function(test) {
         test.done();
       });
     });
-  });    
+  });
 }
 
+/**
+ * @ignore
+ */
+exports['Should correctly create an index with overriden name'] = function(test) {
+  // Establish connection to db
+  client.createCollection('shouldCorrectlyCreateAnIndexWithOverridenName', function(err, collection) {
+    test.equal(null, err);
+
+    collection.ensureIndex("name", {name: "myfunky_name"}, function(err, indexName) {
+      test.equal(null, err);
+
+      // Fetch full index information
+      collection.indexInformation({full:false}, function(err, indexInformation) {
+        test.ok(indexInformation['myfunky_name'] != null);
+        test.done();
+      });
+    });
+  });
+}
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -788,7 +807,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
