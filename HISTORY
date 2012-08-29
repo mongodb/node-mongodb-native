@@ -6,6 +6,7 @@
 - Added name parameter to createIndex/ensureIndex to be able to override index names larger than 128 bytes
 - Added exhaust option for find for feature completion (not recommended for normal use)
 - Added tailableRetryInterval to find for tailable cursors to allow to control getMore retry time interval
+- Fixes for read preferences when using MongoS to correctly handle no read preference set when iterating over a cursor (Issue #686)
 
 1.1.4 2012-08-12
 ----------------

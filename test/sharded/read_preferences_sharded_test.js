@@ -9,6 +9,7 @@ var testCase = require('nodeunit').testCase,
   Db = mongodb.Db,
   Mongos = mongodb.Mongos,
   ReadPreference = mongodb.ReadPreference,
+  GridStore = mongodb.GridStore,
   Server = mongodb.Server;
 
 // Keep instance of ReplicaSetManager
@@ -19,7 +20,7 @@ var Shard = Shard == null ? null : Shard;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
@@ -32,18 +33,18 @@ exports.setUp = function(callback) {
     configPortRangeSet:40000,
     // Two mongos proxies to ensure correct failover
     numberOfMongosServers:2,
-    mongosRangeSet:50000,    
+    mongosRangeSet:50000,
     // Collection and shard key setup
     db:"sharded_test_db",
     collection:"sharded_test_db_collection",
-    shardKey: "_id",      
+    shardKey: "_id",
     // Additional settings
     replicasetOptions: [
       {tags: [{"dc1":"ny"}, {"dc2":"sf"}]},
       {tags: [{"dc1":"ny"}, {"dc2":"sf"}]}
     ]
   })
-    
+
   // Start the shard
   Shard.start(function(err, result) {
     callback();
@@ -53,7 +54,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -77,7 +78,7 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
-  
+
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test");
     // Insert a simple doc
@@ -102,9 +103,9 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
 
         db.close();
         test.done();
-      })      
+      })
     });
-  });  
+  });
 }
 
 /**
@@ -122,7 +123,7 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
-  
+
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test");
     // Insert a simple doc
@@ -145,9 +146,9 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
         test.ok(err != null);
         db.close();
         test.done();
-      })      
+      })
     });
-  });  
+  });
 }
 
 /**
@@ -165,7 +166,7 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
-  
+
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test");
     // Insert a simple doc
@@ -188,9 +189,9 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
         test.ok(err != null);
         db.close();
         test.done();
-      })      
+      })
     });
-  });  
+  });
 }
 
 /**
@@ -208,7 +209,7 @@ exports['Should correctly read from a tagged secondary using Mongos'] = function
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
-  
+
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test");
     // Insert a simple doc
@@ -233,15 +234,48 @@ exports['Should correctly read from a tagged secondary using Mongos'] = function
 
         db.close();
         test.done();
-      })      
+      })
     });
-  });  
+  });
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly perform gridstore read and write'] = function(test) {
+  // Set up mongos connection
+  var mongos = new Mongos([
+      new Server("localhost", 50000, { auto_reconnect: true }),
+      new Server("localhost", 50001, { auto_reconnect: true })
+    ])
+
+  // Connect using the mongos connections
+  var db = new Db('integration_test_', mongos);
+  db.open(function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+
+    GridStore(db, "test_gs_small_file", "w").open(function(err, gridStore) {
+      gridStore.write("hello world!", function(err, gridStore) {
+        gridStore.close(function(err, result) {
+          // Read test of the file
+          GridStore.read(db, 'test_gs_small_file', function(err, data) {
+            test.equal('hello world!', data);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+}
+
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -253,7 +287,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;

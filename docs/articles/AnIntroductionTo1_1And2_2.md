@@ -23,9 +23,9 @@ Below is a simple example using readpreferences at the db level.
 
     // Replica configuration
     var replSet = new ReplSet( [
-        new Server( "localhost", 27017, { auto_reconnect: true } ),
-        new Server( "localhost", 27018, { auto_reconnect: true } ),
-        new Server( "localhost", 27019, { auto_reconnect: true } )
+        new Server( "localhost", 27017),
+        new Server( "localhost", 27018),
+        new Server( "localhost", 27019)
       ], {rs_name: "foo"}
     );
 
@@ -46,9 +46,9 @@ Below is a simple example using readpreferences at the collection level.
 
     // Replica configuration
     var replSet = new ReplSet( [
-        new Server( "localhost", 27017, { auto_reconnect: true } ),
-        new Server( "localhost", 27018, { auto_reconnect: true } ),
-        new Server( "localhost", 27019, { auto_reconnect: true } )
+        new Server( "localhost", 27017),
+        new Server( "localhost", 27018),
+        new Server( "localhost", 27019)
       ], {rs_name: "foo"}
     );
 
@@ -74,9 +74,9 @@ Below is a simple example using readpreferences at the query level.
 
     // Replica configuration
     var replSet = new ReplSet( [
-        new Server( "localhost", 27017, { auto_reconnect: true } ),
-        new Server( "localhost", 27018, { auto_reconnect: true } ),
-        new Server( "localhost", 27019, { auto_reconnect: true } )
+        new Server( "localhost", 27017),
+        new Server( "localhost", 27018),
+        new Server( "localhost", 27019)
       ], {rs_name: "foo"}
     );
 
@@ -102,9 +102,9 @@ Below is a simple example using a readpreference with tags at the query level. T
 
     // Replica configuration
     var replSet = new ReplSet( [
-        new Server( "localhost", 27017, { auto_reconnect: true } ),
-        new Server( "localhost", 27018, { auto_reconnect: true } ),
-        new Server( "localhost", 27019, { auto_reconnect: true } )
+        new Server( "localhost", 27017),
+        new Server( "localhost", 27018),
+        new Server( "localhost", 27019)
       ], {rs_name: "foo"}
     );
 
@@ -284,8 +284,8 @@ A simple example below
 Thanks to the awesome people at Lucasfilm Singapore we have a new BSON C++ serializer/deserializer that performs on average 40-50% faster than the current implementation.
 
 ## Other minor changes
-* Connection pool is not set to 5 by default override if there is need for either a bigger or smaller pool pr node process.
-* Gridfs now ensure an index on the chunks collection on file_id.
+* Connection pool is now set to 5 by default. Override if there is need for either a bigger or smaller pool per node process.
+* Gridfs now ensures an index on the chunks collection on file_id.
 
 
 
