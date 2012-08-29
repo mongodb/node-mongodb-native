@@ -1,4 +1,5 @@
-1.1.5
+1.1.5 2012-08-29
+----------------
 - Fix for eval on replicaset Issue #684
 - Use helpful error msg when native parser not compiled (Issue #685, https://github.com/aheckmann)
 - Arbiter connect hotfix (Issue #681, https://github.com/fengmk2)
