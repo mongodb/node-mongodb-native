@@ -271,6 +271,54 @@ exports['Should correctly perform gridstore read and write'] = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
+exports['Should correctly connect to MongoS using single server instance'] = function(test) {
+  // Set up mongos connection
+  // var mongos = new Mongos([
+  //     new Server("localhost", 50000, { auto_reconnect: true }),
+  //     new Server("localhost", 50001, { auto_reconnect: true })
+  //   ])
+
+  var mongos = new Server("localhost", 50000, { auto_reconnect: true });
+
+  // Connect using the mongos connections
+  var db = new Db('integration_test_', mongos);
+  db.open(function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+
+    // Perform a simple insert into a collection
+    var collection = db.collection("shard_test");
+    // Insert a simple doc
+    collection.insert({test:1}, {safe:{w:2, wtimeout:10000}}, function(err, result) {
+      test.equal(null, err);
+
+      collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{"dc2":"sf"}, {"dc1":"ny"}])}, function(err, item) {
+        test.equal(null, err);
+        test.equal(1, item.test);
+
+        db.close();
+        test.done();
+      })
+    });
+
+    // GridStore(db, "test_gs_small_file", "w").open(function(err, gridStore) {
+    //   gridStore.write("hello world!", function(err, gridStore) {
+    //     gridStore.close(function(err, result) {
+    //       // Read test of the file
+    //       GridStore.read(db, 'test_gs_small_file', function(err, data) {
+    //         test.equal('hello world!', data);
+
+    //         db.close();
+    //         test.done();
+    //       });
+    //     });
+    //   });
+    // });
+  });
+}
 
 /**
  * Retrieve the server information for the current

@@ -12,6 +12,7 @@ var testCase = require('nodeunit').testCase,
   Binary = mongodb.Binary,
   Step = require('step'),
   Db = mongodb.Db,
+  ReadPreference = mongodb.ReadPreference,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server;
@@ -1748,6 +1749,39 @@ exports.shouldCorrectlyExecuteExhaustQuery = function(test) {
         })
       }
 
+      // Insert a bunch of documents
+      collection.insert(docs, {safe:true}, function(err, result) {
+        // Peform a simple find and return all the documents
+        collection.find({}, {exhaust:true}).toArray(function(err, docs2) {
+          test.equal(null, err);
+          test.equal(docs.length, docs2.length)
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}
+
+exports['Readpreferences should work fine when using a single server instance'] = function(test) {
+  var server = new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL, readPreference:ReadPreference.PRIMARY_PREFERRED});
+  var db = new Db('integration_tests', server, {native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    test.equal(null, err);
+
+    var docs = [];
+    for(var i = 0; i < 1; i++) {
+      docs.push({
+        a: 1,
+        b: "helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld",
+      })
+    }
+
+    // Create a collection we want to drop later
+    db.collection('Readpreferencesshouldworkfine', function(err, collection) {
       // Insert a bunch of documents
       collection.insert(docs, {safe:true}, function(err, result) {
         // Peform a simple find and return all the documents
