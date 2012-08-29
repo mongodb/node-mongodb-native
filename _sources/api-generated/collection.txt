@@ -1025,31 +1025,31 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('simple_find_and_modify_operations_', function(err, collection) {      
+       db.createCollection('simple_find_and_modify_operations_', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert some test documentations
          collection.insert([{a:1}, {b:1}, {c:1}], {safe:true}, function(err, result) {
            assert.equal(null, err);
-           
+     
            // Simple findAndModify command returning the new document
            collection.findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true}, function(err, doc) {
              assert.equal(null, err);
              assert.equal(1, doc.a);
              assert.equal(1, doc.b1);
-             
-             // Simple findAndModify command returning the new document and 
+     
+             // Simple findAndModify command returning the new document and
              // removing it at the same time
-             collection.findAndModify({b:1}, [['b', 1]], 
+             collection.findAndModify({b:1}, [['b', 1]],
                {$set:{b:2}}, {remove:true}, function(err, doc) {
-               
+     
                // Verify that the document is gone
                collection.findOne({b:1}, function(err, item) {
                  assert.equal(null, err);
@@ -1062,12 +1062,12 @@ Options
                      assert.equal(null, err);
                      assert.equal(1, doc.d);
                      assert.equal(1, doc.f);
-                     
+     
                      db.close();
                  })
                });
-             }); 
-           });        
+             });
+           });
          });
        });
      });
@@ -1112,26 +1112,26 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('simple_find_and_modify_operations_', function(err, collection) {      
+       db.createCollection('simple_find_and_modify_operations_', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert some test documentations
          collection.insert([{a:1}, {b:1}, {c:1}], {safe:true}, function(err, result) {
-           assert.equal(null, err);        
-           
-           // Simple findAndModify command returning the new document and 
+           assert.equal(null, err);
+     
+           // Simple findAndModify command returning the new document and
            // removing it at the same time
            collection.findAndRemove({b:1}, [['b', 1]], function(err, doc) {
              assert.equal(null, err);
              assert.equal(1, doc.b);
-             
+     
              // Verify that the document is gone
              collection.findOne({b:1}, function(err, item) {
                assert.equal(null, err);
@@ -1139,7 +1139,7 @@ Options
      
                db.close();
              });
-           }); 
+           });
          });
        });
      });
@@ -1175,7 +1175,9 @@ Options
  - **snapshot** {Boolean, default:false}, snapshot query.
  - **timeout** {Boolean, default:false}, specify if the cursor can timeout.
  - **tailable** {Boolean, default:false}, specify if the cursor is tailable.
+ - **tailableRetryInterval** {Number, default:100}, specify the miliseconds between getMores on tailable cursor.
  - **awaitdata** {Boolean, default:false} allow the cursor to wait for data, only applicable for tailable cursor.
+ - **exhaust** {Boolean, default:false} have the server send all the documents at once as getMore packets, not recommended.
  - **batchSize** {Number, default:0}, set the batchSize for the getMoreCommand when iterating over the query results.
  - **returnKey** {Boolean, default:false}, only return the index key.
  - **maxScan** {Number}, Limit the number of items to scan.
@@ -1185,7 +1187,7 @@ Options
  - **comment** {String}, You can put a $comment field on a query to make looking in the profiler logs simpler.
  - **raw** {Boolean, default:false}, Return all BSON documents as Raw Buffer documents.
  - **readPreference** {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
- - **numberOfRetries** {Number, default:1}, if using awaidata specifies the number of times to retry on timeout.
+ - **numberOfRetries** {Number, default:5}, if using awaidata specifies the number of times to retry on timeout.
 
 .. js:function:: find(query[, options], [callback])
 
@@ -1213,16 +1215,16 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('simple_query', function(err, collection) {      
+       db.createCollection('simple_query', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert a bunch of documents for the testing
          collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, result) {
            assert.equal(null, err);
@@ -1231,12 +1233,12 @@ Options
            collection.find().toArray(function(err, docs) {
              assert.equal(null, err);
              assert.equal(3, docs.length);
-             
+     
              db.close();
            });
          });
        });
-     });  
+     });
 
   
   
@@ -1254,16 +1256,16 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('simple_explain_query', function(err, collection) {      
+       db.createCollection('simple_explain_query', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert a bunch of documents for the testing
          collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, result) {
            assert.equal(null, err);
@@ -1272,12 +1274,12 @@ Options
            collection.find({}, {explain:true}).toArray(function(err, docs) {
              assert.equal(null, err);
              assert.equal(1, docs.length);
-             
+     
              db.close();
            });
          });
        });
-     });  
+     });
 
   
   
@@ -1295,16 +1297,16 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('simple_limit_skip_query', function(err, collection) {      
+       db.createCollection('simple_limit_skip_query', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert a bunch of documents for the testing
          collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
            assert.equal(null, err);
@@ -1315,12 +1317,12 @@ Options
              assert.equal(1, docs.length);
              assert.equal(null, docs[0].a);
              assert.equal(2, docs[0].b);
-             
+     
              db.close();
            });
          });
        });
-     });  
+     });
 
 
 -------
@@ -1389,16 +1391,16 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('simple_limit_skip_find_one_query', function(err, collection) {      
+       db.createCollection('simple_limit_skip_find_one_query', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert a bunch of documents for the testing
          collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
            assert.equal(null, err);
@@ -1408,12 +1410,12 @@ Options
              assert.equal(null, err);
              assert.equal(null, doc.a);
              assert.equal(2, doc.b);
-             
+     
              db.close();
            });
          });
        });
-     });  
+     });
 
 
 -----------
@@ -1433,6 +1435,9 @@ Options
  - **dropDups** {Boolean, default:false}, a unique index cannot be created on a key that has pre-existing duplicate values. If you would like to create the index anyway, keeping the first document the database indexes and deleting all subsequent documents that have duplicate value
  - **min** {Number}, for geospatial indexes set the lower bound for the co-ordinates.
  - **max** {Number}, for geospatial indexes set the high bound for the co-ordinates.
+ - **v** {Number}, specify the format version of the indexes.
+ - **expireAfterSeconds** {Number}, allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
+ - **name** {String}, override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
 
 .. js:function:: createIndex(fieldOrSpec[, options], callback)
 
@@ -1460,28 +1465,28 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('simple_index_test', function(err, collection) {      
+       db.createCollection('simple_index_test', function(err, collection) {
          assert.equal(null, err);
-         
+     
          // Insert a bunch of documents for the index
          collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {safe:true}, function(err, result) {
            assert.equal(null, err);
-           
+     
            // Create an index on the a field
            collection.createIndex('a', {safe:true}, function(err, indexName) {
              assert.equal("a_1", indexName);
-             
+     
              // Peform a query, with explain to show we hit the query
              collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
                assert.deepEqual([[2, 2]], explanation[0].indexBounds.a);
-               
+     
                db.close();
              });
            });
@@ -1505,14 +1510,14 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
      
        // Create a collection we want to drop later
-       db.createCollection('more_complex_index_test', function(err, collection) {      
+       db.createCollection('more_complex_index_test', function(err, collection) {
          assert.equal(null, err);
      
          // Insert a bunch of documents for the index
@@ -1523,12 +1528,12 @@ Options
            // Create an index on the a field
            collection.createIndex({a:1, b:1}
              , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-       
+     
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
                assert.equal(null, err);
                assert.equal(4, items.length);
-         
+     
                // Peform a query, with explain to show we hit the query
                collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
                  assert.equal(null, err);
@@ -1562,6 +1567,8 @@ Options
  - **min** {Number}, for geospatial indexes set the lower bound for the co-ordinates.
  - **max** {Number}, for geospatial indexes set the high bound for the co-ordinates.
  - **v** {Number}, specify the format version of the indexes.
+ - **expireAfterSeconds** {Number}, allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
+ - **name** {String}, override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
 
 .. js:function:: ensureIndex(fieldOrSpec[, options], callback)
 
@@ -1589,30 +1596,30 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
      
        // Create a collection we want to drop later
-       db.createCollection('more_complex_ensure_index_test', function(err, collection) {      
+       db.createCollection('more_complex_ensure_index_test', function(err, collection) {
          assert.equal(null, err);
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
            assert.equal(null, err);
-       
+     
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
              , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-         
+     
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
                assert.equal(null, err);
                assert.equal(4, items.length);
-           
+     
                // Peform a query, with explain to show we hit the query
                collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
                  assert.equal(null, err);
@@ -1665,25 +1672,25 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('more_index_information_test', function(err, collection) {      
+       db.createCollection('more_index_information_test', function(err, collection) {
          assert.equal(null, err);
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
            assert.equal(null, err);
-       
+     
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
              , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-         
+     
              // Fetch basic indexInformation for collection
              collection.indexInformation(function(err, indexInformation) {
                assert.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
@@ -1694,7 +1701,7 @@ Options
                  assert.deepEqual({ _id: 1 }, indexInformation[0].key);
                  assert.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
      
-                 db.close();              
+                 db.close();
                });
              });
            });
@@ -1735,35 +1742,35 @@ Drops an index from this collection.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('create_and_drop_an_index', function(err, collection) {      
+       db.createCollection('create_and_drop_an_index', function(err, collection) {
          assert.equal(null, err);
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
            assert.equal(null, err);
-       
+     
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
              , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
-         
+     
              // Drop the index
              collection.dropIndex("a_1_b_1", function(err, result) {
                assert.equal(null, err);
-           
+     
                // Verify that the index is gone
-               collection.indexInformation(function(err, indexInformation) {              
+               collection.indexInformation(function(err, indexInformation) {
                  assert.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
                  assert.equal(null, indexInformation.a_1_b_1);
      
-                 db.close();              
+                 db.close();
                });
              });
            });
@@ -1817,21 +1824,21 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a collection we want to drop later
-       db.createCollection('shouldCorrectlyForceReindexOnCollection', function(err, collection) {      
+       db.createCollection('shouldCorrectlyForceReindexOnCollection', function(err, collection) {
          assert.equal(null, err);
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
            assert.equal(null, err);
-       
+     
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
              , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
@@ -1840,13 +1847,13 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
              collection.reIndex(function(err, result) {
                assert.equal(null, err);
                assert.equal(true, result);
-           
+     
                // Verify that the index is gone
-               collection.indexInformation(function(err, indexInformation) {              
+               collection.indexInformation(function(err, indexInformation) {
                  assert.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
                  assert.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
      
-                 db.close();              
+                 db.close();
                });
              });
            });

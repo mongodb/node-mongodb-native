@@ -40,9 +40,9 @@ Read preferences
     
     // Replica configuration
     var replSet = new ReplSet( [
-        new Server( "localhost", 27017, { auto_reconnect: true } ),
-        new Server( "localhost", 27018, { auto_reconnect: true } ),
-        new Server( "localhost", 27019, { auto_reconnect: true } )
+        new Server( "localhost", 27017),
+        new Server( "localhost", 27018),
+        new Server( "localhost", 27019)
       ], {rs_name: "foo"}
     );
     
@@ -68,9 +68,9 @@ Read preferences
     
     // Replica configuration
     var replSet = new ReplSet( [
-        new Server( "localhost", 27017, { auto_reconnect: true } ),
-        new Server( "localhost", 27018, { auto_reconnect: true } ),
-        new Server( "localhost", 27019, { auto_reconnect: true } )
+        new Server( "localhost", 27017),
+        new Server( "localhost", 27018),
+        new Server( "localhost", 27019)
       ], {rs_name: "foo"}
     );
     
@@ -101,9 +101,9 @@ Read preferences
     
     // Replica configuration
     var replSet = new ReplSet( [
-        new Server( "localhost", 27017, { auto_reconnect: true } ),
-        new Server( "localhost", 27018, { auto_reconnect: true } ),
-        new Server( "localhost", 27019, { auto_reconnect: true } )
+        new Server( "localhost", 27017),
+        new Server( "localhost", 27018),
+        new Server( "localhost", 27019)
       ], {rs_name: "foo"}
     );
     
@@ -134,9 +134,9 @@ Read preferences
     
     // Replica configuration
     var replSet = new ReplSet( [
-        new Server( "localhost", 27017, { auto_reconnect: true } ),
-        new Server( "localhost", 27018, { auto_reconnect: true } ),
-        new Server( "localhost", 27019, { auto_reconnect: true } )
+        new Server( "localhost", 27017),
+        new Server( "localhost", 27018),
+        new Server( "localhost", 27019)
       ], {rs_name: "foo"}
     );
     
@@ -377,6 +377,6 @@ Much faster BSON C++ parser
 -------------------
 Other minor changes
 -------------------
-  * Connection pool is not set to 5 by default override if there is need for either a bigger or smaller pool pr node process.
-  * Gridfs now ensure an index on the chunks collection on file_id.
+  * Connection pool is now set to 5 by default. Override if there is need for either a bigger or smaller pool per node process.
+  * Gridfs now ensures an index on the chunks collection on file_id.
 

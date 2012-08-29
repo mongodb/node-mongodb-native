@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Mongo Driver and Mongo DB 2.2 Features &mdash; MongoDB Node.JS Driver 1.1.4 documentation</title>
+    <title>Mongo Driver and Mongo DB 2.2 Features &mdash; MongoDB Node.JS Driver 1.1.5 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.1.4',
+        VERSION:     '1.1.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.1.4 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.1.5 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.4 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.5 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -73,9 +73,9 @@
 
 <span class="c1">// Replica configuration</span>
 <span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSet</span><span class="p">(</span> <span class="p">[</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">)</span>
   <span class="p">],</span> <span class="p">{</span><span class="nx">rs_name</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">}</span>
 <span class="p">);</span>
 
@@ -98,9 +98,9 @@
 
 <span class="c1">// Replica configuration</span>
 <span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSet</span><span class="p">(</span> <span class="p">[</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">)</span>
   <span class="p">],</span> <span class="p">{</span><span class="nx">rs_name</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">}</span>
 <span class="p">);</span>
 
@@ -128,9 +128,9 @@
 
 <span class="c1">// Replica configuration</span>
 <span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSet</span><span class="p">(</span> <span class="p">[</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">)</span>
   <span class="p">],</span> <span class="p">{</span><span class="nx">rs_name</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">}</span>
 <span class="p">);</span>
 
@@ -158,9 +158,9 @@
 
 <span class="c1">// Replica configuration</span>
 <span class="kd">var</span> <span class="nx">replSet</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ReplSet</span><span class="p">(</span> <span class="p">[</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">),</span>
-    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">,</span> <span class="p">{</span> <span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">true</span> <span class="p">}</span> <span class="p">)</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27018</span><span class="p">),</span>
+    <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="mi">27019</span><span class="p">)</span>
   <span class="p">],</span> <span class="p">{</span><span class="nx">rs_name</span><span class="o">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">}</span>
 <span class="p">);</span>
 
@@ -384,8 +384,8 @@
 <h2>Other minor changes<a class="headerlink" href="#other-minor-changes" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Connection pool is not set to 5 by default override if there is need for either a bigger or smaller pool pr node process.</li>
-<li>Gridfs now ensure an index on the chunks collection on file_id.</li>
+<li>Connection pool is now set to 5 by default. Override if there is need for either a bigger or smaller pool per node process.</li>
+<li>Gridfs now ensures an index on the chunks collection on file_id.</li>
 </ul>
 </div></blockquote>
 </div>
@@ -565,7 +565,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.4 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.5 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
