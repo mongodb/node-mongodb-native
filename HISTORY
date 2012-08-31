@@ -1,3 +1,8 @@
+1.1.6 2012-09-01
+----------------
+- Fix for readPreference NEAREST for replicasets (Issue #693, https://github.com/aheckmann)
+- Emit end correctly on stream cursor (Issue #692, https://github.com/Raynos)
+
 1.1.5 2012-08-29
 ----------------
 - Fix for eval on replicaset Issue #684
