@@ -16,7 +16,7 @@ Web frameworks using MongoDB
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 5:54:6 on 27/6/2012
+           - 21:48:41 on 31/7/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -39,7 +39,7 @@ Web frameworks using MongoDB
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 23:25:46 on 25/6/2012
+           - 10:20:55 on 31/7/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 18:57:24 on 27/7/2012
+           - 23:55:55 on 29/7/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -144,7 +144,7 @@ Object Document Modeling Libraries
          * - **Forks**
            - 252
          * - **Watchers**
-           - 2291
+           - 2298
 
 .. topic:: mongo-model
 
@@ -167,7 +167,7 @@ Object Document Modeling Libraries
          * - **Forks**
            - 3
          * - **Watchers**
-           - 50
+           - 49
 
 .. topic:: mongodb-expressions
 
@@ -252,7 +252,7 @@ Content Management Systems
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 1:44:52 on 26/7/2012
+           - 23:45:55 on 29/7/2012
          * - **Homepage**
            - http://calip.so
          * - **Url**
@@ -262,7 +262,7 @@ Content Management Systems
          * - **Forks**
            - 138
          * - **Watchers**
-           - 910
+           - 912
 
 Grid FS libraries or tools
 --------------------------
@@ -314,7 +314,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 5
          * - **Watchers**
-           - 41
+           - 39
 
 .. topic:: mongoq
 
@@ -381,9 +381,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/gett/mongojs.git
          * - **Forks**
-           - 23
+           - 24
          * - **Watchers**
-           - 212
+           - 214
 
 .. topic:: mongode
 
@@ -429,7 +429,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 8
          * - **Watchers**
-           - 39
+           - 40
 
 .. topic:: mongodb-async
 
@@ -547,7 +547,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 35
          * - **Watchers**
-           - 168
+           - 167
 
 .. topic:: lazyBum
 
@@ -937,9 +937,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 190
+           - 193
          * - **Watchers**
-           - 2109
+           - 2115
 
 Libraries for the connect middleware
 ------------------------------------
@@ -986,9 +986,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/masylum/connect-mongodb.git
          * - **Forks**
-           - 47
+           - 48
          * - **Watchers**
-           - 174
+           - 175
 
 .. topic:: connect-mongo
 
@@ -1011,7 +1011,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 46
          * - **Watchers**
-           - 144
+           - 145
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -1063,7 +1063,7 @@ Exampe applications
          * - **Forks**
            - 4
          * - **Watchers**
-           - 17
+           - 18
 
 .. topic:: node-mongo-cms
 
