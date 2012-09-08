@@ -3,6 +3,7 @@
 - protect against starting PingStrategy being called more than once (Issue #694, https://github.com/aheckmann)
 - make PingStrategy interval configurable (was 1 second, relaxed to 5) (Issue #693, https://github.com/aheckmann)
 - made PingStrategy api more consistant, callback to start/stop methods are optional (Issue #693, https://github.com/aheckmann)
+- Proper stopping of strategy on replicaset stop
 
 1.1.6 2012-09-01
 ----------------
