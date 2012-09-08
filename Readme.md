@@ -27,6 +27,7 @@ This is a node.js driver for MongoDB. It's a port (or close to a port) of the li
 
 A simple example of inserting a document.
 
+```javascript
     var client = new Db('test', new Server("127.0.0.1", 27017, {})),
         test = function (err, collection) {
           collection.insert({a:2}, function(err, docs) {
@@ -49,6 +50,7 @@ A simple example of inserting a document.
     client.open(function(err, p_client) {
       client.collection('test_insert', test);
     });
+```
 
 Data types
 ==========
@@ -57,15 +59,18 @@ To store and retrieve the non-JSON MongoDb primitives ([ObjectID](http://www.mon
 
 In particular, every document has a unique `_id` which can be almost any type, and by default a 12-byte ObjectID is created. ObjectIDs can be represented as 24-digit hexadecimal strings, but you must convert the string back into an ObjectID before you can use it in the database. For example:
 
+```javascript
     // Get the objectID type
     var ObjectID = require('mongodb').ObjectID;
 
     var idString = '4e4e1638c85e808431000003';
     collection.findOne({_id: new ObjectID(idString)}, console.log)  // ok
     collection.findOne({_id: idString}, console.log)  // wrong! callback gets undefined
+```
 
 Here are the constructors the non-Javascript BSON primitive types:
 
+```javascript
     // Fetch the library
     var mongo = require('mongodb');
     // Create new instances of BSON types
@@ -79,16 +84,19 @@ Here are the constructors the non-Javascript BSON primitive types:
     new mongo.MinKey()
     new mongo.MaxKey()
     new mongo.Double(number)	// Force double storage
+```
 
 The C/C++ bson parser/serializer
 --------------------------------
 
 If you are running a version of this library has the C/C++ parser compiled, to enable the driver to use the C/C++ bson parser pass it the option native_parser:true like below
 
+```javascript
     // using native_parser:
     var client = new Db('integration_tests_20',
                         new Server("127.0.0.1", 27017),
                         {native_parser:true});
+```
 
 The C++ parser uses the js objects both for serialization and deserialization.
 
@@ -131,6 +139,7 @@ Defining your own primary key factory allows you to generate your own series of 
 
 Simple example below
 
+```javascript
     // Custom factory (need to provide a 12 byte array);
     CustomPKFactory = function() {}
     CustomPKFactory.prototype = new Object();
@@ -155,6 +164,7 @@ Simple example below
         });
       });
     });
+```
 
 Strict mode
 -----------
@@ -163,6 +173,7 @@ Each database has an optional strict mode. If it is set then asking for a collec
 that does not exist will return an Error object in the callback. Similarly if you
 attempt to create a collection that already exists. Strict is provided for convenience.
 
+```javascript
     var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
       test.assertEquals(true, error_client.strict);
 
@@ -180,6 +191,7 @@ attempt to create a collection that already exists. Strict is provided for conve
         });
       });
     });
+```
 
 Documentation
 =============
@@ -202,6 +214,7 @@ methods `each` and `toArray` call `nextObject` until the cursor is exhausted.
 
 Signatures:
 
+```javascript
     var cursor = collection.find(query, [fields], options);
     cursor.sort(fields).limit(n).skip(m).
 
@@ -210,6 +223,7 @@ Signatures:
     cursor.toArray(function(err, docs) {});
 
     cursor.rewind()  // reset the cursor to its initial state.
+```
 
 Useful chainable methods of cursor. These can optionally be options of `find` instead of method calls:
 
@@ -241,6 +255,7 @@ inactivity period.
 For information on how to create queries, see the
 [MongoDB section on querying](http://www.mongodb.org/display/DOCS/Querying).
 
+```javascript
     var mongodb = require('mongodb');
     var server = new mongodb.Server("127.0.0.1", 27017, {});
     new mongodb.Db('test', server, {}).open(function (error, client) {
@@ -250,13 +265,16 @@ For information on how to create queries, see the
         console.dir(docs);
       });
     });
+```
 
 Insert
 ------
 
 Signature:
 
+```javascript
     collection.insert(docs, options, [callback]);
+```
 
 where `docs` can be a single document or an array of documents.
 
@@ -266,6 +284,7 @@ Useful options:
 
 See also: [MongoDB docs for insert](http://www.mongodb.org/display/DOCS/Inserting).
 
+```javascript
     var mongodb = require('mongodb');
     var server = new mongodb.Server("127.0.0.1", 27017, {});
     new mongodb.Db('test', server, {}).open(function (error, client) {
@@ -279,6 +298,7 @@ See also: [MongoDB docs for insert](http://www.mongodb.org/display/DOCS/Insertin
         }
       });
     });
+```
 
 Note that there's no reason to pass a callback to the insert or update commands
 unless you use the `safe:true` option. If you don't specify `safe:true`, then
@@ -296,7 +316,9 @@ the modifier (`$inc`, `$set`, `$push`, etc.) formats.
 
 Signature:
 
+```javascript
     collection.update(criteria, objNew, options, [callback]);
+```
 
 Useful options:
 
@@ -306,6 +328,7 @@ Useful options:
 
 Example for `update`:
 
+```javascript
     var mongodb = require('mongodb');
     var server = new mongodb.Server("127.0.0.1", 27017, {});
     new mongodb.Db('test', server, {}).open(function (error, client) {
@@ -317,6 +340,7 @@ Example for `update`:
         else console.log('successfully updated');
       });
     });
+```
 
 Find and modify
 ---------------
@@ -330,7 +354,9 @@ update:
 
 Signature:
 
+```javascript
     collection.findAndModify(query, sort, update, options, callback)
+```
 
 The sort parameter is used to specify which object to operate on, if more than
 one document matches. It takes the same format as the cursor sort (see
@@ -348,6 +374,7 @@ Useful options:
 
 Example for `findAndModify`:
 
+```javascript
     var mongodb = require('mongodb');
     var server = new mongodb.Server("127.0.0.1", 27017, {});
     new mongodb.Db('test', server, {}).open(function (error, client) {
@@ -359,6 +386,7 @@ Example for `findAndModify`:
         else console.dir(object);  // undefined if no matching object exists.
       });
     });
+```
 
 Save
 ----
