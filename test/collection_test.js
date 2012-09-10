@@ -1305,6 +1305,24 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(test) 
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyReadBackDocumentWithNull = function(test) {
+  client.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, function(err, collection) {
+    // Insert a document with a date
+    collection.insert({test:null}, {safe:true}, function(err, result) {
+        test.equal(null, err);
+
+        collection.findOne(function(err, item) {
+          test.equal(null, err);
+
+          test.done();
+        });
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
