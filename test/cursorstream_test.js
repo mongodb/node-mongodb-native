@@ -19,11 +19,11 @@ var client = null;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
+  var self = exports;
   client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
@@ -40,7 +40,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -59,14 +59,14 @@ exports.tearDown = function(callback) {
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a lot of documents to insert
-    var docs = []  
+    var docs = []
     for(var i = 0; i < 1; i++) {
       docs.push({'a':i})
     }
@@ -76,10 +76,10 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(test) 
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {        
+      collection.insert(docs, {safe:true}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
-        
+
         // For each data item
         stream.on("data", function(item) {
           // Check if cursor is paused
@@ -87,23 +87,25 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(test) 
           // Pause stream
           stream.pause();
           // Check if cursor is paused
-          test.equal(true, stream.paused);         
-           
+          test.equal(true, stream.paused);
+
           // Restart the stream after 1 miliscecond
           setTimeout(function() {
             stream.resume();
             // Check if cursor is paused
-            test.equal(false, stream.paused);
-          }, 1);          
+            process.nextTick(function() {
+              test.equal(false, stream.paused);
+            })
+          }, 1);
         });
-        
+
         // When the stream is done
         stream.on("close", function() {
           db.close();
-          test.done();          
-        });        
+          test.done();
+        });
       });
-    });    
+    });
   });
 }
 
@@ -115,14 +117,14 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(test) 
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheCursorStreamResumeFunction = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a lot of documents to insert
-    var docs = []  
+    var docs = []
     for(var i = 0; i < 1; i++) {
       docs.push({'a':i})
     }
@@ -132,10 +134,10 @@ exports.shouldStreamDocumentsUsingTheCursorStreamResumeFunction = function(test)
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {        
+      collection.insert(docs, {safe:true}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
-        
+
         // For each data item
         stream.on("data", function(item) {
           // Check if cursor is paused
@@ -143,8 +145,8 @@ exports.shouldStreamDocumentsUsingTheCursorStreamResumeFunction = function(test)
           // Pause stream
           stream.pause();
           // Check if cursor is paused
-          test.equal(true, stream.paused);         
-           
+          test.equal(true, stream.paused);
+
           // Restart the stream after 1 miliscecond
           setTimeout(function() {
 
@@ -152,17 +154,19 @@ exports.shouldStreamDocumentsUsingTheCursorStreamResumeFunction = function(test)
             stream.resume();
 
             // Check if cursor is paused
-            test.equal(false, stream.paused);
-          }, 1);          
+            process.nextTick(function() {
+              test.equal(false, stream.paused);
+            });
+          }, 1);
         });
-        
+
         // When the stream is done
         stream.on("close", function() {
           db.close();
-          test.done();          
-        });        
+          test.done();
+        });
       });
-    });    
+    });
   });
 }
 
@@ -174,14 +178,14 @@ exports.shouldStreamDocumentsUsingTheCursorStreamResumeFunction = function(test)
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a lot of documents to insert
-    var docs = []  
+    var docs = []
     for(var i = 0; i < 1; i++) {
       docs.push({'a':i})
     }
@@ -191,71 +195,71 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = function(test
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {        
+      collection.insert(docs, {safe:true}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
-        
+
         // For each data item
         stream.on("data", function(item) {
           // Destroy stream
           stream.destroy();
         });
-        
+
         // When the stream is done
         stream.on("close", function() {
           db.close();
-          test.done();          
-        });        
+          test.done();
+        });
       });
-    });    
+    });
   });
 }
 
 exports.shouldStreamDocumentsWithPauseAndResumeForFetching = function(test) {
   var docs = []
-  
+
   for(var i = 0; i < 3000; i++) {
     docs.push({'a':i})
   }
 
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 5, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     db.createCollection('test_streaming_function_with_limit_for_fetching', function(err, collection) {
       test.ok(collection instanceof Collection);
 
-      collection.insert(docs, {safe:true}, function(err, ids) {        
+      collection.insert(docs, {safe:true}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find({}).stream();
         var data = [];
-      
+
         // For each data item
         stream.on("data", function(item) {
           stream.pause()
-        
+
           collection.findOne({}, function(err, result) {
             data.push(1);
             stream.resume();
           })
         });
-        
+
         // When the stream is done
         stream.on("close", function() {
           test.equal(3000, data.length);
           db.close();
-          test.done();          
-        });        
+          test.done();
+        });
       });
-    });    
+    });
   });
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -267,7 +271,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;

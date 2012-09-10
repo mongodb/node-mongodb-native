@@ -1301,8 +1301,10 @@ exports['should be able to stream documents'] = function(test) {
           setTimeout(function () {
             test.equal(true, stream.paused);
             stream.resume();
-            test.equal(false, stream.paused);
-            resumed++;
+            process.nextTick(function() {
+              test.equal(false, stream.paused);
+              resumed++;
+            })
           }, 20);
         }
       });
@@ -2088,6 +2090,49 @@ exports.shouldCorrectExecuteExplainHonoringLimit = function (test) {
       });
     });
   })
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+
+    // Create a lot of documents to insert
+    var dup_check = {};
+    var docs = [];
+    for(var i = 0; i < 100; i++) {
+      docs.push({'a':i})
+    }
+
+    // Create a collection
+    db.createCollection('shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates', function(err, collection) {
+      test.equal(null, err);
+
+      // Insert documents into collection
+      collection.insert(docs, {safe:true}, function(err, ids) {
+        // Peform a find to get a cursor
+        var stream = collection.find().stream();
+        stream.pause();
+        stream.resume();
+        stream.on("data", function(item) {
+          // console.log(item)
+          // var key = item._id.toHexString();
+          // test.ok(dup_check[key] == null);
+          // dup_check[key] = true;
+        });
+
+        stream.on("end", function() {
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
 }
 
 /**
