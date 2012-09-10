@@ -23,11 +23,11 @@ var native_parser = (process.env['TEST_NATIVE'] != null);
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
+  var self = exports;
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -43,7 +43,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -53,7 +53,7 @@ exports.tearDown = function(callback) {
   client.close();
   callback();
 }
-    
+
 /**
  * @ignore
  */
@@ -74,8 +74,8 @@ exports.shouldCorrectlyFailDueToMissingChunks = function(test) {
             gs.close(function (){});
             test.done();
           });
-        });          
-      }); 
+        });
+      });
   });
 }
 
@@ -85,7 +85,7 @@ exports.shouldCorrectlyFailDueToMissingChunks = function(test) {
 exports.shouldCorrectlyWriteASmallPayload = function(test) {
   var gridStore = new GridStore(client, "test_gs_small_write", "w");
   gridStore.open(function(err, gridStore) {
-    
+
     gridStore.write("hello world!", function(err, gridStore) {
 
       gridStore.close(function(err, result) {
@@ -119,7 +119,7 @@ exports.shouldCorrectlyWriteSmallFileUsingABuffer = function(test) {
   var gridStore = new GridStore(client, "test_gs_small_write_with_buffer", "w");
   gridStore.open(function(err, gridStore) {
     var data = new Buffer("hello world", "utf8");
-  
+
     gridStore.write(data, function(err, gridStore) {
       gridStore.close(function(err, result) {
         client.collection('fs.files', function(err, collection) {
@@ -200,10 +200,10 @@ exports.shouldCorrectlyOverwriteFile = function(test) {
  * @ignore
  */
 exports.shouldCorrectlySeekWithBuffer = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     // Create a file and open it
     var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w");
@@ -212,7 +212,7 @@ exports.shouldCorrectlySeekWithBuffer = function(test) {
       gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
         // Flush the file to GridFS
         gridStore.close(function(result) {
-          
+
           // Open the file in read mode
           var gridStore2 = new GridStore(db, "test_gs_seek_with_buffer", "r");
           gridStore2.open(function(err, gridStore) {
@@ -281,7 +281,7 @@ exports.shouldCorrectlySeekWithBuffer = function(test) {
                         gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
                           gridStore.getc(function(err, chr) {
                             test.equal('o', chr);
-                            
+
                             db.close();
                             test.done();
                           });
@@ -388,11 +388,11 @@ exports.shouldCorrectlySeekWithString = function(test) {
  * @ignore
  */
 exports.shouldCorrectlySeekAcrossChunks = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
   test.expect(2);
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     // Create a new file
     var gridStore = new GridStore(db, "test_gs_seek_across_chunks", "w");
@@ -439,7 +439,7 @@ exports.shouldCorrectlyAppendToFile = function(test) {
   fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       var id = new ObjectID();
-      
+
       var gridStore = new GridStore(fs_client, "test_gs_append", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello, world!", function(err, gridStore) {
@@ -456,7 +456,7 @@ exports.shouldCorrectlyAppendToFile = function(test) {
 
                       GridStore.read(fs_client, 'test_gs_append', function(err, data) {
                         test.equal("hello, world! how are you?", data.toString('ascii'));
-                        
+
                         fs_client.close();
                         test.done();
                       });
@@ -480,10 +480,10 @@ exports.shouldCorrectlyAppendToFile = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRewingAndTruncateOnWrite = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
     var fileId = new ObjectID();
@@ -522,7 +522,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = function(test) {
                   });
                 });
               });
-            });            
+            });
           });
         });
       });
@@ -550,7 +550,7 @@ exports.shouldCorrectlySaveEmptyFile = function(test) {
             fs_client.collection('fs.chunks', function(err, collection) {
               collection.count(function(err, count) {
                 test.equal(0, count);
-                  
+
                 fs_client.close();
                 test.done();
               });
@@ -570,18 +570,18 @@ exports.shouldCorrectlySaveEmptyFile = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyDetectEOF = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Open the file in write mode
     var gridStore = new GridStore(db, 'test_gs_empty_file_eof', "w");
     gridStore.open(function(err, gridStore) {
       // Flush the empty file to GridFS
       gridStore.close(function(err, gridStore) {
-        
+
         // Open the file in read mode
         var gridStore2 = new GridStore(db, 'test_gs_empty_file_eof', "r");
         gridStore2.open(function(err, gridStore) {
@@ -707,7 +707,7 @@ exports.shouldCorrectlyCalculateMD5 = function(test) {
         gridStore2.open(function(err, gridStore) {
           test.equal("6f5902ac237024bdd0c176cb93063dc4", gridStore.md5);
           try {
-            gridStore.md5 = "can't do this";            
+            gridStore.md5 = "can't do this";
           } catch(err) {
             test.ok(err != null);
           }
@@ -893,10 +893,10 @@ exports.shouldNotThrowErrorOnClose = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     // Create a new file
     var gridStore = new GridStore(db, "test_gs_tell", "w");
@@ -906,7 +906,7 @@ exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
       gridStore.write("hello, world!", function(err, gridStore) {
         // Flush the file to GridFS
         gridStore.close(function(err, result) {
-          
+
           // Open the file in read only mode
           var gridStore2 = new GridStore(db, "test_gs_tell", "r");
           gridStore2.open(function(err, gridStore) {
@@ -918,7 +918,7 @@ exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
               // Get the current position of the read head
               gridStore.tell(function(err, position) {
                 test.equal(5, position);
-                
+
                 db.close();
                 test.done();
               });
@@ -938,10 +938,10 @@ exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     // Create a file and open it
     var gridStore = new GridStore(db, "test_gs_getc_file", "w");
@@ -950,7 +950,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
       gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
         // Flush the file to GridFS
         gridStore.close(function(result) {
-          
+
           // Open the file in read mode
           var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
           gridStore2.open(function(err, gridStore) {
@@ -958,7 +958,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
             // Read first character and verify
             gridStore.getc(function(err, chr) {
               test.equal('h', chr);
-              
+
               db.close();
               test.done();
             });
@@ -1002,10 +1002,10 @@ exports.shouldNotThrowErrorOnClose = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
    {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
     // Create a file and open it
     var gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
@@ -1015,7 +1015,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
         // Flush the file to GridFS
         gridStore.close(function(err, fileData) {
           test.equal(null, err);
-          
+
           // Create another file with same name and and save content to it
           gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
           gridStore.open(function(err, gridStore) {
@@ -1024,11 +1024,11 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
               // Flush the file to GridFS
               gridStore.close(function(err, fileData) {
                 test.equal(null, err);
-                
+
                 // Open the file in read mode using the filename
                 var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
                 gridStore2.open(function(err, gridStore) {
-                
+
                   // Read first character and verify
                   gridStore.getc(function(err, chr) {
                     test.equal('h', chr);
@@ -1062,7 +1062,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
 exports.shouldCorrectlySafeFileUsingIntAsIdKey = function(test) {
   var gridStore = new GridStore(client, 500, "test_gs_small_write", "w");
   gridStore.open(function(err, gridStore) {
-    
+
     gridStore.write("hello world!", function(err, gridStore) {
 
       gridStore.close(function(err, result) {
@@ -1111,12 +1111,12 @@ exports.shouldCorrectlyReadWithPositionOffset = function(test) {
   var data = new Buffer(1024*512);
   // Set some data in the buffer at a point we want to read in the next chunk
   data.write('Hello world!', 1024*256);
-  
+
   var gridStore = new GridStore(client, Long.fromNumber(100), "test_gs_small_write", "w");
-  gridStore.open(function(err, gridStore) {    
+  gridStore.open(function(err, gridStore) {
     gridStore.write(data, function(err, gridStore) {
       gridStore.close(function(err, result) {
-        
+
         // Reopen the gridstore in read only mode, seek and then attempt read
         gridStore = new GridStore(client, Long.fromNumber(100), "test_gs_small_write", "r");
         gridStore.open(function(err, gridStore) {
@@ -1125,10 +1125,10 @@ exports.shouldCorrectlyReadWithPositionOffset = function(test) {
             // Read
             gridStore.read(5, function(err, data) {
               test.equal('world', data.toString('ascii'))
-              test.done();              
-            })            
-          });          
-        });        
+              test.done();
+            })
+          });
+        });
       });
     });
   });
@@ -1162,17 +1162,28 @@ exports.shouldCorrectlyWrite = function(test) {
                 test.done();
               });
             });
-          });   
+          });
         });
       });
     });
-  });  
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyReturnErrorMessageOnNoFileExisting = function(test) {
+  var gridStore = new GridStore(client, "_i_shouldCorrectlyWriteASmallPayload", "r");
+  gridStore.open(function(err, gridStore) {
+    test.ok(err != null);
+    test.done();
+  });
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -1184,7 +1195,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;

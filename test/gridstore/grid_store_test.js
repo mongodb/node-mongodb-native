@@ -1541,7 +1541,7 @@ exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = function(test) {
 
   // Establish connection to db
   db.open(function(err, db) {
-    var store = new GridStore(db, new ObjectID( asset.source.toString() ), 'r', {root: 'store'});
+    var store = new GridStore(db, new ObjectID( asset.source.toString() ), 'w', {root: 'store'});
     store.open(function(err, gridStore) {
       test.equal(null, err);
 
