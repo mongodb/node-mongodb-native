@@ -1797,6 +1797,26 @@ exports['Readpreferences should work fine when using a single server instance'] 
   });
 }
 
+exports['Each should not hang on iterating over no results'] = function(test) {
+  var server = new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL, readPreference:ReadPreference.PRIMARY_PREFERRED});
+  var db = new Db('not_existing', server, {native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    test.equal(null, err);
+    // Create a collection we want to drop later
+    db.collection('noresultAvailableForEachToIterate', function(err, collection) {
+      // Peform a simple find and return all the documents
+      collection.find({}).each(function(err, item) {
+        test.equal(null, item);
+
+        db.close();
+        test.done();
+      });
+    });
+  });
+}
+
 /**
  * Retrieve the server information for the current
  * instance of the db client

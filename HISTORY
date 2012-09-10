@@ -5,6 +5,7 @@
 - Made PingStrategy api more consistant, callback to start/stop methods are optional (Issue #693, https://github.com/aheckmann)
 - Proper stopping of strategy on replicaset stop
 - Throw error when gridstore file is not found in read mode (Issue #702, https://github.com/jbrumwell)
+- Cursor stream resume now using nextTick to avoid duplicated records (Issue #696)
 
 1.1.6 2012-09-01
 ----------------
