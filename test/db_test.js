@@ -184,6 +184,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(test) {
 
   // Establish connection to db
   db.open(function(err, db) {
+    var numberOfTests = 
 
     // Evaluate a function on the server with the parameter 3 passed in
     db.eval('function (x) {return x;}', [3], function(err, result) {
@@ -234,7 +235,6 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(test) {
     // Evaluate a statement using the code object including a scope
     db.eval(new Code("i + 3;", {'i':2}), function(err, result) {
       test.equal(5, result);
-      test.done();
     });
 
     // Evaluate an illegal statement
@@ -242,11 +242,43 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(test) {
       test.ok(err instanceof Error);
       test.ok(err.message != null);
       // Let's close the db
+      db.close();
       test.done();
     });
+  });
+}
 
-    db.close();
-    test.done();
+/**
+ * Defining and calling a system level javascript function (NOT recommended, http://www.mongodb.org/display/DOCS/Server-side+Code+Execution)
+ *
+ * @_class db
+ * @_function eval
+ * @ignore
+ */
+exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+
+    // Clean out the collection
+    db.collection("system.js").remove({}, {safe:true}, function(err, result) {
+      test.equal(null, err);
+
+      // Define a system level function
+      db.collection("system.js").insert({_id: "echo", value: new Code("function(x) { return x; }")}, {safe:true}, function(err, result) {
+        test.equal(null, err);
+      
+        db.eval("echo(5)", function(err, result) {
+          test.equal(null, err);
+          test.equal(5, result);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
   });
 }
 
