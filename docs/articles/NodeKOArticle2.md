@@ -16,7 +16,7 @@ Let's dive straight into a simple example on how to write a file to the grid usi
       if(!err) {
         var grid = new Grid(db, 'fs');    
         var buffer = new Buffer("Hello world");
-        grid.put.(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
+        grid.put(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
           if(!err) {
             console.log("Finished writing file to Mongo");
           }
@@ -30,10 +30,10 @@ All right let's dissect the example. The first thing you'll notice is the statem
 
 Since GridFS is actually a special structure stored as collections you'll notice that we are using the db connection that we used in the previous tutorial to operate on collections and documents. The second parameter **'fs'** allows you to change the collections you want to store the data in. In this example the collections would be **fs_files** and **fs_chunks**.
 
-Having a life grid instance we now go ahead and create some test data stored in a Buffer instance, although you can pass in a string instead. We then write our data to disk.
+Having a live grid instance we now go ahead and create some test data stored in a Buffer instance, although you can pass in a string instead. We then write our data to disk.
 
     var buffer = new Buffer("Hello world");
-    grid.put.(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
+    grid.put(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
       if(!err) {
         console.log("Finished writing file to Mongo");
       }
@@ -72,7 +72,7 @@ The **delete** method also takes an ObjectID as the first argument but will dele
 This **api** is the simplest one you can use to interact with GridFS but it's not suitable for all kinds of files. One of it's main drawbacks is you are trying to write large files to Mongo. This api will require you to read the entire file into memory when writing and reading from Mongo which most likely is not feasible if you have to store large files like Video or RAW Pictures. Luckily this is not the only way to work with GridFS. That's not to say this api is not useful. If you are storing tons of small files the memory usage vs the simplicity might be a worthwhile tradeoff. Let's dive into some of the more advanced ways of using GridFS.
 
 ## Advanced GridFS or how not to run out of memory
-As we just said controlling memory consumption for you file writing and reading is key if you want to scale up the application. That means not reading in entire files before either writing or reading from Mongo DB. The good news it's supported. Let's throw some code out there straight away and look at how to do chunk sized streaming writes and reads.
+As we just said controlling memory consumption for you file writing and reading is key if you want to scale up the application. That means not reading in entire files before either writing or reading from Mongo DB. The good news is, it's supported. Let's throw some code out there straight away and look at how to do chunk sized streaming writes and reads.
 
 **the requires and and other initializing stuff omitted for brevity**
 
