@@ -125,6 +125,12 @@ ShardedManager.prototype.killAll = function(callback) {
   });
 }
 
+// Kill a random shard
+ShardedManager.prototype.killShard = function(callback) {
+  var replicasetServer = this.replicasetManagers.pop();
+  replicasetServer.killSetServers(callback);
+}
+
 // Kills the first server
 ShardedManager.prototype.killMongoS = function(port, callback) {
 	// Locate the server instance and kill it
@@ -148,6 +154,34 @@ ShardedManager.prototype.restartMongoS = function(port, callback) {
 			proxy.start(false, callback);
 		}
 	}
+}
+
+// Shard a db
+ShardedManager.prototype.shardDb = function(dbname, callback) {
+  if(this.mongosProxies.length == 0) throw new Error("need at least one mongos server");
+  // Set up the db connection
+  var db = new Db("admin", new Server("localhost", this.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {});
+  db.open(function(err, db) {
+    // Run the add shard commands
+    db.command({enablesharding:dbname}, function(err, result) {
+      db.close();
+      callback(err, result);      
+    });
+  });
+}
+
+// Shard a db
+ShardedManager.prototype.shardCollection = function(collectionName, key, callback) {
+  if(this.mongosProxies.length == 0) throw new Error("need at least one mongos server");
+  // Set up the db connection
+  var db = new Db("admin", new Server("localhost", this.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {});
+  db.open(function(err, db) {
+    // Run the add shard commands
+    db.command({shardcollection:collectionName, key:key}, function(err, result) {
+      db.close();
+      callback(err, result);      
+    });
+  });
 }
 
 var setupShards = function(self, callback) {

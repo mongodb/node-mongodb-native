@@ -8,6 +8,7 @@
 .tm_properties
 data
 node_modules/
+lib-cov/
 output
 build
 upload.py

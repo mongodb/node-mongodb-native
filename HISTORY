@@ -1,3 +1,8 @@
+1.1.8
+----------------
+- Fixed db.eval to correctly handle system.js global javascript functions (Issue #709)
+- Cleanup of non-closing connections (Issue #706)
+
 1.1.7 2012-09-10
 ----------------
 - Protect against starting PingStrategy being called more than once (Issue #694, https://github.com/aheckmann)

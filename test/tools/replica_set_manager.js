@@ -268,6 +268,28 @@ ReplicaSetManager.prototype.kill = function(node, signal, options, callback) {
   });
 }
 
+ReplicaSetManager.prototype.killSetServers = function(callback) {
+  var keys = Object.keys(this.mongods);
+  var totalKeys = keys.length;
+  var self = this;
+
+  var killCallback = function(_nodeKey) {
+    return function(err, result) {
+      console.log("====================================================== KILL")
+      console.dir(_nodeKey)
+
+      self.kill(_nodeKey, 9, function() {
+        totalKeys = totalKeys - 1;
+        if(totalKeys == 0) return callback(null, null);        
+      })
+    }
+  }
+
+  for(var i = 0; i < keys.length; i++) {
+    killCallback(keys[i])();
+  }
+}
+
 ReplicaSetManager.prototype.killPrimary = function(signal, options, callback) {
   var self = this;
   // Unpack callback and variables
@@ -562,7 +584,7 @@ ReplicaSetManager.prototype.restart = start;
 
 ReplicaSetManager.prototype.startCmd = function(n) {
   // Create boot command
-  this.mongods[n]["start"] = "mongod --rest --noprealloc --smallfiles --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
+  this.mongods[n]["start"] = "mongod --nojournal --oplogSize 1 --rest --noprealloc --smallfiles --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
       " --dbpath " + this.mongods[n]['db_path'] + " --port " + this.mongods[n]['port'] + " --fork";
   this.mongods[n]["start"] = this.durable ? this.mongods[n]["start"] + " --dur" : this.mongods[n]["start"];
 
