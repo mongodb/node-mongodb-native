@@ -1,4 +1,5 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
+if(process.env['TEST_COVERAGE']) var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib-cov/mongodb').native() : require('../../lib-cov/mongodb').pure();
 var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
 var testCase = require('nodeunit').testCase,

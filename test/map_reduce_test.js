@@ -1,4 +1,5 @@
 var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib/mongodb').native() : require('../lib/mongodb').pure();
+if(process.env['TEST_COVERAGE']) var mongodb = process.env['TEST_NATIVE'] != null ? require('../lib-cov/mongodb').native() : require('../lib-cov/mongodb').pure();
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 
 var testCase = require('nodeunit').testCase,
@@ -52,6 +53,7 @@ exports.tearDown = function(callback) {
   callback();
 }
 
+if(!process.env['TEST_COVERAGE']) {
 /**
  * A whole lot of different wayt to execute the group command
  *
@@ -76,24 +78,21 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
         collection.insert([{'a':2}, {'b':5}, {'a':1}], {safe:true}, function(err, ids) {
           
           // Perform a group count
-          collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }"
-            , function(err, results) {
+          collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
             test.equal(3, results[0].count);
 
             // Pefrom a group count using the eval method
-            collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }"
-              , false, function(err, results) {
+            collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false, function(err, results) {
+              console.dir(err)
               test.equal(3, results[0].count);
 
               // Group with a conditional
-              collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }"
-                , function(err, results) {
+              collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
                 // Results
                 test.equal(1, results[0].count);
 
                 // Group with a conditional using the EVAL method
-                collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }"
-                  , false, function(err, results) {
+                collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }" , false, function(err, results) {
                   // Results
                   test.equal(1, results[0].count);
 
@@ -101,8 +100,7 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
                   collection.insert([{'a':2}, {'b':3}], {safe:true}, function(err, ids) {
                     
                     // Do a Group by field a
-                    collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }"
-                      , function(err, results) {
+                    collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
                       // Results                        
                       test.equal(2, results[0].a);
                       test.equal(2, results[0].count);
@@ -112,8 +110,7 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
                       test.equal(1, results[2].count);
                       
                       // Do a Group by field a
-                      collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }
-                        , true, function(err, results) {
+                      collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true, function(err, results) {
                         // Results                        
                         test.equal(2, results[0].a);
                         test.equal(2, results[0].count);
@@ -129,8 +126,7 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
                         
                           // Use a function to select the keys used to group by
                           var keyf = function(doc) { return {a: doc.a}; };
-                          collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}
-                            , function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
+                          collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
                             // Results                        
                             results.sort(function(a, b) { return b.count - a.count; });
                             test.equal(2, results[0].count);
@@ -142,8 +138,7 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
                             
                             // Use a Code object to select the keys used to group by
                             var keyf = new Code(function(doc) { return {a: doc.a}; });
-                            collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}
-                              , function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
+                            collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
                               // Results                        
                               results.sort(function(a, b) { return b.count - a.count; });
                               test.equal(2, results[0].count);
@@ -175,6 +170,7 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
       });
     });
   });
+}
 }
 
 /**

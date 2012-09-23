@@ -6,6 +6,11 @@ name = all
 
 total: build_native
 
+test-coverage:
+	rm -rf lib-cov/
+	jscoverage lib/ lib-cov/
+	@TEST_COVERAGE=true nodeunit test/ test/gridstore test/connection
+
 build_native:
 
 test: build_native
