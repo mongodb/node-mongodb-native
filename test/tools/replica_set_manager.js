@@ -485,9 +485,9 @@ ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
   if(numberOfNodes == 0) return self.ensureUp(callback);
 
   // Restart all the number of nodes
-  for(var i = 0; i < numberOfNodes; i++) {
+  for(var i = 0; i < numberOfNodes; i++) {    
     // Start the process
-    self.start(nodes[i], function(err, result) {
+    self.reStart(nodes[i], function(err, result) {
       // Adjust the number of nodes we are starting
       numberOfNodes = numberOfNodes - 1;
 
@@ -553,6 +553,24 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
   } else {
     callback(new Error("no primary node found to do stepDownPrimary"), null);
   }
+}
+
+var reStart = ReplicaSetManager.prototype.reStart = function(node, callback) {
+  var self = this;
+  // console.log("============================================================ restart")
+  // console.dir(self.mongods[node])
+  // console.dir(self.mongods[node]["db_path"])
+  // Perform cleanup of directories
+  exec("rm -rf " + self.mongods[node]["db_path"], function(err, stdout, stderr) {
+    if(err != null) return callback(err, null);
+
+    // Create directory
+    exec("mkdir -p " + self.mongods[node]["db_path"], function(err, stdout, stderr) {
+      exec("mkdir -p " + self.mongods[node]["db_path"] + "/journal", function(err, stdout, stderr) {
+        self.start(node, callback);
+      });
+    });
+  });
 }
 
 // Fire up the mongodb instance

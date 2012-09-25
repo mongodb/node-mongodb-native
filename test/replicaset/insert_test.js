@@ -187,7 +187,7 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
           // Kill the primary
-          RS.killPrimary(2, {killNodeWaitTime:0}, function(node) {
+          RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
             // Attempt insert (should fail)
             collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
 
@@ -215,7 +215,6 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
         });
       });
     });
-    // p_db = _p_db;
   });
 }
 
@@ -253,7 +252,7 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {
           // Kill the primary
-          RS.killPrimary(2, {killNodeWaitTime:0}, function(node) {
+          RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
             // Ok let's execute same query a couple of times
             collection.find({}).toArray(function(err, items) {
               test.ok(err != null);
