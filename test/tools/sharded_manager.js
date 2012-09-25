@@ -119,9 +119,9 @@ ShardedManager.prototype.start = function(callback) {
 // Kill everything
 ShardedManager.prototype.killAll = function(callback) {
   exec('killall -9 mongod', function(err, stdout, stderr) {
-	  exec('killall -9 mongos', function(err, stdout, stderr) {
-    	callback(null, null);
-		});
+    exec('killall -9 mongos', function(err, stdout, stderr) {
+      callback(null, null);
+    });
   });
 }
 
@@ -131,29 +131,35 @@ ShardedManager.prototype.killShard = function(callback) {
   replicasetServer.killSetServers(callback);
 }
 
+// Kill a shard primary
+ShardedManager.prototype.killShardPrimary = function(callback) {
+  var replicasetServer = this.replicasetManagers.pop();
+  replicasetServer.killPrimary(9, callback);
+}
+
 // Kills the first server
 ShardedManager.prototype.killMongoS = function(port, callback) {
-	// Locate the server instance and kill it
-	for(var i = 0; i < this.mongosProxies.length; i++) {
-		var proxy = this.mongosProxies[i];
-		// If it's the right one kill it
-		if(proxy.port == port) {
-			proxy.stop(9, callback);
-		}
-	}
+  // Locate the server instance and kill it
+  for(var i = 0; i < this.mongosProxies.length; i++) {
+    var proxy = this.mongosProxies[i];
+    // If it's the right one kill it
+    if(proxy.port == port) {
+      proxy.stop(9, callback);
+    }
+  }
 }
 
 // Restart a specific mongos server
 ShardedManager.prototype.restartMongoS = function(port, callback) {
-	// Locate the server instance and kill it
-	for(var i = 0; i < this.mongosProxies.length; i++) {
-		var proxy = this.mongosProxies[i];
+  // Locate the server instance and kill it
+  for(var i = 0; i < this.mongosProxies.length; i++) {
+    var proxy = this.mongosProxies[i];
 
-		// If it's the right one restart it
-		if(proxy.port == port) {
-			proxy.start(false, callback);
-		}
-	}
+    // If it's the right one restart it
+    if(proxy.port == port) {
+      proxy.start(false, callback);
+    }
+  }
 }
 
 // Shard a db
@@ -220,8 +226,8 @@ var setupShards = function(self, callback) {
 
 var startMongosProxies = function(self, callback) {
   if(self.mongosProxies.length == 0) throw new Error("need at least one mongos server");
-	// Set up only the first to kill all
-	var killAll = true;
+  // Set up only the first to kill all
+  var killAll = true;
   // Boot up the number of config servers needed
   var mongosProxiesToStart = self.numberOfMongosServers;
   // Boot up mongos proxies
@@ -235,8 +241,8 @@ var startMongosProxies = function(self, callback) {
       }
     });
 
-		// Set killall to false
-		killAll = false;
+    // Set killall to false
+    killAll = false;
   }
 }
 

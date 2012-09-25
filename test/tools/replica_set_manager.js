@@ -600,16 +600,3 @@ ReplicaSetManager.prototype.startCmd = function(n) {
 
   return this.mongods[n]["start"];
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
