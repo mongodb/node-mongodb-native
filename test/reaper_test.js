@@ -50,7 +50,7 @@ exports.tearDown = function(callback) {
   callback();
 }
 
-exports.shouldCorrectlySaveUnicodeContainingDocument = function(test) {
+exports.shouldCorrectlyAssertCorrectReaperBehavior = function(test) {
   var reaperClient = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {reaper:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   reaperClient.open(function(err, reaperClient) {
     reaperClient._lastReaperTimestamp = (new Date().getTime() - 1000000);
@@ -67,6 +67,42 @@ exports.shouldCorrectlySaveUnicodeContainingDocument = function(test) {
     });
   })
 }
+
+// // *  - **reaperInterval** {Number, default:10000}, number of miliseconds between reaper wakups.
+// //  *  - **reaperTimeout** {Number, default:30000}, the amount of time before a callback times out.
+
+// exports.shouldHandleReaperKills = function(test) {
+//   var reaperClient = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {reaper:true, reaperInterval:0, reaperTimeout:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   reaperClient.open(function(err, db) {
+//     db.collection("shouldHandleReaperKills").insert({a:1}, {safe:true}, function(err, result) {
+//       console.log("============================================")
+//     db.collection("shouldHandleReaperKills").insert({a:1}, {safe:true}, function(err, result) {
+//     // Prime the reaper with a bogus call
+//     db._callBackStore._notReplied["3"] = {start: (new Date().getTime() - 50000), 'raw': false, chained:null, connection:null};
+
+//   db.collection("shouldHandleReaperKills").findOne(function(err, item) {    
+//       db.close();
+//       test.done();
+//   })      
+
+//     });
+//     });
+
+
+//     // reaperClient._lastReaperTimestamp = (new Date().getTime() - 1000000);
+//     // var con = reaperClient.serverConfig.checkoutReader();
+//     // // Prime the reaper with a bogus call
+//     // reaperClient._callBackStore._notReplied["3"] = {start: (new Date().getTime() - 50000), 'raw': false, chained:null, connection:con};
+//     // reaperClient._callBackStore.once("3", function(err, result) {
+//     //   reaperClient.close();
+//     //   test.done();
+//     // })
+    
+//     // reaperClient.collection("test", {safe:true}, function(err, col) {
+//     //   // Does not matter
+//     // });
+//   })
+// }
 
 /**
  * Retrieve the server information for the current
