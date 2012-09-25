@@ -96,7 +96,6 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(test)
     collection.insert(docs, {safe:{w:1, wtimeout:1000}}, function(err, result) {
       test.equal(null, err);
 
-
         Shard.killShard(function() {
 
           collection.find({}, {partial:true}).toArray(function(err, items) {

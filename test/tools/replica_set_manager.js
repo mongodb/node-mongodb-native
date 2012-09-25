@@ -203,33 +203,35 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
 
     // Create directory
     exec("mkdir -p " + self.mongods[n]["db_path"], function(err, stdout, stderr) {
-      if(err != null) return callback(err, null);
-      self.mongods[n]["start"] = self.startCmd(n);
+      exec("mkdir -p " + self.mongods[n]["db_path"] + "/journal", function(err, stdout, stderr) {
+        if(err != null) return callback(err, null);
+        self.mongods[n]["start"] = self.startCmd(n);
 
-      // console.log("----------------------------------------------------- node start command")
-      // console.log(self.mongods[n]["start"])
+        // console.log("----------------------------------------------------- node start command")
+        // console.log(self.mongods[n]["start"])
 
-      self.start(n, function() {
-        // Add instance to list of members
-        var member = {"_id": n, "host": self.host + ":" + self.mongods[n]["port"]};
-        // Set it to arbiter if it's been passed
-        if(self.mongods[n]['arbiterOnly']) {
-          member['arbiterOnly'] = true;
-        }
-        // Set priority level if it's defined
-        if(priority != null) {
-          member['priority'] = priority;
-        }
+        self.start(n, function() {
+          // Add instance to list of members
+          var member = {"_id": n, "host": self.host + ":" + self.mongods[n]["port"]};
+          // Set it to arbiter if it's been passed
+          if(self.mongods[n]['arbiterOnly']) {
+            member['arbiterOnly'] = true;
+          }
+          // Set priority level if it's defined
+          if(priority != null) {
+            member['priority'] = priority;
+          }
 
-        // Check if we have tags
-        if(self.mongods[n]['tags'] != null) {
-          member["tags"] = self.mongods[n]['tags'];
-        }
+          // Check if we have tags
+          if(self.mongods[n]['tags'] != null) {
+            member["tags"] = self.mongods[n]['tags'];
+          }
 
-        // Push member to config
-        self.config["members"].push(member);
-        // Return
-        return callback();
+          // Push member to config
+          self.config["members"].push(member);
+          // Return
+          return callback();
+        });
       });
     });
   });
@@ -275,9 +277,6 @@ ReplicaSetManager.prototype.killSetServers = function(callback) {
 
   var killCallback = function(_nodeKey) {
     return function(err, result) {
-      console.log("====================================================== KILL")
-      console.dir(_nodeKey)
-
       self.kill(_nodeKey, 9, function() {
         totalKeys = totalKeys - 1;
         if(totalKeys == 0) return callback(null, null);        

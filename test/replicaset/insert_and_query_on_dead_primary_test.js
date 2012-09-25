@@ -112,14 +112,14 @@ exports.shouldNotTimeout = function (test) {
     db.collection('shouldnottimeout', function (err, coll) {
       test.equal(null, err);
 
-      RS.killPrimary(9, function(node) {
+      RS.killPrimary(2, function(node) {
         var pending = 2;
 
         coll.update({name: 'a'}, {'$inc': {v: 1}}, {upsert: true, safe:true}, done);
         coll.findOne({name: 'a'}, done);
 
         function done (err, result) {
-          debug('should not timeout:', pending, err);
+          console.log('should not timeout: ' + pending);
           if (--pending) return;
           test.done();
           p_db.close();

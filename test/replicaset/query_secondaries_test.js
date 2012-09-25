@@ -181,7 +181,7 @@ exports.shouldCorrectlyQuerySecondaries = function(test) {
         // Ensure replication happened in time
         setTimeout(function() {
           // Kill the primary
-          RS.killPrimary(9, function(node) {
+          RS.killPrimary(2, function(node) {
             // console.log("----------------------------------------------------------------- 3")
             // Do a collection find
             collection.find().toArray(function(err, items) {   
