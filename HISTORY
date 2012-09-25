@@ -2,6 +2,7 @@
 ----------------
 - Fixed db.eval to correctly handle system.js global javascript functions (Issue #709)
 - Cleanup of non-closing connections (Issue #706)
+- More cleanup of connections under replicaset (Issue #707, https://github.com/elbert3)
 
 1.1.7 2012-09-10
 ----------------
