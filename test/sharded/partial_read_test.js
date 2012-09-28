@@ -109,26 +109,6 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(test)
             test.done();
           });
         });
-
-        // // Perform a find and each
-        // collection.find().each(function(err, item) {
-        //   if(err) console.dir(err)
-
-        //   if(item == null) {
-        //     test.equal(1000, numberOfRecords);
-
-        //     // Perform a find and each
-        //     collection.find().toArray(function(err, items) {
-        //       if(err) console.dir(err)
-        //       test.equal(1000, items.length);
-
-        //       db.close();
-        //       test.done();
-        //     })
-        //   } else {
-        //     numberOfRecords = numberOfRecords + 1;
-        //   }
-        // });
     });
   });
 }

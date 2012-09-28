@@ -1,18 +1,3 @@
-DONE
-- Mongos connection
-- Gridfs streaming node.js read/write
-- toBson methods on serializer to allow for simpler serialization of complex objects
-- Refactor admin.js to use authdb passthrough
-- Aggregation helper
-- Read preferences for Mongos and Replicaset according to spec
-- https://github.com/mongodb/node-mongodb-native/issues/648
-- https://github.com/mongodb/node-mongodb-native/pull/646
-- https://github.com/mongodb/node-mongodb-native/issues/640
-- Write TTL collection tests for 2.2
-
 TODO
-- Ensure closest pick for MongoS failover
-- Proper Error handling (no mixing of mongos and mongod instances in mongos MongoS class, same for replicaset seeds in ReplSet)
-- Attempt to get bson C++ patch in
-- Update all documentation
-- Update to new look and feel for documentation based on mongo docs
+- Certificate verification for SSL
+- local sockets as well as ip for connections
