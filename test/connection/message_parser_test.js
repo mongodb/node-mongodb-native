@@ -1,7 +1,7 @@
 var testCase = require('nodeunit').testCase,
   Buffer = require('buffer').Buffer,
   gleak = require('../../dev/tools/gleak'),
-  Connection = require('../../lib/mongodb/connection/connection').Connection;
+  Connection = process.env['TEST_NATIVE'] != null ? require('../../lib-cov/mongodb/connection/connection').Connection : require('../../lib-cov/mongodb/connection/connection').Connection;
 
 var assertBuffersEqual = function(test, buffer1, buffer2) {  
   if(buffer1.length != buffer2.length) test.fail("Buffers do not have the same length", buffer1, buffer2);

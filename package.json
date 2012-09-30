@@ -52,7 +52,8 @@
                       "gitfy",
                       "Andrew Stone",
 											"John Le Drew",
-                      "Lucasfilm Singapore"]
+                      "Lucasfilm Singapore",
+                      "Roman Shtylman"]
 
 , "repository" :    { "type" :  "git"
                     , "url" :   "http://github.com/mongodb/node-mongodb-native.git" }
