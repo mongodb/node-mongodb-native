@@ -39,8 +39,8 @@ RCover.prototype.load = function load(files) {
         return true;
       })
 
-      // for(var i = 0; i < keys.length; i++) {
-      for(var i = 0; i < 1; i++) {
+      for(var i = 0; i < keys.length; i++) {
+      // for(var i = 0; i < 1; i++) {
         this.run(__dirname + "/../../" + file, keys[i]);
       }      
     }
