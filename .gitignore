@@ -12,3 +12,4 @@ lib-cov/
 output
 build
 upload.py
+rcover_html/

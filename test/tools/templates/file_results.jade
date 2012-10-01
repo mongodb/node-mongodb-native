@@ -1,0 +1,12 @@
+html
+body
+  table(width="100%", border=1)
+    - for a in results
+      tr
+        td(width="75%")
+          pre
+            code
+              = a.source.replace(/~*$/, '')
+        td(width="25%")
+          for b in a.files
+            = b.file + " :: " + b.test
