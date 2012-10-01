@@ -144,13 +144,6 @@ exports.shouldCorrectlyAddAndRemoveUser = function(test) {
   });
 }
 
-// run this last
-exports.noGlobalsLeaked = function(test) {
-  var leaks = gleak.detectNew();
-  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-  test.done();
-}
-
 /**
  * Retrieve the server information for the current
  * instance of the db client

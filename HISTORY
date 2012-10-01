@@ -5,6 +5,7 @@
 - More cleanup of connections under replicaset (Issue #707, https://github.com/elbert3)
 - Set keepalive on as default, override if not needed
 - Cleanup of jsbon install to correctly build without install.js script (https://github.com/shtylman)
+- Added domain socket support new Server("/tmp/mongodb.sock") style
 
 1.1.7 2012-09-10
 ----------------
