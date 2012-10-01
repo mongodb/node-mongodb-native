@@ -43,7 +43,7 @@ Let's get around to setting up a connection with the Mongo DB database. Jumping 
       }
     });
 
-Let's have a quick look at the simple connection. The **new Server(...)** sets up a configuration for the connection and the **auto_reconnect** tells the driver to retry sending a command to the server if there is a failure. Another option you can set is **poolSize**, this allows you to control how many tcp connections are opened in parallel. The default value for this is 1 but you can set it as high as you want. The driver will use a round-robin strategy to dispatch and read from the tcp connection.
+Let's have a quick look at the simple connection. The **new Server(...)** sets up a configuration for the connection and the **auto_reconnect** tells the driver to retry sending a command to the server if there is a failure. Another option you can set is **poolSize**, this allows you to control how many tcp connections are opened in parallel. The default value for this is 5 but you can set it as high as you want. The driver will use a round-robin strategy to dispatch and read from the tcp connection.
 
 We are up and running with a connection to the database. Let's move on and look at what collections are and how they work.
 
