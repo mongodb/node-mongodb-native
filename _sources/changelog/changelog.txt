@@ -2,6 +2,24 @@
 Changelog
 =========
 
+1.1.8
+----------------
+- Fixed db.eval to correctly handle system.js global javascript functions (Issue #709)
+- Cleanup of non-closing connections (Issue #706)
+- More cleanup of connections under replicaset (Issue #707, https://github.com/elbert3)
+- Set keepalive on as default, override if not needed
+- Cleanup of jsbon install to correctly build without install.js script (https://github.com/shtylman)
+- Added domain socket support new Server(&quot;/tmp/mongodb.sock&quot;) style
+
+1.1.7 2012-09-10
+----------------
+- Protect against starting PingStrategy being called more than once (Issue #694, https://github.com/aheckmann)
+- Make PingStrategy interval configurable (was 1 second, relaxed to 5) (Issue #693, https://github.com/aheckmann)
+- Made PingStrategy api more consistant, callback to start/stop methods are optional (Issue #693, https://github.com/aheckmann)
+- Proper stopping of strategy on replicaset stop
+- Throw error when gridstore file is not found in read mode (Issue #702, https://github.com/jbrumwell)
+- Cursor stream resume now using nextTick to avoid duplicated records (Issue #696)
+
 1.1.6 2012-09-01
 ----------------
 - Fix for readPreference NEAREST for replicasets (Issue #693, https://github.com/aheckmann)

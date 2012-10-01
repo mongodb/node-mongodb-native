@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A primer for GridFS using the Mongo DB driver &mdash; MongoDB Node.JS Driver 1.1.6 documentation</title>
+    <title>A primer for GridFS using the Mongo DB driver &mdash; MongoDB Node.JS Driver 1.1.8 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.1.6',
+        VERSION:     '1.1.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.1.6 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.1.8 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.6 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -66,7 +66,7 @@
   <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">grid</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Grid</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s1">&#39;fs&#39;</span><span class="p">);</span>
     <span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="s2">&quot;Hello world&quot;</span><span class="p">);</span>
-    <span class="nx">grid</span><span class="p">.</span><span class="nx">put</span><span class="p">.(</span><span class="nx">buffer</span><span class="p">,</span> <span class="p">{</span><span class="nx">metadata</span><span class="o">:</span><span class="p">{</span><span class="nx">category</span><span class="o">:</span><span class="s1">&#39;text&#39;</span><span class="p">},</span> <span class="nx">content_type</span><span class="o">:</span> <span class="s1">&#39;text&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">fileInfo</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">grid</span><span class="p">.</span><span class="nx">put</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="p">{</span><span class="nx">metadata</span><span class="o">:</span><span class="p">{</span><span class="nx">category</span><span class="o">:</span><span class="s1">&#39;text&#39;</span><span class="p">},</span> <span class="nx">content_type</span><span class="o">:</span> <span class="s1">&#39;text&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">fileInfo</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Finished writing file to Mongo&quot;</span><span class="p">);</span>
       <span class="p">}</span>
@@ -83,10 +83,10 @@
 </div>
 </div></blockquote>
 <p>Since GridFS is actually a special structure stored as collections you&#8217;ll notice that we are using the db connection that we used in the previous tutorial to operate on collections and documents. The second parameter  <strong>&#8216;fs&#8217;</strong>  allows you to change the collections you want to store the data in. In this example the collections would be  <strong>fs_files</strong>  and  <strong>fs_chunks</strong> .</p>
-<p>Having a life grid instance we now go ahead and create some test data stored in a Buffer instance, although you can pass in a string instead. We then write our data to disk.</p>
+<p>Having a live grid instance we now go ahead and create some test data stored in a Buffer instance, although you can pass in a string instead. We then write our data to disk.</p>
 <blockquote>
 <div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="s2">&quot;Hello world&quot;</span><span class="p">);</span>
-<span class="nx">grid</span><span class="p">.</span><span class="nx">put</span><span class="p">.(</span><span class="nx">buffer</span><span class="p">,</span> <span class="p">{</span><span class="nx">metadata</span><span class="o">:</span><span class="p">{</span><span class="nx">category</span><span class="o">:</span><span class="s1">&#39;text&#39;</span><span class="p">},</span> <span class="nx">content_type</span><span class="o">:</span> <span class="s1">&#39;text&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">fileInfo</span><span class="p">)</span> <span class="p">{</span>
+<span class="nx">grid</span><span class="p">.</span><span class="nx">put</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="p">{</span><span class="nx">metadata</span><span class="o">:</span><span class="p">{</span><span class="nx">category</span><span class="o">:</span><span class="s1">&#39;text&#39;</span><span class="p">},</span> <span class="nx">content_type</span><span class="o">:</span> <span class="s1">&#39;text&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">fileInfo</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Finished writing file to Mongo&quot;</span><span class="p">);</span>
   <span class="p">}</span>
@@ -129,7 +129,7 @@
 <div class="section" id="advanced-gridfs-or-how-not-to-run-out-of-memory">
 <h2>Advanced GridFS or how not to run out of memory<a class="headerlink" href="#advanced-gridfs-or-how-not-to-run-out-of-memory" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div><p>As we just said controlling memory consumption for you file writing and reading is key if you want to scale up the application. That means not reading in entire files before either writing or reading from Mongo DB. The good news it&#8217;s supported. Let&#8217;s throw some code out there straight away and look at how to do chunk sized streaming writes and reads.</p>
+<div><p>As we just said controlling memory consumption for you file writing and reading is key if you want to scale up the application. That means not reading in entire files before either writing or reading from Mongo DB. The good news is, it&#8217;s supported. Let&#8217;s throw some code out there straight away and look at how to do chunk sized streaming writes and reads.</p>
 <p><strong>the requires and and other initializing stuff omitted for brevity</strong></p>
 <blockquote>
 <div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">fileId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
@@ -453,7 +453,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.6 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

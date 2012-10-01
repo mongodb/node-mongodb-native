@@ -39,7 +39,8 @@ but use find to acquire a cursor.
    :param number numberOfRetries: if using awaidata specifies the number of times to retry on timeout.
    :param string dbName: override the default dbName.
    :param number tailableRetryInterval: specify the miliseconds between getMores on tailable cursor.
-   :param boolean have: the server send all the documents at once as getMore packets.
+   :param boolean exhaust: have the server send all the documents at once as getMore packets.
+   :param boolean partial: have the sharded system return a partial result from mongos.
 
 
 
@@ -680,84 +681,6 @@ long it took the database to process it.
              assert.equal(null, err);
      
              db.close();
-           });
-         });
-       });
-     });
-
-
--------------
-streamRecords
--------------
-
-
-Returns a stream object that can be used to listen to and stream records
-(**Use the CursorStream object instead as this is deprected**)
-
-
-
-Options
- - **fetchSize** {Number} the number of records to fetch in each batch (steam specific batchSize).
-
-
-
-Events
- - **data** {function(item) {}} the data event triggers when a document is ready.
- - **error** {function(err) {}} the error event triggers if an error happens.
- - **end** {function() {}} the end event triggers when there is no more documents available.
-
-.. js:function:: streamRecords([options])
-
-   :param object [options]: additional options for streamRecords.
-   :returns: eventemitter returns a stream object.
-
-
-**Examples**
-
-  
-  
-  A simple example showing the use of the cursor streamRecords function.
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
-     
-     // Establish connection to db
-     db.open(function(err, db) {
-     
-       // Create a lot of documents to insert
-       var docs = []
-       for(var i = 0; i < 100; i++) {
-         docs.push({'a':i})
-       }
-     
-       // Create a collection
-       db.createCollection('test_streamingRecords_function', function(err, collection) {
-         assert.equal(null, err);
-     
-         // Insert documents into collection
-         collection.insert(docs, {safe:true}, function(err, ids) {
-           // Peform a find to get a cursor
-           var stream = collection.find().streamRecords({fetchSize:1000});
-     
-           // Execute find on all the documents
-           stream.on('end', function() {
-             db.close();
-           });
-     
-           stream.on('data', function(data) {
-             assert.ok(data != null);
            });
          });
        });

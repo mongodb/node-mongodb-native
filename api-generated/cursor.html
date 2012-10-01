@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Cursor() &mdash; MongoDB Node.JS Driver 1.1.6 documentation</title>
+    <title>Cursor() &mdash; MongoDB Node.JS Driver 1.1.8 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.1.6',
+        VERSION:     '1.1.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.1.6 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.1.8 documentation" href="../index.html" />
     <link rel="next" title="CursorStream()" href="cursorstream.html" />
     <link rel="prev" title="Admin()" href="admin.html" /> 
   </head>
@@ -38,7 +38,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.6 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -88,7 +88,8 @@ but use find to acquire a cursor.</p>
 <li><strong>numberOfRetries</strong> (<em>number</em>) &#8211; if using awaidata specifies the number of times to retry on timeout.</li>
 <li><strong>dbName</strong> (<em>string</em>) &#8211; override the default dbName.</li>
 <li><strong>tailableRetryInterval</strong> (<em>number</em>) &#8211; specify the miliseconds between getMores on tailable cursor.</li>
-<li><strong>have</strong> (<em>boolean</em>) &#8211; the server send all the documents at once as getMore packets.</li>
+<li><strong>exhaust</strong> (<em>boolean</em>) &#8211; have the server send all the documents at once as getMore packets.</li>
+<li><strong>partial</strong> (<em>boolean</em>) &#8211; have the sharded system return a partial result from mongos.</li>
 </ul>
 </td>
 </tr>
@@ -818,92 +819,6 @@ long it took the database to process it.</p>
 </div>
 </div></blockquote>
 </div>
-<div class="section" id="streamrecords">
-<h2>streamRecords<a class="headerlink" href="#streamrecords" title="Permalink to this headline">¶</a></h2>
-<p>Returns a stream object that can be used to listen to and stream records
-(<strong>Use the CursorStream object instead as this is deprected</strong>)</p>
-<dl class="docutils">
-<dt>Options</dt>
-<dd><ul class="first last simple">
-<li><strong>fetchSize</strong> {Number} the number of records to fetch in each batch (steam specific batchSize).</li>
-</ul>
-</dd>
-<dt>Events</dt>
-<dd><ul class="first last simple">
-<li><strong>data</strong> {function(item) {}} the data event triggers when a document is ready.</li>
-<li><strong>error</strong> {function(err) {}} the error event triggers if an error happens.</li>
-<li><strong>end</strong> {function() {}} the end event triggers when there is no more documents available.</li>
-</ul>
-</dd>
-</dl>
-<dl class="function">
-<dt id="streamRecords">
-<tt class="descname">streamRecords</tt><big>(</big><span class="optional">[</span><em>options</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#streamRecords" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options for streamRecords.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">eventemitter returns a stream object.</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the use of the cursor streamRecords function.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
-
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-
-  <span class="c1">// Create a lot of documents to insert</span>
-  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">docs</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="nx">i</span><span class="p">})</span>
-  <span class="p">}</span>
-
-  <span class="c1">// Create a collection</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test_streamingRecords_function&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-
-    <span class="c1">// Insert documents into collection</span>
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">ids</span><span class="p">)</span> <span class="p">{</span>
-      <span class="c1">// Peform a find to get a cursor</span>
-      <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">streamRecords</span><span class="p">({</span><span class="nx">fetchSize</span><span class="o">:</span><span class="mi">1000</span><span class="p">});</span>
-
-      <span class="c1">// Execute find on all the documents</span>
-      <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-      <span class="p">});</span>
-
-      <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">data</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
-      <span class="p">});</span>
-    <span class="p">});</span>
-  <span class="p">});</span>
-<span class="p">});</span>
-</pre></div>
-</div>
-</div></blockquote>
-</div>
 <div class="section" id="stream">
 <h2>stream<a class="headerlink" href="#stream" title="Permalink to this headline">¶</a></h2>
 <p>Returns a Node ReadStream interface for this cursor.</p>
@@ -1136,7 +1051,6 @@ long it took the database to process it.</p>
 <li><a class="reference internal" href="#batchsize">batchSize</a></li>
 <li><a class="reference internal" href="#nextobject">nextObject</a></li>
 <li><a class="reference internal" href="#explain">explain</a></li>
-<li><a class="reference internal" href="#streamrecords">streamRecords</a></li>
 <li><a class="reference internal" href="#stream">stream</a></li>
 <li><a class="reference internal" href="#close">close</a></li>
 <li><a class="reference internal" href="#isclosed">isClosed</a></li>
@@ -1296,7 +1210,7 @@ long it took the database to process it.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.6 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

@@ -26,7 +26,7 @@ A simple example
       if(!err) {
         var grid = new Grid(db, 'fs');    
         var buffer = new Buffer("Hello world");
-        grid.put.(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
+        grid.put(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
           if(!err) {
             console.log("Finished writing file to Mongo");
           }
@@ -49,13 +49,13 @@ A simple example
 
 
 
- Having a life grid instance we now go ahead and create some test data stored in a Buffer instance, although you can pass in a string instead. We then write our data to disk.
+ Having a live grid instance we now go ahead and create some test data stored in a Buffer instance, although you can pass in a string instead. We then write our data to disk.
 
 
   .. code-block:: javascript
 
     var buffer = new Buffer("Hello world");
-    grid.put.(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
+    grid.put(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
       if(!err) {
         console.log("Finished writing file to Mongo");
       }
@@ -120,7 +120,7 @@ A simple example
 Advanced GridFS or how not to run out of memory
 -----------------------------------------------
 
- As we just said controlling memory consumption for you file writing and reading is key if you want to scale up the application. That means not reading in entire files before either writing or reading from Mongo DB. The good news it's supported. Let's throw some code out there straight away and look at how to do chunk sized streaming writes and reads.
+ As we just said controlling memory consumption for you file writing and reading is key if you want to scale up the application. That means not reading in entire files before either writing or reading from Mongo DB. The good news is, it's supported. Let's throw some code out there straight away and look at how to do chunk sized streaming writes and reads.
 
 
 
