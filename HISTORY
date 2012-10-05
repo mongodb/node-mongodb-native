@@ -1,4 +1,8 @@
-1.1.8
+1.1.9 2012-10-05
+----------------
+- Updated bson to 0.1.5 to fix build problem on sunos/windows.
+
+1.1.8 2012-10-01
 ----------------
 - Fixed db.eval to correctly handle system.js global javascript functions (Issue #709)
 - Cleanup of non-closing connections (Issue #706)
