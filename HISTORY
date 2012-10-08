@@ -1,3 +1,9 @@
+1.1.10 2012-10-08
+-----------------
+- fix Admin.serverStatus (Issue #723, https://github.com/Contra)
+- logging on connection open/close(Issue #721, https://github.com/asiletto)
+- more fixes for windows bson install (Issue #724)
+
 1.1.9 2012-10-05
 ----------------
 - Updated bson to 0.1.5 to fix build problem on sunos/windows.
