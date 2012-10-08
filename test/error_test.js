@@ -22,7 +22,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -52,7 +52,7 @@ exports.tearDown = function(callback) {
 // Test the error reporting functionality
 exports.shouldCorrectlyRetrieveErrorMessagesFromServer = function(test) {    
   // Just run with one connection in the pool
-  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Open the db
   error_client.open(function(err, error_client) {
     error_client.resetErrorHistory(function() {
@@ -116,7 +116,7 @@ exports.shouldCorrectlyRetrieveErrorMessagesFromServer = function(test) {
 // Test the last status functionality of the driver
 exports.shouldCorrectlyExecuteLastStatus = function(test) {
   // Just run with one connection in the pool
-  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Open the db
   error_client.open(function(err, client) {
     client.createCollection('test_last_status', function(err, collection) {
@@ -189,7 +189,7 @@ exports.shouldFailInsertDueToUniqueIndex = function(test) {
 
 // Test the error reporting functionality
 exports.shouldFailInsertDueToUniqueIndexStrict = function(test) {
-  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   error_client.open(function(err, error_client) {
     error_client.dropCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
       error_client.createCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
@@ -211,7 +211,7 @@ exports.shouldFailInsertDueToUniqueIndexStrict = function(test) {
 }
 
 exports['safe mode should pass the disconnected error to the callback'] = function (test) {
-  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   var name = 'test_safe_mode_when_disconnected';
   error_client.open(function(err, error_client) {
     test.ok(err == null);

@@ -71,7 +71,7 @@ var ISODate = function (string) {
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -107,7 +107,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -140,7 +140,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = func
  */
 exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -174,7 +174,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(test) {
  */
 exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -208,7 +208,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(t
  */
 exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -257,7 +257,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
  */
 exports.shouldForceMongoDbServerToAssignId = function(test) {
   /// Set up server with custom pk factory
-  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null), 'forceServerObjectId':true});
+  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null), 'forceServerObjectId':true});
   db.open(function(err, client) {
     client.createCollection('test_insert2', function(err, r) {
       client.collection('test_insert2', function(err, collection) {
@@ -484,7 +484,7 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext= function(test) {
-  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
     //convience curried handler for functions of type 'a -> (err, result)
     function getResult(callback){
@@ -620,7 +620,7 @@ exports.shouldCorrectlyDoToJsonForLongValue = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyInsertAndUpdateWithNoCallback = function(test) {
-  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server('localhost', 27017, {safe:false, auto_reconnect: true, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, client) {
     client.createCollection('test_insert_and_update_no_callback', function(err, collection) {
       // Insert the update
@@ -647,7 +647,7 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = function(test) {
  */
 exports.shouldInsertAndQueryTimestamp = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -793,7 +793,7 @@ exports.shouldCorrectlyInsertDocumentWithUUID = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = function(test) {
-  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, poolSize: 1, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, client) {
     client.createCollection('test_insert_and_update_no_callback_strict', function(err, collection) {
       collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {safe:true}, function(err, result) {
@@ -846,7 +846,7 @@ exports.shouldCorrectlyInsertDBRefWithDbNotDefined = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = function(test) {
-  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
     db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions', function(err, collection) {
       collection.insert({a:1}, {safe:true}, function(err, result) {
@@ -875,7 +875,7 @@ exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyExecuteMultipleFetches = function(test) {
-  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Search parameter
   var to = 'ralph'
   // Execute query
@@ -1230,7 +1230,7 @@ exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = function(test) {
  */
 exports.shouldAttempToForceBsonSize = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL, disableDriverBSONSizeCheck:true}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL, disableDriverBSONSizeCheck:true}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {

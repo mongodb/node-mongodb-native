@@ -23,7 +23,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -59,7 +59,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldRemoveAllDocumentsNoSafe = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -99,7 +99,7 @@ exports.shouldRemoveAllDocumentsNoSafe = function(test) {
  */
 exports.shouldRemoveSubsetOfDocumentsSafeMode = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {

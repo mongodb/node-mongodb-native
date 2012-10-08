@@ -72,7 +72,7 @@ exports.shouldCorrectlyWaitForReplicationToServersOnInserts = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
   db.open(function(err, p_db) {
     // Drop collection on replicaset
     p_db.dropCollection('shouldCorrectlyWaitForReplicationToServersOnInserts', function(err, r) {
@@ -101,7 +101,7 @@ exports.shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts = function(t
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
   db.open(function(err, p_db) {
     // Check if we got an error
     if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
@@ -135,7 +135,7 @@ exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
   db.open(function(err, p_db) {
     // Check if we got an error
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
@@ -174,7 +174,7 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
 
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
   // Open db
   db.open(function(err, p_db) {
     // Drop collection on replicaset
@@ -228,7 +228,7 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -285,7 +285,7 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
   db.open(function(err, p_db) {
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
     // Drop collection on replicaset

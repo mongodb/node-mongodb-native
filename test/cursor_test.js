@@ -25,7 +25,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -60,7 +60,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldCorrectlyExecuteToArray = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -121,7 +121,7 @@ exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = function(tes
  */
 exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1175,7 +1175,7 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = func
  */
 exports['Should correctly rewind and restart cursor'] = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1423,7 +1423,7 @@ exports['destroying a stream stops it'] = function(test) {
  * @api private
  */
 exports['cursor stream errors']= function(test) {
-  var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     test.equal(null, err);
 
@@ -1533,7 +1533,7 @@ exports['cursor stream pipe']= function(test) {
  */
 exports.shouldCorrectlyUseCursorCountFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1568,7 +1568,7 @@ exports.shouldCorrectlyUseCursorCountFunction = function(test) {
  */
 exports.shouldCorrectlyPeformSimpleSorts = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1609,7 +1609,7 @@ exports.shouldCorrectlyPeformSimpleSorts = function(test) {
  */
 exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1644,7 +1644,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
  */
 exports.shouldCorrectlyPeformSkipOnCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1680,7 +1680,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = function(test) {
  */
 exports.shouldCorrectlyPeformBatchSizeOnCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1715,7 +1715,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = function(test) {
  */
 exports.shouldCorrectlyPeformNextObjectOnCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1750,7 +1750,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = function(test) {
  */
 exports.shouldCorrectlyPeformSimpleExplainCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1784,7 +1784,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheStreamRecords = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1827,7 +1827,7 @@ exports.shouldStreamDocumentsUsingTheStreamRecords = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheStreamFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1870,7 +1870,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheCloseFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1916,7 +1916,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1960,7 +1960,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
 exports.shouldCloseDeadTailableCursors = function (test) {
   // http://www.mongodb.org/display/DOCS/Tailable+Cursors
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   db.open(function(err, db) {
 
@@ -2025,7 +2025,7 @@ exports.shouldCloseDeadTailableCursors = function (test) {
 exports.shouldAwaitData = function (test) {
   // http://www.mongodb.org/display/DOCS/Tailable+Cursors
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 2, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 2, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   db.open(function(err, db) {
     var options = { capped: true, size: 8};
@@ -2097,7 +2097,7 @@ exports.shouldCorrectExecuteExplainHonoringLimit = function (test) {
  */
 exports.shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {

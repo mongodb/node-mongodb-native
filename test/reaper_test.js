@@ -22,7 +22,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -50,7 +50,7 @@ exports.tearDown = function(callback) {
 }
 
 exports.shouldCorrectlyAssertCorrectReaperBehavior = function(test) {
-  var reaperClient = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {reaper:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var reaperClient = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {safe:false, reaper:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   reaperClient.open(function(err, reaperClient) {
     reaperClient._lastReaperTimestamp = (new Date().getTime() - 1000000);
     var con = reaperClient.serverConfig.checkoutReader();

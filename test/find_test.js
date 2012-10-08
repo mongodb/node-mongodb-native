@@ -30,7 +30,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -559,7 +559,7 @@ exports.shouldCorrectlyReturnDocumentWithOriginalStructure= function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleRecord = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {
       collection.insert({'a':0}, {safe:true}, function(err, r) {
@@ -881,7 +881,7 @@ exports['Should correctly pass timeout options to cursor'] = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.createCollection('shouldCorrectlyFindAndModifyDocumentWithDBStrict', function(err, collection) {
       // Test return old document on change
@@ -925,7 +925,7 @@ exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = function(test
  * @ignore
  */
 exports.shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments', function(err, collection) {
       // Test return old document on change
@@ -1019,7 +1019,7 @@ exports['Should correctly return record with 64-bit id'] = function(test) {
  * @ignore
  */
 exports['Should Correctly find a Document using findOne excluding _id field'] = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     client.createCollection('Should_Correctly_find_a_Document_using_findOne_excluding__id_field', function(err, collection) {
       var doc = {_id : new ObjectID(), a:1, c:2}
@@ -1141,7 +1141,7 @@ exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = function(
  * @ignore
  */
 exports.shouldCorrectlyExecuteMultipleFindsInParallel = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.createCollection('tasks', function(err, collection) {
       var numberOfOperations = 0;
@@ -1195,7 +1195,7 @@ exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = functi
  * @ignore
  */
 exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   var running = true;
 
   p_client.open(function(err, p_client) {
@@ -1233,7 +1233,7 @@ exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = function(test) 
  * @ignore
  */
 exports.shouldCorrectlyIterateOverCollection = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   var numberOfSteps = 0;
 
   // Open db connection
@@ -1264,7 +1264,7 @@ exports.shouldCorrectlyIterateOverCollection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {strict:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.createCollection('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', function(err, collection) {
       // Test return old document on change
@@ -1291,7 +1291,7 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = function(test) {
  */
 exports.shouldPerformSimpleFindInArray = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1336,7 +1336,7 @@ exports.shouldPerformSimpleFindInArray = function(test) {
  */
 exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1392,7 +1392,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
  */
 exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1433,7 +1433,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
  */
 exports.shouldPeformASimpleQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1467,7 +1467,7 @@ exports.shouldPeformASimpleQuery = function(test) {
  */
 exports.shouldPeformASimpleExplainQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1501,7 +1501,7 @@ exports.shouldPeformASimpleExplainQuery = function(test) {
  */
 exports.shouldPeformASimpleLimitSkipQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1537,7 +1537,7 @@ exports.shouldPeformASimpleLimitSkipQuery = function(test) {
  */
 exports.shouldPeformASimpleLimitSkipFindOneQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1569,7 +1569,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = function(test) {
  */
 exports.shouldPeformASimpleLimitSkipFindWithFields = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1610,7 +1610,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields = function(test) {
  */
 exports.shouldPeformASimpleLimitSkipFindWithFields2 = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1643,7 +1643,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = function(test) {
  */
 exports.shouldPerformQueryWithBatchSizeDifferentToStandard = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1679,7 +1679,7 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = function(test) {
  */
 exports.shouldQueryCurrentOperation = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1701,7 +1701,7 @@ exports.shouldQueryCurrentOperation = function(test) {
  */
 exports.shouldCorrectlyPerformNegativeLimit = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1733,7 +1733,7 @@ exports.shouldCorrectlyPerformNegativeLimit = function(test) {
  */
 exports.shouldCorrectlyExecuteExhaustQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1766,7 +1766,7 @@ exports.shouldCorrectlyExecuteExhaustQuery = function(test) {
 
 exports['Readpreferences should work fine when using a single server instance'] = function(test) {
   var server = new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL, readPreference:ReadPreference.PRIMARY_PREFERRED});
-  var db = new Db('integration_tests', server, {native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
+  var db = new Db('integration_tests', server, {safe:false, native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1799,7 +1799,7 @@ exports['Readpreferences should work fine when using a single server instance'] 
 
 exports['Each should not hang on iterating over no results'] = function(test) {
   var server = new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL, readPreference:ReadPreference.PRIMARY_PREFERRED});
-  var db = new Db('not_existing', server, {native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
+  var db = new Db('not_existing', server, {safe:false, native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
 
   // Establish connection to db
   db.open(function(err, db) {

@@ -59,7 +59,7 @@ exports.shouldCorrectlyConncetToSSLBasedReplicaset = function(test) {
   
   // Connect to the replicaset
   var slaveDb = null;
-  var db = new Db('foo', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('foo', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, p_db) {
     test.equal(null, err);
     test.done();

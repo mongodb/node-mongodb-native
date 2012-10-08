@@ -71,7 +71,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
     ])
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos);
+  var db = new Db('integration_test_', mongos, {safe:false});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -106,7 +106,7 @@ exports.shouldCorrectlyEmitOpenEvent = function(test) {
 
   var openCalled = false;
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos);
+  var db = new Db('integration_test_', mongos, {safe:false});
   db.once("open", function(_err, _db) {
     openCalled = true;
   })
@@ -132,7 +132,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
     ], {ha:true})
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos);
+  var db = new Db('integration_test_', mongos, {safe:false});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);

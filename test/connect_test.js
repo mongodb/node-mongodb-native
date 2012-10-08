@@ -14,7 +14,7 @@ var testCase = require('nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var clientUrl = 'mongo://localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
+var clientUrl = 'mongo://localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
 
 /**
  * @ignore
@@ -89,7 +89,7 @@ exports.testConnectGoodAuth = function(test) {
   });
 
   function restOfTest() {
-    var url = 'mongo://' + user + ':' + password + '@localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
+    var url = 'mongo://' + user + ':' + password + '@localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
     connect(url, connectionTester(test, 'testConnectGoodAuth'));
   }
 };
@@ -98,7 +98,7 @@ exports.testConnectGoodAuth = function(test) {
  * @ignore
  */
 exports.testConnectBadAuth = function(test) {
-  var url = 'mongo://slithy:toves@localhost:27017/' + MONGODB + (useSSL == true ? '?ssl=true' : '');
+  var url = 'mongo://slithy:toves@localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
   connect(url, function(err, db) {    
     test.ok(err);
     test.ok(db);
@@ -111,7 +111,7 @@ exports.testConnectBadAuth = function(test) {
  * @ignore
  */
 exports.testConnectNoOpen = function(test) {
-  var db = connect('mongo://localhost:27017/' + MONGODB, {noOpen:true});
+  var db = connect('mongo://localhost:27017/?safe=false' + MONGODB, {noOpen:true});
   test.ok(db != null);
   test.done();
 };
@@ -121,7 +121,7 @@ exports.testConnectNoOpen = function(test) {
  */
 exports.testConnectThrowsNoCallbackProvided = function(test) {
   test.throws(function() {
-    var db = connect('mongo://localhost:27017/' + MONGODB);
+    var db = connect('mongo://localhost:27017/?safe=false' + MONGODB);
   });
   test.done();
 };
@@ -131,7 +131,7 @@ exports.testConnectThrowsNoCallbackProvided = function(test) {
  */
 exports.testConnectBadUrl = function(test) {
   test.throws(function() {
-    connect('mango://localhost:27017/' + MONGODB, function(err, db) {
+    connect('mango://localhost:27017/?safe=false' + MONGODB, function(err, db) {
       test.ok(false, 'Bad URL!');
     });
   });
@@ -147,7 +147,7 @@ exports.testConnectBadUrl = function(test) {
  */
 exports.shouldCorrectlyDoSimpleCountExamples = function(test) {
   // Connect to the server
-  Db.connect('mongodb://localhost:27017/integration_tests' + (useSSL == true ? '?ssl=true' : ''), function(err, db) {
+  Db.connect('mongodb://localhost:27017/integration_tests?safe=false' + (useSSL == true ? '&ssl=true' : ''), function(err, db) {
     test.equal(null, err);
     
     db.close();

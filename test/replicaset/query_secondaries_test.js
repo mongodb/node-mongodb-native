@@ -28,7 +28,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
   
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -103,7 +103,7 @@ exports.shouldReadPrimary = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   db.open(function(err, p_db) {
     var waitForSetup = function() {
       if(Object.keys(p_db.serverConfig._state.secondaries).length == 0) {
@@ -134,7 +134,7 @@ exports.shouldCorrectlyTestConnection = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   db.open(function(err, p_db) {
     var waitForSetup = function() {
       if(Object.keys(p_db.serverConfig._state.secondaries).length == 0) {
@@ -170,7 +170,7 @@ exports.shouldCorrectlyQuerySecondaries = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   db.open(function(err, p_db) {
     // console.log("----------------------------------------------------------------- 0")
     p_db.createCollection("testsets", {safe:{w:2, wtimeout:10000}}, function(err, collection) {
@@ -222,7 +222,7 @@ exports.shouldCorrectlyQueryPrimary = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   db.open(function(err, p_db) {
     if(err != null) debug("shouldReadPrimary :: " + inspect(err));
     
@@ -248,7 +248,7 @@ exports.shouldAllowToForceReadWithPrimary = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   db.open(function(err, p_db) {
     if(err != null) debug("shouldReadPrimary :: " + inspect(err));
     // Create a collection
@@ -282,7 +282,7 @@ exports.shouldWorkWithSecondarySeeding = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   db.on("fullsetup", function() {
     // Create a collection
     db.createCollection('shouldWorkWithSecondarySeeding', function(err, collection) {

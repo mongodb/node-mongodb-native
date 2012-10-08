@@ -76,7 +76,7 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(test)
   }
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos);
+  var db = new Db('integration_test_', mongos, {safe:false});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);

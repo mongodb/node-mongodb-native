@@ -13,7 +13,7 @@ var testCase = require('nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 var native_parser = (process.env['TEST_NATIVE'] != null);
 

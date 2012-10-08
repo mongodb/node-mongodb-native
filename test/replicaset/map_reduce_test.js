@@ -28,7 +28,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   // Open the db
   db.open(function(err, p_db) {
     // Close connections
@@ -100,7 +100,7 @@ exports['Should Correctly group using replicaset'] = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {slave_ok:true});
+  var db = new Db('integration_test_', replSet, {safe:false, slave_ok:true});
   db.open(function(err, p_db) {
     if(err != null) debug("shouldGroup :: " + inspect(err));
 
@@ -142,7 +142,7 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
   );
 
   // Establish connection to db
-  var db = new Db('integration_test_', replSet, {slave_ok:true});
+  var db = new Db('integration_test_', replSet, {safe:false, slave_ok:true});
   db.open(function(err, db) {
 
     // Parse version of server if available
@@ -192,7 +192,7 @@ exports.shouldFailToDoMapReduceToOutCollection = function(test) {
   );
 
   // Establish connection to db
-  var db = new Db('integration_test_', replSet, {slave_ok:true});
+  var db = new Db('integration_test_', replSet, {safe:false, slave_ok:true});
   db.open(function(err, db) {
 
     // Parse version of server if available
@@ -243,7 +243,7 @@ exports['Should correctly execute eval'] = function(test) {
   );
 
   // Establish connection to db
-  var db = new Db('integration_test_', replSet, {slave_ok:true});
+  var db = new Db('integration_test_', replSet, {safe:false, slave_ok:true});
   db.open(function(err, db) {
     db.eval("1+1", function(err, result) {
       test.equal(null, err);

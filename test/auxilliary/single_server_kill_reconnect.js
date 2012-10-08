@@ -13,7 +13,7 @@ var testCase = require('nodeunit').testCase,
   Step = require("step");
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
 var serverManager = null;
 
 /**
@@ -37,7 +37,7 @@ exports.tearDown = function(callback) {
 }
 
 exports.shouldCorrectlyKeepInsertingDocumentsWhenServerDiesAndComesUp = function(test) {
-  var db1 = new Db('mongo-ruby-test-single-server', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db1 = new Db('mongo-ruby-test-single-server', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   // All inserted docs
   var docs = [];
   var errs = [];
@@ -94,7 +94,7 @@ exports.shouldCorrectlyKeepInsertingDocumentsWhenServerDiesAndComesUp = function
 }
 
 exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = function(test) {
-  var db = new Db('test-single-server-recovery', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {numberOfRetries:3, retryMiliSeconds:500, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('test-single-server-recovery', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, numberOfRetries:3, retryMiliSeconds:500, native_parser: (process.env['TEST_NATIVE'] != null)});
   // All inserted docs
   var docs = [];
   var errs = [];

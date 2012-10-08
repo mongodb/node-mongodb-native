@@ -27,7 +27,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -105,7 +105,7 @@ exports.shouldRetrieveCorrectCountAfterInsertionReconnect = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet);
+  var db = new Db('integration_test_', replSet, {safe:false});
   db.open(function(err, p_db) {
     // if(err != null) debug("shouldRetrieveCorrectCountAfterInsertionReconnect :: " + inspect(err));
     // Drop collection on replicaset

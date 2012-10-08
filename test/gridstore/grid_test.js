@@ -14,7 +14,7 @@ var testCase = require('nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 var native_parser = (process.env['TEST_NATIVE'] != null);
 
@@ -61,7 +61,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldPutFileCorrectlyToGridUsingObjectId = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -91,7 +91,7 @@ exports.shouldPutFileCorrectlyToGridUsingObjectId = function(test) {
  */
 exports.shouldPutAndGetFileCorrectlyToGridUsingObjectId = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -139,7 +139,7 @@ exports.shouldFailToPutFileDueToDataObjectNotBeingBuffer = function(test) {
  */
 exports.shouldCorrectlyWriteFileAndThenDeleteIt = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {

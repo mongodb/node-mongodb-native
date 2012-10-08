@@ -23,7 +23,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -58,7 +58,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldCreateASimpleIndexOnASingleField = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -96,7 +96,7 @@ exports.shouldCreateASimpleIndexOnASingleField = function(test) {
  */
 exports.shouldCreateComplexIndexOnTwoFields = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -143,7 +143,7 @@ exports.shouldCreateComplexIndexOnTwoFields = function(test) {
  */
 exports.shouldCreateComplexEnsureIndex = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -190,7 +190,7 @@ exports.shouldCreateComplexEnsureIndex = function(test) {
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -236,7 +236,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
  */
 exports.shouldCorrectlyCreateAndDropIndex = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -281,7 +281,7 @@ exports.shouldCorrectlyCreateAndDropIndex = function(test) {
  */
 exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -332,7 +332,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
  */
 exports.shouldCorrectlyForceReindexOnCollection = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -736,7 +736,7 @@ exports.shouldThrowDuplicateKeyErrorWhenCreatingIndex = function(test) {
  */
 exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {native_parser: native_parser, strict:true});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser, strict:true});
   // Establish connection to db
   db.open(function(err, db) {
     db.createCollection('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', function(err, collection) {

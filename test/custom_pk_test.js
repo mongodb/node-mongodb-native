@@ -23,7 +23,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -58,7 +58,7 @@ exports.shouldCreateRecordsWithCustomPKFactory = function(test) {
     return new ObjectID("aaaaaaaaaaaa");
   }
 
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {ssl:useSSL}), {'pk':CustomPKFactory, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {ssl:useSSL}), {safe:false, 'pk':CustomPKFactory, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.dropDatabase(function(err, done) {
       p_client.createCollection('test_custom_key', function(err, collection) {
