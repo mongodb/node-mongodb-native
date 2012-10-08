@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GridStore() &mdash; MongoDB Node.JS Driver 1.1.9 documentation</title>
+    <title>GridStore() &mdash; MongoDB Node.JS Driver 1.1.10 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.1.9',
+        VERSION:     '1.1.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.1.9 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.1.10 documentation" href="../index.html" />
     <link rel="next" title="ReadStream()" href="readstream.html" />
     <link rel="prev" title="Grid()" href="grid.html" /> 
   </head>
@@ -38,7 +38,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -185,7 +185,7 @@ new one if file does not exist.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -228,7 +228,7 @@ new one if file does not exist.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -274,7 +274,7 @@ new one if file does not exist.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -365,7 +365,7 @@ new one if file does not exist.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -410,7 +410,7 @@ new one if file does not exist.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -486,7 +486,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -551,7 +551,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -613,7 +613,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -693,7 +693,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -756,7 +756,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -839,7 +839,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -931,7 +931,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1005,7 +1005,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1090,7 +1090,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1219,7 +1219,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1281,7 +1281,7 @@ already exists. This will work properly only if mode was initialized to
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1350,7 +1350,7 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1424,7 +1424,7 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1488,7 +1488,7 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1564,7 +1564,7 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1647,7 +1647,7 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1789,7 +1789,7 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1859,7 +1859,7 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -1938,7 +1938,7 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -2032,7 +2032,7 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;integration_tests&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span>
- <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
+ <span class="p">{</span><span class="nx">auto_reconnect</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">poolSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">}),</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">native_parser</span><span class="o">:</span> <span class="kc">false</span><span class="p">});</span>
 
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
@@ -2280,7 +2280,7 @@ the given string does not have one.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

@@ -26,7 +26,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 2
          * - **Watchers**
-           - 7
+           - 8
 
 .. topic:: caboose
 
@@ -39,7 +39,7 @@ Web frameworks using MongoDB
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 10:37:25 on 1/9/2012
+           - 11:2:11 on 8/9/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -49,7 +49,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 1
          * - **Watchers**
-           - 8
+           - 10
 
 .. topic:: node-bread
 
@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 21:54:39 on 4/9/2012
+           - 17:58:25 on 5/9/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 266
+           - 270
          * - **Watchers**
-           - 2386
+           - 2395
 
 .. topic:: mongo-model
 
@@ -383,7 +383,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 26
          * - **Watchers**
-           - 231
+           - 234
 
 .. topic:: mongode
 
@@ -406,7 +406,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 3
          * - **Watchers**
-           - 45
+           - 46
 
 .. topic:: node-mongodb-wrapper
 
@@ -545,9 +545,9 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 37
+           - 38
          * - **Watchers**
-           - 170
+           - 171
 
 .. topic:: lazyBum
 
@@ -913,7 +913,7 @@ Translation libraries or frameworks
          * - **Forks**
            - 18
          * - **Watchers**
-           - 98
+           - 99
 
 Libraries or Applications for analytics
 ---------------------------------------
@@ -937,9 +937,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 200
+           - 202
          * - **Watchers**
-           - 2177
+           - 2181
 
 Libraries for the connect middleware
 ------------------------------------
@@ -1011,7 +1011,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 49
          * - **Watchers**
-           - 149
+           - 151
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -1035,9 +1035,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 28
+           - 30
          * - **Watchers**
-           - 213
+           - 215
 
 Exampe applications
 -------------------

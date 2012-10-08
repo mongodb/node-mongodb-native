@@ -51,7 +51,7 @@ Puts binary data to the grid
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -103,7 +103,7 @@ Get binary data to the grid
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -160,7 +160,7 @@ Delete file from grid
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {

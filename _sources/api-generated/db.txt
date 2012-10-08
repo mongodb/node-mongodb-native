@@ -18,7 +18,7 @@ Create a new Db instance.
 
 
 Options
- - **strict** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, execute insert with a getLastError command returning the result of the insert command.
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, execute insert with a getLastError command returning the result of the insert command.
  - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  - **native_parser** {Boolean, default:false}, use c++ bson parser.
  - **forceServerObjectId** {Boolean, default:false}, force server to create _id fields instead of client.
@@ -75,7 +75,7 @@ Initialize the database connection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -108,13 +108,11 @@ Initialize the database connection.
        ]
      );
      
-     var db = new Db('integration_test_', replSet);
+     var db = new Db('integration_test_', replSet, {safe:false});
      db.open(function(err, p_db) {
        assert.equal(null, err);
        p_db.close();
      });
-     }
-     
 
   
   
@@ -142,7 +140,7 @@ Initialize the database connection.
      );
      
      // Create db instance
-     var db = new Db('integration_test_', replSet, {native_parser: (process.env['TEST_NATIVE'] != null)});
+     var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
      // Trigger test once whole set is up
      db.on("fullsetup", function() {
        // Rip out secondaries forcing an attempt to read from the primary
@@ -188,7 +186,7 @@ Initialize the database connection.
        ])
      
      // Connect using the mongos connections
-     var db = new Db('integration_test_', mongos);
+     var db = new Db('integration_test_', mongos, {safe:false});
      db.open(function(err, db) {
        assert.equal(null, err);
        assert.ok(db != null);
@@ -241,7 +239,7 @@ Create a new Db instance sharing the current socket connections.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -307,7 +305,7 @@ Close the current db connection, including all the child db instances. Emits clo
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -348,7 +346,7 @@ Close the current db connection, including all the child db instances. Emits clo
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -394,7 +392,7 @@ Access the Admin database
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -441,7 +439,7 @@ Returns a cursor to all the collection information.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -509,7 +507,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -577,7 +575,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -641,7 +639,7 @@ Fetch all collections for the current db.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -701,7 +699,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -784,7 +782,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -841,7 +839,7 @@ Dereference a dbref, against a db
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -910,7 +908,7 @@ Logout user from server, fire off on all connections and remove all auth info
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -976,7 +974,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1036,7 +1034,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1090,7 +1088,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1171,7 +1169,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1224,7 +1222,7 @@ Execute a command hash against MongoDB. This lets you acess any commands not ava
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1272,7 +1270,7 @@ Drop a collection from the database, removing it permanently. New accesses will 
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1341,7 +1339,7 @@ Rename a collection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1428,7 +1426,7 @@ Connection Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1500,7 +1498,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1572,7 +1570,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1658,7 +1656,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1745,7 +1743,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1821,7 +1819,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1891,7 +1889,7 @@ Drop an index on a collection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1959,7 +1957,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2036,7 +2034,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2105,7 +2103,7 @@ Drop a database.
          assert = require('assert');
 
      var db = new Db('integration_tests_to_drop', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2188,7 +2186,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2246,7 +2244,7 @@ Options
          assert = require('assert');
 
      // Connect to the server
-     Db.connect('mongodb://localhost:27017/integration_tests' + (useSSL == true ? '?ssl=true' : ''), function(err, db) {
+     Db.connect('mongodb://localhost:27017/integration_tests?safe=false' + (useSSL == true ? '&ssl=true' : ''), function(err, db) {
        assert.equal(null, err);
        
        db.close();

@@ -50,7 +50,7 @@ instance of the db client
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -113,7 +113,7 @@ Retrieve this db's server status.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -185,7 +185,7 @@ Retrieve the current profiling Level for MongoDB
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -256,7 +256,7 @@ Ping the MongoDB server and retrieve results
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: true, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -321,7 +321,7 @@ Authenticate against MongoDB
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -389,7 +389,7 @@ Logout current authenticated user
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: true, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -461,7 +461,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: true, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -526,7 +526,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: true, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -596,7 +596,7 @@ Set the current profiling level of MongoDB
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -696,7 +696,7 @@ Retrive the current profiling information for MongoDB
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -784,7 +784,7 @@ Execute a db command against the Admin database
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -850,7 +850,7 @@ Validate an existing collection
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: true, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -928,7 +928,7 @@ List the available databases
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {native_parser: false});
+       {auto_reconnect: true, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -979,7 +979,7 @@ Get ReplicaSet status
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
