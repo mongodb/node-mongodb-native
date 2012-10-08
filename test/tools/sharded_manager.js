@@ -166,7 +166,7 @@ ShardedManager.prototype.restartMongoS = function(port, callback) {
 ShardedManager.prototype.shardDb = function(dbname, callback) {
   if(this.mongosProxies.length == 0) throw new Error("need at least one mongos server");
   // Set up the db connection
-  var db = new Db("admin", new Server("localhost", this.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {});
+  var db = new Db("admin", new Server("localhost", this.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {safe:false});
   db.open(function(err, db) {
     // Run the add shard commands
     db.command({enablesharding:dbname}, function(err, result) {
@@ -180,7 +180,7 @@ ShardedManager.prototype.shardDb = function(dbname, callback) {
 ShardedManager.prototype.shardCollection = function(collectionName, key, callback) {
   if(this.mongosProxies.length == 0) throw new Error("need at least one mongos server");
   // Set up the db connection
-  var db = new Db("admin", new Server("localhost", this.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {});
+  var db = new Db("admin", new Server("localhost", this.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {safe:false});
   db.open(function(err, db) {
     // Run the add shard commands
     db.command({shardcollection:collectionName, key:key}, function(err, result) {
@@ -193,7 +193,7 @@ ShardedManager.prototype.shardCollection = function(collectionName, key, callbac
 var setupShards = function(self, callback) {
   if(self.mongosProxies.length == 0) throw new Error("need at least one mongos server");
   // Set up the db connection
-  var db = new Db("admin", new Server("localhost", self.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {});
+  var db = new Db("admin", new Server("localhost", self.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {safe:false});
   db.open(function(err, db) {
     // console.log("=================================================================")
     // console.dir(err)
