@@ -440,16 +440,16 @@ exports.shouldCorrectlyExecuteIndexExists = function(test) {
  */
 exports.shouldEnsureStrictAccessCollection = function(test) {
   var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
-  test.equal(true, error_client.strict);
+  test.equal(true, error_client.safe);
 
   error_client.open(function(err, error_client) {
-    error_client.collection('does-not-exist', function(err, collection) {
+    error_client.collection('does-not-exist', {safe:true}, function(err, collection) {
       test.ok(err instanceof Error);
-      test.equal("Collection does-not-exist does not exist. Currently in strict mode.", err.message);
+      test.equal("Collection does-not-exist does not exist. Currently in safe mode.", err.message);
     });
 
     error_client.createCollection('test_strict_access_collection', function(err, collection) {
-      error_client.collection('test_strict_access_collection', function(err, collection) {
+      error_client.collection('test_strict_access_collection', {safe:true}, function(err, collection) {
         test.ok(collection instanceof Collection);
         // Let's close the db
         error_client.close();
@@ -464,20 +464,19 @@ exports.shouldEnsureStrictAccessCollection = function(test) {
  */
 exports.shouldPerformStrictCreateCollection = function(test) {
   var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
-  test.equal(true, error_client.strict);
+  test.equal(true, error_client.safe);
 
   error_client.open(function(err, error_client) {
     error_client.createCollection('test_strict_create_collection', function(err, collection) {
       test.ok(collection instanceof Collection);
 
       // Creating an existing collection should fail
-      error_client.createCollection('test_strict_create_collection', function(err, collection) {
+      error_client.createCollection('test_strict_create_collection', {safe:true}, function(err, collection) {
         test.ok(err instanceof Error);
-        test.equal("Collection test_strict_create_collection already exists. Currently in strict mode.", err.message);
+        test.equal("Collection test_strict_create_collection already exists. Currently in safe mode.", err.message);
 
         // Switch out of strict mode and try to re-create collection
-        error_client.strict = false;
-        error_client.createCollection('test_strict_create_collection', function(err, collection) {
+        error_client.createCollection('test_strict_create_collection', {safe:false}, function(err, collection) {
           test.ok(collection instanceof Collection);
 
           // Let's close the db

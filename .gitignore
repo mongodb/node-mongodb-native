@@ -13,3 +13,4 @@ output
 build
 upload.py
 rcover_html/
+.coverage_data/

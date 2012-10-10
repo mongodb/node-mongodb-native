@@ -1,3 +1,7 @@
+1.1.11 2012-10-10
+-----------------
+- Removed strict mode and introduced normal handling of safe at DB level.
+
 1.1.10 2012-10-08
 -----------------
 - fix Admin.serverStatus (Issue #723, https://github.com/Contra)
