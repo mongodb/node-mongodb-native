@@ -82,7 +82,6 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
 
             // Pefrom a group count using the eval method
             collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false, function(err, results) {
-              console.dir(err)
               test.equal(3, results[0].count);
 
               // Group with a conditional
