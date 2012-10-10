@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 17:58:25 on 5/9/2012
+           - 19:32:15 on 8/9/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 270
+           - 272
          * - **Watchers**
-           - 2395
+           - 2401
 
 .. topic:: mongo-model
 
@@ -381,7 +381,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/gett/mongojs.git
          * - **Forks**
-           - 26
+           - 27
          * - **Watchers**
            - 234
 
@@ -429,7 +429,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 7
          * - **Watchers**
-           - 41
+           - 42
 
 .. topic:: mongodb-async
 
@@ -547,7 +547,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 38
          * - **Watchers**
-           - 171
+           - 172
 
 .. topic:: lazyBum
 
@@ -717,7 +717,7 @@ Queue libraries using MongoDB
          * - **Forks**
            - 5
          * - **Watchers**
-           - 72
+           - 73
 
 Logging libraries or applications
 ---------------------------------
@@ -939,7 +939,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 202
          * - **Watchers**
-           - 2181
+           - 2185
 
 Libraries for the connect middleware
 ------------------------------------
@@ -1037,7 +1037,7 @@ Libraries or applications for continous integration
          * - **Forks**
            - 30
          * - **Watchers**
-           - 215
+           - 214
 
 Exampe applications
 -------------------

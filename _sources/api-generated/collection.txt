@@ -44,7 +44,7 @@ Options
 
    :param array docs: 
    :param object [options]: optional options for insert command
-   :param function [callback]: optional callback for the function, must be provided when using `safe` or `strict` mode
+   :param function [callback]: optional callback for the function, must be provided when using `safe` mode
    :returns: null 
 
 
