@@ -1,7 +1,7 @@
 
 var shared = require('./shared');
 shared.object = { name: 1, age: -1 };
-shared.array = [1,2]
+shared.array = ['name']
 shared.string = 'woot'
 shared.string2 = String('woot')
 shared.number = 3
