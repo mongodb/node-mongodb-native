@@ -2,7 +2,8 @@
 -----------------
 - honor connectTimeoutMS option for replicasets (Issue #750, https://github.com/aheckmann)
 - Fix ping strategy regression (Issue #738, https://github.com/aheckmann)
-- Small cleanup of code (Issue #753, https://github.com/sokra/node-mongodb-native) 
+- Small cleanup of code (Issue #753, https://github.com/sokra/node-mongodb-native)
+- fixed index declaration using objects/arrays from other contexts (Issue #755, https://github.com/sokra/node-mongodb-native)
 
 1.1.11 2012-10-10
 -----------------
