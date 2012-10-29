@@ -310,32 +310,16 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = function(test) {
       db_p.authenticate('test', 'test', function(err, replies) {
         test.equal(null, err);
 
-        db_p.collection('userconfirm').find({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, items) {
-          console.log("---------------------------------------------------------------")
-          console.dir(err)
-          console.dir(items)
-
-        db_p.collection('userconfirm').find({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, items) {
-          console.log("---------------------------------------------------------------")
-          console.dir(err)
-          console.dir(items)
-
-        db_p.collection('userconfirm').find({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, items) {
-          console.log("---------------------------------------------------------------")
-          console.dir(err)
-          console.dir(items)
-
-        db_p.collection('userconfirm').find({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, items) {
-          console.log("---------------------------------------------------------------")
-          console.dir(err)
-          console.dir(items)
+        db_p.collection('userconfirm2').insert({a:1}, {safe:true}, function(err, result) {
           test.equal(null, err);
-          db_p.close();
-          test.done();
+
+          db_p.collection('userconfirm2').findOne(function(err, item) {            
+            test.equal(null, err);
+            test.equal(1, item.a);
+            db_p.close();
+            test.done();
+          });
         });
-      });
-      });
-      });
       });
     });
   });
