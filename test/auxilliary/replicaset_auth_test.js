@@ -9,6 +9,7 @@ var testCase = require('nodeunit').testCase,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
+  ReadPreference = mongodb.ReadPreference,
   ReplSetServers = mongodb.ReplSetServers,
   ReplicaSetManager = require('../../test/tools/replica_set_manager').ReplicaSetManager,
   Step = require("step");
@@ -27,7 +28,7 @@ exports.setUp = function(callback) {
   RS = new ReplicaSetManager({retries:120,
     auth:true,
     arbiter_count:0,
-    secondary_count:1,
+    secondary_count:2,
     passive_count:0});
   RS.startSet(true, function(err, result) {
     if(err != null) throw err;
@@ -286,6 +287,55 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = function(test) {
             });
           });
         });
+      });
+    });
+  });
+}
+
+exports.shouldCorrectlyAuthenticateAndUseReadPreference = function(test) {
+  var replSet = new ReplSetServers( [
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+    ],
+    {rs_name:RS.name}
+  );
+
+  var db = new Db(MONGODB, replSet, {safe:false, native_parser: false});
+  db.open(function(err, db_p) {
+    test.equal(null, err);
+
+    db_p.addUser('test', 'test', function(err, result) {
+      test.equal(null, err);
+
+      db_p.authenticate('test', 'test', function(err, replies) {
+        test.equal(null, err);
+
+        db_p.collection('userconfirm').find({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, items) {
+          console.log("---------------------------------------------------------------")
+          console.dir(err)
+          console.dir(items)
+
+        db_p.collection('userconfirm').find({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, items) {
+          console.log("---------------------------------------------------------------")
+          console.dir(err)
+          console.dir(items)
+
+        db_p.collection('userconfirm').find({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, items) {
+          console.log("---------------------------------------------------------------")
+          console.dir(err)
+          console.dir(items)
+
+        db_p.collection('userconfirm').find({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, items) {
+          console.log("---------------------------------------------------------------")
+          console.dir(err)
+          console.dir(items)
+          test.equal(null, err);
+          db_p.close();
+          test.done();
+        });
+      });
+      });
+      });
       });
     });
   });
