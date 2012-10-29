@@ -243,6 +243,37 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
   })
 },
 
+exports['Should correctly create and start a ping strategy'] = function(test) {
+  // Replica configuration
+  var replSet = new ReplSetServers([
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ],
+    {strategy:'ping'}
+  );
+
+  // Ensure we have the right strategy
+  test.ok(replSet.strategyInstance instanceof PingStrategy);
+
+  // Set read preference
+  replSet.setReadPreference(Server.READ_SECONDARY);
+
+  // Open the database
+  var db = new Db('integration_test_', replSet, {safe:false});
+
+  // Trigger test once whole set is up
+  db.on("fullsetup", function() {
+    test.equal('connected', replSet.strategyInstance.state);
+    db.close();
+    test.done();
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
+  })
+},
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
