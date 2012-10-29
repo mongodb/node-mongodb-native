@@ -4,6 +4,7 @@
 - Fix ping strategy regression (Issue #738, https://github.com/aheckmann)
 - Small cleanup of code (Issue #753, https://github.com/sokra/node-mongodb-native)
 - fixed index declaration using objects/arrays from other contexts (Issue #755, https://github.com/sokra/node-mongodb-native)
+- Intermittent (and rare) null callback exception when using ReplicaSets (Issue #752)
 
 1.1.11 2012-10-10
 -----------------
