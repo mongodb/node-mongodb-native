@@ -2,6 +2,7 @@ var http            = require('http'),
     os              = require('os'),
     mongodb         = require('../../lib/mongodb'),
     Server          = mongodb.Server,
+    ReadPreference = mongodb.ReadPreference,
     ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
     ReplSetServers  = mongodb.ReplSetServers,
     Db              = mongodb.Db;
@@ -15,7 +16,7 @@ var replSet = new ReplSetServers([
         new Server('127.0.0.1', 30002, { auto_reconnect: true })
     ], {
       rs_name: 'testappset',
-      read_secondary: true,
+      readPreference: ReadPreference.SECONDARY_ONLY,
       // ha:true
     }
 );
