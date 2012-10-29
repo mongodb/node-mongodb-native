@@ -15,6 +15,7 @@ data/
 dev/
 examples/
 test/
+.coverage_data/
 
 external-libs/bson/build/
 external-libs/bson/build/.wafpickle-7
