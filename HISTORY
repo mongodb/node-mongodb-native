@@ -1,3 +1,7 @@
+1.1.12
+-----------------
+- honor connectTimeoutMS option for replicasets (Issue #750, https://github.com/aheckmann)
+
 1.1.11 2012-10-10
 -----------------
 - Removed strict mode and introduced normal handling of safe at DB level.
