@@ -19,7 +19,7 @@ The first thing to do in order to make queries to the database is to open one. T
 Several options can be passed to the `Server` constructor with `options` parameter.  
   
 * `auto_reconnect` - to reconnect automatically, `default:false`
-* `poolSize` - specify the number of connections in the pool `default:1`
+* `poolSize` - specify the number of connections in the pool `default:5`
 * `socketOptions` - a collection of pr socket settings
 
 ## Socket options
