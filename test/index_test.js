@@ -9,7 +9,8 @@ var testCase = require('nodeunit').testCase,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
-  Server = mongodb.Server;
+  Server = mongodb.Server,
+  shared = require('./contexts')
 
 var MONGODB = 'integration_tests';
 var native_parser = (process.env['TEST_NATIVE'] != null);
@@ -790,6 +791,16 @@ exports['Should correctly create an index with overriden name'] = function(test)
       });
     });
   });
+}
+
+exports['should handle index declarations using objects from other contexts'] = function (test) {
+  client.collection('indexcontext').ensureIndex(shared.object, { safe: true, background: true }, function (err) {
+    test.equal(null, err);
+    client.collection('indexcontext').ensureIndex(shared.array, { safe: true, background: true }, function (err) {
+      test.equal(null, err);
+      test.done();
+    })
+  })
 }
 
 /**
