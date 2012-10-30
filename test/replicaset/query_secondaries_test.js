@@ -172,36 +172,18 @@ exports.shouldCorrectlyQuerySecondaries = function(test) {
   // Insert some data
   var db = new Db('integration_test_', replSet, {safe:false});
   db.open(function(err, p_db) {
-    // console.log("----------------------------------------------------------------- 0")
     p_db.createCollection("testsets", {safe:{w:2, wtimeout:10000}}, function(err, collection) {
-      // console.log("----------------------------------------------------------------- 1")
       collection.insert([{a:20}, {a:30}, {a:40}], {safe:{w:2, wtimeout:10000}}, function(err, result) {
-        // console.log("----------------------------------------------------------------- 2")
         // Ensure replication happened in time
         setTimeout(function() {
           // Kill the primary
           RS.killPrimary(2, function(node) {
-            // console.log("----------------------------------------------------------------- 3")
-            // Do a collection find
-            collection.find().toArray(function(err, items) {   
-              // console.log("----------------------------------------------------------------- 4")
-              test.ok(err != null);
-              // console.log("============================================================================ shouldCorrectlyQuerySecondaries")
-              // console.dir(err)
-              // console.dir(items)
-
-              collection.find().toArray(function(err, items) {                
-                // console.log("----------------------------------------------------------------- 5")
-                // console.log("============================================================================ shouldCorrectlyQuerySecondaries 1")
-                // console.dir(err)
-                // console.dir(items)
-
-                test.equal(null, err);
-                test.equal(3, items.length);                
-                p_db.close();
-                test.done();
-              });
-            });            
+            collection.find().toArray(function(err, items) {                
+              test.equal(null, err);
+              test.equal(3, items.length);                
+              p_db.close();
+              test.done();
+            });
           });
         }, 2000);
       })
