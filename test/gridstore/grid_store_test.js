@@ -1608,6 +1608,38 @@ exports.shouldCorrectlyAppendToFileCorrectly = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = function(test) {
+  var id = new ObjectID();
+  var gridStore = new GridStore(client, id, "test_gs_read_length", "w", {content_type: "image/jpeg"});
+  gridStore.open(function(err, gridStore) {
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        // Open the gridstore
+        new GridStore(client, id, "w+").open(function(err, gridStore) {
+          gridStore.contentType = "html/text";
+          gridStore.close(function(err, result) {
+
+            new GridStore(client, id, "r").open(function(err, gridStore) {
+              test.equal(null, err);
+              test.equal("html/text", gridStore.contentType);
+
+              gridStore.read(function(err, data) {
+                test.equal(null, err);
+                test.equal("hello world!", data.toString('utf8'));
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *

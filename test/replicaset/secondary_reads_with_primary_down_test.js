@@ -8,6 +8,7 @@ var testCase = require('nodeunit').testCase,
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = mongodb.Db,
   ReplSetServers = mongodb.ReplSetServers,
+  ReadPreference = mongodb.ReadPreference,
   Server = mongodb.Server;
 
 // Keep instance of ReplicaSetManager
@@ -97,13 +98,13 @@ exports.tearDown = function(callback) {
 /**
  * @ignore
  */
-exports.shouldContinueToQueryWithPrimaryNodeShutdown = function(test) {
+exports.shouldCorrectlyReadFromSecondaryEvenIfPrimaryIsDown = function(test) {
   var replSet = new ReplSetServers( [
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ],
-    {rs_name:RS.name, read_secondary:true}
+    {rs_name:RS.name, readPreference:ReadPreference.PRIMARY_PREFERRED}
   );
 
   ensureConnection(test, retries, function(err) {
@@ -113,71 +114,32 @@ exports.shouldContinueToQueryWithPrimaryNodeShutdown = function(test) {
       test.ok(err == null);
       test.equal(true, p_db.serverConfig.isConnected());
 
-      p_db.createCollection('empty', function (err, collection) {
-        // Run a simple query
-        collection.findOne(function (err, doc) {
-          test.ok(err == null);
-          test.ok(doc == null);
+      p_db.createCollection('notempty', function (err, collection) {
 
-          // Shut down primary server
-          RS.killPrimary(function (err, result) {
-            // Run a simple query
-            collection.findOne(function (err, doc) {
-              test.ok(err == null);
-              test.ok(doc == null);
+        // Insert a document
+        collection.insert({a:1}, {safe:true}, function(err, result) {
+          
+          // Run a simple query
+          collection.findOne(function (err, doc) {
+            test.ok(err == null);
+            test.ok(doc == null);
 
-              p_db.close();
-              test.done();
+            // Shut down primary server
+            RS.killPrimary(function (err, result) {
+              test.ok(Object.keys(replSet._state.secondaries).length > 0);
+
+              // Run a simple query
+              collection.findOne(function (err, doc) {
+                test.ok(Object.keys(replSet._state.secondaries).length > 0);
+                test.equal(null, err);
+                test.ok(doc != null);
+
+                p_db.close();
+                test.done();
+              });
             });
           });
-        });
-      });
-    });
-  });
-}
-
-/**
- * @ignore
- */
-exports.shouldContinueToQueryWithSecondaryNodeShutdown = function(test) {
-  var replSet = new ReplSetServers( [
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ],
-    {rs_name:RS.name, read_secondary:true}
-  );
-
-  ensureConnection(test, retries, function(err) {
-    test.ok(err == null);
-
-    new Db('integration_test_', replSet, {safe:false}).open(function(err, p_db) {
-      test.ok(err == null);
-      test.equal(true, p_db.serverConfig.isConnected());
-
-      p_db.createCollection('empty', function (err, collection) {
-        // Run a simple query
-        collection.findOne(function (err, doc) {
-          test.ok(err == null);
-          test.ok(doc == null);
-
-          // Shut down secondary server
-          RS.killSecondary(function (err, result) {
-            // Run a simple query
-            collection.findOne(function (err, doc) {
-              if (err) {
-                console.log("============================= caught error");
-                console.dir(err);
-                if (err.stack != null) console.log(err.stack);
-              }
-              test.ok(err == null);
-              test.ok(doc == null);
-
-              p_db.close();
-              test.done();
-            });
-          });
-        });
+        });  
       });
     });
   });
