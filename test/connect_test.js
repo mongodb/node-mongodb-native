@@ -14,7 +14,7 @@ var testCase = require('nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var clientUrl = 'mongo://localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
+var clientUrl = 'mongodb://localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
 
 /**
  * @ignore
@@ -104,7 +104,7 @@ exports.testConnectGoodAuth = function(test) {
   });
 
   function restOfTest() {
-    var url = 'mongo://' + user + ':' + password + '@localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
+    var url = 'mongodb://' + user + ':' + password + '@localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
     connect(url, connectionTester(test, 'testConnectGoodAuth', function(db) {            
       test.equal(false, db.safe);
       test.done();
@@ -116,7 +116,7 @@ exports.testConnectGoodAuth = function(test) {
  * @ignore
  */
 exports.testConnectBadAuth = function(test) {
-  var url = 'mongo://slithy:toves@localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
+  var url = 'mongodb://slithy:toves@localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
   connect(url, function(err, db) { 
     test.ok(err);
     test.ok(db);
@@ -129,7 +129,7 @@ exports.testConnectBadAuth = function(test) {
  * @ignore
  */
 exports.testConnectNoOpen = function(test) {
-  var db = connect('mongo://localhost:27017/?safe=false' + MONGODB, {noOpen:true});
+  var db = connect('mongodb://localhost:27017/?safe=false' + MONGODB, {noOpen:true});
   test.ok(db != null);
   test.done();
 };
@@ -139,7 +139,7 @@ exports.testConnectNoOpen = function(test) {
  */
 exports.testConnectThrowsNoCallbackProvided = function(test) {
   test.throws(function() {
-    var db = connect('mongo://localhost:27017/?safe=false' + MONGODB);
+    var db = connect('mongodb://localhost:27017/?safe=false' + MONGODB);
   });
   test.done();
 };
@@ -149,7 +149,7 @@ exports.testConnectThrowsNoCallbackProvided = function(test) {
  */
 exports.testConnectBadUrl = function(test) {
   test.throws(function() {
-    connect('mango://localhost:27017/?safe=false' + MONGODB, function(err, db) {
+    connect('mangodb://localhost:27017/?safe=false' + MONGODB, function(err, db) {
       test.ok(false, 'Bad URL!');
     });
   });
