@@ -58,9 +58,9 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
-  Shard.killAll(function() {
+  // Shard.killAll(function() {
     callback();
-  });
+  // });
 }
 
 /**
