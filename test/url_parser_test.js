@@ -39,6 +39,33 @@ exports['Should correctly parse mongodb://localhost'] = function(test) {
 /**
  * @ignore
  */
+exports['Should correctly parse mongodb://localhost:27017'] = function(test) {
+  // console.dir(parse)
+  var object = parse("mongodb://localhost:27017");
+  test.equal(1, object.servers.length);
+  test.equal('localhost', object.servers[0].host);
+  test.equal('27017', object.servers[0].port);
+  test.equal('default', object.dbName);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly parse mongodb://localhost?safe=true&readPreference=secondary'] = function(test) {
+  // console.dir(parse)
+  var object = parse("mongodb://localhost?safe=true&readPreference=secondary");
+  // var object = parse("mongodb://localhost?safe");
+  test.equal(1, object.servers.length);
+  test.equal('localhost', object.servers[0].host);
+  test.equal('27017', object.servers[0].port);
+  test.equal('default', object.dbName);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports['Should correctly parse mongodb://localhost:28101'] = function(test) {
   // console.dir(parse)
   var object = parse("mongodb://localhost:28101");
@@ -116,6 +143,21 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
   test.equal('somedb', object.dbName);
   test.equal('fred', object.auth.user);
   test.equal('foo', object.auth.password);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = function(test) {
+  // console.dir(parse)
+  var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
+  test.equal(1, object.servers.length);
+  test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
+  test.equal('somedb', object.dbName);
+  test.equal('fred', object.auth.user);
+  test.equal('foo', object.auth.password);
+  test.equal(true, object.db_options.safe);
   test.done();
 }
 
