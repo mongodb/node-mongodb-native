@@ -19,7 +19,7 @@ var clientUrl = 'mongo://localhost:27017/?safe=false' + MONGODB + (useSSL == tru
 /**
  * @ignore
  */
-function connectionTester(test, testName) {
+function connectionTester(test, testName, callback) {
   return function(err, db) {
     test.equal(err, null);
     db.collection(testName, function(err, collection) {
@@ -31,6 +31,7 @@ function connectionTester(test, testName) {
           db.close();
           test.equal(err, null);
           test.ok(done);
+          if(callback) return callback(db);
           test.done();
         });
       });
@@ -42,7 +43,9 @@ function connectionTester(test, testName) {
  * @ignore
  */
 exports.testConnectNoOptions = function(test) {
-  connect(clientUrl, connectionTester(test, 'testConnectNoOptions'));
+  connect(clientUrl, connectionTester(test, 'testConnectNoOptions', function(db) {
+    test.done();
+  }));
 };
 
 /**
@@ -51,7 +54,10 @@ exports.testConnectNoOptions = function(test) {
 exports.testConnectDbOptions = function(test) {
   connect(clientUrl,
           { db: {native_parser: (process.env['TEST_NATIVE'] != null)} },
-          connectionTester(test, 'testConnectDbOptions'));
+          connectionTester(test, 'testConnectDbOptions', function(db) {            
+    test.equal(process.env['TEST_NATIVE'] != null, db.native_parser);
+    test.done();
+  }));
 };
 
 /**
@@ -60,7 +66,11 @@ exports.testConnectDbOptions = function(test) {
 exports.testConnectServerOptions = function(test) {
   connect(clientUrl,
           { server: {auto_reconnect: true, poolSize: 4} },
-          connectionTester(test, 'testConnectServerOptions'));
+          connectionTester(test, 'testConnectServerOptions', function(db) {            
+    test.equal(4, db.serverConfig.poolSize);
+    test.equal(true, db.serverConfig.autoReconnect);
+    test.done();
+  }));
 };
 
 /**
@@ -70,7 +80,12 @@ exports.testConnectAllOptions = function(test) {
   connect(clientUrl,
           { server: {auto_reconnect: true, poolSize: 4},
             db: {native_parser: (process.env['TEST_NATIVE'] != null)} },
-          connectionTester(test, 'testConnectAllOptions'));
+          connectionTester(test, 'testConnectAllOptions', function(db) {
+    test.equal(process.env['TEST_NATIVE'] != null, db.native_parser);
+    test.equal(4, db.serverConfig.poolSize);
+    test.equal(true, db.serverConfig.autoReconnect);
+    test.done();
+  }));
 };
 
 /**
@@ -90,7 +105,10 @@ exports.testConnectGoodAuth = function(test) {
 
   function restOfTest() {
     var url = 'mongo://' + user + ':' + password + '@localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
-    connect(url, connectionTester(test, 'testConnectGoodAuth'));
+    connect(url, connectionTester(test, 'testConnectGoodAuth', function(db) {            
+      test.equal(false, db.safe);
+      test.done();
+    }));
   }
 };
 
@@ -99,7 +117,7 @@ exports.testConnectGoodAuth = function(test) {
  */
 exports.testConnectBadAuth = function(test) {
   var url = 'mongo://slithy:toves@localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
-  connect(url, function(err, db) {    
+  connect(url, function(err, db) { 
     test.ok(err);
     test.ok(db);
     db.close();
