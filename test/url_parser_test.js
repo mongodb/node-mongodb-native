@@ -369,10 +369,10 @@ exports['Read preferences tag parsing'] = function(test) {
   var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1");
   test.deepEqual([{dc:"ny", rack:"1"}], object.db_options.read_preference_tags);
 
-  var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTag=dc:sf,rack:2");
+  var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2");
   test.deepEqual([{dc:"ny", rack:"1"}, {dc:"sf", rack:"2"}], object.db_options.read_preference_tags);
 
-  var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTag=dc:sf,rack:2&readPreferenceTag=");
+  var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2&readPreferenceTags=");
   test.deepEqual([{dc:"ny", rack:"1"}, {dc:"sf", rack:"2"}, {}], object.db_options.read_preference_tags);
   test.done();
 }

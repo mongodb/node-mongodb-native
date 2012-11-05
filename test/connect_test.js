@@ -128,15 +128,6 @@ exports.testConnectBadAuth = function(test) {
 /**
  * @ignore
  */
-exports.testConnectNoOpen = function(test) {
-  var db = connect('mongodb://localhost:27017/?safe=false' + MONGODB, {noOpen:true});
-  test.ok(db != null);
-  test.done();
-};
-
-/**
- * @ignore
- */
 exports.testConnectThrowsNoCallbackProvided = function(test) {
   test.throws(function() {
     var db = connect('mongodb://localhost:27017/?safe=false' + MONGODB);
