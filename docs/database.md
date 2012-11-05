@@ -44,6 +44,7 @@ Several options can be passed to the `Db` constructor with `options` parameter.
 * `reaperInterval` - specify the number of milliseconds between each reaper attempt `default:10000`
 * `reaperTimeout` - specify the number of milliseconds for timing out callbacks that don't return `default:30000`
 * `raw` - driver expects Buffer raw bson document, `default:false`
+* `logger` - object specifying error(), debug() and log() functions
 
 ## Opening a database
 
@@ -122,3 +123,28 @@ Custom primary key factory is actually an object with method `createPK` which re
 
     db_connector = new mongodb.Db(name, mongoserver, {pk: CustomPKFactory});
 
+## debug commands
+
+In order to debug the commands sent to the database you can add a `logger` object to the `DB options`. Make sure also the property `doDebug` is set.
+
+Example
+    
+    options = {}
+    options.logger = {};
+    options.logger.doDebug = true;
+    options.logger.debug = function (message, object) {
+        // print the mongo command:
+        // "writing command to mongodb"
+        console.log(message);
+
+        // print the collection name 
+        console.log(object.json.collectionName)
+
+        // print the json query sent to MongoDB
+        console.log(object.json.query)
+
+        // print the binary object
+        console.log(object.binary)
+    }
+
+    var db = new Db('some_database', new Server(...), options);
