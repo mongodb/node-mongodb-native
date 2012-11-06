@@ -35,6 +35,22 @@ exports['Should correctly connect via domain socket'] = function(test) {
   }
 }
 
+exports['Should correctly connect via normal url using connect'] = function(test) {
+  mongodb.connect("mongodb://localhost?safe=false", function(err, db) {
+    test.equal(false, db.safe);
+    db.close();
+    test.done();
+  });
+}
+
+exports['Should correctly connect via normal url using require'] = function(test) {
+  require('../lib/mongodb')("mongodb://localhost?safe=false", function(err, db) {
+    test.equal(false, db.safe);
+    db.close();
+    test.done();
+  });
+}
+
 exports['Should correctly connect via normal url'] = function(test) {
   Db.connect("mongodb://localhost?safe=false", function(err, db) {
     test.equal(false, db.safe);
