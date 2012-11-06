@@ -298,6 +298,20 @@ exports['Parse mongodb://localhost/db?maxPoolSize=100'] = function(test) {
 /**
  * @ignore
  */
+exports['Parse mongodb://localhost/db?w=-1'] = function(test) {
+  // console.dir(parse)
+  var object = parse("mongodb://localhost/db?w=-1");
+  test.equal(1, object.servers.length);
+  test.equal("localhost", object.servers[0].host);
+  test.equal('27017', object.servers[0].port);
+  test.equal('db', object.dbName);
+  test.equal(-1, object.db_options.w);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports['Throw on unsuported options'] = function(test) {
   // console.dir(parse)
   test.throws(function() { parse("mongodb://localhost/db?minPoolSize=100") }, "minPoolSize not supported");
@@ -312,21 +326,15 @@ exports['Throw on unsuported options'] = function(test) {
  * @ignore
  */
 exports['Write concerns parsing'] = function(test) {
-  var object = parse("mongodb://localhost/db?fireAndForget=true");
-  test.equal(true, object.db_options.fireAndForget);
-  
-  object = parse("mongodb://localhost/db?fireAndForget=false");
-  test.equal(false, object.db_options.fireAndForget);
-
-  object = parse("mongodb://localhost/db?safe=true");
+  var object = parse("mongodb://localhost/db?safe=true&w=1");
   test.equal(true, object.db_options.safe);
 
-  object = parse("mongodb://localhost/db?safe=false");
+  object = parse("mongodb://localhost/db?safe=false&w=1");
   test.equal(false, object.db_options.safe);
 
   // should throw as fireAndForget is set aswell as safe or any other write concerns
-  test.throws(function() {parse("mongodb://localhost/db?safe=true&fireAndForget=true"), "fireAndForget set to false cannot be combined with safe/w/journal/fsync"});
-  test.throws(function() {parse("mongodb://localhost/db?fsync=true&fireAndForget=true"), "fireAndForget set to false cannot be combined with safe/w/journal/fsync"});
+  test.throws(function() {parse("mongodb://localhost/db?safe=true&w=0"), "w set to -1 or 0 cannot be combined with safe/w/journal/fsync"});
+  test.throws(function() {parse("mongodb://localhost/db?fsync=true&w=-1"), "w set to -1 or 0 cannot be combined with safe/w/journal/fsync"});
   test.done();
 }
 

@@ -143,6 +143,50 @@ exports['Should correctly connect to a repliaset with a read preference and sock
   });
 }
 
+exports['Should correctly connect to a repliaset with w=-1'] = function(test) {
+  Db.connect(format("mongodb://%s:%s,%s:%s/integration_test_?replicaSet=%s&w=%s"
+      , RS.host, RS.ports[1]
+      , RS.host, RS.ports[0]
+      , RS.name, -1), function(err, db) {
+
+    db.collection('repliaset_w_negative').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      test.equal(null, err);
+      test.equal(null, result);
+      db.close();
+      test.done();
+    });
+  });
+}
+
+exports['Should correctly connect to a repliaset with w=0'] = function(test) {
+  Db.connect(format("mongodb://%s:%s,%s:%s/integration_test_?replicaSet=%s&w=%s"
+      , RS.host, RS.ports[1]
+      , RS.host, RS.ports[0]
+      , RS.name, 0), function(err, db) {
+
+    db.collection('repliaset_w_negative').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      test.equal(null, err);
+      test.equal(null, result);
+      db.close();
+      test.done();
+    });
+  });
+}
+
+exports['Should correctly connect to a repliaset with w=1'] = function(test) {
+  Db.connect(format("mongodb://%s:%s,%s:%s/integration_test_?replicaSet=%s&w=%s"
+      , RS.host, RS.ports[1]
+      , RS.host, RS.ports[0]
+      , RS.name, 1), function(err, db) {
+
+    db.collection('repliaset_w_negative').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      db.close();
+      test.done();
+    });
+  });
+}
+
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
