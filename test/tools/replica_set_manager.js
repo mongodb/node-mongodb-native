@@ -18,7 +18,7 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.host = options["host"] != null ? options["host"] : "localhost";
   this.retries = options["retries"] != null ? options["retries"] : 60;
   this.config = {"_id": this.name, "version": 1, "members": []};
-  this.durable = options["durable"] != null ? options["durable"] : false;
+  this.journal = options["journal"] != null ? options["journal"] : false;
   this.auth = options['auth'] != null ? options['auth'] : false;
   this.path = path.resolve("data");
   this.killNodeWaitTime = options['kill_node_wait_time'] != null ? options['kill_node_wait_time'] : 1000;
@@ -61,6 +61,10 @@ ReplicaSetManager.prototype.primary = function(callback) {
       return callback(null, items[0]);
     }
   });
+}
+
+ReplicaSetManager.prototype.setAuths = function(user, password) {
+  this.auths = {user: user, password: password};
 }
 
 ReplicaSetManager.prototype.allHostPairsWithState = function(state, callback) {
@@ -381,6 +385,16 @@ ReplicaSetManager.prototype.getNodeWithState = function(state, callback) {
   });
 }
 
+var _authenticateIfNeeded = function(self, connection, callback) {
+  if(self.auths != null) {
+    connection.admin().authenticate(self.auths.user, self.auths.password, function(err, result) {
+      callback();
+    });
+  } else {
+    callback();
+  }
+}
+
 ReplicaSetManager.prototype.ensureUp = function(callback) {
   var self = this;
   var numberOfInitiateRetries = this.retries;
@@ -404,49 +418,18 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
 
         // We have a connection, execute command and update server object
         if(err == null && connection != null) {
-          // Check repl set get status
-          connection.admin().command({"replSetGetStatus": 1}, function(err, object) {
-            // Close connection
-            if(connection != null) connection.close();
-            // Get documents
-            var documents = object.documents;
-            // Get status object
-            var status = documents[0];
-
-            // If no members set
-            if(status["members"] == null || err != null) {
-              // if we have a connection force close it
+          _authenticateIfNeeded(self, connection, function() {
+            // Check repl set get status
+            connection.admin().command({"replSetGetStatus": 1}, function(err, object) {
+              // Close connection
               if(connection != null) connection.close();
-              // Ensure we perform enough retries
-              if(self.ensureUpRetries >=  self.retries) {
-                // Set that we are done
-                done = true;
-                // Return error
-                return callback(new Error("Operation Failure"), null);
-              } else {
-                // Execute function again
-                setTimeout(ensureUpFunction, 1000);
-              }
-            } else {
-              // Establish all health member
-              var healthyMembers = status.members.filter(function(element) {
-                return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1
-              });
+              // Get documents
+              var documents = object.documents;
+              // Get status object
+              var status = documents[0];
 
-              var stateCheck = status["members"].filter(function(element, indexOf, array) {
-                return element["state"] == 1;
-              });
-
-              if(healthyMembers.length == status.members.length && stateCheck.length > 0) {
-                // Set that we are done
-                done = true;
-                // if we have a connection force close it
-                if(connection != null) connection.close();
-                // process.stdout.write("all members up! \n\n");
-                if(!self.up) process.stdout.write("all members up!\n\n")
-                self.up = true;
-                return callback(null, status);
-              } else {
+              // If no members set
+              if(status["members"] == null || err != null) {
                 // if we have a connection force close it
                 if(connection != null) connection.close();
                 // Ensure we perform enough retries
@@ -459,8 +442,41 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
                   // Execute function again
                   setTimeout(ensureUpFunction, 1000);
                 }
+              } else {
+                // Establish all health member
+                var healthyMembers = status.members.filter(function(element) {
+                  return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1
+                });
+
+                var stateCheck = status["members"].filter(function(element, indexOf, array) {
+                  return element["state"] == 1;
+                });
+
+                if(healthyMembers.length == status.members.length && stateCheck.length > 0) {
+                  // Set that we are done
+                  done = true;
+                  // if we have a connection force close it
+                  if(connection != null) connection.close();
+                  // process.stdout.write("all members up! \n\n");
+                  if(!self.up) process.stdout.write("all members up!\n\n")
+                  self.up = true;
+                  return callback(null, status);
+                } else {
+                  // if we have a connection force close it
+                  if(connection != null) connection.close();
+                  // Ensure we perform enough retries
+                  if(self.ensureUpRetries >=  self.retries) {
+                    // Set that we are done
+                    done = true;
+                    // Return error
+                    return callback(new Error("Operation Failure"), null);
+                  } else {
+                    // Execute function again
+                    setTimeout(ensureUpFunction, 1000);
+                  }
+                }
               }
-            }
+            });
           });
         } else if(err != null && connection != null) {
           if(connection != null) connection.close();
@@ -601,9 +617,9 @@ ReplicaSetManager.prototype.restart = start;
 
 ReplicaSetManager.prototype.startCmd = function(n) {
   // Create boot command
-  this.mongods[n]["start"] = "mongod --nojournal --oplogSize 1 --rest --noprealloc --smallfiles --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
+  this.mongods[n]["start"] = "mongod --oplogSize 1 --rest --noprealloc --smallfiles --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
       " --dbpath " + this.mongods[n]['db_path'] + " --port " + this.mongods[n]['port'] + " --fork";
-  this.mongods[n]["start"] = this.durable ? this.mongods[n]["start"] + " --dur" : this.mongods[n]["start"];
+  this.mongods[n]["start"] = this.journal ? this.mongods[n]["start"] + " --journal" : this.mongods[n]["start"] + " --nojournal";
 
   if(this.auth) {
     this.mongods[n]["start"] = this.auth ? this.mongods[n]["start"] + " --auth --keyFile " + this.keyPath : this.mongods[n]["start"];
