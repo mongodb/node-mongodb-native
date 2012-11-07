@@ -1,33 +1,30 @@
-var Db = require('../lib/mongodb').Db,
-  Connection = require('../lib/mongodb').Connection,
-  Server = require('../lib/mongodb').Server,
-  GridStore = require('../lib/mongodb').GridStore;
+var Db = require('../lib/mongodb').Db
+  , Connection = require('../lib/mongodb').Connection
+  , Server = require('../lib/mongodb').Server
+  , GridStore = require('../lib/mongodb').GridStore
+  , format = require('util').format;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
 console.log(">> Connecting to " + host + ":" + port);
-var db1 = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
-db1.open(function(err, db) {
+Db.connect(format("mongodb://%s:%s/node-mongo-examples?w=1", host, port), function(err, db) {
   // Write a new file
-  var gridStore = new GridStore(db, "foobar", "w");
-  gridStore.open(function(err, gridStore) {    
+  new GridStore(db, "foobar", "w").open(function(err, gridStore) {    
     gridStore.write("hello world!", function(err, gridStore) {
       gridStore.close(function(err, result) {
         // Read the file and dump the contents
         dump(db, 'foobar');
   
         // Append more data
-        gridStore = new GridStore(db, 'foobar', "w+");
-        gridStore.open(function(err, gridStore) {
+        new GridStore(db, 'foobar', "w+").open(function(err, gridStore) {
           gridStore.write('\n', function(err, gridStore) {
             gridStore.puts('line two', function(err, gridStore) {
               gridStore.close(function(err, result) {
                 dump(db, 'foobar');          
   
                 // Overwrite
-                gridStore = new GridStore(db, 'foobar', "w");
-                gridStore.open(function(err, gridStore) {
+                new GridStore(db, 'foobar', "w").open(function(err, gridStore) {
                   gridStore.write('hello, sailor!', function(err, gridStore) {
                     gridStore.close(function(err, result) {
                       dump(db, 'foobar', function() {
@@ -45,11 +42,9 @@ db1.open(function(err, db) {
   });
 });
 
-var db2 = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
-db2.open(function(err, db) {
+Db.connect(format("mongodb://%s:%s/node-mongo-examples?w=1", host, port), {native_parser:true}, function(err, db) {
   // File existence tests
-  var gridStore = new GridStore(db, "foobar2", "w");
-  gridStore.open(function(err, gridStore) {    
+  new GridStore(db, "foobar2", "w").open(function(err, gridStore) {    
     gridStore.write( 'hello sailor', function(err, gridStore) {
       gridStore.close(function(err, result) {
         GridStore.exist(db, 'foobar2', function(err, result) {
@@ -66,8 +61,7 @@ db2.open(function(err, db) {
         });
 
         // Rewind/seek/tell
-        var gridStore2 = new GridStore(db, 'foobar2', 'w');
-        gridStore2.open(function(err, gridStore) {
+        new GridStore(db, 'foobar2', 'w').open(function(err, gridStore) {
           gridStore.write('hello, world!', function(err, gridStore){});
           gridStore.rewind(function(){});
           gridStore.write('xyzzz', function(err, gridStore){});
@@ -93,11 +87,9 @@ db2.open(function(err, db) {
   });
 });
 
-var db3 = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
-db3.open(function(err, db) {
+Db.connect(format("mongodb://%s:%s/node-mongo-examples?w=1", host, port), {native_parser:true}, function(err, db) {
   // Metadata
-  var gridStore = new GridStore(db, "foobar3", "w");
-  gridStore.open(function(err, gridStore) {    
+  new GridStore(db, "foobar3", "w").open(function(err, gridStore) {    
     gridStore.write('hello, world!', function(err, gridStore){});
     gridStore.close(function(err, gridStore) {
       gridStore = new GridStore(db, 'foobar3', "r");
@@ -109,14 +101,12 @@ db3.open(function(err, db) {
       });
       
       // Add some metadata
-      gridStore = new GridStore(db, 'foobar3', "w+");
-      gridStore.open(function(err, gridStore) {
+      new GridStore(db, 'foobar3', "w+").open(function(err, gridStore) {
         gridStore.contentType = 'text/xml';
         gridStore.metadata = {'a':1};
         gridStore.close(function(err, gridStore) {
           // Print the metadata
-          gridStore = new GridStore(db, 'foobar3', "r");
-          gridStore.open(function(err, gridStore) {
+          new GridStore(db, 'foobar3', "r").open(function(err, gridStore) {
             console.log("contentType: " + gridStore.contentType);
             console.log("uploadDate: " + gridStore.uploadDate);
             console.log("chunkSize: " + gridStore.chunkSize);
@@ -133,8 +123,7 @@ db3.open(function(err, db) {
   // collection: instead of gridfs.files and gridfs.chunks, here we use
   // my_files.files and my_files.chunks      
   var gridStore = new GridStore(db, "foobar3", "w", {'content_type':'text/plain', 
-    'metadata':{'a':1}, 'chunk_size': 1024*4, 'root':'my_files'});
-  gridStore.open(function(err, gridStore) {    
+    'metadata':{'a':1}, 'chunk_size': 1024*4, 'root':'my_files'}).open(function(err, gridStore) {    
     gridStore.write('hello, world!', function(err, gridStore){});
     gridStore.close(function() {
     });

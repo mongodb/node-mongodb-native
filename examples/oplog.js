@@ -1,7 +1,8 @@
-var Db = require('../lib/mongodb').Db,
-  Connection = require('../lib/mongodb').Connection,
-  Server = require('../lib/mongodb').Server,
-  Cursor = require('../lib/mongodb').Cursor;
+var Db = require('../lib/mongodb').Db
+  , Connection = require('../lib/mongodb').Connection
+  , Server = require('../lib/mongodb').Server
+  , Cursor = require('../lib/mongodb').Cursor
+  , format = require('util').format;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
@@ -13,7 +14,6 @@ Slave = function() {
   //no strict mode (because system db signed with $  db.js line 189)
   //connect without dbName for querying not only "local" db
   console.log("Connecting to " + host + ":" + port);
-  this.db = new Db('testing', new Server(host, port, {}), {});
 }
 
 //start watching
@@ -21,11 +21,13 @@ Slave.prototype.start = function() {
   var self = this;
   if (this.running) return;
   
-  this.db.open(function(err, db) {
+  Db.connect(format("mongodb://%s:%s/testing?w=1", host, port), function(err, db) {
     if (err) {
       console.log('> MongoSlave error' + err);
       process.exit(1);
     }
+
+    self.db = db;
 
     db.collection('local.oplog.$main', function(err, collection) {
       if (! collection) {
