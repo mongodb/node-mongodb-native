@@ -1,20 +1,20 @@
-var Db = require('../lib/mongodb').Db,
-  Connection = require('../lib/mongodb').Connection,
-  Server = require('../lib/mongodb').Server;
+var Db = require('../lib/mongodb').Db
+  , Connection = require('../lib/mongodb').Connection
+  , Server = require('../lib/mongodb').Server
+  , format = require('util').format;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
 var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
 
 console.log("Connecting to " + host + ":" + port);
-var db = new Db('node-mongo-examples', new Server(host, port, {}), {native_parser:true});
-db.open(function(err, db) {
+Db.connect(format("mongodb://%s:%s/node-mongo-examples?w=1", host, port), function(err, db) {
   db.collection('test', function(err, collection) {
     // Erase all records from collection, if any
     collection.remove(function(err, result) {
       
       // Insert 3 records
       for(var i = 0; i < 3; i++) {
-        collection.insert({'a':i});
+        collection.insert({'a':i}, {safe:{w:0}});
       }
       
       // Cursors don't run their queries until you actually attempt to retrieve data
