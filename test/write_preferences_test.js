@@ -109,7 +109,7 @@ exports['insert with journal db level'] = function(test) {
 exports['insert with journal collection level'] = function(test) {
   var db = new Db(MONGODB, 
     new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL})
-    , {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+    , {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
     db.collection('insert_with_w_1', {journal:true}).update({a:1}, {a:1}, {upsert:true}, function(err, result) {
       test.equal(null, err);
@@ -123,7 +123,7 @@ exports['insert with journal collection level'] = function(test) {
 exports['insert with journal collection insert level'] = function(test) {
   var db = new Db(MONGODB, 
     new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL})
-    , {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+    , {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
     db.collection('insert_with_w_1').update({a:1}, {a:1}, {upsert:true, journal:true}, function(err, result) {
       test.equal(null, err);
@@ -145,6 +145,23 @@ exports['insert with journal and w == 1 at db level'] = function(test) {
       test.done();
       db.close();
     });
+  });
+}
+
+exports['throw error when combining w:0 and journal'] = function(test) {
+  var db = new Db(MONGODB, 
+    new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL})
+    , {w:0, journal:true, wtimeout:1000, native_parser: (process.env['TEST_NATIVE'] != null)});
+  db.open(function(err, db) {
+    test.throws(function() { 
+      db.collection('insert_with_w_1').update({a:1}, {a:1}, {upsert:true}, function(err, result) {
+        test.equal(null, err);
+        test.equal(1, result);
+      });
+    }, "No acknowlegement using w < 1 cannot be combined with journal:ture or fsync:true");
+
+    test.done();
+    db.close();
   });
 }
 
