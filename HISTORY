@@ -9,6 +9,7 @@
 - If using read preferences with secondaries queries will not fail if primary is down (Issue #744)
 - noOpen connection for Db.connect removed as not compatible with autodetection of Mongo type
 - Mongos connection with auth not working (Issue #737)
+- Use the connect method directly from the require. require('mongodb')("mongodb://localhost:27017/db")
 
 1.1.11 2012-10-10
 -----------------

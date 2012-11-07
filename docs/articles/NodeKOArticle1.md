@@ -33,19 +33,29 @@ Let's get around to setting up a connection with the Mongo DB database. Jumping 
     var mongo = require('mongodb'),
       Server = mongo.Server,
       Db = mongo.Db;
-	
-    var server = new Server('localhost', 27017, {auto_reconnect: true});
-    var db = new Db('exampleDb', server);
 
-    db.open(function(err, db) {
+    Db.connect("mongodb://localhost:27017/exampleDb", {auto_reconnect:true}, function(err, db) {
       if(!err) {
         console.log("We are connected");
       }
     });
 
-Let's have a quick look at the simple connection. The **new Server(...)** sets up a configuration for the connection and the **auto_reconnect** tells the driver to retry sending a command to the server if there is a failure. Another option you can set is **poolSize**, this allows you to control how many tcp connections are opened in parallel. The default value for this is 5 but you can set it as high as you want. The driver will use a round-robin strategy to dispatch and read from the tcp connection.
+Let's have a quick look at how the connection code works. The **Db.connect**
+method let's use use a uri to connect to the Mongo database, where 
+**localhost:27017** is the server host and port and **exampleDb** the db
+we wish to connect to. After the url notice the hash containing the 
+**auto_reconnect** key. Auto reconnect tells the driver to retry sending 
+a command to the server if there is a failure during it's execution.
 
-We are up and running with a connection to the database. Let's move on and look at what collections are and how they work.
+Another useful option you can pass in is 
+
+**poolSize**, this allows you to control how many tcp connections are
+opened in parallel. The default value for this is 5 but you can set it
+as high as you want. The driver will use a round-robin strategy to
+dispatch and read from the tcp connection.
+
+We are up and running with a connection to the database. Let's move on
+and look at what collections are and how they work.
 
 ## Mongo DB and Collections
 Collections are the equivalent of tables in traditional databases and contain all your documents. A database can have many collections. So how do we go about defining and using collections. Well there are a couple of methods that we can use. Let's jump straight into code and then look at the code.
@@ -53,16 +63,17 @@ Collections are the equivalent of tables in traditional databases and contain al
 **the requires and and other initializing stuff omitted for brevity**
 
     db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {});
+      if(err) { return console.dir(err); }
 
-        db.collection('test', {safe:true}, function(err, collection) {});
+      db.collection('test', function(err, collection) {});
 
-        db.createCollection('test', function(err, collection) {});
+      db.collection('test', {w:1}, function(err, collection) {});
 
-        db.createCollection('test', {safe:true}, function(err, collection) {});
-      }
-    });  
+      db.createCollection('test', function(err, collection) {});
+
+      db.createCollection('test', {w:1}, function(err, collection) {});
+
+    });
 
 Three different ways of creating a collection object but slightly different in behavior. Let's go through them and see what they do
 
@@ -91,19 +102,19 @@ So let's get dirty with the basic operations for Mongo DB. The Mongo DB wire pro
 **the requires and and other initializing stuff omitted for brevity**
 
     db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {
-          var doc1 = {'hello':'doc1'};
-          var doc2 = {'hello':'doc2'};
-          var lotsOfDocs = [{'hello':'doc3'}, {'hello':'doc4'}];
+      if(err) { return console.dir(err); }
 
-          collection.insert(doc1);
+      var collection = db.collection('test');
+      var doc1 = {'hello':'doc1'};
+      var doc2 = {'hello':'doc2'};
+      var lotsOfDocs = [{'hello':'doc3'}, {'hello':'doc4'}];
 
-          collection.insert(doc2, {safe:true}, function(err, result) {});
+      collection.insert(doc1);
 
-          collection.insert(lotsOfDocs, {safe:true}, function(err, result) {});
-        });
-      }
+      collection.insert(doc2, {w:1}, function(err, result) {});
+
+      collection.insert(lotsOfDocs, {w:1}, function(err, result) {});
+
     });
 
 A couple of variations on the theme of inserting a document as we can see. To understand why it's important to understand how Mongo DB works during inserts of documents.
@@ -129,21 +140,20 @@ Right that's the basics of insert's ironed out. We got some documents in there b
 **the requires and and other initializing stuff omitted for brevity**
 
     db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {
-          var doc = {mykey:1, fieldtoupdate:1};
+      if(err) { return console.dir(err); }
 
-          collection.insert(doc, {safe:true}, function(err, result) {
-            collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {safe:true}, function(err, result) {});      
-          });
+      var collection = db.collection('test');
+      var doc = {mykey:1, fieldtoupdate:1};
 
-          var doc2 = {mykey:2, docs:[{doc1:1}]};
-		
-          collection.insert(doc2, {safe:true}, function(err, result) {
-            collection.update({mykey:2}, {$push:{docs:{doc2:1}}, {safe:true}, function(err, result) {});
-          });
-        });
-      };
+      collection.insert(doc, {w:1}, function(err, result) {
+        collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});
+      });
+
+      var doc2 = {mykey:2, docs:[{doc1:1}]};
+
+      collection.insert(doc2, {w:1}, function(err, result) {
+        collection.update({mykey:2}, {$push:{docs:{doc2:1}}, {w:1}, function(err, result) {});
+      });
     });
 
 Alright before we look at the code we want to understand how document updates work and how to do the efficiently. The most basic and less efficient way is to replace the whole document, this is not really the way to go if you want to change just a field in your document. Luckily Mongo DB provides a whole set of operations that let you modify just pieces of the document [Atomic operations documentation](http://www.mongodb.org/display/DOCS/Atomic+Operations). Basically outlined below.
@@ -175,20 +185,19 @@ Let's have a look at the remove operation for the driver. As before let's start 
 **the requires and and other initializing stuff omitted for brevity**
 
     db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {
-          var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
+      if(err) { return console.dir(err); }
 
-          collection.insert(docs, {safe:true}, function(err, result) {
+      var collection = db.collection('test');
+      var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
 
-            collection.remove({mykey:1});
+      collection.insert(docs, {w:1}, function(err, result) {
 
-            collection.remove({mykey:2}, {safe:true}, function(err, result) {});
+        collection.remove({mykey:1});
 
-            collection.remove();
-          });
-        });
-      };
+        collection.remove({mykey:2}, {w:1}, function(err, result) {});
+
+        collection.remove();
+      });
     });
 
 Let's examine the 3 remove variants and what they do.
@@ -211,23 +220,22 @@ Queries is of course a fundamental part of interacting with a database and Mongo
 **the requires and and other initializing stuff omitted for brevity**
 
     db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {
-          var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
+      if(err) { return console.dir(err); }
 
-          collection.insert(docs, {safe:true}, function(err, result) {
+      var collection = db.collection('test');
+      var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
 
-            collection.find().toArray(function(err, items) {});
+      collection.insert(docs, {w:1}, function(err, result) {
 
-            var stream = collection.find({mykey:{$ne:2}}).streamRecords();
-            stream.on("data", function(item) {});
-            stream.on("end", function() {});
+        collection.find().toArray(function(err, items) {});
 
-            collection.findOne({mykey:1}, function(err, item) {});
+        var stream = collection.find({mykey:{$ne:2}}).streamRecords();
+        stream.on("data", function(item) {});
+        stream.on("end", function() {});
 
-          });
-        });
-      };
+        collection.findOne({mykey:1}, function(err, item) {});
+
+      });
     });
 
 Before we start picking apart the code there is one thing that needs to be understood, the **find** method does not execute the actual query. It builds an instance of **Cursor** that you then use to retrieve the data. This lets you manage how you retrieve the data from Mongo DB and keeps state about your current Cursor state on Mongo DB. Now let's pick apart the queries we have here and look at what they do. 

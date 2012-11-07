@@ -679,6 +679,24 @@ exports.shouldCorrectlyFindAndModifyDocument = function(test) {
 }
 
 /**
+ * Test findAndModify a document with fields
+ * @ignore
+ */
+exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = function(test) {
+  client.createCollection('test_find_and_modify_a_document', function(err, collection) {
+    // Test return new document on change
+    collection.insert({'a':1, 'b':2}, {safe:true}, function(err, doc) {
+      // Let's modify the document in place
+      collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true, 'fields': {a:1}}, function(err, updated_doc) {
+        test.equal(2, Object.keys(updated_doc).length);
+        test.equal(1, updated_doc.a);
+        test.done();
+      });
+    });
+  });
+}
+
+/**
  * @ignore
  */
 exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = function(test) {
