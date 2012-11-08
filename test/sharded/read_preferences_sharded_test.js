@@ -74,7 +74,7 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
     ])
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -119,7 +119,7 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
     ])
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -162,7 +162,7 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
     ])
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -205,7 +205,7 @@ exports['Should correctly read from a tagged secondary using Mongos'] = function
     ])
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -250,7 +250,7 @@ exports['Should correctly perform gridstore read and write'] = function(test) {
     ])
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -277,7 +277,7 @@ exports['Should correctly perform gridstore read and write'] = function(test) {
 exports['Should correctly connect to MongoS using single server instance'] = function(test) {
   var mongos = new Server("localhost", 50000, { auto_reconnect: true });
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);

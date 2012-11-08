@@ -23,7 +23,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -59,7 +59,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -78,7 +78,7 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(tes
         // Create a collection
         db.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray', function(err, collection) {
           // Insert the docs
-          collection.insert(docs, {safe:true}, function(err, result) {
+          collection.insert(docs, {w: 1}, function(err, result) {
 
             // Execute aggregate, notice the pipeline is expressed as an Array
             collection.aggregate([
@@ -120,7 +120,7 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(tes
  */
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -139,7 +139,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
         // Create a collection
         client.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments', function(err, collection) {
           // Insert the docs
-          collection.insert(docs, {safe:true}, function(err, result) {
+          collection.insert(docs, {w: 1}, function(err, result) {
             // Execute aggregate, notice the pipeline is expressed as function call parameters
             // instead of an Array.
             collection.aggregate(
@@ -181,7 +181,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
  */
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingleObject = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -200,7 +200,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
         // Create a collection
         client.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments', function(err, collection) {
           // Insert the docs
-          collection.insert(docs, {safe:true}, function(err, result) {
+          collection.insert(docs, {w: 1}, function(err, result) {
             // Execute aggregate, notice the pipeline is expressed as function call parameters
             // instead of an Array.
             collection.aggregate(
@@ -250,7 +250,7 @@ exports.shouldCorrectlyFailAndReturnError = function(test) {
       // Create a collection
       client.createCollection('shouldCorrectlyFailAndReturnError', function(err, collection) {
         // Insert the docs
-        collection.insert(docs, {safe:true}, function(err, result) {
+        collection.insert(docs, {w: 1}, function(err, result) {
           // Execute aggregate
           collection.aggregate(
               { $project : {
@@ -291,7 +291,7 @@ exports.shouldCorrectlyFailAndReturnError = function(test) {
 //       // Create a collection
 //       client.createCollection('shouldCorrectlyExecuteAggregationWithExplain', function(err, collection) {
 //         // Insert the docs
-//         collection.insert(docs, {safe:true}, function(err, result) {
+//         collection.insert(docs, {w: 1}, function(err, result) {
 //           // Execute aggregate
 //           collection.aggregate(
 //               [{ $project : {

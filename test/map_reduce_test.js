@@ -25,7 +25,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -61,7 +61,7 @@ if(!process.env['TEST_COVERAGE']) {
  */
 exports.shouldCorrectlyExecuteGroupFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -74,7 +74,7 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
         test.deepEqual([], results);
 
         // Trigger some inserts on the collection
-        collection.insert([{'a':2}, {'b':5}, {'a':1}], {safe:true}, function(err, ids) {
+        collection.insert([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
           
           // Perform a group count
           collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -95,7 +95,7 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
                   test.equal(1, results[0].count);
 
                   // Insert some more test data
-                  collection.insert([{'a':2}, {'b':3}], {safe:true}, function(err, ids) {
+                  collection.insert([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
                     
                     // Do a Group by field a
                     collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -180,7 +180,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = function(test)
       test.deepEqual([], results);
 
       // Trigger some inserts
-      collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], {safe:true}, function(err, ids) {
+      collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], {w:1}, function(err, ids) {
         collection.group([], {}, {count: 0, running_average: 0}
           , function (doc, out) { 
               out.count++;
@@ -206,7 +206,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = function(test)
  */
 exports.shouldPerformSimpleMapReduceFunctions = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -215,7 +215,7 @@ exports.shouldPerformSimpleMapReduceFunctions = function(test) {
     db.createCollection('test_map_reduce_functions', function(err, collection) {
       
       // Insert some documents to perform map reduce over
-      collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+      collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
         // Map function
         var map = function() { emit(this.user_id, 1); };
@@ -249,7 +249,7 @@ exports.shouldPerformSimpleMapReduceFunctions = function(test) {
  */
 exports.shouldPerformMapReduceFunctionInline = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -264,7 +264,7 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
         db.createCollection('test_map_reduce_functions_inline', function(err, collection) {
           
           // Insert some test documents
-          collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+          collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
             // Map function
             var map = function() { emit(this.user_id, 1); };
@@ -299,7 +299,7 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
 */
 exports.shouldPerformMapReduceInContext = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -309,7 +309,7 @@ exports.shouldPerformMapReduceInContext = function(test) {
 
       // Insert some test documents
       collection.insert([{'user_id':1, 'timestamp':new Date()}
-        , {'user_id':2, 'timestamp':new Date()}], {safe:true}, function(err, r) {
+        , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
         
         // Map function
         var map = function(){
@@ -351,7 +351,7 @@ exports.shouldPerformMapReduceInContext = function(test) {
 */
 exports.shouldPerformMapReduceWithStringFunctions = function(test) {
   client.createCollection('test_map_reduce', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+    collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
       // String functions
       var map = "function() { emit(this.user_id, 1); }";
       var reduce = "function(k,vals) { return 1; }";
@@ -376,7 +376,7 @@ exports.shouldPerformMapReduceWithStringFunctions = function(test) {
 */
 exports.shouldForceMapReduceError = function(test) {
   client.createCollection('test_map_reduce', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+    collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
       // String functions
       var map = "function() { emiddft(this.user_id, 1); }";
       var reduce = "function(k,vals) { return 1; }";
@@ -402,7 +402,7 @@ exports.shouldForceMapReduceError = function(test) {
 */
 exports.shouldPerformMapReduceWithParametersBeingFunctions = function(test) {
   client.createCollection('test_map_reduce_with_functions_as_arguments', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+    collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
       // String functions
       var map = function() { emit(this.user_id, 1); };
       var reduce = function(k,vals) { return 1; };
@@ -426,7 +426,7 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = function(test) {
 */
 exports.shouldPerformMapReduceWithCodeObjects = function(test) {
   client.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+    collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
       // String functions
       var map = new Code("function() { emit(this.user_id, 1); }");
       var reduce = new Code("function(k,vals) { return 1; }");
@@ -450,7 +450,7 @@ exports.shouldPerformMapReduceWithCodeObjects = function(test) {
 */
 exports.shouldPerformMapReduceWithOptions = function(test) {
   client.createCollection('test_map_reduce_with_options', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {safe:true}, function(err, r) {
+    collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
       // String functions
       var map = new Code("function() { emit(this.user_id, 1); }");
       var reduce = new Code("function(k,vals) { return 1; }");
@@ -478,7 +478,7 @@ exports.shouldPerformMapReduceWithOptions = function(test) {
 */
 exports.shouldHandleMapReduceErrors = function(test) {
   client.createCollection('test_map_reduce_error', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {safe:true}, function(err, r) {
+    collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
       // String functions
       var map = new Code("function() { throw 'error'; }");
       var reduce = new Code("function(k,vals) { throw 'error'; }");
@@ -496,7 +496,7 @@ exports.shouldHandleMapReduceErrors = function(test) {
 */
 exports.shouldSaveDataToDifferentDbFromMapreduce = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -505,7 +505,7 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = function(test) {
     db.createCollection('test_map_reduce_functions', function(err, collection) {
       
       // Insert some documents to perform map reduce over
-      collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+      collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
         // Map function
         var map = function() { emit(this.user_id, 1); };
@@ -567,7 +567,7 @@ exports.shouldCorrectlyReturnNestedKeys = function(test) {
           lastname:'smith',
           date:new Date()
         }
-      }, {safe:true}, function(err, result) {
+      }, {w:1}, function(err, result) {
       
       // Execute the group 
       collection.group(keys, condition, initial, reduce, true, function(err, r) {

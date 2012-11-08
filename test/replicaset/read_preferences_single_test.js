@@ -29,7 +29,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -71,7 +71,7 @@ var identifyServers = function(rs, dbname, callback) {
     // Connect to the db and query the state
     var server = new Server(host, port,{auto_reconnect: true});
     // Create db instance
-    var db = new Db(dbname, server, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(dbname, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     // Connect to the db
     db.open(function(err, db) {
       numberOfServersToCheck = numberOfServersToCheck - 1;
@@ -145,7 +145,7 @@ exports['Connection to a arbiter host with primary preference should give error'
     // Connect to the db
     var server = new Server(host, port,{auto_reconnect: true});
     // Create db instance
-    var db = new Db('integration_test_', server, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db('integration_test_', server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     db.open(function(err, p_db) {
       // Grab a collection
       p_db.createCollection('read_preference_single_test_0', function(err, collection) {
@@ -169,7 +169,7 @@ exports['Connection to a single primary host with different read preferences'] =
     // Connect to the db
     var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_PRIMARY});
     // Create db instance
-    var db = new Db('integration_test_', server, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db('integration_test_', server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     db.open(function(err, p_db) {
       // Grab the collection
       p_db.collection("read_preference_single_test_0", function(err, collection) {
@@ -181,7 +181,7 @@ exports['Connection to a single primary host with different read preferences'] =
           // Connect to the db
           var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_SECONDARY});
           // Create db instance
-          var db = new Db('integration_test_', server, {safe:false, slave_ok:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+          var db = new Db('integration_test_', server, {w:0, slave_ok:true, native_parser: (process.env['TEST_NATIVE'] != null)});
           db.open(function(err, p_db) {
             // Grab the collection
             db.collection("read_preference_single_test_0", function(err, collection) {
@@ -196,7 +196,7 @@ exports['Connection to a single primary host with different read preferences'] =
                 // Connect to the db
                 var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_SECONDARY_ONLY});
                 // Create db instance
-                var db = new Db('integration_test_', server, {safe:false, slave_ok:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+                var db = new Db('integration_test_', server, {w:0, slave_ok:true, native_parser: (process.env['TEST_NATIVE'] != null)});
                 db.open(function(err, p_db) {
                   // Grab the collection
                   db.collection("read_preference_single_test_0", function(err, collection) {
@@ -230,7 +230,7 @@ exports['Connection to a single secondary host with different read preferences']
     // Connect to the db
     var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_PRIMARY});
     // Create db instance
-    var db = new Db('integration_test_', server, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db('integration_test_', server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     db.open(function(err, p_db) {
       // Grab the collection
       p_db.collection("read_preference_single_test_1", function(err, collection) {
@@ -243,7 +243,7 @@ exports['Connection to a single secondary host with different read preferences']
           // Connect to the db
           var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_SECONDARY});
           // Create db instance
-          var db = new Db('integration_test_', server, {safe:false, slave_ok:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+          var db = new Db('integration_test_', server, {w:0, slave_ok:true, native_parser: (process.env['TEST_NATIVE'] != null)});
           db.open(function(err, p_db) {
             // Grab the collection
             db.collection("read_preference_single_test_1", function(err, collection) {
@@ -256,7 +256,7 @@ exports['Connection to a single secondary host with different read preferences']
                 // Connect to the db
                 var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_SECONDARY_ONLY});
                 // Create db instance
-                var db = new Db('integration_test_', server, {safe:false, slave_ok:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+                var db = new Db('integration_test_', server, {w:0, slave_ok:true, native_parser: (process.env['TEST_NATIVE'] != null)});
                 db.open(function(err, p_db) {
                   // Grab the collection
                   db.collection("read_preference_single_test_1", function(err, collection) {

@@ -40,7 +40,7 @@ exports.setUp = function(callback) {
     );
     
     // Connect to the replicaset
-    var db = new Db('node-native-test', replSet, {safe:false});
+    var db = new Db('node-native-test', replSet, {w:0});
     db.open(function(err, p_db) {
       db.addUser("me", "secret", function() {
         db.close();

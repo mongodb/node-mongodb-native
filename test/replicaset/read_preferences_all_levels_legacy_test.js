@@ -29,7 +29,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -71,7 +71,7 @@ var identifyServers = function(rs, dbname, callback) {
     // Connect to the db and query the state
     var server = new Server(host, port,{auto_reconnect: true});
     // Create db instance
-    var db = new Db(dbname, server, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(dbname, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     // Connect to the db
     db.open(function(err, db) {
       numberOfServersToCheck = numberOfServersToCheck - 1;
@@ -150,7 +150,7 @@ exports['Set read preference at collection level using collection method'] = fun
   var executedCorrectlyRead = false;
 
   // Create db instance
-  var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Connect to the db
   db.open(function(err, p_db) {
     // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
@@ -191,7 +191,7 @@ exports['Set read preference at collection level using createCollection method']
   var executedCorrectlyRead = false;
 
   // Create db instance
-  var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Connect to the db
   db.open(function(err, p_db) {
     // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
@@ -232,7 +232,7 @@ exports['Set read preference at cursor level'] = function(test) {
   var executedCorrectlyRead = false;
 
   // Create db instance
-  var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Connect to the db
   db.open(function(err, p_db) {
     // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
@@ -272,7 +272,7 @@ exports['Attempt to change read preference at cursor level after object read'] =
   var executedCorrectlyRead = false;
 
   // Create db instance
-  var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Connect to the db
   db.open(function(err, p_db) {
     // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
@@ -286,7 +286,7 @@ exports['Attempt to change read preference at cursor level after object read'] =
     // Grab the collection
     db.collection("read_preferences_all_levels_2", {}, function(err, collection) {
       // Insert a bunch of documents
-      collection.insert([{a:1}, {b:1}, {c:1}], {safe:true}, function(err) {
+      collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err) {
         test.equal(null, err);
 
         // Set up cursor

@@ -23,7 +23,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -53,7 +53,7 @@ exports.tearDown = function(callback) {
 exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = function(test) {
   client.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw', function(err, collection) {
     // Insert some documents
-    collection.insert([{a:1}, {b:2000}, {c:2.3}], {safe:true}, function(err, result) {
+    collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
       // You have to pass at least query + fields before passing options
       collection.find({}, null, {raw:true}).toArray(function(err, items) {
         var objects = [];
@@ -81,7 +81,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = function(test) {
 exports.shouldCorrectlyRemoveDocumentAndReturnRaw = function(test) {
   client.createCollection('shouldCorrectlyRemoveDocumentAndReturnRaw', function(err, collection) {
     // Insert some documents
-    collection.insert([{a:1}, {b:2000}, {c:2.3}], {safe:true}, function(err, result) {
+    collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
       // Let's create a raw delete command
       var queryObject = {b:2000};
       // Create raw bson buffer
@@ -89,7 +89,7 @@ exports.shouldCorrectlyRemoveDocumentAndReturnRaw = function(test) {
       client.bson.serializeWithBufferAndIndex(queryObject, false, rawQueryObject, 0);    
 
       // Update the document and return the raw new document
-      collection.remove(rawQueryObject, {safe:true}, function(err, numberOfDeleted) {
+      collection.remove(rawQueryObject, {w:1}, function(err, numberOfDeleted) {
         test.equal(1, numberOfDeleted);
         
         collection.findOne({b:2000}, function(err, item) {
@@ -104,7 +104,7 @@ exports.shouldCorrectlyRemoveDocumentAndReturnRaw = function(test) {
 exports.shouldCorrectlyUpdateDocumentAndReturnRaw = function(test) {
   client.createCollection('shouldCorrectlyUpdateDocumentAndReturnRaw', function(err, collection) {
     // Insert some documents
-    collection.insert([{a:1}, {b:2000}, {c:2.3}], {safe:true}, function(err, result) {
+    collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
       // Let's create a raw delete command
       var selectorObject = {b:2000};
       // Create raw bson buffer
@@ -116,7 +116,7 @@ exports.shouldCorrectlyUpdateDocumentAndReturnRaw = function(test) {
       var rawUpdateObject = new Buffer(client.bson.calculateObjectSize(updateObject));
       client.bson.serializeWithBufferAndIndex(updateObject, false, rawUpdateObject, 0);    
       // Update the document and return the raw new document
-      collection.update(rawSelectorObject, rawUpdateObject, {safe:true}, function(err, numberOfUpdated) {
+      collection.update(rawSelectorObject, rawUpdateObject, {w:1}, function(err, numberOfUpdated) {
         test.equal(1, numberOfUpdated);
         
         // Query the document
@@ -154,7 +154,7 @@ exports.shouldCorreclyInsertRawDocumentAndRetrieveThem = function(test) {
     }
     
     // Insert all raw objects
-    collection.insert(serializedObjects, {safe:true}, function(err, result) {
+    collection.insert(serializedObjects, {w:1}, function(err, result) {
       test.equal(null, err);
       
       // Query the document
@@ -177,7 +177,7 @@ exports.shouldCorreclyInsertRawDocumentAndRetrieveThem = function(test) {
 
 exports.shouldCorrectlyPeformQueryUsingRaw = function(test) {
   client.createCollection('shouldCorrectlyPeformQueryUsingRaw', function(err, collection) {
-    collection.insert([{a:1}, {b:2}, {b:3}], {safe:true}, function(err, result) {
+    collection.insert([{a:1}, {b:2}, {b:3}], {w:1}, function(err, result) {
       test.equal(null, err);
 
       // Let's create a raw query object
@@ -215,7 +215,7 @@ exports.shouldCorrectlyThrowErrorsWhenIllegalySizedMessages = function(test) {
   client.createCollection('shouldCorrectlyThrowErrorsWhenIllegalySizedMessages', function(err, collection) {
     var illegalBuffer = new Buffer(20);
     try {
-      collection.insert(illegalBuffer, {safe:true}, function(err, result) {});        
+      collection.insert(illegalBuffer, {w:1}, function(err, result) {});        
     } catch (err) {
       test.ok(err.toString().indexOf("insert") != -1);        
     }
@@ -267,7 +267,7 @@ exports.shouldCorrectlyThrowErrorsWhenIllegalySizedMessages = function(test) {
 
 exports.shouldCorrectlyPeformQueryUsingRawSettingRawAtCollectionLevel = function(test) {
   client.createCollection('shouldCorrectlyPeformQueryUsingRawSettingRawAtCollectionLevel', function(err, collection) {
-    collection.insert([{a:1}, {b:2}, {b:3}], {safe:true}, function(err, result) {
+    collection.insert([{a:1}, {b:2}, {b:3}], {w:1}, function(err, result) {
       test.equal(null, err);
 
       // Let's create a raw query object
@@ -318,7 +318,7 @@ exports.shouldCorreclyInsertRawDocumentAndRetrieveThemSettingRawAtCollectionLeve
     }
     
     // Insert all raw objects
-    collection.insert(serializedObjects, {safe:true}, function(err, result) {
+    collection.insert(serializedObjects, {w:1}, function(err, result) {
       test.equal(null, err);
       
       // Query the document
@@ -342,7 +342,7 @@ exports.shouldCorreclyInsertRawDocumentAndRetrieveThemSettingRawAtCollectionLeve
 exports.shouldCorrectlyUpdateDocumentAndReturnRawSettingRawAtCollectionLevel = function(test) {
   client.createCollection('shouldCorrectlyUpdateDocumentAndReturnRawSettingRawAtCollectionLevel', {raw:true}, function(err, collection) {
     // Insert some documents
-    collection.insert([{a:1}, {b:2000}, {c:2.3}], {safe:true}, function(err, result) {
+    collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
       // Let's create a raw delete command
       var selectorObject = {b:2000};
       // Create raw bson buffer
@@ -354,7 +354,7 @@ exports.shouldCorrectlyUpdateDocumentAndReturnRawSettingRawAtCollectionLevel = f
       var rawUpdateObject = new Buffer(client.bson.calculateObjectSize(updateObject));
       client.bson.serializeWithBufferAndIndex(updateObject, false, rawUpdateObject, 0);    
       // Update the document and return the raw new document
-      collection.update(rawSelectorObject, rawUpdateObject, {safe:true}, function(err, numberOfUpdated) {
+      collection.update(rawSelectorObject, rawUpdateObject, {w:1}, function(err, numberOfUpdated) {
         test.equal(1, numberOfUpdated);
         
         // Query the document

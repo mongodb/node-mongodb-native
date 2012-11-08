@@ -25,7 +25,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -60,7 +60,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldCorrectlyExecuteToArray = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -69,7 +69,7 @@ exports.shouldCorrectlyExecuteToArray = function(test) {
     db.createCollection('test_array', function(err, collection) {
 
       // Insert a test document
-      collection.insert({'b':[1, 2, 3]}, {safe:true}, function(err, ids) {
+      collection.insert({'b':[1, 2, 3]}, {w:1}, function(err, ids) {
 
         // Retrieve all the documents in the collection
         collection.find().toArray(function(err, documents) {
@@ -91,7 +91,7 @@ exports.shouldCorrectlyExecuteToArray = function(test) {
 exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = function(test) {
   client.createCollection('test_to_a', function(err, collection) {
     test.ok(collection instanceof Collection);
-    collection.insert({'a':1}, {safe:true}, function(err, ids) {
+    collection.insert({'a':1}, {w:1}, function(err, ids) {
       var cursor = collection.find({});
       cursor.toArray(function(err, items) {
         // Should fail if called again (cursor should be closed)
@@ -121,7 +121,7 @@ exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = function(tes
  */
 exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -132,7 +132,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(test) {
       test.ok(collection instanceof Collection);
 
       // Insert a document in the collection
-      collection.insert({'a':1}, {safe:true}, function(err, ids) {
+      collection.insert({'a':1}, {w:1}, function(err, ids) {
 
         // Grab a cursor
         var cursor = collection.find();
@@ -164,7 +164,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(test) {
  */
 exports.shouldCorrectlyExecuteCursorExplain = function(test) {
   client.createCollection('test_explain', function(err, collection) {
-    collection.insert({'a':1}, {safe:true}, function(err, r) {
+    collection.insert({'a':1}, {w:1}, function(err, r) {
       collection.find({'a':1}).explain(function(err, explaination) {
         test.ok(explaination.cursor != null);
         test.ok(explaination.n.constructor == Number);
@@ -192,7 +192,7 @@ exports.shouldCorrectlyExecuteCursorCount = function(test) {
           var group = this.group();
 
           for(var i = 0; i < 10; i++) {
-            collection.insert({'x':i}, {safe:true}, group());
+            collection.insert({'x':i}, {w:1}, group());
           }
         },
 
@@ -246,7 +246,7 @@ exports.shouldCorrectlyExecuteSortOnCursor = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 5; i++) {
-          collection.insert({'a':i}, {safe:true}, group());
+          collection.insert({'a':i}, {w:1}, group());
         }
       },
 
@@ -316,7 +316,7 @@ exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 2; i++) {
-          collection.save({'x':1}, {safe:true}, group());
+          collection.save({'x':1}, {w:1}, group());
         }
       },
 
@@ -343,7 +343,7 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 2; i++) {
-          collection.save({'x':1}, {safe:true}, group());
+          collection.save({'x':1}, {w:1}, group());
         }
       },
 
@@ -370,7 +370,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 10; i++) {
-          collection.save({'x':1}, {safe:true}, group());
+          collection.save({'x':1}, {w:1}, group());
         }
       },
 
@@ -400,7 +400,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 10; i++) {
-          collection.save({'x':1}, {safe:true}, group());
+          collection.save({'x':1}, {w:1}, group());
         }
       },
 
@@ -426,7 +426,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 10; i++) {
-          collection.save({'x':1}, {safe:true}, group());
+          collection.save({'x':1}, {w:1}, group());
         }
       },
 
@@ -447,7 +447,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = function(test) {
  */
 exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = function(test) {
   client.createCollection('test_limit_exceptions', function(err, collection) {
-    collection.insert({'a':1}, {safe:true}, function(err, docs) {});
+    collection.insert({'a':1}, {w:1}, function(err, docs) {});
     collection.find(function(err, cursor) {
       cursor.limit('not-an-integer', function(err, cursor) {
         test.ok(err instanceof Error);
@@ -508,7 +508,7 @@ exports.shouldCorrectlySkipRecordsOnCursor = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 10; i++) {
-          collection.insert({'x':i}, {safe:true}, group());
+          collection.insert({'x':i}, {w:1}, group());
         }
       },
 
@@ -551,7 +551,7 @@ exports.shouldCorrectlySkipRecordsOnCursor = function(test) {
  */
 exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = function(test) {
   client.createCollection('test_skip_exceptions', function(err, collection) {
-    collection.insert({'a':1}, {safe:true}, function(err, docs) {});
+    collection.insert({'a':1}, {w:1}, function(err, docs) {});
     collection.find().skip('not-an-integer', function(err, cursor) {
       test.ok(err instanceof Error);
       test.equal("skip requires an integer", err.message);
@@ -583,7 +583,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = function(test) {
  */
 exports.shouldReturnErrorsOnIllegalBatchSizes = function(test) {
   client.createCollection('test_batchSize_exceptions', function(err, collection) {
-    collection.insert({'a':1}, {safe:true}, function(err, docs) {});
+    collection.insert({'a':1}, {w:1}, function(err, docs) {});
     var cursor = collection.find();
     cursor.batchSize('not-an-integer', function(err, cursor) {
       test.ok(err instanceof Error);
@@ -646,7 +646,7 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = function(test) {
       docs.push({'a':i});
     }
 
-    collection.insert(docs, {safe:true}, function() {
+    collection.insert(docs, {w:1}, function() {
       collection.find({}, {batchSize : batchSize}, function(err, cursor) {
         //1st
         cursor.nextObject(function(err, items) {
@@ -715,7 +715,7 @@ exports.shouldCorrectlyHandleBatchSize = function(test) {
       docs.push({'a':i});
     }
 
-    collection.insert(docs, {safe:true}, function() {
+    collection.insert(docs, {w:1}, function() {
       collection.find({}, {batchSize : batchSize}, function(err, cursor) {
         //1st
         cursor.nextObject(function(err, items) {
@@ -767,7 +767,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = function(test) {
       docs.push({'a':i});
     }
 
-    collection.insert(docs, {safe:true}, function() {
+    collection.insert(docs, {w:1}, function() {
       var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
       //1st
       cursor.nextObject(function(err, items) {
@@ -814,7 +814,7 @@ exports.shouldHandleLimitLessThanBatchSize = function(test) {
       docs.push({'a':i});
     }
 
-    collection.insert(docs, {safe:true}, function() {
+    collection.insert(docs, {w:1}, function() {
       var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
       //1st
       cursor.nextObject(function(err, items) {
@@ -848,7 +848,7 @@ exports.shouldHandleSkipLimitChaining = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 10; i++) {
-          collection.insert({'x':1}, {safe:true}, group());
+          collection.insert({'x':1}, {w:1}, group());
         }
       },
 
@@ -888,7 +888,7 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 10; i++) {
-          collection.insert({'x':1}, {safe:true}, group());
+          collection.insert({'x':1}, {w:1}, group());
         }
       },
 
@@ -944,7 +944,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = function(test) {
         var group = this.group();
 
         for(var i = 0; i < COUNT; i++) {
-          collection.save({'a': i}, {safe:true}, group());
+          collection.save({'a': i}, {w:1}, group());
         }
       },
 
@@ -1001,7 +1001,7 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = function(test) {
         var group = this.group();
 
         for(var i = 0; i < 1000; i++) {
-          collection.save({'a': i}, {safe:true}, group());
+          collection.save({'a': i}, {w:1}, group());
         }
       },
 
@@ -1052,7 +1052,7 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = function(test) {
  */
 exports.shouldCloseCursorAfterQueryHasBeenSent = function(test) {
   client.createCollection('test_close_after_query_sent', function(err, collection) {
-    collection.insert({'a':1}, {safe:true}, function(err, r) {
+    collection.insert({'a':1}, {w:1}, function(err, r) {
       var cursor = collection.find({'a':1});
       cursor.nextObject(function(err, item) {
         cursor.close(function(err, cursor) {
@@ -1071,7 +1071,7 @@ exports.shouldCloseCursorAfterQueryHasBeenSent = function(test) {
  */
 exports.shouldCorrectlyExecuteCursorCountWithFields = function(test) {
   client.createCollection('test_count_with_fields', function(err, collection) {
-    collection.save({'x':1, 'a':2}, {safe:true}, function(err, doc) {
+    collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
       collection.find({}, {'fields':['a']}).toArray(function(err, items) {
         test.equal(1, items.length);
         test.equal(2, items[0].a);
@@ -1093,7 +1093,7 @@ exports.shouldCorrectlyExecuteCursorCountWithFields = function(test) {
  */
 exports.shouldCorrectlyCountWithFieldsUsingExclude = function(test) {
   client.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
-    collection.save({'x':1, 'a':2}, {safe:true}, function(err, doc) {
+    collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
       collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
         test.equal(1, items.length);
         test.equal(2, items[0].a);
@@ -1121,7 +1121,7 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = function(test) {
     // ensure index of createdAt index
     collection.ensureIndex({createdAt:1})
     // insert all docs
-    collection.insert(docs, {safe:true}, function(err, result) {
+    collection.insert(docs, {w:1}, function(err, result) {
       test.equal(null, err);
 
       // Find with sort
@@ -1153,7 +1153,7 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = func
       test.equal(null, err);
 
       // insert all docs
-      collection.insert(docs, {safe:true}, function(err, result) {
+      collection.insert(docs, {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Find with sort
@@ -1175,7 +1175,7 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = func
  */
 exports['Should correctly rewind and restart cursor'] = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1192,7 +1192,7 @@ exports['Should correctly rewind and restart cursor'] = function(test) {
       test.equal(null, err);
 
       // insert all docs
-      collection.insert(docs, {safe:true}, function(err, result) {
+      collection.insert(docs, {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Grab a cursor using the find
@@ -1233,7 +1233,7 @@ exports['Should correctly execute count on cursor'] = function(test) {
     test.equal(null, err);
 
     // insert all docs
-    collection.insert(docs, {safe:true}, function(err, result) {
+    collection.insert(docs, {w:1}, function(err, result) {
       test.equal(null, err);
       var total = 0;
       // Create a cursor for the content
@@ -1272,7 +1272,7 @@ exports['should be able to stream documents'] = function(test) {
     test.equal(null, err);
 
     // insert all docs
-    collection.insert(docs, {safe:true}, function(err, result) {
+    collection.insert(docs, {w:1}, function(err, result) {
       test.equal(null, err);
 
       var paused = 0
@@ -1345,7 +1345,7 @@ exports['immediately destroying a stream prevents the query from executing'] = f
     test.equal(null, err);
 
     // insert all docs
-    collection.insert(docs, {safe:true}, function(err, result) {
+    collection.insert(docs, {w:1}, function(err, result) {
       test.equal(null, err);
 
       var stream = collection.find().stream();
@@ -1381,7 +1381,7 @@ exports['destroying a stream stops it'] = function(test) {
     for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
 
     // insert all docs
-    collection.insert(docs, {safe:true}, function(err, result) {
+    collection.insert(docs, {w:1}, function(err, result) {
       test.equal(null, err);
 
       var finished = 0
@@ -1423,7 +1423,7 @@ exports['destroying a stream stops it'] = function(test) {
  * @api private
  */
 exports['cursor stream errors']= function(test) {
-  var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     test.equal(null, err);
 
@@ -1434,7 +1434,7 @@ exports['cursor stream errors']= function(test) {
       for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
 
       // insert all docs
-      collection.insert(docs, {safe:true}, function(err, result) {
+      collection.insert(docs, {w:1}, function(err, result) {
         test.equal(null, err);
 
         var finished = 0
@@ -1487,7 +1487,7 @@ exports['cursor stream pipe']= function(test) {
     });
 
     // insert all docs
-    collection.insert(docs, {safe:true}, function(err, result) {
+    collection.insert(docs, {w:1}, function(err, result) {
       test.equal(null, err);
 
       var filename = '/tmp/_nodemongodbnative_stream_out.txt'
@@ -1533,7 +1533,7 @@ exports['cursor stream pipe']= function(test) {
  */
 exports.shouldCorrectlyUseCursorCountFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1543,7 +1543,7 @@ exports.shouldCorrectlyUseCursorCountFunction = function(test) {
       test.equal(null, err);
 
       // Insert some docs
-      collection.insert([{a:1}, {a:2}], {safe:true}, function(err, docs) {
+      collection.insert([{a:1}, {a:2}], {w:1}, function(err, docs) {
         test.equal(null, err);
 
         // Do a find and get the cursor count
@@ -1568,7 +1568,7 @@ exports.shouldCorrectlyUseCursorCountFunction = function(test) {
  */
 exports.shouldCorrectlyPeformSimpleSorts = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1578,7 +1578,7 @@ exports.shouldCorrectlyPeformSimpleSorts = function(test) {
       test.equal(null, err);
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+      collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
         test.equal(null, err);
 
         // Do normal ascending sort
@@ -1609,7 +1609,7 @@ exports.shouldCorrectlyPeformSimpleSorts = function(test) {
  */
 exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1619,7 +1619,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
       test.equal(null, err);
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+      collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
         test.equal(null, err);
 
         // Limit to only one document returned
@@ -1644,7 +1644,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(test) {
  */
 exports.shouldCorrectlyPeformSkipOnCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1654,7 +1654,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = function(test) {
       test.equal(null, err);
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+      collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
         test.equal(null, err);
 
         // Skip one document
@@ -1680,7 +1680,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = function(test) {
  */
 exports.shouldCorrectlyPeformBatchSizeOnCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1690,7 +1690,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = function(test) {
       test.equal(null, err);
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+      collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
         test.equal(null, err);
 
         // Do normal ascending sort
@@ -1715,7 +1715,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = function(test) {
  */
 exports.shouldCorrectlyPeformNextObjectOnCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1725,7 +1725,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = function(test) {
       test.equal(null, err);
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+      collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
         test.equal(null, err);
 
         // Do normal ascending sort
@@ -1750,7 +1750,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = function(test) {
  */
 exports.shouldCorrectlyPeformSimpleExplainCursor = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1760,7 +1760,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = function(test) {
       test.equal(null, err);
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+      collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
         test.equal(null, err);
 
         // Do normal ascending sort
@@ -1784,7 +1784,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheStreamRecords = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1800,7 +1800,7 @@ exports.shouldStreamDocumentsUsingTheStreamRecords = function(test) {
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {
+      collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().streamRecords({fetchSize:1000});
 
@@ -1827,7 +1827,7 @@ exports.shouldStreamDocumentsUsingTheStreamRecords = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheStreamFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1843,7 +1843,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = function(test) {
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {
+      collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -1870,7 +1870,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheCloseFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1886,7 +1886,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(test) {
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {
+      collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var cursor = collection.find();
 
@@ -1916,7 +1916,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1932,7 +1932,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {
+      collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var cursor = collection.find();
 
@@ -1960,7 +1960,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(test) {
 exports.shouldCloseDeadTailableCursors = function (test) {
   // http://www.mongodb.org/display/DOCS/Tailable+Cursors
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   db.open(function(err, db) {
 
@@ -1977,7 +1977,7 @@ exports.shouldCloseDeadTailableCursors = function (test) {
         for(var end = insertId+1; insertId < end+80; insertId++) {
           docs.push({id:insertId})
         }
-        collection.insert(docs, {safe:true}, function(err, ids) {
+        collection.insert(docs, {w:1}, function(err, ids) {
           test.equal(null, err);
           cb && cb();
         })
@@ -2025,12 +2025,12 @@ exports.shouldCloseDeadTailableCursors = function (test) {
 exports.shouldAwaitData = function (test) {
   // http://www.mongodb.org/display/DOCS/Tailable+Cursors
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 2, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 2, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   db.open(function(err, db) {
     var options = { capped: true, size: 8};
     db.createCollection('should_await_data', options, function(err, collection) {
-      collection.insert({a:1}, {safe:true}, function(err, result) {
+      collection.insert({a:1}, {w:1}, function(err, result) {
         // Create cursor with awaitdata, and timeout after the period specified
         collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
           if(err != null) {
@@ -2071,10 +2071,10 @@ exports.shouldCorrectExecuteExplainHonoringLimit = function (test) {
 
   // Insert all the docs
   var collection = client.collection('shouldCorrectExecuteExplainHonoringLimit');
-  collection.insert(docs, {safe:true}, function(err, result) {
+  collection.insert(docs, {w:1}, function(err, result) {
     test.equal(null, err);
 
-    collection.ensureIndex({_keywords:1}, {safe:true}, function(err, result) {
+    collection.ensureIndex({_keywords:1}, {w:1}, function(err, result) {
       test.equal(null, err);
 
       // collection.find({_keywords:'red'},{}).limit(10).explain(function(err, result) {
@@ -2097,7 +2097,7 @@ exports.shouldCorrectExecuteExplainHonoringLimit = function (test) {
  */
 exports.shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -2114,7 +2114,7 @@ exports.shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates = function(te
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {
+      collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
         stream.pause();

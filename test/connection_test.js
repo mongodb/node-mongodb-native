@@ -24,7 +24,7 @@ function connectionTester(test, testName, callback) {
     db.collection(testName, function(err, collection) {
       test.equal(err, null);
       var doc = {foo:123};
-      collection.insert({foo:123}, {safe:true}, function(err, docs) {
+      collection.insert({foo:123}, {w:1}, function(err, docs) {
         test.equal(err, null);
         db.dropDatabase(function(err, done) {
           test.equal(err, null);
@@ -44,7 +44,7 @@ function connectionTester(test, testName, callback) {
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -75,8 +75,8 @@ exports.shouldThrowErrorDueToSharedConnectionUsage = function(test) {
   var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL});
 
   try {
-    var db = new Db(MONGODB, server, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
-    var db1 = new Db(MONGODB, server, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db1 = new Db(MONGODB, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   } catch(err) {
     if (db) db.close();
     if (db1) db1.close();
@@ -126,7 +126,7 @@ exports.shouldCorrectlyReconnectOnNonExistingServer = function(test) {
   var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
   // Kill the server
   serverManager.killAll(function() {
-    var _client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var _client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     _client.open(function(err, __client) {
       test.ok(err != null);
       // Restart the server
@@ -144,7 +144,7 @@ exports.shouldCorrectlyReconnectOnNonExistingServer = function(test) {
 
 exports.shouldCorrectlyOpenCloseAndOpenAgain = function(test) {
   var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL});
-  var db = new Db(MONGODB, server, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db){
     test.equal(null, err);
 
@@ -162,7 +162,7 @@ exports.shouldCorrectlyOpenCloseAndOpenAgain = function(test) {
 }
 
 exports.testCloseNoCallback = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(connectionTester(test, 'testCloseNoCallback', function() {
     var dbCloseCount = 0, connectionCloseCount = 0, poolCloseCount = 0;
     // Ensure no close events are fired as we are closing the connection specifically
@@ -180,7 +180,7 @@ exports.testCloseNoCallback = function(test) {
 }
 
 exports.testCloseWithCallback = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(connectionTester(test, 'testCloseWithCallback', function() {
     var dbCloseCount = 0, connectionCloseCount = 0, poolCloseCount = 0;
     // Ensure no close events are fired as we are closing the connection specifically
@@ -203,13 +203,13 @@ exports.testCloseWithCallback = function(test) {
 }
 
 exports.testShouldCorrectlyCloseOnUnopedConnection = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.close();
   test.done();
 }
 
 exports.testConnectUsingDefaultHostAndPort = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
     test.equal(null, err);
     test.done();
@@ -218,7 +218,7 @@ exports.testConnectUsingDefaultHostAndPort = function(test) {
 }
 
 exports.testConnectUsingSocketOptions = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}, ssl:useSSL}),{safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
     test.equal(null, err);
     test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)

@@ -22,7 +22,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -64,7 +64,7 @@ exports.shouldCorrectlyLogContent = function(test) {
     }
   }
       
-  var automatic_connect_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50, logger:logger});
+  var automatic_connect_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50, logger:logger});
   automatic_connect_client.open(function(err, automatic_connect_client) {
     automatic_connect_client.close();
     test.equal(true, loggedOutput);

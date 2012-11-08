@@ -33,11 +33,11 @@ RS.startSet(true, function(err, result) {
 
       db.collection('stats', function(statsErr, stats) {
           if (statsErr) return console.log('error opening stats %o', err);
-          stats.remove({}, {safe:true}, function(err, result) {
+          stats.remove({}, {w:1}, function(err, result) {
             console.log("================================================================")
             console.dir(err)
 
-            stats.insert({name:'reqcount', value:0}, {safe:true}, function(err, result) {
+            stats.insert({name:'reqcount', value:0}, {w:1}, function(err, result) {
               console.log("================================================================")
               console.dir(err)
               //create server

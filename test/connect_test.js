@@ -25,7 +25,7 @@ function connectionTester(test, testName, callback) {
     db.collection(testName, function(err, collection) {
       test.equal(err, null);
       var doc = {foo:123};
-      collection.insert({foo:123}, {safe:true}, function(err, docs) {
+      collection.insert({foo:123}, {w:1}, function(err, docs) {
         test.equal(err, null);
         db.dropDatabase(function(err, done) {
           db.close();

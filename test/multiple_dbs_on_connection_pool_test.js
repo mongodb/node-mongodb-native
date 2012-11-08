@@ -24,7 +24,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -58,7 +58,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(test) {
   if(process.env['JENKINS']) return test.done();
   
   if(process.platform !== 'linux') {
-    var db = new Db('tests', new Server("127.0.0.1", 27027, {auto_reconnect: true}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db('tests', new Server("127.0.0.1", 27027, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     // All inserted docs
     var docs = [];
     var errs = [];
@@ -76,7 +76,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(test) {
         db.createCollection('shouldCorrectlyErrorOnAllDbs', function(err, collection) {
           test.equal(null, err);
 
-          collection.insert({a:1}, {safe:true}, function(err, result) {
+          collection.insert({a:1}, {w:1}, function(err, result) {
             test.equal(null, err);
 
             // Open a second db
@@ -108,7 +108,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(test) {
-  var second_test_database = new Db(MONGODB + "_2", new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
+  var second_test_database = new Db(MONGODB + "_2", new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
   // Just create second database
   second_test_database.open(function(err, second_test_database) {
     // Close second database
@@ -154,7 +154,7 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(test) {
-  var second_test_database = new Db(MONGODB + "_2", new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
+  var second_test_database = new Db(MONGODB + "_2", new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null), retryMiliSeconds:50});
   // Just create second database
   second_test_database.open(function(err, second_test_database) {
     // Close second database
@@ -202,7 +202,7 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(test) {
  */
 exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -217,8 +217,8 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = function(
     var multipleColl2 = secondDb.collection("multiple_db_instances");
     
     // Write a record into each and then count the records stored
-    multipleColl1.insert({a:1}, {safe:true}, function(err, result) {      
-      multipleColl2.insert({a:1}, {safe:true}, function(err, result) {
+    multipleColl1.insert({a:1}, {w:1}, function(err, result) {      
+      multipleColl2.insert({a:1}, {w:1}, function(err, result) {
         
         // Count over the results ensuring only on record in each collection
         multipleColl1.count(function(err, count) {
@@ -241,7 +241,7 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = function(
  */
 exports.shouldCorrectlyHandleMultipleDbsFindAndModifies = function(test) {
   var mongo_server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1, socketOptions: {noDelay:false}});
-  new Db('init_db', mongo_server, {safe:false}).open(function (error, db) {
+  new Db('init_db', mongo_server, {w:0}).open(function (error, db) {
     var db_instance = db.db('site1');
     db_instance = db.db('site2');
     db_instance = db.db('rss');

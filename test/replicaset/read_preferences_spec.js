@@ -30,7 +30,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -63,7 +63,7 @@ var waitForReplicaset = function(callback) {
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ], {});
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.on("fullsetup", function() {
     db.close();
     callback();
@@ -126,7 +126,7 @@ exports['Should Correctly Checkout Readers'] = function(test) {
   );
 
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false, recordQueryStats:true});
+  var db = new Db('integration_test_', replSet, {w:0, recordQueryStats:true});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
 
@@ -238,7 +238,7 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference'] = functio
   );
 
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false, recordQueryStats:true});
+  var db = new Db('integration_test_', replSet, {w:0, recordQueryStats:true});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     // Wait for a bit, let ping happen
@@ -323,7 +323,7 @@ exports['Should Correctly Use Preferences by tags no strategy'] = function(test)
     ]);
 
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false, recordQueryStats:true});
+  var db = new Db('integration_test_', replSet, {w:0, recordQueryStats:true});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     // Wait for a bit, let ping happen
@@ -450,7 +450,7 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags']
   );
 
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false, recordQueryStats:true});
+  var db = new Db('integration_test_', replSet, {w:0, recordQueryStats:true});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     // Wait for a bit, let ping happen
@@ -532,7 +532,7 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags a
   );
 
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false, recordQueryStats:true});
+  var db = new Db('integration_test_', replSet, {w:0, recordQueryStats:true});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     // Wait for a bit, let ping happen

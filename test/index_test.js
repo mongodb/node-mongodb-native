@@ -24,7 +24,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -59,7 +59,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldCreateASimpleIndexOnASingleField = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -69,11 +69,11 @@ exports.shouldCreateASimpleIndexOnASingleField = function(test) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the index
-      collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {safe:true}, function(err, result) {
+      collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
-        collection.createIndex('a', {safe:true}, function(err, indexName) {
+        collection.createIndex('a', {w:1}, function(err, indexName) {
           test.equal("a_1", indexName);
 
           // Peform a query, with explain to show we hit the query
@@ -97,7 +97,7 @@ exports.shouldCreateASimpleIndexOnASingleField = function(test) {
  */
 exports.shouldCreateComplexIndexOnTwoFields = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -108,12 +108,12 @@ exports.shouldCreateComplexIndexOnTwoFields = function(test) {
 
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.createIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
 
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
@@ -144,7 +144,7 @@ exports.shouldCreateComplexIndexOnTwoFields = function(test) {
  */
 exports.shouldCreateComplexEnsureIndex = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -155,12 +155,12 @@ exports.shouldCreateComplexEnsureIndex = function(test) {
 
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
 
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
@@ -191,7 +191,7 @@ exports.shouldCreateComplexEnsureIndex = function(test) {
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -202,12 +202,12 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
 
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
 
           // Fetch basic indexInformation for collection
           collection.indexInformation(function(err, indexInformation) {
@@ -237,7 +237,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(test) {
  */
 exports.shouldCorrectlyCreateAndDropIndex = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -248,12 +248,12 @@ exports.shouldCorrectlyCreateAndDropIndex = function(test) {
 
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
 
           // Drop the index
           collection.dropIndex("a_1_b_1", function(err, result) {
@@ -282,7 +282,7 @@ exports.shouldCorrectlyCreateAndDropIndex = function(test) {
  */
 exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -293,16 +293,16 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
 
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
 
           // Create an additional index
           collection.ensureIndex({c:1}
-            , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
 
             // Drop the index
             collection.dropAllIndexes(function(err, result) {
@@ -333,7 +333,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(test) {
  */
 exports.shouldCorrectlyForceReindexOnCollection = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -344,12 +344,12 @@ exports.shouldCorrectlyForceReindexOnCollection = function(test) {
 
       // Insert a bunch of documents for the index
       collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
 
           // Force a reindex of the collection
           collection.reIndex(function(err, result) {
@@ -376,9 +376,9 @@ exports.shouldCorrectlyForceReindexOnCollection = function(test) {
  */
 exports.shouldCorrectlyExtractIndexInformation = function(test) {
   client.createCollection('test_index_information', function(err, collection) {
-    collection.insert({a:1}, {safe:true}, function(err, ids) {
+    collection.insert({a:1}, {w:1}, function(err, ids) {
       // Create an index on the collection
-      client.createIndex(collection.collectionName, 'a', {safe:true}, function(err, indexName) {
+      client.createIndex(collection.collectionName, 'a', {w:1}, function(err, indexName) {
         test.equal("a_1", indexName);
         // Let's fetch the index information
         client.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -418,7 +418,7 @@ exports.shouldCorrectlyHandleMultipleColumnIndexes = function(test) {
   client.createCollection('test_multiple_index_cols', function(err, collection) {
     collection.insert({a:1}, function(err, ids) {
       // Create an index on the collection
-      client.createIndex(collection.collectionName, [['a', -1], ['b', 1], ['c', -1]], {safe:true}, function(err, indexName) {
+      client.createIndex(collection.collectionName, [['a', -1], ['b', 1], ['c', -1]], {w:1}, function(err, indexName) {
         test.equal("a_-1_b_1_c_-1", indexName);
         // Let's fetch the index information
         client.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -445,9 +445,9 @@ exports.shouldCorrectlyHandleMultipleColumnIndexes = function(test) {
 exports.shouldCorrectlyHandleUniqueIndex = function(test) {
   // Create a non-unique index and test inserts
   client.createCollection('test_unique_index', function(err, collection) {
-    client.createIndex(collection.collectionName, 'hello', {safe:true}, function(err, indexName) {
+    client.createIndex(collection.collectionName, 'hello', {w:1}, function(err, indexName) {
       // Insert some docs
-      collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, errors) {
+      collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {w:1}, function(err, errors) {
         // Assert that we have no erros
         client.error(function(err, errors) {
           test.equal(1, errors.length);
@@ -455,9 +455,9 @@ exports.shouldCorrectlyHandleUniqueIndex = function(test) {
 
           // Create a unique index and test that insert fails
           client.createCollection('test_unique_index2', function(err, collection) {
-            client.createIndex(collection.collectionName, 'hello', {unique:true, safe:true}, function(err, indexName) {
+            client.createIndex(collection.collectionName, 'hello', {unique:true, w:1}, function(err, indexName) {
               // Insert some docs
-              collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {safe:true}, function(err, ids) {
+              collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {w:1}, function(err, ids) {
                 test.ok(err != null);
                 test.equal(11000, err.code);
                 test.done();
@@ -476,7 +476,7 @@ exports.shouldCorrectlyHandleUniqueIndex = function(test) {
 exports.shouldCorrectlyCreateSubfieldIndex = function(test) {
   // Create a non-unique index and test inserts
   client.createCollection('test_index_on_subfield', function(err, collection) {
-    collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {safe:true}, function(err, ids) {
+    collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {w:1}, function(err, ids) {
       // Assert that we have no erros
       client.error(function(err, errors) {
         test.equal(1, errors.length);
@@ -484,8 +484,8 @@ exports.shouldCorrectlyCreateSubfieldIndex = function(test) {
 
         // Create a unique subfield index and test that insert fails
         client.createCollection('test_index_on_subfield2', function(err, collection) {
-          client.createIndex(collection.collectionName, 'hello.a', {safe:true, unique:true}, function(err, indexName) {
-            collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {safe:true}, function(err, ids) {
+          client.createIndex(collection.collectionName, 'hello.a', {w:1, unique:true}, function(err, indexName) {
+            collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {w:1}, function(err, ids) {
               // Assert that we have erros
               test.ok(err != null);
               test.done();
@@ -502,9 +502,9 @@ exports.shouldCorrectlyCreateSubfieldIndex = function(test) {
  */
 exports.shouldCorrectlyDropIndexes = function(test) {
   client.createCollection('test_drop_indexes', function(err, collection) {
-    collection.insert({a:1}, {safe:true}, function(err, ids) {
+    collection.insert({a:1}, {w:1}, function(err, ids) {
       // Create an index on the collection
-      client.createIndex(collection.collectionName, 'a', {safe:true}, function(err, indexName) {
+      client.createIndex(collection.collectionName, 'a', {w:1}, function(err, indexName) {
         test.equal("a_1", indexName);
         // Drop all the indexes
         collection.dropAllIndexes(function(err, result) {
@@ -528,7 +528,7 @@ exports.shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback = function(tes
 
     try {
       // insert a doc
-      collection.createIndex({a:1}, {safe:true});
+      collection.createIndex({a:1}, {w:1});
       test.ok(false);
     } catch(err) {}
 
@@ -544,7 +544,7 @@ exports.shouldThrowErrorOnAttemptingSafeEnsureIndexWithNoCallback = function(tes
 
     try {
       // insert a doc
-      collection.ensureIndex({a:1}, {safe:true});
+      collection.ensureIndex({a:1}, {w:1});
       test.ok(false);
     } catch(err) {}
 
@@ -561,7 +561,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = function(test) {
     collection.insert([{'a':0, 'b':{'c':'a'}},
       {'a':1, 'b':{'c':'b'}},
       {'a':1, 'b':{'c':'c'}},
-      {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], {safe:true}, function(err, ids) {
+      {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], {w:1}, function(err, ids) {
         collection.distinct('a', function(err, docs) {
           test.deepEqual([0, 1, 2, 3], docs.sort());
         });
@@ -580,7 +580,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = function(test) {
 exports.shouldCorrectlyExecuteEnsureIndex = function(test) {
   client.createCollection('test_ensure_index', function(err, collection) {
     // Create an index on the collection
-    client.ensureIndex(collection.collectionName, 'a', {safe:true}, function(err, indexName) {
+    client.ensureIndex(collection.collectionName, 'a', {w:1}, function(err, indexName) {
       test.equal("a_1", indexName);
       // Let's fetch the index information
       client.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -589,7 +589,7 @@ exports.shouldCorrectlyExecuteEnsureIndex = function(test) {
         test.ok(collectionInfo['a_1'] != null);
         test.deepEqual([["a", 1]], collectionInfo['a_1']);
 
-        client.ensureIndex(collection.collectionName, 'a', {safe:true}, function(err, indexName) {
+        client.ensureIndex(collection.collectionName, 'a', {w:1}, function(err, indexName) {
           test.equal("a_1", indexName);
           // Let's fetch the index information
           client.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -613,8 +613,8 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = function(test) {
   client.createCollection('create_and_use_sparse_index_test', function(err, r) {
     client.collection('create_and_use_sparse_index_test', function(err, collection) {
 
-      collection.ensureIndex({title:1}, {sparse:true, safe:true}, function(err, indexName) {
-        collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
+      collection.ensureIndex({title:1}, {sparse:true, w:1}, function(err, indexName) {
+        collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
           collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
             test.equal(1, items.length);
             test.equal("Sarah", items[0].name);
@@ -639,10 +639,10 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
   client.admin().serverInfo(function(err, result){
     if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
       client.createCollection('shouldCorrectlyExecuteKeepGoingWithMongodb191OrHigher', function(err, collection) {
-        collection.ensureIndex({title:1}, {unique:true, safe:true}, function(err, indexName) {
-          collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
+        collection.ensureIndex({title:1}, {unique:true, w:1}, function(err, indexName) {
+          collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
             // Force keep going flag, ignoring unique index issue
-            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {safe:true, keepGoing:true}, function(err, result) {
+            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
               collection.count(function(err, count) {
                 test.equal(3, count);
                 test.done();
@@ -665,10 +665,10 @@ exports.shouldCorrectlyHandleGeospatialIndexes = function(test) {
     if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
       client.createCollection('geospatial_index_test', function(err, r) {
         client.collection('geospatial_index_test', function(err, collection) {
-          collection.ensureIndex({loc:'2d'}, {safe:true}, function(err, indexName) {
-            collection.insert({'loc': [-100,100]}, {safe:true}, function(err, result) {
+          collection.ensureIndex({loc:'2d'}, {w:1}, function(err, indexName) {
+            collection.insert({'loc': [-100,100]}, {w:1}, function(err, result) {
               test.equal(err,null);
-              collection.insert({'loc': [200,200]}, {safe:true}, function(err, result) {
+              collection.insert({'loc': [200,200]}, {w:1}, function(err, result) {
                 err = err ? err : {};
                 test.ok(err.err.indexOf("point not in interval of") != -1);
                 test.ok(err.err.indexOf("-180") != -1);
@@ -693,12 +693,12 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = function(test) {
     if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
       client.createCollection('geospatial_index_altered_test', function(err, r) {
         client.collection('geospatial_index_altered_test', function(err, collection) {
-          collection.ensureIndex({loc:'2d'},{min:0,max:1024, safe:true}, function(err, indexName) {
-            collection.insert({'loc': [100,100]}, {safe:true}, function(err, result) {
+          collection.ensureIndex({loc:'2d'},{min:0,max:1024, w:1}, function(err, indexName) {
+            collection.insert({'loc': [100,100]}, {w:1}, function(err, result) {
               test.equal(err,null);
-              collection.insert({'loc': [200,200]}, {safe:true}, function(err, result) {
+              collection.insert({'loc': [200,200]}, {w:1}, function(err, result) {
                 test.equal(err,null);
-                collection.insert({'loc': [-200,-200]}, {safe:true}, function(err, result) {
+                collection.insert({'loc': [-200,-200]}, {w:1}, function(err, result) {
                   err = err ? err : {};
                   test.ok(err.err.indexOf("point not in interval of") != -1);
                   test.ok(err.err.indexOf("0") != -1);
@@ -721,10 +721,10 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = function(test) {
  */
 exports.shouldThrowDuplicateKeyErrorWhenCreatingIndex = function(test) {
   client.createCollection('shouldThrowDuplicateKeyErrorWhenCreatingIndex', function(err, collection) {
-    collection.insert([{a:1}, {a:1}], {safe:true}, function(err, result) {
+    collection.insert([{a:1}, {a:1}], {w:1}, function(err, result) {
       test.equal(null, err);
 
-      collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, indexName) {
+      collection.ensureIndex({a:1}, {unique:true, w:1}, function(err, indexName) {
         test.ok(err != null);
         test.done();
       });
@@ -737,14 +737,14 @@ exports.shouldThrowDuplicateKeyErrorWhenCreatingIndex = function(test) {
  */
 exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser, strict:true});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser, strict:true});
   // Establish connection to db
   db.open(function(err, db) {
     db.createCollection('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', function(err, collection) {
-      collection.insert([{a:1}, {a:1}], {safe:true}, function(err, result) {
+      collection.insert([{a:1}, {a:1}], {w:1}, function(err, result) {
         test.equal(null, err);
 
-        collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, indexName) {
+        collection.ensureIndex({a:1}, {unique:true, w:1}, function(err, indexName) {
           test.ok(err != null);
           db.close();
           test.done();
@@ -762,10 +762,10 @@ exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = function(test) {
   client.createCollection('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', function(err, collection) {
     test.equal(null, err);
 
-    collection.ensureIndex({loc:'2d'}, {min:200, max:1400, safe:true}, function(err, indexName) {
+    collection.ensureIndex({loc:'2d'}, {min:200, max:1400, w:1}, function(err, indexName) {
       test.equal(null, err);
 
-      collection.insert({loc:[600, 600]}, {safe:true}, function(err, result) {
+      collection.insert({loc:[600, 600]}, {w:1}, function(err, result) {
         test.equal(null, err);
         test.done();
       });

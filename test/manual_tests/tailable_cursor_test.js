@@ -19,7 +19,7 @@ _db.open(function(err, db) {
 
   // db.dropCollection("tailableCollection", function(err, result) {
     // Set up tailable cursor
-    db.createCollection("tailableCollection", {safe:true, capped:true, size: 100000}, function(err, collection) {
+    db.createCollection("tailableCollection", {w:1, capped:true, size: 100000}, function(err, collection) {
 
       console.log("======================== ++++++++++++++++++++++++++++++++++++++++");
       // db.collection("tailableCollection").find({}, {tailable:true, tailableRetryInterval:1000}).each(function(err, item) {

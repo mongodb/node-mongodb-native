@@ -57,7 +57,7 @@ exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = function(test)
 
   // Connect to the replicaset
   var slaveDb = null;
-  var db = new Db('foo', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('foo', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, p_db) {
     Step(
       function addUser() {
@@ -133,7 +133,7 @@ exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = function(test)
         test.ok(err != null);
 
         slaveDb = new Db('foo', new Server(db.serverConfig.secondaries[0].host
-                  , db.serverConfig.secondaries[0].port, {auto_reconnect: true, poolSize: 1}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null), slave_ok:true});
+                  , db.serverConfig.secondaries[0].port, {auto_reconnect: true, poolSize: 1}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null), slave_ok:true});
         slaveDb.open(function(err, slaveDb) {
           slaveDb.collection('stuff', function(err, collection) {
             collection.findOne(self)
@@ -178,7 +178,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
 
   // Connect to the replicaset
   var slaveDb = null;
-  var db = new Db('foo', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('foo', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, p_db) {
     Step(
       function addUser() {
@@ -238,7 +238,7 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = function(test) {
     {rs_name:RS.name}
   );
 
-  var db = new Db(MONGODB, replSet, {safe:false, native_parser: false});
+  var db = new Db(MONGODB, replSet, {w:0, native_parser: false});
   db.open(function(err, db_p) {
     if (err){
       console.log('ERR:'+err);
@@ -300,7 +300,7 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = function(test) {
     {rs_name:RS.name}
   );
 
-  var db = new Db(MONGODB, replSet, {safe:false, native_parser: false});
+  var db = new Db(MONGODB, replSet, {w:0, native_parser: false});
   db.open(function(err, db_p) {
     test.equal(null, err);
 
@@ -310,7 +310,7 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = function(test) {
       db_p.authenticate('test', 'test', function(err, replies) {
         test.equal(null, err);
 
-        db_p.collection('userconfirm2').insert({a:1}, {safe:true}, function(err, result) {
+        db_p.collection('userconfirm2').insert({a:1}, {w:1}, function(err, result) {
           test.equal(null, err);
 
           db_p.collection('userconfirm2').findOne(function(err, item) {            

@@ -22,7 +22,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -82,7 +82,7 @@ exports.shouldCorrectlyReAuthorizeReconnectedConnections = function(test) {
   var user_name = 'spongebob2';
   var password = 'password';
 
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:3, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:3, ssl:useSSL}), {w: 0, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, automatic_connect_client) {
     p_client.authenticate('admin', 'admin', function(err, replies) {
       test.ok(err instanceof Error);
@@ -96,9 +96,9 @@ exports.shouldCorrectlyReAuthorizeReconnectedConnections = function(test) {
           p_client.serverConfig.close();
 
           p_client.createCollection('shouldCorrectlyReAuthorizeReconnectedConnections', function(err, collection) {
-            collection.insert({a:1}, {safe:true}, function(err, r) {
-              collection.insert({a:2}, {safe:true}, function(err, r) {
-                collection.insert({a:3}, {safe:true}, function(err, r) {
+            collection.insert({a:1}, {w: 1}, function(err, r) {
+              collection.insert({a:2}, {w: 1}, function(err, r) {
+                collection.insert({a:3}, {w: 1}, function(err, r) {
                   collection.count(function(err, count) {
                     test.equal(3, count);
                     p_client.close();
@@ -118,7 +118,7 @@ exports.shouldCorrectlyAddAndRemoveUser = function(test) {
   var user_name = 'spongebob2';
   var password = 'password';
 
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w: 0, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, automatic_connect_client) {
     p_client.authenticate('admin', 'admin', function(err, replies) {
       test.ok(err instanceof Error);

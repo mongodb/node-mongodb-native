@@ -25,7 +25,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -61,7 +61,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldCorrectlyPerformSimpleGeoNearCommand = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {safe:false, auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {w:0, auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -73,7 +73,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = function(test) {
       collection.ensureIndex({loc:"2d"}, function(err, result) {
 
         // Save a new location tagged document
-        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {safe:true}, function(err, result) {
+        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
          
           // Use geoNear command to find document
           collection.geoNear(50, 50, {query:{a:1}, num:1}, function(err, docs) {
@@ -97,7 +97,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = function(test) {
  */
 exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -109,7 +109,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = function(test) {
       collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}, function(err, result) {
 
         // Save a new location tagged document
-        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {safe:true}, function(err, result) {
+        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
          
           // Use geoNear command to find document
           collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {

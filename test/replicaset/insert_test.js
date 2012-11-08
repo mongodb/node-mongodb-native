@@ -72,7 +72,7 @@ exports.shouldCorrectlyWaitForReplicationToServersOnInserts = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
   db.open(function(err, p_db) {
     // Drop collection on replicaset
     p_db.dropCollection('shouldCorrectlyWaitForReplicationToServersOnInserts', function(err, r) {
@@ -101,7 +101,7 @@ exports.shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts = function(t
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
   db.open(function(err, p_db) {
     // Check if we got an error
     if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
@@ -135,7 +135,7 @@ exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
   db.open(function(err, p_db) {
     // Check if we got an error
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
@@ -174,7 +174,7 @@ exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
 
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
   // Open db
   db.open(function(err, p_db) {
     // Drop collection on replicaset
@@ -228,7 +228,7 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -239,17 +239,21 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
 
   // Open db
   db.open(function(err, p_db) {
+    console.log("---------------------------------------------------- 0")
     // Check if we got an error
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
     // Drop collection on replicaset
     p_db.dropCollection('shouldCorrectlyQueryAfterPrimaryComesBackUp', function(err, r) {
+    console.log("---------------------------------------------------- 1")
       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
       // Recreate collection on replicaset
       p_db.createCollection('shouldCorrectlyQueryAfterPrimaryComesBackUp', function(err, collection) {
+    console.log("---------------------------------------------------- 2")
         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Insert a dummy document
         collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {
+    console.log("---------------------------------------------------- 3")
           // Kill the primary
           RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
             // Ok let's execute same query a couple of times
@@ -285,7 +289,7 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {safe:false, numberOfRetries:20, retryMiliSeconds:5000});
+  var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
   db.open(function(err, p_db) {
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
     // Drop collection on replicaset
@@ -311,7 +315,7 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
 
               test.ok(err == null);
 
-              // p_db.collection('shouldWorkCorrectlyWithInserts', {safe:true}, function(err, collection) {
+              // p_db.collection('shouldWorkCorrectlyWithInserts', {w:1}, function(err, collection) {
               p_db.collection('shouldWorkCorrectlyWithInserts', function(err, collection) {
                 if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
                 // Execute a set of inserts
@@ -352,7 +356,7 @@ exports.shouldWorkCorrectlyWithInserts = function(test) {
                             });
 
                             // Run second check
-                            collection.save({a:80}, {safe:true}, function(err, r) {
+                            collection.save({a:80}, {w:1}, function(err, r) {
                               if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
                               collection.find().toArray(function(err, items) {

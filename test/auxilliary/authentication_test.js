@@ -14,7 +14,7 @@ var testCase = require('nodeunit').testCase,
   Step = require("step");
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
 var serverManager = null;
 
 /**
@@ -41,9 +41,9 @@ exports.tearDown = function(callback) {
 
 exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(test) {
   if(process.env['JENKINS']) return test.done();
-  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
-  var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
-  var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
 
   serverManager = new ServerManager({auth:false, purgedirectories:true})
   serverManager.start(true, function(err, result) {
@@ -154,9 +154,9 @@ exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(test) {
 
 exports.shouldCorrectlyAuthenticate = function(test) {
   if(process.env['JENKINS']) return test.done();
-  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
-  var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
-  var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
 
   Step(
     function bootTheServerWithNoAuth() {
@@ -224,11 +224,11 @@ exports.shouldCorrectlyAuthenticate = function(test) {
       var self = this;
 
       db1.collection('stuff', function(err, collection) {
-        collection.insert({a:2}, {safe:true}, self.parallel());
+        collection.insert({a:2}, {w:1}, self.parallel());
       });
 
       db2.collection('stuff', function(err, collection) {
-        collection.insert({a:2}, {safe:true}, self.parallel());
+        collection.insert({a:2}, {w:1}, self.parallel());
       });
     },
 
@@ -271,11 +271,11 @@ exports.shouldCorrectlyAuthenticate = function(test) {
           test.equal(1, items.length);
 
           db1.collection('stuff', function(err, collection) {
-            collection.insert({a:2}, {safe:true}, self.parallel());
+            collection.insert({a:2}, {w:1}, self.parallel());
           });
 
           db2.collection('stuff', function(err, collection) {
-            collection.insert({a:2}, {safe:true}, self.parallel());
+            collection.insert({a:2}, {w:1}, self.parallel());
           });
         })
       });
@@ -292,7 +292,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
     function insertShouldFail(err, result) {
       var self = this;
       db1.collection('stuff', function(err, collection) {
-        collection.insert({a:2}, {safe:true}, self.parallel());
+        collection.insert({a:2}, {w:1}, self.parallel());
       });
     },
 
@@ -304,7 +304,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
     function insertShouldFail(err, result) {
       var self = this;
       db2.collection('stuff', function(err, collection) {
-        collection.insert({a:2}, {safe:true}, function(err, result) {
+        collection.insert({a:2}, {w:1}, function(err, result) {
           test.ok(err != null);
           test.done();
           // Close all connections

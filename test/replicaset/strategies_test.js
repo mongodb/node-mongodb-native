@@ -29,7 +29,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -62,7 +62,7 @@ var waitForReplicaset = function(callback) {
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ], {});
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.on("fullsetup", function() {
     db.close();
     callback();
@@ -127,7 +127,7 @@ exports['Should Correctly Collect ping information from servers'] = function(tes
   // Set read preference
   replSet.setReadPreference({'dc3':'pa', 'dc2':'sf', 'dc1':'ny'});
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false, recordQueryStats:true});
+  var db = new Db('integration_test_', replSet, {w:0, recordQueryStats:true});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     setTimeout(function() {
@@ -163,7 +163,7 @@ exports['Should correctly pick a ping strategy for secondary'] = function(test) 
   // Set read preference
   replSet.setReadPreference(Server.READ_SECONDARY);
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false, recordQueryStats:true});
+  var db = new Db('integration_test_', replSet, {w:0, recordQueryStats:true});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     db.createCollection('testsets3', function(err, collection) {
@@ -204,7 +204,7 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
   // Set read preference
   replSet.setReadPreference(Server.READ_SECONDARY);
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     db.createCollection('testsets2', function(err, collection) {
@@ -260,7 +260,7 @@ exports['Should correctly create and start a ping strategy'] = function(test) {
   replSet.setReadPreference(Server.READ_SECONDARY);
 
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
 
   // Trigger test once whole set is up
   db.on("fullsetup", function() {

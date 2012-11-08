@@ -30,7 +30,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -68,7 +68,7 @@ exports.shouldCorrectlyPerformSimpleFind = function(test) {
       var doc2 = null;
 
       // Insert some test documents
-      collection.insert([{a:2}, {b:3}], {safe:true}, function(err, docs) {
+      collection.insert([{a:2}, {b:3}], {w:1}, function(err, docs) {
         doc1 = docs[0];
         doc2 = docs[1]
 
@@ -104,7 +104,7 @@ exports.shouldCorrectlyPeformSimpleChainedFind = function(test) {
       var doc2 = null;
 
       // Insert some test documents
-      collection.insert([{a:2}, {b:3}], {safe:true}, function(err, docs) {
+      collection.insert([{a:2}, {b:3}], {w:1}, function(err, docs) {
         doc1 = docs[0];
         doc2 = docs[1]
 
@@ -139,7 +139,7 @@ exports.shouldCorrectlyPeformAdvancedFinds = function(test) {
       var doc1 = null, doc2 = null, doc3 = null;
 
       // Insert some test documents
-      collection.insert([{a:1}, {a:2}, {b:3}], {safe:true}, function(err, docs) {
+      collection.insert([{a:1}, {a:2}, {b:3}], {w:1}, function(err, docs) {
         var doc1 = docs[0], doc2 = docs[1], doc3 = docs[2];
 
         // Locate by less than
@@ -227,7 +227,7 @@ exports.shouldCorrectlyPerformFindWithSort = function(test) {
           {a:2, b:1},
           {a:3, b:2},
           {a:4, b:1}
-        ], {safe:true}, function(err, docs) {
+        ], {w:1}, function(err, docs) {
           doc1 = docs[0];
           doc2 = docs[1];
           doc3 = docs[2];
@@ -327,7 +327,7 @@ exports.shouldCorrectlyPerformFindWithLimit = function(test) {
           {b:2},
           {c:3},
           {d:4}
-        ], {safe:true}, function(err, docs) {
+        ], {w:1}, function(err, docs) {
           doc1 = docs[0];
           doc2 = docs[1];
           doc3 = docs[2];
@@ -373,7 +373,7 @@ exports.shouldCorrectlyFindWithNonQuotedValues = function(test) {
     client.collection('test_find_non_quoted_values', function(err, collection) {
       // insert test document
       collection.insert([{ a: 19, b: 'teststring', c: 59920303 },
-                         { a: "19", b: 'teststring', c: 3984929 }], {safe:true} , function(err, r) {
+                         { a: "19", b: 'teststring', c: 3984929 }], {w:1} , function(err, r) {
 
          collection.find({ a: 19 }).toArray(function(err, documents) {
            test.equal(1, documents.length);
@@ -393,7 +393,7 @@ exports.shouldCorrectlyFindEmbeddedDocument = function(test) {
     client.collection('test_find_embedded_document', function(err, collection) {
       // insert test document
       collection.insert([{ a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' }},
-                         { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}], {safe:true}, function(err, r) {
+                         { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}], {w:1}, function(err, r) {
 
          // test using integer value
          collection.find({ 'a.id': 10 }).toArray(function(err, documents) {
@@ -436,7 +436,7 @@ exports.shouldCorrectlyFindNoRecords = function(test) {
 exports.shouldCorrectlyPerformFindByWhere = function(test) {
   client.createCollection('test_where', function(err, collection) {
     test.ok(collection instanceof Collection);
-    collection.insert([{'a':1}, {'a':2}, {'a':3}], {safe:true}, function(err, ids) {
+    collection.insert([{'a':1}, {'a':2}, {'a':3}], {w:1}, function(err, ids) {
       collection.count(function(err, count) {
         test.equal(3, count);
 
@@ -461,8 +461,8 @@ exports.shouldCorrectlyPerformFindByWhere = function(test) {
  */
 exports.shouldCorrectlyPerformFindsWithHintTurnedOn = function(test) {
   client.createCollection('test_hint', function(err, collection) {
-    collection.insert({'a':1}, {safe:true}, function(err, ids) {
-      client.createIndex(collection.collectionName, "a", {safe:true}, function(err, indexName) {
+    collection.insert({'a':1}, {w:1}, function(err, ids) {
+      client.createIndex(collection.collectionName, "a", {w:1}, function(err, indexName) {
         collection.find({'a':1}, {'hint':'a'}).toArray(function(err, items) {
           test.equal(1, items.length);
         });
@@ -511,7 +511,7 @@ exports.shouldCorrectlyPerformFindsWithHintTurnedOn = function(test) {
  */
 exports.shouldCorrectlyPerformFindByObjectID = function(test) {
   client.createCollection('test_find_by_oid', function(err, collection) {
-    collection.save({'hello':'mike'}, {safe:true}, function(err, docs) {
+    collection.save({'hello':'mike'}, {w:1}, function(err, docs) {
       test.ok(docs._id instanceof ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
 
       collection.findOne({'_id':docs._id}, function(err, doc) {
@@ -542,8 +542,8 @@ exports.shouldCorrectlyReturnDocumentWithOriginalStructure= function(test) {
       , _id: new ObjectID
     };
 
-    collection.insert(doc, {safe:true}, function(err, docs) {
-      collection.findOne({'_id':doc._id}, {safe:true,fields: undefined}, function(err, doc) {
+    collection.insert(doc, {w:1}, function(err, docs) {
+      collection.findOne({'_id':doc._id}, {w:1,fields: undefined}, function(err, doc) {
         if (err) console.error('error', err);
         test.equal(2, doc.comments.length);
         test.equal('number 1', doc.comments[0].title);
@@ -559,10 +559,10 @@ exports.shouldCorrectlyReturnDocumentWithOriginalStructure= function(test) {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleRecord = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {
-      collection.insert({'a':0}, {safe:true}, function(err, r) {
+      collection.insert({'a':0}, {w:1}, function(err, r) {
         p_client.collection('test_should_correctly_retrieve_one_record', function(err, usercollection) {
           usercollection.findOne({'a': 0}, function(err, result) {
             p_client.close();
@@ -601,7 +601,7 @@ exports.shouldCorrectlyPerformFindWithOptions = function(test) {
 
       // Insert some test documents
       while(docCount--) docs.push({a:docCount, b:docCount});
-      collection.insert(docs, {safe:true}, function(err,retDocs) {
+      collection.insert(docs, {w:1}, function(err,retDocs) {
         docs = retDocs;
 
         collection.find({},{ 'a' : 1},{ limit : 3, sort : [['a',-1]] }).toArray(function(err,documents){
@@ -633,21 +633,21 @@ exports.shouldCorrectlyPerformFindWithOptions = function(test) {
 exports.shouldCorrectlyFindAndModifyDocument = function(test) {
   client.createCollection('test_find_and_modify_a_document', function(err, collection) {
     // Test return new document on change
-    collection.insert({'a':1, 'b':2}, {safe:true}, function(err, doc) {
+    collection.insert({'a':1, 'b':2}, {w:1}, function(err, doc) {
       // Let's modify the document in place
       collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true}, function(err, updated_doc) {
         test.equal(1, updated_doc.a);
         test.equal(3, updated_doc.b);
 
         // Test return old document on change
-        collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
+        collection.insert({'a':2, 'b':2}, {w:1}, function(err, doc) {
           // Let's modify the document in place
-          collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {safe:true}, function(err, result, object) {
+          collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {w:1}, function(err, result, object) {
             test.equal(2, result.a);
             test.equal(2, result.b);
 
             // Test remove object on change
-            collection.insert({'a':3, 'b':2}, {safe:true}, function(err, doc) {
+            collection.insert({'a':3, 'b':2}, {w:1}, function(err, doc) {
               // Let's modify the document in place
               collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {'new': true, remove: true}, function(err, updated_doc) {
                 test.equal(3, updated_doc.a);
@@ -659,7 +659,7 @@ exports.shouldCorrectlyFindAndModifyDocument = function(test) {
                   test.equal(3, updated_doc.b);
 
                   // Test selecting a subset of fields
-                  collection.insert({a: 100, b: 101}, {safe:true}, function (err, ids) {
+                  collection.insert({a: 100, b: 101}, {w:1}, function (err, ids) {
                     collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
                       test.equal(2, Object.keys(updated_doc).length);
                       test.equal(ids[0]['_id'].toHexString(), updated_doc._id.toHexString());
@@ -685,7 +685,7 @@ exports.shouldCorrectlyFindAndModifyDocument = function(test) {
 exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = function(test) {
   client.createCollection('test_find_and_modify_a_document', function(err, collection) {
     // Test return new document on change
-    collection.insert({'a':1, 'b':2}, {safe:true}, function(err, doc) {
+    collection.insert({'a':1, 'b':2}, {w:1}, function(err, doc) {
       // Let's modify the document in place
       collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true, 'fields': {a:1}}, function(err, updated_doc) {
         test.equal(2, Object.keys(updated_doc).length);
@@ -702,7 +702,7 @@ exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = functi
 exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = function(test) {
   client.createCollection('shouldCorrectlyExecuteFindOneWithAnInSearchTag', function(err, collection) {
     // Test return new document on change
-    collection.insert({'tags':[]}, {safe:true}, function(err, docs) {
+    collection.insert({'tags':[]}, {w:1}, function(err, docs) {
       // Fetch the id
       var id = docs[0]._id
 
@@ -715,7 +715,7 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = function(test) {
             test.ok(doc != null);
 
             // Perform atomic push operation
-            collection.update({_id:id}, {'$push':{comments:{title:'1'}}}, {safe:true}, self);
+            collection.update({_id:id}, {'$push':{comments:{title:'1'}}}, {w:1}, self);
           })
         },
 
@@ -730,7 +730,7 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = function(test) {
             test.deepEqual(1, doc.comments.length);
 
             // Perform atomic push operation
-            collection.update({_id:id}, {'$push':{comments:{title:'2'}}}, {safe:true}, self);
+            collection.update({_id:id}, {'$push':{comments:{title:'2'}}}, {w:1}, self);
           })
         },
 
@@ -745,7 +745,7 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = function(test) {
             test.deepEqual(2, doc.comments.length);
 
             // Perform atomic push operation
-            collection.update({_id:id}, {'$push':{comments:{title:'3'}}}, {safe:true}, self);
+            collection.update({_id:id}, {'$push':{comments:{title:'3'}}}, {w:1}, self);
           })
         },
 
@@ -759,7 +759,7 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = function(test) {
             test.ok(doc != null);
             test.deepEqual(3, doc.comments.length);
             // Perform atomic push operation
-            collection.update({_id:id}, {'$pushAll':{comments:[{title:'4'}, {title:'5'}]}}, {safe:true}, self);
+            collection.update({_id:id}, {'$pushAll':{comments:[{title:'4'}, {title:'5'}]}}, {w:1}, self);
           })
         },
 
@@ -788,11 +788,11 @@ exports['ShouldCorrectlyLocatePostAndIncValues'] = function(test) {
     // Test return new document on change
     collection.insert({title:'Tobi',
         author:'Brian',
-        newTitle:'Woot', meta:{visitors:0}}, {safe:true}, function(err, docs) {
+        newTitle:'Woot', meta:{visitors:0}}, {w:1}, function(err, docs) {
       // Fetch the id
       var id = docs[0]._id
 
-      collection.update({_id:id}, {$inc:{ 'meta.visitors': 1 }}, {safe:true}, function(err, result) {
+      collection.update({_id:id}, {$inc:{ 'meta.visitors': 1 }}, {w:1}, function(err, result) {
         test.equal(1, result);
         test.equal(null, err);
 
@@ -811,9 +811,9 @@ exports['ShouldCorrectlyLocatePostAndIncValues'] = function(test) {
  */
 exports['Should Correctly Handle FindAndModify Duplicate Key Error'] = function(test) {
   client.createCollection('FindAndModifyDuplicateKeyError', function(err, collection) {
-    collection.ensureIndex(['name', 1], {unique:true, safe:true}, function(err, index) {
+    collection.ensureIndex(['name', 1], {unique:true, w:1}, function(err, index) {
       // Test return new document on change
-      collection.insert([{name:'test1'}, {name:'test2'}], {safe:true}, function(err, doc) {
+      collection.insert([{name:'test1'}, {name:'test2'}], {w:1}, function(err, doc) {
         // Let's modify the document in place
         collection.findAndModify({name: 'test1'}, [], {$set: {name: 'test2'}}, {}, function(err, updated_doc) {
           test.equal(null, updated_doc);
@@ -844,7 +844,7 @@ exports['Should correctly return null when attempting to modify a non-existing d
  */
 exports['Should correctly handle chained skip and limit on find with toArray'] = function(test) {
   client.createCollection('skipAndLimitOnFindWithToArray', function(err, collection) {
-    collection.insert([{a:1}, {b:2}, {c:3}], {safe:true}, function(err, result) {
+    collection.insert([{a:1}, {b:2}, {c:3}], {w:1}, function(err, result) {
 
       collection.find().skip(1).limit(-1).toArray(function(err, items) {
         test.equal(null, err);
@@ -861,7 +861,7 @@ exports['Should correctly handle chained skip and limit on find with toArray'] =
  */
 exports['Should correctly handle chained skip and negative limit on find with toArray'] = function(test) {
   client.createCollection('skipAndNegativeLimitOnFindWithToArray', function(err, collection) {
-    collection.insert([{a:1}, {b:2}, {c:3}, {d:4}, {e:5}], {safe:true}, function(err, result) {
+    collection.insert([{a:1}, {b:2}, {c:3}, {d:4}, {e:5}], {w:1}, function(err, result) {
 
       collection.find().skip(1).limit(-3).toArray(function(err, items) {
         test.equal(null, err);
@@ -899,11 +899,11 @@ exports['Should correctly pass timeout options to cursor'] = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.createCollection('shouldCorrectlyFindAndModifyDocumentWithDBStrict', function(err, collection) {
       // Test return old document on change
-      collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
+      collection.insert({'a':2, 'b':2}, {w:1}, function(err, doc) {
         // Let's modify the document in place
         collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {new:true}, function(err, result) {
           test.equal(2, result.a)
@@ -923,12 +923,12 @@ exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = function(test) {
 exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = function(test) {
   client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function(err, collection) {
     // Set up an index to force duplicate index erro
-    collection.ensureIndex([['failIndex', 1]], {unique:true, safe:true}, function(err, index) {
+    collection.ensureIndex([['failIndex', 1]], {unique:true, w:1}, function(err, index) {
       // Setup a new document
-      collection.insert({'a':2, 'b':2, 'failIndex':2}, {safe:true}, function(err, doc) {
+      collection.insert({'a':2, 'b':2, 'failIndex':2}, {w:1}, function(err, doc) {
 
         // Let's attempt to upsert with a duplicate key error
-        collection.findAndModify({'c':2}, [['a', 1]], {'a':10, 'b':10, 'failIndex':2}, {safe:true, upsert:true}, function(err, result) {
+        collection.findAndModify({'c':2}, [['a', 1]], {'a':10, 'b':10, 'failIndex':2}, {w:1, upsert:true}, function(err, result) {
           test.equal(null, result);
           test.ok(err.errmsg.match("duplicate key error index"));
           test.done();
@@ -943,7 +943,7 @@ exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = function(test
  * @ignore
  */
 exports.shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInSecondStepWithNoMatchingDocuments', function(err, collection) {
       // Test return old document on change
@@ -969,7 +969,7 @@ exports['Should correctly return new modified document'] = function(test) {
     var id = new ObjectID();
     var doc = {_id:id, a:1, b:1, c:{a:1, b:1}};
 
-    collection.insert(doc, {safe:true}, function(err, result) {
+    collection.insert(doc, {w:1}, function(err, result) {
       test.ok(err == null);
 
       // Find and modify returning the new object
@@ -1019,7 +1019,7 @@ exports['Should correctly return record with 64-bit id'] = function(test) {
     var lowerDoc = {_id:_lowerId, id: lowerId};
     var higherDoc = {_id:_higherId, id: higherId};
 
-    collection.insert([lowerDoc, higherDoc], {safe:true}, function(err, result) {
+    collection.insert([lowerDoc, higherDoc], {w:1}, function(err, result) {
       test.ok(err == null);
 
       // Select record with id of 133118461172916225 using $gt directive
@@ -1037,12 +1037,12 @@ exports['Should correctly return record with 64-bit id'] = function(test) {
  * @ignore
  */
 exports['Should Correctly find a Document using findOne excluding _id field'] = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     client.createCollection('Should_Correctly_find_a_Document_using_findOne_excluding__id_field', function(err, collection) {
       var doc = {_id : new ObjectID(), a:1, c:2}
       // insert doc
-      collection.insert(doc, {safe:true}, function(err, result) {
+      collection.insert(doc, {w:1}, function(err, result) {
         // Get one document, excluding the _id field
         collection.findOne({a:1}, {fields:{'_id': 0}}, function(err, item) {
           test.equal(null, item._id);
@@ -1070,7 +1070,7 @@ exports['Should correctly execute find and findOne queries in the same way'] = f
   client.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {
     var doc = {_id : new ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
     // insert doc
-    collection.insert(doc, {safe:true}, function(err, result) {
+    collection.insert(doc, {w:1}, function(err, result) {
 
       collection.find({_id: doc._id}, {comments: {$slice: -5}}).toArray(function(err, docs) {
         test.equal(5, docs[0].comments.length)
@@ -1091,7 +1091,7 @@ exports['Should correctly execute find and findOne queries with selector set to 
   client.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {
     var doc = {_id : new ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
     // insert doc
-    collection.insert(doc, {safe:true}, function(err, result) {
+    collection.insert(doc, {w:1}, function(err, result) {
 
       collection.find(null, {comments: {$slice: -5}}).toArray(function(err, docs) {
         test.equal(5, docs[0].comments.length)
@@ -1141,7 +1141,7 @@ exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = function(
   }
 
   client.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
-    collection.insert(wrapingObject, {safe:true}, function(err, doc) {
+    collection.insert(wrapingObject, {w:1}, function(err, doc) {
       test.equal(null, err);
 
       collection.findOne({_id:doc[0]._id, 'funds.remaining': {$gte: 3.0}, 'transactions.id': {$ne: transaction.transactionId}}, function(err, item) {
@@ -1159,13 +1159,13 @@ exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = function(
  * @ignore
  */
 exports.shouldCorrectlyExecuteMultipleFindsInParallel = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.createCollection('tasks', function(err, collection) {
       var numberOfOperations = 0;
 
       // Test return old document on change
-      collection.insert({'a':2, 'b':2}, {safe:true}, function(err, doc) {
+      collection.insert({'a':2, 'b':2}, {w:1}, function(err, doc) {
         collection.find({"user_id":"4e9fc8d55883d90100000003","lc_status":{"$ne":"deleted"},"owner_rating":{"$exists":false}},
           {"skip":0,"limit":10,"sort":{"updated":-1}}).count(function(err, count) {
           numberOfOperations = numberOfOperations + 1;
@@ -1200,7 +1200,7 @@ exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = functi
     var doc = {_id: new ObjectID(), x:1};
 
     // Insert original doc
-    collection.insert(doc, {safe:true}, function(err, result) {
+    collection.insert(doc, {w:1}, function(err, result) {
       collection.findAndModify(q, [], set, opts, function (err, res) {
         test.ok(err != null);
         test.done();
@@ -1213,7 +1213,7 @@ exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = functi
  * @ignore
  */
 exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:10, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   var running = true;
 
   p_client.open(function(err, p_client) {
@@ -1223,10 +1223,10 @@ exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = function(test) 
       setTimeout(function() {
         var id = new ObjectID();
 
-        collection.insert({_id:id, a:1}, {safe:true}, function(err, result) {
+        collection.insert({_id:id, a:1}, {w:1}, function(err, result) {
           test.equal(null, err);
 
-          collection.insert({_id:id, a:1}, {safe:true}, function(err, result) {
+          collection.insert({_id:id, a:1}, {w:1}, function(err, result) {
             running = false;
             test.done();
             p_client.close();
@@ -1251,7 +1251,7 @@ exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = function(test) 
  * @ignore
  */
 exports.shouldCorrectlyIterateOverCollection = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:1, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   var numberOfSteps = 0;
 
   // Open db connection
@@ -1282,14 +1282,14 @@ exports.shouldCorrectlyIterateOverCollection = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = function(test) {
-  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var p_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
   p_client.open(function(err, p_client) {
     p_client.createCollection('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', function(err, collection) {
       // Test return old document on change
-      collection.insert([{'login':'user1'}, {'login':'user2'}], {safe:true}, function(err, docs) {
+      collection.insert([{'login':'user1'}, {'login':'user2'}], {w:1}, function(err, docs) {
         var id = docs[1]._id;
         // Set an index
-        collection.ensureIndex('login', {unique:true, safe:true}, function(err, result) {
+        collection.ensureIndex('login', {unique:true, w:1}, function(err, result) {
           // Attemp to modify document
           collection.findAndModify({_id: id}, [], { $set: {login: 'user1'} }, {}, function(err, user){
             test.ok(err != null);
@@ -1309,7 +1309,7 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = function(test) {
  */
 exports.shouldPerformSimpleFindInArray = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1322,7 +1322,7 @@ exports.shouldPerformSimpleFindInArray = function(test) {
       for(var i = 0; i < 100; i++) docs.push({a:i});
 
       // Insert some test documentations
-      collection.insert(docs, {safe:true}, function(err, result) {
+      collection.insert(docs, {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Find all the variables in a specific array
@@ -1354,7 +1354,7 @@ exports.shouldPerformSimpleFindInArray = function(test) {
  */
 exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1364,7 +1364,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
       test.equal(null, err);
 
       // Insert some test documentations
-      collection.insert([{a:1}, {b:1}, {c:1}], {safe:true}, function(err, result) {
+      collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Simple findAndModify command returning the new document
@@ -1386,7 +1386,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
               // Simple findAndModify command performing an upsert and returning the new document
               // executing the command safely
               collection.findAndModify({d:1}, [['b', 1]],
-                {d:1, f:1}, {new:true, upsert:true, safe:true}, function(err, doc) {
+                {d:1, f:1}, {new:true, upsert:true, w:1}, function(err, doc) {
                   test.equal(null, err);
                   test.equal(1, doc.d);
                   test.equal(1, doc.f);
@@ -1410,7 +1410,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
  */
 exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1420,7 +1420,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
       test.equal(null, err);
 
       // Insert some test documentations
-      collection.insert([{a:1}, {b:1}, {c:1}], {safe:true}, function(err, result) {
+      collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Simple findAndModify command returning the new document and
@@ -1451,7 +1451,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(test) {
  */
 exports.shouldPeformASimpleQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1461,7 +1461,7 @@ exports.shouldPeformASimpleQuery = function(test) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, result) {
+      collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1485,7 +1485,7 @@ exports.shouldPeformASimpleQuery = function(test) {
  */
 exports.shouldPeformASimpleExplainQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1495,7 +1495,7 @@ exports.shouldPeformASimpleExplainQuery = function(test) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, result) {
+      collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1519,7 +1519,7 @@ exports.shouldPeformASimpleExplainQuery = function(test) {
  */
 exports.shouldPeformASimpleLimitSkipQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1529,7 +1529,7 @@ exports.shouldPeformASimpleLimitSkipQuery = function(test) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1555,7 +1555,7 @@ exports.shouldPeformASimpleLimitSkipQuery = function(test) {
  */
 exports.shouldPeformASimpleLimitSkipFindOneQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1565,7 +1565,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = function(test) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1587,7 +1587,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = function(test) {
  */
 exports.shouldPeformASimpleLimitSkipFindWithFields = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1597,7 +1597,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields = function(test) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1628,7 +1628,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields = function(test) {
  */
 exports.shouldPeformASimpleLimitSkipFindWithFields2 = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1638,7 +1638,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = function(test) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1661,7 +1661,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = function(test) {
  */
 exports.shouldPerformQueryWithBatchSizeDifferentToStandard = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1676,7 +1676,7 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = function(test) {
       }
 
       // Insert a bunch of documents for the testing
-      collection.insert(docs, {safe:true}, function(err, result) {
+      collection.insert(docs, {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1697,7 +1697,7 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = function(test) {
  */
 exports.shouldQueryCurrentOperation = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1719,7 +1719,7 @@ exports.shouldQueryCurrentOperation = function(test) {
  */
 exports.shouldCorrectlyPerformNegativeLimit = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1732,7 +1732,7 @@ exports.shouldCorrectlyPerformNegativeLimit = function(test) {
       }
 
       // Insert a bunch of documents
-      collection.insert(docs, {safe:true}, function(err, result) {
+      collection.insert(docs, {w:1}, function(err, result) {
         // Peform a simple find and return all the documents
         collection.find({}).limit(-10).toArray(function(err, docs) {
           test.equal(null, err);
@@ -1751,7 +1751,7 @@ exports.shouldCorrectlyPerformNegativeLimit = function(test) {
  */
 exports.shouldCorrectlyExecuteExhaustQuery = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1768,7 +1768,7 @@ exports.shouldCorrectlyExecuteExhaustQuery = function(test) {
       }
 
       // Insert a bunch of documents
-      collection.insert(docs, {safe:true}, function(err, result) {
+      collection.insert(docs, {w:1}, function(err, result) {
         // Peform a simple find and return all the documents
         collection.find({}, {exhaust:true}).toArray(function(err, docs2) {
           test.equal(null, err);
@@ -1784,7 +1784,7 @@ exports.shouldCorrectlyExecuteExhaustQuery = function(test) {
 
 exports['Readpreferences should work fine when using a single server instance'] = function(test) {
   var server = new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL, readPreference:ReadPreference.PRIMARY_PREFERRED});
-  var db = new Db('integration_tests', server, {safe:false, native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
+  var db = new Db('integration_tests', server, {w:0, native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1801,7 +1801,7 @@ exports['Readpreferences should work fine when using a single server instance'] 
     // Create a collection we want to drop later
     db.collection('Readpreferencesshouldworkfine', function(err, collection) {
       // Insert a bunch of documents
-      collection.insert(docs, {safe:true}, function(err, result) {
+      collection.insert(docs, {w:1}, function(err, result) {
         // Peform a simple find and return all the documents
         collection.find({}, {exhaust:true}).toArray(function(err, docs2) {
           test.equal(null, err);
@@ -1817,7 +1817,7 @@ exports['Readpreferences should work fine when using a single server instance'] 
 
 exports['Each should not hang on iterating over no results'] = function(test) {
   var server = new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize: 4, ssl:useSSL, readPreference:ReadPreference.PRIMARY_PREFERRED});
-  var db = new Db('not_existing', server, {safe:false, native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
+  var db = new Db('not_existing', server, {w:0, native_parser: native_parser, readPreference:ReadPreference.PRIMARY_PREFERRED});
 
   // Establish connection to db
   db.open(function(err, db) {

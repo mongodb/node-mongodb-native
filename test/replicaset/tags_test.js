@@ -29,7 +29,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -62,7 +62,7 @@ var waitForReplicaset = function(callback) {
       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
     ], {});
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.on("fullsetup", function() {
     db.close();
     callback();
@@ -124,7 +124,7 @@ exports['Should Correctly Connect With Default Replicaset And Insert Document Fo
     {}
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     // Recreate collection on replicaset
@@ -164,7 +164,7 @@ exports['Should Honor setReadPreference primary'] = function(test) {
   // Set read preference
   replSet.setReadPreference(Server.READ_PRIMARY);
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     // Checkout a reader and make sure it's the primary
@@ -200,7 +200,7 @@ exports['Should Honor setReadPreference secondary'] = function(test) {
   // Set read preference
   replSet.setReadPreference(Server.READ_SECONDARY);
   // Open the database
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     // Checkout a reader and make sure it's the primary

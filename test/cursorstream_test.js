@@ -24,7 +24,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -60,7 +60,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -76,7 +76,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(test) 
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {
+      collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -118,7 +118,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(test) 
  */
 exports.shouldStreamDocumentsUsingTheCursorStreamResumeFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -134,7 +134,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamResumeFunction = function(test)
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {
+      collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -179,7 +179,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamResumeFunction = function(test)
  */
 exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -195,7 +195,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = function(test
       test.equal(null, err);
 
       // Insert documents into collection
-      collection.insert(docs, {safe:true}, function(err, ids) {
+      collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -223,14 +223,14 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = function(test) {
   }
 
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 5, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 5, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
     db.createCollection('test_streaming_function_with_limit_for_fetching', function(err, collection) {
       test.ok(collection instanceof Collection);
 
-      collection.insert(docs, {safe:true}, function(err, ids) {
+      collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find({}).stream();
         var data = [];

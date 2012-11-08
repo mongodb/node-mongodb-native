@@ -70,7 +70,7 @@ exports['Should correctly connect to the mongoses using the connection string an
   ]);
 
   // Connect using the mongos connections
-  new Db('integration_test_', mongos, {safe:false}).open(function(err, db) {
+  new Db('integration_test_', mongos, {w:0}).open(function(err, db) {
     db.admin().addUser("root", "root", function(err, result) {
       test.equal(null, err);
   

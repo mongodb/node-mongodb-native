@@ -22,7 +22,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -53,7 +53,7 @@ exports.shouldCorrectlyInsertSimpleRegExpDocument = function(test) {
   var regexp = /foobar/i;
 
   client.createCollection('test_regex', function(err, collection) {
-    collection.insert({'b':regexp}, {safe:true}, function(err, ids) {
+    collection.insert({'b':regexp}, {w:1}, function(err, ids) {
       collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
         test.equal(("" + regexp), ("" + items[0].b));
         // Let's close the db
@@ -67,7 +67,7 @@ exports.shouldCorrectlyInsertSimpleUTF8Regexp = function(test) {
   var regexp = /foobaré/;
 
   client.createCollection('test_utf8_regex', function(err, collection) {
-    collection.insert({'b':regexp}, {safe:true}, function(err, ids) {
+    collection.insert({'b':regexp}, {w:1}, function(err, ids) {
       collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
         test.equal(("" + regexp), ("" + items[0].b));
         // Let's close the db
@@ -81,7 +81,7 @@ exports.shouldCorrectlyFindDocumentsByRegExp = function(test) {
   // Serialized regexes contain extra trailing chars. Sometimes these trailing chars contain / which makes
   // the original regex invalid, and leads to segmentation fault.
   client.createCollection('test_regex_serialization', function(err, collection) {
-    collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, {safe:true}, function(err, r) {
+    collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, {w:1}, function(err, r) {
       
       var count = 20,
           run = function(i) {

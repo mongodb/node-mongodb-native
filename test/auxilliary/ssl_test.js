@@ -38,7 +38,7 @@ exports.tearDown = function(callback) {
 
 exports.shouldCorrectlyCommunicateUsingSSLSocket = function(test) {
   if(process.env['JENKINS']) return test.done();
-  var db1 = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:4, ssl:ssl}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db1 = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:4, ssl:ssl}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // All inserted docs
   var docs = [];
   var errs = [];
@@ -54,7 +54,7 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = function(test) {
         collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
         collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
         collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-        collection.insert([{a:1}, {b:2}, {c:'hello world'}], {safe:true}, function(err, result) {
+        collection.insert([{a:1}, {b:2}, {c:'hello world'}], {w:1}, function(err, result) {
           collection.find({}).toArray(function(err, items) {
             // test.equal(3, items.length);
             db.close();

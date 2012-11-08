@@ -26,7 +26,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -59,12 +59,12 @@ exports.tearDown = function(callback) {
  * 
  * @ignore
  */
-exports.shouldCorrectlyCallValidateCollection = function(test) {
-  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = function(test) {
+  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 1, native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       fs_client.collection('test', function(err, collection) {
-        collection.insert({'a':1}, {safe:true}, function(err, doc) {
+        collection.insert({'a':1}, {w: 1}, function(err, doc) {
           fs_client.admin(function(err, adminDb) {
             adminDb.addUser('admin', 'admin', function(err, result) {
               adminDb.authenticate('admin', 'admin', function(err, replies) {
@@ -98,7 +98,7 @@ exports.shouldCorrectlyCallValidateCollection = function(test) {
  */
 exports.shouldCorrectlyAuthenticate = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -111,7 +111,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insert({'a':1}, {safe:true}, function(err, doc) {
+        collection.insert({'a':1}, {w:1}, function(err, doc) {
 
           // Use the admin database for the operation
           db.admin(function(err, adminDb) {
@@ -143,7 +143,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
  */
 exports.shouldCorrectlyAuthenticate = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -167,7 +167,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
  */
 exports.shouldCorrectlyAuthenticate = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -208,7 +208,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
  */
 exports.shouldCorrectlyAuthenticate = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -249,7 +249,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
  */
 exports.shouldCorrectlySetDefaultProfilingLevel = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -262,7 +262,7 @@ exports.shouldCorrectlySetDefaultProfilingLevel = function(test) {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insert({'a':1}, {safe:true}, function(err, doc) {
+        collection.insert({'a':1}, {w: 1}, function(err, doc) {
 
           // Use the admin database for the operation
           db.admin(function(err, adminDb) {
@@ -298,7 +298,7 @@ exports.shouldCorrectlySetDefaultProfilingLevel = function(test) {
  */ 
 exports.shouldCorrectlyChangeProfilingLevel = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -311,7 +311,7 @@ exports.shouldCorrectlyChangeProfilingLevel = function(test) {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insert({'a':1}, {safe:true}, function(err, doc) {
+        collection.insert({'a':1}, {w: 1}, function(err, doc) {
 
           // Use the admin database for the operation
           db.admin(function(err, adminDb) {
@@ -375,7 +375,7 @@ exports.shouldCorrectlyChangeProfilingLevel = function(test) {
  */ 
 exports.shouldCorrectlySetAndExtractProfilingInfo = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -388,7 +388,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = function(test) {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insert({'a':1}, {safe:true}, function(doc) {
+        collection.insert({'a':1}, {w: 1}, function(doc) {
 
           // Use the admin database for the operation
           db.admin(function(err, adminDb) {
@@ -439,7 +439,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = function(test) {
  */
 exports.shouldCorrectlyCallValidateCollection = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
   
   // Establish connection to db  
   db.open(function(err, db) {
@@ -452,7 +452,7 @@ exports.shouldCorrectlyCallValidateCollection = function(test) {
         
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insert({'a':1}, {safe:true}, function(err, doc) {
+        collection.insert({'a':1}, {w: 1}, function(err, doc) {
           
           // Use the admin database for the operation
           db.admin(function(err, adminDb) {
@@ -494,7 +494,7 @@ exports.shouldCorrectlyCallValidateCollection = function(test) {
  */
 exports.shouldCorrectlyPingTheMongoDbInstance = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -534,7 +534,7 @@ exports.shouldCorrectlyPingTheMongoDbInstance = function(test) {
  */
 exports.shouldCorrectlyUseLogoutFunction = function(test) {  
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -575,7 +575,7 @@ exports.shouldCorrectlyUseLogoutFunction = function(test) {
  */
 exports.shouldCorrectlyAddAUserToAdminDb = function(test) {  
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -610,7 +610,7 @@ exports.shouldCorrectlyAddAUserToAdminDb = function(test) {
  */
 exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = function(test) {  
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -655,7 +655,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = function(test) {
  */
 exports.shouldCorrectlyListAllAvailableDatabases = function(test) {  
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+    {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -684,7 +684,7 @@ exports.shouldCorrectlyListAllAvailableDatabases = function(test) {
  */
 exports.shouldCorrectlyRetrieveServerInfo = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -697,7 +697,7 @@ exports.shouldCorrectlyRetrieveServerInfo = function(test) {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insert({'a':1}, {safe:true}, function(err, doc) {
+        collection.insert({'a':1}, {w: 1}, function(err, doc) {
 
           // Use the admin database for the operation
           db.admin(function(err, adminDb) {
@@ -734,7 +734,7 @@ exports.shouldCorrectlyRetrieveServerInfo = function(test) {
  */
 exports.shouldCorrectlyRetrieveReplSetGetStatus = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -747,7 +747,7 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = function(test) {
 
         // Force the creation of the collection by inserting a document
         // Collections are not created until the first document is inserted
-        collection.insert({'a':1}, {safe:true}, function(err, doc) {
+        collection.insert({'a':1}, {w: 1}, function(err, doc) {
 
           // Use the admin database for the operation
           db.admin(function(err, adminDb) {

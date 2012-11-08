@@ -23,7 +23,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -58,7 +58,7 @@ exports.shouldCorrectlyGenerateObjectID = function(test) {
 
   client.collection('test_object_id_generation.data', function(err, collection) {
     // Insert test documents (creates collections and test fetch by query)
-    collection.insert({name:"Fred", age:42}, {safe:true}, function(err, ids) {
+    collection.insert({name:"Fred", age:42}, {w:1}, function(err, ids) {
       test.equal(1, ids.length);
       test.ok(ids[0]['_id'].toHexString().length == 24);
       // Locate the first document inserted
@@ -69,7 +69,7 @@ exports.shouldCorrectlyGenerateObjectID = function(test) {
     });
 
     // Insert another test document and collect using ObjectId
-    collection.insert({name:"Pat", age:21}, {safe:true}, function(err, ids) {
+    collection.insert({name:"Pat", age:21}, {w:1}, function(err, ids) {
       test.equal(1, ids.length);
       test.ok(ids[0]['_id'].toHexString().length == 24);
       // Locate the first document inserted
@@ -82,7 +82,7 @@ exports.shouldCorrectlyGenerateObjectID = function(test) {
     // Manually created id
     var objectId = new ObjectID(null);
     // Insert a manually created document with generated oid
-    collection.insert({"_id":objectId, name:"Donald", age:95}, {safe:true}, function(err, ids) {
+    collection.insert({"_id":objectId, name:"Donald", age:95}, {w:1}, function(err, ids) {
       test.equal(1, ids.length);
       test.ok(ids[0]['_id'].toHexString().length == 24);
       test.equal(objectId.toHexString(), ids[0]['_id'].toHexString());
@@ -241,7 +241,7 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = function(test) {
     date.setUTCMinutes(0);
     date.setUTCSeconds(30);
 
-    collection.insert({'_id':date}, {safe:true}, function(err, ids) {
+    collection.insert({'_id':date}, {w:1}, function(err, ids) {
       collection.find({'_id':date}).toArray(function(err, items) {
         test.equal(("" + date), ("" + items[0]._id));
 
@@ -283,9 +283,9 @@ exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = function(test) 
  */
 exports.shouldCorrectlyInsertWithObjectId = function(test) {
   client.createCollection('shouldCorrectlyInsertWithObjectId', function(err, collection) {
-    collection.insert({}, {safe:true}, function(err, ids) {
+    collection.insert({}, {w:1}, function(err, ids) {
       setTimeout(function() {
-        collection.insert({}, {safe:true}, function(err, ids) {
+        collection.insert({}, {w:1}, function(err, ids) {
           collection.find().toArray(function(err, items) {
             var compareDate = new Date();
             

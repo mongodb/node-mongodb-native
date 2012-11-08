@@ -28,7 +28,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     db.close();
     if(err != null) {
@@ -50,7 +50,7 @@ var waitForReplicaset = function(callback) {
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
     ], {});
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.on("fullsetup", function() {
     db.close();
     callback();
@@ -116,7 +116,7 @@ exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
   );
 
   // Insert some data
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
     db = p_db;

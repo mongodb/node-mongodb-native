@@ -23,7 +23,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -53,7 +53,7 @@ exports.tearDown = function(callback) {
 exports.shouldStreamRecordsCallsDataTheRightNumberOfTimes = function(test) {
   client.createCollection('test_stream_records', function(err, collection) {
     test.ok(collection instanceof Collection);
-    collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], {safe:true}, function(err, ids) {
+    collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], {w:1}, function(err, ids) {
       var stream = collection.find({}, {'limit' : 3}).streamRecords();
       var callsToEnd = 0;
       stream.on('end', function() { 
@@ -72,7 +72,7 @@ exports.shouldStreamRecordsCallsDataTheRightNumberOfTimes = function(test) {
 exports.shouldStreamRecordsCallsEndTheRightNumberOfTimes = function(test) {
   client.createCollection('test_stream_records', function(err, collection) {
     test.ok(collection instanceof Collection);
-    collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], {safe:true}, function(err, ids) {
+    collection.insert([{'a':1}, {'b' : 2}, {'c' : 3}, {'d' : 4}, {'e' : 5}], {w:1}, function(err, ids) {
       var cursor = collection.find({}, {'limit' : 3});
       var stream = cursor.streamRecords(function(er,item) {}); 
       var callsToEnd = 0;
@@ -102,7 +102,7 @@ exports.shouldStreamDocumentsWithLimitForFetching = function(test) {
   client.createCollection('test_streaming_function_with_limit_for_fetching', function(err, collection) {
     test.ok(collection instanceof Collection);
 
-    collection.insert(docs, {safe:true}, function(err, ids) {        
+    collection.insert(docs, {w:1}, function(err, ids) {        
       var cursor = collection.find({});
       // Execute find on all the documents
       var stream = cursor.streamRecords({fetchSize:1000}); 

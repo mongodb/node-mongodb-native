@@ -29,7 +29,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -71,7 +71,7 @@ var identifyServers = function(rs, dbname, callback) {
     // Connect to the db and query the state
     var server = new Server(host, port,{auto_reconnect: true});
     // Create db instance
-    var db = new Db(dbname, server, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(dbname, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     // Connect to the db
     db.open(function(err, db) {
       numberOfServersToCheck = numberOfServersToCheck - 1;
@@ -152,7 +152,7 @@ exports['Connection to replicaset with primary read preference'] = function(test
   var executedCorrectly = false;
 
   // Create db instance
-  var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     // Let's get the primary server and wrap the checkout Method to ensure it's the one called for read
@@ -196,7 +196,7 @@ exports['Connection to replicaset with secondary read preference with no seconda
     );
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     // Trigger test once whole set is up
     db.on("fullsetup", function() {
       // Rip out secondaries forcing an attempt to read from the primary
@@ -247,7 +247,7 @@ exports['Connection to replicaset with secondary only read preference no seconda
   );
 
   // Create db instance
-  var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     // Rip out secondaries forcing an attempt to read from the primary
@@ -291,7 +291,7 @@ exports['Connection to replicaset with secondary only read preference should ret
     var executedCorrectly = false;
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     // Trigger test once whole set is up
     db.on("fullsetup", function() {
       // Let's set up all the secondaries
@@ -342,7 +342,7 @@ exports['Connection to replicaset with secondary read preference should return s
     var executedCorrectly = false;
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     // Trigger test once whole set is up
     db.on("fullsetup", function() {
       // Let's set up all the secondaries

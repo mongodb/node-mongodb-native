@@ -22,7 +22,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;  
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -94,7 +94,7 @@ exports.shouldCorrectlySaveUnicodeContainingDocument = function(test) {
   client.createCollection('test_should_correctly_save_unicode_containing_document', function(err, collection) {
     doc['_id'] = 'felixge';
 
-    collection.save(doc, {safe:true}, function(err, doc) {
+    collection.save(doc, {w:1}, function(err, doc) {
       collection.findOne(function(err, doc) {
         test.equal('felixge', doc._id);
         test.done();
@@ -107,9 +107,9 @@ exports.shouldCorrectlySaveUnicodeContainingDocument = function(test) {
 exports.shouldCorrectlyInsertUnicodeCharacters = function(test) {
   client.createCollection('unicode_test_collection', function(err, collection) {
     var test_strings = ["ouooueauiOUOOUEAUI", "öüóőúéáűíÖÜÓŐÚÉÁŰÍ", "本荘由利地域に洪水警報"];
-    collection.insert({id: 0, text: test_strings[0]}, {safe:true}, function(err, ids) {
-      collection.insert({id: 1, text: test_strings[1]}, {safe:true}, function(err, ids) {
-        collection.insert({id: 2, text: test_strings[2]}, {safe:true}, function(err, ids) {
+    collection.insert({id: 0, text: test_strings[0]}, {w:1}, function(err, ids) {
+      collection.insert({id: 1, text: test_strings[1]}, {w:1}, function(err, ids) {
+        collection.insert({id: 2, text: test_strings[2]}, {w:1}, function(err, ids) {
           collection.find().each(function(err, item) {
             if(item != null) {
               test.equal(test_strings[item.id], item.text);
@@ -129,7 +129,7 @@ exports.shouldCreateObjectWithChineseObjectName = function(test) {
   client.createCollection('create_object_with_chinese_object_name', function(err, r) {
     client.collection('create_object_with_chinese_object_name', function(err, collection) {        
       
-      collection.insert(object, {safe:true}, function(err, result) {
+      collection.insert(object, {w:1}, function(err, result) {
         collection.findOne(function(err, item) {
           test.equal(object['客家话'], item['客家话'])
 
@@ -145,7 +145,7 @@ exports.shouldCreateObjectWithChineseObjectName = function(test) {
 
 exports.shouldCorrectlyHandleUT8KeyNames = function(test) { 
   client.createCollection('test_utf8_key_name', function(err, collection) { 
-    collection.insert({'šđžčćŠĐŽČĆ':1}, {safe:true}, function(err, ids) { 
+    collection.insert({'šđžčćŠĐŽČĆ':1}, {w:1}, function(err, ids) { 
           // finished_test({test_utf8_key_name:'ok'}); 
       collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}).toArray(function(err, items) { 
         test.equal(1, items[0]['šđžčćŠĐŽČĆ']); 

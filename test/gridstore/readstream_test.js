@@ -17,7 +17,7 @@ var testCase = require('nodeunit').testCase,
 
 var MONGODB = 'integration_tests';
 var useSSL = process.env['USE_SSL'] != null ? true : false;
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
 var native_parser = (process.env['TEST_NATIVE'] != null);
 
 /**
@@ -63,7 +63,7 @@ exports.tearDown = function(callback) {
  */
 exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -122,7 +122,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {
@@ -197,7 +197,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = function(test) {
  */
 exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db  
   db.open(function(err, db) {

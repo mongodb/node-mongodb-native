@@ -27,7 +27,7 @@ db.open(function(err, client) {
 
 			console.log('findAndModify request (should not be last)');
 
-			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{safe:true, upsert:true}, function(err, object) {
+			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{w:1, upsert:true}, function(err, object) {
 				if (err) {
 					console.warn('findAndModify error response ', err.message); // returns error if no matching object found
 				} else {

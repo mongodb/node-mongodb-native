@@ -57,7 +57,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
   );
 
   // Connect
-  new Db('replicaset_test_auth', replSet, {safe:false}).open(function(err, db) {    
+  new Db('replicaset_test_auth', replSet, {w:0}).open(function(err, db) {    
     // Just set auths for the manager to handle it correctly
     RS.setAuths("root", "root");
     // Add a user
@@ -69,7 +69,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
         test.ok(result);
 
         RS.killPrimary(9, function(err, result) {
-          db.collection('replicaset_test_auth').insert({a:1}, {safe:true}, function(err, result) {
+          db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
             test.equal(null, err);
 
             db.close();

@@ -16,7 +16,7 @@ var testCase = require('nodeunit').testCase,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
 var useSSL = process.env['USE_SSL'] != null ? true : false;
 var native_parser = (process.env['TEST_NATIVE'] != null);
 
@@ -67,7 +67,7 @@ exports.shouldCorrectlyFailDueToMissingChunks = function(test) {
       "aliases" : null,
       "metadata" : {},
       "md5" : "4e638392b289870da9291a242e474930"},
-      {safe:true}, function(err, result) {
+      {w:1}, function(err, result) {
         new mongodb.GridStore(client, FILE, "r").open(function (err, gs) {
           gs.read(function(err, data) {
             test.ok(err != null);
@@ -201,7 +201,7 @@ exports.shouldCorrectlyOverwriteFile = function(test) {
  */
 exports.shouldCorrectlySeekWithBuffer = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -389,7 +389,7 @@ exports.shouldCorrectlySeekWithString = function(test) {
  */
 exports.shouldCorrectlySeekAcrossChunks = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   test.expect(2);
   // Establish connection to db
@@ -435,7 +435,7 @@ exports.shouldCorrectlySeekAcrossChunks = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyAppendToFile = function(test) {
-  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       var id = new ObjectID();
@@ -481,7 +481,7 @@ exports.shouldCorrectlyAppendToFile = function(test) {
  */
 exports.shouldCorrectlyRewingAndTruncateOnWrite = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -534,7 +534,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = function(test) {
  * @ignore
  */
 exports.shouldCorrectlySaveEmptyFile = function(test) {
-  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var fs_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   fs_client.open(function(err, fs_client) {
     fs_client.dropDatabase(function(err, done) {
       var gridStore = new GridStore(fs_client, "test_gs_save_empty_file", "w");
@@ -571,7 +571,7 @@ exports.shouldCorrectlySaveEmptyFile = function(test) {
  */
 exports.shouldCorrectlyDetectEOF = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -894,7 +894,7 @@ exports.shouldNotThrowErrorOnClose = function(test) {
  */
 exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -939,7 +939,7 @@ exports.shouldCorrectlyExecuteGridstoreTell = function(test) {
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1003,7 +1003,7 @@ exports.shouldNotThrowErrorOnClose = function(test) {
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {

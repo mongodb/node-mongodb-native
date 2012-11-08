@@ -27,7 +27,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -103,7 +103,7 @@ exports.shouldNotTimeout = function (test) {
     {}
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
 
   db.open(function(err, p_db) {
     test.equal(null, err);
@@ -114,7 +114,7 @@ exports.shouldNotTimeout = function (test) {
       RS.killPrimary(2, function(node) {
         var pending = 2;
 
-        coll.update({name: 'a'}, {'$inc': {v: 1}}, {upsert: true, safe:true}, done);
+        coll.update({name: 'a'}, {'$inc': {v: 1}}, {upsert: true, w:1}, done);
         coll.findOne({name: 'a'}, done);
 
         function done (err, result) {

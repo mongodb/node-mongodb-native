@@ -76,7 +76,7 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(test)
   }
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -86,7 +86,7 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(test)
       test.equal(null, err);
 
       // Perform an update
-      collection.update({a:0}, {$set: {c:1}}, {safe:true}, function(err, result) {
+      collection.update({a:0}, {$set: {c:1}}, {w:1}, function(err, result) {
         test.equal(null, err);
         var numberOfRecords = 0;
 

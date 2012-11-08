@@ -28,7 +28,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -110,14 +110,14 @@ exports.shouldCorrectlyReadFromSecondaryEvenIfPrimaryIsDown = function(test) {
   ensureConnection(test, retries, function(err) {
     test.ok(err == null);
 
-    new Db('integration_test_', replSet, {safe:false}).open(function(err, p_db) {
+    new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
       test.ok(err == null);
       test.equal(true, p_db.serverConfig.isConnected());
 
       p_db.createCollection('notempty', function (err, collection) {
 
         // Insert a document
-        collection.insert({a:1}, {safe:true}, function(err, result) {
+        collection.insert({a:1}, {w:1}, function(err, result) {
           
           // Run a simple query
           collection.findOne(function (err, doc) {

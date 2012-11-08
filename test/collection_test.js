@@ -26,7 +26,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
-  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
       // If first test drop the db
@@ -62,14 +62,13 @@ exports.tearDown = function(callback) {
  */
 exports.shouldCorrectlySaveASimpleDocument = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
 
     // Fetch the collection
     db.collection("save_a_simple_document", function(err, collection) {
-
       // Save a document with no safe option
       collection.save({hello:'world'});
 
@@ -97,7 +96,7 @@ exports.shouldCorrectlySaveASimpleDocument = function(test) {
  */
 exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -106,7 +105,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = function(test) {
     db.collection("save_a_simple_document_modify_it_and_resave_it", function(err, collection) {
 
       // Save a document with no safe option
-      collection.save({hello:'world'}, {safe:true}, function(err, result) {
+      collection.save({hello:'world'}, {w: 0}, function(err, result) {
 
         // Find the saved document
         collection.findOne({hello:'world'}, function(err, item) {
@@ -117,7 +116,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = function(test) {
           item['hello2'] = 'world2';
 
           // Save the item with the additional field
-          collection.save(item, {safe:true}, function(err, result) {
+          collection.save(item, {w: 1}, function(err, result) {
 
             // Find the changed document
             collection.findOne({hello:'world'}, function(err, item) {
@@ -177,10 +176,10 @@ exports.shouldAccessToCollections = function(test) {
     client.createCollection('test.mario', function(r) {
       // Insert test documents (creates collections)
       client.collection('test.spiderman', function(err, spiderman_collection) {
-        spiderman_collection.insert({foo:5}, {safe:true}, function(err, r) {
+        spiderman_collection.insert({foo:5}, {w: 1}, function(err, r) {
 
           client.collection('test.mario', function(err, mario_collection) {
-            mario_collection.insert({bar:0}, {safe:true}, function(err, r) {
+            mario_collection.insert({bar:0}, {w: 1}, function(err, r) {
               // Assert collections
               client.collections(function(err, collections) {
                 var found_spiderman = false;
@@ -241,7 +240,7 @@ exports.shouldCorrectlyDropCollection = function(test) {
  */
 exports.shouldCorrectlyDropCollectionWithDropFunction = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -292,7 +291,7 @@ exports.shouldCorrectlyRetriveCollectionNames = function(test) {
       test.ok(found);
       // Insert a document in an non-existing collection should create the collection
       client.collection('test_collection_names2', function(err, collection) {
-        collection.insert({a:1}, {safe:true}, function(err, r) {
+        collection.insert({a:1}, {w: 1}, function(err, r) {
           client.collectionNames(function(err, documents) {
             documents.forEach(function(document) {
               if(document.name == MONGODB + '.test_collection_names2') found = true;
@@ -341,7 +340,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(test) {
  */
 exports.shouldCorrectlyRetriveCollectionOptions = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -372,7 +371,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = function(test) {
  */
 exports.shouldCorrectlyExecuteIsCapped = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -401,17 +400,17 @@ exports.shouldCorrectlyExecuteIsCapped = function(test) {
  */
 exports.shouldCorrectlyExecuteIndexExists = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
 
     // Create a test collection that we are getting the options back from
-    db.createCollection('test_collection_index_exists', {safe:true}, function(err, collection) {
+    db.createCollection('test_collection_index_exists', {w: 1}, function(err, collection) {
       test.equal(null, err);
 
       // Create an index on the collection
-      collection.createIndex('a', {safe:true}, function(err, indexName) {
+      collection.createIndex('a', {w: 1}, function(err, indexName) {
 
         // Let's test to check if a single index exists
         collection.indexExists("a_1", function(err, result) {
@@ -439,17 +438,17 @@ exports.shouldCorrectlyExecuteIndexExists = function(test) {
  * @ignore
  */
 exports.shouldEnsureStrictAccessCollection = function(test) {
-  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
-  test.equal(true, error_client.safe);
+  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {w: 1, native_parser: (process.env['TEST_NATIVE'] != null)});
+  test.equal(1, error_client.options.w);
 
   error_client.open(function(err, error_client) {
-    error_client.collection('does-not-exist', {safe:true}, function(err, collection) {
+    error_client.collection('does-not-exist', {strict: true}, function(err, collection) {
       test.ok(err instanceof Error);
       test.equal("Collection does-not-exist does not exist. Currently in safe mode.", err.message);
     });
 
     error_client.createCollection('test_strict_access_collection', function(err, collection) {
-      error_client.collection('test_strict_access_collection', {safe:true}, function(err, collection) {
+      error_client.collection('test_strict_access_collection', {w: 1}, function(err, collection) {
         test.ok(collection instanceof Collection);
         // Let's close the db
         error_client.close();
@@ -463,20 +462,20 @@ exports.shouldEnsureStrictAccessCollection = function(test) {
  * @ignore
  */
 exports.shouldPerformStrictCreateCollection = function(test) {
-  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {safe:true, native_parser: (process.env['TEST_NATIVE'] != null)});
-  test.equal(true, error_client.safe);
+  var error_client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, ssl:useSSL}), {w: 1, native_parser: (process.env['TEST_NATIVE'] != null)});
+  // test.equal(true, error_client.safe);
 
   error_client.open(function(err, error_client) {
     error_client.createCollection('test_strict_create_collection', function(err, collection) {
       test.ok(collection instanceof Collection);
 
       // Creating an existing collection should fail
-      error_client.createCollection('test_strict_create_collection', {safe:true}, function(err, collection) {
+      error_client.createCollection('test_strict_create_collection', {strict: true}, function(err, collection) {
         test.ok(err instanceof Error);
         test.equal("Collection test_strict_create_collection already exists. Currently in safe mode.", err.message);
 
         // Switch out of strict mode and try to re-create collection
-        error_client.createCollection('test_strict_create_collection', {safe:false}, function(err, collection) {
+        error_client.createCollection('test_strict_create_collection', {strict: false}, function(err, collection) {
           test.ok(collection instanceof Collection);
 
           // Let's close the db
@@ -494,35 +493,35 @@ exports.shouldPerformStrictCreateCollection = function(test) {
 exports.shouldFailToInsertDueToIllegalKeys = function(test) {
   client.createCollection('test_invalid_key_names', function(err, collection) {
     // Legal inserts
-    collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}], {safe:true}, function(err, r) {
+    collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}], {w: 1}, function(err, r) {
       // Illegal insert for key
-      collection.insert({'$hello':'world'}, {safe:true}, function(err, doc) {
+      collection.insert({'$hello':'world'}, {w: 1}, function(err, doc) {
         test.ok(err instanceof Error);
         test.equal("key $hello must not start with '$'", err.message);
 
-        collection.insert({'hello':{'$hello':'world'}}, {safe:true}, function(err, doc) {
+        collection.insert({'hello':{'$hello':'world'}}, {w: 1}, function(err, doc) {
           test.ok(err instanceof Error);
           test.equal("key $hello must not start with '$'", err.message);
 
-          collection.insert({'he$llo':'world'}, {safe:true}, function(err, docs) {
+          collection.insert({'he$llo':'world'}, {w: 1}, function(err, docs) {
             test.ok(docs[0].constructor == Object);
 
-            collection.insert({'hello':{'hell$o':'world'}}, {safe:true}, function(err, docs) {
+            collection.insert({'hello':{'hell$o':'world'}}, {w: 1}, function(err, docs) {
               test.ok(err == null);
 
-              collection.insert({'.hello':'world'}, {safe:true}, function(err, doc) {
+              collection.insert({'.hello':'world'}, {w: 1}, function(err, doc) {
                 test.ok(err instanceof Error);
                 test.equal("key .hello must not contain '.'", err.message);
 
-                collection.insert({'hello':{'.hello':'world'}}, {safe:true}, function(err, doc) {
+                collection.insert({'hello':{'.hello':'world'}}, {w: 1}, function(err, doc) {
                   test.ok(err instanceof Error);
                   test.equal("key .hello must not contain '.'", err.message);
 
-                  collection.insert({'hello.':'world'}, {safe:true}, function(err, doc) {
+                  collection.insert({'hello.':'world'}, {w: 1}, function(err, doc) {
                     test.ok(err instanceof Error);
                     test.equal("key hello. must not contain '.'", err.message);
 
-                    collection.insert({'hello':{'hello.':'world'}}, {safe:true}, function(err, doc) {
+                    collection.insert({'hello':{'hello.':'world'}}, {w: 1}, function(err, doc) {
                       test.ok(err instanceof Error);
                       test.equal("key hello. must not contain '.'", err.message);
                       // Let's close the db
@@ -588,14 +587,14 @@ exports.shouldCorrectlyCountOnNonExistingCollection = function(test) {
 exports.shouldCorrectlyExecuteSave = function(test) {
   client.createCollection('test_save', function(err, collection) {
     var doc = {'hello':'world'};
-    collection.save(doc, {safe:true}, function(err, docs) {
+    collection.save(doc, {w: 1}, function(err, docs) {
       test.ok(docs._id instanceof ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
 
       collection.count(function(err, count) {
         test.equal(1, count);
         doc = docs;
 
-        collection.save(doc, {safe:true}, function(err, doc2) {
+        collection.save(doc, {w: 1}, function(err, doc2) {
 
           collection.count(function(err, count) {
             test.equal(1, count);
@@ -605,7 +604,7 @@ exports.shouldCorrectlyExecuteSave = function(test) {
 
               doc3.hello = 'mike';
 
-              collection.save(doc3, {safe:true}, function(err, doc4) {
+              collection.save(doc3, {w: 1}, function(err, doc4) {
                 collection.count(function(err, count) {
                   test.equal(1, count);
 
@@ -613,7 +612,7 @@ exports.shouldCorrectlyExecuteSave = function(test) {
                     test.equal('mike', doc5.hello);
 
                     // Save another document
-                    collection.save({hello:'world'}, {safe:true}, function(err, doc) {
+                    collection.save({hello:'world'}, {w: 1}, function(err, doc) {
                       collection.count(function(err, count) {
                         test.equal(2, count);
                         // Let's close the db
@@ -636,7 +635,7 @@ exports.shouldCorrectlyExecuteSave = function(test) {
  */
 exports.shouldCorrectlySaveDocumentWithLongValue = function(test) {
   client.createCollection('test_save_long', function(err, collection) {
-    collection.insert({'x':Long.fromNumber(9223372036854775807)}, {safe:true}, function(err, r) {
+    collection.insert({'x':Long.fromNumber(9223372036854775807)}, {w: 1}, function(err, r) {
       collection.findOne(function(err, doc) {
         test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
         // Let's close the db
@@ -652,7 +651,7 @@ exports.shouldCorrectlySaveDocumentWithLongValue = function(test) {
 exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = function(test) {
   client.createCollection('test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection', function(err, collection) {
     var a = {'_id':'1', 'hello':'world'};
-    collection.save(a, {safe:true}, function(err, docs) {
+    collection.save(a, {w: 1}, function(err, docs) {
       collection.count(function(err, count) {
         test.equal(1, count);
 
@@ -660,7 +659,7 @@ exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = function(test) {
           test.equal('world', doc.hello);
 
           doc.hello = 'mike';
-          collection.save(doc, {safe:true}, function(err, doc) {
+          collection.save(doc, {w: 1}, function(err, doc) {
             collection.count(function(err, count) {
               test.equal(1, count);
             });
@@ -689,7 +688,7 @@ exports.shouldCorrectlyPerformUpsert = function(test) {
       function test1() {
         var self = this;
 
-        collection.update({"_id":id}, doc, {upsert:true, safe:true}, function(err, result) {
+        collection.update({"_id":id}, doc, {upsert:true, w: 1}, function(err, result) {
           test.equal(null, err);
           test.equal(1, result);
 
@@ -704,7 +703,7 @@ exports.shouldCorrectlyPerformUpsert = function(test) {
         id = new ObjectID(null)
         doc = {_id:id, a:2};
 
-        collection.update({"_id":id}, doc, {safe:true, upsert:true}, function(err, result) {
+        collection.update({"_id":id}, doc, {w: 1, upsert:true}, function(err, result) {
           test.equal(null, err);
           test.equal(1, result);
 
@@ -716,7 +715,7 @@ exports.shouldCorrectlyPerformUpsert = function(test) {
         var self = this;
         test.equal(2, doc2.a);
 
-        collection.update({"_id":id}, doc2, {safe:true, upsert:true}, function(err, result) {
+        collection.update({"_id":id}, doc2, {w: 1, upsert:true}, function(err, result) {
           test.equal(null, err);
           test.equal(1, result);
 
@@ -737,7 +736,7 @@ exports.shouldCorrectlyUpdateWithNoDocs = function(test) {
   client.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
     var id = new ObjectID(null)
     var doc = {_id:id, a:1};
-    collection.update({"_id":id}, doc, {safe:true}, function(err, numberofupdateddocs) {
+    collection.update({"_id":id}, doc, {w: 1}, function(err, numberofupdateddocs) {
       test.equal(null, err);
       test.equal(0, numberofupdateddocs);
 
@@ -754,7 +753,7 @@ exports.shouldCorrectlyUpdateWithNoDocs = function(test) {
  */
 exports.shouldCorrectlyUpdateASimpleDocument = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -763,7 +762,7 @@ exports.shouldCorrectlyUpdateASimpleDocument = function(test) {
     db.collection('update_a_simple_document', function(err, collection) {
 
       // Insert a document, then update it
-      collection.insert({a:1}, {safe:true}, function(err, doc) {
+      collection.insert({a:1}, {w: 1}, function(err, doc) {
 
         // Update the document with an atomic operator
         collection.update({a:1}, {$set:{b:2}});
@@ -794,7 +793,7 @@ exports.shouldCorrectlyUpdateASimpleDocument = function(test) {
  */
 exports.shouldCorrectlyUpsertASimpleDocument = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -803,7 +802,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = function(test) {
     db.collection('update_a_simple_document_upsert', function(err, collection) {
 
       // Update the document using an upsert operation, ensuring creation if it does not exist
-      collection.update({a:1}, {b:2, a:1}, {upsert:true, safe:true}, function(err, result) {
+      collection.update({a:1}, {b:2, a:1}, {upsert:true, w: 1}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result);
 
@@ -829,7 +828,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = function(test) {
  */
 exports.shouldCorrectlyUpdateMultipleDocuments = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -838,10 +837,10 @@ exports.shouldCorrectlyUpdateMultipleDocuments = function(test) {
     db.collection('update_a_simple_document_multi', function(err, collection) {
 
       // Insert a couple of documentations
-      collection.insert([{a:1, b:1}, {a:1, b:2}], {safe:true}, function(err, result) {
+      collection.insert([{a:1, b:1}, {a:1, b:2}], {w: 1}, function(err, result) {
 
         // Update multiple documents using the multi option
-        collection.update({a:1}, {$set:{b:0}}, {safe:true, multi:true}, function(err, numberUpdated) {
+        collection.update({a:1}, {$set:{b:0}}, {w: 1, multi:true}, function(err, numberUpdated) {
           test.equal(null, err);
           test.equal(2, numberUpdated);
 
@@ -871,7 +870,7 @@ exports.shouldCorrectlyUpdateMultipleDocuments = function(test) {
  */
 exports.shouldCorrectlyHandleDistinctIndexes = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -881,7 +880,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = function(test) {
 
       // Insert documents to perform distinct against
       collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
-        {a:2, b:{c:'a'}}, {a:3}, {a:3}], {safe:true}, function(err, ids) {
+        {a:2, b:{c:'a'}}, {a:3}, {a:3}], {w: 1}, function(err, ids) {
 
         // Peform a distinct query against the a field
         collection.distinct('a', function(err, docs) {
@@ -909,7 +908,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = function(test) {
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -919,7 +918,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = function(test) 
 
       // Insert documents to perform distinct against
       collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
-        {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], {safe:true}, function(err, ids) {
+        {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], {w: 1}, function(err, ids) {
 
         // Peform a distinct query with a filter against the documents
         collection.distinct('a', {c:1}, function(err, docs) {
@@ -942,7 +941,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = function(test) 
  */
 exports.shouldCorrectlyDoSimpleCountExamples = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -951,7 +950,7 @@ exports.shouldCorrectlyDoSimpleCountExamples = function(test) {
     db.createCollection('simple_count_example', function(err, collection) {
 
       // Insert documents to perform distinct against
-      collection.insert([{a:1}, {a:2}, {a:3}, {a:4, b:1}], {safe:true}, function(err, ids) {
+      collection.insert([{a:1}, {a:2}, {a:3}, {a:4, b:1}], {w: 1}, function(err, ids) {
 
         // Perform a total count command
         collection.count(function(err, count) {
@@ -980,17 +979,17 @@ exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = function(test) {
     test.ok(collection instanceof Collection);
     test.equal('test_should_execute_insert_update_delete_safe_mode', collection.collectionName);
 
-    collection.insert({i:1}, {safe:true}, function(err, ids) {
+    collection.insert({i:1}, {w: 1}, function(err, ids) {
       test.equal(1, ids.length);
       test.ok(ids[0]._id.toHexString().length == 24);
 
       // Update the record
-      collection.update({i:1}, {"$set":{i:2}}, {safe:true}, function(err, result) {
+      collection.update({i:1}, {"$set":{i:2}}, {w: 1}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result);
 
         // Remove safely
-        collection.remove({}, {safe:true}, function(err, result) {
+        collection.remove({}, {w: 1}, function(err, result) {
           test.equal(null, err);
 
           test.done();
@@ -1004,31 +1003,30 @@ exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = function(test) {
  * @ignore
  */
 exports.shouldPerformMultipleSaves = function(test) {
-   client.createCollection("multiple_save_test", function(err, collection) {
-     var doc = {
-        name: 'amit',
-        text: 'some text'
-     };
+  client.createCollection("multiple_save_test", function(err, collection) {
+    var doc = {
+      name: 'amit',
+      text: 'some text'
+    };
 
-     //insert new user
-     collection.save(doc, {safe:true}, function(err, r) {
-       collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
-         var user = users[0]
+    //insert new user
+    collection.save(doc, {w: 1}, function(err, r) {
+      collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
+        var user = users[0]
 
-         if(err) {
-           throw new Error(err)
-         } else if(user) {
-           user.pants = 'worn'
+        if(err) {
+          throw new Error(err)
+        } else if(user) {
+          user.pants = 'worn'
 
-           collection.save(user, {safe:true}, function(err, result){
-             test.equal(null, err);
-             test.equal(1, result);
-
+          collection.save(user, {w: 1}, function(err, result){
+            test.equal(null, err);
+            test.equal(1, result);
             test.done();
-           })
-         }
-       });
-     })
+          })
+        }
+      });
+    })
   });
 }
 
@@ -1036,11 +1034,11 @@ exports.shouldPerformMultipleSaves = function(test) {
  * @ignore
  */
 exports.shouldCorrectlySaveDocumentWithNestedArray = function(test) {
-  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {w: 0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
     db.createCollection("save_error_on_save_test", function(err, collection) {
       // Create unique index for username
-      collection.createIndex([['username', 1]], {safe:true}, function(err, result) {
+      collection.createIndex([['username', 1]], {w: 1}, function(err, result) {
         var doc = {
           email: 'email@email.com',
           encrypted_password: 'password',
@@ -1054,7 +1052,7 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = function(test) {
           profile_fields: [],
           username: 'amit' };
         //insert new user
-        collection.save(doc, {safe:true}, function(err, doc) {
+        collection.save(doc, {w: 1}, function(err, doc) {
 
             collection.find({}).limit(1).toArray(function(err, users) {
               test.equal(null, err);
@@ -1065,7 +1063,7 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = function(test) {
                 test.equal(null, err);
 
                 // Update again
-                collection.update({_id:new ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, safe:true}, function(err, result) {
+                collection.update({_id:new ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, w: 1}, function(err, result) {
                   test.equal(null, err);
                   test.equal(1, result);
 
@@ -1085,10 +1083,10 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = function(test) {
  */
 exports.shouldPeformCollectionRemoveWithNoCallback = function(test) {
   client.collection("remove_with_no_callback_bug_test", function(err, collection) {
-    collection.save({a:1}, {safe:true}, function(){
-      collection.save({b:1}, {safe:true}, function(){
-        collection.save({c:1}, {safe:true}, function(){
-           collection.remove({a:1}, {safe:true}, function() {
+    collection.save({a:1}, {w: 1}, function(){
+      collection.save({b:1}, {w: 1}, function(){
+        collection.save({c:1}, {w: 1}, function(){
+           collection.remove({a:1}, {w: 1}, function() {
              // Let's perform a count
              collection.count(function(err, count) {
                test.equal(null, err);
@@ -1111,7 +1109,7 @@ exports.shouldPeformCollectionRemoveWithNoCallback = function(test) {
  */
 exports.shouldCorrectlyRetriveACollectionsIndexes = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1120,11 +1118,11 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = function(test) {
     db.createCollection('simple_key_based_distinct', function(err, collection) {
 
       // Create a geo 2d index
-      collection.ensureIndex({loc:"2d"}, {safe:true}, function(err, result) {
+      collection.ensureIndex({loc:"2d"}, {w: 1}, function(err, result) {
         test.equal(null, err);
 
         // Create a simple single field index
-        collection.ensureIndex({a:1}, {safe:true}, function(err, result) {
+        collection.ensureIndex({a:1}, {w: 1}, function(err, result) {
           test.equal(null, err);
 
           // List all of the indexes on the collection
@@ -1149,7 +1147,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = function(test) {
  */
 exports.shouldCorrectlyReturnACollectionsStats = function(test) {
   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {safe:false, native_parser: native_parser});
+   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w: 0, native_parser: native_parser});
 
   // Establish connection to db
   db.open(function(err, db) {
@@ -1158,7 +1156,7 @@ exports.shouldCorrectlyReturnACollectionsStats = function(test) {
     db.createCollection('collection_stats_test', function(err, collection) {
 
         // Insert some documents
-        collection.insert([{a:1}, {hello:'world'}], {safe:true}, function(err, result) {
+        collection.insert([{a:1}, {hello:'world'}], {w: 1}, function(err, result) {
 
           // Retrieve the statistics for the collection
           collection.stats(function(err, stats) {
@@ -1179,12 +1177,12 @@ exports.shouldThrowErrorOnAttemptingSafeRemoveWithNoCallback = function(test) {
   client.createCollection('shouldThrowErrorOnAttemptingSafeRemoveWithNoCallback', function(err, collection) {
 
     // insert a doc
-    collection.insert({a:1}, {safe:true}, function(err, result) {
+    collection.insert({a:1}, {w: 1}, function(err, result) {
       test.equal(null, err);
 
       // attemp a safe remove with no callback (should throw)
       try {
-        collection.remove({a:1}, {safe:true})
+        collection.remove({a:1}, {w: 1})
         test.ok(false);
       } catch(err) {}
 
@@ -1201,7 +1199,7 @@ exports.shouldThrowErrorOnAttemptingSafeInsertWithNoCallback = function(test) {
 
     try {
       // insert a doc
-      collection.insert({a:1}, {safe:true});
+      collection.insert({a:1}, {w: 1});
       test.ok(false);
     } catch(err) {}
 
@@ -1217,7 +1215,7 @@ exports.shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback = function(test) {
 
     try {
       // insert a doc
-      collection.update({a:1}, {$set:{b:1}}, {safe:true, upsert:true});
+      collection.update({a:1}, {$set:{b:1}}, {w: 1, upsert:true});
       test.ok(false);
     } catch(err) {}
 
@@ -1236,11 +1234,11 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = function(t
     if(parseInt((result.version.replace(/\./g, ''))) >= 212) {
 
       client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex', function(err, collection) {
-        collection.ensureIndex({createdAt:1}, {expireAfterSeconds:1, safe:true}, function(err, result) {
+        collection.ensureIndex({createdAt:1}, {expireAfterSeconds:1, w: 1}, function(err, result) {
           test.equal(null, err);
 
           // Insert a document with a date
-          collection.insert({a:1, createdAt:new Date()}, {safe:true}, function(err, result) {
+          collection.insert({a:1, createdAt:new Date()}, {w: 1}, function(err, result) {
             test.equal(null, err);
 
             collection.indexInformation({full:true}, function(err, indexes) {
@@ -1275,11 +1273,11 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(test) 
     if(parseInt((result.version.replace(/\./g, ''))) >= 212) {
 
       client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex', {}, function(err, collection) {
-        collection.createIndex({createdAt:1}, {expireAfterSeconds:1, safe:true}, function(err, result) {
+        collection.createIndex({createdAt:1}, {expireAfterSeconds:1, w: 1}, function(err, result) {
           test.equal(null, err);
 
           // Insert a document with a date
-          collection.insert({a:1, createdAt:new Date()}, {safe:true}, function(err, result) {
+          collection.insert({a:1, createdAt:new Date()}, {w: 1}, function(err, result) {
             test.equal(null, err);
 
             collection.indexInformation({full:true}, function(err, indexes) {
@@ -1309,7 +1307,7 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(test) 
 exports.shouldCorrectlyReadBackDocumentWithNull = function(test) {
   client.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, function(err, collection) {
     // Insert a document with a date
-    collection.insert({test:null}, {safe:true}, function(err, result) {
+    collection.insert({test:null}, {w: 1}, function(err, result) {
         test.equal(null, err);
 
         collection.findOne(function(err, item) {

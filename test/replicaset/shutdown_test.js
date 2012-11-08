@@ -27,7 +27,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -109,7 +109,7 @@ exports.shouldContinueToQueryWithPrimaryNodeShutdown = function(test) {
   ensureConnection(test, retries, function(err) {
     test.ok(err == null);
 
-    new Db('integration_test_', replSet, {safe:false}).open(function(err, p_db) {
+    new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
       test.ok(err == null);
       test.equal(true, p_db.serverConfig.isConnected());
 
@@ -151,7 +151,7 @@ exports.shouldContinueToQueryWithSecondaryNodeShutdown = function(test) {
   ensureConnection(test, retries, function(err) {
     test.ok(err == null);
 
-    new Db('integration_test_', replSet, {safe:false}).open(function(err, p_db) {
+    new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
       test.ok(err == null);
       test.equal(true, p_db.serverConfig.isConnected());
 

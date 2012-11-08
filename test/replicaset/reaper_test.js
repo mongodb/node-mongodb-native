@@ -72,7 +72,7 @@ exports.shouldCorrectlyHandleActiveReaper = function(test) {
   // Insert some data
   var db = new Db('integration_test_', replSet, 
     {
-      safe:false,
+      w:0,
       numberOfRetries:20, 
       retryMiliSeconds:5000,
       reaper:true,

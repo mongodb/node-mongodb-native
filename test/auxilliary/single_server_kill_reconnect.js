@@ -13,7 +13,7 @@ var testCase = require('nodeunit').testCase,
   Step = require("step");
 
 var MONGODB = 'integration_tests';
-var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+var client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 1}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
 var serverManager = null;
 
 /**
@@ -37,7 +37,7 @@ exports.tearDown = function(callback) {
 }
 
 exports.shouldCorrectlyKeepInsertingDocumentsWhenServerDiesAndComesUp = function(test) {
-  var db1 = new Db('mongo-ruby-test-single-server', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db1 = new Db('mongo-ruby-test-single-server', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // All inserted docs
   var docs = [];
   var errs = [];
@@ -94,7 +94,7 @@ exports.shouldCorrectlyKeepInsertingDocumentsWhenServerDiesAndComesUp = function
 }
 
 exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = function(test) {
-  var db = new Db('test-single-server-recovery', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {safe:false, numberOfRetries:3, retryMiliSeconds:500, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db = new Db('test-single-server-recovery', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, numberOfRetries:3, retryMiliSeconds:500, native_parser: (process.env['TEST_NATIVE'] != null)});
   // All inserted docs
   var docs = [];
   var errs = [];
@@ -111,14 +111,14 @@ exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = functio
 
       db.collection('inserts', function(err, collection) {
         var doc = {timestamp:new Date().getTime(), a:1};
-        collection.insert(doc, {safe:true}, function(err, result) {
+        collection.insert(doc, {w:1}, function(err, result) {
           test.equal(null, err);
 
           // Kill server instance
           serverManager.stop(9, function(err, result) {
             // Attemp insert (should timeout)
             var doc = {timestamp:new Date().getTime(), b:1};
-            collection.insert(doc, {safe:true}, function(err, result) {
+            collection.insert(doc, {w:1}, function(err, result) {
               test.ok(err != null);
               test.equal(null, result);
 
@@ -126,7 +126,7 @@ exports.shouldCorrectlyInsertKillServerFailThenRestartServerAndSucceed = functio
               serverManager = new ServerManager({auth:false, purgedirectories:false, journal:true});
               serverManager.start(true, function() {
                 // Attemp insert again
-                collection.insert(doc, {safe:true}, function(err, result) {
+                collection.insert(doc, {w:1}, function(err, result) {
                   // Fetch the documents
                   collection.find({b:1}).toArray(function(err, items) {
                     test.equal(null, err);

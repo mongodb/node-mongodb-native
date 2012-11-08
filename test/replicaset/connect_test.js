@@ -28,7 +28,7 @@ var ensureConnection = function(test, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   // Print any errors
   db.on("error", function(err) {
     console.log("============================= ensureConnection caught error")
@@ -108,8 +108,8 @@ exports.shouldThrowErrorDueToSharedConnectionUsage = function(test) {
   );
 
   try {
-    var db = new Db(MONGODB, replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
-    var db1 = new Db(MONGODB, replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db1 = new Db(MONGODB, replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   } catch(err) {
     test.done();
   }
@@ -143,7 +143,7 @@ exports.shouldCorrectlyHandleErrorWhenNoServerUpInReplicaset = function(test) {
     ]
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     test.ok(err != null);
     test.done();
@@ -165,7 +165,7 @@ exports.shouldCorrectlyConnectWithDefaultReplicasetNoOption = function(test) {
     ]
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     test.equal(null, err);
     p_db.close();
@@ -186,7 +186,7 @@ exports.shouldCorrectlyConnectWithDefaultReplicaset = function(test) {
     {}
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     test.equal(null, err);
     test.done();
@@ -207,7 +207,7 @@ exports.shouldCorrectlyConnectWithDefaultReplicasetAndSocketOptionsSet = functio
     {socketOptions:{keepAlive:100}}
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     test.equal(null, err);
     test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
@@ -228,7 +228,7 @@ exports.shouldEmitCloseNoCallback = function(test) {
     ], {}
   );
 
-  new Db('integration_test_', replSet, {safe:false}).open(function(err, db) {
+  new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
     test.equal(null, err);
     var dbCloseCount = 0, serverCloseCount = 0;
     db.on('close', function() { ++dbCloseCount; });
@@ -253,7 +253,7 @@ exports.shouldEmitCloseWithCallback = function(test) {
     ], {}
   );
 
-  new Db('integration_test_', replSet, {safe:false}).open(function(err, db) {
+  new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
     test.equal(null, err);
     var dbCloseCount = 0;
     db.on('close', function() { ++dbCloseCount; });
@@ -281,7 +281,7 @@ exports.shouldCorrectlyPassErrorWhenWrongReplicaSet = function(test) {
     {rs_name:RS.name + "-wrong"}
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     test.notEqual(null, err);
     test.done();
@@ -305,7 +305,7 @@ exports.shouldConnectWithPrimarySteppedDown = function(test) {
     // Wait for new primary to pop up
     ensureConnection(test, retries, function(err, p_db) {
 
-      new Db('integration_test_', replSet, {safe:false}).open(function(err, p_db) {
+      new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
         test.ok(err == null);
         test.equal(true, p_db.serverConfig.isConnected());
 
@@ -336,7 +336,7 @@ exports.shouldConnectWithThirdNodeKilled = function(test) {
 
       // Wait for new primary to pop up
       ensureConnection(test, retries, function(err, p_db) {
-        new Db('integration_test_', replSet, {safe:false}).open(function(err, p_db) {
+        new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
           test.ok(err == null);
           test.equal(true, p_db.serverConfig.isConnected());
 
@@ -363,7 +363,7 @@ exports.shouldConnectWithSecondaryNodeKilled = function(test) {
       {rs_name:RS.name}
     );
 
-    var db = new Db('integration_test_', replSet, {safe:false});
+    var db = new Db('integration_test_', replSet, {w:0});
     // Print any errors
     db.on("error", function(err) {
       console.log("============================= caught error")
@@ -397,7 +397,7 @@ exports.shouldConnectWithPrimaryNodeKilled = function(test) {
       {rs_name:RS.name}
     );
 
-    var db = new Db('integration_test_', replSet, {safe:false});
+    var db = new Db('integration_test_', replSet, {w:0});
     ensureConnection(test, retries, function(err, p_db) {
       if(err != null && err.stack != null) console.log(err.stack)
       test.done();
@@ -418,7 +418,7 @@ exports.shouldCorrectlyBeAbleToUsePortAccessors = function(test) {
     {rs_name:RS.name}
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     if(err != null) debug("shouldCorrectlyBeAbleToUsePortAccessors :: " + inspect(err));
     test.equal(replSet.host, p_db.serverConfig.primary.host);
@@ -451,7 +451,7 @@ exports.shouldCorrectlyConnect = function(test) {
     {rs_name:RS.name, connectArbiter:true}
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     if(err != null) debug("shouldCorrectlyConnect :: " + inspect(err));
     test.equal(true, p_db.serverConfig.isConnected());
@@ -480,7 +480,7 @@ exports.shouldCorrectlyConnect = function(test) {
                                           return item.host + ":" + item.port;
                                         }).sort());
           // Force new instance
-          var db2 = new Db('integration_test_', replSet2, {safe:false});
+          var db2 = new Db('integration_test_', replSet2, {w:0});
           db2.open(function(err, p_db2) {
             if(err != null) debug("shouldCorrectlyConnect :: " + inspect(err));
 
@@ -510,7 +510,7 @@ exports.shouldCorrectlyEmitOpenSignalAndFullSetSignal = function(test) {
     {rs_name:RS.name}
   );
 
-  var db = new Db('integration_test_', replSet, {safe:false});
+  var db = new Db('integration_test_', replSet, {w:0});
   db.once("open", function(_err, _db) {
     openCalled = true;
   });

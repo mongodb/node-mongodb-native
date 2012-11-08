@@ -71,7 +71,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
     ])
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -79,7 +79,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(test) {
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test");
     // Insert a simple doc
-    collection.insert({test:1}, {safe:true}, function(err, result) {
+    collection.insert({test:1}, {w:1}, function(err, result) {
       test.equal(null, err);
 
       collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY)}, function(err, item) {
@@ -106,7 +106,7 @@ exports.shouldCorrectlyEmitOpenEvent = function(test) {
 
   var openCalled = false;
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.once("open", function(_err, _db) {
     openCalled = true;
   })
@@ -132,7 +132,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
     ], {ha:true})
 
   // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {safe:false});
+  var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -140,14 +140,14 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
     // Perform a simple insert into a collection
     var collection = db.collection("shard_test2");
     // Insert a simple doc
-    collection.insert({test:1}, {safe:true}, function(err, result) {
+    collection.insert({test:1}, {w:1}, function(err, result) {
       test.equal(null, err);
 
       // Kill the mongos proxy
       Shard.killMongoS(50000, function(err, result) {
 
         // Attempt another insert
-        collection.insert({test:2}, {safe:true}, function(err, result) {
+        collection.insert({test:2}, {w:1}, function(err, result) {
           test.equal(null, err);
           test.equal(1, db.serverConfig.downServers.length);
 
@@ -161,7 +161,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
               // Kill the mongos proxy
               Shard.killMongoS(50001, function(err, result) {
                 // Attempt another insert
-                collection.insert({test:3}, {safe:true}, function(err, result) {
+                collection.insert({test:3}, {w:1}, function(err, result) {
                   test.equal(null, err);
                   test.equal(1, db.serverConfig.downServers.length);
 
@@ -172,7 +172,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
                       // Kill the mongos proxy
                       Shard.killMongoS(50000, function(err, result) {
                         // Attempt another insert
-                        collection.insert({test:4}, {safe:true}, function(err, result) {
+                        collection.insert({test:4}, {w:1}, function(err, result) {
                           test.equal(null, err);
 
                           // Wait for the ha process to pick up the existing new server
