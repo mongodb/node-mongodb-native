@@ -1040,7 +1040,7 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = function(test) {
   db.open(function(err, db) {
     db.createCollection("save_error_on_save_test", function(err, collection) {
       // Create unique index for username
-      collection.createIndex([['username', 1]], true, function(err, result) {
+      collection.createIndex([['username', 1]], {safe:true}, function(err, result) {
         var doc = {
           email: 'email@email.com',
           encrypted_password: 'password',
