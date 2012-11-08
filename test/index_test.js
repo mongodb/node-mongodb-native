@@ -803,6 +803,18 @@ exports['should handle index declarations using objects from other contexts'] = 
   })
 }
 
+exports['should correctly return error message when applying unique index to dupicate documents'] = function (test) {
+  var collection = client.collection("should_throw_error_due_to_duplicates");
+  collection.insert([{a:1}, {a:1}, {a:1}], {w:1}, function(err, result) {
+    test.equal(null, err);
+
+    collection.ensureIndex({a:1}, {w:1, unique:true}, function(err, result) {
+      test.ok(err != null);
+      test.done();
+    });
+  });
+}
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
