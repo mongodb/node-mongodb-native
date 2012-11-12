@@ -156,7 +156,7 @@ exports.testConnectBadUrl = function(test) {
  */
 exports.shouldCorrectlyDoSimpleCountExamples = function(test) {
   // Connect to the server
-  Db.connect('mongodb://localhost:27017/integration_tests?safe=false' + (useSSL == true ? '&ssl=true' : ''), function(err, db) {
+  Db.connect('mongodb://localhost:27017/integration_tests?w=0' + (useSSL == true ? '&ssl=true' : ''), function(err, db) {
     test.equal(null, err);
     
     db.close();

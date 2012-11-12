@@ -132,43 +132,43 @@ Let's look at the query. **$near** specifies the center point for the geospatial
 
 Let's look at the results returned by the query.
 
-  {
-    "ns" : "test.places",
-    "near" : "1100000011110000111100001111000011110000111100001111",
-    "results" : [
-      {
-        "dis" : 0,
-        "obj" : {
-          "_id" : 509a47337d6ab61b2871ee8e,
-          "name" : "Awesome burger bar",
-          "loc" : [
-            50,
-            50
-          ]
+    {
+      "ns" : "test.places",
+      "near" : "1100000011110000111100001111000011110000111100001111",
+      "results" : [
+        {
+          "dis" : 0,
+          "obj" : {
+            "_id" : 509a47337d6ab61b2871ee8e,
+            "name" : "Awesome burger bar",
+            "loc" : [
+              50,
+              50
+            ]
+          }
+        },
+        {
+          "dis" : 7.0710678118654755,
+          "obj" : {
+            "_id" : 509a47337d6ab61b2871ee90,
+            "name" : "More or less an Awesome burger bar",
+            "loc" : [
+              45,
+              45
+            ]
+          }
         }
+      ],
+      "stats" : {
+        "time" : 0,
+        "btreelocs" : 0,
+        "nscanned" : 2,
+        "objectsLoaded" : 2,
+        "avgDistance" : 3.5355339059327378,
+        "maxDistance" : 7.071128503792992
       },
-      {
-        "dis" : 7.0710678118654755,
-        "obj" : {
-          "_id" : 509a47337d6ab61b2871ee90,
-          "name" : "More or less an Awesome burger bar",
-          "loc" : [
-            45,
-            45
-          ]
-        }
-      }
-    ],
-    "stats" : {
-      "time" : 0,
-      "btreelocs" : 0,
-      "nscanned" : 2,
-      "objectsLoaded" : 2,
-      "avgDistance" : 3.5355339059327378,
-      "maxDistance" : 7.071128503792992
-    },
-    "ok" : 1
-  }
+      "ok" : 1
+    }
 
 Notice that **geoNear** is a command not a find query so it returns a single document with the results in the results field of the returned document. As we can see from the results each returned result has a field called **dis** that is the distance of the document from the center point of our search. Cool we've now covered the basics of geospatial search so let's move onto more advanced queries.
 
