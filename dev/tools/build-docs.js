@@ -14,6 +14,7 @@ var fs = require('fs'),
 var apiClasses = [
     {tag:"admin", path:"./lib/mongodb/admin.js"},
     {tag:"collection", path:"./lib/mongodb/collection.js"},
+    {tag:"mongoclient", path:"./lib/mongodb/mongo_client.js"},
     {tag:"db", path:"./lib/mongodb/db.js"},
     {tag:"cursor", path:"./lib/mongodb/cursor.js"},
     {tag:"cursorstream", path:"./lib/mongodb/cursorstream.js"},
@@ -28,6 +29,9 @@ var apiClasses = [
 
 // All test files
 var testClasses = [
+    {path:"./test/mongo_client_test.js"},
+    {path:"./test/replicaset/mongo_client_test.js"},
+    {path:"./test/sharded/mongo_client_test.js"},
     {path:"./test/admin_test.js"},
     {path:"./test/objectid_test.js"},
     {path:"./test/insert_test.js"},

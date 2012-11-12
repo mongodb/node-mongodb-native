@@ -51,13 +51,17 @@ exports.tearDown = function(callback) {
   callback();
 }
 
-// MongoClient interface
-//  .open
-//  .close
-//  .db
-//  .connect
+/**
+ * A basic example using the MongoClient to connect using a Server instance, similar to existing Db version
+ *
+ * @_class mongoclient
+ * @_function open
+ */
 exports['Should correctly connect using MongoClient to a single server'] = function(test) {
-  var mongoclient = new MongoClient(new Server("localhost", 27017, {ssl:useSSL}), {native_parser: (process.env['TEST_NATIVE'] != null)});
+  // Set up the connection to the local db
+  var mongoclient = new MongoClient(new Server("localhost", 27017, {native_parser: true});
+
+  // Open the connection to the server
   mongoclient.open(function(err, mongoclient) {
 
     // Get the first db and do an update document on it
@@ -72,6 +76,7 @@ exports['Should correctly connect using MongoClient to a single server'] = funct
         test.equal(null, err);
         test.equal(1, result);
 
+        // Close the connection
         mongoclient.close();
         test.done();
       });
@@ -79,10 +84,15 @@ exports['Should correctly connect using MongoClient to a single server'] = funct
   });
 }
 
+/**
+ * Example of a simple url connection string for a single server connection
+ *
+ * @_class mongoclient
+ * @_function MongoClient.connect
+ */
 exports['Should correctly connect using MongoClient to a single server using connect'] = function(test) {
-  var options = {native_parser: (process.env['TEST_NATIVE'] != null)};
   // Connect using the connection string  
-  MongoClient.connect("mongodb://localhost:27017/integration_tests", options, function(err, db) {
+  MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
     test.equal(null, err);
 
     db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {

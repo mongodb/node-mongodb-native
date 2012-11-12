@@ -148,11 +148,10 @@ exports.testConnectBadUrl = function(test) {
 };
 
 /**
- * Example of a simple url connection string.
+ * Example of a simple url connection string, with no acknowledgement of writes.
  *
  * @_class db
  * @_function Db.connect
- * @ignore
  */
 exports.shouldCorrectlyDoSimpleCountExamples = function(test) {
   // Connect to the server

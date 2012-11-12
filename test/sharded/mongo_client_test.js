@@ -59,7 +59,10 @@ exports.tearDown = function(callback) {
 }
 
 /**
- * @ignore
+ * Example of a simple url connection string to a shard, with acknowledgement of writes.
+ *
+ * @_class mongoclient
+ * @_function MongoClient.connect
  */
 exports['Should connect to mongos proxies using connectiong string'] = function(test) {
   MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1', function(err, db) {

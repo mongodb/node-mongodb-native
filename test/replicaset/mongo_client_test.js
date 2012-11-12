@@ -96,6 +96,12 @@ exports.tearDown = function(callback) {
   }
 }
 
+/**
+ * Example of a simple url connection string to a replicaset, with acknowledgement of writes.
+ *
+ * @_class mongoclient
+ * @_function MongoClient.connect
+ */
 exports['Should correctly connect to a replicaset'] = function(test) {
   MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_?w=1", function(err, db) {
     test.equal(null, err);
