@@ -178,4 +178,79 @@ to connect to a single server a replicaset and a sharded system using **MongoCli
     });
 
 Notice that when connecting to the shareded system it's pretty much the same url as for connecting to the replicaset. This is because the driver
-itself figures out if it's a replicaset or a set of Mongos proxies it's connecting to.
+itself figures out if it's a replicaset or a set of Mongos proxies it's connecting to. No special care is needed to specify if it's one or the other.
+This is in contrast to having to use the **ReplSet** or **Mongos** instances when using the **open** command.
+
+## MongoClient.connect options
+The connect function also takes a hash of options divided into db/server/replset/mongos alowing you to tweak options not directly supported by the
+unified url string format. To use these options you do pass in a has like this.
+
+    var MongoClient = require('mongodb').MongoClient;
+
+    MongoClient.connect("mongodb://localhost:27017/integration_test_?", {
+        db: {
+          native_parser: false
+        },
+        server: {
+          socketOptions: {
+            connectTimeoutMS: 500
+          }
+        },
+        replSet: {},
+        mongos: {}
+      }, function(err, db) {
+      test.equal(null, err);
+      test.ok(db != null);
+
+      db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+        test.equal(null, err);
+        test.equal(1, result);
+
+        db.close();
+        test.done();
+      });
+    });
+
+Below are all the options supported for db/server/replset/mongos.
+
+* **db** A hash of options at the db level overriding or adjusting functionaliy not suppported by the url
+    *  **w**, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowlegement of write and w >= 1 or w = 'majority' acknowledges the write
+    *  **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+    *  **fsync**, (Boolean, default:false) write waits for fsync before returning
+    *  **journal**, (Boolean, default:false) write waits for journal sync before returning
+    *  **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+    *  **native_parser** {Boolean, default:false}, use c++ bson parser.
+    *  **forceServerObjectId** {Boolean, default:false}, force server to create _id fields instead of client.
+    *  **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
+    *  **serializeFunctions** {Boolean, default:false}, serialize functions.
+    *  **raw** {Boolean, default:false}, peform operations using raw bson buffers.
+    *  **recordQueryStats** {Boolean, default:false}, record query statistics during execution.
+    *  **retryMiliSeconds** {Number, default:5000}, number of miliseconds between retries.
+    *  **numberOfRetries** {Number, default:5}, number of retries off connection.
+
+* **server** A hash of options at the server level not supported by the url.
+    *  **readPreference** {String, default:null}, set's the read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST)
+    *  **ssl** {Boolean, default:false}, use ssl connection (needs to have a mongod server with ssl support)
+    *  **slaveOk** {Boolean, default:false}, legacy option allowing reads from secondary, use **readPrefrence** instead.
+    *  **poolSize** {Number, default:1}, number of connections in the connection pool, set to 1 as default for legacy reasons.
+    *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
+    *  **logger** {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error **({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})**.
+    *  **auto_reconnect** {Boolean, default:false}, reconnect on error.
+    *  **disableDriverBSONSizeCheck** {Boolean, default:false}, force the server to error if the BSON message is to big
+
+* **replSet** A hash of options at the replSet level not supported by the url.
+    *  **ha** {Boolean, default:true}, turn on high availability.
+    *  **haInterval** {Number, default:2000}, time between each replicaset status check.
+    *  **reconnectWait** {Number, default:1000}, time to wait in miliseconds before attempting reconnect.
+    *  **retries** {Number, default:30}, number of times to attempt a replicaset reconnect.
+    *  **rs_name** {String}, the name of the replicaset to connect to.
+    *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
+    *  **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+    *  **strategy** {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)
+    *  **secondaryAcceptableLatencyMS** {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
+    *  **connectArbiter** {Boolean, default:false}, sets if the driver should connect to arbiters or not.
+
+* **mongos** A hash of options at the mongos level not supported by the url.
+    *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
+    *  **ha** {Boolean, default:true}, turn on high availability, attempts to reconnect to down proxies
+    *  **haInterval** {Number, default:2000}, time between each replicaset status check.
