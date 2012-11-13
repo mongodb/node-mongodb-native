@@ -34,7 +34,7 @@ Let's get around to setting up a connection with the Mongo DB database. Jumping 
     var MongoClient = require('mongodb').MongoClient;
     
     // Connect to the db
-    MongoClient.connect("mongodb://localhost:27017/exampleDb", {auto_reconnect:true}, function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(!err) {
         console.log("We are connected");
       }
@@ -66,7 +66,7 @@ Collections are the equivalent of tables in traditional databases and contain al
     var MongoClient = require('mongodb').MongoClient;
     
     // Connect to the db
-    MongoClient.connect("mongodb://localhost:27017/exampleDb", {auto_reconnect:true}, function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
 
       db.collection('test', function(err, collection) {});
@@ -109,7 +109,7 @@ So let's get dirty with the basic operations for Mongo DB. The Mongo DB wire pro
     var MongoClient = require('mongodb').MongoClient;
     
     // Connect to the db
-    MongoClient.connect("mongodb://localhost:27017/exampleDb", {auto_reconnect:true}, function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
 
       var collection = db.collection('test');
@@ -151,7 +151,7 @@ Right that's the basics of insert's ironed out. We got some documents in there b
     var MongoClient = require('mongodb').MongoClient;
     
     // Connect to the db
-    MongoClient.connect("mongodb://localhost:27017/exampleDb", {auto_reconnect:true}, function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
 
       var collection = db.collection('test');
@@ -200,7 +200,7 @@ Let's have a look at the remove operation for the driver. As before let's start 
     var MongoClient = require('mongodb').MongoClient;
     
     // Connect to the db
-    MongoClient.connect("mongodb://localhost:27017/exampleDb", {auto_reconnect:true}, function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
 
       var collection = db.collection('test');
@@ -239,7 +239,7 @@ Queries is of course a fundamental part of interacting with a database and Mongo
     var MongoClient = require('mongodb').MongoClient;
     
     // Connect to the db
-    MongoClient.connect("mongodb://localhost:27017/exampleDb", {auto_reconnect:true}, function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
 
       var collection = db.collection('test');
