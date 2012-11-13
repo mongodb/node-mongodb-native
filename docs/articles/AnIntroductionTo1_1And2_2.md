@@ -16,45 +16,38 @@ Using a read preference is very simple. Below are some examples using it at the 
 
 Below is a simple example using readpreferences at the db level.
 
-    var mongo = require('mongodb'),
-      ReplSet = mongo.ReplSet,
-      ReadPreference = mongodb.ReadPreference,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
 
-    // Replica configuration
-    var replSet = new ReplSet( [
-        new Server( "localhost", 27017),
-        new Server( "localhost", 27018),
-        new Server( "localhost", 27019)
-      ], {rs_name: "foo"}
-    );
+    var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , "localhost:27017",
+      , "localhost:27018"
+      , "localhost:27019"
+      , "exampleDb"
+      , "foo"
+      , "secondaryPreferred");
 
-    // Instantiate a new db object
-    var db = new Db('exampleDb', replSet, {readPreference: ReadPreference.SECONDARY_PREFERRED});
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
       }
     });
 
+
 Below is a simple example using readpreferences at the collection level.
 
-    var mongo = require('mongodb'),
-      ReplSet = mongo.ReplSet,
-      ReadPreference = mongodb.ReadPreference,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
 
-    // Replica configuration
-    var replSet = new ReplSet( [
-        new Server( "localhost", 27017),
-        new Server( "localhost", 27018),
-        new Server( "localhost", 27019)
-      ], {rs_name: "foo"}
-    );
+    var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , "localhost:27017",
+      , "localhost:27018"
+      , "localhost:27019"
+      , "exampleDb"
+      , "foo"
+      , "secondaryPreferred");
 
-    // Instantiate a new db object
-    var db = new Db('exampleDb', replSet);
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
 
@@ -67,22 +60,18 @@ Below is a simple example using readpreferences at the collection level.
 
 Below is a simple example using readpreferences at the query level.
 
-    var mongo = require('mongodb'),
-      ReplSet = mongo.ReplSet,
-      ReadPreference = mongodb.ReadPreference,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
 
-    // Replica configuration
-    var replSet = new ReplSet( [
-        new Server( "localhost", 27017),
-        new Server( "localhost", 27018),
-        new Server( "localhost", 27019)
-      ], {rs_name: "foo"}
-    );
+    var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , "localhost:27017",
+      , "localhost:27018"
+      , "localhost:27019"
+      , "exampleDb"
+      , "foo"
+      , "secondaryPreferred");
 
-    // Instantiate a new db object
-    var db = new Db('exampleDb', replSet);
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
 
@@ -95,22 +84,18 @@ Below is a simple example using readpreferences at the query level.
 
 Below is a simple example using a readpreference with tags at the query level. This example will pick from the set of servers tagged with **dc1:ny**.
 
-    var mongo = require('mongodb'),
-      ReplSet = mongo.ReplSet,
-      ReadPreference = mongodb.ReadPreference,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
 
-    // Replica configuration
-    var replSet = new ReplSet( [
-        new Server( "localhost", 27017),
-        new Server( "localhost", 27018),
-        new Server( "localhost", 27019)
-      ], {rs_name: "foo"}
-    );
+    var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , "localhost:27017",
+      , "localhost:27018"
+      , "localhost:27019"
+      , "exampleDb"
+      , "foo"
+      , "secondaryPreferred");
 
-    // Instantiate a new db object
-    var db = new Db('exampleDb', replSet);
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
 
@@ -124,19 +109,15 @@ Below is a simple example using a readpreference with tags at the query level. T
 ## Mongos
 There is now a seperate Server type for Mongos that handles not only Mongos read preferences for Mongo DB but also failover and picking the nearest Mongos proxy to your application. To use simply do
 
-    var mongo = require('mongodb'),
-      Mongos = mongo.Mongos,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
 
-    // Set up mongos connection
-    var mongos = new Mongos([
-        new Server("localhost", 50000, { auto_reconnect: true }),
-        new Server("localhost", 50001, { auto_reconnect: true })
-      ])
+    var url = format("mongodb://%s,%s/%s"
+      , "localhost:50000",
+      , "localhost:50001"
+      , "exampleDb");
 
-    // Instantiate a new db object
-    var db = new Db('exampleDb', server);
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
       }
@@ -151,9 +132,7 @@ The MongoDB aggregation framework provides a means to calculate aggregate values
 
 The driver supports the aggregation framework by adding a helper at the collection level to execute an aggregation pipeline against the documents in that collection. Below is a simple example of using the aggregation framework to perform a group by tags.
 
-    var mongo = require('mongodb'),
-      Server = mongo.Server,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient;
 
     // Some docs for insertion
     var docs = [{
@@ -163,8 +142,7 @@ The driver supports the aggregation framework by adding a helper at the collecti
           { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
         ]}];
 
-    var db = new Db(new Server('localhost', 27017));
-    db.open(function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       // Create a collection
       db.createCollection('test', function(err, collection) {
         // Insert the docs
@@ -213,14 +191,19 @@ GridFS now supports the streaming api's for node allowing you to pipe content ei
 
 A simple example is shown below for how to stream from a file on disk to a gridstore object.
 
-    var mongo = require('mongodb'),
-      fs = require('fs'),
-      Server = mongo.Server,
-      GridStore = mongo.GridStore,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , fs = require('fs')
+      , GridStore = mongo.GridStore;
 
-    var db = new Db(new Server("localhost", 27017, {auto_reconnect:true}));
-    db.open(function(err, client) {
+    // Some docs for insertion
+    var docs = [{
+        title : "this is my title", author : "bob", posted : new Date() ,
+        pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+        comments : [
+          { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+        ]}];
+
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       // Set up gridStore
       var gridStore = new GridStore(client, "test_stream_write", "w");
       // Create a file reader stream to an object
@@ -240,14 +223,11 @@ A simple example is shown below for how to stream from a file on disk to a grids
 
 A simple example is shown below for how to stream from a gridfs file to a file on disk.
 
-    var mongo = require('mongodb'),
-      fs = require('fs'),
-      Server = mongo.Server,
-      GridStore = mongo.GridStore,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , fs = require('fs')
+      , GridStore = mongo.GridStore;
 
-    var db = new Db(new Server("localhost", 27017, {auto_reconnect:true}));
-    db.open(function(err, client) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       // Set up gridStore
       var gridStore = new GridStore(client, "test_stream_write_2", "w");
       gridStore.writeFile("./test/gridstore/test_gs_working_field_read.pdf", function(err, result) {

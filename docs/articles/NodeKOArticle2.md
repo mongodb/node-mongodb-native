@@ -4,11 +4,11 @@ In the first tutorial we targeted general usage of the database. But Mongo DB is
 ## A simple example
 Let's dive straight into a simple example on how to write a file to the grid using the simplified Grid class.
 
-    var mongo = require('mongodb'),
-      Db = mongo.Db,
-    	Grid = mongo.Grid;
-	
-    Db.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+    var MongoClient = require('mongodb').MongoClient,
+      Grid = mongo.Grid;
+    
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) return console.dir(err);
 
       var grid = new Grid(db, 'fs');    
@@ -43,11 +43,11 @@ Right so we have written out first file, let's look at the other two simple func
 
 **the requires and and other initializing stuff omitted for brevity**
     
-    var mongo = require('mongodb'),
-      Db = mongo.Db,
+    var MongoClient = require('mongodb').MongoClient,
       Grid = mongo.Grid;
-  
-    Db.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+    
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) return console.dir(err);
 
       var grid = new Grid(db, 'fs');    

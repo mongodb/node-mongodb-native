@@ -32,14 +32,14 @@ Easy right? The only thing you have to ensure is that the first coordinate is th
 
 Let's go ahead and connect to the database and insert the document
 
-    var Db = require('mongodb').Db;
+    var MongoClient = require('mongodb').MongoClient;
 
     var document = {
       name: "Awesome burger bar",
       loc: [50, 50]      
     }
 
-    Db.connect("mongodb://localhost:27017/geodb", function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/geodb", function(err, db) {
       if(err) return console.dir(err)
 
       db.collection('places').insert(document, {w:1}, function(err, result) {
@@ -49,14 +49,14 @@ Let's go ahead and connect to the database and insert the document
 
 So now we have a document in our collection. We now need to tell MongoDB to index our collection and create a 2D index on our loc attribute so we can avail us of the awesome geospatial features. This turns out to be easy as well. Let's modify the code to ensure we have the index on startup.
 
-    var Db = require('mongodb').Db;
+    var MongoClient = require('mongodb').MongoClient;
 
     var document = {
       name: "Awesome burger bar",
       loc: [50, 50]      
     }
 
-    Db.connect("mongodb://localhost:27017/geodb", function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/geodb", function(err, db) {
       if(err) return console.dir(err)
       var collection = db.collection('places');
 
@@ -74,7 +74,7 @@ So now we have a document in our collection. We now need to tell MongoDB to inde
 ## Basic queries for your geospatial documents
 Since we now have a geospatial index on our collection let's play around with the query methods and learn how we can work with the data. First however let's add some more documents so we can see the effects of the different boundaries.
 
-    var Db = require('mongodb').Db;
+    var MongoClient = require('mongodb').MongoClient;
 
     var documents = [
         {name: "Awesome burger bar", loc: [50, 50]}
@@ -82,7 +82,7 @@ Since we now have a geospatial index on our collection let's play around with th
       , {name: "More or less an Awesome burger bar", loc: [45, 45]}
     ]
 
-    Db.connect("mongodb://localhost:27017/geodb", function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/geodb", function(err, db) {
       if(err) return console.dir(err)
       var collection = db.collection('places');
 
@@ -97,10 +97,10 @@ Since we now have a geospatial index on our collection let's play around with th
 
 Right from now one for brevities sake we are going to assume we have the documents stored in the collection and the index created so we can work on queries without the boilerplate insert and index creation code. The first thing we are going to do is locate all the documents that's a distance of 10 away from 50, 50.
 
-    var Db = require('mongodb').Db,
+    var MongoClient = require('mongodb').MongoClient,
       assert = require('assert');
 
-    Db.connect("mongodb://localhost:27017/geodb", function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/geodb", function(err, db) {
       if(err) return console.dir(err)
       
       db.collection('places').find({loc: {$near: [50,50], $maxDistance: 10}}).toArray(function(err, docs) {
@@ -117,10 +117,10 @@ This returns the following results (ignore the _id it will be different as it's 
 
 Let's look at the query. **$near** specifies the center point for the geospatial query and **$maxDistance** the radius of the search circle. Given this the query will return the two documents at **[50, 50]** and **[10, 10]**. Now this is a nice feature but what if we need to know the distance from each of the found documents to the originating center for our query. Luckily we have a command that support that called **geoNear**. Let's execute it and look at the results.
 
-    var Db = require('mongodb').Db,
+    var MongoClient = require('mongodb').MongoClient,
       assert = require('assert');
 
-    Db.connect("mongodb://localhost:27017/geodb", function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/geodb", function(err, db) {
       if(err) return console.dir(err)
       
       db.collection('places').geoNear(50, 50, {$maxDistance:10}, function(err, result) {
@@ -178,10 +178,10 @@ So besides these simple queries we can also do **bounds queries**. With bounds q
 ### The magical boundry box query
 Our country Whopper on Burgoria is a perfectly bound box (imagine that). Our application wants to restrict our searches to only burger bars in Burgonia. The boundaries for Burgonia are defined by (30, 30) -> (30, 60) and (30, 60) -> (60, 60). Great let's peform a box bounded query.
 
-    var Db = require('mongodb').Db,
+    var MongoClient = require('mongodb').MongoClient,
       assert = require('assert');
 
-    Db.connect("mongodb://localhost:27017/geodb", function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/geodb", function(err, db) {
       if(err) return console.dir(err)
       var box = [[30, 30], [60, 60]];
 
@@ -200,10 +200,10 @@ The results returned are.
 ### A polygon to far
 Awesome we can now do a query by our perfectly boxed country. Inside Whopper the country is split into triangles where triangle one is made up of three points (40, 40), (40, 50), (45, 45). We want to look for points that are only inside this triangle. Let's have a look at the query.
 
-    var Db = require('mongodb').Db,
+    var MongoClient = require('mongodb').MongoClient,
       assert = require('assert');
 
-    Db.connect("mongodb://localhost:27017/geodb", function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/geodb", function(err, db) {
       if(err) return console.dir(err)
       var triangle = [[40, 40], [40, 50], [45, 45]];
 
