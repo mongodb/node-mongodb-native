@@ -10,6 +10,9 @@
 - noOpen connection for Db.connect removed as not compatible with autodetection of Mongo type
 - Mongos connection with auth not working (Issue #737)
 - Use the connect method directly from the require. require('mongodb')("mongodb://localhost:27017/db")
+- new MongoClient introduced as the point of connecting to MongoDB's instead of the Db
+  - open/close/db/connect methods implemented
+- Implemented common URL connection format using MongoClient.connect allowing for simialar interface across all drivers.
 
 1.1.11 2012-10-10
 -----------------
