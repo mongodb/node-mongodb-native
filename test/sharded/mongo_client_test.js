@@ -80,6 +80,29 @@ exports['Should connect to mongos proxies using connectiong string'] = function(
 }
 
 /**
+ * @ignore
+ */
+exports['Should connect to mongos proxies using connectiong string and options'] = function(test) {
+  MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1', {
+    mongos: {
+      haInterval: 500
+    }
+  }, function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+    test.equal(500, db.serverConfig.mongosStatusCheckInterval);
+
+    db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      test.equal(null, err);
+      test.equal(1, result);
+
+      db.close();
+      test.done();
+    });    
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *

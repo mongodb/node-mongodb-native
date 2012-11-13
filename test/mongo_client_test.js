@@ -106,6 +106,36 @@ exports['Should correctly connect using MongoClient to a single server using con
 }
 
 /**
+ * @ignore
+ */
+exports['Should correctly connect using MongoClient to a single server using connect with optional server setting'] = function(test) {
+  // Connect using the connection string  
+  MongoClient.connect("mongodb://localhost:27017/integration_tests", {
+    db: {
+      native_parser: false
+    },
+
+    server: {
+      socketOptions: {
+        connectTimeoutMS: 500
+      }
+    }
+  }, function(err, db) {
+    test.equal(null, err);
+    test.equal(500, db.serverConfig.socketOptions.connectTimeoutMS);
+    test.equal(false, db.native_parser);
+
+    db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      test.equal(null, err);
+      test.equal(1, result);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *

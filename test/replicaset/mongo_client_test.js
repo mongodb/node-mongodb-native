@@ -118,6 +118,38 @@ exports['Should correctly connect to a replicaset'] = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports['Should correctly connect to a replicaset with additional options'] = function(test) {
+  MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_", {
+    db: {
+      native_parser: false
+    },
+
+    replSet: {
+      haInterval: 500,
+      socketOptions: {
+        connectTimeoutMS: 500
+      }
+    }
+  }, function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+    test.equal(500, db.serverConfig.socketOptions.connectTimeoutMS);
+    test.equal(false, db.native_parser);
+    test.equal(500, db.serverConfig.replicasetStatusCheckInterval)
+
+    db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      test.equal(null, err);
+      test.equal(1, result);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
