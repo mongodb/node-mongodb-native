@@ -78,13 +78,18 @@ not supported by the Node.js driver are left out for simplicities sake.
     * Default value is 100
 
 ### Write concern configuration:
+More detailed information about write concerns can be found at [http://www.mongodb.org/display/DOCS/getLastError+Command](http://www.mongodb.org/display/DOCS/getLastError+Command)
+
 * **w=wValue**
     * For numeric values above 1, the driver adds { w : wValue } to the getLastError command.
     * wValue is typically a number, but can be any string in order to allow for specifications like "majority"
     * Default value is 1.
-    * If wValue == -1 ignore network errors
-    * If wValue == 0 Don't send getLastError
-    * If wValue == 1 send {getlasterror: 1} (no w)
+      * wValue == -1 ignore network errors
+      * wValue == 0 no write acknowledgement
+      * wValue == 1 perform a write acknowledgement
+      * wValue == 2 perform a write acknowledgement across primary and one secondary
+      * wValue == 'majority' perform a write acknowledgement across the majority of servers in the replicaset
+      * wValue == 'tag name' perform a write acknowledgement against the replicaset tag name
 
 * **wtimeoutMS=ms**
     * The driver adds { wtimeout : ms } to the getlasterror command.
