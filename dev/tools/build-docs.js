@@ -12,19 +12,19 @@ var fs = require('fs'),
 // ----------------------------------------------------------------------------
 // All source files for the api generation
 var apiClasses = [
-    {tag:"admin", path:"./lib/mongodb/admin.js"},
-    {tag:"collection", path:"./lib/mongodb/collection.js"},
+    // {tag:"admin", path:"./lib/mongodb/admin.js"},
+    // {tag:"collection", path:"./lib/mongodb/collection.js"},
     {tag:"mongoclient", path:"./lib/mongodb/mongo_client.js"},
-    {tag:"db", path:"./lib/mongodb/db.js"},
-    {tag:"cursor", path:"./lib/mongodb/cursor.js"},
-    {tag:"cursorstream", path:"./lib/mongodb/cursorstream.js"},
-    {tag:"gridstore", path:"./lib/mongodb/gridfs/gridstore.js"},
-    {tag:"readstream", path:"./lib/mongodb/gridfs/readstream.js"},
-    {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"},
-    {tag:"server", path:"./lib/mongodb/connection/server.js"},
-    {tag:"mongos", path:"./lib/mongodb/connection/mongos.js"},
-    {tag:"replset", path:"./lib/mongodb/connection/repl_set.js"},
-    {tag:"readpreference", path:"./lib/mongodb/connection/read_preference.js"}
+    // {tag:"db", path:"./lib/mongodb/db.js"},
+    // {tag:"cursor", path:"./lib/mongodb/cursor.js"},
+    // {tag:"cursorstream", path:"./lib/mongodb/cursorstream.js"},
+    // {tag:"gridstore", path:"./lib/mongodb/gridfs/gridstore.js"},
+    // {tag:"readstream", path:"./lib/mongodb/gridfs/readstream.js"},
+    // {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"},
+    // {tag:"server", path:"./lib/mongodb/connection/server.js"},
+    // {tag:"mongos", path:"./lib/mongodb/connection/mongos.js"},
+    // {tag:"replset", path:"./lib/mongodb/connection/repl_set.js"},
+    // {tag:"readpreference", path:"./lib/mongodb/connection/read_preference.js"}
   ];
 
 // All test files

@@ -30,6 +30,7 @@ for(var i = 0; i < entries.length; i++) {
       .replace(/\<h2\>|\<\/h2\>/g, "**")
       .replace(/\<p\>/g, "\n\n")
       .replace(/\<\/p\>/g, "")
+      .replace(/&lt;/g, "<")
       .replace(/\<strong\>|\<\/strong\>/g, "**")
       .replace(/\<em\>|\<\/em\>/g, "*")
       .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
@@ -65,7 +66,8 @@ for(var i = 0; i < entries.length; i++) {
       .replace(/\<\/p\>/g, "")
       .replace(/\<strong\>|\<\/strong\>/g, "**")
       .replace(/\<em\>|\<\/em\>/g, "*")
-      .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n");
+      .replace(/\<br[ ]*\>|\<\/br[ ]*\>|\<br[ ]*\/\>/g, "\n")
+      .replace(/&lt;/g, "<")
     %><%- format("%s\n\n", fullDescription) %><%    
   }
 }
