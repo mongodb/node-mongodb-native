@@ -371,6 +371,9 @@ exports['Read preferences parsing'] = function(test) {
  * @ignore
  */
 exports['Read preferences tag parsing'] = function(test) {
+  var object = parse("mongodb://localhost/db");
+  test.equal(null, object.db_options.read_preference_tags);
+
   var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny");
   test.deepEqual([{dc:"ny"}], object.db_options.read_preference_tags);
 
