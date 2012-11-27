@@ -144,7 +144,7 @@ Object Document Modeling Libraries
          * - **Forks**
            - 306
          * - **Watchers**
-           - 2530
+           - 2531
 
 .. topic:: mongo-model
 
@@ -916,7 +916,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 208
          * - **Watchers**
-           - 2280
+           - 2281
 
 Libraries for the connect middleware
 ------------------------------------

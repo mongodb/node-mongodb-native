@@ -82,6 +82,7 @@
 <li><strong>strategy</strong> {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)</li>
 <li><strong>secondaryAcceptableLatencyMS</strong> {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)</li>
 <li><strong>connectArbiter</strong> {Boolean, default:false}, sets if the driver should connect to arbiters or not.</li>
+<li><strong>logger</strong> {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error <strong>({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})</strong>.</li>
 </ul>
 </dd>
 </dl>

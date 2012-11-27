@@ -36,7 +36,7 @@ Inserts a single document or a an array of documents into MongoDB.
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -251,7 +251,7 @@ Removes documents specified by <code>selector</code> from the db.
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -487,7 +487,7 @@ operators and update instead for more efficient operations.
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -613,7 +613,7 @@ Updates documents.
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -1033,7 +1033,7 @@ Find and update a document.
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -1139,7 +1139,7 @@ Find and remove a document
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -1500,7 +1500,7 @@ Creates an index on the collection.
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -1641,7 +1641,7 @@ Ensures that an index exists, if it does not it creates it
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
