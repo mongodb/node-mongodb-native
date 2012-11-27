@@ -72,6 +72,7 @@ Calculate the bson size for a passed in Javascript object.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -118,6 +119,7 @@ Serialize a Javascript object using a predefined Buffer and index into the buffe
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -176,6 +178,7 @@ Serialize a Javascript object.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -232,6 +235,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -301,6 +305,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -361,6 +366,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -426,6 +432,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -491,6 +498,7 @@ Serialize a Javascript object.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -538,6 +546,7 @@ Calculate the bson size for a passed in Javascript object.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -586,6 +595,7 @@ Serialize a Javascript object using a predefined Buffer and index into the buffe
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,

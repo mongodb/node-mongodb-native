@@ -25,10 +25,11 @@ put
 
 Puts binary data to the grid
 
-.. js:function:: put(data[, options])
+.. js:function:: put(data[, options], callback)
 
    :param buffer data: buffer with Binary Data.
    :param object [options]: the options for the files.
+   :param function callback: this will be called after this method is executed. The first parameter will contain an Error object if an error occured or null otherwise. The second parameter will contain a reference to this object.
    :returns: null 
 
 
@@ -41,6 +42,7 @@ Puts binary data to the grid
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -51,7 +53,7 @@ Puts binary data to the grid
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -78,9 +80,10 @@ get
 
 Get binary data to the grid
 
-.. js:function:: get(id)
+.. js:function:: get(id, callback)
 
    :param objectid id: ObjectID for file.
+   :param function callback: this will be called after this method is executed. The first parameter will contain an Error object if an error occured or null otherwise. The second parameter will contain a reference to this object.
    :returns: null 
 
 
@@ -93,6 +96,7 @@ Get binary data to the grid
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -103,7 +107,7 @@ Get binary data to the grid
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -135,9 +139,10 @@ delete
 
 Delete file from grid
 
-.. js:function:: delete(id)
+.. js:function:: delete(id, callback)
 
    :param objectid id: ObjectID for file.
+   :param function callback: this will be called after this method is executed. The first parameter will contain an Error object if an error occured or null otherwise. The second parameter will contain a reference to this object.
    :returns: null 
 
 
@@ -150,6 +155,7 @@ Delete file from grid
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -160,7 +166,7 @@ Delete file from grid
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {

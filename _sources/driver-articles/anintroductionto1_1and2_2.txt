@@ -33,22 +33,18 @@ Read preferences
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      ReplSet = mongo.ReplSet,
-      ReadPreference = mongodb.ReadPreference,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
     
-    // Replica configuration
-    var replSet = new ReplSet( [
-        new Server( "localhost", 27017),
-        new Server( "localhost", 27018),
-        new Server( "localhost", 27019)
-      ], {rs_name: "foo"}
-    );
+    var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , "localhost:27017",
+      , "localhost:27018"
+      , "localhost:27019"
+      , "exampleDb"
+      , "foo"
+      , "secondaryPreferred");
     
-    // Instantiate a new db object
-    var db = new Db('exampleDb', replSet, {readPreference: ReadPreference.SECONDARY_PREFERRED});
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
       }
@@ -61,22 +57,18 @@ Read preferences
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      ReplSet = mongo.ReplSet,
-      ReadPreference = mongodb.ReadPreference,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
     
-    // Replica configuration
-    var replSet = new ReplSet( [
-        new Server( "localhost", 27017),
-        new Server( "localhost", 27018),
-        new Server( "localhost", 27019)
-      ], {rs_name: "foo"}
-    );
+    var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , "localhost:27017",
+      , "localhost:27018"
+      , "localhost:27019"
+      , "exampleDb"
+      , "foo"
+      , "secondaryPreferred");
     
-    // Instantiate a new db object
-    var db = new Db('exampleDb', replSet);
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
     
@@ -94,22 +86,18 @@ Read preferences
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      ReplSet = mongo.ReplSet,
-      ReadPreference = mongodb.ReadPreference,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
     
-    // Replica configuration
-    var replSet = new ReplSet( [
-        new Server( "localhost", 27017),
-        new Server( "localhost", 27018),
-        new Server( "localhost", 27019)
-      ], {rs_name: "foo"}
-    );
+    var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , "localhost:27017",
+      , "localhost:27018"
+      , "localhost:27019"
+      , "exampleDb"
+      , "foo"
+      , "secondaryPreferred");
     
-    // Instantiate a new db object
-    var db = new Db('exampleDb', replSet);
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
     
@@ -127,22 +115,18 @@ Read preferences
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      ReplSet = mongo.ReplSet,
-      ReadPreference = mongodb.ReadPreference,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
     
-    // Replica configuration
-    var replSet = new ReplSet( [
-        new Server( "localhost", 27017),
-        new Server( "localhost", 27018),
-        new Server( "localhost", 27019)
-      ], {rs_name: "foo"}
-    );
+    var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , "localhost:27017",
+      , "localhost:27018"
+      , "localhost:27019"
+      , "exampleDb"
+      , "foo"
+      , "secondaryPreferred");
     
-    // Instantiate a new db object
-    var db = new Db('exampleDb', replSet);
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
     
@@ -163,19 +147,15 @@ Mongos
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      Mongos = mongo.Mongos,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , format = require('util').format;
     
-    // Set up mongos connection
-    var mongos = new Mongos([
-        new Server("localhost", 50000, { auto_reconnect: true }),
-        new Server("localhost", 50001, { auto_reconnect: true })
-      ])
+    var url = format("mongodb://%s,%s/%s"
+      , "localhost:50000",
+      , "localhost:50001"
+      , "exampleDb");
     
-    // Instantiate a new db object
-    var db = new Db('exampleDb', server);
-    db.open(function(err, db) {
+    MongoClient.connect(url, function(err db) {
       if(!err) {
         console.log("We are connected");
       }
@@ -201,9 +181,7 @@ Aggregation framework helper
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      Server = mongo.Server,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient;
     
     // Some docs for insertion
     var docs = [{
@@ -213,8 +191,7 @@ Aggregation framework helper
           { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
         ]}];
     
-    var db = new Db(new Server('localhost', 27017));
-    db.open(function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       // Create a collection
       db.createCollection('test', function(err, collection) {
         // Insert the docs
@@ -285,14 +262,19 @@ Better stream support for GridFS
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      fs = require('fs'),
-      Server = mongo.Server,
-      GridStore = mongo.GridStore,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , fs = require('fs')
+      , GridStore = mongo.GridStore;
     
-    var db = new Db(new Server("localhost", 27017, {auto_reconnect:true}));
-    db.open(function(err, client) {
+    // Some docs for insertion
+    var docs = [{
+        title : "this is my title", author : "bob", posted : new Date() ,
+        pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+        comments : [
+          { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+        ]}];
+    
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       // Set up gridStore
       var gridStore = new GridStore(client, "test_stream_write", "w");
       // Create a file reader stream to an object
@@ -317,14 +299,11 @@ Better stream support for GridFS
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      fs = require('fs'),
-      Server = mongo.Server,
-      GridStore = mongo.GridStore,
-      Db = mongo.Db;
+    var MongoClient = require('mongodb').MongoClient
+      , fs = require('fs')
+      , GridStore = mongo.GridStore;
     
-    var db = new Db(new Server("localhost", 27017, {auto_reconnect:true}));
-    db.open(function(err, client) {
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       // Set up gridStore
       var gridStore = new GridStore(client, "test_stream_write_2", "w");
       gridStore.writeFile("./test/gridstore/test_gs_working_field_read.pdf", function(err, result) {

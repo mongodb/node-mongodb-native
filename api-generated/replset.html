@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ReplSet &mdash; MongoDB Node.JS Driver 1.1.11 documentation</title>
+    <title>ReplSet &mdash; MongoDB Node.JS Driver 1.2.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.1.11',
+        VERSION:     '1.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.1.11 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.2.0 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.11 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -86,6 +86,53 @@
 </dd>
 </dl>
 </div>
+<div class="section" id="enableha">
+<h2>_enableHA<a class="headerlink" href="#enableha" title="Permalink to this headline">¶</a></h2>
+<p>Enables high availability pings.</p>
+<dl class="function">
+<dt id="_enableHA">
+<tt class="descname">_enableHA</tt><big>(</big><big>)</big><a class="headerlink" href="#_enableHA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="replset-state">
+<h2>ReplSet.State<a class="headerlink" href="#replset-state" title="Permalink to this headline">¶</a></h2>
+<p>Interval state object constructor</p>
+<dl class="function">
+<dt id="ReplSet.State">
+<tt class="descclassname">ReplSet.</tt><tt class="descname">State</tt><big>(</big><big>)</big><a class="headerlink" href="#ReplSet.State" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handleonfullsetup">
+<h2>_handleOnFullSetup<a class="headerlink" href="#handleonfullsetup" title="Permalink to this headline">¶</a></h2>
+<p>Handles the first &lt;code&gt;fullsetup&lt;/code&gt; event of this ReplSet.</p>
+<dl class="function">
+<dt id="_handleOnFullSetup">
+<tt class="descname">_handleOnFullSetup</tt><big>(</big><em>parent</em><big>)</big><a class="headerlink" href="#_handleOnFullSetup" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parent</strong> (<em>db</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="disableha">
+<h2>_disableHA<a class="headerlink" href="#disableha" title="Permalink to this headline">¶</a></h2>
+<p>Disables high availability pings.</p>
+<dl class="function">
+<dt id="_disableHA">
+<tt class="descname">_disableHA</tt><big>(</big><big>)</big><a class="headerlink" href="#_disableHA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 </div>
 
 
@@ -98,6 +145,10 @@
 <ul>
 <li><a class="reference internal" href="#">ReplSet</a><ul>
 <li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#enableha">_enableHA</a></li>
+<li><a class="reference internal" href="#replset-state">ReplSet.State</a></li>
+<li><a class="reference internal" href="#handleonfullsetup">_handleOnFullSetup</a></li>
+<li><a class="reference internal" href="#disableha">_disableHA</a></li>
 </ul>
 </li>
 </ul>
@@ -108,6 +159,7 @@
 </ul>
 <h3>Manual</h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="mongoclient.html">MongoClient()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="admin.html">Admin()</a></li>
@@ -254,7 +306,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.11 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

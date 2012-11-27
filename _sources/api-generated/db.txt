@@ -18,7 +18,10 @@ Create a new Db instance.
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, execute insert with a getLastError command returning the result of the insert command.
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  - **native_parser** {Boolean, default:false}, use c++ bson parser.
  - **forceServerObjectId** {Boolean, default:false}, force server to create _id fields instead of client.
@@ -26,11 +29,13 @@ Options
  - **serializeFunctions** {Boolean, default:false}, serialize functions.
  - **raw** {Boolean, default:false}, peform operations using raw bson buffers.
  - **recordQueryStats** {Boolean, default:false}, record query statistics during execution.
- - **reaper** {Boolean, default:false}, enables the reaper, timing out calls that never return.
- - **reaperInterval** {Number, default:10000}, number of miliseconds between reaper wakups.
- - **reaperTimeout** {Number, default:30000}, the amount of time before a callback times out.
  - **retryMiliSeconds** {Number, default:5000}, number of miliseconds between retries.
  - **numberOfRetries** {Number, default:5}, number of retries off connection.
+
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 
 ------------------
@@ -52,7 +57,7 @@ Initialize the database connection.
 
 .. js:function:: open(callback)
 
-   :param function callback: returns index information.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the index information or null if an error occured.
    :returns: null 
 
 
@@ -65,6 +70,7 @@ Initialize the database connection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -75,7 +81,7 @@ Initialize the database connection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -91,6 +97,7 @@ Initialize the database connection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -108,7 +115,7 @@ Initialize the database connection.
        ]
      );
      
-     var db = new Db('integration_test_', replSet, {safe:false});
+     var db = new Db('integration_test_', replSet, {w:0});
      db.open(function(err, p_db) {
        assert.equal(null, err);
        p_db.close();
@@ -121,6 +128,7 @@ Initialize the database connection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -140,7 +148,7 @@ Initialize the database connection.
      );
      
      // Create db instance
-     var db = new Db('integration_test_', replSet, {safe:false, native_parser: (process.env['TEST_NATIVE'] != null)});
+     var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
      // Trigger test once whole set is up
      db.on("fullsetup", function() {
        // Rip out secondaries forcing an attempt to read from the primary
@@ -170,6 +178,7 @@ Initialize the database connection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -186,7 +195,7 @@ Initialize the database connection.
        ])
      
      // Connect using the mongos connections
-     var db = new Db('integration_test_', mongos, {safe:false});
+     var db = new Db('integration_test_', mongos, {w:0});
      db.open(function(err, db) {
        assert.equal(null, err);
        assert.ok(db != null);
@@ -194,7 +203,7 @@ Initialize the database connection.
        // Perform a simple insert into a collection
        var collection = db.collection("shard_test");
        // Insert a simple doc
-       collection.insert({test:1}, {safe:true}, function(err, result) {
+       collection.insert({test:1}, {w:1}, function(err, result) {
          assert.equal(null, err);
      
          collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY)}, function(err, item) {
@@ -229,6 +238,7 @@ Create a new Db instance sharing the current socket connections.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -239,7 +249,7 @@ Create a new Db instance sharing the current socket connections.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -254,8 +264,8 @@ Create a new Db instance sharing the current socket connections.
        var multipleColl2 = secondDb.collection("multiple_db_instances");
        
        // Write a record into each and then count the records stored
-       multipleColl1.insert({a:1}, {safe:true}, function(err, result) {      
-         multipleColl2.insert({a:1}, {safe:true}, function(err, result) {
+       multipleColl1.insert({a:1}, {w:1}, function(err, result) {      
+         multipleColl2.insert({a:1}, {w:1}, function(err, result) {
            
            // Count over the results ensuring only on record in each collection
            multipleColl1.count(function(err, count) {
@@ -279,10 +289,10 @@ close
 
 Close the current db connection, including all the child db instances. Emits close event if no callback is provided.
 
-.. js:function:: close([forceClose][, callback])
+.. js:function:: close([forceClose], callback)
 
    :param boolean [forceClose]: connection can never be reused.
-   :param function [callback]: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results or null if an error occured.
    :returns: null 
 
 
@@ -295,6 +305,7 @@ Close the current db connection, including all the child db instances. Emits clo
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -305,7 +316,7 @@ Close the current db connection, including all the child db instances. Emits clo
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -314,14 +325,14 @@ Close the current db connection, including all the child db instances. Emits clo
        db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb', function(err, collection) {
      
          // Insert a document
-         collection.insert({a:1}, {safe:true}, function(err, result) {
+         collection.insert({a:1}, {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Force close the connection
            db.close(true, function(err, result) {
      
              // Attemp to insert should fail now with correct message 'db closed by application'
-             collection.insert({a:2}, {safe:true}, function(err, result) {
+             collection.insert({a:2}, {w:1}, function(err, result) {
                assert.equal('db closed by application', err.message);
              });
            });
@@ -336,6 +347,7 @@ Close the current db connection, including all the child db instances. Emits clo
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -346,7 +358,7 @@ Close the current db connection, including all the child db instances. Emits clo
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -382,6 +394,7 @@ Access the Admin database
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -392,7 +405,7 @@ Access the Admin database
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -416,7 +429,7 @@ Returns a cursor to all the collection information.
 .. js:function:: collectionsInfo([collectionName], callback)
 
    :param string [collectionName]: the collection name we wish to retrieve the information from.
-   :param function callback: returns option results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the options or null if an error occured.
    :returns: null 
 
 
@@ -429,6 +442,7 @@ Returns a cursor to all the collection information.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -439,7 +453,7 @@ Returns a cursor to all the collection information.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -484,7 +498,7 @@ Options
 
    :param string [collectionName]: the collection name we wish to filter by.
    :param object [options]: additional options during update.
-   :param function callback: returns option results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the collection names or null if an error occured.
    :returns: null 
 
 
@@ -497,6 +511,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -507,7 +522,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -542,17 +557,26 @@ Fetch a specific collection (containing the actual collection information)
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
  - **raw** {Boolean, default:false}, perform all operations using raw bson objects.
  - **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
  - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **strict**, (Boolean, default:false) throws and error if collection already exists
 
-.. js:function:: collection(collectionName[, options], [callback])
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
+.. js:function:: collection(collectionName[, options], callback)
 
    :param string collectionName: the collection name we wish to access.
    :param object [options]: returns option results.
-   :param function [callback]: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the collection or null if an error occured.
    :returns: null 
 
 
@@ -565,6 +589,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -575,7 +600,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -589,14 +614,14 @@ Options
          assert.equal(null, err);
      
          // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
-         db.collection('test_correctly_access_collections', {safe:true}, function(err, col3) {
+         db.collection('test_correctly_access_collections', {strict:true}, function(err, col3) {
            assert.ok(err != null);
      
            // Create the collection
            db.createCollection('test_correctly_access_collections', function(err, result) {
      
              // Retry to get the collection, should work as it's now created
-             db.collection('test_correctly_access_collections', {safe:true}, function(err, col3) {
+             db.collection('test_correctly_access_collections', {strict:true}, function(err, col3) {
                assert.equal(null, err);
      
                db.close();
@@ -616,7 +641,7 @@ Fetch all collections for the current db.
 
 .. js:function:: collections(callback)
 
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the collections or null if an error occured.
    :returns: null 
 
 
@@ -629,6 +654,7 @@ Fetch all collections for the current db.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -639,7 +665,7 @@ Fetch all collections for the current db.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -676,7 +702,7 @@ Options
    :param code code: javascript to execute on server.
    :param object [parameters]: the parameters for the call.
    :param object [options]: the options
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from eval or null if an error occured.
    :returns: null 
 
 
@@ -689,6 +715,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -699,7 +726,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -772,6 +799,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -782,17 +810,17 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
      
        // Clean out the collection
-       db.collection("system.js").remove({}, {safe:true}, function(err, result) {
+       db.collection("system.js").remove({}, {w:1}, function(err, result) {
          assert.equal(null, err);
      
          // Define a system level function
-         db.collection("system.js").insert({_id: "echo", value: new Code("function(x) { return x; }")}, {safe:true}, function(err, result) {
+         db.collection("system.js").insert({_id: "echo", value: new Code("function(x) { return x; }")}, {w:1}, function(err, result) {
            assert.equal(null, err);
          
            db.eval("echo(5)", function(err, result) {
@@ -816,7 +844,7 @@ Dereference a dbref, against a db
 .. js:function:: dereference(dbRef, callback)
 
    :param dbref dbRef: db reference object we wish to resolve.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dereference or null if an error occured.
    :returns: null 
 
 
@@ -829,6 +857,7 @@ Dereference a dbref, against a db
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -839,7 +868,7 @@ Dereference a dbref, against a db
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -852,7 +881,7 @@ Dereference a dbref, against a db
        secondDb.createCollection('test_deref_examples', function(err, collection) {
      
          // Insert a document in the collection
-         collection.insert({'a':1}, {safe:true}, function(err, ids) {
+         collection.insert({'a':1}, {w:1}, function(err, ids) {
      
            // Let's build a db reference and resolve it
            var dbRef = new DBRef('test_deref_examples', ids[0]._id, 'integration_tests_2');
@@ -885,7 +914,7 @@ Logout user from server, fire off on all connections and remove all auth info
 
 .. js:function:: logout(callback)
 
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from logout or null if an error occured.
    :returns: null 
 
 
@@ -898,6 +927,7 @@ Logout user from server, fire off on all connections and remove all auth info
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -908,7 +938,7 @@ Logout user from server, fire off on all connections and remove all auth info
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -951,7 +981,7 @@ Options
    :param string username: username.
    :param string password: password.
    :param object [options]: the options
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from authentication or null if an error occured.
    :returns: null 
 
 
@@ -964,6 +994,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -974,7 +1005,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1004,6 +1035,14 @@ Add a user to the database.
 
 
 Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
+
+
+
+Deprecated Options 
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: addUser(username, password[, options], callback)
@@ -1011,7 +1050,7 @@ Options
    :param string username: username.
    :param string password: password.
    :param object [options]: additional options during update.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from addUser or null if an error occured.
    :returns: null 
 
 
@@ -1024,6 +1063,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1034,7 +1074,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1059,13 +1099,21 @@ Remove a user from a database
 
 
 Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
+
+
+
+Deprecated Options 
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: removeUser(username[, options], callback)
 
    :param string username: username.
    :param object [options]: additional options during update.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from removeUser or null if an error occured.
    :returns: null 
 
 
@@ -1078,6 +1126,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1088,7 +1137,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1132,7 +1181,10 @@ Creates a collection on a server pre-allocating space, need to create f.ex cappe
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
  - **raw** {Boolean, default:false}, perform all operations using raw bson objects.
  - **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
@@ -1141,12 +1193,18 @@ Options
  - **max** {Number}, the maximum number of documents in the capped collection.
  - **autoIndexId** {Boolean, default:false}, create an index on the _id field of the document, not created automatically on capped collections.
  - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **strict**, (Boolean, default:false) throws and error if collection already exists
+
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: createCollection(collectionName[, options], callback)
 
    :param string collectionName: the collection name we wish to access.
    :param object [options]: returns option results.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from createCollection or null if an error occured.
    :returns: null 
 
 
@@ -1159,6 +1217,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1169,18 +1228,18 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
      
        // Create a capped collection with a maximum of 1000 documents
-       db.createCollection("a_simple_collection", {capped:true, size:10000, max:1000, safe:true}, function(err, collection) {
+       db.createCollection("a_simple_collection", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
          assert.equal(null, err);
      
          // Insert a document in the capped collection
-         collection.insert({a:1}, {safe:true}, function(err, result) {
+         collection.insert({a:1}, {w:1}, function(err, result) {
            assert.equal(null, err);
      
            db.close();
@@ -1199,7 +1258,7 @@ Execute a command hash against MongoDB. This lets you acess any commands not ava
 .. js:function:: command(selector, callback)
 
    :param object selector: the command hash to send to the server, ex: {ping:1}.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The command always return the whole result of the command as the second parameter.
    :returns: null 
 
 
@@ -1212,6 +1271,7 @@ Execute a command hash against MongoDB. This lets you acess any commands not ava
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1222,7 +1282,7 @@ Execute a command hash against MongoDB. This lets you acess any commands not ava
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1247,7 +1307,7 @@ Drop a collection from the database, removing it permanently. New accesses will 
 .. js:function:: dropCollection(collectionName, callback)
 
    :param string collectionName: the name of the collection we wish to drop.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dropCollection or null if an error occured.
    :returns: null 
 
 
@@ -1260,6 +1320,7 @@ Drop a collection from the database, removing it permanently. New accesses will 
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1270,7 +1331,7 @@ Drop a collection from the database, removing it permanently. New accesses will 
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1281,11 +1342,11 @@ Drop a collection from the database, removing it permanently. New accesses will 
          assert.equal(null, err);
      
          // Create a capped collection with a maximum of 1000 documents
-         db.createCollection("a_simple_create_drop_collection", {capped:true, size:10000, max:1000, safe:true}, function(err, collection) {
+         db.createCollection("a_simple_create_drop_collection", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
            assert.equal(null, err);
      
            // Insert a document in the capped collection
-           collection.insert({a:1}, {safe:true}, function(err, result) {
+           collection.insert({a:1}, {w:1}, function(err, result) {
              assert.equal(null, err);
      
              // Drop the collection from this world
@@ -1316,7 +1377,7 @@ Rename a collection.
 
    :param string fromCollection: the name of the current collection we wish to rename.
    :param string toCollection: the new name of the collection.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from renameCollection or null if an error occured.
    :returns: null 
 
 
@@ -1329,6 +1390,7 @@ Rename a collection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1339,18 +1401,18 @@ Rename a collection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
      
        // Create a collection
-       db.createCollection("simple_rename_collection", {safe:true}, function(err, collection) {
+       db.createCollection("simple_rename_collection", {w:1}, function(err, collection) {
          assert.equal(null, err);
      
          // Insert a document in the collection
-         collection.insert({a:1}, {safe:true}, function(err, result) {
+         collection.insert({a:1}, {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Rename the collection
@@ -1403,7 +1465,7 @@ Connection Options
 
    :param object [options]: returns option results.
    :param object [connectionOptions]: returns option results.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from lastError or null if an error occured.
    :returns: null 
 
 
@@ -1416,6 +1478,7 @@ Connection Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1426,14 +1489,14 @@ Connection Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
      
        // Create a collection
-       db.createCollection("simple_rename_collection", {safe:true}, function(err, collection) {
+       db.createCollection("simple_rename_collection", {w:1}, function(err, collection) {
          assert.equal(null, err);
      
          // Insert a document in the collection
@@ -1475,7 +1538,7 @@ Options
 .. js:function:: previousErrors([options], callback)
 
    :param object [options]: returns option results.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from previousErrors or null if an error occured.
    :returns: null 
 
 
@@ -1488,6 +1551,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1498,18 +1562,18 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
      
        // Create a collection
-       db.createCollection("simple_previous_error_coll", {safe:true}, function(err, collection) {
+       db.createCollection("simple_previous_error_coll", {w:1}, function(err, collection) {
          assert.equal(null, err);
      
          // Force a unique index
-         collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, result) {
+         collection.ensureIndex({a:1}, {unique:true, w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Force some errors
@@ -1547,7 +1611,7 @@ Options
 .. js:function:: resetErrorHistory([options], callback)
 
    :param object [options]: returns option results.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from resetErrorHistory or null if an error occured.
    :returns: null 
 
 
@@ -1560,6 +1624,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1570,18 +1635,18 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
      
        // Create a collection
-       db.createCollection("simple_reset_error_history_coll", {safe:true}, function(err, collection) {
+       db.createCollection("simple_reset_error_history_coll", {w:1}, function(err, collection) {
          assert.equal(null, err);
      
          // Force a unique index
-         collection.ensureIndex({a:1}, {unique:true, safe:true}, function(err, result) {
+         collection.ensureIndex({a:1}, {unique:true, w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Force some errors
@@ -1617,7 +1682,10 @@ Creates an index on the collection.
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
@@ -1628,12 +1696,17 @@ Options
  - **expireAfterSeconds** {Number}, allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  - **name** {String}, override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
 
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
 .. js:function:: createIndex(collectionName, fieldOrSpec[, options], callback)
 
    :param string collectionName: name of the collection to create the index on.
    :param object fieldOrSpec: fieldOrSpec that defines the index.
    :param object [options]: additional options during update.
-   :param function callback: for results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from createIndex or null if an error occured.
    :returns: null 
 
 
@@ -1646,6 +1719,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1656,7 +1730,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1667,12 +1741,12 @@ Options
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            db.createIndex('more_complex_index_test', {a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
@@ -1704,7 +1778,10 @@ Ensures that an index exists, if it does not it creates it
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
@@ -1715,12 +1792,17 @@ Options
  - **expireAfterSeconds** {Number}, allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  - **name** {String}, override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
 
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
 .. js:function:: ensureIndex(collectionName, fieldOrSpec[, options], callback)
 
    :param string collectionName: name of the collection to create the index on.
    :param object fieldOrSpec: fieldOrSpec that defines the index.
    :param object [options]: additional options during update.
-   :param function callback: for results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from ensureIndex or null if an error occured.
    :returns: null 
 
 
@@ -1733,6 +1815,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1743,7 +1826,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1754,12 +1837,12 @@ Options
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            db.ensureIndex('more_complex_ensure_index_test', {a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
@@ -1796,7 +1879,7 @@ Options
 .. js:function:: cursorInfo([options], callback)
 
    :param object [options]: additional options during update.
-   :param function callback: for results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from cursorInfo or null if an error occured.
    :returns: null 
 
 
@@ -1809,6 +1892,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1819,7 +1903,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1835,7 +1919,7 @@ Options
          }
      
          // Insert a bunch of documents for the index
-         collection.insert(docs, {safe:true}, function(err, result) {
+         collection.insert(docs, {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Let's set a cursor
@@ -1866,7 +1950,7 @@ Drop an index on a collection.
 
    :param string collectionName: the name of the collection where the command will drop an index.
    :param string indexName: name of the index to drop.
-   :param function callback: for results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dropIndex or null if an error occured.
    :returns: null 
 
 
@@ -1879,6 +1963,7 @@ Drop an index on a collection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1889,7 +1974,7 @@ Drop an index on a collection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1900,12 +1985,12 @@ Drop an index on a collection.
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Drop the index
              db.dropIndex("create_and_drop_an_index", "a_1_b_1", function(err, result) {
@@ -1936,7 +2021,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 .. js:function:: reIndex(collectionName, callback)
 
    :param string collectionName: the name of the collection.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from reIndex or null if an error occured.
 
 **Examples**
 
@@ -1947,6 +2032,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1957,7 +2043,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1968,12 +2054,12 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Force a reindex of the collection
              db.reIndex('create_and_drop_all_indexes', function(err, result) {
@@ -2011,7 +2097,7 @@ Options
 
    :param string collectionName: the name of the collection.
    :param object [options]: additional options during update.
-   :param function callback: returns the index information.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from indexInformation or null if an error occured.
    :returns: null 
 
 
@@ -2024,6 +2110,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2034,7 +2121,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2045,12 +2132,12 @@ Options
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Fetch basic indexInformation for collection
              db.indexInformation('more_index_information_test', function(err, indexInformation) {
@@ -2080,7 +2167,7 @@ Drop a database.
 
 .. js:function:: dropDatabase(callback)
 
-   :param function callback: returns the index information.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dropDatabase or null if an error occured.
    :returns: null 
 
 
@@ -2093,6 +2180,7 @@ Drop a database.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2103,7 +2191,7 @@ Drop a database.
          assert = require('assert');
 
      var db = new Db('integration_tests_to_drop', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2114,7 +2202,7 @@ Drop a database.
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Let's drop the database
@@ -2163,7 +2251,7 @@ Options
 .. js:function:: stats([options], callback)
 
    :param objects [options]: options for the stats command
-   :param function callback: returns statistical information for the db.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from stats or null if an error occured.
    :returns: null 
 
 
@@ -2176,6 +2264,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2186,7 +2275,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2216,12 +2305,16 @@ www.mongodb.org/display/DOCS/Connections
 
 Options
  - **uri_decode_auth** {Boolean, default:false} uri decode the user name and password for authentication
+ - **db** {Object, default: null} a hash off options to set on the db object, see **Db constructor**
+ - **server** {Object, default: null} a hash off options to set on the server objects, see **Server** constructor**
+ - **replSet** {Object, default: null} a hash off options to set on the replSet object, see **ReplSet** constructor**
+ - **mongos** {Object, default: null} a hash off options to set on the mongos object, see **Mongos** constructor**
 
 .. js:function:: Db.connect(url[, options], callback)
 
    :param string url: connection url for MongoDB.
    :param object [options]: optional options for insert command
-   :param function callback: callback returns the initialized db.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the db instance or null if an error occured.
    :returns: null 
 
 
@@ -2229,11 +2322,12 @@ Options
 
   
   
-  Example of a simple url connection string.
+  Example of a simple url connection string, with no acknowledgement of writes.
 
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2244,7 +2338,7 @@ Options
          assert = require('assert');
 
      // Connect to the server
-     Db.connect('mongodb://localhost:27017/integration_tests?safe=false' + (useSSL == true ? '&ssl=true' : ''), function(err, db) {
+     Db.connect('mongodb://localhost:27017/integration_tests?w=0' + (useSSL == true ? '&ssl=true' : ''), function(err, db) {
        assert.equal(null, err);
        
        db.close();

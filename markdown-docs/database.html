@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Database &mdash; MongoDB Node.JS Driver 1.1.11 documentation</title>
+    <title>Database &mdash; MongoDB Node.JS Driver 1.2.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.1.11',
+        VERSION:     '1.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.1.11 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.2.0 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.11 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -73,7 +73,7 @@
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">auto_reconnect</span></tt>  - to reconnect automatically,  <tt class="docutils literal"><span class="pre">default:false</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">poolSize</span></tt>  - specify the number of connections in the pool  <tt class="docutils literal"><span class="pre">default:1</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">poolSize</span></tt>  - specify the number of connections in the pool  <tt class="docutils literal"><span class="pre">default:5</span></tt></li>
 <li><tt class="docutils literal"><span class="pre">socketOptions</span></tt>  - a collection of pr socket settings</li>
 </ul>
 </div></blockquote>
@@ -109,6 +109,7 @@
 <li><tt class="docutils literal"><span class="pre">reaperInterval</span></tt>  - specify the number of milliseconds between each reaper attempt  <tt class="docutils literal"><span class="pre">default:10000</span></tt></li>
 <li><tt class="docutils literal"><span class="pre">reaperTimeout</span></tt>  - specify the number of milliseconds for timing out callbacks that don&#8217;t return  <tt class="docutils literal"><span class="pre">default:30000</span></tt></li>
 <li><tt class="docutils literal"><span class="pre">raw</span></tt>  - driver expects Buffer raw bson document,  <tt class="docutils literal"><span class="pre">default:false</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">logger</span></tt>  - object specifying error(), debug() and log() functions</li>
 </ul>
 </div></blockquote>
 </div></blockquote>
@@ -210,6 +211,36 @@
 </div></blockquote>
 </div></blockquote>
 </div>
+<div class="section" id="debug-commands">
+<h2>debug commands<a class="headerlink" href="#debug-commands" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>In order to debug the commands sent to the database you can add a  <tt class="docutils literal"><span class="pre">logger</span></tt>  object to the  <tt class="docutils literal"><span class="pre">DB</span> <span class="pre">options</span></tt> . Make sure also the property  <tt class="docutils literal"><span class="pre">doDebug</span></tt>  is set.</p>
+<p>Example</p>
+<blockquote>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">options</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="nx">options</span><span class="p">.</span><span class="nx">logger</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="nx">options</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">doDebug</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+<span class="nx">options</span><span class="p">.</span><span class="nx">logger</span><span class="p">.</span><span class="nx">debug</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">message</span><span class="p">,</span> <span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// print the mongo command:</span>
+    <span class="c1">// &quot;writing command to mongodb&quot;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+
+    <span class="c1">// print the collection name</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">object</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">collectionName</span><span class="p">)</span>
+
+    <span class="c1">// print the json query sent to MongoDB</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">object</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">query</span><span class="p">)</span>
+
+    <span class="c1">// print the binary object</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">object</span><span class="p">.</span><span class="nx">binary</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;some_database&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(...),</span> <span class="nx">options</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div></blockquote>
+</div>
 </div>
 
 
@@ -228,6 +259,7 @@
 <li><a class="reference internal" href="#sharing-the-connections-over-multiple-dbs">Sharing the connections over multiple dbs</a></li>
 <li><a class="reference internal" href="#deleting-a-database">Deleting a database</a></li>
 <li><a class="reference internal" href="#custom-primary-keys">Custom primary keys</a></li>
+<li><a class="reference internal" href="#debug-commands">debug commands</a></li>
 </ul>
 </li>
 </ul>
@@ -238,14 +270,7 @@
 </ul>
 <h3>Manual</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
@@ -384,7 +409,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.1.11 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

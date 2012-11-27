@@ -37,3 +37,36 @@ Always ourselves
 
 .. js:function:: setReadPreference()
 
+
+----------------
+assignReplicaSet
+----------------
+
+
+Assigns a replica set to this <code>server</code>.
+
+.. js:function:: assignReplicaSet(replset)
+
+   :param replset replset: 
+
+-------------------------
+inheritReplSetOptionsFrom
+-------------------------
+
+
+Takes needed options from <code>replset</code> and overwrites
+our own options.
+
+.. js:function:: inheritReplSetOptionsFrom(replset)
+
+   :param replset replset: 
+
+-------
+connect
+-------
+
+
+Opens this server connection.
+
+.. js:function:: connect()
+

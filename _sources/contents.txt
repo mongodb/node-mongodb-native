@@ -5,6 +5,7 @@ Node.JS MongoDB Driver Manual Contents
 .. toctree::
    :maxdepth: 3
 
+   api-generated/mongoclient
    api-generated/db
    api-generated/collection
    api-generated/admin

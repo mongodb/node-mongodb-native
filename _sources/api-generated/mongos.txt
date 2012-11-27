@@ -21,3 +21,13 @@ Options
  - **ha** {Boolean, default:true}, turn on high availability, attempts to reconnect to down proxies
  - **haInterval** {Number, default:2000}, time between each replicaset status check.
 
+
+-----------------
+setReadPreference
+-----------------
+
+
+Always ourselves
+
+.. js:function:: setReadPreference()
+

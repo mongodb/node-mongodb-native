@@ -36,15 +36,23 @@ Inserts a single document or a an array of documents into MongoDB.
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **continueOnError/keepGoing** {Boolean, default:false}, keep inserting documents even if one document has an error, *mongodb 1.9.1 >*.
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
+
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: insert(docs[, options], [callback])
 
    :param array docs: 
    :param object [options]: optional options for insert command
-   :param function [callback]: optional callback for the function, must be provided when using `safe` mode
+   :param function [callback]: optional callback for the function, must be provided when using a writeconcern
    :returns: null 
 
 
@@ -57,6 +65,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -67,7 +76,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -96,6 +105,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -106,7 +116,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -116,7 +126,7 @@ Options
      
          // Insert a single document
          collection.insert([{hello:'world_safe1'}
-           , {hello:'world_safe2'}], {safe:true}, function(err, result) {
+           , {hello:'world_safe2'}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Fetch the document
@@ -136,6 +146,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -146,7 +157,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -156,7 +167,7 @@ Options
      
          // Insert a single document
          collection.insert({hello:'world'
-           , func:function() {}}, {safe:true, serializeFunctions:true}, function(err, result) {
+           , func:function() {}}, {w:1, serializeFunctions:true}, function(err, result) {
            assert.equal(null, err);
      
            // Fetch the document
@@ -176,6 +187,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -186,7 +198,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -205,12 +217,12 @@ Options
      
                // Insert some intial data into the collection
                collection.insert([{name:"Jim"}
-                 , {name:"Sarah", title:"Princess"}], {safe:true}, function(err, result) {
+                 , {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
      
                  // Force keep going flag, ignoring unique index issue
                  collection.insert([{name:"Jim"}
                    , {name:"Sarah", title:"Princess"}
-                   , {name:'Gump', title:"Gump"}], {safe:true, keepGoing:true}, function(err, result) {
+                   , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
      
                    // Count the number of documents left (should not include the duplicates)
                    collection.count(function(err, count) {
@@ -239,14 +251,22 @@ Removes documents specified by <code>selector</code> from the db.
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **single** {Boolean, default:false}, removes the first document found.
+
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: remove([selector][, options], [callback])
 
    :param object [selector]: optional select, no selector is equivalent to removing all documents.
    :param object [options]: additional options during remove.
-   :param function [callback]: must be provided if you performing a safe remove
+   :param function [callback]: must be provided if you performing a remove with a writeconcern
    :returns: null 
 
 
@@ -259,6 +279,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -269,7 +290,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -278,7 +299,7 @@ Options
        db.collection("remove_all_documents_no_safe", function(err, collection) {
          
          // Insert a bunch of documents
-         collection.insert([{a:1}, {b:2}], {safe:true}, function(err, result) {
+         collection.insert([{a:1}, {b:2}], {w:1}, function(err, result) {
            assert.equal(null, err);
            
            // Remove all the document
@@ -305,6 +326,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -315,7 +337,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -324,11 +346,11 @@ Options
        db.collection("remove_subset_of_documents_safe", function(err, collection) {
          
          // Insert a bunch of documents
-         collection.insert([{a:1}, {b:2}], {safe:true}, function(err, result) {
+         collection.insert([{a:1}, {b:2}], {w:1}, function(err, result) {
            assert.equal(null, err);
            
            // Remove all the document
-           collection.remove({a:1}, {safe:true}, function(err, numberOfRemovedDocs) {
+           collection.remove({a:1}, {w:1}, function(err, numberOfRemovedDocs) {
              assert.equal(null, err);
              assert.equal(1, numberOfRemovedDocs);
              db.close();
@@ -361,6 +383,7 @@ Renames the collection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -371,7 +394,7 @@ Renames the collection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -428,7 +451,7 @@ Renames the collection.
            }
      
            // Insert a couple of documents
-           collection1.insert([{'x':1}, {'x':2}], {safe:true}, function(err, docs) {
+           collection1.insert([{'x':1}, {'x':2}], {w:1}, function(err, docs) {
      
              // Attemp to rename the first collection to the second one, this will fail
              collection1.rename('test_rename_collection2', function(err, collection) {
@@ -464,6 +487,14 @@ operators and update instead for more efficient operations.
 
 
 Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
+
+
+
+Deprecated Options 
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: save([doc][, options], [callback])
@@ -483,6 +514,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -493,14 +525,13 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
      
        // Fetch the collection
        db.collection("save_a_simple_document", function(err, collection) {
-     
          // Save a document with no safe option
          collection.save({hello:'world'});
      
@@ -524,6 +555,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -534,7 +566,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -543,7 +575,7 @@ Options
        db.collection("save_a_simple_document_modify_it_and_resave_it", function(err, collection) {
      
          // Save a document with no safe option
-         collection.save({hello:'world'}, {safe:true}, function(err, result) {
+         collection.save({hello:'world'}, {w: 0}, function(err, result) {
      
            // Find the saved document
            collection.findOne({hello:'world'}, function(err, item) {
@@ -554,7 +586,7 @@ Options
              item['hello2'] = 'world2';
      
              // Save the item with the additional field
-             collection.save(item, {safe:true}, function(err, result) {
+             collection.save(item, {w: 1}, function(err, result) {
      
                // Find the changed document
                collection.findOne({hello:'world'}, function(err, item) {
@@ -581,17 +613,25 @@ Updates documents.
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **upsert** {Boolean, default:false}, perform an upsert operation.
  - **multi** {Boolean, default:false}, update all documents matching the selector.
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
+
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: update(selector, document[, options], [callback])
 
    :param object selector: the query to select the document/documents to be updated
    :param object document: the fields/vals to be updated, or in the case of an upsert operation, inserted.
    :param object [options]: additional options during update.
-   :param function [callback]: must be provided if you performing a safe update
+   :param function [callback]: must be provided if you performing an update with a writeconcern
    :returns: null 
 
 
@@ -604,6 +644,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -614,7 +655,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -623,7 +664,7 @@ Options
        db.collection('update_a_simple_document', function(err, collection) {
      
          // Insert a document, then update it
-         collection.insert({a:1}, {safe:true}, function(err, doc) {
+         collection.insert({a:1}, {w: 1}, function(err, doc) {
      
            // Update the document with an atomic operator
            collection.update({a:1}, {$set:{b:2}});
@@ -650,6 +691,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -660,7 +702,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -669,7 +711,7 @@ Options
        db.collection('update_a_simple_document_upsert', function(err, collection) {
      
          // Update the document using an upsert operation, ensuring creation if it does not exist
-         collection.update({a:1}, {b:2, a:1}, {upsert:true, safe:true}, function(err, result) {
+         collection.update({a:1}, {b:2, a:1}, {upsert:true, w: 1}, function(err, result) {
            assert.equal(null, err);
            assert.equal(1, result);
      
@@ -691,6 +733,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -701,7 +744,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -710,10 +753,10 @@ Options
        db.collection('update_a_simple_document_multi', function(err, collection) {
      
          // Insert a couple of documentations
-         collection.insert([{a:1, b:1}, {a:1, b:2}], {safe:true}, function(err, result) {
+         collection.insert([{a:1, b:1}, {a:1, b:2}], {w: 1}, function(err, result) {
      
            // Update multiple documents using the multi option
-           collection.update({a:1}, {$set:{b:0}}, {safe:true, multi:true}, function(err, numberUpdated) {
+           collection.update({a:1}, {$set:{b:0}}, {w: 1, multi:true}, function(err, numberUpdated) {
              assert.equal(null, err);
              assert.equal(2, numberUpdated);
      
@@ -750,7 +793,7 @@ Options
    :param string key: key to run distinct against.
    :param object [query]: option query to narrow the returned objects.
    :param object [options]: additional options during update.
-   :param function callback: must be provided.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from distinct or null if an error occured.
    :returns: null 
 
 
@@ -763,6 +806,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -773,7 +817,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -783,7 +827,7 @@ Options
      
          // Insert documents to perform distinct against
          collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
-           {a:2, b:{c:'a'}}, {a:3}, {a:3}], {safe:true}, function(err, ids) {
+           {a:2, b:{c:'a'}}, {a:3}, {a:3}], {w: 1}, function(err, ids) {
      
            // Peform a distinct query against the a field
            collection.distinct('a', function(err, docs) {
@@ -807,6 +851,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -817,7 +862,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -827,7 +872,7 @@ Options
      
          // Insert documents to perform distinct against
          collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
-           {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], {safe:true}, function(err, ids) {
+           {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], {w: 1}, function(err, ids) {
      
            // Peform a distinct query with a filter against the documents
            collection.distinct('a', {c:1}, function(err, docs) {
@@ -856,7 +901,7 @@ Options
 
    :param object [query]: query to filter by before performing count.
    :param object [options]: additional options during count.
-   :param function callback: must be provided.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the count method or null if an error occured.
    :returns: null 
 
 
@@ -869,6 +914,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -879,7 +925,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -888,7 +934,7 @@ Options
        db.createCollection('simple_count_example', function(err, collection) {
      
          // Insert documents to perform distinct against
-         collection.insert([{a:1}, {a:2}, {a:3}, {a:4, b:1}], {safe:true}, function(err, ids) {
+         collection.insert([{a:1}, {a:2}, {a:3}, {a:4, b:1}], {w: 1}, function(err, ids) {
      
            // Perform a total count command
            collection.count(function(err, count) {
@@ -915,9 +961,9 @@ drop
 
 Drop the collection
 
-.. js:function:: drop([callback])
+.. js:function:: drop(callback)
 
-   :param function [callback]: provide a callback to be notified when command finished executing
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the drop method or null if an error occured.
    :returns: null 
 
 
@@ -930,6 +976,7 @@ Drop the collection
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -940,7 +987,7 @@ Drop the collection
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -986,18 +1033,26 @@ Find and update a document.
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **remove** {Boolean, default:false}, set to true to remove the object before returning.
  - **upsert** {Boolean, default:false}, perform an upsert operation.
  - **new** {Boolean, default:false}, set to true if you want to return the modified object rather than the original. Ignored for remove.
 
-.. js:function:: findAndModify(query, sort, doc[, options], [callback])
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
+.. js:function:: findAndModify(query, sort, doc[, options], callback)
 
    :param object query: query object to locate the object to modify
    :param array sort: - if multiple docs match, choose the first one in the specified sort order as the object to manipulate
    :param object doc: - the fields/vals to be updated
    :param object [options]: additional options during update.
-   :param function [callback]: returns results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the findAndModify method or null if an error occured.
    :returns: null 
 
 
@@ -1016,6 +1071,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1026,7 +1082,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1036,7 +1092,7 @@ Options
          assert.equal(null, err);
      
          // Insert some test documentations
-         collection.insert([{a:1}, {b:1}, {c:1}], {safe:true}, function(err, result) {
+         collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Simple findAndModify command returning the new document
@@ -1058,7 +1114,7 @@ Options
                  // Simple findAndModify command performing an upsert and returning the new document
                  // executing the command safely
                  collection.findAndModify({d:1}, [['b', 1]],
-                   {d:1, f:1}, {new:true, upsert:true, safe:true}, function(err, doc) {
+                   {d:1, f:1}, {new:true, upsert:true, w:1}, function(err, doc) {
                      assert.equal(null, err);
                      assert.equal(1, doc.d);
                      assert.equal(1, doc.f);
@@ -1083,14 +1139,22 @@ Find and remove a document
 
 
 Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
+
+
+
+Deprecated Options 
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
-.. js:function:: findAndRemove(query, sort[, options], [callback])
+.. js:function:: findAndRemove(query, sort[, options], callback)
 
    :param object query: query object to locate the object to modify
    :param array sort: - if multiple docs match, choose the first one in the specified sort order as the object to manipulate
    :param object [options]: additional options during update.
-   :param function [callback]: returns results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the findAndRemove method or null if an error occured.
    :returns: null 
 
 
@@ -1103,6 +1167,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1113,7 +1178,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1123,7 +1188,7 @@ Options
          assert.equal(null, err);
      
          // Insert some test documentations
-         collection.insert([{a:1}, {b:1}, {c:1}], {safe:true}, function(err, result) {
+         collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Simple findAndModify command returning the new document and
@@ -1191,11 +1256,11 @@ Options
  - **numberOfRetries** {Number, default:5}, if using awaidata specifies the number of times to retry on timeout.
  - **partial** {Boolean, default:false}, specify if the cursor should return partial results when querying against a sharded system
 
-.. js:function:: find(query[, options], [callback])
+.. js:function:: find(query[, options], callback)
 
    :param object query: query object to locate the object to modify
    :param object [options]: additional options during update.
-   :param function [callback]: optional callback for cursor.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the find method or null if an error occured.
    :returns: cursor returns a cursor to the query
 
 
@@ -1208,6 +1273,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1218,7 +1284,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1228,7 +1294,7 @@ Options
          assert.equal(null, err);
      
          // Insert a bunch of documents for the testing
-         collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, result) {
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Peform a simple find and return all the documents
@@ -1249,6 +1315,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1259,7 +1326,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1269,7 +1336,7 @@ Options
          assert.equal(null, err);
      
          // Insert a bunch of documents for the testing
-         collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, result) {
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Peform a simple find and return all the documents
@@ -1290,6 +1357,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1300,7 +1368,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1310,7 +1378,7 @@ Options
          assert.equal(null, err);
      
          // Insert a bunch of documents for the testing
-         collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+         collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Peform a simple find and return all the documents
@@ -1368,11 +1436,11 @@ Options
  - **readPreference** {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
  - **partial** {Boolean, default:false}, specify if the cursor should return partial results when querying against a sharded system
 
-.. js:function:: findOne(query[, options], [callback])
+.. js:function:: findOne(query[, options], callback)
 
    :param object query: query object to locate the object to modify
    :param object [options]: additional options during update.
-   :param function [callback]: optional callback for cursor.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the findOne method or null if an error occured.
    :returns: cursor returns a cursor to the query
 
 
@@ -1385,6 +1453,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1395,7 +1464,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1405,7 +1474,7 @@ Options
          assert.equal(null, err);
      
          // Insert a bunch of documents for the testing
-         collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {safe:true}, function(err, result) {
+         collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Peform a simple find and return all the documents
@@ -1431,7 +1500,10 @@ Creates an index on the collection.
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
@@ -1442,11 +1514,16 @@ Options
  - **expireAfterSeconds** {Number}, allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  - **name** {String}, override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
 
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
 .. js:function:: createIndex(fieldOrSpec[, options], callback)
 
    :param object fieldOrSpec: fieldOrSpec that defines the index.
    :param object [options]: additional options during update.
-   :param function callback: for results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the createIndex method or null if an error occured.
    :returns: null 
 
 
@@ -1459,6 +1536,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1469,7 +1547,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1479,11 +1557,11 @@ Options
          assert.equal(null, err);
      
          // Insert a bunch of documents for the index
-         collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {safe:true}, function(err, result) {
+         collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
-           collection.createIndex('a', {safe:true}, function(err, indexName) {
+           collection.createIndex('a', {w:1}, function(err, indexName) {
              assert.equal("a_1", indexName);
      
              // Peform a query, with explain to show we hit the query
@@ -1504,6 +1582,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1514,7 +1593,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1525,12 +1604,12 @@ Options
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            collection.createIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
@@ -1562,7 +1641,10 @@ Ensures that an index exists, if it does not it creates it
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write (<a href='https://wiki.10gen.com/display/DOCS/getLastError+Command'>https://wiki.10gen.com/display/DOCS/getLastError+Command</a>)
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning
+ - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **unique** {Boolean, default:false}, creates an unique index.
  - **sparse** {Boolean, default:false}, creates a sparse index.
  - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
@@ -1573,11 +1655,16 @@ Options
  - **expireAfterSeconds** {Number}, allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  - **name** {String}, override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
 
+
+
+Deprecated Options 
+ - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+
 .. js:function:: ensureIndex(fieldOrSpec[, options], callback)
 
    :param object fieldOrSpec: fieldOrSpec that defines the index.
    :param object [options]: additional options during update.
-   :param function callback: for results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the ensureIndex method or null if an error occured.
    :returns: null 
 
 
@@ -1590,6 +1677,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1600,7 +1688,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1611,12 +1699,12 @@ Options
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
@@ -1653,7 +1741,7 @@ Options
 .. js:function:: indexInformation([options], callback)
 
    :param object [options]: additional options during update.
-   :param function callback: returns the index information.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the indexInformation method or null if an error occured.
    :returns: null 
 
 
@@ -1666,6 +1754,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1676,7 +1765,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1687,12 +1776,12 @@ Options
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Fetch basic indexInformation for collection
              collection.indexInformation(function(err, indexInformation) {
@@ -1723,7 +1812,7 @@ Drops an index from this collection.
 .. js:function:: dropIndex(name, callback)
 
    :param string name: 
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the dropIndex method or null if an error occured.
    :returns: null 
 
 
@@ -1736,6 +1825,7 @@ Drops an index from this collection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1746,7 +1836,7 @@ Drops an index from this collection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1757,12 +1847,12 @@ Drops an index from this collection.
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Drop the index
              collection.dropIndex("a_1_b_1", function(err, result) {
@@ -1791,7 +1881,7 @@ Drops all indexes from this collection.
 
 .. js:function:: dropAllIndexes(callback)
 
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the dropAllIndexes method or null if an error occured.
    :returns: null 
 
 
@@ -1805,7 +1895,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 
 .. js:function:: reIndex(callback)
 
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the reIndex method or null if an error occured.
    :returns: null 
 
 
@@ -1818,6 +1908,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1828,7 +1919,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1839,12 +1930,12 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
      
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
-           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {safe:true}, function(err, result) {
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true, safe:true}, function(err, indexName) {
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Force a reindex of the collection
              collection.reIndex(function(err, result) {
@@ -1891,7 +1982,7 @@ Options
    :param function map: the mapping function.
    :param function reduce: the reduce function.
    :param objects [options]: options for the map reduce job.
-   :param function callback: returns the result of the map reduce job, (error, results, [stats])
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the mapReduce method or null if an error occured.
    :returns: null 
 
 
@@ -1904,6 +1995,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1914,7 +2006,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -1923,7 +2015,7 @@ Options
        db.createCollection('test_map_reduce_functions', function(err, collection) {
          
          // Insert some documents to perform map reduce over
-         collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+         collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
      
            // Map function
            var map = function() { emit(this.user_id, 1); };
@@ -1954,6 +2046,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1964,7 +2057,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -1979,7 +2072,7 @@ Options
            db.createCollection('test_map_reduce_functions_inline', function(err, collection) {
              
              // Insert some test documents
-             collection.insert([{'user_id':1}, {'user_id':2}], {safe:true}, function(err, r) {
+             collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
      
                // Map function
                var map = function() { emit(this.user_id, 1); };
@@ -2011,6 +2104,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2021,7 +2115,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -2031,7 +2125,7 @@ Options
      
          // Insert some test documents
          collection.insert([{'user_id':1, 'timestamp':new Date()}
-           , {'user_id':2, 'timestamp':new Date()}], {safe:true}, function(err, r) {
+           , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
            
            // Map function
            var map = function(){
@@ -2087,7 +2181,7 @@ Options
    :param function finalize: an optional function to be run on each item in the result set just before the item is returned.
    :param boolean command: specify if you wish to run using the internal group command or using eval, default is true.
    :param object [options]: additional options during update.
-   :param function callback: returns the results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the group method or null if an error occured.
    :returns: null 
 
 
@@ -2100,6 +2194,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2110,7 +2205,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -2123,7 +2218,7 @@ Options
            assert.deepEqual([], results);
      
            // Trigger some inserts on the collection
-           collection.insert([{'a':2}, {'b':5}, {'a':1}], {safe:true}, function(err, ids) {
+           collection.insert([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
              
              // Perform a group count
              collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -2131,7 +2226,6 @@ Options
      
                // Pefrom a group count using the eval method
                collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false, function(err, results) {
-                 console.dir(err)
                  assert.equal(3, results[0].count);
      
                  // Group with a conditional
@@ -2145,7 +2239,7 @@ Options
                      assert.equal(1, results[0].count);
      
                      // Insert some more test data
-                     collection.insert([{'a':2}, {'b':3}], {safe:true}, function(err, ids) {
+                     collection.insert([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
                        
                        // Do a Group by field a
                        collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -2229,7 +2323,7 @@ Returns the options of the collection.
 
 .. js:function:: options(callback)
 
-   :param function callback: returns option results.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the options method or null if an error occured.
    :returns: null 
 
 
@@ -2242,6 +2336,7 @@ Returns the options of the collection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2252,7 +2347,7 @@ Returns the options of the collection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2283,7 +2378,7 @@ Returns if the collection is a capped collection
 
 .. js:function:: isCapped(callback)
 
-   :param function callback: returns if collection is capped.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the isCapped method or null if an error occured.
    :returns: null 
 
 
@@ -2296,6 +2391,7 @@ Returns if the collection is a capped collection
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2306,7 +2402,7 @@ Returns if the collection is a capped collection
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2336,7 +2432,7 @@ Checks if one or more indexes exist on the collection
 .. js:function:: indexExists(indexNames, callback)
 
    :param string indexNames: check if one or more indexes exist on the collection.
-   :param function callback: returns if the indexes exist.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the indexExists method or null if an error occured.
    :returns: null 
 
 
@@ -2349,6 +2445,7 @@ Checks if one or more indexes exist on the collection
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2359,17 +2456,17 @@ Checks if one or more indexes exist on the collection
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
      
        // Create a test collection that we are getting the options back from
-       db.createCollection('test_collection_index_exists', {safe:true}, function(err, collection) {
+       db.createCollection('test_collection_index_exists', {w: 1}, function(err, collection) {
          assert.equal(null, err);
      
          // Create an index on the collection
-         collection.createIndex('a', {safe:true}, function(err, indexName) {
+         collection.createIndex('a', {w: 1}, function(err, indexName) {
      
            // Let's test to check if a single index exists
            collection.indexExists("a_1", function(err, result) {
@@ -2416,7 +2513,7 @@ Options
    :param number x: point to search on the x axis, ensure the indexes are ordered in the same order.
    :param number y: point to search on the y axis, ensure the indexes are ordered in the same order.
    :param objects [options]: options for the map reduce job.
-   :param function callback: returns matching documents.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the geoNear method or null if an error occured.
    :returns: null 
 
 
@@ -2429,6 +2526,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2439,7 +2537,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {safe:false, auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {w:0, auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -2451,7 +2549,7 @@ Options
          collection.ensureIndex({loc:"2d"}, function(err, result) {
      
            // Save a new location tagged document
-           collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {safe:true}, function(err, result) {
+           collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
             
              // Use geoNear command to find document
              collection.geoNear(50, 50, {query:{a:1}, num:1}, function(err, docs) {
@@ -2485,7 +2583,7 @@ Options
    :param number x: point to search on the x axis, ensure the indexes are ordered in the same order.
    :param number y: point to search on the y axis, ensure the indexes are ordered in the same order.
    :param objects [options]: options for the map reduce job.
-   :param function callback: returns matching documents.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the geoHaystackSearch method or null if an error occured.
    :returns: null 
 
 
@@ -2498,6 +2596,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2508,7 +2607,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -2520,7 +2619,7 @@ Options
          collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}, function(err, result) {
      
            // Save a new location tagged document
-           collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {safe:true}, function(err, result) {
+           collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
             
              // Use geoNear command to find document
              collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
@@ -2543,7 +2642,7 @@ Retrieve all the indexes on the collection.
 
 .. js:function:: indexes(callback)
 
-   :param function callback: returns index information.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the indexes method or null if an error occured.
    :returns: null 
 
 
@@ -2556,6 +2655,7 @@ Retrieve all the indexes on the collection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2566,7 +2666,7 @@ Retrieve all the indexes on the collection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2575,11 +2675,11 @@ Retrieve all the indexes on the collection.
        db.createCollection('simple_key_based_distinct', function(err, collection) {
      
          // Create a geo 2d index
-         collection.ensureIndex({loc:"2d"}, {safe:true}, function(err, result) {
+         collection.ensureIndex({loc:"2d"}, {w: 1}, function(err, result) {
            assert.equal(null, err);
      
            // Create a simple single field index
-           collection.ensureIndex({a:1}, {safe:true}, function(err, result) {
+           collection.ensureIndex({a:1}, {w: 1}, function(err, result) {
              assert.equal(null, err);
      
              // List all of the indexes on the collection
@@ -2610,7 +2710,7 @@ Options
 
    :param array array: containing all the aggregation framework commands for the execution.
    :param object [options]: additional options during update.
-   :param function callback: returns matching documents.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the aggregate method or null if an error occured.
    :returns: null 
 
 
@@ -2623,6 +2723,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2633,7 +2734,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2652,7 +2753,7 @@ Options
            // Create a collection
            db.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray', function(err, collection) {
              // Insert the docs
-             collection.insert(docs, {safe:true}, function(err, result) {
+             collection.insert(docs, {w: 1}, function(err, result) {
      
                // Execute aggregate, notice the pipeline is expressed as an Array
                collection.aggregate([
@@ -2690,6 +2791,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2700,7 +2802,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2719,7 +2821,7 @@ Options
            // Create a collection
            client.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments', function(err, collection) {
              // Insert the docs
-             collection.insert(docs, {safe:true}, function(err, result) {
+             collection.insert(docs, {w: 1}, function(err, result) {
                // Execute aggregate, notice the pipeline is expressed as function call parameters
                // instead of an Array.
                collection.aggregate(
@@ -2757,6 +2859,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2767,7 +2870,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2786,7 +2889,7 @@ Options
            // Create a collection
            client.createCollection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments', function(err, collection) {
              // Insert the docs
-             collection.insert(docs, {safe:true}, function(err, result) {
+             collection.insert(docs, {w: 1}, function(err, result) {
                // Execute aggregate, notice the pipeline is expressed as function call parameters
                // instead of an Array.
                collection.aggregate(
@@ -2834,7 +2937,7 @@ Options
 .. js:function:: stats([options], callback)
 
    :param objects [options]: options for the stats command.
-   :param function callback: returns statistical information for the collection.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the stats method or null if an error occured.
    :returns: null 
 
 
@@ -2847,6 +2950,7 @@ Options
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -2857,7 +2961,7 @@ Options
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -2866,7 +2970,7 @@ Options
        db.createCollection('collection_stats_test', function(err, collection) {
      
            // Insert some documents
-           collection.insert([{a:1}, {hello:'world'}], {safe:true}, function(err, result) {
+           collection.insert([{a:1}, {hello:'world'}], {w: 1}, function(err, result) {
      
              // Retrieve the statistics for the collection
              collection.stats(function(err, stats) {

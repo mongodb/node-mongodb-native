@@ -5,15 +5,4 @@ Driver API
 .. toctree::
   :maxdepth: 2
   
-  admin
-  collection
-  db
-  cursor
-  cursorstream
-  gridstore
-  readstream
-  grid
-  server
-  mongos
-  replset
-  readpreference
+  mongoclient

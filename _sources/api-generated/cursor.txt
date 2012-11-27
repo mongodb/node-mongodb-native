@@ -18,30 +18,34 @@ but use find to acquire a cursor.
    :param collection collection: the collection to query.
    :param object selector: the query selector.
    :param object fields: an object containing what fields to include or exclude from objects returned.
-   :param number skip: number of documents to skip.
-   :param number limit: the number of results to return. -1 has a special meaning and is used by Db.eval. A value of 1 will also be treated as if it were -1.
-   :param string sort: the required sorting for the query.
-   :param object hint: force the query to use a specific index.
-   :param boolean explain: return the explaination of the query.
-   :param boolean snapshot: Snapshot mode assures no duplicates are returned.
-   :param boolean timeout: allow the query to timeout.
-   :param boolean tailable: allow the cursor to be tailable.
-   :param boolean awaitdata: allow the cursor to wait for data, only applicable for tailable cursor.
-   :param number batchSize: the number of the subset of results to request the database to return for every request. This should initially be greater than 1 otherwise the database will automatically close the cursor. The batch size can be set to 1 with cursorInstance.batchSize after performing the initial query to the database.
-   :param boolean raw: return all query documents as raw buffers (default false).
-   :param boolean read: specify override of read from source (primary/secondary).
-   :param boolean returnKey: only return the index key.
-   :param number maxScan: limit the number of items to scan.
-   :param number min: set index bounds.
-   :param number max: set index bounds.
-   :param boolean showDiskLoc: show disk location of results.
-   :param string comment: you can put a $comment field on a query to make looking in the profiler logs simpler.
-   :param number numberOfRetries: if using awaidata specifies the number of times to retry on timeout.
-   :param string dbName: override the default dbName.
-   :param number tailableRetryInterval: specify the miliseconds between getMores on tailable cursor.
-   :param boolean exhaust: have the server send all the documents at once as getMore packets.
-   :param boolean partial: have the sharded system return a partial result from mongos.
+   :param object [options]: additional options for the collection.
 
+
+Options
+ - **skip** {Number} skip number of documents to skip.
+ - **limit** {Number}, limit the number of results to return. -1 has a special meaning and is used by Db.eval. A value of 1 will also be treated as if it were -1.
+ - **sort** {Array | Object}, set to sort the documents coming back from the query. Array of indexes, [['a', 1]] etc.
+ - **hint**  {Object}, hint force the query to use a specific index.
+ - **explain** {Boolean}, explain return the explaination of the query.
+ - **snapshot** {Boolean}, snapshot Snapshot mode assures no duplicates are returned.
+ - **timeout** {Boolean}, timeout allow the query to timeout.
+ - **tailable** {Boolean}, tailable allow the cursor to be tailable.
+ - **awaitdata** {Boolean}, awaitdata allow the cursor to wait for data, only applicable for tailable cursor.
+ - **batchSize** {Number}, batchSize the number of the subset of results to request the database to return for every request. This should initially be greater than 1 otherwise the database will automatically close the cursor. The batch size can be set to 1 with cursorInstance.batchSize after performing the initial query to the database.
+ - **raw** {Boolean}, raw return all query documents as raw buffers (default false).
+ - **read** {Boolean}, read specify override of read from source (primary/secondary).
+ - **slaveOk** {Boolean}, slaveOk, sets the slaveOk flag on the query wire protocol for secondaries.
+ - **returnKey** {Boolean}, returnKey only return the index key.
+ - **maxScan** {Number}, maxScan limit the number of items to scan.
+ - **min** {Number}, min set index bounds.
+ - **max** {Number}, max set index bounds.
+ - **showDiskLoc** {Boolean}, showDiskLoc show disk location of results.
+ - **comment** {String}, comment you can put a $comment field on a query to make looking in the profiler logs simpler.
+ - **numberOfRetries** {Number}, numberOfRetries if using awaidata specifies the number of times to retry on timeout.
+ - **dbName** {String}, dbName override the default dbName.
+ - **tailableRetryInterval** {Number}, tailableRetryInterval specify the miliseconds between getMores on tailable cursor.
+ - **exhaust** {Boolean}, exhaust have the server send all the documents at once as getMore packets.
+ - **partial** {Boolean}, partial have the sharded system return a partial result from mongos.
 
 
 ------------------
@@ -78,6 +82,7 @@ tailable, batchSizeValue, skipValue and limits are preserved.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -88,7 +93,7 @@ tailable, batchSizeValue, skipValue and limits are preserved.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -105,7 +110,7 @@ tailable, batchSizeValue, skipValue and limits are preserved.
          assert.equal(null, err);
      
          // insert all docs
-         collection.insert(docs, {safe:true}, function(err, result) {
+         collection.insert(docs, {w:1}, function(err, result) {
            assert.equal(null, err);
      
            // Grab a cursor using the find
@@ -140,7 +145,7 @@ cursor.rewind() can be used to reset the cursor.
 
 .. js:function:: toArray(callback)
 
-   :param function callback: This will be called after executing this method successfully. The first paramter will contain the Error object if an error occured, or null otherwise. The second paramter will contain an array of BSON deserialized objects as a result of the query.
+   :param function callback: This will be called after executing this method successfully. The first parameter will contain the Error object if an error occured, or null otherwise. The second parameter will contain an array of BSON deserialized objects as a result of the query.
    :returns: null 
 
 
@@ -153,6 +158,7 @@ cursor.rewind() can be used to reset the cursor.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -163,7 +169,7 @@ cursor.rewind() can be used to reset the cursor.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {safe:false, native_parser: false});
+       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -172,7 +178,7 @@ cursor.rewind() can be used to reset the cursor.
        db.createCollection('test_array', function(err, collection) {
      
          // Insert a test document
-         collection.insert({'b':[1, 2, 3]}, {safe:true}, function(err, ids) {
+         collection.insert({'b':[1, 2, 3]}, {w:1}, function(err, ids) {
      
            // Retrieve all the documents in the collection
            collection.find().toArray(function(err, documents) {
@@ -200,7 +206,7 @@ for making sure that the entire result can fit the memory.
 
 .. js:function:: each(callback)
 
-   :param function callback: this will be called for while iterating every document of the query result. The first paramter will contain the Error object if an error occured, or null otherwise. While the second paramter will contain the document.
+   :param function callback: this will be called for while iterating every document of the query result. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the document.
    :returns: null 
 
 
@@ -213,6 +219,7 @@ for making sure that the entire result can fit the memory.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -223,7 +230,7 @@ for making sure that the entire result can fit the memory.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -234,7 +241,7 @@ for making sure that the entire result can fit the memory.
          assert.ok(collection instanceof Collection);
      
          // Insert a document in the collection
-         collection.insert({'a':1}, {safe:true}, function(err, ids) {
+         collection.insert({'a':1}, {w:1}, function(err, ids) {
      
            // Grab a cursor
            var cursor = collection.find();
@@ -268,7 +275,7 @@ Determines how many result the query for this cursor will return
 
 .. js:function:: count(callback)
 
-   :param function callback: this will be after executing this method. The first paramter will contain the Error object if an error occured, or null otherwise. While the second paramter will contain the number of results or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the number of results or null if an error occured.
    :returns: null 
 
 
@@ -281,6 +288,7 @@ Determines how many result the query for this cursor will return
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -291,7 +299,7 @@ Determines how many result the query for this cursor will return
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -301,7 +309,7 @@ Determines how many result the query for this cursor will return
          assert.equal(null, err);
      
          // Insert some docs
-         collection.insert([{a:1}, {a:2}], {safe:true}, function(err, docs) {
+         collection.insert([{a:1}, {a:2}], {w:1}, function(err, docs) {
            assert.equal(null, err);
      
            // Do a find and get the cursor count
@@ -347,6 +355,7 @@ Sets the sort parameter of this cursor to the given value.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -357,7 +366,7 @@ Sets the sort parameter of this cursor to the given value.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -367,7 +376,7 @@ Sets the sort parameter of this cursor to the given value.
          assert.equal(null, err);
      
          // Insert some documents we can sort on
-         collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
            assert.equal(null, err);
      
            // Do normal ascending sort
@@ -411,6 +420,7 @@ Sets the limit parameter of this cursor to the given value.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -421,7 +431,7 @@ Sets the limit parameter of this cursor to the given value.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -431,7 +441,7 @@ Sets the limit parameter of this cursor to the given value.
          assert.equal(null, err);
      
          // Insert some documents we can sort on
-         collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
            assert.equal(null, err);
      
            // Limit to only one document returned
@@ -483,6 +493,7 @@ Sets the skip parameter of this cursor to the given value.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -493,7 +504,7 @@ Sets the skip parameter of this cursor to the given value.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -503,7 +514,7 @@ Sets the skip parameter of this cursor to the given value.
          assert.equal(null, err);
      
          // Insert some documents we can sort on
-         collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
            assert.equal(null, err);
      
            // Skip one document
@@ -542,6 +553,7 @@ Sets the batch size parameter of this cursor to the given value.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -552,7 +564,7 @@ Sets the batch size parameter of this cursor to the given value.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -562,7 +574,7 @@ Sets the batch size parameter of this cursor to the given value.
          assert.equal(null, err);
      
          // Insert some documents we can sort on
-         collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
            assert.equal(null, err);
      
            // Do normal ascending sort
@@ -597,6 +609,7 @@ Gets the next document from the cursor.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -607,7 +620,7 @@ Gets the next document from the cursor.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -617,7 +630,7 @@ Gets the next document from the cursor.
          assert.equal(null, err);
      
          // Insert some documents we can sort on
-         collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
            assert.equal(null, err);
      
            // Do normal ascending sort
@@ -653,6 +666,7 @@ long it took the database to process it.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -663,7 +677,7 @@ long it took the database to process it.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -673,7 +687,7 @@ long it took the database to process it.
          assert.equal(null, err);
      
          // Insert some documents we can sort on
-         collection.insert([{a:1}, {a:2}, {a:3}], {safe:true}, function(err, docs) {
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
            assert.equal(null, err);
      
            // Do normal ascending sort
@@ -708,6 +722,7 @@ Returns a Node ReadStream interface for this cursor.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -718,7 +733,7 @@ Returns a Node ReadStream interface for this cursor.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -734,7 +749,7 @@ Returns a Node ReadStream interface for this cursor.
          assert.equal(null, err);
      
          // Insert documents into collection
-         collection.insert(docs, {safe:true}, function(err, ids) {
+         collection.insert(docs, {w:1}, function(err, ids) {
            // Peform a find to get a cursor
            var stream = collection.find().stream();
      
@@ -773,6 +788,7 @@ Close the cursor.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -783,7 +799,7 @@ Close the cursor.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -799,7 +815,7 @@ Close the cursor.
          assert.equal(null, err);
      
          // Insert documents into collection
-         collection.insert(docs, {safe:true}, function(err, ids) {
+         collection.insert(docs, {w:1}, function(err, ids) {
            // Peform a find to get a cursor
            var cursor = collection.find();
      
@@ -840,6 +856,7 @@ Check if the cursor is closed or open.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -850,7 +867,7 @@ Check if the cursor is closed or open.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -866,7 +883,7 @@ Check if the cursor is closed or open.
          assert.equal(null, err);
      
          // Insert documents into collection
-         collection.insert(docs, {safe:true}, function(err, ids) {
+         collection.insert(docs, {w:1}, function(err, ids) {
            // Peform a find to get a cursor
            var cursor = collection.find();
      

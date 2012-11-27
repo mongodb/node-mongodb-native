@@ -55,14 +55,11 @@ Getting that connection to the database
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      Server = mongo.Server,
-      Db = mongo.Db;
+    // Retrieve
+    var MongoClient = require('mongodb').MongoClient;
     
-    var server = new Server('localhost', 27017, {auto_reconnect: true});
-    var db = new Db('exampleDb', server);
-    
-    db.open(function(err, db) {
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(!err) {
         console.log("We are connected");
       }
@@ -70,11 +67,28 @@ Getting that connection to the database
 
 
 
- Let's have a quick look at the simple connection. The  **new Server(...)**  sets up a configuration for the connection and the  **auto_reconnect**  tells the driver to retry sending a command to the server if there is a failure. Another option you can set is  **poolSize** , this allows you to control how many tcp connections are opened in parallel. The default value for this is 5 but you can set it as high as you want. The driver will use a round-robin strategy to dispatch and read from the tcp connection.
+ Let's have a quick look at how the connection code works. The  **Db.connect** 
+method let's use use a uri to connect to the Mongo database, where 
+ **localhost:27017**  is the server host and port and  **exampleDb**  the db
+we wish to connect to. After the url notice the hash containing the 
+ **auto_reconnect**  key. Auto reconnect tells the driver to retry sending 
+a command to the server if there is a failure during it's execution.
 
 
 
- We are up and running with a connection to the database. Let's move on and look at what collections are and how they work.
+ Another useful option you can pass in is 
+
+
+
+ **poolSize** , this allows you to control how many tcp connections are
+opened in parallel. The default value for this is 5 but you can set it
+as high as you want. The driver will use a round-robin strategy to
+dispatch and read from the tcp connection.
+
+
+
+ We are up and running with a connection to the database. Let's move on
+and look at what collections are and how they work.
 
 
 ------------------------
@@ -90,17 +104,22 @@ Mongo DB and Collections
 
   .. code-block:: javascript
 
-    db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {});
+    // Retrieve
+    var MongoClient = require('mongodb').MongoClient;
     
-        db.collection('test', {safe:true}, function(err, collection) {});
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+      if(err) { return console.dir(err); }
     
-        db.createCollection('test', function(err, collection) {});
+      db.collection('test', function(err, collection) {});
     
-        db.createCollection('test', {safe:true}, function(err, collection) {});
-      }
-    });  
+      db.collection('test', {w:1}, function(err, collection) {});
+    
+      db.createCollection('test', function(err, collection) {});
+    
+      db.createCollection('test', {w:1}, function(err, collection) {});
+    
+    });
 
 
 
@@ -160,20 +179,24 @@ And then there was CRUD
 
   .. code-block:: javascript
 
-    db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {
-          var doc1 = {'hello':'doc1'};
-          var doc2 = {'hello':'doc2'};
-          var lotsOfDocs = [{'hello':'doc3'}, {'hello':'doc4'}];
+    // Retrieve
+    var MongoClient = require('mongodb').MongoClient;
     
-          collection.insert(doc1);
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+      if(err) { return console.dir(err); }
     
-          collection.insert(doc2, {safe:true}, function(err, result) {});
+      var collection = db.collection('test');
+      var doc1 = {'hello':'doc1'};
+      var doc2 = {'hello':'doc2'};
+      var lotsOfDocs = [{'hello':'doc3'}, {'hello':'doc4'}];
     
-          collection.insert(lotsOfDocs, {safe:true}, function(err, result) {});
-        });
-      }
+      collection.insert(doc1);
+    
+      collection.insert(doc2, {w:1}, function(err, result) {});
+    
+      collection.insert(lotsOfDocs, {w:1}, function(err, result) {});
+    
     });
 
 
@@ -226,22 +249,25 @@ And then there was CRUD
 
   .. code-block:: javascript
 
-    db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {
-          var doc = {mykey:1, fieldtoupdate:1};
+    // Retrieve
+    var MongoClient = require('mongodb').MongoClient;
     
-          collection.insert(doc, {safe:true}, function(err, result) {
-            collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {safe:true}, function(err, result) {});      
-          });
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+      if(err) { return console.dir(err); }
     
-          var doc2 = {mykey:2, docs:[{doc1:1}]};
+      var collection = db.collection('test');
+      var doc = {mykey:1, fieldtoupdate:1};
     
-          collection.insert(doc2, {safe:true}, function(err, result) {
-            collection.update({mykey:2}, {$push:{docs:{doc2:1}}, {safe:true}, function(err, result) {});
-          });
-        });
-      };
+      collection.insert(doc, {w:1}, function(err, result) {
+        collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});
+      });
+    
+      var doc2 = {mykey:2, docs:[{doc1:1}]};
+    
+      collection.insert(doc2, {w:1}, function(err, result) {
+        collection.update({mykey:2}, {$push:{docs:{doc2:1}}, {w:1}, function(err, result) {});
+      });
     });
 
 
@@ -294,21 +320,24 @@ And then there was CRUD
 
   .. code-block:: javascript
 
-    db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {
-          var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
+    // Retrieve
+    var MongoClient = require('mongodb').MongoClient;
     
-          collection.insert(docs, {safe:true}, function(err, result) {
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+      if(err) { return console.dir(err); }
     
-            collection.remove({mykey:1});
+      var collection = db.collection('test');
+      var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
     
-            collection.remove({mykey:2}, {safe:true}, function(err, result) {});
+      collection.insert(docs, {w:1}, function(err, result) {
     
-            collection.remove();
-          });
-        });
-      };
+        collection.remove({mykey:1});
+    
+        collection.remove({mykey:2}, {w:1}, function(err, result) {});
+    
+        collection.remove();
+      });
     });
 
 
@@ -356,24 +385,27 @@ Time to Query
 
   .. code-block:: javascript
 
-    db.open(function(err, db) {
-      if(!err) {
-        db.collection('test', function(err, collection) {
-          var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
+    // Retrieve
+    var MongoClient = require('mongodb').MongoClient;
     
-          collection.insert(docs, {safe:true}, function(err, result) {
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+      if(err) { return console.dir(err); }
     
-            collection.find().toArray(function(err, items) {});
+      var collection = db.collection('test');
+      var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
     
-            var stream = collection.find({mykey:{$ne:2}}).streamRecords();
-            stream.on("data", function(item) {});
-            stream.on("end", function() {});
+      collection.insert(docs, {w:1}, function(err, result) {
     
-            collection.findOne({mykey:1}, function(err, item) {});
+        collection.find().toArray(function(err, items) {});
     
-          });
-        });
-      };
+        var stream = collection.find({mykey:{$ne:2}}).streamRecords();
+        stream.on("data", function(item) {});
+        stream.on("end", function() {});
+    
+        collection.findOne({mykey:1}, function(err, item) {});
+    
+      });
     });
 
 

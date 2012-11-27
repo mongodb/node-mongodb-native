@@ -2,6 +2,23 @@
 Changelog
 =========
 
+1.2.0 2012-11-27
+----------------
+- Honor connectTimeoutMS option for replicasets (Issue #750, https://github.com/aheckmann)
+- Fix ping strategy regression (Issue #738, https://github.com/aheckmann)
+- Small cleanup of code (Issue #753, https://github.com/sokra/node-mongodb-native)
+- Fixed index declaration using objects/arrays from other contexts (Issue #755, https://github.com/sokra/node-mongodb-native)
+- Intermittent (and rare) null callback exception when using ReplicaSets (Issue #752)
+- Force correct setting of read_secondary based on the read preference (Issue #741)
+- If using read preferences with secondaries queries will not fail if primary is down (Issue #744)
+- noOpen connection for Db.connect removed as not compatible with autodetection of Mongo type
+- Mongos connection with auth not working (Issue #737)
+- Use the connect method directly from the require. require('mongodb')(&quot;mongodb://localhost:27017/db&quot;)
+- new MongoClient introduced as the point of connecting to MongoDB's instead of the Db
+  - open/close/db/connect methods implemented
+- Implemented common URL connection format using MongoClient.connect allowing for simialar interface across all drivers.
+- Fixed a bug with aggregation helper not properly accepting readPreference
+
 1.1.11 2012-10-10
 -----------------
 - Removed strict mode and introduced normal handling of safe at DB level.

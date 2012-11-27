@@ -28,3 +28,44 @@ Options
  - **secondaryAcceptableLatencyMS** {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
  - **connectArbiter** {Boolean, default:false}, sets if the driver should connect to arbiters or not.
 
+
+---------
+_enableHA
+---------
+
+
+Enables high availability pings.
+
+.. js:function:: _enableHA()
+
+
+-------------
+ReplSet.State
+-------------
+
+
+Interval state object constructor
+
+.. js:function:: ReplSet.State()
+
+
+------------------
+_handleOnFullSetup
+------------------
+
+
+Handles the first <code>fullsetup</code> event of this ReplSet.
+
+.. js:function:: _handleOnFullSetup(parent)
+
+   :param db parent: 
+
+----------
+_disableHA
+----------
+
+
+Disables high availability pings.
+
+.. js:function:: _disableHA()
+

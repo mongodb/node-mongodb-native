@@ -87,6 +87,7 @@ new one if file does not exist.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -97,7 +98,7 @@ new one if file does not exist.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -134,6 +135,7 @@ new one if file does not exist.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -144,7 +146,7 @@ new one if file does not exist.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -184,6 +186,7 @@ new one if file does not exist.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -194,7 +197,7 @@ new one if file does not exist.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -269,6 +272,7 @@ Stores a file from the file system to the GridFS database.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -279,7 +283,7 @@ Stores a file from the file system to the GridFS database.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -318,6 +322,7 @@ Stores a file from the file system to the GridFS database.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -328,7 +333,7 @@ Stores a file from the file system to the GridFS database.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -388,6 +393,7 @@ already exists. This will work properly only if mode was initialized to
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -398,7 +404,7 @@ already exists. This will work properly only if mode was initialized to
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -447,6 +453,7 @@ Retrieve this file's chunks collection.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -457,7 +464,7 @@ Retrieve this file's chunks collection.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -503,6 +510,7 @@ Deletes all the chunks of this file in the database.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -513,7 +521,7 @@ Deletes all the chunks of this file in the database.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -577,6 +585,7 @@ Retrieves the file collection associated with this object.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -587,7 +596,7 @@ Retrieves the file collection associated with this object.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -634,6 +643,7 @@ Reads the data of this file.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -644,7 +654,7 @@ Reads the data of this file.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -711,6 +721,7 @@ Deletes all the chunks of this file in the database if mode was set to "w" or
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -721,7 +732,7 @@ Deletes all the chunks of this file in the database if mode was set to "w" or
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -801,6 +812,7 @@ Retrieves the contents of this file and advances the read/write head. Works with
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -811,7 +823,7 @@ Retrieves the contents of this file and advances the read/write head. Works with
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -869,6 +881,7 @@ Retrieves the position of the read/write head of this file.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -879,7 +892,7 @@ Retrieves the position of the read/write head of this file.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -949,6 +962,7 @@ Seek Location Modes
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -959,7 +973,7 @@ Seek Location Modes
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1077,6 +1091,7 @@ Verify if the file is at EOF.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1087,7 +1102,7 @@ Verify if the file is at EOF.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1133,6 +1148,7 @@ Retrieves a single character from this file.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1143,7 +1159,7 @@ Retrieves a single character from this file.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1196,6 +1212,7 @@ the given string does not have one.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1206,7 +1223,7 @@ the given string does not have one.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1262,6 +1279,7 @@ Events
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1272,7 +1290,7 @@ Events
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -1330,6 +1348,7 @@ Events
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1340,7 +1359,7 @@ Events
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -1400,6 +1419,7 @@ Checks if a file exists in the database.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1410,7 +1430,7 @@ Checks if a file exists in the database.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1477,6 +1497,7 @@ Gets the list of files stored in the GridFS.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1487,7 +1508,7 @@ Gets the list of files stored in the GridFS.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1619,6 +1640,7 @@ This method has the following signatures
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1629,7 +1651,7 @@ This method has the following signatures
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1683,6 +1705,7 @@ Reads the data of this file.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1693,7 +1716,7 @@ Reads the data of this file.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1756,6 +1779,7 @@ Deletes the chunks and metadata information of a file from GridFS.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1766,7 +1790,7 @@ Deletes the chunks and metadata information of a file from GridFS.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {
@@ -1844,6 +1868,7 @@ Writes some data. This method will work properly only if initialized with mode "
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -1854,7 +1879,7 @@ Writes some data. This method will work properly only if initialized with mode "
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db
      db.open(function(err, db) {

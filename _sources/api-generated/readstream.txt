@@ -47,6 +47,7 @@ Pauses this stream, then no farther events will be fired.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -57,7 +58,7 @@ Pauses this stream, then no farther events will be fired.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -125,6 +126,7 @@ Destroys the stream, then no farther events will be fired.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -135,7 +137,7 @@ Destroys the stream, then no farther events will be fired.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {
@@ -191,6 +193,7 @@ Resumes this stream.
   .. code-block:: javascript
 
      var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
          Server = require('mongodb').Server,
          ReplSetServers = require('mongodb').ReplSetServers,
          ObjectID = require('mongodb').ObjectID,
@@ -201,7 +204,7 @@ Resumes this stream.
          assert = require('assert');
 
      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {safe:false, native_parser: false});
+      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
      
      // Establish connection to db  
      db.open(function(err, db) {

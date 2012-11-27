@@ -14,24 +14,20 @@ A simple example
 
   .. code-block:: javascript
 
-    var mongo = require('mongodb'),
-      Server = mongo.Server,
-      Db = mongo.Db,
-    Grid = mongo.Grid;
+    var MongoClient = require('mongodb').MongoClient,
+      Grid = mongo.Grid;
     
-    var server = new Server('localhost', 27017, {auto_reconnect: true});
-    var db = new Db('exampleDb', server);
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+      if(err) return console.dir(err);
     
-    db.open(function(err, db) {
-      if(!err) {
-        var grid = new Grid(db, 'fs');    
-        var buffer = new Buffer("Hello world");
-        grid.put(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
-          if(!err) {
-            console.log("Finished writing file to Mongo");
-          }
-        });
-      }
+      var grid = new Grid(db, 'fs');    
+      var buffer = new Buffer("Hello world");
+      grid.put(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
+        if(!err) {
+          console.log("Finished writing file to Mongo");
+        }
+      });
     });
 
 
@@ -80,18 +76,22 @@ A simple example
 
   .. code-block:: javascript
 
-    db.open(function(err, db) {
-      if(!err) {
-        var grid = new Grid(db, 'fs');    
-        var buffer = new Buffer("Hello world");
-        grid.put.(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {        
-          grid.get(fileInfo._id, function(err, data) {
-            console.log("Retrieved data: " + data.toString());
-            grid.delete(fileInfo._id, function(err, result) {
-            });        
-          });
+    var MongoClient = require('mongodb').MongoClient,
+      Grid = mongo.Grid;
+    
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+      if(err) return console.dir(err);
+    
+      var grid = new Grid(db, 'fs');    
+      var buffer = new Buffer("Hello world");
+      grid.put.(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {        
+        grid.get(fileInfo._id, function(err, data) {
+          console.log("Retrieved data: " + data.toString());
+          grid.delete(fileInfo._id, function(err, result) {
+          });        
         });
-      }
+      });
     });
 
 
@@ -193,8 +193,7 @@ Advanced GridFS or how not to run out of memory
 
   .. code-block:: javascript
 
-    var gridStore = new GridStore(db, fileId, "r");
-    gridStore.open(function(err, gridStore) {
+    new GridStore(db, fileId, "r").open(function(err, gridStore) {
       var stream = gridStore.stream(true);
     
       stream.on("data", function(chunk) {
