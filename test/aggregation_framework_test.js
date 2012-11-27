@@ -274,6 +274,76 @@ exports.shouldCorrectlyFailAndReturnError = function(test) {
   });
 }
 
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyPassReadPreference = function(test) {
+  // Some docs for insertion
+  var docs = [{
+      title : "this is my title", author : "bob", posted : new Date() ,
+      pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+      comments : [
+        { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+      ]}];
+
+  client.admin().serverInfo(function(err, result){
+    if(parseInt((result.version.replace(/\./g, ''))) >= 210) {
+      // Create a collection
+      client.createCollection('shouldCorrectlyFailAndReturnError', function(err, collection) {
+        // Override the command object for the db
+        var _command = client.command;        
+        client.command = function(selector, options, callback) {
+            var args = Array.prototype.slice.call(arguments, 0);
+            test.equal("secondary", options.readPreference);
+          _command.apply(client, args);
+        }
+
+        // Insert the docs
+        collection.insert(docs, {w: 1}, function(err, result) {
+          // Execute aggregate
+          collection.aggregate(
+              { $project : {
+                author : 1,
+                tags : 1,
+              }},
+              { $32unwind : "$tags" },
+              { $group : {
+                _id : { tags : 1 },
+                authors : { $addToSet : "$author" }
+              }},
+              {readPreference:'secondary'}
+            , function(err, result) {
+              // client.command = _command;
+
+              // Execute aggregate
+              collection.aggregate(
+                  [{ $project : {
+                    author : 1,
+                    tags : 1,
+                  }},
+                  { $32unwind : "$tags" },
+                  { $group : {
+                    _id : { tags : 1 },
+                    authors : { $addToSet : "$author" }
+                  }}],
+                  {readPreference:'secondary'}
+                , function(err, result) {
+                  client.command = _command;
+                  test.ok(err != null);
+                  test.done();
+              });
+
+              test.ok(err != null);
+              test.done();
+          });
+        });
+      });
+    } else {
+      test.done();
+    }
+  });
+}
+
 // /**
 //  * @ignore
 //  */

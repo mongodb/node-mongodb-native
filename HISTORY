@@ -1,5 +1,5 @@
-1.1.12
------------------
+1.2 2012-11-27
+--------------
 - Honor connectTimeoutMS option for replicasets (Issue #750, https://github.com/aheckmann)
 - Fix ping strategy regression (Issue #738, https://github.com/aheckmann)
 - Small cleanup of code (Issue #753, https://github.com/sokra/node-mongodb-native)
@@ -13,6 +13,7 @@
 - new MongoClient introduced as the point of connecting to MongoDB's instead of the Db
   - open/close/db/connect methods implemented
 - Implemented common URL connection format using MongoClient.connect allowing for simialar interface across all drivers.
+- Fixed a bug with aggregation helper not properly accepting readPreference
 
 1.1.11 2012-10-10
 -----------------
