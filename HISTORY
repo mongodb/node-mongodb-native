@@ -1,5 +1,5 @@
-1.2 2012-11-27
---------------
+1.2.0 2012-11-27
+----------------
 - Honor connectTimeoutMS option for replicasets (Issue #750, https://github.com/aheckmann)
 - Fix ping strategy regression (Issue #738, https://github.com/aheckmann)
 - Small cleanup of code (Issue #753, https://github.com/sokra/node-mongodb-native)
