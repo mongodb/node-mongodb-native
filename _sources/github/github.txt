@@ -39,7 +39,7 @@ Web frameworks using MongoDB
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 1:5:57 on 29/9/2012
+           - 4:4:14 on 28/10/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 21:50:58 on 26/10/2012
+           - 0:58:5 on 29/10/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 306
+           - 305
          * - **Watchers**
-           - 2531
+           - 2538
 
 .. topic:: mongo-model
 
@@ -360,7 +360,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 32
          * - **Watchers**
-           - 253
+           - 256
 
 .. topic:: mongode
 
@@ -522,9 +522,9 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 40
+           - 41
          * - **Watchers**
-           - 184
+           - 185
 
 .. topic:: lazyBum
 
@@ -841,7 +841,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 0
          * - **Watchers**
-           - 24
+           - 25
 
 Translation libraries or frameworks
 -----------------------------------
@@ -914,9 +914,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 208
+           - 209
          * - **Watchers**
-           - 2281
+           - 2285
 
 Libraries for the connect middleware
 ------------------------------------
@@ -1038,7 +1038,7 @@ Exampe applications
          * - **Clone Url**
            - https://github.com/gotik/nodejs-blackboard.git
          * - **Forks**
-           - 5
+           - 6
          * - **Watchers**
            - 21
 
