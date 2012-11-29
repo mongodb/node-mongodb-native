@@ -300,6 +300,24 @@ exports['Should correctly connect to MongoS using single server instance'] = fun
 }
 
 /**
+ * @ignore
+ */
+exports['Should correctly connect to the mongos using Server connection'] = function(test) {
+  var db = new Db("test", new Server("localhost", 50000), {safe:false});
+  db.open(function(e, db) {
+    test.equal(null, e);
+
+    db.createCollection("GabeTest", function(e,collection) { 
+      test.equal(null, e);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
