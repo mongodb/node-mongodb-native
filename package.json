@@ -75,6 +75,7 @@
   }
 , "config":         { "native" : false }
 , "main":             "./lib/mongodb/index"
+, "homepage":         "http://mongodb.github.com/node-mongodb-native/"
 , "directories" :   { "lib" : "./lib/mongodb" }
 , "engines" :       { "node" : ">=0.6.0" }
 , "scripts": { "test" : "make test_pure" }
