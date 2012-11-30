@@ -1,3 +1,8 @@
+1.2.1 2012-11-30
+----------------
+- Fix for double callback on insert with w:0 specified (Issue #783)
+- Small cleanup of urlparser.
+
 1.2.0 2012-11-27
 ----------------
 - Honor connectTimeoutMS option for replicasets (Issue #750, https://github.com/aheckmann)

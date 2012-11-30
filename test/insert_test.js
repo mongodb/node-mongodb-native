@@ -1293,6 +1293,93 @@ exports.shouldExecuteInsertWithNoCallbackAndWriteConcern = function(test) {
 }
 
 /**
+ * @ignore
+ */
+exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = function (test) {
+  var server = new Server("127.0.0.1", 27017
+      , {auto_reconnect: true, poolSize: 4, ssl:useSSL})
+
+  var dbOpts = {w:1, native_parser: (process.env['TEST_NATIVE'] != null)};
+  var client = new Db(MONGODB, server, dbOpts);
+
+  function cb (err) {
+    test.equal(null, err);
+    cb.called++;
+    test.equal(1, cb.called);
+  }
+  cb.called = 0;
+
+  client.open(function(err, db_p) {
+    client.createCollection('gh-completely', function(err, collection) {
+      test.equal(null, err);
+      collection.insert({ a: 1 }, { w: 0 }, cb);
+      setTimeout(function(){
+        client.close();
+        test.done();
+      }, 100)
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = function (test) {
+  var server = new Server("127.0.0.1", 27017
+      , {auto_reconnect: true, poolSize: 4, ssl:useSSL})
+
+  var dbOpts = {w:1, native_parser: (process.env['TEST_NATIVE'] != null)};
+  var client = new Db(MONGODB, server, dbOpts);
+
+  function cb (err) {
+    test.equal(null, err);
+    cb.called++;
+    test.equal(1, cb.called);
+  }
+  cb.called = 0;
+
+  client.open(function(err, db_p) {
+    client.createCollection('gh-completely', function(err, collection) {
+      test.equal(null, err);
+      collection.update({ a: 1 }, {a:2}, { upsert:true, w: 0 }, cb);
+      setTimeout(function(){
+        client.close();
+        test.done();
+      }, 100)
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = function (test) {
+  var server = new Server("127.0.0.1", 27017
+      , {auto_reconnect: true, poolSize: 4, ssl:useSSL})
+
+  var dbOpts = {w:1, native_parser: (process.env['TEST_NATIVE'] != null)};
+  var client = new Db(MONGODB, server, dbOpts);
+
+  function cb (err) {
+    test.equal(null, err);
+    cb.called++;
+    test.equal(1, cb.called);
+  }
+  cb.called = 0;
+
+  client.open(function(err, db_p) {
+    client.createCollection('gh-completely', function(err, collection) {
+      test.equal(null, err);
+      collection.remove({ a: 1 }, { w: 0 }, cb);
+      setTimeout(function(){
+        client.close();
+        test.done();
+      }, 100)
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
