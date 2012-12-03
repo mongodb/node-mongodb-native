@@ -8,6 +8,7 @@ var testCase = require('nodeunit').testCase,
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = mongodb.Db,
   ReplSetServers = mongodb.ReplSetServers,
+  ReadPreference = mongodb.ReadPreference,
   Server = mongodb.Server,
   Step = require("step");  
 
@@ -172,13 +173,13 @@ exports.shouldCorrectlyQuerySecondaries = function(test) {
   // Insert some data
   var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
-    p_db.createCollection("testsets", {safe:{w:2, wtimeout:10000}}, function(err, collection) {
-      collection.insert([{a:20}, {a:30}, {a:40}], {safe:{w:2, wtimeout:10000}}, function(err, result) {
+    p_db.createCollection("testsets", {safe:{w:3, wtimeout:10000}}, function(err, collection) {
+      collection.insert([{a:20}, {a:30}, {a:40}], {safe:{w:3, wtimeout:10000}}, function(err, result) {
         // Ensure replication happened in time
         setTimeout(function() {
           // Kill the primary
           RS.killPrimary(2, function(node) {
-            collection.find().toArray(function(err, items) {                
+            collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
               test.equal(null, err);
               test.equal(3, items.length);                
               p_db.close();

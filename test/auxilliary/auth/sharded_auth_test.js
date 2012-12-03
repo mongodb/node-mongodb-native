@@ -1,11 +1,11 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../../../lib/mongodb').native() : require('../../../lib/mongodb').pure();
 var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
-  gleak = require('../../dev/tools/gleak'),
-  ShardedManager = require('../tools/sharded_manager').ShardedManager,
+  gleak = require('../../../dev/tools/gleak'),
+  ShardedManager = require('../../tools/sharded_manager').ShardedManager,
   Db = mongodb.Db,
   Mongos = mongodb.Mongos,
   ReadPreference = mongodb.ReadPreference,

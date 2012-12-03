@@ -1,15 +1,15 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../../../lib/mongodb').native() : require('../../../lib/mongodb').pure();
 
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
-  gleak = require('../../dev/tools/gleak'),
+  gleak = require('../../../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
-  ServerManager = require('../../test/tools/server_manager').ServerManager,
+  ServerManager = require('../../../test/tools/server_manager').ServerManager,
   Step = require("step");
 
 var MONGODB = 'integration_tests';

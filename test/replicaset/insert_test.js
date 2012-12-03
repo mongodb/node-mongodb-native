@@ -239,21 +239,17 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
 
   // Open db
   db.open(function(err, p_db) {
-    console.log("---------------------------------------------------- 0")
     // Check if we got an error
     if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
     // Drop collection on replicaset
     p_db.dropCollection('shouldCorrectlyQueryAfterPrimaryComesBackUp', function(err, r) {
-    console.log("---------------------------------------------------- 1")
       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
       // Recreate collection on replicaset
       p_db.createCollection('shouldCorrectlyQueryAfterPrimaryComesBackUp', function(err, collection) {
-    console.log("---------------------------------------------------- 2")
         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
         // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {
-    console.log("---------------------------------------------------- 3")
+        collection.insert({a:20}, {safe: {w:3, wtimeout: 10000}}, function(err, r) {
           // Kill the primary
           RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
             // Ok let's execute same query a couple of times
@@ -262,11 +258,15 @@ exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
               test.equal("connection closed", err.message);
 
               collection.find({}).toArray(function(err, items) {
-                test.ok(err == null);
-                test.equal(1, items.length);
+                test.ok(err != null);
 
-                db.close(function() {
-                  test.done();
+                collection.find({}).toArray(function(err, items) {
+                  test.ok(err == null);
+                  test.equal(1, items.length);
+
+                  db.close(function() {
+                    test.done();
+                  });
                 });
               });
             });

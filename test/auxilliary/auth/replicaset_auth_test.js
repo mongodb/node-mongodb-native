@@ -1,17 +1,17 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../../../lib/mongodb').native() : require('../../../lib/mongodb').pure();
 
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
-  gleak = require('../../dev/tools/gleak'),
+  gleak = require('../../../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
   ReadPreference = mongodb.ReadPreference,
   ReplSetServers = mongodb.ReplSetServers,
-  ReplicaSetManager = require('../../test/tools/replica_set_manager').ReplicaSetManager,
+  ReplicaSetManager = require('../../../test/tools/replica_set_manager').ReplicaSetManager,
   Step = require("step");
 
 var MONGODB = 'integration_tests';
@@ -318,6 +318,68 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = function(test) {
             test.equal(1, item.a);
             db_p.close();
             test.done();
+          });
+        });
+      });
+    });
+  });
+}
+
+exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary = function(test) {
+  var replSet = new ReplSetServers( [
+      new Server( RS.host, RS.ports[0]),
+      new Server( RS.host, RS.ports[1]),
+    ],
+    {rs_name:RS.name}
+  );
+
+  var db = new Db(MONGODB, replSet, {w:1, native_parser: false});
+  db.open(function(err, db_p) {
+    test.equal(null, err);
+
+    db.collection('test').insert({a:1}, {w:1}, function(err, result) {
+      test.equal(null, err);
+
+      db_p.addUser('test', 'test', function(err, result) {
+        test.equal(null, err);
+        test.ok(result != null);
+
+        db_p.authenticate('test', 'test', function(err, result) {
+          test.equal(null, err);
+          test.equal(true, result);
+
+          // console.log("============================================================================== 0")
+          // console.dir(db_p.serverConfig._state)
+
+          // Step down the primary
+          RS.stepDownPrimary(function(err, result) {
+
+            // Wait for the secondary to recover
+            setTimeout(function(e) {
+              var counter = 1000;
+              var errors = 0;
+
+              // console.log("============================================================================== 1")
+              // console.dir(db_p.serverConfig._state)
+
+              for(var i = 0; i < counter; i++) {
+                db_p.collection('test').find({a:1}).setReadPreference(ReadPreference.SECONDARY).toArray(function(err, r) {
+                  counter = counter - 1;
+
+                  if(err != null) {
+                    errors = errors + 1;
+                    console.dir(err)
+                  }
+
+                  if(counter == 0) {
+                    test.equal(0, errors)
+
+                    db_p.close();
+                    test.done();
+                  }
+                });
+              }
+            }, 30000);
           });
         });
       });

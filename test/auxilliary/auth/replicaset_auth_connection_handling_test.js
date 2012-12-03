@@ -1,17 +1,17 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../../../lib/mongodb').native() : require('../../../lib/mongodb').pure();
 
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
-  gleak = require('../../dev/tools/gleak'),
+  gleak = require('../../../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
   ReadPreference = mongodb.ReadPreference,
   ReplSetServers = mongodb.ReplSetServers,
-  ReplicaSetManager = require('../../test/tools/replica_set_manager').ReplicaSetManager,
+  ReplicaSetManager = require('../../../test/tools/replica_set_manager').ReplicaSetManager,
   Step = require("step");
 
 var MONGODB = 'integration_tests';

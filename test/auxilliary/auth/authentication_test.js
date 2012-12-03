@@ -1,16 +1,16 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../../../lib/mongodb').native() : require('../../../lib/mongodb').pure();
 
 var testCase = require('nodeunit').testCase,
   async = require('async'),
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
-  gleak = require('../../dev/tools/gleak'),
+  gleak = require('../../../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
-  ServerManager = require('../../test/tools/server_manager').ServerManager,
+  ServerManager = require('../../../test/tools/server_manager').ServerManager,
   Step = require("step");
 
 var MONGODB = 'integration_tests';
@@ -77,8 +77,8 @@ exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(test) {
                               var col1 = db1.collection('stuff');
                               var col2 = db2.collection('stuff');
 
+                              // col1.insert({a:2}, {safe:{j:true}}, function(err1, result) {
                               col1.insert({a:2}, {safe:{j:true}}, function(err1, result) {
-
                                 col2.insert({a:2}, {safe:{j:true}}, function(err2, result) {
                                   test.ok(err1 != null);
                                   test.ok(err2 != null);
@@ -246,11 +246,13 @@ exports.shouldCorrectlyAuthenticate = function(test) {
       test.ok(result2);
 
       db1.collection('stuff', function(err, collection) {
-        collection.insert({a:2}, {safe:{j:true}}, self.parallel());
+        // collection.insert({a:2}, {safe:{j:true}}, self.parallel());
+        collection.insert({a:2}, {j:true}, self.parallel());
       });
 
       db2.collection('stuff', function(err, collection) {
-        collection.insert({a:2}, {safe:{j:true}}, self.parallel());
+        // collection.insert({a:2}, {safe:{j:true}}, self.parallel());
+        collection.insert({a:2}, {j:true}, self.parallel());
       });
     },
 
