@@ -387,6 +387,75 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
   });
 }
 
+
+
+
+exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = function(test) {
+  var replSet = new ReplSetServers([
+  new Server(RS.host, RS.ports[0]), new Server(RS.host, RS.ports[1]), ], {
+    rs_name: RS.name,
+    read_secondary: true
+  });
+
+  var db = new Db(MONGODB, replSet, {
+    w: 1,
+    native_parser: false
+  });
+  db.open(function(err, db_p) {
+    db.admin().addUser("me", "secret", function runWhatever(err, result) {
+      test.equal(null, err);
+      //create an admin account so that authentication is required on collections
+      db.admin().authenticate("me", "secret", function(err, result) {
+
+        //add a non-admin user
+        db.addUser('test', 'test', function(err, result) {
+          test.equal(null, err);
+
+          db.authenticate('test', 'test', function(err, result) {
+            //insert, just to give us something to find
+            db.collection('test').insert({a: 1}, {w: 1}, function(err, result) {
+          
+              db.collection('test').find({a: 1}).toArray(function(err, r) {
+                test.equal(null, err);
+
+                RS.setAuths("me", "secret");
+
+                RS.killPrimary(function(err, result) {
+                  RS.restartKilledNodes(function(err, result) {
+                    // Wait for the primary to come back up, as a secondary.
+                    setTimeout(function(e) {
+                      var counter = 20;
+                      var errors = 0;
+                      for(var i = 0; i < counter; i++) {
+                        db.collection('test').find({a: 1}).toArray(
+                        function(err, r) {
+                          counter = counter - 1;
+                          if(err != null) {
+                            errors = errors + 1;
+                            console.dir(err)
+                          }
+
+                          if(counter == 0) {
+                            test.equal(0, errors)
+                            db_p.close();
+                            test.done();
+                          }
+                        });
+                      }
+                    }, 30000);
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
