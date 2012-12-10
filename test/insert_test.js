@@ -1484,6 +1484,40 @@ exports.mixedTimestampAndDateQuery = function (test) {
 }
 
 /**
+ * @ignore
+ */
+exports.positiveAndNegativeInfinity = function (test) {
+  var db = new Db(MONGODB, new Server("127.0.0.1", 27017,
+    {auto_reconnect: false, poolSize: 1}), {w: 0, native_parser: false});
+
+  db.open(function (err, db) {
+    db.dropCollection("negative_pos", function (err, result) {
+      db.createCollection('negative_pos', function (err, collection) {
+        var d = new Date();
+
+        var document = {
+            pos: Number.POSITIVE_INFINITY
+          , neg: Number.NEGATIVE_INFINITY
+        }
+
+        collection.insert(document, {w:1}, function(err, result) {
+          test.equal(null, err);
+
+          collection.findOne({}, function(err, doc) {
+            test.equal(null, err);
+            test.equal(Number.POSITIVE_INFINITY, doc.pos);
+            test.equal(Number.NEGATIVE_INFINITY, doc.neg);
+              
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
