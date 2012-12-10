@@ -66,7 +66,7 @@ The URL format is unified across official drivers from 10gen with some options n
 
 ### Connection pool configuration:
 * **maxPoolSize=n:** The maximum number of connections in the connection pool
-    * Default value is 100
+    * Default value is 5
 
 ### Write concern configuration:
 More detailed information about write concerns can be found at [http://www.mongodb.org/display/DOCS/getLastError+Command](http://www.mongodb.org/display/DOCS/getLastError+Command)
