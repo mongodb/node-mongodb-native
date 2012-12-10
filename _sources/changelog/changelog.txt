@@ -2,6 +2,21 @@
 Changelog
 =========
 
+1.2.3
+----------------
+- Fix for new replicaset members correctly authenticating when being added (Issue #791, https://github.com/m4tty)
+- Fixed seek issue in gridstore when using stream (Issue #790)
+
+1.2.2 2012-12-03
+----------------
+- Fix for journal write concern not correctly being passed under some circumstances.
+- Fixed correct behavior and re-auth for servers that get stepped down (Issue #779).
+
+1.2.1 2012-11-30
+----------------
+- Fix for double callback on insert with w:0 specified (Issue #783)
+- Small cleanup of urlparser.
+
 1.2.0 2012-11-27
 ----------------
 - Honor connectTimeoutMS option for replicasets (Issue #750, https://github.com/aheckmann)

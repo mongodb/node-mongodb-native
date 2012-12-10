@@ -78,7 +78,7 @@ The URL connection format
    * How long a send or receive on a socket can take before timing out.   * Current driver behavior already differs on this, so default must be left to each driver. For new implementations, the default should be to never timeout.
 
 
-  * **maxPoolSize=n:**  The maximum number of connections in the connection pool   * Default value is 100
+  * **maxPoolSize=n:**  The maximum number of connections in the connection pool   * Default value is 5
 
 
 

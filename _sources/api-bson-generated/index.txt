@@ -8,6 +8,7 @@ Binary JSON API
   objectid
   binary
   code
+  db_ref
   double
   minkey
   maxkey

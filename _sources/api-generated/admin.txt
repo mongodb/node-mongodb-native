@@ -554,6 +554,8 @@ Options
                
                // Remove the user
                adminDb.removeUser('admin', function(err, result) {              
+                 assert.equal(null, err);
+                 assert.equal(true, result);
                  
                  // Authenticate using the removed user should fail
                  adminDb.authenticate('admin', 'admin', function(err, result) {

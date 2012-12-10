@@ -16,7 +16,7 @@ A class representation of a file stored in GridFS.
    :param objectid id: an unique ObjectID for this file
    :param string [filename]: optional a filename for this file, no unique constrain on the field
    :param string mode: set the mode for this file.
-   :param object options: optional properties to specify. Recognized keys:
+   :param object options: optional properties to specify.
    :returns: gridstore 
 
 

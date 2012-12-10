@@ -1,20 +1,19 @@
-=======
-DBRef()
-=======
+======
+Code()
+======
 
 ------------------
 Constructor
 ------------------
 
 
-A class representation of the BSON DBRef type.
+A class representation of the BSON Code type.
 
 
-  .. js:class:: DBRef()
+  .. js:class:: Code()
 
-   :param string namespace: the collection name.
-   :param objectid oid: the reference ObjectID.
-   :param string [db]: optional db name, if omitted the reference is local to the current db.
-   :returns: dbref 
+   :param string code: a string or function.
+   :param object [scope]: an optional scope for the function.
+   :returns: code 
 
 

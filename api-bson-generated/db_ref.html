@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Articles &mdash; MongoDB Node.JS Driver 1.2.3 documentation</title>
+    <title>DBRef() &mdash; MongoDB Node.JS Driver 1.2.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -45,27 +45,34 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="articles">
-<h1>Articles<a class="headerlink" href="#articles" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="nodekoarticle1.html">A Basic introduction to Mongo DB</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle1.html#mongo-db-data-types">Mongo DB data types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle1.html#getting-that-connection-to-the-database">Getting that connection to the database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle1.html#mongo-db-and-collections">Mongo DB and Collections</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle1.html#and-then-there-was-crud">And then there was CRUD</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle1.html#time-to-query">Time to Query</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle1.html#links-and-stuff">Links and stuff</a></li>
+  <div class="section" id="dbref">
+<h1>DBRef()<a class="headerlink" href="#dbref" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>A class representation of the BSON DBRef type.</p>
+<blockquote>
+<div><dl class="class">
+<dt id="DBRef">
+<em class="property">class </em><tt class="descname">DBRef</tt><big>(</big><big>)</big><a class="headerlink" href="#DBRef" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>namespace</strong> (<em>string</em>) &#8211; the collection name.</li>
+<li><strong>oid</strong> (<em>objectid</em>) &#8211; the reference ObjectID.</li>
+<li><strong>[db]</strong> (<em>string</em>) &#8211; optional db name, if omitted the reference is local to the current db.</li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="nodekoarticle2.html">A primer for GridFS using the Mongo DB driver</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle2.html#a-simple-example">A simple example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle2.html#advanced-gridfs-or-how-not-to-run-out-of-memory">Advanced GridFS or how not to run out of memory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle2.html#other-useful-methods-on-the-gridstore-object">Other useful methods on the Gridstore object</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nodekoarticle2.html#links-and-stuff">Links and stuff</a></li>
-</ul>
-</li>
-</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dbref</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
 </div>
 </div>
 
@@ -77,7 +84,8 @@
         <div class="sphinxsidebarwrapper">
 <h3>Contents</h3>
 <ul>
-<li><a class="reference internal" href="#">Articles</a><ul>
+<li><a class="reference internal" href="#">DBRef()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
 </ul>
 </li>
 </ul>
@@ -97,15 +105,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symbol.html">Symbol()</a></li>
 </ul>
 
 <ul class="this-page-menu">
