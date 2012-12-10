@@ -1,6 +1,7 @@
 1.2.3
 ----------------
 - Fix for new replicaset members correctly authenticating when being added (Issue #791, https://github.com/m4tty)
+- Fixed seek issue in gridstore when using stream (Issue #790)
 
 1.2.2 2012-12-03
 ----------------
