@@ -1380,6 +1380,64 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = funct
 }
 
 /**
+ * @ignore
+ */
+exports.handleBSONTypeInsertsCorrectly = function (test) {
+  var db = new Db(MONGODB, new Server("127.0.0.1", 27017,
+    {auto_reconnect: false, poolSize: 1}), {w: 0, native_parser: false});
+
+  db.open(function (err, db) {
+    db.dropCollection("minkey", function (err, result) {
+      db.createCollection('minkey', function (err, collection) {
+
+        var document = {
+            "symbol": new mongodb.Symbol("abcdefghijkl")
+          , "objid": new mongodb.ObjectID("abcdefghijkl")
+          , "double": new mongodb.Double(1)
+          , "binary": new mongodb.Binary(new Buffer("hello world"))
+          , "minkey": new mongodb.MinKey()
+          , "maxkey": new mongodb.MaxKey()
+        }
+
+        collection.insert(document, {w:1}, function(err, result) {
+          test.equal(null, err);
+
+          collection.findOne({"symbol": new mongodb.Symbol("abcdefghijkl")}, function(err, doc) {
+            test.equal(null, err);
+            test.equal("abcdefghijkl", doc.symbol.toString());
+
+            collection.findOne({"objid": new mongodb.ObjectID("abcdefghijkl")}, function(err, doc) {            
+              test.equal(null, err);
+              test.equal("6162636465666768696a6b6c", doc.objid.toString());
+
+              collection.findOne({"double": new mongodb.Double(1)}, function(err, doc) {            
+                test.equal(null, err);
+                test.equal(1, doc.double);
+
+                collection.findOne({"binary": new mongodb.Binary(new Buffer("hello world"))}, function(err, doc) {            
+                  test.equal(null, err);
+                  test.equal("hello world", doc.binary.toString());
+
+                  collection.findOne({"minkey": new mongodb.MinKey()}, function(err, doc) {            
+                    test.equal(null, err);
+                    test.ok(doc.minkey instanceof mongodb.MinKey);
+
+                    collection.findOne({"maxkey": new mongodb.MaxKey()}, function(err, doc) {            
+                      db.close();
+                      test.done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *

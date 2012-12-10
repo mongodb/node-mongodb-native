@@ -1,7 +1,7 @@
 { "name" :            "mongodb"
 , "description" :     "A node.js driver for MongoDB"
 , "keywords" :        ["mongodb", "mongo", "driver", "db"]
-, "version" :         "1.2.2"
+, "version" :         "1.2.3"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  [ "Aaron Heckmann",
                       "Christoph Pojer",
