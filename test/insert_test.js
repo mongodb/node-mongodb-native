@@ -1387,8 +1387,8 @@ exports.handleBSONTypeInsertsCorrectly = function (test) {
     {auto_reconnect: false, poolSize: 1}), {w: 0, native_parser: false});
 
   db.open(function (err, db) {
-    db.dropCollection("minkey", function (err, result) {
-      db.createCollection('minkey', function (err, collection) {
+    db.dropCollection("bson_types_insert", function (err, result) {
+      db.createCollection('bson_types_insert', function (err, collection) {
 
         var document = {
             "symbol": new mongodb.Symbol("abcdefghijkl")
@@ -1429,7 +1429,7 @@ exports.handleBSONTypeInsertsCorrectly = function (test) {
 
                       collection.findOne({"code": new mongodb.Code("function () {}", {a: 77})}, function(err, doc) {            
                         test.equal(null, err);
-                        test.equal(doc != null);
+                        test.ok(doc != null);
 
                         db.close();
                         test.done();
@@ -1454,8 +1454,8 @@ exports.mixedTimestampAndDateQuery = function (test) {
     {auto_reconnect: false, poolSize: 1}), {w: 0, native_parser: false});
 
   db.open(function (err, db) {
-    db.dropCollection("minkey", function (err, result) {
-      db.createCollection('minkey', function (err, collection) {
+    db.dropCollection("timestamp_date", function (err, result) {
+      db.createCollection('timestamp_date', function (err, collection) {
         var d = new Date();
 
         var documents = [
