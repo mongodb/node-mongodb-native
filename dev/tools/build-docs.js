@@ -93,7 +93,7 @@ var apiClasses2 = [
     {tag:"objectid", path:"./node_modules/bson/lib/bson/objectid.js"},
     {tag:"binary", path:"./node_modules/bson/lib/bson/binary.js"},
     {tag:"code", path:"./node_modules/bson/lib/bson/code.js"},
-    {tag:"code", path:"./node_modules/bson/lib/bson/db_ref.js"},
+    {tag:"db_ref", path:"./node_modules/bson/lib/bson/db_ref.js"},
     {tag:"double", path:"./node_modules/bson/lib/bson/double.js"},
     {tag:"minkey", path:"./node_modules/bson/lib/bson/min_key.js"},
     {tag:"maxkey", path:"./node_modules/bson/lib/bson/max_key.js"},
