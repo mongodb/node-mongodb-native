@@ -1438,6 +1438,43 @@ exports.handleBSONTypeInsertsCorrectly = function (test) {
 }
 
 /**
+ * @ignore
+ */
+exports.mixedTimestampAndDateQuery = function (test) {
+  var db = new Db(MONGODB, new Server("127.0.0.1", 27017,
+    {auto_reconnect: false, poolSize: 1}), {w: 0, native_parser: false});
+
+  db.open(function (err, db) {
+    db.dropCollection("minkey", function (err, result) {
+      db.createCollection('minkey', function (err, collection) {
+        var d = new Date();
+
+        var documents = [
+            { "x": new mongodb.Timestamp(1, 2) }
+          , { "x": d }];
+
+        collection.insert(documents, {w:1}, function(err, result) {
+          test.equal(null, err);
+
+          collection.findOne({"x": new mongodb.Timestamp(1, 2)}, function(err, doc) {
+            test.equal(null, err);
+            test.ok(doc != null);
+
+            collection.findOne({"x": d}, function(err, doc) {            
+              test.equal(null, err);
+              test.ok(doc != null);
+              
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
