@@ -810,7 +810,6 @@ exports.shouldCorrectlyReadAndWriteFile = function(test) {
   });
 }
 
-
 /**
  * A simple example showing the usage of the read method.
  *
@@ -1638,6 +1637,71 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = functi
   });
 }
 
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyHandleSeekWithStream = function(test) {
+  var id = new ObjectID();
+  var gridStore = new GridStore(client, id, "test_gs_read_length", "w", {content_type: "image/jpeg"});
+  gridStore.open(function(err, gridStore) {
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        // Open the gridstore
+        new GridStore(client, id, "r").open(function(err, gridStore) {
+          test.equal(null, err);
+
+          gridStore.pause();
+
+          gridStore.seek(2, function(err, gstore) {
+            test.equal(null, err);
+
+            var stream = gridStore.stream(true);
+
+            stream.on('data', function(chunk) {
+              test.equal("llo world!", chunk.toString());
+            }).on('end', function() {
+              test.done();
+            }).resume();
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyHandleSeekIntoSecondChunkWithStream = function(test) {
+  var id = new ObjectID();
+  var gridStore = new GridStore(client, id, "test_gs_read_length", "w", {content_type: "image/jpeg", chunk_size:5});
+  gridStore.open(function(err, gridStore) {
+    gridStore.write("hello world!", function(err, gridStore) {
+      gridStore.close(function(err, result) {
+        // Open the gridstore
+        new GridStore(client, id, "r").open(function(err, gridStore) {
+          test.equal(null, err);
+
+          gridStore.pause();
+
+          gridStore.seek(7, function(err, gstore) {
+            test.equal(null, err);
+
+            var stream = gridStore.stream(true);
+            var data = '';
+
+            stream.on('data', function(chunk) {
+              data = data + chunk.toString();
+            }).on('end', function() {
+              test.equal("orld!", data);
+              test.done();
+            }).resume();
+          });
+        });
+      });
+    });
+  });
+}
 
 /**
  * Retrieve the server information for the current
