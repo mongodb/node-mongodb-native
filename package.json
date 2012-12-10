@@ -53,7 +53,8 @@
                       "Andrew Stone",
 											"John Le Drew",
                       "Lucasfilm Singapore",
-                      "Roman Shtylman"]
+                      "Roman Shtylman",
+                      "Matt Self"]
 
 , "repository" :    { "type" :  "git"
                     , "url" :   "http://github.com/mongodb/node-mongodb-native.git" }

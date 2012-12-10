@@ -421,6 +421,7 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = function(test) {
                 RS.setAuths("me", "secret");
 
                 RS.killPrimary(function(err, result) {
+
                   RS.restartKilledNodes(function(err, result) {
                     // Wait for the primary to come back up, as a secondary.
                     setTimeout(function(e) {
