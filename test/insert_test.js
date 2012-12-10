@@ -1397,6 +1397,7 @@ exports.handleBSONTypeInsertsCorrectly = function (test) {
           , "binary": new mongodb.Binary(new Buffer("hello world"))
           , "minkey": new mongodb.MinKey()
           , "maxkey": new mongodb.MaxKey()
+          , "code": new mongodb.Code("function () {}", {a: 55})
         }
 
         collection.insert(document, {w:1}, function(err, result) {
@@ -1423,8 +1424,16 @@ exports.handleBSONTypeInsertsCorrectly = function (test) {
                     test.ok(doc.minkey instanceof mongodb.MinKey);
 
                     collection.findOne({"maxkey": new mongodb.MaxKey()}, function(err, doc) {            
-                      db.close();
-                      test.done();
+                      test.equal(null, err);
+                      test.ok(doc.maxkey instanceof mongodb.MaxKey);
+
+                      collection.findOne({"code": new mongodb.Code("function () {}", {a: 77})}, function(err, doc) {            
+                        test.equal(null, err);
+                        test.equal(doc != null);
+
+                        db.close();
+                        test.done();
+                      });
                     });
                   });
                 });
