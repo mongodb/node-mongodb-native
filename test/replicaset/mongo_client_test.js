@@ -2,8 +2,7 @@ var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').
 var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : false;
 
 var testCase = require('nodeunit').testCase,
-  debug = require('util').debug,
-  inspect = require('util').inspect,
+  format = require('util').format,
   gleak = require('../../dev/tools/gleak'),
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = mongodb.Db,
@@ -142,6 +141,30 @@ exports['Should correctly connect to a replicaset with additional options'] = fu
     db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
       test.equal(null, err);
       test.equal(1, result);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+
+/**
+ * @ignore
+ */
+exports['Should correctly connect to a replicaset with readPreference set'] = function(test) {
+  var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
+    , "localhost:30000"
+    , "localhost:30001"
+    , "integration_test_"
+    , RS.name
+    , "secondaryPreferred");
+
+  MongoClient.connect(url, function(err, db) {
+    test.equal(null, err);
+
+    db.collection("test_collection").insert({a:1}, function(err, result) {
+      test.equal(null, err);
 
       db.close();
       test.done();
