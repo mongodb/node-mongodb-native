@@ -12,6 +12,7 @@ var testCase = require('nodeunit').testCase,
   Script = require('vm'),
   Collection = mongodb.Collection,
   Server = mongodb.Server,
+  ReadPreference = mongodb.ReadPreference,
   ServerManager = require('../test/tools/server_manager').ServerManager;
 
 // Test db
@@ -219,6 +220,17 @@ exports.testConnectUsingDefaultHostAndPort = function(test) {
 
 exports.testConnectUsingSocketOptions = function(test) {
   var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  db.open(function(err, db) {
+    test.equal(null, err);
+    test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
+    test.done();
+    db.close();
+  })
+}
+
+exports.testConnectUsingSocketOptionsAndReadPreferenceAsObject = function(test) {
+  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT
+    , {readPreference: new ReadPreference("secondary"), auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
     test.equal(null, err);
     test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
