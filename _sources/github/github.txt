@@ -26,7 +26,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 2
          * - **Watchers**
-           - 11
+           - 12
 
 .. topic:: caboose
 
@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 0:22:59 on 8/11/2012
+           - 0:45:14 on 11/11/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 309
+           - 312
          * - **Watchers**
-           - 2559
+           - 2564
 
 .. topic:: mongo-model
 
@@ -237,9 +237,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 158
+           - 159
          * - **Watchers**
-           - 982
+           - 984
 
 Grid FS libraries or tools
 --------------------------
@@ -841,7 +841,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 0
          * - **Watchers**
-           - 26
+           - 27
 
 Translation libraries or frameworks
 -----------------------------------
@@ -914,9 +914,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 209
+           - 210
          * - **Watchers**
-           - 2306
+           - 2307
 
 Libraries for the connect middleware
 ------------------------------------
@@ -1014,7 +1014,7 @@ Libraries or applications for continous integration
          * - **Forks**
            - 32
          * - **Watchers**
-           - 227
+           - 230
 
 Exampe applications
 -------------------
