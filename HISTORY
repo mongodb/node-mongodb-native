@@ -1,3 +1,7 @@
+1.2.4 2012-12-11
+----------------
+- Fix to ensure authentication is correctly applied across all secondaries when using MongoClient.
+
 1.2.3 2012-12-10
 ----------------
 - Fix for new replicaset members correctly authenticating when being added (Issue #791, https://github.com/m4tty)
