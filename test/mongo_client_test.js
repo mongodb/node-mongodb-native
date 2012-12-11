@@ -136,6 +136,24 @@ exports['Should correctly connect using MongoClient to a single server using con
 }
 
 /**
+ * @ignore
+ */
+exports['Should correctly allow for w:0 overriding on the connect url'] = function(test) {
+  // Connect using the connection string  
+  MongoClient.connect("mongodb://localhost:27017/integration_tests?w=0", function(err, db) {
+    test.equal(null, err);
+
+    db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      test.equal(null, err);
+      test.equal(null, result);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *

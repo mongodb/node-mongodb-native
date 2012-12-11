@@ -4,10 +4,12 @@ var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
+  format = require('util').format,
   gleak = require('../../../dev/tools/gleak'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
+  MongoClient = mongodb.MongoClient,
   Server = mongodb.Server,
   ReadPreference = mongodb.ReadPreference,
   ReplSetServers = mongodb.ReplSetServers,
@@ -387,9 +389,6 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
   });
 }
 
-
-
-
 exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = function(test) {
   var replSet = new ReplSetServers([
   new Server(RS.host, RS.ports[0]), new Server(RS.host, RS.ports[1]), ], {
@@ -455,7 +454,82 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = function(test) {
   });
 }
 
+exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = function(test) {
+  var replSet = new ReplSetServers([
+    new Server(RS.host, RS.ports[0]), new Server(RS.host, RS.ports[1]), ], {
+      rs_name: RS.name,
+      read_secondary: true
+  });
+  
+  // var dbName = MONGODB;
+  var dbName = 'admin';
 
+  new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
+    db_p.admin().addUser("me", "secret", function runWhatever(err, result) {
+      test.equal(null, err);
+      test.ok(result != null);
+      db_p.close();
+
+      MongoClient.connect(format("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
+        , RS.host, RS.ports[0], dbName, RS.name), function(err, db) {
+          test.equal(null, err);
+
+          // Insert document
+          db.collection('authcollectiontest').insert({a:1}, function(err, result) {
+            test.equal(null, err);
+
+            // Find the document
+            db.collection('authcollectiontest').find().toArray(function(err, docs) {
+              test.equal(null, err);
+              test.equal(1, docs.length);
+              test.equal(1, docs[0].a);
+
+              db.close();
+              test.done();
+            });
+          });
+      });
+    });
+  });
+}
+
+exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = function(test) {
+  var replSet = new ReplSetServers([
+    new Server(RS.host, RS.ports[0]), new Server(RS.host, RS.ports[1]), ], {
+      rs_name: RS.name,
+      read_secondary: true
+  });
+  
+  var dbName = MONGODB;
+
+  new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
+    db_p.addUser("me", "secret", function runWhatever(err, result) {
+      test.equal(null, err);
+      test.ok(result != null);
+      db_p.close();
+
+      MongoClient.connect(format("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
+        , RS.host, RS.ports[0], dbName, RS.name), function(err, db) {
+          test.equal(null, err);
+
+          // Insert document
+          db.collection('authcollectiontest').insert({a:1}, function(err, result) {
+            test.equal(null, err);
+
+            // Find the document
+            db.collection('authcollectiontest').find().toArray(function(err, docs) {
+              test.equal(null, err);
+              test.equal(1, docs.length);
+              test.equal(1, docs[0].a);
+
+              db.close();
+              test.done();
+            });
+          });
+      });
+    });
+  });
+}
 
 /**
  * Retrieve the server information for the current
