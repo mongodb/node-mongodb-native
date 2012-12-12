@@ -62,7 +62,7 @@ exports.setUp = function(callback) {
   // Create instance of replicaset manager but only for the first call
   if(!serversUp && !noReplicasetStart) {
     serversUp = true;
-    RS = new ReplicaSetManager({retries:120, secondary_count:1, passive_count:0, arbiter_count:0});
+    RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
     // RS = new ReplicaSetManager({retries:120, secondary_count:1, passive_count:0, arbiter_count:0});
     RS.startSet(true, function(err, result) {
       if(err != null) throw err;
@@ -158,7 +158,7 @@ exports['Should correctly connect to a replicaset with readPreference set'] = fu
     , "localhost:30001"
     , "integration_test_"
     , RS.name
-    , "secondaryPreferred");
+    , "primary");
 
   MongoClient.connect(url, function(err, db) {
     test.equal(null, err);
@@ -173,15 +173,20 @@ exports['Should correctly connect to a replicaset with readPreference set'] = fu
 }
 
 /**
- * Retrieve the server information for the current
- * instance of the db client
- *
  * @ignore
  */
-exports.noGlobalsLeaked = function(test) {
-  var leaks = gleak.detectNew();
-  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-  test.done();
+exports['Should give an error for non-existing servers'] = function(test) {
+  var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
+    , "nolocalhost:30000"
+    , "nolocalhost:30001"
+    , "integration_test_"
+    , RS.name
+    , "primary");
+
+  MongoClient.connect(url, function(err, db) {
+    test.ok(err != null);
+    test.done();
+  });
 }
 
 /**

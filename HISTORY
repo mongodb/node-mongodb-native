@@ -1,3 +1,8 @@
+1.2.5 2012-12-12
+----------------
+- Fixed ssl regression, added more test coverage (Issue #800)
+- Added better error reporting to the Db.connect if no valid serverConfig setup found (Issue #798)
+
 1.2.4 2012-12-11
 ----------------
 - Fix to ensure authentication is correctly applied across all secondaries when using MongoClient.
