@@ -9,6 +9,7 @@ var testCase = require('nodeunit').testCase,
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
+  Binary = mongodb.Binary,
   fs = require('fs'),
   Server = mongodb.Server;
 
@@ -255,6 +256,48 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = function(test) {
     });
   });
 }
+
+exports.shouldStream10KDocuments = function(test) {
+  var docs = []
+
+  for(var i = 0; i < 10000; i++) {
+    docs.push({'a':i, bin: new Binary(new Buffer(256))})
+  }
+
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 5, ssl:useSSL}), {w:0, native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    db.createCollection('test_streaming_function_with_limit_for_fetching_2', function(err, collection) {
+      test.ok(collection instanceof Collection);
+
+      collection.insert(docs, {w:1}, function(err, ids) {
+        // Peform a find to get a cursor
+        var stream = collection.find({}).stream();
+        var data = [];
+
+        // For each data item
+        stream.on("data", function(item) {
+          stream.pause()
+
+          collection.findOne({}, function(err, result) {
+            data.push(1);
+            stream.resume();
+          })
+        });
+
+        // When the stream is done
+        stream.on("close", function() {
+          test.equal(10000, data.length);
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}
+
 
 /**
  * Retrieve the server information for the current
