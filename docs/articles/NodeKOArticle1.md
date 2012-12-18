@@ -29,10 +29,10 @@ As we see the number type can be a little tricky due to the way integers are imp
 
 ## Getting that connection to the database
 Let's get around to setting up a connection with the Mongo DB database. Jumping straight into the code let's do direct connection and then look at the code.
- 
+
     // Retrieve
     var MongoClient = require('mongodb').MongoClient;
-    
+
     // Connect to the db
     MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(!err) {
@@ -41,13 +41,13 @@ Let's get around to setting up a connection with the Mongo DB database. Jumping 
     });
 
 Let's have a quick look at how the connection code works. The **Db.connect**
-method let's use use a uri to connect to the Mongo database, where 
+method let's use use a uri to connect to the Mongo database, where
 **localhost:27017** is the server host and port and **exampleDb** the db
-we wish to connect to. After the url notice the hash containing the 
-**auto_reconnect** key. Auto reconnect tells the driver to retry sending 
+we wish to connect to. After the url notice the hash containing the
+**auto_reconnect** key. Auto reconnect tells the driver to retry sending
 a command to the server if there is a failure during it's execution.
 
-Another useful option you can pass in is 
+Another useful option you can pass in is
 
 **poolSize**, this allows you to control how many tcp connections are
 opened in parallel. The default value for this is 5 but you can set it
@@ -64,7 +64,7 @@ Collections are the equivalent of tables in traditional databases and contain al
 
     // Retrieve
     var MongoClient = require('mongodb').MongoClient;
-    
+
     // Connect to the db
     MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
@@ -82,7 +82,7 @@ Collections are the equivalent of tables in traditional databases and contain al
 Three different ways of creating a collection object but slightly different in behavior. Let's go through them and see what they do
 
     db.collection('test', function(err, collection) {});
- 
+
 This function will not actually create a collection on the database until you actually insert the first document.
 
     db.collection('test', {safe:true}, function(err, collection) {});
@@ -107,7 +107,7 @@ So let's get dirty with the basic operations for Mongo DB. The Mongo DB wire pro
 
     // Retrieve
     var MongoClient = require('mongodb').MongoClient;
-    
+
     // Connect to the db
     MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
@@ -149,7 +149,7 @@ Right that's the basics of insert's ironed out. We got some documents in there b
 
     // Retrieve
     var MongoClient = require('mongodb').MongoClient;
-    
+
     // Connect to the db
     MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
@@ -164,7 +164,7 @@ Right that's the basics of insert's ironed out. We got some documents in there b
       var doc2 = {mykey:2, docs:[{doc1:1}]};
 
       collection.insert(doc2, {w:1}, function(err, result) {
-        collection.update({mykey:2}, {$push:{docs:{doc2:1}}, {w:1}, function(err, result) {});
+        collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {w:1}, function(err, result) {});
       });
     });
 
@@ -188,7 +188,7 @@ Now that the operations are outline let's dig into the specific cases show in th
 
 Right so this update will look for the document that has a field **mykey** equal to **1** and apply an update to the field **fieldtoupdate** setting the value to **2**. Since we are using the **{safe:true}** option the result parameter in the callback will return the value **1** indicating that 1 document was modified by the update statement.
 
-    collection.update({mykey:2}, {$push:{docs:{doc2:1}}, {safe:true}, function(err, result) {});
+    collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {safe:true}, function(err, result) {});
 
 This updates adds another document to the field **docs** in the document identified by **{mykey:2}** using the atomic operation **$push**. This allows you to modify keep such structures as queues in Mongo DB.
 
@@ -198,7 +198,7 @@ Let's have a look at the remove operation for the driver. As before let's start 
 
     // Retrieve
     var MongoClient = require('mongodb').MongoClient;
-    
+
     // Connect to the db
     MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
@@ -237,7 +237,7 @@ Queries is of course a fundamental part of interacting with a database and Mongo
 
     // Retrieve
     var MongoClient = require('mongodb').MongoClient;
-    
+
     // Connect to the db
     MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
       if(err) { return console.dir(err); }
@@ -258,7 +258,7 @@ Queries is of course a fundamental part of interacting with a database and Mongo
       });
     });
 
-Before we start picking apart the code there is one thing that needs to be understood, the **find** method does not execute the actual query. It builds an instance of **Cursor** that you then use to retrieve the data. This lets you manage how you retrieve the data from Mongo DB and keeps state about your current Cursor state on Mongo DB. Now let's pick apart the queries we have here and look at what they do. 
+Before we start picking apart the code there is one thing that needs to be understood, the **find** method does not execute the actual query. It builds an instance of **Cursor** that you then use to retrieve the data. This lets you manage how you retrieve the data from Mongo DB and keeps state about your current Cursor state on Mongo DB. Now let's pick apart the queries we have here and look at what they do.
 
     collection.find().toArray(function(err, items) {});
 
@@ -281,27 +281,3 @@ That's pretty much it for the quick intro on how to use the database. I have als
 * [All the integration tests, they have tons of different usage cases](https://github.com/mongodb/node-mongodb-native/tree/master/test)
 * [The Mongo DB wiki pages such as the advanced query link](http://www.mongodb.org/display/DOCS/Advanced+Queries)
 * [A silly simple location based application using Express JS and Mongo DB](https://github.com/christkv/mongodb-presentation)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
