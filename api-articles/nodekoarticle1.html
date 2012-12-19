@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.2.4 documentation</title>
+    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.2.6 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.2.4',
+        VERSION:     '1.2.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.2.4 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.2.6 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.4 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.6 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -236,7 +236,7 @@ dispatch and read from the tcp connection.</p>
   <span class="kd">var</span> <span class="nx">doc2</span> <span class="o">=</span> <span class="p">{</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">,</span> <span class="nx">docs</span><span class="o">:</span><span class="p">[{</span><span class="nx">doc1</span><span class="o">:</span><span class="mi">1</span><span class="p">}]};</span>
 
   <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc2</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">$push</span><span class="o">:</span><span class="p">{</span><span class="nx">docs</span><span class="o">:</span><span class="p">{</span><span class="nx">doc2</span><span class="o">:</span><span class="mi">1</span><span class="p">}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">$push</span><span class="o">:</span><span class="p">{</span><span class="nx">docs</span><span class="o">:</span><span class="p">{</span><span class="nx">doc2</span><span class="o">:</span><span class="mi">1</span><span class="p">}}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
   <span class="p">});</span>
 <span class="p">});</span>
 </pre></div>
@@ -266,7 +266,7 @@ dispatch and read from the tcp connection.</p>
 </div></blockquote>
 <p>Right so this update will look for the document that has a field  <strong>mykey</strong>  equal to  <strong>1</strong>  and apply an update to the field  <strong>fieldtoupdate</strong>  setting the value to  <strong>2</strong> . Since we are using the  <strong>{safe:true}</strong>  option the result parameter in the callback will return the value  <strong>1</strong>  indicating that 1 document was modified by the update statement.</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">$push</span><span class="o">:</span><span class="p">{</span><span class="nx">docs</span><span class="o">:</span><span class="p">{</span><span class="nx">doc2</span><span class="o">:</span><span class="mi">1</span><span class="p">}},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">$push</span><span class="o">:</span><span class="p">{</span><span class="nx">docs</span><span class="o">:</span><span class="p">{</span><span class="nx">doc2</span><span class="o">:</span><span class="mi">1</span><span class="p">}}},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -557,7 +557,7 @@ dispatch and read from the tcp connection.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.4 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.6 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

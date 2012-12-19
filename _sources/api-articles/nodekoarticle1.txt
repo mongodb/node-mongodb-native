@@ -68,15 +68,15 @@ Getting that connection to the database
 
 
  Let's have a quick look at how the connection code works. The  **Db.connect** 
-method let's use use a uri to connect to the Mongo database, where 
+method let's use use a uri to connect to the Mongo database, where
  **localhost:27017**  is the server host and port and  **exampleDb**  the db
-we wish to connect to. After the url notice the hash containing the 
- **auto_reconnect**  key. Auto reconnect tells the driver to retry sending 
+we wish to connect to. After the url notice the hash containing the
+ **auto_reconnect**  key. Auto reconnect tells the driver to retry sending
 a command to the server if there is a failure during it's execution.
 
 
 
- Another useful option you can pass in is 
+ Another useful option you can pass in is
 
 
 
@@ -266,7 +266,7 @@ And then there was CRUD
       var doc2 = {mykey:2, docs:[{doc1:1}]};
     
       collection.insert(doc2, {w:1}, function(err, result) {
-        collection.update({mykey:2}, {$push:{docs:{doc2:1}}, {w:1}, function(err, result) {});
+        collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {w:1}, function(err, result) {});
       });
     });
 
@@ -303,7 +303,7 @@ And then there was CRUD
 
   .. code-block:: javascript
 
-    collection.update({mykey:2}, {$push:{docs:{doc2:1}}, {safe:true}, function(err, result) {});
+    collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {safe:true}, function(err, result) {});
 
 
 
@@ -410,7 +410,7 @@ Time to Query
 
 
 
- Before we start picking apart the code there is one thing that needs to be understood, the  **find**  method does not execute the actual query. It builds an instance of  **Cursor**  that you then use to retrieve the data. This lets you manage how you retrieve the data from Mongo DB and keeps state about your current Cursor state on Mongo DB. Now let's pick apart the queries we have here and look at what they do. 
+ Before we start picking apart the code there is one thing that needs to be understood, the  **find**  method does not execute the actual query. It builds an instance of  **Cursor**  that you then use to retrieve the data. This lets you manage how you retrieve the data from Mongo DB and keeps state about your current Cursor state on Mongo DB. Now let's pick apart the queries we have here and look at what they do.
 
 
   .. code-block:: javascript
