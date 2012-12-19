@@ -50,14 +50,13 @@ exports.tearDown = function(callback) {
 }
 
 /**
- * Test the authentication method for the user
- *
  * @ignore
  */
 exports['Should correctly connect to server using domain socket'] = function(test) {
 
-  var db = new Db(MONGODB, new Server("/tmp/mongodb-27017.sock", {w:0, auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});  
+  var db = new Db(MONGODB, new Server("/tmp/mongodb-27017.sock", {w:0, auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, db) {
+    test.equal(null, err);
 
     db.collection("domainSocketCollection").insert({a:1}, {w:1}, function(err, item) {
       test.equal(null, err);
@@ -65,12 +64,54 @@ exports['Should correctly connect to server using domain socket'] = function(tes
       db.collection("domainSocketCollection").find({a:1}).toArray(function(err, items) {
         test.equal(null, err);
         test.equal(1, items.length);
-  
+
         db.close();
         test.done();
       });
     });
   });
+}
+
+/**
+ * @ignore
+ */
+exports['Should connect to server using domain socket with undefined port'] = function(test) {
+
+  var db = new Db(MONGODB, new Server("/tmp/mongodb-27017.sock", undefined, {w:0, auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  db.open(function(err, db) {
+    test.equal(null, err);
+
+    db.collection("domainSocketCollection").insert({x:1}, {w:1}, function(err, item) {
+      test.equal(null, err);
+
+      db.collection("domainSocketCollection").find({x:1}).toArray(function(err, items) {
+        test.equal(null, err);
+        test.equal(1, items.length);
+
+        db.close();
+        test.done();
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should fail to connect using non-domain socket with undefined port'] = function(test) {
+
+  var db = new Db(MONGODB, new Server("localhost", undefined, {w:0, auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+
+  var error;
+  try {
+    db.open(function(){});
+  } catch (err){
+    error = err;
+  }
+
+  test.ok(error instanceof Error);
+  test.ok(/port must be specified/.test(error));
+  test.done();
 }
 
 // /**
