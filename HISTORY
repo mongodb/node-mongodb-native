@@ -3,6 +3,7 @@
 - domain sockets shouldn't require a port arg (Issue #815, https://github.com/aheckmann)
 - Cannot read property 'info' of null (Issue #809, https://github.com/thesmart)
 - Cursor.each should work in batches (Issue #804, https://github.com/Swatinem)
+- Cursor readPreference bug for non-supported read prefrences (Issue #817)
 
 1.2.5 2012-12-12
 ----------------

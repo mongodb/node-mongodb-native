@@ -2136,6 +2136,28 @@ exports.shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates = function(te
 }
 
 /**
+ * @ignore
+ */
+exports.shouldFailToSetReadPreferenceOnCursor = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    try {
+      db.collection('shouldFailToSetReadPreferenceOnCursor').find().setReadPreference("notsecondary");      
+      test.ok(false);
+    } catch (err) {
+    }
+
+    db.collection('shouldFailToSetReadPreferenceOnCursor').find().setReadPreference("secondary");      
+
+    db.close();
+    test.done()
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
