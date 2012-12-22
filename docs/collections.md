@@ -35,7 +35,7 @@ Several options can be passed to the `createCollection` function with `options` 
 ### Collection properties
 
   * `collectionName` is the name of the collection (not including the database name as a prefix)
-  * `db` is the pointer to the corresponding databse object
+  * `db` is the pointer to the corresponding database object
 
 Example of usage:
 
