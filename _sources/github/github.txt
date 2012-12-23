@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 23:9:40 on 18/11/2012
+           - 23:28:10 on 21/11/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 319
+           - 321
          * - **Watchers**
-           - 2591
+           - 2604
 
 .. topic:: mongo-model
 
@@ -229,7 +229,7 @@ Content Management Systems
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 18:55:17 on 2/11/2012
+           - 16:12:10 on 23/11/2012
          * - **Homepage**
            - http://calip.so
          * - **Url**
@@ -239,7 +239,7 @@ Content Management Systems
          * - **Forks**
            - 163
          * - **Watchers**
-           - 993
+           - 992
 
 Grid FS libraries or tools
 --------------------------
@@ -337,7 +337,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 12
          * - **Watchers**
-           - 101
+           - 103
 
 .. topic:: mongojs
 
@@ -512,9 +512,9 @@ REST api's around MongoDB or resource based libraries
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 21:25:54 on 9/5/2012
+           - 21:12:16 on 20/11/2012
          * - **Homepage**
            - http://
          * - **Url**
@@ -766,7 +766,7 @@ Logging libraries or applications
          * - **Forks**
            - 0
          * - **Watchers**
-           - 20
+           - 21
 
 Monitoring applications or libraries
 ------------------------------------
@@ -839,9 +839,9 @@ General frameworks over MongoDB
          * - **Clone Url**
            - https://github.com/evanp/databank.git
          * - **Forks**
-           - 1
+           - 2
          * - **Watchers**
-           - 31
+           - 33
 
 Translation libraries or frameworks
 -----------------------------------
@@ -914,9 +914,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 213
+           - 214
          * - **Watchers**
-           - 2321
+           - 2329
 
 Libraries for the connect middleware
 ------------------------------------
@@ -965,7 +965,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 58
          * - **Watchers**
-           - 183
+           - 184
 
 .. topic:: connect-mongo
 
@@ -988,7 +988,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 52
          * - **Watchers**
-           - 164
+           - 166
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -1012,9 +1012,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 32
+           - 31
          * - **Watchers**
-           - 232
+           - 233
 
 Exampe applications
 -------------------
