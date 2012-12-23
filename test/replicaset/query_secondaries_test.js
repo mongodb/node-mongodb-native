@@ -278,6 +278,10 @@ exports.shouldWorkWithSecondarySeeding = function(test) {
         var cursor = collection.find({}, {read:'primary'})            
         // Get documents
         cursor.toArray(function(err, items) {
+          // console.log("==================================")
+          // console.dir(err)
+          // console.dir(items)
+
           test.equal(1, items.length);          
           test.equal(1, items[0].a);
           db.close();

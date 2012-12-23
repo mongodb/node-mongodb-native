@@ -133,69 +133,61 @@ exports.tearDown = function(callback) {
 
 
 exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = function(test) {
-    MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_", { db: { native_parser: false },
-          replSet: {
-              //set replset check interval to be much smaller than our querying interval
-              haInterval: 50,
-              socketOptions: {
-                connectTimeoutMS: 500
-              }
+  MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_", { 
+      db: { native_parser: false },
+      replSet: {
+          //set replset check interval to be much smaller than our querying interval
+          haInterval: 50,
+          socketOptions: {
+            connectTimeoutMS: 500
           }
-        }, function(err,db){
-            test.equal(null, err);
-            test.ok(db != null);
+      }
+    }, function(err,db){
+      test.equal(null, err);
+      test.ok(db != null);
 
-            db.collection("replicaset_readpref_test").insert({testfield:123}, function(err, result) {
-              test.equal(null, err);
-              db.collection("replicaset_readpref_test").findOne({}, function(err, result){
-                test.equal(null, err);
-                test.equal(result.testfield, 123);
+      db.collection("replicaset_readpref_test").insert({testfield:123}, function(err, result) {
+        test.equal(null, err);
+        db.collection("replicaset_readpref_test").findOne({}, function(err, result){
+          test.equal(null, err);
+          test.equal(result.testfield, 123);
 
-                // wait five seconds, then kill 2 of the 3 nodes that are up.
-                setTimeout(function(){
-                    RS.kill(0, function(){console.log("killed replica set member 0.")});
-                    RS.kill(1, function(){console.log("killed replica set member 1.")});
-                }, 5000);
+          // wait five seconds, then kill 2 of the 3 nodes that are up.
+          setTimeout(function(){
+            RS.kill(0, function(){console.log("killed replica set member 0.")});
+            RS.kill(1, function(){console.log("killed replica set member 1.")});
+          }, 5000);
 
 
-                // we should be able to continue querying for a full minute
-                var counter = 0;
-                var callbacksWaiting = 0;
-                var intervalid = setInterval(function(){
-                    if(counter++ >= 30){
-                        clearInterval(intervalid);
-                        console.log("after", counter, "seconds callbacks check:");
-                        test.ok(callbacksWaiting < 3);
-                        console.log("callbacks not returned", callbacksWaiting, "times in a row");
-                        test.done();
-                        return;
-                    }
-                    callbacksWaiting++;
-                    db.collection("replicaset_readpref_test").findOne({},
-                        {readPreference: ReadPreference.SECONDARY_PREFERRED},
-                        function(err, result){
-                            callbacksWaiting--;
-                        });
-                    console.log("counter:", counter, callbacksWaiting);
-                }, 1000);
+          // we should be able to continue querying for a full minute
+          var counter = 0;
+          var callbacksWaiting = 0;
+          var intervalid = setInterval(function() {
 
+            if(counter++ >= 30){
+              clearInterval(intervalid);
+              // console.log("after", counter, "seconds callbacks check:");
+              test.ok(callbacksWaiting < 3);
+              // console.log("callbacks not returned", callbacksWaiting, "times in a row");
+              db.close();
+              test.done();
+              return;
+            }
+
+            callbacksWaiting++;
+
+            db.collection("replicaset_readpref_test").findOne({},
+              {readPreference: ReadPreference.SECONDARY_PREFERRED},
+              function(err, result){
+                  callbacksWaiting--;
               });
-            });
+
+            // console.log("counter:", counter, callbacksWaiting);
+          }, 1000);
         });
+      });
+    });
 };
-
-
-/**
- * Retrieve the server information for the current
- * instance of the db client
- *
- * @ignore
- */
-exports.noGlobalsLeaked = function(test) {
-  var leaks = gleak.detectNew();
-  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
-  test.done();
-}
 
 /**
  * Retrieve the server information for the current

@@ -298,8 +298,11 @@ exports['Attempt to change read preference at cursor level after object read'] =
             p_db.close();
             test.done();
           } else {
-            // Try to change the read preference it should not work as the query was executed
-            cursor.setReadPreference(Server.READ_PRIMARY);
+            try {
+              // Try to change the read preference it should not work as the query was executed
+              cursor.setReadPreference(Server.READ_PRIMARY);
+              test.ok(false);
+            } catch(err) {}
             // With callback
             cursor.setReadPreference(Server.READ_PRIMARY, function(err) {
               test.ok(err != null)
