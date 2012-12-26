@@ -83,6 +83,70 @@ exports.shouldPutFileCorrectlyToGridUsingObjectId = function(test) {
 }
 
 /**
+ * A simple example showing the usage of the put method.
+ *
+ * @_class grid
+ * @_function put
+ * @ignore
+ */
+exports.shouldPutFileCorrectlyToGridUsingIntId = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    // Create a new grid instance
+    var grid = new Grid(db, 'fs');
+    // Some data to write
+    var originalData = new Buffer('Hello world');
+    // Write data to grid
+    var id = 123;
+    grid.put(originalData, {_id: id}, function(err, result) {
+      // Fetch the content
+      grid.get(id, function(err, data) {
+        test.deepEqual(originalData.toString('base64'), data.toString('base64'));
+
+        db.close();
+        test.done();
+      });
+    });
+  });
+}
+
+/**
+ * A simple example showing the usage of the put method.
+ *
+ * @_class grid
+ * @_function put
+ * @ignore
+ */
+exports.shouldPutFileCorrectlyToGridUsingStringId = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    // Create a new grid instance
+    var grid = new Grid(db, 'fs');
+    // Some data to write
+    var originalData = new Buffer('Hello world');
+    // Write data to grid
+    var id = 'test';
+    grid.put(originalData, {_id: id}, function(err, result) {
+      test.equal(result._id, id);
+
+      // Fetch the content
+      grid.get(id, function(err, data) {
+        test.deepEqual(originalData.toString('base64'), data.toString('base64'));
+
+        db.close();
+        test.done();
+      });
+    });
+  });
+}
+
+/**
  * A simple example showing the usage of the get method.
  *
  * @_class grid
