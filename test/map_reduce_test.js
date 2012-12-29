@@ -313,7 +313,7 @@ exports.shouldPerformMapReduceInContext = function(test) {
         
         // Map function
         var map = function(){
-            emit(test(this.timestamp.getYear()), 1);
+            emit(fn(this.timestamp.getYear()), 1);
         }
 
         // Reduce function
@@ -329,18 +329,36 @@ exports.shouldPerformMapReduceInContext = function(test) {
         var t = function(val){ return val+1; }
 
         // Execute the map reduce with the custom scope
-        collection.mapReduce(map, reduce, {scope:{test:new Code(t.toString())}
-          , out: {replace:'replacethiscollection'}}, function(err, collection) {
+        var o = {};
+        o.scope =  { fn: new Code(t.toString()) }
+        o.out = { replace: 'replacethiscollection' }
+
+        collection.mapReduce(map, reduce, o, function(err, outCollection) {
+          test.equal(null, err);
 
           // Find all entries in the map-reduce collection
-          collection.find().toArray(function(err, results) {
+          outCollection.find().toArray(function(err, results) {
+            test.equal(null, err);
             test.equal(2, results[0].value)
-            
-            db.close();
-            test.done();
+
+            // mapReduce with scope containing plain function
+            var o = {};
+            o.scope =  { fn: t }
+            o.out = { replace: 'replacethiscollection' }
+
+            collection.mapReduce(map, reduce, o, function(err, outCollection) {
+              test.equal(null, err);
+
+              // Find all entries in the map-reduce collection
+              outCollection.find().toArray(function(err, results) {
+                test.equal(2, results[0].value)
+                db.close();
+                test.done();
+              });
+            });
           });
-        });        
-      });  
+        });
+      });
     });
   });
 }
