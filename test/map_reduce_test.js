@@ -20,11 +20,11 @@ var client = null;
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.setUp = function(callback) {
-  var self = exports;  
+  var self = exports;
   client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
@@ -41,7 +41,7 @@ exports.setUp = function(callback) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.tearDown = function(callback) {
@@ -60,10 +60,10 @@ if(!process.env['TEST_COVERAGE']) {
  * @_function group
  */
 exports.shouldCorrectlyExecuteGroupFunction = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
 
     // Create a test collection
@@ -75,7 +75,7 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
 
         // Trigger some inserts on the collection
         collection.insert([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
-          
+
           // Perform a group count
           collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
             test.equal(3, results[0].count);
@@ -96,20 +96,20 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
 
                   // Insert some more test data
                   collection.insert([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
-                    
+
                     // Do a Group by field a
                     collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
-                      // Results                        
+                      // Results
                       test.equal(2, results[0].a);
                       test.equal(2, results[0].count);
                       test.equal(null, results[1].a);
                       test.equal(2, results[1].count);
                       test.equal(1, results[2].a);
                       test.equal(1, results[2].count);
-                      
+
                       // Do a Group by field a
                       collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true, function(err, results) {
-                        // Results                        
+                        // Results
                         test.equal(2, results[0].a);
                         test.equal(2, results[0].count);
                         test.equal(null, results[1].a);
@@ -121,11 +121,11 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
                         collection.group([], {}, {}, "5 ++ 5", function(err, results) {
                           test.ok(err instanceof Error);
                           test.ok(err.message != null);
-                        
+
                           // Use a function to select the keys used to group by
                           var keyf = function(doc) { return {a: doc.a}; };
                           collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
-                            // Results                        
+                            // Results
                             results.sort(function(a, b) { return b.count - a.count; });
                             test.equal(2, results[0].count);
                             test.equal(2, results[0].a);
@@ -133,11 +133,11 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
                             test.equal(1, results[1].count);
                             test.equal(1, results[1].a);
                             test.equal(1, results[1].value);
-                            
+
                             // Use a Code object to select the keys used to group by
                             var keyf = new Code(function(doc) { return {a: doc.a}; });
                             collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
-                              // Results                        
+                              // Results
                               results.sort(function(a, b) { return b.count - a.count; });
                               test.equal(2, results[0].count);
                               test.equal(2, results[0].a);
@@ -145,12 +145,12 @@ exports.shouldCorrectlyExecuteGroupFunction = function(test) {
                               test.equal(1, results[1].count);
                               test.equal(1, results[1].a);
                               test.equal(1, results[1].value);
-                              
+
                               // Correctly handle illegal function when using the EVAL method
                               collection.group([], {}, {}, "5 ++ 5", false, function(err, results) {
                                 test.ok(err instanceof Error);
                                 test.ok(err.message != null);
-  
+
                                 db.close();
                                 test.done();
                               });
@@ -182,12 +182,12 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = function(test)
       // Trigger some inserts
       collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], {w:1}, function(err, ids) {
         collection.group([], {}, {count: 0, running_average: 0}
-          , function (doc, out) { 
+          , function (doc, out) {
               out.count++;
               out.running_average += doc.a;
             }
           , function(out) {
-              out.average = out.running_average / out.count;                
+              out.average = out.running_average / out.count;
             }, true, function(err, results) {
               test.equal(3, results[0].running_average)
               test.equal(0.75, results[0].average)
@@ -205,15 +205,15 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = function(test)
  * @_function mapReduce
  */
 exports.shouldPerformSimpleMapReduceFunctions = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a test collection
     db.createCollection('test_map_reduce_functions', function(err, collection) {
-      
+
       // Insert some documents to perform map reduce over
       collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
@@ -224,19 +224,19 @@ exports.shouldPerformSimpleMapReduceFunctions = function(test) {
 
         // Peform the map reduce
         collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
-          // Mapreduce returns the temporary collection with the results          
+          // Mapreduce returns the temporary collection with the results
           collection.findOne({'_id':1}, function(err, result) {
             test.equal(1, result.value);
-          
+
             collection.findOne({'_id':2}, function(err, result) {
               test.equal(1, result.value);
-              
+
               db.close();
               test.done();
             });
           });
-        });        
-      });  
+        });
+      });
     });
   });
 }
@@ -248,21 +248,21 @@ exports.shouldPerformSimpleMapReduceFunctions = function(test) {
  * @_function mapReduce
  */
 exports.shouldPerformMapReduceFunctionInline = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Parse version of server if available
     db.admin().serverInfo(function(err, result){
-      
+
       // Only run if the MongoDB version is higher than 1.7.6
       if(parseInt((result.version.replace(/\./g, ''))) >= 176) {
-        
+
         // Create a test collection
         db.createCollection('test_map_reduce_functions_inline', function(err, collection) {
-          
+
           // Insert some test documents
           collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
@@ -298,19 +298,19 @@ exports.shouldPerformMapReduceFunctionInline = function(test) {
 * @_function mapReduce
 */
 exports.shouldPerformMapReduceInContext = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a test collection
     client.createCollection('test_map_reduce_functions_scope', function(err, collection) {
 
       // Insert some test documents
       collection.insert([{'user_id':1, 'timestamp':new Date()}
         , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
-        
+
         // Map function
         var map = function(){
             emit(fn(this.timestamp.getYear()), 1);
@@ -383,8 +383,8 @@ exports.shouldPerformMapReduceWithStringFunctions = function(test) {
           test.equal(1, result.value);
           test.done();
         });
-      });        
-    });  
+      });
+    });
   });
 }
 
@@ -408,10 +408,10 @@ exports.shouldForceMapReduceError = function(test) {
           collection.mapReduce(map, reduce, {out: {inline : 1}}, function(err, collection) {
             test.ok(err != null);
             test.done();
-          });        
+          });
         };
       });
-    });  
+    });
   });
 }
 
@@ -429,13 +429,13 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = function(test) {
         collection.findOne({'_id':1}, function(err, result) {
           test.equal(1, result.value);
         });
-        
+
         collection.findOne({'_id':2}, function(err, result) {
           test.equal(1, result.value);
           test.done();
         });
-      });        
-    });  
+      });
+    });
   });
 }
 
@@ -453,13 +453,13 @@ exports.shouldPerformMapReduceWithCodeObjects = function(test) {
         collection.findOne({'_id':1}, function(err, result) {
           test.equal(1, result.value);
         });
-        
+
         collection.findOne({'_id':2}, function(err, result) {
           test.equal(1, result.value);
           test.done();
         });
-      });        
-    });  
+      });
+    });
   });
 }
 
@@ -480,14 +480,14 @@ exports.shouldPerformMapReduceWithOptions = function(test) {
           collection.findOne({'_id':2}, function(err, result) {
             test.equal(1, result.value);
           });
-          
+
           collection.findOne({'_id':3}, function(err, result) {
             test.equal(1, result.value);
             test.done();
           });
         });
-      });        
-    });  
+      });
+    });
   });
 }
 
@@ -504,8 +504,8 @@ exports.shouldHandleMapReduceErrors = function(test) {
       collection.mapReduce(map, reduce, {out : {inline: 1}, 'query': {'user_id':{'$gt':1}}}, function(err, r) {
         test.ok(err != null);
         test.done();
-      });        
-    });  
+      });
+    });
   });
 }
 
@@ -513,15 +513,15 @@ exports.shouldHandleMapReduceErrors = function(test) {
 * @ignore
 */
 exports.shouldSaveDataToDifferentDbFromMapreduce = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
     {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-  // Establish connection to db  
+  // Establish connection to db
   db.open(function(err, db) {
-    
+
     // Create a test collection
     db.createCollection('test_map_reduce_functions', function(err, collection) {
-      
+
       // Insert some documents to perform map reduce over
       collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
@@ -533,19 +533,19 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = function(test) {
         // Peform the map reduce
         collection.mapReduce(map, reduce, {out: {replace : 'tempCollection', db: "outputCollectionDb"}}, function(err, collection) {
 
-          // Mapreduce returns the temporary collection with the results          
+          // Mapreduce returns the temporary collection with the results
           collection.findOne({'_id':1}, function(err, result) {
             test.equal(1, result.value);
-          
+
             collection.findOne({'_id':2}, function(err, result) {
               test.equal(1, result.value);
-              
+
               db.close();
               test.done();
             });
           });
-        });        
-      });  
+        });
+      });
     });
   });
 }
@@ -556,18 +556,18 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = function(test) {
 exports.shouldCorrectlyReturnNestedKeys = function(test) {
   var start = new Date().setTime(new Date().getTime() - 10000);
   var end = new Date().setTime(new Date().getTime() + 10000);
-  
+
   var keys =  {
      "data.lastname": true
   };
 
   var condition = {
-   "data.date": { 
+   "data.date": {
          $gte: start,
          $lte: end
      }
   };
-  
+
   condition = {}
 
   var initial = {
@@ -586,21 +586,21 @@ exports.shouldCorrectlyReturnNestedKeys = function(test) {
           date:new Date()
         }
       }, {w:1}, function(err, result) {
-      
-      // Execute the group 
+
+      // Execute the group
       collection.group(keys, condition, initial, reduce, true, function(err, r) {
         test.equal(1, r[0].count)
-        test.equal('smith', r[0]['data.lastname']);    
+        test.equal('smith', r[0]['data.lastname']);
         test.done();
       });
-    });      
+    });
   });
 }
 
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 exports.noGlobalsLeaked = function(test) {
@@ -612,7 +612,7 @@ exports.noGlobalsLeaked = function(test) {
 /**
  * Retrieve the server information for the current
  * instance of the db client
- * 
+ *
  * @ignore
  */
 var numberOfTestsRun = Object.keys(this).length - 2;
