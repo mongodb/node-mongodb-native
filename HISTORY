@@ -7,6 +7,7 @@
 - Fix connection leak (gh-827) for HA replicaset health checks (Issue #833, https://github.com/aheckmann)
 - Modified findOne to use nextObject instead of toArray avoiding a nextTick operation (Issue #836)
 - Fixes for cursor stream to avoid multiple getmore issues when one in progress (Issue #818)
+- Fixes .open replaying all backed up commands correctly if called after operations performed, (Issue #829 and #823)
 
 1.2.7 2012-12-23
 ----------------
