@@ -1256,81 +1256,81 @@ exports['Should correctly execute count on cursor'] = function(test) {
   });
 }
 
-/**
- * @ignore
- * @api private
- */
-exports['should be able to stream documents'] = function(test) {
-  var docs = [];
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports['should be able to stream documents'] = function(test) {
+//   var docs = [];
 
-  for (var i = 0; i < 1000; i++) {
-    docs[i] = { a: i+1 };
-  }
+//   for (var i = 0; i < 1000; i++) {
+//     docs[i] = { a: i+1 };
+//   }
 
-  // Create collection
-  client.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
-    test.equal(null, err);
+//   // Create collection
+//   client.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
+//     test.equal(null, err);
 
-    // insert all docs
-    collection.insert(docs, {w:1}, function(err, result) {
-      test.equal(null, err);
+//     // insert all docs
+//     collection.insert(docs, {w:1}, function(err, result) {
+//       test.equal(null, err);
 
-      var paused = 0
-        , closed = 0
-        , resumed = 0
-        , i = 0
-        , err
+//       var paused = 0
+//         , closed = 0
+//         , resumed = 0
+//         , i = 0
+//         , err
 
-      var stream = collection.find().stream();
+//       var stream = collection.find().stream();
 
-      stream.on('data', function (doc) {
-        test.equal(true, !! doc);
-        test.equal(true, !! doc.a);
+//       stream.on('data', function (doc) {
+//         test.equal(true, !! doc);
+//         test.equal(true, !! doc.a);
 
-        if (paused > 0 && 0 === resumed) {
-          err = new Error('data emitted during pause');
-          return done();
-        }
+//         if (paused > 0 && 0 === resumed) {
+//           err = new Error('data emitted during pause');
+//           return done();
+//         }
 
-        if (++i === 3) {
-          test.equal(false, stream.paused);
-          stream.pause();
-          test.equal(true, stream.paused);
-          paused++;
+//         if (++i === 3) {
+//           test.equal(false, stream.paused);
+//           stream.pause();
+//           test.equal(true, stream.paused);
+//           paused++;
 
-          setTimeout(function () {
-            test.equal(true, stream.paused);
-            stream.resume();
-            process.nextTick(function() {
-              test.equal(false, stream.paused);
-              resumed++;
-            })
-          }, 20);
-        }
-      });
+//           setTimeout(function () {
+//             test.equal(true, stream.paused);
+//             stream.resume();
+//             process.nextTick(function() {
+//               test.equal(false, stream.paused);
+//               resumed++;
+//             })
+//           }, 20);
+//         }
+//       });
 
-      stream.on('error', function (er) {
-        err = er;
-        done();
-      });
+//       stream.on('error', function (er) {
+//         err = er;
+//         done();
+//       });
 
-      stream.on('close', function () {
-        closed++;
-        done();
-      });
+//       stream.on('close', function () {
+//         closed++;
+//         done();
+//       });
 
-      function done () {
-        test.equal(undefined, err);
-        test.equal(i, docs.length);
-        test.equal(1, closed);
-        test.equal(1, paused);
-        test.equal(1, resumed);
-        test.strictEqual(stream._cursor.isClosed(), true);
-        test.done();
-      }
-    })
-  })
-}
+//       function done () {
+//         test.equal(undefined, err);
+//         test.equal(i, docs.length);
+//         test.equal(1, closed);
+//         test.equal(1, paused);
+//         test.equal(1, resumed);
+//         test.strictEqual(stream._cursor.isClosed(), true);
+//         test.done();
+//       }
+//     })
+//   })
+// }
 
 /**
  * @ignore

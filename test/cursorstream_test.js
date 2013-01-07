@@ -298,6 +298,48 @@ exports.shouldStream10KDocuments = function(test) {
   });
 }
 
+exports.shouldTriggerMassiveAmountOfGetMores = function(test) {
+  var docs = []
+  var counter = 0;
+  var counter2 = 0;
+
+  for(var i = 0; i < 1000; i++) {
+    docs.push({'a':i, bin: new Binary(new Buffer(256))})
+  }
+
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 5, ssl:useSSL}), {w:0, native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    db.createCollection('test_streaming_function_with_limit_for_fetching_3', function(err, collection) {
+      test.ok(collection instanceof Collection);
+
+      collection.insert(docs, {w:1}, function(err, ids) {
+        // Peform a find to get a cursor
+        var stream = collection.find({}).stream();
+        var data = [];
+
+        // For each data item
+        stream.on("data", function(item) {
+          counter++;
+          stream.pause()
+          stream.resume();
+          counter2++;
+        });
+
+        // When the stream is done
+        stream.on("close", function() {
+          test.equal(1000, counter);
+          test.equal(1000, counter2);
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}
+
 
 /**
  * Retrieve the server information for the current
