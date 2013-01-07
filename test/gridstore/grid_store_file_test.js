@@ -1087,7 +1087,7 @@ exports.shouldCorrectlySafeFileUsingIntAsIdKey = function(test) {
                     test.equal(null, err);
                     test.equal('hello world!', data.toString('ascii'));
 
-                    GridStore.read(client, 500, function(err, data) {
+                    GridStore.read(client, "test_gs_small_write", function(err, data) {
                       test.equal(null, err);
                       test.equal('hello world!', data.toString('ascii'));
                       test.done();
