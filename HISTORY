@@ -3,7 +3,9 @@
 - Accept function in a Map Reduce scope object not only a function string (Issue #826, https://github.com/aheckmann)
 - Typo in db.authenticate caused a check (for provided connection) to return false, causing a connection AND onAll=true to be passed into __executeQueryCommand downstream (Issue #831, https://github.com/m4tty)
 - Allow gridfs objects to use non ObjectID ids (Issue #825, https://github.com/nailgun)
-- removed the double wrap, by not passing an Error object to the wrap function (Issue #832, https://github.com/m4tty)
+- Removed the double wrap, by not passing an Error object to the wrap function (Issue #832, https://github.com/m4tty)
+- Fix connection leak (gh-827) for HA replicaset health checks (Issue #833, https://github.com/aheckmann)
+- Modified findOne to use nextObject instead of toArray avoiding a nextTick operation (Issue #836)
 
 1.2.7 2012-12-23
 ----------------
