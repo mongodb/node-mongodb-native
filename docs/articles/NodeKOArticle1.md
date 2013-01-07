@@ -85,17 +85,17 @@ Three different ways of creating a collection object but slightly different in b
 
 This function will not actually create a collection on the database until you actually insert the first document.
 
-    db.collection('test', {safe:true}, function(err, collection) {});
+    db.collection('test', {w:1}, function(err, collection) {});
 
-Notice the **{safe:true}** option. This option will make the driver check if the collection exists and issue an error if it does not.
+Notice the **{w:1}** option. This option will make the driver check if the collection exists and issue an error if it does not.
 
     db.createCollection('test', function(err, collection) {});
 
 This command will create the collection on the Mongo DB database before returning the collection object. If the collection already exists it will ignore the creation of the collection.
 
-    db.createCollection('test', {safe:true}, function(err, collection) {});
+    db.createCollection('test', {w:1}, function(err, collection) {});
 
-The **{safe:true}** option will make the method return an error if the collection already exists.
+The **{w:1}** option will make the method return an error if the collection already exists.
 
 With an open db connection and a collection defined we are ready to do some CRUD operation on the data.
 
@@ -127,7 +127,7 @@ So let's get dirty with the basic operations for Mongo DB. The Mongo DB wire pro
 
 A couple of variations on the theme of inserting a document as we can see. To understand why it's important to understand how Mongo DB works during inserts of documents.
 
-Mongo DB has asynchronous **insert/update/remove** operations. This means that when you issue an **insert** operation its a fire and forget operation where the database does not reply with the status of the insert operation. To retrieve the status of the operation you have to issue a query to retrieve the last error status of the connection. To make it simpler to the developer the driver implements the **{safe:true}** options so that this is done automatically when inserting the document. **{safe:true}** becomes especially important when you do **update** or **remove** as otherwise it's not possible to determine the amount of documents modified or removed.
+Mongo DB has asynchronous **insert/update/remove** operations. This means that when you issue an **insert** operation its a fire and forget operation where the database does not reply with the status of the insert operation. To retrieve the status of the operation you have to issue a query to retrieve the last error status of the connection. To make it simpler to the developer the driver implements the **{w:1}** options so that this is done automatically when inserting the document. **{w:1}** becomes especially important when you do **update** or **remove** as otherwise it's not possible to determine the amount of documents modified or removed.
 
 Now let's go through the different types of inserts shown in the code above.
 
@@ -135,11 +135,11 @@ Now let's go through the different types of inserts shown in the code above.
 
 Taking advantage of the async behavior and not needing confirmation about the persisting of the data to Mongo DB we just fire off the insert (we are doing live analytics, loosing a couple of records does not matter).
 
-    collection.insert(doc2, {safe:true}, function(err, result) {});
+    collection.insert(doc2, {w:1}, function(err, result) {});
 
-That document needs to stick. Using the **{safe:true}** option ensure you get the error back if the document fails to insert correctly.
+That document needs to stick. Using the **{w:1}** option ensure you get the error back if the document fails to insert correctly.
 
-    collection.insert(lotsOfDocs, {safe:true}, function(err, result) {});
+    collection.insert(lotsOfDocs, {w:1}, function(err, result) {});
 
 A batch insert of document with any errors being reported. This is much more efficient if you need to insert large batches of documents as you incur a lot less overhead.
 
@@ -184,11 +184,11 @@ Alright before we look at the code we want to understand how document updates wo
 
 Now that the operations are outline let's dig into the specific cases show in the code example.
 
-    collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {safe:true}, function(err, result) {});
+    collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});
 
-Right so this update will look for the document that has a field **mykey** equal to **1** and apply an update to the field **fieldtoupdate** setting the value to **2**. Since we are using the **{safe:true}** option the result parameter in the callback will return the value **1** indicating that 1 document was modified by the update statement.
+Right so this update will look for the document that has a field **mykey** equal to **1** and apply an update to the field **fieldtoupdate** setting the value to **2**. Since we are using the **{w:1}** option the result parameter in the callback will return the value **1** indicating that 1 document was modified by the update statement.
 
-    collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {safe:true}, function(err, result) {});
+    collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {w:1}, function(err, result) {});
 
 This updates adds another document to the field **docs** in the document identified by **{mykey:2}** using the atomic operation **$push**. This allows you to modify keep such structures as queues in Mongo DB.
 
@@ -222,9 +222,9 @@ Let's examine the 3 remove variants and what they do.
 
 This leverages the fact that Mongo DB is asynchronous and that it does not return a result for **insert/update/remove** to allow for **synchronous** style execution. This particular remove query will remove the document where **mykey** equals **1**.
 
-    collection.remove({mykey:2}, {safe:true}, function(err, result) {});
+    collection.remove({mykey:2}, {w:1}, function(err, result) {});
 
-This remove statement removes the document where **mykey** equals **2** but since we are using **{safe:true}** it will back to Mongo DB to get the status of the remove operation and return the number of documents removed in the result variable.
+This remove statement removes the document where **mykey** equals **2** but since we are using **{w:1}** it will back to Mongo DB to get the status of the remove operation and return the number of documents removed in the result variable.
 
     collection.remove();
 
@@ -249,7 +249,7 @@ Queries is of course a fundamental part of interacting with a database and Mongo
 
         collection.find().toArray(function(err, items) {});
 
-        var stream = collection.find({mykey:{$ne:2}}).streamRecords();
+        var stream = collection.find({mykey:{$ne:2}}).stream();
         stream.on("data", function(item) {});
         stream.on("end", function() {});
 
@@ -264,7 +264,7 @@ Before we start picking apart the code there is one thing that needs to be under
 
 This query will fetch all the document in the collection and return them as an array of items. Be careful with the function **toArray** as it might cause a lot of memory usage as it will instantiate all the document into memory before returning the final array of items. If you have a big resultset you could run into memory issues.
 
-    var stream = collection.find({mykey:{$ne:2}}).streamRecords();
+    var stream = collection.find({mykey:{$ne:2}}).stream();
     stream.on("data", function(item) {});
     stream.on("end", function() {});
 
