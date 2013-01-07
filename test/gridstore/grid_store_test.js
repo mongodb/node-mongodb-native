@@ -88,6 +88,72 @@ exports.shouldCreateNewGridStoreObject = function(test) {
 };
 
 /**
+ * @ignore
+ */
+exports.shouldCreateNewGridStoreObjectWithIntId = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
+
+  var gs1
+    , gs2
+    , id = 123
+    , filename = 'test_create_gridstore';
+  try {
+    var gs = new GridStore(db, id, filename, "w");
+    test.ok(gs instanceof GridStore);
+    test.equals(id, gs.fileId);
+    test.equals(filename, gs.filename);
+  } catch(e) {
+    test.ok(false, "Failed to create GridStore with new");
+  }
+
+  try {
+    var gs = GridStore(db, id, filename, "w");
+    test.ok(gs instanceof GridStore);
+    test.equals(id, gs.fileId);
+    test.equals(filename, gs.filename);
+  } catch(e) {
+    test.ok(false, "Failed to create GridStore without new");
+  }
+
+   db.close();
+   test.done();
+};
+
+/**
+ * @ignore
+ */
+exports.shouldCreateNewGridStoreObjectWithStringId = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
+
+  var gs1
+    , gs2
+    , id = 'test'
+    , filename = 'test_create_gridstore';
+  try {
+    var gs = new GridStore(db, id, filename, "w");
+    test.ok(gs instanceof GridStore);
+    test.equals(id, gs.fileId);
+    test.equals(filename, gs.filename);
+  } catch(e) {
+    test.ok(false, "Failed to create GridStore with new");
+  }
+
+  try {
+    var gs = GridStore(db, id, filename, "w");
+    test.ok(gs instanceof GridStore);
+    test.equals(id, gs.fileId);
+    test.equals(filename, gs.filename);
+  } catch(e) {
+    test.ok(false, "Failed to create GridStore without new");
+  }
+
+   db.close();
+   test.done();
+};
+
+/**
  * A simple example showing the usage of the Gridstore.exist method.
  *
  * @_class gridstore
@@ -638,7 +704,7 @@ exports.shouldCorrectlyPerformWorkingFiledRead = function(test) {
  */
 exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = function(test) {
   // Create a new file
-  var gridStore = new GridStore(client, "test.txt", null, "w");
+  var gridStore = new GridStore(client, "test.txt", "w");
 
   // This shouldnt have to be set higher than the file...
   gridStore.chunkSize = 40960;
