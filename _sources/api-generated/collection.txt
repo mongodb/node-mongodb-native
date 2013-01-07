@@ -2005,15 +2005,15 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a test collection
        db.createCollection('test_map_reduce_functions', function(err, collection) {
-         
+     
          // Insert some documents to perform map reduce over
          collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
      
@@ -2024,18 +2024,18 @@ Options
      
            // Peform the map reduce
            collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
-             // Mapreduce returns the temporary collection with the results          
+             // Mapreduce returns the temporary collection with the results
              collection.findOne({'_id':1}, function(err, result) {
                assert.equal(1, result.value);
-             
+     
                collection.findOne({'_id':2}, function(err, result) {
                  assert.equal(1, result.value);
-                 
+     
                  db.close();
                });
              });
-           });        
-         });  
+           });
+         });
        });
      });
 
@@ -2056,21 +2056,21 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Parse version of server if available
        db.admin().serverInfo(function(err, result){
-         
+     
          // Only run if the MongoDB version is higher than 1.7.6
          if(parseInt((result.version.replace(/\./g, ''))) >= 176) {
-           
+     
            // Create a test collection
            db.createCollection('test_map_reduce_functions_inline', function(err, collection) {
-             
+     
              // Insert some test documents
              collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
      
@@ -2114,22 +2114,22 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
-       
+     
        // Create a test collection
        client.createCollection('test_map_reduce_functions_scope', function(err, collection) {
      
          // Insert some test documents
          collection.insert([{'user_id':1, 'timestamp':new Date()}
            , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
-           
+     
            // Map function
            var map = function(){
-               emit(test(this.timestamp.getYear()), 1);
+               emit(fn(this.timestamp.getYear()), 1);
            }
      
            // Reduce function
@@ -2145,17 +2145,35 @@ Options
            var t = function(val){ return val+1; }
      
            // Execute the map reduce with the custom scope
-           collection.mapReduce(map, reduce, {scope:{test:new Code(t.toString())}
-             , out: {replace:'replacethiscollection'}}, function(err, collection) {
+           var o = {};
+           o.scope =  { fn: new Code(t.toString()) }
+           o.out = { replace: 'replacethiscollection' }
+     
+           collection.mapReduce(map, reduce, o, function(err, outCollection) {
+             assert.equal(null, err);
      
              // Find all entries in the map-reduce collection
-             collection.find().toArray(function(err, results) {
+             outCollection.find().toArray(function(err, results) {
+               assert.equal(null, err);
                assert.equal(2, results[0].value)
-               
-               db.close();
+     
+               // mapReduce with scope containing plain function
+               var o = {};
+               o.scope =  { fn: t }
+               o.out = { replace: 'replacethiscollection' }
+     
+               collection.mapReduce(map, reduce, o, function(err, outCollection) {
+                 assert.equal(null, err);
+     
+                 // Find all entries in the map-reduce collection
+                 outCollection.find().toArray(function(err, results) {
+                   assert.equal(2, results[0].value)
+                   db.close();
+                 });
+               });
              });
-           });        
-         });  
+           });
+         });
        });
      });
 
@@ -2204,10 +2222,10 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
+     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
        {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
      
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
      
        // Create a test collection
@@ -2219,7 +2237,7 @@ Options
      
            // Trigger some inserts on the collection
            collection.insert([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
-             
+     
              // Perform a group count
              collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
                assert.equal(3, results[0].count);
@@ -2240,20 +2258,20 @@ Options
      
                      // Insert some more test data
                      collection.insert([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
-                       
+     
                        // Do a Group by field a
                        collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
-                         // Results                        
+                         // Results
                          assert.equal(2, results[0].a);
                          assert.equal(2, results[0].count);
                          assert.equal(null, results[1].a);
                          assert.equal(2, results[1].count);
                          assert.equal(1, results[2].a);
                          assert.equal(1, results[2].count);
-                         
+     
                          // Do a Group by field a
                          collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true, function(err, results) {
-                           // Results                        
+                           // Results
                            assert.equal(2, results[0].a);
                            assert.equal(2, results[0].count);
                            assert.equal(null, results[1].a);
@@ -2265,11 +2283,11 @@ Options
                            collection.group([], {}, {}, "5 ++ 5", function(err, results) {
                              assert.ok(err instanceof Error);
                              assert.ok(err.message != null);
-                           
+     
                              // Use a function to select the keys used to group by
                              var keyf = function(doc) { return {a: doc.a}; };
                              collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
-                               // Results                        
+                               // Results
                                results.sort(function(a, b) { return b.count - a.count; });
                                assert.equal(2, results[0].count);
                                assert.equal(2, results[0].a);
@@ -2277,11 +2295,11 @@ Options
                                assert.equal(1, results[1].count);
                                assert.equal(1, results[1].a);
                                assert.equal(1, results[1].value);
-                               
+     
                                // Use a Code object to select the keys used to group by
                                var keyf = new Code(function(doc) { return {a: doc.a}; });
                                collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
-                                 // Results                        
+                                 // Results
                                  results.sort(function(a, b) { return b.count - a.count; });
                                  assert.equal(2, results[0].count);
                                  assert.equal(2, results[0].a);
@@ -2289,7 +2307,7 @@ Options
                                  assert.equal(1, results[1].count);
                                  assert.equal(1, results[1].a);
                                  assert.equal(1, results[1].value);
-                                 
+     
                                  // Correctly handle illegal function when using the EVAL method
                                  collection.group([], {}, {}, "5 ++ 5", false, function(err, results) {
                                    assert.ok(err instanceof Error);

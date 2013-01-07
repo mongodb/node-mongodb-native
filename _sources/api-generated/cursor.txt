@@ -59,6 +59,7 @@ Constants
    "Cursor.INIT", "0", "Init state"
    "Cursor.OPEN", "1", "Cursor open"
    "Cursor.CLOSED", "2", "Cursor closed"
+   "Cursor.GET_MORE", "3", "Cursor performing a get more"
 
 ------
 rewind

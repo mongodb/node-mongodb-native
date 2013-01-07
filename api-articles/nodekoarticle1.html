@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.2.7 documentation</title>
+    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.2.8 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.2.7',
+        VERSION:     '1.2.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.2.7 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.2.8 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -147,11 +147,11 @@ dispatch and read from the tcp connection.</p>
 </div></blockquote>
 <p>This function will not actually create a collection on the database until you actually insert the first document.</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>Notice the  <strong>{safe:true}</strong>  option. This option will make the driver check if the collection exists and issue an error if it does not.</p>
+<p>Notice the  <strong>{w:1}</strong>  option. This option will make the driver check if the collection exists and issue an error if it does not.</p>
 <blockquote>
 <div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
@@ -159,11 +159,11 @@ dispatch and read from the tcp connection.</p>
 </div></blockquote>
 <p>This command will create the collection on the Mongo DB database before returning the collection object. If the collection already exists it will ignore the creation of the collection.</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>The  <strong>{safe:true}</strong>  option will make the method return an error if the collection already exists.</p>
+<p>The  <strong>{w:1}</strong>  option will make the method return an error if the collection already exists.</p>
 <p>With an open db connection and a collection defined we are ready to do some CRUD operation on the data.</p>
 </div></blockquote>
 </div>
@@ -196,7 +196,7 @@ dispatch and read from the tcp connection.</p>
 </div>
 </div></blockquote>
 <p>A couple of variations on the theme of inserting a document as we can see. To understand why it&#8217;s important to understand how Mongo DB works during inserts of documents.</p>
-<p>Mongo DB has asynchronous  <strong>insert/update/remove</strong>  operations. This means that when you issue an  <strong>insert</strong>  operation its a fire and forget operation where the database does not reply with the status of the insert operation. To retrieve the status of the operation you have to issue a query to retrieve the last error status of the connection. To make it simpler to the developer the driver implements the  <strong>{safe:true}</strong>  options so that this is done automatically when inserting the document.  <strong>{safe:true}</strong>  becomes especially important when you do  <strong>update</strong>  or  <strong>remove</strong>  as otherwise it&#8217;s not possible to determine the amount of documents modified or removed.</p>
+<p>Mongo DB has asynchronous  <strong>insert/update/remove</strong>  operations. This means that when you issue an  <strong>insert</strong>  operation its a fire and forget operation where the database does not reply with the status of the insert operation. To retrieve the status of the operation you have to issue a query to retrieve the last error status of the connection. To make it simpler to the developer the driver implements the  <strong>{w:1}</strong>  options so that this is done automatically when inserting the document.  <strong>{w:1}</strong>  becomes especially important when you do  <strong>update</strong>  or  <strong>remove</strong>  as otherwise it&#8217;s not possible to determine the amount of documents modified or removed.</p>
 <p>Now let&#8217;s go through the different types of inserts shown in the code above.</p>
 <blockquote>
 <div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc1</span><span class="p">);</span>
@@ -205,13 +205,13 @@ dispatch and read from the tcp connection.</p>
 </div></blockquote>
 <p>Taking advantage of the async behavior and not needing confirmation about the persisting of the data to Mongo DB we just fire off the insert (we are doing live analytics, loosing a couple of records does not matter).</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc2</span><span class="p">,</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc2</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>That document needs to stick. Using the  <strong>{safe:true}</strong>  option ensure you get the error back if the document fails to insert correctly.</p>
+<p>That document needs to stick. Using the  <strong>{w:1}</strong>  option ensure you get the error back if the document fails to insert correctly.</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">lotsOfDocs</span><span class="p">,</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">lotsOfDocs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -260,13 +260,13 @@ dispatch and read from the tcp connection.</p>
 </div></blockquote>
 <p>Now that the operations are outline let&#8217;s dig into the specific cases show in the code example.</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">$set</span><span class="o">:</span><span class="p">{</span><span class="nx">fieldtoupdate</span><span class="o">:</span><span class="mi">2</span><span class="p">}},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">$set</span><span class="o">:</span><span class="p">{</span><span class="nx">fieldtoupdate</span><span class="o">:</span><span class="mi">2</span><span class="p">}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>Right so this update will look for the document that has a field  <strong>mykey</strong>  equal to  <strong>1</strong>  and apply an update to the field  <strong>fieldtoupdate</strong>  setting the value to  <strong>2</strong> . Since we are using the  <strong>{safe:true}</strong>  option the result parameter in the callback will return the value  <strong>1</strong>  indicating that 1 document was modified by the update statement.</p>
+<p>Right so this update will look for the document that has a field  <strong>mykey</strong>  equal to  <strong>1</strong>  and apply an update to the field  <strong>fieldtoupdate</strong>  setting the value to  <strong>2</strong> . Since we are using the  <strong>{w:1}</strong>  option the result parameter in the callback will return the value  <strong>1</strong>  indicating that 1 document was modified by the update statement.</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">$push</span><span class="o">:</span><span class="p">{</span><span class="nx">docs</span><span class="o">:</span><span class="p">{</span><span class="nx">doc2</span><span class="o">:</span><span class="mi">1</span><span class="p">}}},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">$push</span><span class="o">:</span><span class="p">{</span><span class="nx">docs</span><span class="o">:</span><span class="p">{</span><span class="nx">doc2</span><span class="o">:</span><span class="mi">1</span><span class="p">}}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -304,11 +304,11 @@ dispatch and read from the tcp connection.</p>
 </div></blockquote>
 <p>This leverages the fact that Mongo DB is asynchronous and that it does not return a result for  <strong>insert/update/remove</strong>  to allow for  <strong>synchronous</strong>  style execution. This particular remove query will remove the document where  <strong>mykey</strong>  equals  <strong>1</strong> .</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">remove</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">remove</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>This remove statement removes the document where  <strong>mykey</strong>  equals  <strong>2</strong>  but since we are using  <strong>{safe:true}</strong>  it will back to Mongo DB to get the status of the remove operation and return the number of documents removed in the result variable.</p>
+<p>This remove statement removes the document where  <strong>mykey</strong>  equals  <strong>2</strong>  but since we are using  <strong>{w:1}</strong>  it will back to Mongo DB to get the status of the remove operation and return the number of documents removed in the result variable.</p>
 <blockquote>
 <div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
 </pre></div>
@@ -337,7 +337,7 @@ dispatch and read from the tcp connection.</p>
 
     <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{});</span>
 
-    <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="p">{</span><span class="nx">$ne</span><span class="o">:</span><span class="mi">2</span><span class="p">}}).</span><span class="nx">streamRecords</span><span class="p">();</span>
+    <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="p">{</span><span class="nx">$ne</span><span class="o">:</span><span class="mi">2</span><span class="p">}}).</span><span class="nx">stream</span><span class="p">();</span>
     <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{});</span>
     <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{});</span>
 
@@ -356,7 +356,7 @@ dispatch and read from the tcp connection.</p>
 </div></blockquote>
 <p>This query will fetch all the document in the collection and return them as an array of items. Be careful with the function  <strong>toArray</strong>  as it might cause a lot of memory usage as it will instantiate all the document into memory before returning the final array of items. If you have a big resultset you could run into memory issues.</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="p">{</span><span class="nx">$ne</span><span class="o">:</span><span class="mi">2</span><span class="p">}}).</span><span class="nx">streamRecords</span><span class="p">();</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="p">{</span><span class="nx">$ne</span><span class="o">:</span><span class="mi">2</span><span class="p">}}).</span><span class="nx">stream</span><span class="p">();</span>
 <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{});</span>
 <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{});</span>
 </pre></div>
@@ -557,11 +557,11 @@ dispatch and read from the tcp connection.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
-        &copy; Copyright 2012, MongoDB Node.JS Team 
+        &copy; Copyright 2013, MongoDB Node.JS Team 
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
