@@ -1,4 +1,4 @@
-1.2.8
+1.2.8 2013-01-07
 ----------------
 - Accept function in a Map Reduce scope object not only a function string (Issue #826, https://github.com/aheckmann)
 - Typo in db.authenticate caused a check (for provided connection) to return false, causing a connection AND onAll=true to be passed into __executeQueryCommand downstream (Issue #831, https://github.com/m4tty)
