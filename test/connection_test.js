@@ -162,6 +162,20 @@ exports.shouldCorrectlyOpenCloseAndOpenAgain = function(test) {
   });
 }
 
+exports.shouldCorrectlyHandleAutoReconnectWithOpenCalled = function(test) {
+  var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL});
+  var db = new Db(MONGODB, server, {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
+
+  db.open(function(err) {
+  });
+
+  var collection = db.collection('test');  
+  collection.find().toArray(function(err, rows) {
+    db.close();
+    test.done();
+  });
+}
+
 exports.testCloseNoCallback = function(test) {
   var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(connectionTester(test, 'testCloseNoCallback', function() {
