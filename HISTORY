@@ -6,6 +6,7 @@
 - Removed the double wrap, by not passing an Error object to the wrap function (Issue #832, https://github.com/m4tty)
 - Fix connection leak (gh-827) for HA replicaset health checks (Issue #833, https://github.com/aheckmann)
 - Modified findOne to use nextObject instead of toArray avoiding a nextTick operation (Issue #836)
+- Fixes for cursor stream to avoid multiple getmore issues when one in progress (Issue #818)
 
 1.2.7 2012-12-23
 ----------------
