@@ -1547,6 +1547,26 @@ exports.shouldPeformASimpleLimitSkipQuery = function(test) {
   });
 }
 
+exports.shouldReturnInstanceofErrorWithBadFieldSelection = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
+
+  db.open(function(err, db) {
+    test.equal(null, err);
+
+    var col = db.collection('bad_field_selection');
+    col.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+      test.equal(null, err);
+
+      col.find({}, {skip:1, limit:1, fields:{_id:1,b:0}}).toArray(function(err, docs) {
+        test.ok(err instanceof Error);
+        db.close();
+        test.done();
+      });
+    });
+  });
+}
+
 /**
  * A simple query using findOne
  *
