@@ -11,11 +11,13 @@ var testCase = require('nodeunit').testCase,
   Collection = mongodb.Collection,
   Step = require('step'),
   fs = require('fs'),
+  ServerManager = require('../test/tools/server_manager').ServerManager,
   Server = mongodb.Server;
 
 var MONGODB = 'integration_tests';
 var native_parser = (process.env['TEST_NATIVE'] != null);
 var client = null;
+var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true});
 
 /**
  * Retrieve the server information for the current
@@ -25,6 +27,7 @@ var client = null;
  */
 exports.setUp = function(callback) {
   var self = exports;
+  // Start server
   client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   client.open(function(err, db_p) {
     if(numberOfTestsRun == (Object.keys(self).length)) {
@@ -2154,6 +2157,50 @@ exports.shouldFailToSetReadPreferenceOnCursor = function(test) {
 
     db.close();
     test.done()
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyFailTailedCursor = function(test) {
+  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    db.createCollection("capped_collect_killed_server_test", {capped:true, size:100000}, function(err, collection) {
+      test.equal(null, err);
+      test.ok(collection != null);
+      var error_ok = false;
+      var data_ok = false;
+
+      var stream = collection.find({}, {tailable:true}).stream();
+      stream.on("data", function(data) {
+        data_ok = true;      
+      });
+
+      stream.on("error", function(data) {
+        error_ok = true;
+      });
+
+      stream.on("close", function(data) {        
+        serverManager.start(false, function() {
+          test.equal(true, data_ok);
+          test.equal(true, error_ok);
+
+          db.close();
+          test.done()                
+        });
+      });
+
+      var docs = [];
+      for(var i = 0; i < 100; i++) docs.push({a:1, b:"hhhhhhhhhhhhhhhhhhhhhhhhhh"});
+      collection.insert(docs, {w:1}, function(err, result) {
+        test.equal(null, err);
+        serverManager.killAll(function(err, result) {});
+      });
+    });
   });
 }
 
