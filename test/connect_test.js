@@ -76,18 +76,6 @@ exports.testConnectServerOptions = function(test) {
 /**
  * @ignore
  */
-exports.testConnectWithNoOpenOption = function(test) {
-  connect(clientUrl,
-          { noOpen: true },
-          connectionTester(test, 'testConnectWithNoOpenOption', function(db) {
-    test.ok(db);
-    test.done();
-  }));
-};
-
-/**
- * @ignore
- */
 exports.testConnectAllOptions = function(test) {
   connect(clientUrl,
           { server: {auto_reconnect: true, poolSize: 4},
