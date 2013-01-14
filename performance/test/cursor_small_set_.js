@@ -15,11 +15,17 @@ var simple_100_document_toArray = function(connection_string) {
         MongoClient.connect(connection_string, function(err, db) {
           if(err) return callback(err);
           self.db = db;
-          // Create 100 documents
-          var docs = [];
-          for(var i = 0; i < 100; i++) docs.push({a:1, b:'hello world', c:1});
-          // Setup the 100 documents
-          db.collection('simple_100_document_toArray').insert(docs, {w:1}, callback);
+    
+          // Drop the collection
+          db.collection('simple_100_document_toArray').drop(function(err, result) {
+            if(err) return callback(err);
+            
+            // Create 100 documents
+            var docs = [];
+            for(var i = 0; i < 100; i++) docs.push({a:1, b:'hello world', c:1});
+            // Setup the 100 documents
+            db.collection('simple_100_document_toArray').insert(docs, {w:1}, callback);  
+          });
         });
       },
 
