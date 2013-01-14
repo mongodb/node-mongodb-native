@@ -115,9 +115,7 @@ var execute_test_batches = function(func_name, test, number_left_to_run_batch, n
 }
 
 var exceute_test_serially = function(func_name, test, number_of_times, results, callback) {
-  // console.log("========================== exceute_test_serially :: " + number_of_times)
   if(number_of_times == 0) return callback(null, results);
-  number_of_times = number_of_times - 1;
   // Set start function
   var start = new Date();
   // Execute function
