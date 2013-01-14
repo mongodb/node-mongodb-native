@@ -114,7 +114,7 @@ ServerManager.prototype.stop = function(signal, callback) {
 
 ServerManager.prototype.killAll = function(callback) {
   exec('killall -9 mongod', function(err, stdout, stderr) {
-    callback(null, null);
+    if(typeof callback == 'function') callback(null, null);
   });
 }
 

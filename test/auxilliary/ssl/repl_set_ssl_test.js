@@ -9,6 +9,7 @@ var testCase = require('nodeunit').testCase,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
+  MongoClient = mongodb.MongoClient,
   ReplSetServers = mongodb.ReplSetServers,
   ReplicaSetManager = require('../../../test/tools/replica_set_manager').ReplicaSetManager,
   Step = require("step");  
@@ -28,7 +29,7 @@ exports.setUp = function(callback) {
   RS = new ReplicaSetManager({retries:120, 
     ssl:ssl,
     arbiter_count:1,
-    secondary_count:1,
+    secondary_count:2,
     passive_count:1});
   RS.startSet(true, function(err, result) {      
     if(err != null) throw err;
@@ -64,6 +65,16 @@ exports.shouldCorrectlyConncetToSSLBasedReplicaset = function(test) {
     test.equal(null, err);
     test.done();
     p_db.close();
+  });
+}
+
+exports.shouldCorrectlyConncetMongoClient = function(test) {
+  // Connect to the replicaset
+  MongoClient.connect("mongodb://localhost:" + RS.ports[1] + ",localhost:" + RS.ports[0] + "/foo?ssl=true", function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+    db.close();
+    test.done();
   });
 }
   
