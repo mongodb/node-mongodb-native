@@ -15,6 +15,7 @@ data/
 dev/
 examples/
 test/
+performance/
 .coverage_data/
 
 external-libs/bson/build/
