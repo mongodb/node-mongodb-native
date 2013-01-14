@@ -253,6 +253,25 @@ exports.testConnectUsingSocketOptionsAndReadPreferenceAsObject = function(test) 
   })
 }
 
+exports.testConnectUsingPortAsString = function(test) {
+  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT.toString()
+    , {auto_reconnect: true, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  db.open(function(err, db) {
+    test.equal(null, err);
+    test.done();
+    db.close();
+  })
+}
+
+exports.testConnectShouldFailDueToIllegalString = function(test) {
+  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT.toString() + "a"
+    , {auto_reconnect: true, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  db.open(function(err, db) {
+    test.equal("failed to connect to [127.0.0.1:27017a]", err.message);
+    test.done();
+  })
+}
+
 /**
  * Retrieve the server information for the current
  * instance of the db client
