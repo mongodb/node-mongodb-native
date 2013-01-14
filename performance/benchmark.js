@@ -11,6 +11,8 @@ var run_number_of_times = 1000;
 var warm_up_iterations = 10;
 // Run serially or all of them at the same time
 var concurrent = false;
+// Number of operations in one concurrent batch
+var concurrent_batch_size = 10;
 // Default connection url
 var default_url = "mongodb://localhost:27017/db";
 
@@ -19,7 +21,7 @@ console.log("= running benchmarks                                  =")
 console.log("=======================================================");
 
 var start = new Date();
-run_test(default_url, tests[0], run_number_of_times + warm_up_iterations, concurrent, function(err, results) {
+run_test(default_url, tests[0], run_number_of_times, warm_up_iterations, concurrent, concurrent_batch_size, function(err, results) {
   var end = new Date();
   for(var key in results) {
     // Calculate the averages
@@ -41,11 +43,6 @@ run_test(default_url, tests[0], run_number_of_times + warm_up_iterations, concur
     console.log("  variance :: " + stats.variance);
     console.log("  std dev  :: " + stats.standardDeviation);
   }
-
-
-  // console.dir(err)
-  // console.dir(results["simple_100_document_toArray"])
-  console.log("total time :: " + (end.getTime() - start.getTime()));
 });
 
 

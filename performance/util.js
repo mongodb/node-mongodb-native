@@ -8,7 +8,7 @@ var read_all_tests = function(directory) {
   })
 }
 
-var run_test = function(url, file, number_of_times, concurrent, test_name, callback) {
+var run_test = function(url, file, number_of_times, warm_up_iterations, concurrent, concurrent_batch_size, test_name, callback) {
   var final_results = {};  
   var number_of_test_to_run = 0;
   // If we have not test_name set up
@@ -16,6 +16,8 @@ var run_test = function(url, file, number_of_times, concurrent, test_name, callb
     callback = test_name;
     test_name = null;
   }
+  // Ensure the batch size is correct
+  if(concurrent && (number_of_times % concurrent_batch_size > 0)) return callback("Number of iterations must be divisible by batch size");
 
   // Load the file
   var _module = require(file);
@@ -28,7 +30,7 @@ var run_test = function(url, file, number_of_times, concurrent, test_name, callb
     for(var i = 0; i < keys.length; i++) {
       // Wrap the scope so we can execute it by itself
       new function(_key, _module_func) {
-        run_single_test(url, _key, _module_func, number_of_times, concurrent, function(err, results) {          
+        run_single_test(url, _key, _module_func, number_of_times, warm_up_iterations, concurrent, concurrent_batch_size, function(err, results) {          
           // Final results
           final_results[_key] = { results: results};
           if(err) { final_results[_key].err = err; }
@@ -43,7 +45,7 @@ var run_test = function(url, file, number_of_times, concurrent, test_name, callb
   }
 }
 
-var run_single_test = function(url, func_name, func, number_of_times, concurrent, callback) {
+var run_single_test = function(url, func_name, func, number_of_times, warm_up_iterations, concurrent, concurrent_batch_size, callback) {
   var results = [];
   var test = func(url)();
 
@@ -52,40 +54,67 @@ var run_single_test = function(url, func_name, func, number_of_times, concurrent
     if(err) return callback(err, null);
 
     if(!concurrent) {
-      exceute_test_serially(url, func_name, test, number_of_times, results, function(err, test_results) {
+      // Ensure we run warm up
+      number_of_times = number_of_times + warm_up_iterations;
+      // Execute the test
+      exceute_test_serially(func_name, test, number_of_times, results, function(err, test_results) {
         test.teardown(function(_t_err, _t_result) {
           if(_t_err) return callback(_t_err, null);
-          callback(err, test_results)
+          callback(err, test_results);
         })
       });
-    } else {
-      var number_left_to_run = number_of_times;
-      // Execute all the tests
-      for(var i = 0; i < number_of_times; i++) {
-        new function() {
-          // Set start function
-          var start = new Date();
-          // Execute function
-          test.test(function(err, result) {
-            var end = new Date();
-            var time = end.getTime() - start.getTime();
-            results.push({start: start, end: end, time: time});
-            // Adjust the number of tests to run
-            number_left_to_run = number_left_to_run - 1;
-            if(number_left_to_run == 0) {
-              test.teardown(function(_t_err, _t_result) {
-                if(_t_err) return callback(_t_err, null);
-                callback(err, results)
-              })            
-            }
-          });          
-        }();
-      }
+    } else {      
+      // Number of batches to run
+      var number_of_batches = number_of_times / concurrent_batch_size;
+      // Number of items in each batch
+      var number_left_to_run = number_of_batches;
+
+      // Warm up the JIT
+      exceute_test_serially(func_name, test, warm_up_iterations, [], function(err, test_results) {
+        if(err) return callback(err, null);
+
+        // Iterate over the number of batches
+        execute_test_batches(func_name, test, concurrent_batch_size, number_of_batches, results, function(err, test_results) {
+          test.teardown(function(_t_err, _t_result) {
+            if(_t_err) return callback(_t_err, null);
+            callback(err, test_results);
+          });
+        });
+      });
     }
   })
 }
 
-var exceute_test_serially = function(url, func_name, test, number_of_times, results, callback) {
+var execute_test_batches = function(func_name, test, number_left_to_run_batch, number_of_batches, results, callback) {
+  var number_left_to_run = number_left_to_run_batch;
+
+  if(number_of_batches == -1) return callback(null, results);
+
+  for(var i = 0; i < number_left_to_run_batch; i++) {
+    new function() {
+      // Set start function
+      var start = new Date();
+      
+      // Execute function
+      test.test(function(err, result) {
+        var end = new Date();
+        var time = end.getTime() - start.getTime();
+        results.push({start: start, end: end, time: time});
+        
+        // Adjust the number of tests to run
+        number_left_to_run = number_left_to_run - 1;
+        // Callback
+        if(number_left_to_run == 0) {
+          process.nextTick(function() {
+            execute_test_batches(func_name, test, number_left_to_run_batch, number_of_batches - 1, results, callback);          
+          });
+        }
+      });          
+    }();    
+  }
+}
+
+var exceute_test_serially = function(func_name, test, number_of_times, results, callback) {
   // console.log("========================== exceute_test_serially :: " + number_of_times)
   if(number_of_times == 0) return callback(null, results);
   number_of_times = number_of_times - 1;
@@ -98,7 +127,7 @@ var exceute_test_serially = function(url, func_name, test, number_of_times, resu
     results.push({start: start, end: end, time: time});
     // Execute the next tick
     process.nextTick(function() {
-      exceute_test_serially(url, func_name, test, number_of_times - 1, results, callback);
+      exceute_test_serially(func_name, test, number_of_times - 1, results, callback);
     })
   });
 }
