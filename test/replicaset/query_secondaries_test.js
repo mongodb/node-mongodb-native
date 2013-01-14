@@ -267,17 +267,22 @@ exports.shouldWorkWithSecondarySeeding = function(test) {
   // Insert some data
   var db = new Db('integration_test_', replSet, {w:0});
   db.on("fullsetup", function() {
+    // console.dir(console.dir(Object.keys(replSet._state.addresses)))
+    // debug("=========================================== shouldAllowToForceReadWithPrimary 1")
     // Create a collection
     db.createCollection('shouldWorkWithSecondarySeeding', function(err, collection) {
+      // debug("=========================================== shouldAllowToForceReadWithPrimary 2")
       test.equal(null, err);
       // Insert a document
-      collection.insert({a:1}, {safe:{w:2, wtimeout:10000}}, function(err, result) {
+      collection.insert({a:1}, {w:2, wtimeout:10000}, function(err, result) {
+        // debug("=========================================== shouldAllowToForceReadWithPrimary 3")
         test.equal(null, err);
         
         // Force read using primary
         var cursor = collection.find({}, {read:'primary'})            
         // Get documents
         cursor.toArray(function(err, items) {
+          // debug("=========================================== shouldAllowToForceReadWithPrimary 4")
           // console.log("==================================")
           // console.dir(err)
           // console.dir(items)

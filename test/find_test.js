@@ -1779,7 +1779,7 @@ exports.shouldCorrectlyExecuteExhaustQuery = function(test) {
     // Create a collection we want to drop later
     db.collection('shouldCorrectlyExecuteExhaustQuery', function(err, collection) {
       var docs = [];
-      for(var i = 0; i < 2000; i++) {
+      for(var i = 0; i < 4000; i++) {
         docs.push({
           a: 1,
           b: "helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld",

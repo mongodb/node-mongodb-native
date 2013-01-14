@@ -2205,6 +2205,59 @@ exports.shouldCorrectlyFailTailedCursor = function(test) {
 }
 
 /**
+ * @ignore
+ * @api private
+ */
+exports.shouldNotFailDueToStackOverflowEach = function(test) {
+  client.createCollection('shouldNotFailDueToStackOverflowEach', function(err, collection) {
+    var docs = [];
+    var total = 0;
+    for(var i = 0; i < 30000; i++) docs.push({a:i});
+
+    collection.insert(docs, {w:1}, function(err, ids) {
+      var s = new Date().getTime();
+
+      collection.find({}).each(function(err, item) {
+        if(item == null) {
+          var e = new Date().getTime();
+          // console.log("================== total time :: " + (e - s));
+
+          test.equal(30000, total);
+          test.done();
+        }
+
+        total++;
+      })
+    });
+  });
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports.shouldNotFailDueToStackOverflowToArray = function(test) {
+  client.createCollection('shouldNotFailDueToStackOverflowToArray', function(err, collection) {
+    var docs = [];
+    var total = 0;
+    var s = new Date().getTime();
+    for(var i = 0; i < 30000; i++) docs.push({a:i});
+
+    collection.insert(docs, {w:1}, function(err, ids) {
+      var s = new Date().getTime();
+
+      collection.find({}).toArray(function(err, items) {
+        var e = new Date().getTime();
+        // console.log("================== total time :: " + (e - s));
+
+        test.equal(30000, items.length);
+        test.done();
+      })
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *

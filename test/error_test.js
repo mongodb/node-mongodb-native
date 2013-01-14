@@ -251,26 +251,26 @@ exports['safe mode should pass the disconnected error to the callback'] = functi
 }
 
 exports.shouldHandleAssertionError = function(test) {
-  client.createCollection('test_handle_assertion_error', function(err, r) {
-    client.collection('test_handle_assertion_error', function(err, collection) {
-      collection.insert({a:{lat:50, lng:10}}, {safe: true}, function(err, docs) {
-        test.ok(err == null);
+  client.admin().serverInfo(function(err, result){
+    client.createCollection('test_handle_assertion_error', function(err, r) {
+      client.collection('test_handle_assertion_error', function(err, collection) {
+        collection.insert({a:{lat:50, lng:10}}, {safe: true}, function(err, docs) {
+          test.ok(err == null);
 
-        var query = {a:{$within:{$box:[[1,-10],[80,120]]}}};
+          var query = {a:{$within:{$box:[[1,-10],[80,120]]}}};
 
-        // We don't have a geospatial index at this point
-        collection.findOne(query, function(err, docs) {
-          test.ok(err instanceof Error);
-          
-          collection.ensureIndex([['a', '2d' ]], {unique:true, w:1}, function(err, indexName) {
-            test.ok(err == null);
+          // We don't have a geospatial index at this point
+          collection.findOne(query, function(err, docs) {
+            if(parseInt((result.version.replace(/\./g, ''))) < 223) test.ok(err instanceof Error);
             
-            collection.findOne(query, function(err, doc) {
+            collection.ensureIndex([['a', '2d' ]], {unique:true, w:1}, function(err, indexName) {
               test.ok(err == null);
               
-              var invalidQuery = {a:{$within:{$box:[[-10,-180],[10,180]]}}};
+              collection.findOne(query, function(err, doc) {
+                test.ok(err == null);
+                
+                var invalidQuery = {a:{$within:{$box:[[-10,-180],[10,180]]}}};
 
-              client.admin().serverInfo(function(err, result){
                 collection.findOne(invalidQuery, function(err, doc) {
                   if(parseInt((result.version.replace(/\./g, ''))) < 200) {
                     test.ok(err instanceof Error);
@@ -283,11 +283,11 @@ exports.shouldHandleAssertionError = function(test) {
                 });  
               });
             });
-          });
-        });          
+          });          
+        });
       });
-    });
-  }); 
+    }); 
+  });
 }
 
 exports['mixing included and excluded fields should return an error object with message'] = function (test) {
