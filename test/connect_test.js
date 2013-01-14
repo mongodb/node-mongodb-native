@@ -163,7 +163,6 @@ exports.shouldCorrectlyDoSimpleCountExamples = function(test) {
   });
 }
 
-
 /**
  * @ignore
  */
