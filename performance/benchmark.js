@@ -5,10 +5,13 @@ var read_all_tests = require('./util').read_all_tests
 // Load all the tests
 var tests = read_all_tests(__dirname + "/test");
 
-// Get a test
+// Number of times to run the test
 var run_number_of_times = 100;
+// Number of iterations to run for JIT warmup
+var warm_up_iterations = 10;
+// Run serially or all of them at the same time
 var concurrent = false;
-var results = [];
+// Default connection url
 var default_url = "mongodb://localhost:27017/db";
 
 console.log("=======================================================");
@@ -16,7 +19,7 @@ console.log("= running benchmarks                                  =")
 console.log("=======================================================");
 
 var start = new Date();
-run_test(default_url, tests[0], run_number_of_times, concurrent, function(err, results) {
+run_test(default_url, tests[0], run_number_of_times + warm_up_iterations, concurrent, function(err, results) {
   var end = new Date();
   for(var key in results) {
     // Calculate the averages
@@ -25,17 +28,18 @@ run_test(default_url, tests[0], run_number_of_times, concurrent, function(err, r
     var stats = new RunningStats();
 
     // Iterate over all the items
-    for(var i = 0; i < result.results.length; i++) {
+    for(var i = warm_up_iterations; i < result.results.length; i++) {
       // total_time = total_time + result.results[i].time;
       stats.push(result.results[i].time);
     }
+    
     // Calculate the average
     var average = total_time / result.results.length;
     console.log("= test: " + key);
     console.log("  num      :: " + stats.numDataValues);
     console.log("  avg      :: " + stats.mean);
     console.log("  variance :: " + stats.variance);
-    console.log("  std      :: " + stats.standardDeviation);
+    console.log("  std dev  :: " + stats.standardDeviation);
   }
 
 
