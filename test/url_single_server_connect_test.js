@@ -86,6 +86,7 @@ exports['Should correctly connect via normal url using ip'] = function(test) {
 exports['Should correctly connect via normal url setting up poolsize of 1'] = function(test) {
   Db.connect("mongodb://127.0.0.1:27017?maxPoolSize=1", function(err, db) {
     test.deepEqual(1, db.serverConfig.poolSize);
+    test.equal('admin', db.databaseName);
     db.close();
     test.done();
   });

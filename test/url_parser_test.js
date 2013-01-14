@@ -32,7 +32,7 @@ exports['Should correctly parse mongodb://localhost'] = function(test) {
   test.equal(1, object.servers.length);
   test.equal('localhost', object.servers[0].host);
   test.equal('27017', object.servers[0].port);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.done();
 }
 
@@ -45,7 +45,7 @@ exports['Should correctly parse mongodb://localhost:27017'] = function(test) {
   test.equal(1, object.servers.length);
   test.equal('localhost', object.servers[0].host);
   test.equal('27017', object.servers[0].port);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.done();
 }
 
@@ -59,7 +59,7 @@ exports['Should correctly parse mongodb://localhost?safe=true&readPreference=sec
   test.equal(1, object.servers.length);
   test.equal('localhost', object.servers[0].host);
   test.equal('27017', object.servers[0].port);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.done();
 }
 
@@ -72,7 +72,7 @@ exports['Should correctly parse mongodb://localhost:28101'] = function(test) {
   test.equal(1, object.servers.length);
   test.equal('localhost', object.servers[0].host);
   test.equal('28101', object.servers[0].port);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.done();
 }
 
@@ -114,7 +114,7 @@ exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = function(t
   var object = parse("mongodb:///tmp/mongodb-27017.sock", {uri_decode_auth:true});
   test.equal(1, object.servers.length);
   test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.done();
 }
 
@@ -126,7 +126,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = f
   var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock", {uri_decode_auth:true});
   test.equal(1, object.servers.length);
   test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.equal('fred', object.auth.user);
   test.equal('foo', object.auth.password);
   test.done();
@@ -172,7 +172,7 @@ exports['Should correctly parse mongodb://example1.com:27017,example2.com:27018'
   test.equal('27017', object.servers[0].port);
   test.equal("example2.com", object.servers[1].host);
   test.equal('27018', object.servers[1].port);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.done();
 }
 
@@ -189,7 +189,7 @@ exports['Should correctly parse mongodb://localhost,localhost:27018,localhost:27
   test.equal('27018', object.servers[1].port);
   test.equal("localhost", object.servers[2].host);
   test.equal('27019', object.servers[2].port);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.done();
 }
 
@@ -206,7 +206,7 @@ exports['Should correctly parse mongodb://host1,host2,host3/?slaveOk=true'] = fu
   test.equal('27017', object.servers[1].port);
   test.equal("host3", object.servers[2].host);
   test.equal('27017', object.servers[2].port);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.equal(true, object.server_options.slave_ok);
   test.done();
 }
@@ -220,7 +220,7 @@ exports['Should correctly parse mongodb://localhost/?safe=true'] = function(test
   test.equal(1, object.servers.length);
   test.equal("localhost", object.servers[0].host);
   test.equal('27017', object.servers[0].port);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.equal(true, object.db_options.safe);
   test.done();
 }
@@ -238,7 +238,7 @@ exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtime
   test.equal('27017', object.servers[1].port);
   test.equal("host3", object.servers[2].host);
   test.equal('27017', object.servers[2].port);
-  test.equal('default', object.dbName);
+  test.equal('admin', object.dbName);
   test.equal(true, object.db_options.safe);
   test.equal(2, object.db_options.w);
   test.equal(2000, object.db_options.wtimeoutMS);
