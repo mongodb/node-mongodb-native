@@ -61,4 +61,4 @@ generate_docs:
 	$(NODE) dev/tools/build-docs.js
 	make --directory=./docs/sphinx-docs --file=Makefile html
 
-.PHONY: total
+.PHONY: total test-coverage build_native test test_pure test_junit jenkins test_nodeunit_pure test_nodeunit_replicaset_pure test_nodeunit_native test_nodeunit_replicaset_native test_all test_all_junit clean generate_docs
