@@ -1,3 +1,12 @@
+1.2.9 2013-01-15
+----------------
+- Fixed bug in SSL support for MongoClient/Db.connect when discovering servers (Issue #849)
+- Connection string with no db specified should default to admin db (Issue #848)
+- Support port passed as string to Server class (Issue #844)
+- Removed noOpen support for MongoClient/Db.connect as auto discovery of servers for Mongod/Mongos makes it not possible (Issue #842)
+- Included toError wrapper code moved to utils.js file (Issue #839, #840)
+- Rewrote cursor handling to avoid process.nextTick using trampoline instead to avoid stack overflow, speedup about 40%
+
 1.2.8 2013-01-07
 ----------------
 - Accept function in a Map Reduce scope object not only a function string (Issue #826, https://github.com/aheckmann)
