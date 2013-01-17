@@ -1,16 +1,16 @@
 # A Basic introduction to Mongo DB
-Mongo DB has rapidly grown to become a popular database for web applications and is a perfect fit for Node.JS applications, letting you write Javascript for the client, backend and database layer. It's schemaless nature is a better match to our constantly evolving data structures in web applications and the integrated support for location queries a bonus that it's hard to ignore. Throw Replicasets for scaling and we are looking at really nice platform to grow your storage needs now and in the future.
+Mongo DB has rapidly grown to become a popular database for web applications and is a perfect fit for Node.JS applications, letting you write Javascript for the client, backend and database layer. Its schemaless nature is a better match to our constantly evolving data structures in web applications, and the integrated support for location queries is a bonus that's hard to ignore. Throw in Replica Sets for scaling, and we're looking at really nice platform to grow your storage needs now and in the future.
 
-Now to shamelessly plug my driver. It can be downloaded either using npm or fetched from the github repository. To install via npm do the following.
+Now to shamelessly plug my driver. It can be downloaded via npm, or fetched from the github repository. To install via npm, do the following: 
 
 `npm install mongodb`
 
 or go fetch it from github at [https://github.com/christkv/node-mongodb-native](https://github.com/christkv/node-mongodb-native)
 
-Once this business is taken care of let's move through the types available for the driver and then how to connect to your Mongo DB instance before facing the usage of some crud operations.
+Once this business is taken care of, let's move through the types available for the driver and then how to connect to your Mongo DB instance before facing the usage of some CRUD operations.
 
 ## Mongo DB data types
-So there is an important thing to keep in mind when working with Mongo DB and that is that there is a slight mapping difference between the types supported in Mongo DB and what is native types in Javascript. Let's have a look at the types supported out of the box and then how types are promoted by the driver to try to fit as close to the native Javascript types as possible.
+So there is an important thing to keep in mind when working with Mongo DB, and that is the slight mapping difference between types Mongo DB supports and native Javascript data types. Let's have a look at the types supported out of the box and then how types are promoted by the driver to fit as close to native Javascript types as possible.
 
 * **Float** is a 8 byte and is directly convertible to the Javascript type Number
 * **Double class** a special class representing a float value, this is especially useful when using capped collections where you need to ensure your values are always floats.
