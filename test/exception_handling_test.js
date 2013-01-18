@@ -49,6 +49,23 @@ exports.tearDown = function(callback) {
   callback();
 }
 
+exports.shouldCorrectlyHandleThrownInInsert = function(test) {
+
+    var db = new Db(MONGODB, new Server("127.0.0.1", 27017,
+            {auto_reconnect: false, poolSize:1}), {safe: true, native_parser:true}),
+        doc = {key : { $ref: 'should be error' } };
+    db.on('error', function(error) {
+        test.done()
+    });
+    db.open(function(error, db) {
+        db.dropCollection('shouldCorrectlyHandleThrownInInsert', function(err) {
+            db.createCollection('shouldCorrectlyHandleThrownInInsert', function(err, collection) {
+                collection.insert(doc, {safe:false});
+            });
+        })
+    });
+}
+
 exports.shouldCorrectlyHandleThrownError = function(test) {
   client.createCollection('shouldCorrectlyHandleThrownError', function(err, r) {
     try {
