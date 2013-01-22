@@ -114,14 +114,29 @@ ShardedManager.prototype.start = function(callback) {
   var self = this;
   // Start replicaset servers
   startReplicasetServers(self, function(err, result) {
+    if(err) {
+      console.log("============================ replicaset servers start failed");
+      console.dir(err);
+    }
     // Start the config servers
     startConfigServers(self, function(err, result) {
+      if(err) {
+        console.log("============================ config servers start failed");
+        console.dir(err);
+      }
       // Start the mongos proxies
       startMongosProxies(self, function(err, result) {
-        // Setup shard
-        setupShards(self, function(err, result) {
-          callback();
-        });
+        if(err) {
+          console.log("============================ mongos proxies start failed");
+          console.dir(err);
+        }
+
+        // setTimeout(function() {
+          // Setup shard
+          setupShards(self, function(err, result) {
+            callback();
+          });
+        // }, 10000);
       });
     });
   });
@@ -206,6 +221,7 @@ var setupShards = function(self, callback) {
   // Set up the db connection
   var db = new Db("admin", new Server("localhost", self.mongosRangeSet, {auto_reconnect: true, poolSize: 4}), {w:0});
   db.open(function(err, db) {
+    if(err) throw err;
     // console.log("=================================================================")
     // console.dir(err)
     var numberOfShardsToAdd = self.numberOfReplicaSets;

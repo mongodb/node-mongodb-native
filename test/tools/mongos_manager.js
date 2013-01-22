@@ -64,7 +64,7 @@ MongosManager.prototype.start = function(killall, callback) {
             self.pid = fs.readFileSync(path.join(self.db_path, "mongos.lock"), 'ascii').trim();
             // Callback
             callback();
-          }, 500);
+          }, 2000);
         });    
       });        
     } else {
