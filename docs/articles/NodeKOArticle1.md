@@ -17,7 +17,7 @@ So there is an important thing to keep in mind when working with Mongo DB, and t
 * **Integers** is a bit trickier due to the fact that Javascript represents all Numbers as 64 bit floats meaning that the maximum integer value is at a 53 bit. Mongo has two types for integers, a 32 bit and a 64 bit. The driver will try to fit the value into 32 bits if it can and promote it to 64 bits if it has to. Similarly it will deserialize attempting to fit it into 53 bits if it can. If it cannot it will return an instance of **Long** to avoid loosing precession.
 * **Long class** a special class that let's you store 64 bit integers and also let's you operate on the 64 bits integers.
 * **Date** maps directly to a Javascript Date
-* **RegEp** maps directly to a Javascript RegExp
+* **RegExp** maps directly to a Javascript RegExp
 * **String** maps directly to a Javascript String (encoded in utf8)
 * **Binary class** a special class that let's you store data in Mongo DB
 * **Code class** a special class that let's you store javascript functions in Mongo DB, can also provide a scope to run the method in
