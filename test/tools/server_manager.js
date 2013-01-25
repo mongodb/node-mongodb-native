@@ -159,7 +159,7 @@ var generateStartCmd = function(self, options) {
       startCmd = startCmd + " --sslWeakCertificateValidation"
     }
   }
-  // console.log(startCmd)
+  console.log(startCmd)
 
   // Return start command
   return startCmd;
