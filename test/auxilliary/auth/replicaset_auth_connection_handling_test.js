@@ -61,7 +61,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
     // Just set auths for the manager to handle it correctly
     RS.setAuths("root", "root");
     // Add a user
-    db.admin().addUser("root", "root", function(err, result) {
+    db.admin().addUser("root", "root", {w:3}, function(err, result) {
       test.equal(null, err);
 
       db.admin().authenticate("root", "root", function(err, result) {

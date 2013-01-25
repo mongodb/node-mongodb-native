@@ -46,7 +46,9 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
-  callback();
+  RS.killAll(function() {
+    callback();    
+  });
 }
 
 exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = function(test) {
@@ -63,7 +65,7 @@ exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = function(test)
   db.open(function(err, p_db) {
     Step(
       function addUser() {
-        db.admin().addUser("me", "secret", this);
+        db.admin().addUser("me", "secret", {w:3}, this);
       },
 
       function ensureFailingInsert(err, result) {
@@ -88,7 +90,7 @@ exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = function(test)
         test.equal(null, err);
         test.ok(result);
 
-        db.admin().addUser("me", "secret2", this);
+        db.admin().addUser("me", "secret2", {w:3}, this);
       },
 
       function authenticate(err, result) {
@@ -184,7 +186,7 @@ exports.shouldCorrectlyAuthenticate = function(test) {
   db.open(function(err, p_db) {
     Step(
       function addUser() {
-        db.admin().addUser("me", "secret", this);
+        db.admin().addUser("me", "secret", {w:3}, this);
       },
 
       function ensureFailingInsert(err, result) {
@@ -247,7 +249,7 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = function(test) {
       console.log('DB:'+db_p);
     }
 
-    db_p.addUser('test', 'test', function(err, result) {
+    db_p.addUser('test', 'test', {w:3}, function(err, result) {
       if (err){
         console.log('ERR AUTH:'+err);
         console.log('replies:'+result);
@@ -306,7 +308,7 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = function(test) {
   db.open(function(err, db_p) {
     test.equal(null, err);
 
-    db_p.addUser('test', 'test', function(err, result) {
+    db_p.addUser('test', 'test', {w:3}, function(err, result) {
       test.equal(null, err);
 
       db_p.authenticate('test', 'test', function(err, replies) {
@@ -342,7 +344,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
     db.collection('test').insert({a:1}, {w:1}, function(err, result) {
       test.equal(null, err);
 
-      db_p.addUser('test', 'test', function(err, result) {
+      db_p.addUser('test', 'test', {w:3}, function(err, result) {
         test.equal(null, err);
         test.ok(result != null);
 
@@ -401,13 +403,13 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = function(test) {
     native_parser: false
   });
   db.open(function(err, db_p) {
-    db.admin().addUser("me", "secret", function runWhatever(err, result) {
+    db.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
       test.equal(null, err);
       //create an admin account so that authentication is required on collections
       db.admin().authenticate("me", "secret", function(err, result) {
 
         //add a non-admin user
-        db.addUser('test', 'test', function(err, result) {
+        db.addUser('test', 'test', {w:3}, function(err, result) {
           test.equal(null, err);
 
           db.authenticate('test', 'test', function(err, result) {
@@ -465,7 +467,7 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = function(t
   var dbName = 'admin';
 
   new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
-    db_p.admin().addUser("me", "secret", function runWhatever(err, result) {
+    db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
       test.equal(null, err);
       test.ok(result != null);
       db_p.close();
@@ -503,7 +505,7 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = function(test) {
   var dbName = MONGODB;
 
   new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
-    db_p.addUser("me", "secret", function runWhatever(err, result) {
+    db_p.addUser("me", "secret", {w:3}, function runWhatever(err, result) {
       test.equal(null, err);
       test.ok(result != null);
       db_p.close();

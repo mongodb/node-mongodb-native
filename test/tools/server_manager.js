@@ -18,6 +18,13 @@ var ServerManager = exports.ServerManager = function(options) {
   this.journal = options["journal"] != null ? options["journal"] : false;
   this.auth = options['auth'] != null ? options['auth'] : false;
   this.ssl = options['ssl'] != null ? options['ssl'] : false;
+  this.ssl_server_pem = options['ssl_server_pem'] != null ? options['ssl_server_pem'] : null;
+  this.ssl_server_pem_pass = options['ssl_server_pem_pass'] != null ? options['ssl_server_pem_pass'] : null;
+  this.ssl_weak_certificate_validation = options['ssl_weak_certificate_validation'] != null ? options['ssl_weak_certificate_validation'] : null;
+  // Ca settings for ssl
+  this.ssl_ca = options['ssl_ca'] != null ? options['ssl_ca'] : null;
+  this.ssl_crl = options['ssl_crl'] != null ? options['ssl_crl'] : null;
+
   this.purgedirectories = options['purgedirectories'] != null ? options['purgedirectories'] : true;
   this.configServer = options['configserver'] != null ? options['configserver'] : false;
 
@@ -133,9 +140,27 @@ var generateStartCmd = function(self, options) {
   startCmd = options['configserver'] ? startCmd + " --configsvr" : startCmd;
   // If we have ssl defined set up with test certificate
   if(options['ssl']) {
-    var path = getPath(self, '../test/certificates');
-    startCmd = startCmd + " --sslOnNormalPorts --sslPEMKeyFile=" + path + "/mycert.pem --sslPEMKeyPassword=10gen";
+    var path = getPath(self, self.ssl_server_pem);
+    startCmd = startCmd + " --sslOnNormalPorts --sslPEMKeyFile=" + path;
+
+    if(self.ssl_server_pem_pass) {
+      startCmd = startCmd + " --sslPEMKeyPassword=" + self.ssl_server_pem_pass;
+    }
+
+    if(self.ssl_ca) {
+      startCmd = startCmd + " --sslCAFile=" + getPath(self, self.ssl_ca);
+    }
+
+    if(self.ssl_crl) {
+      startCmd = startCmd + " --sslCRLFile=" + getPath(self, self.ssl_crl);
+    }
+
+    if(self.ssl_weak_certificate_validation) {
+      startCmd = startCmd + " --sslWeakCertificateValidation"
+    }
   }
+  // console.log(startCmd)
+
   // Return start command
   return startCmd;
 }

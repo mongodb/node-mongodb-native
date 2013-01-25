@@ -3,9 +3,11 @@ var mongodb = process.env['TEST_NATIVE'] != null ? require('../../../lib/mongodb
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
+  path = require('path'),
   nodeunit = require('nodeunit'),
   gleak = require('../../../dev/tools/gleak'),
   Db = mongodb.Db,
+  fs = require('fs'),
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
   Server = mongodb.Server,
@@ -36,16 +38,30 @@ exports.tearDown = function(callback) {
   callback();
 }
 
-exports.shouldCorrectlyCommunicateUsingSSLSocket = function(test) {
+exports.shouldCorrectlyValidateServerSSLCertificate = function(test) {
   if(process.env['JENKINS']) return test.done();
-  var db1 = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: false, poolSize:1, ssl:ssl}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  // Read the ca
+  var ca = [fs.readFileSync(__dirname + "/../../certificates/ca.pem")];
+  // Create a db connection
+  var db1 = new Db(MONGODB, new Server("server", 27017, 
+    {   auto_reconnect: false
+      , poolSize:1
+      , ssl:ssl
+      , ssl_validate:true
+      , ssl_ca:ca }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // All inserted docs
   var docs = [];
   var errs = [];
   var insertDocs = [];
   
   // Start server
-  serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true, ssl:ssl, ssl_server_pem: "../test/certificates/server.pem"})
+  serverManager = new ServerManager({
+      auth:false
+    , purgedirectories:true
+    , journal:true
+    , ssl:ssl
+    , ssl_server_pem: "../test/certificates/server.pem"
+    })
   serverManager.start(true, function() {
     db1.open(function(err, db) {        
       // Create a collection
@@ -62,6 +78,38 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = function(test) {
           })
         });
       });        
+    })      
+  });
+}
+
+exports.shouldFailToValidateServerSSLCertificate = function(test) {
+  if(process.env['JENKINS']) return test.done();
+  // Read the ca
+  var ca = [fs.readFileSync(__dirname + "/../../certificates/mycert.pem")];
+  // Create a db connection
+  var db1 = new Db(MONGODB, new Server("server", 27017, 
+    {   auto_reconnect: false
+      , poolSize:1
+      , ssl:ssl
+      , ssl_validate:true
+      , ssl_ca:ca }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  // All inserted docs
+  var docs = [];
+  var errs = [];
+  var insertDocs = [];
+  
+  // Start server
+  serverManager = new ServerManager({
+      auth:false
+    , purgedirectories:true
+    , journal:true
+    , ssl:ssl
+    , ssl_server_pem: "../test/certificates/server.pem"
+    })
+  serverManager.start(true, function() {
+    db1.open(function(err, db) {        
+      test.ok(err != null);
+      test.done();
     })      
   });
 }

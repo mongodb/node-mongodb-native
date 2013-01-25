@@ -260,8 +260,8 @@ exports['Parse mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeout
   test.equal(2000, object.server_options.socketOptions.socketTimeoutMS);
   test.equal(1000, object.rs_options.socketOptions.connectTimeoutMS);
   test.equal(2000, object.rs_options.socketOptions.socketTimeoutMS);
-  test.equal('prefer', object.rs_options.socketOptions.ssl);
-  test.equal('prefer', object.server_options.socketOptions.ssl);
+  test.equal('prefer', object.rs_options.ssl);
+  test.equal('prefer', object.server_options.ssl);
   test.done();
 }
 
@@ -275,8 +275,8 @@ exports['Parse mongodb://localhost/db?ssl=true'] = function(test) {
   test.equal("localhost", object.servers[0].host);
   test.equal('27017', object.servers[0].port);
   test.equal('db', object.dbName);
-  test.equal(true, object.rs_options.socketOptions.ssl);
-  test.equal(true, object.server_options.socketOptions.ssl);
+  test.equal(true, object.rs_options.ssl);
+  test.equal(true, object.server_options.ssl);
   test.done();
 }
 

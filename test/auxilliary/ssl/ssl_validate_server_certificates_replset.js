@@ -5,6 +5,7 @@ var testCase = require('nodeunit').testCase,
   inspect = require('util').inspect,
   nodeunit = require('nodeunit'),
   gleak = require('../../../dev/tools/gleak'),
+  fs = require('fs'),
   Db = mongodb.Db,
   Cursor = mongodb.Cursor,
   Collection = mongodb.Collection,
@@ -27,6 +28,7 @@ var ssl = true;
  */
 exports.setUp = function(callback) {
   RS = new ReplicaSetManager({retries:120, 
+    host: "server",
     ssl:ssl,
     ssl_server_pem: "../test/certificates/server.pem",
     arbiter_count:1,
@@ -52,11 +54,19 @@ exports.tearDown = function(callback) {
 }
 
 exports.shouldCorrectlyConncetToSSLBasedReplicaset = function(test) {
+  // Read the ca
+  var ca = [fs.readFileSync(__dirname + "/../../certificates/ca.pem")];
+  // Create new 
   var replSet = new ReplSetServers( [ 
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
     ], 
-    {rs_name:RS.name, ssl:ssl}
+    {
+        rs_name:RS.name
+      , ssl:ssl
+      , ssl_validate:true
+      , ssl_ca:ca
+    }
   );
   
   // Connect to the replicaset
@@ -69,12 +79,30 @@ exports.shouldCorrectlyConncetToSSLBasedReplicaset = function(test) {
   });
 }
 
-exports.shouldCorrectlyConncetMongoClient = function(test) {
+exports.shouldFailToValidateServerSSLCertificate = function(test) {
+  // Read the ca
+  var ca = [fs.readFileSync(__dirname + "/../../certificates/mycert.pem")];
+  // Create new 
+  var replSet = new ReplSetServers( [ 
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+    ], 
+    {
+        rs_name:RS.name
+      , ssl:ssl
+      , ssl_validate:true
+      , ssl_ca:ca
+      , poolSize:5
+    }
+  );
+  
   // Connect to the replicaset
-  MongoClient.connect("mongodb://localhost:" + RS.ports[1] + ",localhost:" + RS.ports[0] + "/foo?ssl=true", function(err, db) {
-    test.equal(null, err);
-    test.ok(db != null);
-    db.close();
+  var slaveDb = null;
+  var db = new Db('foo', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  db.open(function(err, p_db) {
+    console.dir(err)
+    test.ok(err != null);
+    test.ok(err instanceof Error);
     test.done();
   });
 }
