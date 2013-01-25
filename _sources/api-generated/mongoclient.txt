@@ -129,7 +129,7 @@ Connect to MongoDB using a url as documented at
 
 
 
-www.mongodb.org/display/DOCS/Connections
+docs.mongodb.org/manual/reference/connection-string/
 
 
 

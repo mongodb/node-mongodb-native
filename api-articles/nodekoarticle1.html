@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.2.9 documentation</title>
+    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.2.10 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.2.9',
+        VERSION:     '1.2.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.2.9 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.2.10 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -48,16 +48,16 @@
   <div class="section" id="a-basic-introduction-to-mongo-db">
 <h1>A Basic introduction to Mongo DB<a class="headerlink" href="#a-basic-introduction-to-mongo-db" title="Permalink to this headline">¶</a></h1>
 <blockquote>
-<div><p>Mongo DB has rapidly grown to become a popular database for web applications and is a perfect fit for Node.JS applications, letting you write Javascript for the client, backend and database layer. It&#8217;s schemaless nature is a better match to our constantly evolving data structures in web applications and the integrated support for location queries a bonus that it&#8217;s hard to ignore. Throw Replicasets for scaling and we are looking at really nice platform to grow your storage needs now and in the future.</p>
-<p>Now to shamelessly plug my driver. It can be downloaded either using npm or fetched from the github repository. To install via npm do the following.</p>
+<div><p>Mongo DB has rapidly grown to become a popular database for web applications and is a perfect fit for Node.JS applications, letting you write Javascript for the client, backend and database layer. Its schemaless nature is a better match to our constantly evolving data structures in web applications, and the integrated support for location queries is a bonus that&#8217;s hard to ignore. Throw in Replica Sets for scaling, and we&#8217;re looking at really nice platform to grow your storage needs now and in the future.</p>
+<p>Now to shamelessly plug my driver. It can be downloaded via npm, or fetched from the github repository. To install via npm, do the following:</p>
 <p><tt class="docutils literal"><span class="pre">npm</span> <span class="pre">install</span> <span class="pre">mongodb</span></tt></p>
 <p>or go fetch it from github at  <a class="reference external" href="https://github.com/christkv/node-mongodb-native">https://github.com/christkv/node-mongodb-native</a></p>
-<p>Once this business is taken care of let&#8217;s move through the types available for the driver and then how to connect to your Mongo DB instance before facing the usage of some crud operations.</p>
+<p>Once this business is taken care of, let&#8217;s move through the types available for the driver and then how to connect to your Mongo DB instance before facing the usage of some CRUD operations.</p>
 </div></blockquote>
 <div class="section" id="mongo-db-data-types">
 <h2>Mongo DB data types<a class="headerlink" href="#mongo-db-data-types" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div><p>So there is an important thing to keep in mind when working with Mongo DB and that is that there is a slight mapping difference between the types supported in Mongo DB and what is native types in Javascript. Let&#8217;s have a look at the types supported out of the box and then how types are promoted by the driver to try to fit as close to the native Javascript types as possible.</p>
+<div><p>So there is an important thing to keep in mind when working with Mongo DB, and that is the slight mapping difference between types Mongo DB supports and native Javascript data types. Let&#8217;s have a look at the types supported out of the box and then how types are promoted by the driver to fit as close to native Javascript types as possible.</p>
 <blockquote>
 <div><ul class="simple">
 <li><strong>Float</strong>  is a 8 byte and is directly convertible to the Javascript type Number</li>
@@ -65,7 +65,7 @@
 <li><strong>Integers</strong>  is a bit trickier due to the fact that Javascript represents all Numbers as 64 bit floats meaning that the maximum integer value is at a 53 bit. Mongo has two types for integers, a 32 bit and a 64 bit. The driver will try to fit the value into 32 bits if it can and promote it to 64 bits if it has to. Similarly it will deserialize attempting to fit it into 53 bits if it can. If it cannot it will return an instance of  <strong>Long</strong>  to avoid loosing precession.</li>
 <li><strong>Long class</strong>  a special class that let&#8217;s you store 64 bit integers and also let&#8217;s you operate on the 64 bits integers.</li>
 <li><strong>Date</strong>  maps directly to a Javascript Date</li>
-<li><strong>RegEp</strong>  maps directly to a Javascript RegExp</li>
+<li><strong>RegExp</strong>  maps directly to a Javascript RegExp</li>
 <li><strong>String</strong>  maps directly to a Javascript String (encoded in utf8)</li>
 <li><strong>Binary class</strong>  a special class that let&#8217;s you store data in Mongo DB</li>
 <li><strong>Code class</strong>  a special class that let&#8217;s you store javascript functions in Mongo DB, can also provide a scope to run the method in</li>
@@ -557,7 +557,7 @@ dispatch and read from the tcp connection.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
