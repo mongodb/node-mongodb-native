@@ -3,8 +3,10 @@ var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
+  format = require('util').format,
   nodeunit = require('nodeunit'),
   gleak = require('../../dev/tools/gleak'),
+  child_process = require('child_process'),
   fs = require('fs'),
   ObjectID = mongodb.ObjectID,
   Db = mongodb.Db,
@@ -1763,6 +1765,37 @@ exports.shouldCorrectlyHandleSeekIntoSecondChunkWithStream = function(test) {
               test.done();
             }).resume();
           });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = function(test) {
+  var id = new ObjectID();
+
+  // Execute function
+  var exec_function = format("mongofiles --host localhost --port 27017 --db %s put %s", MONGODB, __dirname + "/iya_logo_final_bw.jpg");
+  var exec = child_process.exec;
+  // Read the data to compare
+  var originalData = fs.readFileSync(__dirname + "/iya_logo_final_bw.jpg");
+  // Upload using the mongofiles
+  exec(exec_function, function(error, stdout, stderr) {
+    test.ok(stdout.match(/added file/) != -1);
+
+    GridStore.list(client, function(err, items) {
+      // Load the file using MongoDB
+      var gridStore = new GridStore(client, __dirname + "/iya_logo_final_bw.jpg", "r", {});
+      gridStore.open(function(err, gridStore) {
+        test.equal(null, err);
+
+        gridStore.read(function(err, data) {
+          test.equal(null, err);
+          test.deepEqual(originalData, data);
+          test.done();
         });
       });
     });
