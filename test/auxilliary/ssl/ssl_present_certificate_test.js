@@ -48,9 +48,9 @@ exports.shouldFailDueToNotPresentingCertificateToServer = function(test) {
     {   auto_reconnect: false
       , poolSize:1
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca
-      , ssl_cert:cert
+      , sslValidate:true
+      , sslCA:ca
+      , sslCert:cert
     }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   
   // All inserted docs
@@ -89,10 +89,10 @@ exports.shouldCorrectlyValidateAndPresentCertificate = function(test) {
     {   auto_reconnect: false
       , poolSize:1
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca
-      , ssl_key:key
-      , ssl_cert:cert
+      , sslValidate:true
+      , sslCA:ca
+      , sslKey:key
+      , sslCert:cert
     }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   
   // All inserted docs
@@ -143,10 +143,10 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(test) {
     {   auto_reconnect: false
       , poolSize:1
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca
-      , ssl_key:key
-      , ssl_cert:cert
+      , sslValidate:true
+      , sslCA:ca
+      , sslKey:key
+      , sslCert:cert
     }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   
   // All inserted docs
@@ -184,11 +184,11 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = function(test) {
     {   auto_reconnect: false
       , poolSize:1
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca
-      , ssl_key:key
-      , ssl_cert:cert
-      , ssl_pass:'qwerty'
+      , sslValidate:true
+      , sslCA:ca
+      , sslKey:key
+      , sslCert:cert
+      , sslPass:'qwerty'
     }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   
   // All inserted docs

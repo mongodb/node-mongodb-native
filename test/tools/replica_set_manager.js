@@ -557,8 +557,8 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
       var connection = new Db("replicaset_test", new Server(self.host, self.mongods[node]["port"], {
           ssl:self.ssl
         , poolSize:1
-        , ssl_key:self.ssl_client_pem
-        , ssl_cert:self.ssl_client_pem
+        , sslKey:self.ssl_client_pem
+        , sslCert:self.ssl_client_pem
       }), {w:0});
       connection.open(function(err, db) {
         if(err == null && !done) {

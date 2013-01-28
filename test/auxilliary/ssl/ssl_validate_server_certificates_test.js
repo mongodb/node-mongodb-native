@@ -47,8 +47,8 @@ exports.shouldCorrectlyValidateServerSSLCertificate = function(test) {
     {   auto_reconnect: false
       , poolSize:1
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+      , sslValidate:true
+      , sslCA:ca }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // All inserted docs
   var docs = [];
   var errs = [];
@@ -91,8 +91,8 @@ exports.shouldFailToValidateServerSSLCertificate = function(test) {
     {   auto_reconnect: false
       , poolSize:1
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+      , sslValidate:true
+      , sslCA:ca }), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // All inserted docs
   var docs = [];
   var errs = [];

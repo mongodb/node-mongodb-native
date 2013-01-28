@@ -64,8 +64,8 @@ exports.shouldCorrectlyConncetToSSLBasedReplicaset = function(test) {
     {
         rs_name:RS.name
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca
+      , sslValidate:true
+      , sslCA:ca
     }
   );
   
@@ -90,8 +90,8 @@ exports.shouldFailToValidateServerSSLCertificate = function(test) {
     {
         rs_name:RS.name
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca
+      , sslValidate:true
+      , sslCA:ca
       , poolSize:5
     }
   );

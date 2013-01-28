@@ -75,10 +75,10 @@ exports.shouldCorrectlyValidateAndPresentCertificate = function(test) {
     {
         rs_name:RS.name
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca
-      , ssl_key:key
-      , ssl_cert:cert
+      , sslValidate:true
+      , sslCA:ca
+      , sslKey:key
+      , sslCert:cert
     }
   );
 
@@ -122,11 +122,11 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(test) {
         rs_name:RS.name
       , poolSize:5
       , ssl:ssl
-      , ssl_validate:true
-      , ssl_ca:ca
-      , ssl_key:key
-      , ssl_cert:cert
-      , ssl_pass:'10gen'
+      , sslValidate:true
+      , sslCA:ca
+      , sslKey:key
+      , sslCert:cert
+      , sslPass:'10gen'
     }
   );
 

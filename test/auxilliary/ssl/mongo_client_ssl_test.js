@@ -84,8 +84,8 @@ exports.shouldCorrectlyValidateServerCertificate = function(test) {
     // Connect and validate the server certificate
     MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
       server: {
-          ssl_validate:true
-        , ssl_ca:ca
+          sslValidate:true
+        , sslCA:ca
       }
     }, function(err, db) {
       test.equal(null, err);
@@ -128,11 +128,11 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
     // Connect and validate the server certificate
     MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
       server: {
-          ssl_validate:true
-        , ssl_ca:ca
-        , ssl_key:key
-        , ssl_cert:cert
-        , ssl_pass:'10gen'
+          sslValidate:true
+        , sslCA:ca
+        , sslKey:key
+        , sslCert:cert
+        , sslPass:'10gen'
       }
     }, function(err, db) {
       test.equal(null, err);
@@ -178,11 +178,11 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = f
     // Connect and validate the server certificate
     MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
       server: {
-          ssl_validate:true
-        , ssl_ca:ca
-        , ssl_key:key
-        , ssl_cert:cert
-        , ssl_pass:'10gen'
+          sslValidate:true
+        , sslCA:ca
+        , sslKey:key
+        , sslCert:cert
+        , sslPass:'10gen'
       }
     }, function(err, db) {
       test.ok(err != null);
@@ -217,8 +217,8 @@ exports.shouldCorrectlyValidateServerCertificateReplSet = function(test) {
     // Connect and validate the server certificate
     MongoClient.connect("mongodb://server:30000,server:30001/test?ssl=true&maxPoolSize=1", {
       replSet: {
-          ssl_validate:true
-        , ssl_ca:ca
+          sslValidate:true
+        , sslCA:ca
       }
     }, function(err, db) {
       test.equal(null, err);
@@ -263,10 +263,10 @@ exports.shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate = fu
     // Connect and validate the server certificate
     MongoClient.connect("mongodb://server:30000,server:30001/test?ssl=true&maxPoolSize=1", {
       replSet: {
-          ssl_validate:true
-        , ssl_ca:ca
-        , ssl_key:key
-        , ssl_cert:cert
+          sslValidate:true
+        , sslCA:ca
+        , sslKey:key
+        , sslCert:cert
       }
     }, function(err, db) {
       test.equal(null, err);
@@ -315,11 +315,11 @@ exports.shouldSendWrongCertificateToReplSetAndValidateServerCertificate = functi
     // Connect and validate the server certificate
     MongoClient.connect("mongodb://server:30000,server:30001/test?ssl=true&maxPoolSize=1", {
       replSet: {
-          ssl_validate:true
-        , ssl_ca:ca
-        , ssl_key:key
-        , ssl_cert:cert
-        , ssl_pass:'10gen'
+          sslValidate:true
+        , sslCA:ca
+        , sslKey:key
+        , sslCert:cert
+        , sslPass:'10gen'
       }
     }, function(err, db) {
       test.ok(err != null)
