@@ -17,6 +17,7 @@ var replSet = new ReplSetServers([
     ], {
       rs_name: 'testappset',
       readPreference: ReadPreference.SECONDARY_ONLY,
+      strategy: 'ping'
       // ha:true
     }
 );
