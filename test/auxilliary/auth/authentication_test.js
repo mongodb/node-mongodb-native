@@ -41,9 +41,9 @@ exports.tearDown = function(callback) {
 
 exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(test) {
   if(process.env['JENKINS']) return test.done();
-  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
 
   serverManager = new ServerManager({auth:false, purgedirectories:true})
   serverManager.start(true, function(err, result) {
@@ -51,25 +51,55 @@ exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(test) {
       db2.open(function(err, result) {
         admin.open(function(err, result) {
           admin.addUser('admin', 'admin', function(err, result) {
+            // console.log("=========================================================== 0")
+            // console.dir(err)
+            // console.dir(result)
+
             serverManager = new ServerManager({auth:true, purgedirectories:false})
             serverManager.start(true, function(err, result) {
               admin.authenticate('admin', 'admin', function(err, result1) {
+                // console.log("=========================================================== 1")
+                // console.dir(err)
+                // console.dir(result1)
 
                 db1.admin().authenticate('admin', 'admin', function(err, result2) {
+                  // console.log("=========================================================== 2")
+                  // console.dir(err)
+                  // console.dir(result2)
 
                   db2.admin().authenticate('admin', 'admin', function(err, result3) {
+                    // console.log("=========================================================== 3")
+                    // console.dir(err)
+                    // console.dir(result3)
 
                     db1.addUser('user1', 'secret', function(err, result1) {
+                      // console.log("=========================================================== 4")
+                      // console.dir(err)
+                      // console.dir(result1)
 
                       db2.addUser('user2', 'secret', function(err, result2) {
+                        // console.log("=========================================================== 5")
+                        // console.dir(err)
+                        // console.dir(result2)
+
                         test.ok(result1 != null);
                         test.ok(result2 != null);
 
                         admin.logout(function(err, _result1) {
+                          // console.log("=========================================================== 6")
+                          // console.dir(err)
+                          // console.dir(_result1)
 
                           db1.admin().logout(function(err, _result2) {
+                            // console.log("=========================================================== 7")
+                            // console.dir(err)
+                            // console.dir(_result2)
 
                             db2.admin().logout(function(err, _result3) {
+                              // console.log("=========================================================== 8")
+                              // console.dir(err)
+                              // console.dir(_result3)
+
                               test.equal(true, _result1);
                               test.equal(true, _result2);
                               test.equal(true, _result3);
@@ -77,8 +107,14 @@ exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(test) {
                               var col1 = db1.collection('stuff');
                               var col2 = db2.collection('stuff');
 
+                              // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+
                               // col1.insert({a:2}, {safe:{j:true}}, function(err1, result) {
                               col1.insert({a:2}, {safe:{j:true}}, function(err1, result) {
+                                // console.log("======================================== 0")
+                                // console.dir(err1)
+                                // console.dir(result)
+
                                 col2.insert({a:2}, {safe:{j:true}}, function(err2, result) {
                                   test.ok(err1 != null);
                                   test.ok(err2 != null);
@@ -154,9 +190,9 @@ exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(test) {
 
 exports.shouldCorrectlyAuthenticate = function(test) {
   if(process.env['JENKINS']) return test.done();
-  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var db2 = new Db('mongo-ruby-test-auth2', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
+  var admin = new Db('admin', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
 
   Step(
     function bootTheServerWithNoAuth() {
