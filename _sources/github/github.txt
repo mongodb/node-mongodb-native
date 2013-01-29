@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 18:19:26 on 23/0/2013
+           - 22:52:32 on 28/0/2013
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 352
+           - 355
          * - **Watchers**
-           - 2701
+           - 2715
 
 .. topic:: mongo-model
 
@@ -237,9 +237,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 171
+           - 172
          * - **Watchers**
-           - 1014
+           - 1018
 
 Grid FS libraries or tools
 --------------------------
@@ -358,9 +358,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/gett/mongojs.git
          * - **Forks**
-           - 37
+           - 38
          * - **Watchers**
-           - 285
+           - 292
 
 .. topic:: mongode
 
@@ -404,7 +404,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/idottv/node-mongodb-wrapper.git
          * - **Forks**
-           - 7
+           - 8
          * - **Watchers**
            - 42
 
@@ -501,7 +501,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 45
          * - **Watchers**
-           - 197
+           - 200
 
 .. topic:: lazyBum
 
@@ -818,7 +818,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 2
          * - **Watchers**
-           - 40
+           - 39
 
 Translation libraries or frameworks
 -----------------------------------
@@ -893,7 +893,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 220
          * - **Watchers**
-           - 2377
+           - 2386
 
 Libraries for the connect middleware
 ------------------------------------
@@ -1015,7 +1015,7 @@ Exampe applications
          * - **Clone Url**
            - https://github.com/gotik/nodejs-blackboard.git
          * - **Forks**
-           - 6
+           - 7
          * - **Watchers**
            - 24
 
