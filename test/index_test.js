@@ -815,6 +815,19 @@ exports['should correctly return error message when applying unique index to dup
   });
 }
 
+exports['should correctly drop index with no callback'] = function(test) {
+  var collection = client.collection("should_correctly_drop_index");
+  collection.insert([{a:1}], {w:1}, function(err, result) {
+    test.equal(null, err);
+
+    collection.ensureIndex({a:1}, {w:1}, function(err, result) {
+      collection.dropIndex("a_1")
+
+      test.done();
+    });
+  });
+}
+
 /**
  * Retrieve the server information for the current
  * instance of the db client

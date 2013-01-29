@@ -1,3 +1,15 @@
+1.2.11 2013-01-29
+-----------------
+- Added fixes for handling type 2 binary due to PHP driver (Issue #864)
+- Moved callBackStore to Base class to have single unified store (Issue #866)
+- Ping strategy now reuses sockets unless they are closed by the server to avoid overhead
+
+1.2.10 2013-01-25
+-----------------
+- Merged in SSL support for 2.4 supporting certificate validation and presenting certificates to the server.
+- Only open a new HA socket when previous one dead (Issue #859, #857)
+- Minor fixes
+
 1.2.9 2013-01-15
 ----------------
 - Fixed bug in SSL support for MongoClient/Db.connect when discovering servers (Issue #849)
