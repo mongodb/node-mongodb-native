@@ -72,205 +72,205 @@ exports.tearDown = function(callback) {
   callback();
 }
 
-exports.shouldThrowErrorDueToSharedConnectionUsage = function(test) {
-  var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL});
+// exports.shouldThrowErrorDueToSharedConnectionUsage = function(test) {
+//   var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL});
 
-  try {
-    var db = new Db(MONGODB, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-    var db1 = new Db(MONGODB, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  } catch(err) {
-    if (db) db.close();
-    if (db1) db1.close();
-    test.done();
-  }
-}
+//   try {
+//     var db = new Db(MONGODB, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//     var db1 = new Db(MONGODB, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   } catch(err) {
+//     if (db) db.close();
+//     if (db1) db1.close();
+//     test.done();
+//   }
+// }
 
-/* does not work
-exports.shouldCorrectlyCallCloseEvent = function(test) {
-  if(process.env['JENKINS']) return test.done();
-  var closedCalled = false;
-  var openCalled = false
+// /* does not work
+// exports.shouldCorrectlyCallCloseEvent = function(test) {
+//   if(process.env['JENKINS']) return test.done();
+//   var closedCalled = false;
+//   var openCalled = false
 
-  // Add a open listener
-  client.once("open", function(err) {
-    openCalled = true;
-  })
+//   // Add a open listener
+//   client.once("open", function(err) {
+//     openCalled = true;
+//   })
 
-  // Add a close listener
-  client.once("close", function(err) {
-    closedCalled = true;
-  })
+//   // Add a close listener
+//   client.once("close", function(err) {
+//     closedCalled = true;
+//   })
 
-  var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
-  // Kill the server
-  serverManager.killAll(function() {
+//   var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
+//   // Kill the server
+//   serverManager.killAll(function() {
 
-    // Restart the server
-    serverManager.start(true, function() {
-      test.equal(true, closedCalled);
+//     // Restart the server
+//     serverManager.start(true, function() {
+//       test.equal(true, closedCalled);
 
-      // Attempt to connect again
-      client.open(function(err, result) {
-        test.equal(null, err)
-        test.equal(true, openCalled);
-        test.done();
-      })
-    });
-  });
-}
-*/
+//       // Attempt to connect again
+//       client.open(function(err, result) {
+//         test.equal(null, err)
+//         test.equal(true, openCalled);
+//         test.done();
+//       })
+//     });
+//   });
+// }
+// */
 
-/* does not work
-exports.shouldCorrectlyReconnectOnNonExistingServer = function(test) {
-  if(process.env['JENKINS']) return test.done();
-  // Start server
-  var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
-  // Kill the server
-  serverManager.killAll(function() {
-    var _client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-    _client.open(function(err, __client) {
-      test.ok(err != null);
-      // Restart the server
-      serverManager.start(true, function() {
-        _client.open(function(err, __client) {
-          test.ok(err == null);
-          _client.close();
-          test.done();
-        });
-      });
-    });
-  });
-}
-*/
+// /* does not work
+// exports.shouldCorrectlyReconnectOnNonExistingServer = function(test) {
+//   if(process.env['JENKINS']) return test.done();
+//   // Start server
+//   var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true})
+//   // Kill the server
+//   serverManager.killAll(function() {
+//     var _client = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//     _client.open(function(err, __client) {
+//       test.ok(err != null);
+//       // Restart the server
+//       serverManager.start(true, function() {
+//         _client.open(function(err, __client) {
+//           test.ok(err == null);
+//           _client.close();
+//           test.done();
+//         });
+//       });
+//     });
+//   });
+// }
+// */
 
-exports.shouldCorrectlyOpenCloseAndOpenAgain = function(test) {
-  var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL});
-  var db = new Db(MONGODB, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  db.open(function(err, db){
-    test.equal(null, err);
+// exports.shouldCorrectlyOpenCloseAndOpenAgain = function(test) {
+//   var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL});
+//   var db = new Db(MONGODB, server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   db.open(function(err, db){
+//     test.equal(null, err);
 
-    db.close(function(){
-      test.equal(null, err);
+//     db.close(function(){
+//       test.equal(null, err);
 
-      db.open(function(){
-        test.equal(null, err);
+//       db.open(function(){
+//         test.equal(null, err);
 
-        db.close();
-        test.done();
-      });
-    });
-  });
-}
+//         db.close();
+//         test.done();
+//       });
+//     });
+//   });
+// }
 
-exports.shouldCorrectlyHandleAutoReconnectWithOpenCalled = function(test) {
-  var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL});
-  var db = new Db(MONGODB, server, {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
+// exports.shouldCorrectlyHandleAutoReconnectWithOpenCalled = function(test) {
+//   var server = new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL});
+//   var db = new Db(MONGODB, server, {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
 
-  db.open(function(err) {
-  });
+//   db.open(function(err) {
+//   });
 
-  var collection = db.collection('test');  
-  collection.find().toArray(function(err, rows) {
-    db.close();
-    test.done();
-  });
-}
+//   var collection = db.collection('test');  
+//   collection.find().toArray(function(err, rows) {
+//     db.close();
+//     test.done();
+//   });
+// }
 
-exports.testCloseNoCallback = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  db.open(connectionTester(test, 'testCloseNoCallback', function() {
-    var dbCloseCount = 0, connectionCloseCount = 0, poolCloseCount = 0;
-    // Ensure no close events are fired as we are closing the connection specifically
-    db.on('close', function() { dbCloseCount++; });
+// exports.testCloseNoCallback = function(test) {
+//   var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   db.open(connectionTester(test, 'testCloseNoCallback', function() {
+//     var dbCloseCount = 0, connectionCloseCount = 0, poolCloseCount = 0;
+//     // Ensure no close events are fired as we are closing the connection specifically
+//     db.on('close', function() { dbCloseCount++; });
 
-    var connectionPool = db.serverConfig.connectionPool;
-    var connections = connectionPool.getAllConnections();
+//     var connectionPool = db.serverConfig.connectionPool;
+//     var connections = connectionPool.getAllConnections();
 
-    // Force the connection close, should not trigger close command
-    db.serverConfig.connectionPool.stop();
-    // Test done
-    test.equal(0, dbCloseCount);
-    test.done();
-  }));
-}
+//     // Force the connection close, should not trigger close command
+//     db.serverConfig.connectionPool.stop();
+//     // Test done
+//     test.equal(0, dbCloseCount);
+//     test.done();
+//   }));
+// }
 
-exports.testCloseWithCallback = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  db.open(connectionTester(test, 'testCloseWithCallback', function() {
-    var dbCloseCount = 0, connectionCloseCount = 0, poolCloseCount = 0;
-    // Ensure no close events are fired as we are closing the connection specifically
-    db.on('close', function() { dbCloseCount++; });
+// exports.testCloseWithCallback = function(test) {
+//   var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   db.open(connectionTester(test, 'testCloseWithCallback', function() {
+//     var dbCloseCount = 0, connectionCloseCount = 0, poolCloseCount = 0;
+//     // Ensure no close events are fired as we are closing the connection specifically
+//     db.on('close', function() { dbCloseCount++; });
 
-    var connectionPool = db.serverConfig.connectionPool;
-    var connections = connectionPool.getAllConnections();
+//     var connectionPool = db.serverConfig.connectionPool;
+//     var connections = connectionPool.getAllConnections();
 
-    // Ensure no close events are fired as we are closing the connection specifically
-    for(var i = 0; i < connections.length; i++) {
-      connections[i].on("close", function() { test.ok(false); });
-    }
+//     // Ensure no close events are fired as we are closing the connection specifically
+//     for(var i = 0; i < connections.length; i++) {
+//       connections[i].on("close", function() { test.ok(false); });
+//     }
 
-    db.close(function() {
-      // Test done
-      test.equal(0, dbCloseCount);
-      test.done();
-    });
-  }));
-}
+//     db.close(function() {
+//       // Test done
+//       test.equal(0, dbCloseCount);
+//       test.done();
+//     });
+//   }));
+// }
 
-exports.testShouldCorrectlyCloseOnUnopedConnection = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  db.close();
-  test.done();
-}
+// exports.testShouldCorrectlyCloseOnUnopedConnection = function(test) {
+//   var db = new Db(MONGODB, new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   db.close();
+//   test.done();
+// }
 
-exports.testConnectUsingDefaultHostAndPort = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  db.open(function(err, db) {
-    test.equal(null, err);
-    test.done();
-    db.close();
-  })
-}
+// exports.testConnectUsingDefaultHostAndPort = function(test) {
+//   var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   db.open(function(err, db) {
+//     test.equal(null, err);
+//     test.done();
+//     db.close();
+//   })
+// }
 
-exports.testConnectUsingSocketOptions = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  db.open(function(err, db) {
-    test.equal(null, err);
-    test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
-    test.done();
-    db.close();
-  })
-}
+// exports.testConnectUsingSocketOptions = function(test) {
+//   var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT, {auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   db.open(function(err, db) {
+//     test.equal(null, err);
+//     test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
+//     test.done();
+//     db.close();
+//   })
+// }
 
-exports.testConnectUsingSocketOptionsAndReadPreferenceAsObject = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT
-    , {readPreference: new ReadPreference("secondary"), auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  db.open(function(err, db) {
-    test.equal(null, err);
-    test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
-    test.done();
-    db.close();
-  })
-}
+// exports.testConnectUsingSocketOptionsAndReadPreferenceAsObject = function(test) {
+//   var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT
+//     , {readPreference: new ReadPreference("secondary"), auto_reconnect: true, poolSize: 4, socketOptions:{keepAlive:100}, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   db.open(function(err, db) {
+//     test.equal(null, err);
+//     test.equal(100, db.serverConfig.checkoutWriter().socketOptions.keepAlive)
+//     test.done();
+//     db.close();
+//   })
+// }
 
-exports.testConnectUsingPortAsString = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT.toString()
-    , {auto_reconnect: true, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  db.open(function(err, db) {
-    test.equal(null, err);
-    test.done();
-    db.close();
-  })
-}
+// exports.testConnectUsingPortAsString = function(test) {
+//   var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT.toString()
+//     , {auto_reconnect: true, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   db.open(function(err, db) {
+//     test.equal(null, err);
+//     test.done();
+//     db.close();
+//   })
+// }
 
-exports.testConnectShouldFailDueToIllegalString = function(test) {
-  var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT.toString() + "a"
-    , {auto_reconnect: true, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-  db.open(function(err, db) {
-    test.equal("failed to connect to [127.0.0.1:27017a]", err.message);
-    test.done();
-  })
-}
+// exports.testConnectShouldFailDueToIllegalString = function(test) {
+//   var db = new Db(MONGODB, new Server("127.0.0.1", mongodb.Connection.DEFAULT_PORT.toString() + "a"
+//     , {auto_reconnect: true, ssl:useSSL}),{w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+//   db.open(function(err, db) {
+//     test.equal("failed to connect to [127.0.0.1:27017a]", err.message);
+//     test.done();
+//   })
+// }
 
 /**
  * Retrieve the server information for the current

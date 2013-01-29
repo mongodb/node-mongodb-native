@@ -675,18 +675,24 @@ exports.shouldCorrectlyDereferenceDbRefExamples = function(test) {
   db.open(function(err, db) {
     test.equal(null, err);
 
+    // console.dir(db.serverConfig._Db)
+
     // Get a second db
     var secondDb = db.db('integration_tests_2');
 
+    // console.dir(secondDb.serverConfig._Db)
+
+        // console.dir("================================= deref 0")
     // Create a dereference example
     secondDb.createCollection('test_deref_examples', function(err, collection) {
 
+        // console.dir("================================= deref 1")
       // Insert a document in the collection
       collection.insert({'a':1}, {w:1}, function(err, ids) {
 
         // Let's build a db reference and resolve it
         var dbRef = new DBRef('test_deref_examples', ids[0]._id, 'integration_tests_2');
-
+        // console.dir("================================= deref")
         // Resolve it including a db resolve
         db.dereference(dbRef, function(err, item) {
           test.equal(1, item.a);
