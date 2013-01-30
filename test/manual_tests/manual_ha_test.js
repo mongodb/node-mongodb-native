@@ -22,7 +22,7 @@ var replSet = new ReplSetServers([
     }
 );
 
-RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:0, arbiter_count:0});
+RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
 RS.startSet(true, function(err, result) {
   if(err != null) throw err;
 
