@@ -1,3 +1,10 @@
+// require('nodetime').profile()
+var memwatch = require('memwatch');
+// memwatch.on('leak', function(info) {
+//   // look at info to find out about what might be leaking
+//   console.dir(info)
+// });
+
 var http            = require('http'),
     os              = require('os'),
     mongodb         = require('../../lib/mongodb'),
@@ -26,6 +33,11 @@ RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, p
 RS.startSet(true, function(err, result) {
   if(err != null) throw err;
 
+  // setInterval(function() {
+  //   console.log("================================= heap snapshot");
+  //   console.dir(hd)
+  // }, 30000)
+
   //opens the database
   var db = new Db('testapp', replSet);
   db.open(function(err) {
@@ -47,6 +59,7 @@ RS.startSet(true, function(err, result) {
                       res.end();
                       return console.log('invalid request performed');
                   }
+                  var hd = new memwatch.HeapDiff();
 
                   //get amount of requests done
                   stats.findOne({name: 'reqcount'}, function(err, reqstat) {
@@ -75,6 +88,9 @@ RS.startSet(true, function(err, result) {
                   //increment amount of requests
                   console.log('incrementing request by 1!');
                   stats.update({name: 'reqcount'}, {'$inc': {value: 1}}, {upsert: true});
+                  var diff = hd.end();
+                  console.log("======================================= DIFF")
+                  console.dir(diff.change)
               }).listen(8000);
             });
           });
