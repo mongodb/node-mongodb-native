@@ -2270,7 +2270,11 @@ exports.shouldCorrectlySkipAndLimit = function(test) {
 
     collection.find({}, {OrderNumber:1}).skip(10).limit(10).toArray(function(err, items) {
       test.equal(10, items[0].OrderNumber);
-      test.done();
+
+      collection.find({}, {OrderNumber:1}).skip(10).limit(10).count(true, function(err, count) {
+        test.equal(10, count);
+        test.done();
+      });
     })
   });
 }
