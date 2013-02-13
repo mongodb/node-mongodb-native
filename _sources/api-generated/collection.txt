@@ -7,7 +7,7 @@ Constructor
 ------------------
 
 
-Create a new Collection instance
+Create a new Collection instance (INTERNAL TYPE)
 
 
   .. js:class:: Collection()
@@ -20,6 +20,7 @@ Create a new Collection instance
 
 
 Options
+ - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  - **slaveOk** {Boolean, default:false}, Allow reads from secondaries.
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
  - **raw** {Boolean, default:false}, perform all operations using raw bson objects.
@@ -895,6 +896,8 @@ Count number of matching documents in the db to a query.
 
 
 Options
+ - **skip** {Number}, The number of documents to skip for the count.
+ - **limit** {Number}, The limit of documents to count.
  - **readPreference** {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).
 
 .. js:function:: count([query][, options], callback)

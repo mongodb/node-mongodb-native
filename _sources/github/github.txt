@@ -26,7 +26,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 3
          * - **Watchers**
-           - 14
+           - 16
 
 .. topic:: caboose
 
@@ -49,7 +49,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 6
          * - **Watchers**
-           - 16
+           - 17
 
 .. topic:: node-bread
 
@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:52:32 on 28/0/2013
+           - 6:1:20 on 12/1/2013
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 355
+           - 366
          * - **Watchers**
-           - 2715
+           - 2770
 
 .. topic:: mongo-model
 
@@ -167,7 +167,7 @@ Object Document Modeling Libraries
          * - **Forks**
            - 5
          * - **Watchers**
-           - 51
+           - 53
 
 .. topic:: leaf
 
@@ -216,7 +216,7 @@ Content Management Systems
          * - **Forks**
            - 0
          * - **Watchers**
-           - 3
+           - 4
 
 .. topic:: calipso
 
@@ -237,9 +237,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 172
+           - 176
          * - **Watchers**
-           - 1018
+           - 1023
 
 Grid FS libraries or tools
 --------------------------
@@ -291,7 +291,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 7
          * - **Watchers**
-           - 41
+           - 42
 
 .. topic:: mongoq
 
@@ -337,7 +337,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 12
          * - **Watchers**
-           - 104
+           - 103
 
 .. topic:: mongojs
 
@@ -350,7 +350,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 19:29:29 on 14/0/2013
+           - 11:46:2 on 9/1/2013
          * - **Homepage**
            - http://
          * - **Url**
@@ -360,7 +360,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 38
          * - **Watchers**
-           - 292
+           - 304
 
 .. topic:: mongode
 
@@ -383,7 +383,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 7
          * - **Watchers**
-           - 54
+           - 56
 
 .. topic:: node-mongodb-wrapper
 
@@ -404,9 +404,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/idottv/node-mongodb-wrapper.git
          * - **Forks**
-           - 8
+           - 9
          * - **Watchers**
-           - 42
+           - 44
 
 .. topic:: mdoq-mongodb
 
@@ -501,7 +501,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 45
          * - **Watchers**
-           - 200
+           - 202
 
 .. topic:: lazyBum
 
@@ -547,7 +547,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 1
          * - **Watchers**
-           - 9
+           - 10
 
 Test helpers and libraries
 --------------------------
@@ -573,7 +573,7 @@ Test helpers and libraries
          * - **Forks**
            - 1
          * - **Watchers**
-           - 6
+           - 7
 
 .. topic:: node-database-cleaner
 
@@ -596,7 +596,7 @@ Test helpers and libraries
          * - **Forks**
            - 7
          * - **Watchers**
-           - 35
+           - 36
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -622,7 +622,7 @@ Tools or applications to manage your MongoDB's
          * - **Forks**
            - 0
          * - **Watchers**
-           - 3
+           - 4
 
 Queue libraries using MongoDB
 -----------------------------
@@ -697,7 +697,7 @@ Logging libraries or applications
          * - **Forks**
            - 0
          * - **Watchers**
-           - 5
+           - 6
 
 .. topic:: nodeEventStore
 
@@ -818,7 +818,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 2
          * - **Watchers**
-           - 39
+           - 43
 
 Translation libraries or frameworks
 -----------------------------------
@@ -865,9 +865,9 @@ Translation libraries or frameworks
          * - **Clone Url**
            - https://github.com/masylum/dialect.git
          * - **Forks**
-           - 20
+           - 22
          * - **Watchers**
-           - 100
+           - 103
 
 Libraries or Applications for analytics
 ---------------------------------------
@@ -881,9 +881,9 @@ Libraries or Applications for analytics
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 15:48:59 on 10/8/2012
+           - 2:33:34 on 8/1/2013
          * - **Homepage**
            - http://http://square.github.com/cube
          * - **Url**
@@ -891,9 +891,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 220
+           - 228
          * - **Watchers**
-           - 2386
+           - 2412
 
 Libraries for the connect middleware
 ------------------------------------
@@ -942,7 +942,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 60
          * - **Watchers**
-           - 183
+           - 182
 
 .. topic:: connect-mongo
 
@@ -963,9 +963,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 60
+           - 61
          * - **Watchers**
-           - 191
+           - 198
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -989,9 +989,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 33
+           - 34
          * - **Watchers**
-           - 237
+           - 244
 
 Exampe applications
 -------------------
@@ -1015,7 +1015,7 @@ Exampe applications
          * - **Clone Url**
            - https://github.com/gotik/nodejs-blackboard.git
          * - **Forks**
-           - 7
+           - 8
          * - **Watchers**
            - 24
 

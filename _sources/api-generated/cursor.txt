@@ -9,7 +9,7 @@ Constructor
 
 Constructor for a cursor object that handles all the operations on query result
 using find. This cursor object is unidirectional and cannot traverse backwards. Clients should not be creating a cursor directly,
-but use find to acquire a cursor.
+but use find to acquire a cursor. (INTERNAL TYPE)
 
 
   .. js:class:: Cursor()
@@ -274,8 +274,9 @@ count
 
 Determines how many result the query for this cursor will return
 
-.. js:function:: count(callback)
+.. js:function:: count(applySkipLimit, callback)
 
+   :param boolean applySkipLimit: if set to true will apply the skip and limits set on the cursor. Defaults to false.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the number of results or null if an error occured.
    :returns: null 
 
