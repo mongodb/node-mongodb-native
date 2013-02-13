@@ -1,8 +1,9 @@
-1.2.12
+1.2.12 2013-02-13
 -----------------
 - Added limit/skip options to Collection.count (Issue #870)
 - Added applySkipLimit option to Cursor.count (Issue #870)
 - Enabled ping strategy as default for Replicaset if none specified (Issue #876)
+- Should correctly pick nearest server for SECONDARY/SECONDARY_PREFERRED/NEAREST (Issue #878)
 
 1.2.11 2013-01-29
 -----------------
