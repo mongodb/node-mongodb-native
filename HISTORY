@@ -2,6 +2,7 @@
 -----------------
 - Added limit/skip options to Collection.count (Issue #870)
 - Added applySkipLimit option to Cursor.count (Issue #870)
+- Enabled ping strategy as default for Replicaset if none specified (Issue #876)
 
 1.2.11 2013-01-29
 -----------------
