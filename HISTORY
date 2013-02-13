@@ -1,3 +1,8 @@
+1.2.12
+-----------------
+- Added limit/skip options to Collection.count (Issue #870)
+- Added applySkipLimit option to Cursor.count (Issue #870)
+
 1.2.11 2013-01-29
 -----------------
 - Added fixes for handling type 2 binary due to PHP driver (Issue #864)
