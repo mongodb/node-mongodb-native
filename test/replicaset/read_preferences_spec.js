@@ -603,6 +603,97 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags a
   })
 }
 
+exports['Should Correctly Pick lowest ping time'] = function(test) {
+  // Replica configuration
+  var replSet = new ReplSetServers([
+      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+    ],
+    {strategy:'ping', secondaryAcceptableLatencyMS: 5}
+  );
+
+  // Open the database
+  var db = new Db('integration_test_', replSet, {w:0, recordQueryStats:true});
+  // Trigger test once whole set is up
+  db.on("fullsetup", function() {
+    var time = 10;
+    // Set the ping times
+    var keys = Object.keys(db.serverConfig._state.secondaries);
+    for(var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      db.serverConfig._state.secondaries[key].runtimeStats['pingMs'] = time;
+      time += 10;
+    }
+    
+    // Set primary pingMs
+    db.serverConfig._state.master.runtimeStats['pingMs'] = time;
+
+    // No server available
+    var connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST));
+    // Should match the first secondary server
+    var matching_server = db.serverConfig._state.secondaries[keys[0]];
+    // Host and port should match
+    test.equal(matching_server.host, connection.socketOptions.host);
+    test.equal(matching_server.port, connection.socketOptions.port);
+
+    // No server available
+    connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY));
+    // Should match the first secondary server
+    var matching_server = db.serverConfig._state.secondaries[keys[0]];
+    // Host and port should match
+    test.equal(matching_server.host, connection.socketOptions.host);
+    test.equal(matching_server.port, connection.socketOptions.port);
+
+    // No server available
+    connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY_PREFERRED));
+    // Should match the first secondary server
+    var matching_server = db.serverConfig._state.secondaries[keys[0]];
+    // Host and port should match
+    test.equal(matching_server.host, connection.socketOptions.host);
+    test.equal(matching_server.port, connection.socketOptions.port);
+
+    // No server available
+    connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.PRIMARY));
+    // Should match the first secondary server
+    var matching_server = db.serverConfig._state.master;
+    // Host and port should match
+    test.equal(matching_server.host, connection.socketOptions.host);
+    test.equal(matching_server.port, connection.socketOptions.port);
+
+    // Set high secondaryAcceptableLatencyMS and ensure both secondaries get picked
+    replSet.strategyInstance.secondaryAcceptableLatencyMS = 500;
+    var selectedServers = {};
+
+    while(Object.keys(selectedServers).length != 2) {
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY));      
+      selectedServers[connection.socketOptions.port] = true;
+    }
+
+    var selectedServers = {};
+
+    while(Object.keys(selectedServers).length != 2) {
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.SECONDARY_PREFERRED));
+      selectedServers[connection.socketOptions.port] = true;
+    }
+
+    var selectedServers = {};
+
+    while(Object.keys(selectedServers).length != 3) {
+      connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST));
+      selectedServers[connection.socketOptions.port] = true;
+    }
+
+    // Finish up test
+    test.done();
+    db.close();
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
+  })
+}
+
 var locateConnection = function(connection, connections) {
   // Locate one
   for(var i = 0; i < connections.length; i++) {
