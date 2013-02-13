@@ -2164,44 +2164,47 @@ exports.shouldFailToSetReadPreferenceOnCursor = function(test) {
  * @ignore
  */
 exports.shouldCorrectlyFailTailedCursor = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
+  var serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true, start_port: 27027});
 
-  // Establish connection to db
-  db.open(function(err, db) {
-    db.createCollection("capped_collect_killed_server_test", {capped:true, size:100000}, function(err, collection) {
-      test.equal(null, err);
-      test.ok(collection != null);
-      var error_ok = false;
-      var data_ok = false;
+  serverManager.start(false, function () {
+    var db = new Db('integration_tests', new Server("127.0.0.1", 27027,
+     {auto_reconnect: false, poolSize: 1, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-      var stream = collection.find({}, {tailable:true}).stream();
-      stream.on("data", function(data) {
-        data_ok = true;      
-      });
+    // Establish connection to db
+    db.open(function(err, db) {
+      db.createCollection("capped_collect_killed_server_test", {capped:true, size:100000}, function(err, collection) {
+        test.equal(null, err);
+        test.ok(collection != null);
+        var error_ok = false;
+        var data_ok = false;
 
-      stream.on("error", function(data) {
-        error_ok = true;
-      });
+        var stream = collection.find({}, {tailable:true}).stream();
+        stream.on("data", function(data) {
+          data_ok = true;
+        });
 
-      stream.on("close", function(data) {        
-        serverManager.start(false, function() {
+        stream.on("error", function(data) {
+          error_ok = true;
+        });
+
+      stream.on("close", function(data) {
           test.equal(true, data_ok);
           test.equal(true, error_ok);
 
           db.close();
-          test.done()                
+          test.done();
+        });
+
+        var docs = [];
+        for(var i = 0; i < 100; i++) docs.push({a:1, b:"hhhhhhhhhhhhhhhhhhhhhhhhhh"});
+        collection.insert(docs, {w:1}, function(err, result) {
+          test.equal(null, err);
+          serverManager.killAll(function(err, result) {});
         });
       });
-
-      var docs = [];
-      for(var i = 0; i < 100; i++) docs.push({a:1, b:"hhhhhhhhhhhhhhhhhhhhhhhhhh"});
-      collection.insert(docs, {w:1}, function(err, result) {
-        test.equal(null, err);
-        serverManager.killAll(function(err, result) {});
-      });
     });
-  });
+  })
+
 }
 
 /**
