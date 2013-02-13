@@ -2258,6 +2258,24 @@ exports.shouldNotFailDueToStackOverflowToArray = function(test) {
 }
 
 /**
+ * @ignore
+ * @api private
+ */
+exports.shouldCorrectlySkipAndLimit = function(test) {
+  var collection = client.collection('shouldCorrectlySkipAndLimit')
+  var docs = [];
+  for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
+
+  collection.insert(docs, {w:1}, function(err, ids) {
+
+    collection.find({}, {OrderNumber:1}).skip(10).limit(10).toArray(function(err, items) {
+      test.equal(10, items[0].OrderNumber);
+      test.done();
+    })
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
