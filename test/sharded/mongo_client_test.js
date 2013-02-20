@@ -53,9 +53,9 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
-  Shard.killAll(function() {
+  // Shard.killAll(function() {
     callback();
-  });
+  // });
 }
 
 /**
@@ -98,6 +98,47 @@ exports['Should connect to mongos proxies using connectiong string and options']
 
       db.close();
       test.done();
+    });    
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly connect and then handle a mongos failure'] = function(test) {
+  MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1', {
+    // mongos: {
+    //   haInterval: 500
+    // }
+  }, function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+    // test.equal(500, db.serverConfig.mongosStatusCheckInterval);
+
+    db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      test.equal(null, err);
+      test.equal(1, result);
+      var numberOfTicks = 10;
+
+      var ticker = function() {
+        numberOfTicks = numberOfTicks - 1;
+
+        db.collection('replicaset_mongo_client_collection').findOne(function(err, doc) {
+          if(numberOfTicks == 0) {
+            db.close();
+            test.done();          
+          } else {
+            setTimeout(ticker, 1000);
+          }
+        });
+      }
+
+      var killport = db.serverConfig._currentMongos.port;
+
+      // Kill the mongos proxy
+      Shard.killMongoS(killport, function(err, result) {
+        setTimeout(ticker, 1000);
+      });
     });    
   });
 }

@@ -1,7 +1,7 @@
 1.2.13 2013-02-20
 -----------------
 - Allow strategy 'none' for repliaset if no strategy wanted
-- 
+- Fixed missing MongoErrors on some cursor methods (Issue #882)
 
 1.2.12 2013-02-13
 -----------------
