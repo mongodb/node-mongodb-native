@@ -503,6 +503,8 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags']
       // Validate no connection available
       test.equal("No replica set members available for query", connection.message);
 
+      var strategyInstance = db.serverConfig.strategyInstance;
+
       // Error if no strategy instance
       db.serverConfig.strategyInstance = null;
 
@@ -510,9 +512,10 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags']
       connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST, {"dc5":"ny"}));
       test.equal("A strategy for calculating nearness must be enabled such as ping or statistical", connection.message);
 
+      db.serverConfig.strategyInstance = strategyInstance;
       // Finish up test
-      test.done();
       db.close();
+      test.done();
     }, 5000);
   });
 
@@ -593,8 +596,8 @@ exports['Should Correctly Use ReadPreference.NEAREST read preference with tags a
       test.equal("A strategy for calculating nearness must be enabled such as ping or statistical", connection.message);
 
       // Finish up test
-      test.done();
       db.close();
+      test.done();
     }, 5000);
   });
 
