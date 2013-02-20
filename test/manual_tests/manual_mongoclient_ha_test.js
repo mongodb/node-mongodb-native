@@ -37,6 +37,7 @@ var simpleQuery = function(callback) {
 }
 
 var connection_string = "mongodb://localhost:30000,localhost:30001,localhost:30002/admin?replicaSet=testappset&autoReconnect=true";
+var number_of_times = 5;
 
 RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:0, arbiter_count:0});
 RS.startSet(true, function(err, result) {
@@ -56,12 +57,15 @@ RS.startSet(true, function(err, result) {
       console.log('connected');
       async.whilst(
         function() {
-          return true;
+          console.log("=== number_of_times :: " + number_of_times);
+          number_of_times = number_of_times - 1;
+          return number_of_times > 0;
         },
         function(callback) {
           simpleQuery(callback);
         },
         function() {
+          db.close();
           console.log("done");
         }
       );      

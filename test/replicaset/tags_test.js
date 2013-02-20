@@ -8,6 +8,7 @@ var testCase = require('nodeunit').testCase,
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = mongodb.Db,
   ReplSetServers = mongodb.ReplSetServers,
+  ReadPreference = mongodb.ReadPreference,
   PingStrategy = require('../../lib/mongodb/connection/strategies/ping_strategy').PingStrategy,
   StatisticsStrategy = require('../../lib/mongodb/connection/strategies/statistics_strategy').StatisticsStrategy,
   Server = mongodb.Server;
@@ -114,7 +115,7 @@ exports.tearDown = function(callback) {
   }
 }
 
-exports['Should Correctly Connect With Default Replicaset And Insert Document For Tag Dc:NY'] = function(test) {
+exports['Ensure tag read goes only to the correct server'] = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers([
       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
@@ -124,97 +125,48 @@ exports['Should Correctly Connect With Default Replicaset And Insert Document Fo
     {}
   );
 
-  var db = new Db('integration_test_', replSet, {w:0});
+  // Set read preference
+  replSet.setReadPreference(new ReadPreference(ReadPreference.SECONDARY, {"dc2":"sf"}));
+  // Open the database
+  var db = new Db('local', replSet, {w:0});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
-    // Recreate collection on replicaset
-    db.createCollection('testsets', function(err, collection) {
-      if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
+    // Checkout a reader and make sure it's the primary
+    var _readPreference;
+    var _tags;
+    var _connections = [];
+    var backup = replSet.checkoutReader;
+    var _member;
+    
+    replSet.checkoutReader = function(readPreference, tags) {
+      _readPreference = readPreference;
+      _tags = tags;
 
-      // Insert a dummy document
-      collection.insert({a:20}, {safe: {w:'majority'}}, function(err, r) {
-        // Should have no error
-        test.equal(null, err);
+      var _connection = backup.apply(replSet, [readPreference, tags]);
+      _connections.push(_connection);
+      return _connection;
+    }
 
-        // Do a read for the value
-        collection.findOne({a:20}, function(err, item) {
-          db.close();
-          test.equal(20, item.a);
-          test.done();
-        })
-      });
+    db.db('local').collection('system.replset').find().toArray(function(err, doc) {
+      var members = doc[0].members;
+      for(var i = 0; i < members.length; i++) {
+        if(members[i].tags && members[i].tags['dc2']) {
+          _member = members[i];
+          break;
+        }
+      }
+
+      // Check that the connections all went to the correct read
+      for(var i = 0; i < _connections.length; i++) {
+        var port = _connections[i].socketOptions.port.toString();
+        test.ok(_member.host.match(port) != null);
+      }
+
+      // Restore the method
+      replSet.checkoutReader = backup;
+      db.close();
+      test.done();
     });
-  });
-
-  db.open(function(err, p_db) {
-    db = p_db;
-  })
-}
-
-exports['Should Honor setReadPreference primary'] = function(test) {
-  // Replica configuration
-  var replSet = new ReplSetServers([
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ],
-    {}
-  );
-
-  // Set read preference
-  replSet.setReadPreference(Server.READ_PRIMARY);
-  // Open the database
-  var db = new Db('integration_test_', replSet, {w:0});
-  // Trigger test once whole set is up
-  db.on("fullsetup", function() {
-    // Checkout a reader and make sure it's the primary
-    var reader = replSet.checkoutReader();
-    var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
-    // Locate server instance associated with this id
-    var serverInstance = replSet._state.addresses[readerAddress];
-    // Check that it's the primary instance
-    test.equal(true, serverInstance.master);
-    // Check that it's in the list of primary servers
-    var primaryAddress = replSet._state.master.host + ":" + replSet._state.master.port;
-    test.equal(primaryAddress, readerAddress);
-    // End test and close db
-    db.close();
-    test.done();
-  });
-
-  db.open(function(err, p_db) {
-    db = p_db;
-  })
-}
-
-exports['Should Honor setReadPreference secondary'] = function(test) {
-  // Replica configuration
-  var replSet = new ReplSetServers([
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ],
-    {}
-  );
-
-  // Set read preference
-  replSet.setReadPreference(Server.READ_SECONDARY);
-  // Open the database
-  var db = new Db('integration_test_', replSet, {w:0});
-  // Trigger test once whole set is up
-  db.on("fullsetup", function() {
-    // Checkout a reader and make sure it's the primary
-    var reader = replSet.checkoutReader();
-    var readerAddress = reader.socketOptions['host'] + ":" + reader.socketOptions['port'];
-    // Locate server instance associated with this id
-    var serverInstance = replSet._state.addresses[readerAddress];
-    // Check that it's the primary instance
-    test.equal(false, serverInstance.master);
-    // Check that it's in the list of primary servers
-    test.ok(replSet._state.secondaries[readerAddress] != null);
-    // End test and close db
-    db.close();
-    test.done();
   });
 
   db.open(function(err, p_db) {
