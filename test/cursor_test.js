@@ -2280,6 +2280,23 @@ exports.shouldCorrectlySkipAndLimit = function(test) {
 }
 
 /**
+ * @ignore
+ * @api private
+ */
+exports.shouldFailToTailANormalCollection = function(test) {
+  var collection = client.collection('shouldFailToTailANormalCollection')
+  var docs = [];
+  for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
+
+  collection.insert(docs, {w:1}, function(err, ids) {
+    collection.find({}, {tailable:true}).each(function(err, doc) {
+      test.ok(err instanceof Error);
+      test.done();
+    });
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
