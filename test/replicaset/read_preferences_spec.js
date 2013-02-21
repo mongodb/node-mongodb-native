@@ -4,6 +4,7 @@ var noReplicasetStart = process.env['NO_REPLICASET_START'] != null ? true : fals
 var testCase = require('nodeunit').testCase,
   debug = require('util').debug,
   inspect = require('util').inspect,
+  format = require('util').format,
   gleak = require('../../dev/tools/gleak'),
   ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
   Db = mongodb.Db,
@@ -617,7 +618,19 @@ exports['Should Correctly Pick lowest ping time'] = function(test) {
   );
 
   // Open the database
-  var db = new Db('integration_test_', replSet, {w:0, recordQueryStats:true});
+  var db = new Db('integration_test_', replSet
+    , {w:0, recordQueryStats:true, logger: {
+      debug: function(message, object) {
+        console.log(format("[DEBUG] %s with tags %o", message, object))
+      },
+      log: function(message, object) {
+
+      },
+      error: function(message, object) {
+
+      }
+    }}
+  );
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
     var time = 10;

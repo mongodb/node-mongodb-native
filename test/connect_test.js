@@ -119,8 +119,7 @@ exports.testConnectBadAuth = function(test) {
   var url = 'mongodb://slithy:toves@localhost:27017/?safe=false' + MONGODB + (useSSL == true ? '&ssl=true' : '');
   connect(url, function(err, db) { 
     test.ok(err);
-    test.ok(db);
-    db.close();
+    test.equal(null, db);
     test.done();
   });
 };
