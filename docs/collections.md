@@ -96,7 +96,7 @@ A collection can be renamed with collection method `rename`
 
 Passing the optional dropTarget boolean as the thrid parameter will allow overwritting of existing collections
     
-    collection.rename(new_name, callback, true);
+    collection.rename(new_name, {dropTarget:true}, callback);
 
 ## Removing records from collections
 
