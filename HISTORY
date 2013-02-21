@@ -1,6 +1,6 @@
 1.2.13 
 -----------------
-- Allow strategy 'none' for repliaset if no strategy wanted
+- Allow strategy 'none' for repliaset if no strategy wanted (will default to round robin selection of servers on a set readPreference)
 - Fixed missing MongoErrors on some cursor methods (Issue #882)
 - Correctly returning a null for the db instance on MongoClient.connect when auth fails (Issue #890)
 - Correctly connecting with missing mongos in connection string using MongoClient.connect (Issue #885)

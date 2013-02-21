@@ -172,20 +172,16 @@ exports.shouldCorrectExecuteBasicCollectionMethods = function(test) {
             test.equal('test_collection_methods4', collection.collectionName);
         
             // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
-            client.renameCollection("test_collection_methods4", "test_collection_methods3", function(err, reply) {
+            client.renameCollection("test_collection_methods4", "test_collection_methods3", {dropTarget:true}, function(err, reply) {
               test.equal(null, err);
-              test.done();
 
               client.dropCollection("test_collection_methods3", function(err, result) {
                 test.equal(true, result);
                 test.done();
               });
-
-            }, true);
-
+            });
           });
         });
-
       });
     });
   });
