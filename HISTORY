@@ -4,6 +4,7 @@
 - Fixed missing MongoErrors on some cursor methods (Issue #882)
 - Correctly returning a null for the db instance on MongoClient.connect when auth fails (Issue #890)
 - Correctly connecting with missing mongos in connection string using MongoClient.connect (Issue #885)
+- Added dropTarget option support for renameCollection/rename (Issue #891, help from https://github.com/jbottigliero)
 
 1.2.12 2013-02-13
 -----------------
