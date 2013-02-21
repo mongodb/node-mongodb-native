@@ -144,6 +144,20 @@ exports['Should correctly connect and then handle a mongos failure'] = function(
 }
 
 /**
+ * @ignore
+ */
+exports['Should correctly connect with a missing mongos'] = function(test) {
+  MongoClient.connect('mongodb://localhost:50000,localhost:50001,localhost:50002/test', {}, function(err, db) {
+    setTimeout(function() {
+      test.equal(null, err);
+      test.ok(db != null);
+      db.close();
+      test.done();
+    }, 10000)
+  });
+}
+
+/**
  * Retrieve the server information for the current
  * instance of the db client
  *
