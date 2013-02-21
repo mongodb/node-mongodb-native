@@ -159,12 +159,36 @@ exports.shouldCorrectExecuteBasicCollectionMethods = function(test) {
           // Drop the collection and check that it's gone
           client.dropCollection("test_collection_methods2", function(err, result) {
             test.equal(true, result);
-            test.done();
-          })
+          });
         });
+
+
+        client.createCollection('test_collection_methods3', function(err, collection) {
+          // Verify that all the result are correct coming back (should contain the value ok)
+          test.equal('test_collection_methods3', collection.collectionName);
+        
+          client.createCollection('test_collection_methods4', function(err, collection) {
+            // Verify that all the result are correct coming back (should contain the value ok)
+            test.equal('test_collection_methods4', collection.collectionName);
+        
+            // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
+            client.renameCollection("test_collection_methods4", "test_collection_methods3", function(err, reply) {
+              test.equal(null, err);
+              test.done();
+
+              client.dropCollection("test_collection_methods3", function(err, result) {
+                test.equal(true, result);
+                test.done();
+              });
+
+            }, true);
+
+          });
+        });
+
       });
     });
-  })
+  });
 }
 
 /**
