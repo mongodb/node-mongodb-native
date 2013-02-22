@@ -95,7 +95,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 1
          * - **Watchers**
-           - 24
+           - 25
 
 Object Document Modeling Libraries
 ----------------------------------
@@ -134,7 +134,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 6:1:20 on 12/1/2013
+           - 17:2:30 on 21/1/2013
          * - **Homepage**
            - http://
          * - **Url**
@@ -142,9 +142,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 366
+           - 372
          * - **Watchers**
-           - 2770
+           - 2788
 
 .. topic:: mongo-model
 
@@ -237,9 +237,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 176
+           - 178
          * - **Watchers**
-           - 1023
+           - 1030
 
 Grid FS libraries or tools
 --------------------------
@@ -360,7 +360,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 38
          * - **Watchers**
-           - 304
+           - 310
 
 .. topic:: mongode
 
@@ -499,9 +499,9 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 45
+           - 47
          * - **Watchers**
-           - 202
+           - 204
 
 .. topic:: lazyBum
 
@@ -573,7 +573,7 @@ Test helpers and libraries
          * - **Forks**
            - 1
          * - **Watchers**
-           - 7
+           - 8
 
 .. topic:: node-database-cleaner
 
@@ -818,33 +818,10 @@ General frameworks over MongoDB
          * - **Forks**
            - 2
          * - **Watchers**
-           - 43
+           - 44
 
 Translation libraries or frameworks
 -----------------------------------
-
-.. topic:: dialect-http
-
-    http client to manage your dialect translations
-
-      .. list-table::
-         :widths: 25 85
-         :header-rows: 0
-
-         * - **Activity Level**
-           - .. image:: ../static/nonactive.png
-         * - **Last push**
-           - 1:43:11 on 8/11/2011
-         * - **Homepage**
-           - http://
-         * - **Url**
-           - https://github.com/masylum/dialect-http
-         * - **Clone Url**
-           - https://github.com/masylum/dialect-http.git
-         * - **Forks**
-           - 7
-         * - **Watchers**
-           - 27
 
 .. topic:: dialect
 
@@ -867,7 +844,7 @@ Translation libraries or frameworks
          * - **Forks**
            - 22
          * - **Watchers**
-           - 103
+           - 101
 
 Libraries or Applications for analytics
 ---------------------------------------
@@ -891,9 +868,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 228
+           - 234
          * - **Watchers**
-           - 2412
+           - 2428
 
 Libraries for the connect middleware
 ------------------------------------
@@ -963,35 +940,12 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 61
+           - 63
          * - **Watchers**
-           - 198
+           - 199
 
 Libraries or applications for continous integration
 ---------------------------------------------------
-
-.. topic:: concrete
-
-    Simple continuous integration server written with NodeJS and CoffeeScript
-
-      .. list-table::
-         :widths: 25 85
-         :header-rows: 0
-
-         * - **Activity Level**
-           - .. image:: ../static/nonactive.png
-         * - **Last push**
-           - 20:18:30 on 9/6/2012
-         * - **Homepage**
-           - http://http://ryankee.github.com/concrete
-         * - **Url**
-           - https://github.com/ryankee/concrete
-         * - **Clone Url**
-           - https://github.com/ryankee/concrete.git
-         * - **Forks**
-           - 34
-         * - **Watchers**
-           - 244
 
 Exampe applications
 -------------------
@@ -1017,7 +971,7 @@ Exampe applications
          * - **Forks**
            - 8
          * - **Watchers**
-           - 24
+           - 26
 
 .. topic:: node-mongo-cms
 

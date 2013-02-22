@@ -1380,10 +1380,16 @@ renameCollection
 
 Rename a collection.
 
-.. js:function:: renameCollection(fromCollection, toCollection, callback)
+
+
+Options
+ - **dropTarget** {Boolean, default:false}, drop the target name collection if it previously exists.
+
+.. js:function:: renameCollection(fromCollection, toCollection[, options], callback)
 
    :param string fromCollection: the name of the current collection we wish to rename.
    :param string toCollection: the new name of the collection.
+   :param object [options]: returns option results.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from renameCollection or null if an error occured.
    :returns: null 
 

@@ -368,9 +368,15 @@ rename
 
 Renames the collection.
 
-.. js:function:: rename(newName, callback)
+
+
+Options
+ - **dropTarget** {Boolean, default:false}, drop the target name collection if it previously exists.
+
+.. js:function:: rename(newName[, options], callback)
 
    :param string newName: the new name of the collection.
+   :param object [options]: returns option results.
    :param function callback: the callback accepting the result
    :returns: null 
 

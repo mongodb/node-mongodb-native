@@ -37,8 +37,9 @@ Constants
    "Binary.SUBTYPE_DEFAULT", "0", "Default BSON type"
    "Binary.SUBTYPE_FUNCTION", "1", "Function BSON type"
    "Binary.SUBTYPE_BYTE_ARRAY", "2", "Byte Array BSON type"
-   "Binary.SUBTYPE_UUID", "3", "UUID BSON type"
-   "Binary.SUBTYPE_MD5", "4", "MD5 BSON type"
+   "Binary.SUBTYPE_UUID_OLD", "3", "OLD UUID BSON type"
+   "Binary.SUBTYPE_UUID", "4", "UUID BSON type"
+   "Binary.SUBTYPE_MD5", "5", "MD5 BSON type"
    "Binary.SUBTYPE_USER_DEFINED", "128", "User BSON type"
 
 ---

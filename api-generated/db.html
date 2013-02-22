@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Db() &mdash; MongoDB Node.JS Driver 1.2.12 documentation</title>
+    <title>Db() &mdash; MongoDB Node.JS Driver 1.2.13 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.2.12',
+        VERSION:     '1.2.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.2.12 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.2.13 documentation" href="../index.html" />
     <link rel="next" title="Collection()" href="collection.html" />
     <link rel="prev" title="MongoClient()" href="mongoclient.html" /> 
   </head>
@@ -38,7 +38,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.12 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -1543,9 +1543,16 @@ different from the name of the current DB, for example admin</li>
 <div class="section" id="renamecollection">
 <h2>renameCollection<a class="headerlink" href="#renamecollection" title="Permalink to this headline">¶</a></h2>
 <p>Rename a collection.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>dropTarget</strong> {Boolean, default:false}, drop the target name collection if it previously exists.</li>
+</ul>
+</dd>
+</dl>
 <dl class="function">
 <dt id="renameCollection">
-<tt class="descname">renameCollection</tt><big>(</big><em>fromCollection</em>, <em>toCollection</em>, <em>callback</em><big>)</big><a class="headerlink" href="#renameCollection" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">renameCollection</tt><big>(</big><em>fromCollection</em>, <em>toCollection</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big><a class="headerlink" href="#renameCollection" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1553,6 +1560,7 @@ different from the name of the current DB, for example admin</li>
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>fromCollection</strong> (<em>string</em>) &#8211; the name of the current collection we wish to rename.</li>
 <li><strong>toCollection</strong> (<em>string</em>) &#8211; the new name of the collection.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; returns option results.</li>
 <li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from renameCollection or null if an error occured.</li>
 </ul>
 </td>
@@ -2811,7 +2819,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.12 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
