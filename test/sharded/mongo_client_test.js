@@ -14,7 +14,6 @@ var testCase = require('nodeunit').testCase,
 
 // Keep instance of ReplicaSetManager
 var serversUp = false;
-var retries = 120;
 var Shard = Shard == null ? null : Shard;
 
 /**
@@ -24,6 +23,8 @@ var Shard = Shard == null ? null : Shard;
  * @ignore
  */
 exports.setUp = function(callback) {
+  if(serversUp) return callback();
+  
   Shard = new ShardedManager({
     // A single replicaset in our sharded system
     numberOfReplicaSets:1,
@@ -42,8 +43,9 @@ exports.setUp = function(callback) {
 
   // Start the shard
   Shard.start(function(err, result) {
+    serversUp = true;
     callback();
-  });
+  });    
 }
 
 /**
@@ -53,9 +55,12 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
-  // Shard.killAll(function() {
+  numberOfTestsRun = numberOfTestsRun - 1;
+  if(numberOfTestsRun > 0) return callback();
+  // Kill the shard setup
+  Shard.killAll(function() {
     callback();
-  // });
+  });
 }
 
 /**
@@ -105,55 +110,14 @@ exports['Should connect to mongos proxies using connectiong string and options']
 /**
  * @ignore
  */
-exports['Should correctly connect and then handle a mongos failure'] = function(test) {
-  MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1', {
-    // mongos: {
-    //   haInterval: 500
-    // }
-  }, function(err, db) {
-    test.equal(null, err);
-    test.ok(db != null);
-    // test.equal(500, db.serverConfig.mongosStatusCheckInterval);
-
-    db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
-      test.equal(null, err);
-      test.equal(1, result);
-      var numberOfTicks = 10;
-
-      var ticker = function() {
-        numberOfTicks = numberOfTicks - 1;
-
-        db.collection('replicaset_mongo_client_collection').findOne(function(err, doc) {
-          if(numberOfTicks == 0) {
-            db.close();
-            test.done();          
-          } else {
-            setTimeout(ticker, 1000);
-          }
-        });
-      }
-
-      var killport = db.serverConfig._currentMongos.port;
-
-      // Kill the mongos proxy
-      Shard.killMongoS(killport, function(err, result) {
-        setTimeout(ticker, 1000);
-      });
-    });    
-  });
-}
-
-/**
- * @ignore
- */
 exports['Should correctly connect with a missing mongos'] = function(test) {
-  MongoClient.connect('mongodb://localhost:50000,localhost:50001,localhost:50002/test', {}, function(err, db) {
+  MongoClient.connect('mongodb://localhost:50002,localhost:50000,localhost:50001/test', {}, function(err, db) {
     setTimeout(function() {
       test.equal(null, err);
       test.ok(db != null);
       db.close();
       test.done();
-    }, 10000)
+    }, 2000)
   });
 }
 
