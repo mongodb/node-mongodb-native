@@ -1,21 +1,30 @@
-var Configuration = require('../lib/configuration').Configuration,
-  Runner = require('../lib/runner').Runner,
-  mongodb = require('../../../'),
-  ServerManager = require('../../../test/tools/server_manager').ServerManager;
+var Configuration = require('integra').Configuration
+  , Runner = require('integra').Runner
+  , mongodb = require('../')
+  , Db = mongodb.Db
+  , Server = mongodb.Server
+  , ServerManager = require('../test/tools/server_manager').ServerManager;
 
 // Server manager
 var serverManager = new ServerManager();
 
-// Set up a set of configurations we are going to use
+// Create Simple Server configuration
 var configurations = Configuration
-  .add("single_server", function() {
+  .add('single_server', function() {
+    var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+     {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
+
     //
     // Basic functions
     //
     this.start = function(callback) {
       serverManager.start(true, {purgedirectories:true}, function(err) {
         if(err) throw err;
-        callback();
+
+        db.open(function(err, result) {
+          if(err) throw err;
+          callback();
+        })
       });
     }
 
@@ -45,16 +54,24 @@ var configurations = Configuration
     }
 
     // Used in tests
-    this.integration_db = "integration_tests";
-  });
+    this.db_name = "integration_tests";
+    this.db = db;
+  })
 
 // Configure a Run of tests
-var runner = Runner
+var functional_tests_runner = Runner
   // Add configurations to the test runner
   .configurations(configurations)
   // First parameter is test suite name
   // Second parameter is the configuration used
   // Third parameter is the list of files to execute
-  .add("no_restart_needed", "single_server", ['/test/mongodb/simple_single_server_test'])
-  // Runs all the suites
-  .run();
+  .add("functional_tests",
+    ['/new_tests/functional/insert_tests.js']
+  );
+
+// Run the tests against configuration 'single_server'
+functional_tests_runner.run("single_server");
+
+
+
+
