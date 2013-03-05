@@ -3,20 +3,25 @@ var Configuration = require('integra').Configuration
   , mongodb = require('../')
   , Db = mongodb.Db
   , Server = mongodb.Server
-  , ServerManager = require('../test/tools/server_manager').ServerManager;
+  , ReplSet = mongodb.ReplSet
+  , ServerManager = require('../test/tools/server_manager').ServerManager
+  , ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
 
 // Server manager
 var serverManager = new ServerManager();
+var replicasetManager = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:0, arbiter_count:0});
 
-// Create Simple Server configuration
+// 
+//  Configurations
+//
 var configurations = Configuration
+  
+  // Single server configuration
   .add('single_server', function() {
     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
 
-    //
-    // Basic functions
-    //
+    // Test suite start
     this.start = function(callback) {
       serverManager.start(true, {purgedirectories:true}, function(err) {
         if(err) throw err;
@@ -28,36 +33,80 @@ var configurations = Configuration
       });
     }
 
-    this.setup = function(callback) {
-      callback();
-    }
-
-    this.teardown = function(callback) {
-      callback();      
-    };
-
+    // Test suite stop
     this.stop = function(callback) {
       serverManager.stop(9, function(err) {
         callback();
       });
     };
 
-    //
-    // Custom functions tests can use to manage a test suite
-    //
-    this.killServer = function(callback) {
-      callback();      
-    }
-
-    this.restartServer = function(callback) {
-      callback();
-    }
+    // Pr test functions
+    this.setup = function(callback) { callback(); }
+    this.teardown = function(callback) { callback(); };
 
     // Used in tests
     this.db_name = "integration_tests";
     this.db = db;
   })
 
+  // Simple Replicaset Configuration
+  .add('replica_set', function() {
+    var self = this;
+
+    // Test suite start
+    this.start = function(callback) {
+      replicasetManager.startSet(true, function(err, result) {
+        if(err) throw err;
+
+        // Set up the replicaset
+        var replSet = new ReplSet( [
+                new Server( replicasetManager.host, replicasetManager.ports[1]),
+                new Server( replicasetManager.host, replicasetManager.ports[0]),
+                new Server( replicasetManager.host, replicasetManager.ports[2])
+              ],
+              {rs_name:replicasetManager.name}
+            );
+
+        self.db = new Db('integration_tests', replSet, {w:0, native_parser: false});
+        self.db.open(function(err, result) {
+          if(err) throw err;
+          callback();
+        })
+      });
+    }
+
+    // Test suite stop
+    this.stop = function(callback) {
+      replicasetManager.killAll(function(err) {
+        callback();
+      });
+    };
+
+    // Allow us to kill the primary
+    this.killPrimary = function(callback) {
+      replicasetManager.killPrimary(function() {
+        callback();
+      })
+    }
+
+    // Pr test functions
+    this.setup = function(callback) { 
+      callback(); 
+    }
+    
+    this.teardown = function(callback) { 
+      replicasetManager.restartKilledNodes(function() {
+        callback();
+      });
+    };
+
+    // Used in tests
+    this.db_name = "integration_tests";
+  })
+
+//
+//  Runners
+//
 // Configure a Run of tests
 var functional_tests_runner = Runner
   // Add configurations to the test runner
@@ -69,8 +118,21 @@ var functional_tests_runner = Runner
     ['/new_tests/functional/insert_tests.js']
   );
 
-// Run the tests against configuration 'single_server'
-functional_tests_runner.run("single_server");
+// Configure a Run of tests
+var repl_set_tests_runner = Runner
+  // Add configurations to the test runner
+  .configurations(configurations)
+  .exeuteSerially(true)
+  // First parameter is test suite name
+  // Second parameter is the configuration used
+  // Third parameter is the list of files to execute
+  .add("replica_set",
+    ['/new_tests/repl_set/reconnect_tests.js']
+  );
+
+// // Run the tests against configuration 'single_server'
+// functional_tests_runner.run("single_server");
+repl_set_tests_runner.run("replica_set");
 
 
 
