@@ -171,8 +171,8 @@ var repl_set_parallel_tests_runner = ParallelRunner
 
 // // Run the tests against configuration 'single_server'
 // functional_tests_runner.run("single_server");
-repl_set_tests_runner.run("replica_set");
-// repl_set_parallel_tests_runner.run("replica_set");
+// repl_set_tests_runner.run("replica_set");
+repl_set_parallel_tests_runner.run("replica_set");
 
 
 
