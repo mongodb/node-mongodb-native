@@ -6,7 +6,7 @@
  * @ignore
  */
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = function(configuration, test) {
-  var db = configuration.db;
+  var db = configuration.db();
   // Fetch a collection to insert document into
   var collection = db.collection("simple_document_insert_collection_no_safe");
   // Insert a single document

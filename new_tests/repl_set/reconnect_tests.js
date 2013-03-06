@@ -1,5 +1,5 @@
 exports['Should retrieve correct count after primary killed'] = function(configuration, test) {
-  var db = configuration.db;
+  var db = configuration.db();
 
   // Drop collection on replicaset
   db.dropCollection('testsets', function(err, r) {
@@ -51,7 +51,7 @@ exports['Should retrieve correct count after primary killed'] = function(configu
 }
 
 exports['Should correctly throw timeout for replication to servers on inserts'] = function(configuration, test) {
-  var db = configuration.db;
+  var db = configuration.db();
 
   // Drop collection on replicaset
   db.dropCollection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts', function(err, r) {
