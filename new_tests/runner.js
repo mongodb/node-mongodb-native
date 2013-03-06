@@ -98,10 +98,9 @@ var configurations = Configuration
     };
 
     // Allow us to kill the primary
-    this.killPrimary = function(callback) {
-      replicasetManager.killPrimary(function() {
-        callback();
-      })
+    this.killPrimary = function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      replicasetManager.killPrimary.apply(replicasetManager, args);
     }
 
     // Pr test functions
@@ -149,7 +148,7 @@ var repl_set_tests_runner = Runner
   .add("replica_set",
     [
         '/new_tests/repl_set/reconnect_tests.js'
-      , '/new_tests/repl_set/reconnect_tests.js'
+      // , '/new_tests/repl_set/reconnect_tests.js'
     ]
   );
 
@@ -157,7 +156,9 @@ var repl_set_tests_runner = Runner
 var repl_set_parallel_tests_runner = ParallelRunner
   // Add configurations to the test runner
   .configurations(configurations)
-  .parallelContexts(2)
+  // .parallelContexts(2)
+  .parallelContexts(1)
+  .parallelizeAtLevel(ParallelRunner.TEST)
   .exeuteSerially(true)
   // First parameter is test suite name
   // Second parameter is the configuration used
@@ -165,7 +166,7 @@ var repl_set_parallel_tests_runner = ParallelRunner
   .add("replica_set",
     [
         '/new_tests/repl_set/reconnect_tests.js'
-      , '/new_tests/repl_set/reconnect_tests.js'
+      // , '/new_tests/repl_set/reconnect_tests.js'
     ]
   );
 

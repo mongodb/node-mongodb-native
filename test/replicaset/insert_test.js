@@ -89,40 +89,40 @@ exports.tearDown = function(callback) {
 //   });
 // }
 
-exports.shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts = function(test) {
-  // debug("=========================================== shouldWorkCorrectlyWithInserts")
-  // Replica configuration
-  var replSet = new ReplSetServers( [
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ],
-    {rs_name:RS.name}
-  );
+// exports.shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts = function(test) {
+//   // debug("=========================================== shouldWorkCorrectlyWithInserts")
+//   // Replica configuration
+//   var replSet = new ReplSetServers( [
+//       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+//       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+//       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+//     ],
+//     {rs_name:RS.name}
+//   );
 
-  // Insert some data
-  var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
-  db.open(function(err, p_db) {
-    // Check if we got an error
-    if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
+//   // Insert some data
+//   var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
+//   db.open(function(err, p_db) {
+//     // Check if we got an error
+//     if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
 
-    // Drop collection on replicaset
-    p_db.dropCollection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts', function(err, r) {
-      if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
-      // Recreate collection on replicaset
-      p_db.createCollection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts', function(err, collection) {
-        if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
-        // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:7, wtimeout: 10000}}, function(err, r) {
-          test.equal('timeout', err.err);
-          test.equal(true, err.wtimeout);
-          test.done();
-          p_db.close();
-        });
-      });
-    });
-  });
-}
+//     // Drop collection on replicaset
+//     p_db.dropCollection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts', function(err, r) {
+//       if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
+//       // Recreate collection on replicaset
+//       p_db.createCollection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts', function(err, collection) {
+//         if(err != null) debug("shouldCorrectlyWaitForReplicationToServersOnInserts :: " + inspect(err));
+//         // Insert a dummy document
+//         collection.insert({a:20}, {safe: {w:7, wtimeout: 10000}}, function(err, r) {
+//           test.equal('timeout', err.err);
+//           test.equal(true, err.wtimeout);
+//           test.done();
+//           p_db.close();
+//         });
+//       });
+//     });
+//   });
+// }
 
 // exports.shouldCorrectlyExecuteSafeFindAndModify = function(test) {
 //   // Replica configuration
@@ -161,61 +161,61 @@ exports.shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts = function(t
 //   });
 // }
 
-exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
-  // Replica configuration
-  var replSet = new ReplSetServers( [
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ],
-    // {rs_name:RS.name, socketOptions:{timeout:30000}}
-    {rs_name:RS.name}
-  );
+// exports.shouldCorrectlyInsertAfterPrimaryComesBackUp = function(test) {
+//   // Replica configuration
+//   var replSet = new ReplSetServers( [
+//       new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+//       new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+//       new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+//     ],
+//     // {rs_name:RS.name, socketOptions:{timeout:30000}}
+//     {rs_name:RS.name}
+//   );
 
 
-  // Insert some data
-  var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
-  // Open db
-  db.open(function(err, p_db) {
-    // Drop collection on replicaset
-    p_db.dropCollection('shouldCorrectlyInsertAfterPrimaryComesBackUp', function(err, r) {
-      if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-      // Recreate collection on replicaset
-      p_db.createCollection('shouldCorrectlyInsertAfterPrimaryComesBackUp', function(err, collection) {
-        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-        // Insert a dummy document
-        collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-          // Kill the primary
-          RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
-            // Attempt insert (should fail)
-            collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+//   // Insert some data
+//   var db = new Db('integration_test_', replSet, {w:0, numberOfRetries:20, retryMiliSeconds:5000});
+//   // Open db
+//   db.open(function(err, p_db) {
+//     // Drop collection on replicaset
+//     p_db.dropCollection('shouldCorrectlyInsertAfterPrimaryComesBackUp', function(err, r) {
+//       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+//       // Recreate collection on replicaset
+//       p_db.createCollection('shouldCorrectlyInsertAfterPrimaryComesBackUp', function(err, collection) {
+//         if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
+//         // Insert a dummy document
+//         collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+//           // Kill the primary
+//           RS.killPrimary(9, {killNodeWaitTime:0}, function(node) {
+//             // Attempt insert (should fail)
+//             collection.insert({a:30}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
 
-              if(err != null) {
-                collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-                  // Peform a count
-                  collection.count(function(err, count) {
-                    test.equal(2, count);
-                    p_db.close();
-                    test.done();
-                  });
-                });
-              } else {
-                collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-                  // Peform a count
-                  collection.count(function(err, count) {
-                    test.equal(2, count);
-                    p_db.close();
-                    test.done();
-                  });
-                });
-              }
-            });
-          });
-        });
-      });
-    });
-  });
-}
+//               if(err != null) {
+//                 collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+//                   // Peform a count
+//                   collection.count(function(err, count) {
+//                     test.equal(2, count);
+//                     p_db.close();
+//                     test.done();
+//                   });
+//                 });
+//               } else {
+//                 collection.insert({a:40}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+//                   // Peform a count
+//                   collection.count(function(err, count) {
+//                     test.equal(2, count);
+//                     p_db.close();
+//                     test.done();
+//                   });
+//                 });
+//               }
+//             });
+//           });
+//         });
+//       });
+//     });
+//   });
+// }
 
 exports.shouldCorrectlyQueryAfterPrimaryComesBackUp = function(test) {
   // Replica configuration
