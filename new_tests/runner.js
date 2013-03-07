@@ -57,6 +57,9 @@ var configurations = Configuration
   // Simple Replicaset Configuration
   .add('replica_set', function() {
     var self = this;
+    // Save the startPort
+    this.startPort = startPort;
+    // Set up replicaset manager
     var replicasetManager = new ReplicaSetManager(
       { 
           retries:120, secondary_count:2
@@ -211,14 +214,46 @@ var repl_set_tests_runner = Runner
     ]
   );
 
+var buckets = {};
+
 // Configure a Run of tests
 var repl_set_parallel_tests_runner = ParallelRunner
   // Add configurations to the test runner
   .configurations(configurations)
-  // .parallelContexts(2)
+  // The number of parallel contexts we are running with
   .parallelContexts(4)
+  // Parallelize at test or file level
   .parallelizeAtLevel(ParallelRunner.TEST)
+  // Execute all tests serially in each context
   .exeuteSerially(true)
+  // Callback for each test run including time to execute and env
+  .testStatistics(function(event_type, test_statistics) {
+    // Unpack statistics
+    var time_spent = test_statistics.end_time.getTime() - test_statistics.start_time.getTime();
+    var test = test_statistics.name;
+    var file = test_statistics.file_name;
+    var config = test_statistics.config_name;
+
+    // Add to bucket
+    if(!Array.isArray(buckets[test_statistics.configuration.startPort])) {
+      buckets[test_statistics.configuration.startPort] = [];
+    }
+
+    // Stat object
+    var stat = {
+        port: test_statistics.configuration.startPort
+      , time: time_spent
+      , test: test
+      , file: file
+      , config: config
+    };
+
+    // Save statistics about test to it's bucket
+    buckets[test_statistics.configuration.startPort].push(stat);
+
+    console.log("---------------------------- stat recorded")
+    console.dir(stat)
+  })
   // First parameter is test suite name
   // Second parameter is the configuration used
   // Third parameter is the list of files to execute
@@ -226,17 +261,27 @@ var repl_set_parallel_tests_runner = ParallelRunner
     [
         '/new_tests/repl_set/reconnect_tests.js'
       , '/new_tests/repl_set/connecting_tests.js'
-      , '/new_tests/repl_set/secondary_queries_tests.js'
-      , '/new_tests/repl_set/mongoclient_tests.js'
-      , '/new_tests/repl_set/read_preferences_tests.js'
-      , '/new_tests/repl_set/read_preferences_spec_tests.js'
-      , '/new_tests/repl_set/failover_query_tests.js'
+      // , '/new_tests/repl_set/secondary_queries_tests.js'
+      // , '/new_tests/repl_set/mongoclient_tests.js'
+      // , '/new_tests/repl_set/read_preferences_tests.js'
+      // , '/new_tests/repl_set/read_preferences_spec_tests.js'
+      // , '/new_tests/repl_set/failover_query_tests.js'
     ]
   );
 
 // // Run the tests against configuration 'single_server'
 // functional_tests_runner.run("single_server");
 // repl_set_tests_runner.run("replica_set");
+
+// // After each test is done
+// repl_set_parallel_tests_runner.on('test_done', function(test_statistics) {
+// })
+
+// // After test suite is finished
+// repl_set_parallel_tests_runner.on('end', function() {
+// });
+
+// Parallel runner
 repl_set_parallel_tests_runner.run("replica_set");
 
 
