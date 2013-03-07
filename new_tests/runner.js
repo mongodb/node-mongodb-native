@@ -60,7 +60,7 @@ var configurations = Configuration
     var replicasetManager = new ReplicaSetManager(
       { 
           retries:120, secondary_count:2
-        , passive_count:0, arbiter_count:0
+        , passive_count:0, arbiter_count:1
         , start_port: startPort
       }
     );
@@ -103,6 +103,54 @@ var configurations = Configuration
       replicasetManager.killPrimary.apply(replicasetManager, args);
     }
 
+    // Restart killed nodes
+    this.restartKilledNodes = function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      replicasetManager.restartKilledNodes.apply(replicasetManager, args);
+    }
+
+    // Stepdown primary
+    this.stepDownPrimary = function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      replicasetManager.stepDownPrimary.apply(replicasetManager, args);
+    }
+
+    // Get node
+    this.getNodeFromPort = function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      replicasetManager.getNodeFromPort.apply(replicasetManager, args);
+    }
+
+    // kill
+    this.kill = function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      replicasetManager.kill.apply(replicasetManager, args);
+    }
+
+    // kill secondary
+    this.killSecondary = function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      replicasetManager.killSecondary.apply(replicasetManager, args);
+    }
+
+    // primary
+    this.primary = function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      replicasetManager.primary.apply(replicasetManager, args);
+    }
+
+    // secondaries
+    this.secondaries = function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      replicasetManager.secondaries.apply(replicasetManager, args);
+    }
+
+    // arbiters
+    this.arbiters = function() {
+      var args = Array.prototype.slice.call(arguments, 0);
+      replicasetManager.arbiters.apply(replicasetManager, args);
+    }
+
     // Pr test functions
     this.setup = function(callback) { 
       callback(); 
@@ -113,6 +161,16 @@ var configurations = Configuration
         callback();
       });
     };
+
+    // Returns the package for using Mongo driver classes
+    this.getMongoPackage = function() {
+      return mongodb;
+    }
+
+    // Get the star port
+    this.getReplicasetManager = function() {
+      return replicasetManager;
+    }
 
     // Returns a db
     this.db = function() {
@@ -157,7 +215,7 @@ var repl_set_parallel_tests_runner = ParallelRunner
   // Add configurations to the test runner
   .configurations(configurations)
   // .parallelContexts(2)
-  .parallelContexts(1)
+  .parallelContexts(2)
   .parallelizeAtLevel(ParallelRunner.TEST)
   .exeuteSerially(true)
   // First parameter is test suite name
@@ -165,8 +223,12 @@ var repl_set_parallel_tests_runner = ParallelRunner
   // Third parameter is the list of files to execute
   .add("replica_set",
     [
-        '/new_tests/repl_set/reconnect_tests.js'
-      // , '/new_tests/repl_set/reconnect_tests.js'
+        // '/new_tests/repl_set/reconnect_tests.js'
+        // '/new_tests/repl_set/connecting_tests.js'
+        // '/new_tests/repl_set/secondary_queries_tests.js'
+        // '/new_tests/repl_set/mongoclient_tests.js'
+        // '/new_tests/repl_set/read_preferences_tests.js'
+        '/new_tests/repl_set/read_preferences_spec_tests.js'
     ]
   );
 

@@ -148,6 +148,7 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = function(test) {
 
       db.collection("replicaset_readpref_test").insert({testfield:123}, function(err, result) {
         test.equal(null, err);
+        
         db.collection("replicaset_readpref_test").findOne({}, function(err, result){
           test.equal(null, err);
           test.equal(result.testfield, 123);
@@ -180,7 +181,7 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = function(test) {
               {readPreference: ReadPreference.SECONDARY_PREFERRED},
               function(err, result){
                   callbacksWaiting--;
-              });
+            });
 
             // console.log("counter:", counter, callbacksWaiting);
           }, 1000);
