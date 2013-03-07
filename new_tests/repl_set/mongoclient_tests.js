@@ -76,8 +76,6 @@ exports['Should give an error for non-existing servers'] = function(configuratio
     MongoClient = mongo.MongoClient;
 
   var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-    , format("%s:%s", replMan.host, replMan.ports[0])
-    , format("%s:%s", replMan.host, replMan.ports[1])
     , "nolocalhost:30000"
     , "nolocalhost:30001"
     , "integration_test_"

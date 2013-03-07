@@ -95,7 +95,7 @@ exports['Should correctly query secondaries'] = function(configuration, test) {
   });
 }
 
-exports.shouldAllowToForceReadWithPrimary = function(configuration, test) {
+exports['Should allow to force read with primary'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     ReadPreference = mongo.ReadPreference;
 
@@ -114,6 +114,61 @@ exports.shouldAllowToForceReadWithPrimary = function(configuration, test) {
       test.equal(1, items[0].a);
       test.done();
     });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly read from secondary even if primary is down'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , ReadPreference = mongo.ReadPreference
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
+
+  // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+
+  // Replica configuration
+  var replSet = new ReplSetServers( [
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ],
+    {rs_name:replicasetManager.name, readPreference:ReadPreference.PRIMARY_PREFERRED}
+  );
+
+  new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
+    test.ok(err == null);
+    test.equal(true, p_db.serverConfig.isConnected());
+
+    var collection = p_db.collection('notempty');
+
+    // Insert a document
+    collection.insert({a:1}, {w:1}, function(err, result) {
+      
+      // Run a simple query
+      collection.findOne(function (err, doc) {
+        test.ok(err == null);
+        test.ok(1, doc.a);
+
+        // Shut down primary server
+        configuration.killPrimary(function (err, result) {
+          test.ok(Object.keys(replSet._state.secondaries).length > 0);
+
+          // Run a simple query
+          collection.findOne(function (err, doc) {
+            test.ok(Object.keys(replSet._state.secondaries).length > 0);
+            test.equal(null, err);
+            test.ok(doc != null);
+
+            p_db.close();
+            test.done();
+          });
+        });
+      });
+    });  
   });
 }
 

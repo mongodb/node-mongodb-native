@@ -520,3 +520,22 @@ exports['Should correctly connect'] = function(configuration, test) {
     })
   });
 }
+
+exports['ReplSet honors connectTimeoutMS option'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
+
+  var set = new ReplSetServers([
+      new Server('localhost', 27107, { auto_reconnect: true } ),
+      new Server('localhost', 27018, { auto_reconnect: true } ),
+      new Server('localhost', 27019, { auto_reconnect: true } )
+    ],
+    {socketOptions: {connectTimeoutMS: 200} }
+  );
+
+  test.equal(200, set.socketOptions.connectTimeoutMS)
+  test.equal(200, set._connectTimeoutMS)
+  test.done();
+}

@@ -967,3 +967,72 @@ exports['Connection to a single secondary host with different read preferences']
   });
 }
 
+exports['Ensure tag read goes only to the correct server'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , MongoClient = mongo.MongoClient
+    , ReadPreference = mongo.ReadPreference
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
+
+  var replicasetManager = configuration.getReplicasetManager();
+
+  // Replica configuration
+  var replSet = new ReplSetServers( [
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ],
+    {}
+  );
+
+  // Set read preference
+  replSet.setReadPreference(new ReadPreference(ReadPreference.SECONDARY, {"dc2":"sf"}));
+  // Open the database
+  var db = new Db('local', replSet, {w:0});
+  // Trigger test once whole set is up
+  db.on("fullsetup", function() {
+    // Checkout a reader and make sure it's the primary
+    var _readPreference;
+    var _tags;
+    var _connections = [];
+    var backup = replSet.checkoutReader;
+    var _member;
+    
+    replSet.checkoutReader = function(readPreference, tags) {
+      _readPreference = readPreference;
+      _tags = tags;
+
+      var _connection = backup.apply(replSet, [readPreference, tags]);
+      _connections.push(_connection);
+      return _connection;
+    }
+
+    db.db('local').collection('system.replset').find().toArray(function(err, doc) {
+      var members = doc[0].members;
+      for(var i = 0; i < members.length; i++) {
+        if(members[i].tags && members[i].tags['dc2']) {
+          _member = members[i];
+          break;
+        }
+      }
+
+      // Check that the connections all went to the correct read
+      for(var i = 0; i < _connections.length; i++) {
+        var port = _connections[i].socketOptions.port.toString();
+        test.ok(_member.host.match(port) != null);
+      }
+
+      // Restore the method
+      replSet.checkoutReader = backup;
+      db.close();
+      test.done();
+    });
+  });
+
+  db.open(function(err, p_db) {
+    db = p_db;
+  })
+}
+
+

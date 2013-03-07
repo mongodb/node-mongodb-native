@@ -62,6 +62,7 @@ var configurations = Configuration
           retries:120, secondary_count:2
         , passive_count:0, arbiter_count:1
         , start_port: startPort
+        , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
       }
     );
 
@@ -215,7 +216,7 @@ var repl_set_parallel_tests_runner = ParallelRunner
   // Add configurations to the test runner
   .configurations(configurations)
   // .parallelContexts(2)
-  .parallelContexts(2)
+  .parallelContexts(4)
   .parallelizeAtLevel(ParallelRunner.TEST)
   .exeuteSerially(true)
   // First parameter is test suite name
@@ -223,12 +224,13 @@ var repl_set_parallel_tests_runner = ParallelRunner
   // Third parameter is the list of files to execute
   .add("replica_set",
     [
-        // '/new_tests/repl_set/reconnect_tests.js'
-        // '/new_tests/repl_set/connecting_tests.js'
-        // '/new_tests/repl_set/secondary_queries_tests.js'
-        // '/new_tests/repl_set/mongoclient_tests.js'
-        // '/new_tests/repl_set/read_preferences_tests.js'
-        '/new_tests/repl_set/read_preferences_spec_tests.js'
+        '/new_tests/repl_set/reconnect_tests.js'
+      , '/new_tests/repl_set/connecting_tests.js'
+      , '/new_tests/repl_set/secondary_queries_tests.js'
+      , '/new_tests/repl_set/mongoclient_tests.js'
+      , '/new_tests/repl_set/read_preferences_tests.js'
+      , '/new_tests/repl_set/read_preferences_spec_tests.js'
+      , '/new_tests/repl_set/failover_query_tests.js'
     ]
   );
 
