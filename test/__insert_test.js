@@ -32,35 +32,35 @@ var native_parser = (process.env['TEST_NATIVE'] != null);
 var ISODate = function (string) {
   var match;
 
-	if (typeof string.getTime === "function")
-		return string;
-	else if (match = string.match(/^(\d{4})(-(\d{2})(-(\d{2})(T(\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|((\+|-)(\d{2}):(\d{2}))))?)?)?$/)) {
-		var date = new Date();
-		date.setUTCFullYear(Number(match[1]));
-		date.setUTCMonth(Number(match[3]) - 1 || 0);
-		date.setUTCDate(Number(match[5]) || 0);
-		date.setUTCHours(Number(match[7]) || 0);
-		date.setUTCMinutes(Number(match[8]) || 0);
-		date.setUTCSeconds(Number(match[10]) || 0);
-		date.setUTCMilliseconds(Number("." + match[12]) * 1000 || 0);
+  if (typeof string.getTime === "function")
+    return string;
+  else if (match = string.match(/^(\d{4})(-(\d{2})(-(\d{2})(T(\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|((\+|-)(\d{2}):(\d{2}))))?)?)?$/)) {
+    var date = new Date();
+    date.setUTCFullYear(Number(match[1]));
+    date.setUTCMonth(Number(match[3]) - 1 || 0);
+    date.setUTCDate(Number(match[5]) || 0);
+    date.setUTCHours(Number(match[7]) || 0);
+    date.setUTCMinutes(Number(match[8]) || 0);
+    date.setUTCSeconds(Number(match[10]) || 0);
+    date.setUTCMilliseconds(Number("." + match[12]) * 1000 || 0);
 
-		if (match[13] && match[13] !== "Z") {
-			var h = Number(match[16]) || 0,
-			    m = Number(match[17]) || 0;
+    if (match[13] && match[13] !== "Z") {
+      var h = Number(match[16]) || 0,
+          m = Number(match[17]) || 0;
 
-			h *= 3600000;
-			m *= 60000;
+      h *= 3600000;
+      m *= 60000;
 
-			var offset = h + m;
-			if (match[15] == "+")
-				offset = -offset;
+      var offset = h + m;
+      if (match[15] == "+")
+        offset = -offset;
 
-			new Date(date.valueOf() + offset);
-		}
+      new Date(date.valueOf() + offset);
+    }
 
-		return date;
-	} else
-		throw new Error("Invalid ISO 8601 date given.", __filename);
+    return date;
+  } else
+    throw new Error("Invalid ISO 8601 date given.", __filename);
 };
 
 /**
@@ -98,254 +98,254 @@ exports.tearDown = function(callback) {
   callback();
 }
 
-/**
- * A simple document insert example, not using safe mode to ensure document persistance on MongoDB
- *
- * @_class collection
- * @_function insert
- * @ignore
- */
-exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
+// /**
+//  * A simple document insert example, not using safe mode to ensure document persistance on MongoDB
+//  *
+//  * @_class collection
+//  * @_function insert
+//  * @ignore
+//  */
+// exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = function(test) {
+//   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+//    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-  // Establish connection to db
-  db.open(function(err, db) {
+//   // Establish connection to db
+//   db.open(function(err, db) {
 
-    // Fetch a collection to insert document into
-    var collection = db.collection("simple_document_insert_collection_no_safe");
-    // Insert a single document
-    collection.insert({hello:'world_no_safe'});
+//     // Fetch a collection to insert document into
+//     var collection = db.collection("simple_document_insert_collection_no_safe");
+//     // Insert a single document
+//     collection.insert({hello:'world_no_safe'});
 
-    // Wait for a second before finishing up, to ensure we have written the item to disk
-    setTimeout(function() {
+//     // Wait for a second before finishing up, to ensure we have written the item to disk
+//     setTimeout(function() {
 
-      // Fetch the document
-      collection.findOne({hello:'world_no_safe'}, function(err, item) {
-        test.equal(null, err);
-        test.equal('world_no_safe', item.hello);
-        test.done();
-        db.close();
-      })
-    }, 1000);
-  });
-}
+//       // Fetch the document
+//       collection.findOne({hello:'world_no_safe'}, function(err, item) {
+//         test.equal(null, err);
+//         test.equal('world_no_safe', item.hello);
+//         test.done();
+//         db.close();
+//       })
+//     }, 1000);
+//   });
+// }
 
-/**
- * A batch document insert example, using safe mode to ensure document persistance on MongoDB
- *
- * @_class collection
- * @_function insert
- * @ignore
- */
-exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
+// /**
+//  * A batch document insert example, using safe mode to ensure document persistance on MongoDB
+//  *
+//  * @_class collection
+//  * @_function insert
+//  * @ignore
+//  */
+// exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(test) {
+//   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+//    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-  // Establish connection to db
-  db.open(function(err, db) {
+//   // Establish connection to db
+//   db.open(function(err, db) {
 
-    // Fetch a collection to insert document into
-    db.collection("batch_document_insert_collection_safe", function(err, collection) {
+//     // Fetch a collection to insert document into
+//     db.collection("batch_document_insert_collection_safe", function(err, collection) {
 
-      // Insert a single document
-      collection.insert([{hello:'world_safe1'}
-        , {hello:'world_safe2'}], {w:1}, function(err, result) {
-        test.equal(null, err);
+//       // Insert a single document
+//       collection.insert([{hello:'world_safe1'}
+//         , {hello:'world_safe2'}], {w:1}, function(err, result) {
+//         test.equal(null, err);
 
-        // Fetch the document
-        collection.findOne({hello:'world_safe2'}, function(err, item) {
-          test.equal(null, err);
-          test.equal('world_safe2', item.hello);
-          test.done();
-          db.close();
-        })
-      });
-    });
-  });
-}
+//         // Fetch the document
+//         collection.findOne({hello:'world_safe2'}, function(err, item) {
+//           test.equal(null, err);
+//           test.equal('world_safe2', item.hello);
+//           test.done();
+//           db.close();
+//         })
+//       });
+//     });
+//   });
+// }
 
-/**
- * Example of inserting a document containing functions
- *
- * @_class collection
- * @_function insert
- * @ignore
- */
-exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
+// /**
+//  * Example of inserting a document containing functions
+//  *
+//  * @_class collection
+//  * @_function insert
+//  * @ignore
+//  */
+// exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(test) {
+//   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+//    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-  // Establish connection to db
-  db.open(function(err, db) {
+//   // Establish connection to db
+//   db.open(function(err, db) {
 
-    // Fetch a collection to insert document into
-    db.collection("simple_document_insert_with_function_safe", function(err, collection) {
+//     // Fetch a collection to insert document into
+//     db.collection("simple_document_insert_with_function_safe", function(err, collection) {
 
-      // Insert a single document
-      collection.insert({hello:'world'
-        , func:function() {}}, {w:1, serializeFunctions:true}, function(err, result) {
-        test.equal(null, err);
+//       // Insert a single document
+//       collection.insert({hello:'world'
+//         , func:function() {}}, {w:1, serializeFunctions:true}, function(err, result) {
+//         test.equal(null, err);
 
-        // Fetch the document
-        collection.findOne({hello:'world'}, function(err, item) {
-          test.equal(null, err);
-          test.ok("function() {}", item.code);
-          test.done();
-          db.close();
-        })
-      });
-    });
-  });
-}
+//         // Fetch the document
+//         collection.findOne({hello:'world'}, function(err, item) {
+//           test.equal(null, err);
+//           test.ok("function() {}", item.code);
+//           test.done();
+//           db.close();
+//         })
+//       });
+//     });
+//   });
+// }
 
-/**
- * Example of using keepGoing to allow batch insert to complete even when there are illegal documents in the batch
- *
- * @_class collection
- * @_function insert
- * @ignore
- */
-exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = function(test) {
-  var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-   {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
+// /**
+//  * Example of using keepGoing to allow batch insert to complete even when there are illegal documents in the batch
+//  *
+//  * @_class collection
+//  * @_function insert
+//  * @ignore
+//  */
+// exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = function(test) {
+//   var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
+//    {auto_reconnect: false, poolSize: 4, ssl:useSSL}), {w:0, native_parser: native_parser});
 
-  // Establish connection to db
-  db.open(function(err, db) {
+//   // Establish connection to db
+//   db.open(function(err, db) {
 
-    // Only run the rest of the code if we have a mongodb server with version >= 1.9.1
-    db.admin().serverInfo(function(err, result){
+//     // Only run the rest of the code if we have a mongodb server with version >= 1.9.1
+//     db.admin().serverInfo(function(err, result){
 
-      // Ensure we are running at least MongoDB v1.9.1
-      if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
+//       // Ensure we are running at least MongoDB v1.9.1
+//       if(parseInt((result.version.replace(/\./g, ''))) >= 191) {
 
-        // Create a collection
-        client.createCollection('keepGoingExample', function(err, collection) {
+//         // Create a collection
+//         client.createCollection('keepGoingExample', function(err, collection) {
 
-          // Add an unique index to title to force errors in the batch insert
-          collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
+//           // Add an unique index to title to force errors in the batch insert
+//           collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
 
-            // Insert some intial data into the collection
-            collection.insert([{name:"Jim"}
-              , {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
+//             // Insert some intial data into the collection
+//             collection.insert([{name:"Jim"}
+//               , {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
 
-              // Force keep going flag, ignoring unique index issue
-              collection.insert([{name:"Jim"}
-                , {name:"Sarah", title:"Princess"}
-                , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
+//               // Force keep going flag, ignoring unique index issue
+//               collection.insert([{name:"Jim"}
+//                 , {name:"Sarah", title:"Princess"}
+//                 , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
 
-                // Count the number of documents left (should not include the duplicates)
-                collection.count(function(err, count) {
-                  test.equal(3, count);
-                  db.close();
-                  test.done();
-                })
-              });
-            });
-          });
-        });
-      } else {
-        db.close();
-        test.done();
-      }
-    });
-  });
-}
+//                 // Count the number of documents left (should not include the duplicates)
+//                 collection.count(function(err, count) {
+//                   test.equal(3, count);
+//                   db.close();
+//                   test.done();
+//                 })
+//               });
+//             });
+//           });
+//         });
+//       } else {
+//         db.close();
+//         test.done();
+//       }
+//     });
+//   });
+// }
 
-/**
- * @ignore
- */
-exports.shouldForceMongoDbServerToAssignId = function(test) {
-  /// Set up server with custom pk factory
-  var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null), 'forceServerObjectId':true});
-  db.open(function(err, client) {
-    client.createCollection('test_insert2', function(err, r) {
-      client.collection('test_insert2', function(err, collection) {
+// /**
+//  * @ignore
+//  */
+// exports.shouldForceMongoDbServerToAssignId = function(test) {
+//   /// Set up server with custom pk factory
+//   var db = new Db(MONGODB, new Server('localhost', 27017, {auto_reconnect: true, ssl:useSSL}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null), 'forceServerObjectId':true});
+//   db.open(function(err, client) {
+//     client.createCollection('test_insert2', function(err, r) {
+//       client.collection('test_insert2', function(err, collection) {
 
-        Step(
-          function inserts() {
-            var group = this.group();
+//         Step(
+//           function inserts() {
+//             var group = this.group();
 
-            for(var i = 1; i < 1000; i++) {
-              collection.insert({c:i}, {w:1}, group());
-            }
-          },
+//             for(var i = 1; i < 1000; i++) {
+//               collection.insert({c:i}, {w:1}, group());
+//             }
+//           },
 
-          function done(err, result) {
-            collection.insert({a:2}, {w:1}, function(err, r) {
-              collection.insert({a:3}, {w:1}, function(err, r) {
-                collection.count(function(err, count) {
-                  test.equal(1001, count);
-                  // Locate all the entries using find
-                  collection.find().toArray(function(err, results) {
-                    test.equal(1001, results.length);
-                    test.ok(results[0] != null);
+//           function done(err, result) {
+//             collection.insert({a:2}, {w:1}, function(err, r) {
+//               collection.insert({a:3}, {w:1}, function(err, r) {
+//                 collection.count(function(err, count) {
+//                   test.equal(1001, count);
+//                   // Locate all the entries using find
+//                   collection.find().toArray(function(err, results) {
+//                     test.equal(1001, results.length);
+//                     test.ok(results[0] != null);
 
-                    client.close();
-                    // Let's close the db
-                    test.done();
-                  });
-                });
-              });
-            });
-          }
-        )
-      });
-    });
-  });
-}
+//                     client.close();
+//                     // Let's close the db
+//                     test.done();
+//                   });
+//                 });
+//               });
+//             });
+//           }
+//         )
+//       });
+//     });
+//   });
+// }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyPerformSingleInsert = function(test) {
-  client.createCollection('shouldCorrectlyPerformSingleInsert', function(err, collection) {
-    collection.insert({a:1}, {w:1}, function(err, result) {
-      collection.findOne(function(err, item) {
-        test.equal(1, item.a);
-        test.done();
-      })
-    })
-  })
-}
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyPerformSingleInsert = function(test) {
+//   client.createCollection('shouldCorrectlyPerformSingleInsert', function(err, collection) {
+//     collection.insert({a:1}, {w:1}, function(err, result) {
+//       collection.findOne(function(err, item) {
+//         test.equal(1, item.a);
+//         test.done();
+//       })
+//     })
+//   })
+// }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyPerformBasicInsert = function(test) {
-  client.createCollection('test_insert', function(err, r) {
-    client.collection('test_insert', function(err, collection) {
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyPerformBasicInsert = function(test) {
+//   client.createCollection('test_insert', function(err, r) {
+//     client.collection('test_insert', function(err, collection) {
 
-      Step(
-        function inserts() {
-          var group = this.group();
+//       Step(
+//         function inserts() {
+//           var group = this.group();
 
-          for(var i = 1; i < 1000; i++) {
-            collection.insert({c:i}, {w:1}, group());
-          }
-        },
+//           for(var i = 1; i < 1000; i++) {
+//             collection.insert({c:i}, {w:1}, group());
+//           }
+//         },
 
-        function done(err, result) {
-          collection.insert({a:2}, {w:1}, function(err, r) {
-            collection.insert({a:3}, {w:1}, function(err, r) {
-              collection.count(function(err, count) {
-                test.equal(1001, count);
-                // Locate all the entries using find
-                collection.find().toArray(function(err, results) {
-                  test.equal(1001, results.length);
-                  test.ok(results[0] != null);
+//         function done(err, result) {
+//           collection.insert({a:2}, {w:1}, function(err, r) {
+//             collection.insert({a:3}, {w:1}, function(err, r) {
+//               collection.count(function(err, count) {
+//                 test.equal(1001, count);
+//                 // Locate all the entries using find
+//                 collection.find().toArray(function(err, results) {
+//                   test.equal(1001, results.length);
+//                   test.ok(results[0] != null);
 
-                  // Let's close the db
-                  test.done();
-                });
-              });
-            });
-          });
-        }
-      )
-    });
-  });
-}
+//                   // Let's close the db
+//                   test.done();
+//                 });
+//               });
+//             });
+//           });
+//         }
+//       )
+//     });
+//   });
+// }
 
 /**
  * @ignore
@@ -1210,8 +1210,8 @@ exports.shouldCorrectlyPerformLargeTextInsert = function(test) {
 exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = function(test) {
   client.createCollection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON', function(err, collection) {
     // Create document with toBSON method
-		var doc = {a:1, b:1};
-		doc.toBSON = function() { return {c:this.a}};
+    var doc = {a:1, b:1};
+    doc.toBSON = function() { return {c:this.a}};
 
     collection.insert(doc, {w:1}, function(err, result) {
       test.equal(null, err);

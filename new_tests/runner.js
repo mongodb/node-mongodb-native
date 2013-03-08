@@ -37,7 +37,7 @@ var configurations = Configuration
 
     // Test suite stop
     this.stop = function(callback) {
-      serverManager.stop(9, function(err) {
+      serverManager.killAll(function(err) {
         callback();
       });
     };
@@ -45,6 +45,16 @@ var configurations = Configuration
     // Pr test functions
     this.setup = function(callback) { callback(); }
     this.teardown = function(callback) { callback(); };
+
+    // Returns the package for using Mongo driver classes
+    this.getMongoPackage = function() {
+      return mongodb;
+    }
+
+    this.newDbInstance = function(db_options, server_options) {
+      return new Db('integration_tests', new Server("127.0.0.1", 27017,
+        server_options), db_options);      
+    }
 
     // Returns a db
     this.db = function() {
@@ -102,59 +112,22 @@ var configurations = Configuration
       });
     };
 
-    // Allow us to kill the primary
-    this.killPrimary = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      replicasetManager.killPrimary.apply(replicasetManager, args);
+    var mapFunction = function(replicasetManager, name) {
+      return function() {
+        var args = Array.prototype.slice.call(arguments, 0);
+        replicasetManager[name].apply(replicasetManager, args);        
+      }
     }
 
-    // Restart killed nodes
-    this.restartKilledNodes = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      replicasetManager.restartKilledNodes.apply(replicasetManager, args);
-    }
-
-    // Stepdown primary
-    this.stepDownPrimary = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      replicasetManager.stepDownPrimary.apply(replicasetManager, args);
-    }
-
-    // Get node
-    this.getNodeFromPort = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      replicasetManager.getNodeFromPort.apply(replicasetManager, args);
-    }
-
-    // kill
-    this.kill = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      replicasetManager.kill.apply(replicasetManager, args);
-    }
-
-    // kill secondary
-    this.killSecondary = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      replicasetManager.killSecondary.apply(replicasetManager, args);
-    }
-
-    // primary
-    this.primary = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      replicasetManager.primary.apply(replicasetManager, args);
-    }
-
-    // secondaries
-    this.secondaries = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      replicasetManager.secondaries.apply(replicasetManager, args);
-    }
-
-    // arbiters
-    this.arbiters = function() {
-      var args = Array.prototype.slice.call(arguments, 0);
-      replicasetManager.arbiters.apply(replicasetManager, args);
-    }
+    this.killPrimary = mapFunction(replicasetManager, 'killPrimary');
+    this.restartKilledNodes = mapFunction(replicasetManager, 'restartKilledNodes');
+    this.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
+    this.getNodeFromPort = mapFunction(replicasetManager, 'getNodeFromPort');
+    this.kill = mapFunction(replicasetManager, 'kill');
+    this.killSecondary = mapFunction(replicasetManager, 'killSecondary');
+    this.primary = mapFunction(replicasetManager, 'primary');
+    this.secondaries = mapFunction(replicasetManager, 'secondaries');
+    this.arbiters = mapFunction(replicasetManager, 'arbiters');
 
     // Pr test functions
     this.setup = function(callback) { 
@@ -200,112 +173,119 @@ var functional_tests_runner = Runner
     ['/new_tests/functional/insert_tests.js']
   );
 
-// Configure a Run of tests
-var repl_set_tests_runner = Runner
-  // Add configurations to the test runner
-  .configurations(configurations)
-  .exeuteSerially(true)
-  // First parameter is test suite name
-  // Second parameter is the configuration used
-  // Third parameter is the list of files to execute
-  .add("replica_set",
-    [
-        '/new_tests/repl_set/reconnect_tests.js'
-      // , '/new_tests/repl_set/reconnect_tests.js'
-    ]
-  );
+functional_tests_runner.run("single_server");
 
-var buckets = {};
-var test_results = [];
-var schedulingData = null;
+// // Configure a Run of tests
+// var repl_set_tests_runner = Runner
+//   // Add configurations to the test runner
+//   .configurations(configurations)
+//   .exeuteSerially(true)
+//   // First parameter is test suite name
+//   // Second parameter is the configuration used
+//   // Third parameter is the list of files to execute
+//   .add("replica_set",
+//     [
+//         '/new_tests/repl_set/reconnect_tests.js'
+//       , '/new_tests/repl_set/connecting_tests.js'
+//       , '/new_tests/repl_set/secondary_queries_tests.js'
+//       , '/new_tests/repl_set/mongoclient_tests.js'
+//       , '/new_tests/repl_set/read_preferences_tests.js'
+//       , '/new_tests/repl_set/read_preferences_spec_tests.js'
+//       , '/new_tests/repl_set/failover_query_tests.js'
+//     ]
+//   );
 
-try {
-  schedulingData = fs.readFileSync('./stats.tmp', 'utf8');
-  schedulingData = JSON.parse(schedulingData);
-} catch(err) {}
+// var buckets = {};
+// var test_results = [];
+// var schedulingData = null;
 
-// Configure a Run of tests
-var repl_set_parallel_tests_runner = ParallelRunner
-  // Add configurations to the test runner
-  .configurations(configurations)
-  // The number of parallel contexts we are running with
-  .parallelContexts(4)
-  // Parallelize at test or file level
-  .parallelizeAtLevel(ParallelRunner.TEST)
-  // Execute all tests serially in each context
-  .exeuteSerially(true)
-  // Load runtime information data (used by scheduler)
-  // to balance execution as much as possible
-  // needs to be array of Json objects with fields {file, test, time}
-  .schedulerHints(schedulingData)
-  // First parameter is test suite name
-  // Second parameter is the configuration used
-  // Third parameter is the list of files to execute
-  .add("replica_set",
-    [
-        '/new_tests/repl_set/reconnect_tests.js'
-      , '/new_tests/repl_set/connecting_tests.js'
-      , '/new_tests/repl_set/secondary_queries_tests.js'
-      , '/new_tests/repl_set/mongoclient_tests.js'
-      , '/new_tests/repl_set/read_preferences_tests.js'
-      , '/new_tests/repl_set/read_preferences_spec_tests.js'
-      , '/new_tests/repl_set/failover_query_tests.js'
-    ]
-  );
+// try {
+//   schedulingData = fs.readFileSync('./stats.tmp', 'utf8');
+//   schedulingData = JSON.parse(schedulingData);
+// } catch(err) {}
 
-// // Run the tests against configuration 'single_server'
-// functional_tests_runner.run("single_server");
-// repl_set_tests_runner.run("replica_set");
+// // Configure a Run of tests
+// var repl_set_parallel_tests_runner = ParallelRunner
+//   // Add configurations to the test runner
+//   .configurations(configurations)
+//   // The number of parallel contexts we are running with
+//   .parallelContexts(4)
+//   // Parallelize at test or file level
+//   .parallelizeAtLevel(ParallelRunner.TEST)
+//   // Execute all tests serially in each context
+//   .exeuteSerially(true)
+//   // Load runtime information data (used by scheduler)
+//   // to balance execution as much as possible
+//   // needs to be array of Json objects with fields {file, test, time}
+//   .schedulerHints(schedulingData)
+//   // First parameter is test suite name
+//   // Second parameter is the configuration used
+//   // Third parameter is the list of files to execute
+//   .add("replica_set",
+//     [
+//         '/new_tests/repl_set/reconnect_tests.js'
+//       , '/new_tests/repl_set/connecting_tests.js'
+//       , '/new_tests/repl_set/secondary_queries_tests.js'
+//       , '/new_tests/repl_set/mongoclient_tests.js'
+//       , '/new_tests/repl_set/read_preferences_tests.js'
+//       , '/new_tests/repl_set/read_preferences_spec_tests.js'
+//       , '/new_tests/repl_set/failover_query_tests.js'
+//     ]
+//   );
 
-// After each test is done
-repl_set_parallel_tests_runner.on('test_done', function(test_statistics) {
-    // Unpack statistics
-    var time_spent = test_statistics.end_time.getTime() - test_statistics.start_time.getTime();
-    var test = test_statistics.name;
-    var file = test_statistics.file_name;
-    var config = test_statistics.config_name;
+// // // Run the tests against configuration 'single_server'
+// // functional_tests_runner.run("single_server");
+// // repl_set_tests_runner.run("replica_set");
 
-    // Add to bucket
-    if(!Array.isArray(buckets[test_statistics.configuration.startPort])) {
-      buckets[test_statistics.configuration.startPort] = [];
-    }
+// // After each test is done
+// repl_set_parallel_tests_runner.on('test_done', function(test_statistics) {
+//     // Unpack statistics
+//     var time_spent = test_statistics.end_time.getTime() - test_statistics.start_time.getTime();
+//     var test = test_statistics.name;
+//     var file = test_statistics.file_name;
+//     var config = test_statistics.config_name;
 
-    // Stat object
-    var stat = {
-        port: test_statistics.configuration.startPort
-      , time: time_spent
-      , test: test
-      , file: file
-      , config: config
-    };
+//     // Add to bucket
+//     if(!Array.isArray(buckets[test_statistics.configuration.startPort])) {
+//       buckets[test_statistics.configuration.startPort] = [];
+//     }
 
-    // Save statistics about test to it's bucket
-    buckets[test_statistics.configuration.startPort].push(stat);
-    // Save to list
-    test_results.push(stat);
-});
+//     // Stat object
+//     var stat = {
+//         port: test_statistics.configuration.startPort
+//       , time: time_spent
+//       , test: test
+//       , file: file
+//       , config: config
+//     };
 
-// After test suite is finished
-repl_set_parallel_tests_runner.on('end', function() {
-  for(var name in buckets) {
-    var tests = buckets[name];
-    var total_time = 0;
+//     // Save statistics about test to it's bucket
+//     buckets[test_statistics.configuration.startPort].push(stat);
+//     // Save to list
+//     test_results.push(stat);
+// });
 
-    for(var i = 0; i < tests.length; i++) {
-      total_time = total_time + tests[i].time;
-    }
+// // After test suite is finished
+// repl_set_parallel_tests_runner.on('end', function() {
+//   for(var name in buckets) {
+//     var tests = buckets[name];
+//     var total_time = 0;
 
-    console.log("===================== " + name + " = " + total_time);
-  }
+//     for(var i = 0; i < tests.length; i++) {
+//       total_time = total_time + tests[i].time;
+//     }
 
-  // Sort in descending order
-  test_results = test_results.sort(function(a, b) { return b.time - a.time });
-  var json = JSON.stringify(test_results);
-  fs.writeFileSync('./stats.tmp', json, 'utf8');
-});
+//     // console.log("===================== " + name + " = " + total_time);
+//   }
 
-// Parallel runner
-repl_set_parallel_tests_runner.run("replica_set");
+//   // Sort in descending order
+//   test_results = test_results.sort(function(a, b) { return b.time - a.time });
+//   var json = JSON.stringify(test_results);
+//   fs.writeFileSync('./stats.tmp', json, 'utf8');
+// });
+
+// // Parallel runner
+// repl_set_parallel_tests_runner.run("replica_set");
 
 
 

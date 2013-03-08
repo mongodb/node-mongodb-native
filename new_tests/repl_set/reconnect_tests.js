@@ -91,7 +91,7 @@ exports['Should correctly insert after primary comes back up'] = function(config
 
     var collection = db.collection('shouldCorrectlyInsertAfterPrimaryComesBackUp');
     // Insert a dummy document
-    collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+    collection.insert({a:20}, {safe: {w:3, wtimeout: 10000}}, function(err, r) {
       test.equal(null, err);
 
       // Kill the primary
@@ -123,7 +123,7 @@ exports['Should correctly query after primary comes back up'] = function(configu
 
     var collection = db.collection('shouldCorrectlyQueryAfterPrimaryComesBackUp');
     // Insert a dummy document
-    collection.insert({a:20}, {safe: {w:3, wtimeout: 10000}}, function(err, r) {
+    collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
       test.equal(null, err);
 
       // Kill the primary
