@@ -166,11 +166,15 @@ var configurations = Configuration
 var functional_tests_runner = Runner
   // Add configurations to the test runner
   .configurations(configurations)
+  .exeuteSerially(true)
   // First parameter is test suite name
   // Second parameter is the configuration used
   // Third parameter is the list of files to execute
   .add("functional_tests",
-    ['/new_tests/functional/insert_tests.js']
+    [
+        '/new_tests/functional/insert_tests.js'
+      , '/new_tests/functional/admin_mode_tests.js'
+    ]
   );
 
 functional_tests_runner.run("single_server");
