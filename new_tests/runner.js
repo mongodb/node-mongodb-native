@@ -2,6 +2,7 @@ var Configuration = require('integra').Configuration
   , Runner = require('integra').Runner
   , ParallelRunner = require('integra').ParallelRunner
   , mongodb = require('../')
+  , fs = require('fs')
   , Db = mongodb.Db
   , Server = mongodb.Server
   , ReplSet = mongodb.ReplSet
@@ -215,6 +216,13 @@ var repl_set_tests_runner = Runner
   );
 
 var buckets = {};
+var test_results = [];
+var schedulingData = null;
+
+try {
+  schedulingData = fs.readFileSync('./stats.tmp', 'utf8');
+  schedulingData = JSON.parse(schedulingData);
+} catch(err) {}
 
 // Configure a Run of tests
 var repl_set_parallel_tests_runner = ParallelRunner
@@ -226,8 +234,31 @@ var repl_set_parallel_tests_runner = ParallelRunner
   .parallelizeAtLevel(ParallelRunner.TEST)
   // Execute all tests serially in each context
   .exeuteSerially(true)
-  // Callback for each test run including time to execute and env
-  .testStatistics(function(event_type, test_statistics) {
+  // Load runtime information data (used by scheduler)
+  // to balance execution as much as possible
+  // needs to be array of Json objects with fields {file, test, time}
+  .schedulerHints(schedulingData)
+  // First parameter is test suite name
+  // Second parameter is the configuration used
+  // Third parameter is the list of files to execute
+  .add("replica_set",
+    [
+        '/new_tests/repl_set/reconnect_tests.js'
+      , '/new_tests/repl_set/connecting_tests.js'
+      , '/new_tests/repl_set/secondary_queries_tests.js'
+      , '/new_tests/repl_set/mongoclient_tests.js'
+      , '/new_tests/repl_set/read_preferences_tests.js'
+      , '/new_tests/repl_set/read_preferences_spec_tests.js'
+      , '/new_tests/repl_set/failover_query_tests.js'
+    ]
+  );
+
+// // Run the tests against configuration 'single_server'
+// functional_tests_runner.run("single_server");
+// repl_set_tests_runner.run("replica_set");
+
+// After each test is done
+repl_set_parallel_tests_runner.on('test_done', function(test_statistics) {
     // Unpack statistics
     var time_spent = test_statistics.end_time.getTime() - test_statistics.start_time.getTime();
     var test = test_statistics.name;
@@ -250,36 +281,28 @@ var repl_set_parallel_tests_runner = ParallelRunner
 
     // Save statistics about test to it's bucket
     buckets[test_statistics.configuration.startPort].push(stat);
+    // Save to list
+    test_results.push(stat);
+});
 
-    console.log("---------------------------- stat recorded")
-    console.dir(stat)
-  })
-  // First parameter is test suite name
-  // Second parameter is the configuration used
-  // Third parameter is the list of files to execute
-  .add("replica_set",
-    [
-        '/new_tests/repl_set/reconnect_tests.js'
-      , '/new_tests/repl_set/connecting_tests.js'
-      // , '/new_tests/repl_set/secondary_queries_tests.js'
-      // , '/new_tests/repl_set/mongoclient_tests.js'
-      // , '/new_tests/repl_set/read_preferences_tests.js'
-      // , '/new_tests/repl_set/read_preferences_spec_tests.js'
-      // , '/new_tests/repl_set/failover_query_tests.js'
-    ]
-  );
+// After test suite is finished
+repl_set_parallel_tests_runner.on('end', function() {
+  for(var name in buckets) {
+    var tests = buckets[name];
+    var total_time = 0;
 
-// // Run the tests against configuration 'single_server'
-// functional_tests_runner.run("single_server");
-// repl_set_tests_runner.run("replica_set");
+    for(var i = 0; i < tests.length; i++) {
+      total_time = total_time + tests[i].time;
+    }
 
-// // After each test is done
-// repl_set_parallel_tests_runner.on('test_done', function(test_statistics) {
-// })
+    console.log("===================== " + name + " = " + total_time);
+  }
 
-// // After test suite is finished
-// repl_set_parallel_tests_runner.on('end', function() {
-// });
+  // Sort in descending order
+  test_results = test_results.sort(function(a, b) { return b.time - a.time });
+  var json = JSON.stringify(test_results);
+  fs.writeFileSync('./stats.tmp', json, 'utf8');
+});
 
 // Parallel runner
 repl_set_parallel_tests_runner.run("replica_set");
