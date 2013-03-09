@@ -107,3 +107,86 @@ exports['Should correctly allow for w:0 overriding on the connect url'] = functi
     });
   });
 }
+
+exports['Should correctly connect via domain socket'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db;
+
+  if(process.platform != "win32") {
+    Db.connect("mongodb:///tmp/mongodb-27017.sock?safe=false", function(err, db) {
+      test.equal(null, err);
+      db.close();
+      test.done();
+    });
+  } else { 
+    test.done();
+  }
+}
+
+exports['Should correctly connect via normal url using connect'] = function(configuration, test) {
+  var mongodb = configuration.getMongoPackage();
+
+  mongodb.connect("mongodb://localhost?safe=false", function(err, db) {
+    test.equal(false, db.safe);
+    db.close();
+    test.done();
+  });
+}
+
+exports['Should correctly connect via normal url using require'] = function(configuration, test) {
+  require('../../lib/mongodb')("mongodb://localhost?safe=false", function(err, db) {
+    test.equal(false, db.safe);
+    db.close();
+    test.done();
+  });
+}
+
+exports['Should correctly connect via normal url'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db;
+
+  Db.connect("mongodb://localhost?safe=false", function(err, db) {
+    test.equal(false, db.safe);
+    db.close();
+    test.done();
+  });
+}
+
+exports['Should correctly connect via normal url'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db;
+
+  Db.connect("mongodb://localhost?journal=true", function(err, db) {
+    // test.equal(false, db.safe);
+    db.close();
+    test.done();
+  });
+}
+
+exports['Should correctly connect via normal url'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db;
+
+  Db.connect("mongodb://localhost?journal=true", function(err, db) {
+    test.deepEqual({j:true}, db.safe);
+    db.close();
+    test.done();
+  });
+}
+
+exports['Should correctly connect via normal url using ip'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db;
+
+  Db.connect("mongodb://127.0.0.1:27017?fsync=true", function(err, db) {
+    test.deepEqual({fsync:true}, db.safe);
+    db.close();
+    test.done();
+  });
+}
+
+exports['Should correctly connect via normal url setting up poolsize of 1'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db;
+
+  Db.connect("mongodb://127.0.0.1:27017?maxPoolSize=1", function(err, db) {
+    test.deepEqual(1, db.serverConfig.poolSize);
+    test.equal('admin', db.databaseName);
+    db.close();
+    test.done();
+  });
+}

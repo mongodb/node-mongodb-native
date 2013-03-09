@@ -51,6 +51,14 @@ var configurations = Configuration
       return mongodb;
     }
 
+    this.newDbInstanceWithDomainSocket = function(host, db_options, server_options) {
+      return new Db('integration_tests', new Server(host, server_options), db_options);      
+    }
+
+    this.newDbInstanceWithDomainSocketAndPort = function(host, port, db_options, server_options) {
+      return new Db('integration_tests', new Server(host, port, server_options), db_options);      
+    }
+
     this.newDbInstance = function(db_options, server_options) {
       return new Db('integration_tests', new Server("127.0.0.1", 27017,
         server_options), db_options);      
@@ -181,6 +189,7 @@ var functional_tests_runner = Runner
       , '/new_tests/functional/uri_tests.js'
       , '/new_tests/functional/url_parser_tests.js'
       , '/new_tests/functional/objectid_tests.js'
+      , '/new_tests/functional/connection_tests.js'
     ]
   );
 
