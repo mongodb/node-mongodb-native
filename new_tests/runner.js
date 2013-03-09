@@ -190,6 +190,7 @@ var functional_tests_runner = Runner
       , '/new_tests/functional/url_parser_tests.js'
       , '/new_tests/functional/objectid_tests.js'
       , '/new_tests/functional/connection_tests.js'
+      , '/new_tests/functional/collection_tests.js'
     ]
   );
 
