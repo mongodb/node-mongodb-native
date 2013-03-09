@@ -174,6 +174,9 @@ var functional_tests_runner = Runner
     [
         '/new_tests/functional/insert_tests.js'
       , '/new_tests/functional/admin_mode_tests.js'
+      , '/new_tests/functional/aggregation_tests.js'
+      , '/new_tests/functional/exception_tests.js'
+      , '/new_tests/functional/error_tests.js'
     ]
   );
 
