@@ -180,7 +180,8 @@ var functional_tests_runner = Runner
   // Third parameter is the list of files to execute
   .add("functional_tests",
     [
-        '/new_tests/functional/find_tests.js'
+      '/new_tests/functional/cursor_tests.js'
+      // , '/new_tests/functional/find_tests.js'
       // , '/new_tests/functional/insert_tests.js'
       // , '/new_tests/functional/admin_mode_tests.js'
       // , '/new_tests/functional/aggregation_tests.js'
