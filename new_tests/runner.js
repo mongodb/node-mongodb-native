@@ -180,17 +180,18 @@ var functional_tests_runner = Runner
   // Third parameter is the list of files to execute
   .add("functional_tests",
     [
-        '/new_tests/functional/insert_tests.js'
-      , '/new_tests/functional/admin_mode_tests.js'
-      , '/new_tests/functional/aggregation_tests.js'
-      , '/new_tests/functional/exception_tests.js'
-      , '/new_tests/functional/error_tests.js'
-      , '/new_tests/functional/command_generation_tests.js'
-      , '/new_tests/functional/uri_tests.js'
-      , '/new_tests/functional/url_parser_tests.js'
-      , '/new_tests/functional/objectid_tests.js'
-      , '/new_tests/functional/connection_tests.js'
-      , '/new_tests/functional/collection_tests.js'
+      //   '/new_tests/functional/insert_tests.js'
+      // , '/new_tests/functional/admin_mode_tests.js'
+      // , '/new_tests/functional/aggregation_tests.js'
+      // , '/new_tests/functional/exception_tests.js'
+      // , '/new_tests/functional/error_tests.js'
+      // , '/new_tests/functional/command_generation_tests.js'
+      // , '/new_tests/functional/uri_tests.js'
+      // , '/new_tests/functional/url_parser_tests.js'
+      // , '/new_tests/functional/objectid_tests.js'
+      // , '/new_tests/functional/connection_tests.js'
+      // , '/new_tests/functional/collection_tests.js'
+      '/new_tests/functional/db_tests.js'
     ]
   );
 
