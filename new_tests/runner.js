@@ -191,7 +191,13 @@ var functional_tests_runner = Runner
   // Third parameter is the list of files to execute
   .add("functional_tests",
     [
-      '/new_tests/functional/util_tests.js'
+      '/new_tests/functional/gridstore/readstream_tests.js'
+      , '/new_tests/functional/gridstore/grid_tests.js'
+      , '/new_tests/functional/gridstore/gridstore_direct_streaming_tests.js'
+      , '/new_tests/functional/gridstore/gridstore_tests.js'
+      , '/new_tests/functional/gridstore/gridstore_stream_tests.js'
+      , '/new_tests/functional/gridstore/gridstore_file_tests.js'
+      , '/new_tests/functional/util_tests.js'
       , '/new_tests/functional/multiple_db_tests.js'
       , '/new_tests/functional/logging_tests.js'
       , '/new_tests/functional/custom_pk_tests.js'

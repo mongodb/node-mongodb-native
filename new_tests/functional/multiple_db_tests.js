@@ -2,8 +2,6 @@
  * @ignore
  */
 exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(configuration, test) {
-  if(process.env['JENKINS']) return test.done();
-  
   if(process.platform !== 'linux') {
     // var db = new Db('tests', new Server("127.0.0.1", 27027, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -79,7 +77,6 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(configura
               collection.findOne({}, function(err, item) {
                 test.equal(20, item.b);
 
-                client.close();
                 test.equal(null, err);            
                 test.done();                
               })              
