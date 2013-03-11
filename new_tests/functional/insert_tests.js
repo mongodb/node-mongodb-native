@@ -1392,3 +1392,34 @@ exports.positiveAndNegativeInfinity = function(configuration, test) {
     });
   });
 }
+
+exports.shouldCorrectlyInsertSimpleRegExpDocument = function(configuration, test) {
+  var regexp = /foobar/i;
+  var client = configuration.db();
+
+  client.createCollection('test_regex', function(err, collection) {
+    collection.insert({'b':regexp}, {w:1}, function(err, ids) {
+      collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
+        test.equal(("" + regexp), ("" + items[0].b));
+        // Let's close the db
+        test.done();
+      });
+    });
+  });
+}
+
+exports.shouldCorrectlyInsertSimpleUTF8Regexp = function(configuration, test) {
+  var regexp = /foobaré/;
+  var client = configuration.db();
+
+  client.createCollection('test_utf8_regex', function(err, collection) {
+    collection.insert({'b':regexp}, {w:1}, function(err, ids) {
+      collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
+        test.equal(("" + regexp), ("" + items[0].b));
+        // Let's close the db
+        test.done();
+      });
+    });
+  });    
+}
+
