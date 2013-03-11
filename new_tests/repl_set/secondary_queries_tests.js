@@ -146,7 +146,7 @@ exports['Should correctly read from secondary even if primary is down'] = functi
     var collection = p_db.collection('notempty');
 
     // Insert a document
-    collection.insert({a:1}, {w:1}, function(err, result) {
+    collection.insert({a:1}, {w:2, wtimeout:10000}, function(err, result) {
       
       // Run a simple query
       collection.findOne(function (err, doc) {
