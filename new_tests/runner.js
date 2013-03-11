@@ -19,6 +19,7 @@ var configurations = Configuration
   
   // Single server configuration
   .add('single_server', function() {
+    var self = this;
     var serverManager = new ServerManager();
     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
@@ -68,6 +69,16 @@ var configurations = Configuration
     this.db = function() {
       return db;
     }
+
+    this.url = function(user, password) {
+      if(user) {
+        return 'mongodb://' + user + ':' + password + '@localhost:27017/' + self.db_name + '?safe=false';
+      }
+
+      return 'mongodb://localhost:27017/' + self.db_name + '?safe=false';
+    }
+
+    this.creatUrl = 
 
     // Used in tests
     this.db_name = "integration_tests";
@@ -180,7 +191,8 @@ var functional_tests_runner = Runner
   // Third parameter is the list of files to execute
   .add("functional_tests",
     [
-      '/new_tests/functional/cursor_tests.js'
+      // '/new_tests/functional/index_tests.js'
+      // , '/new_tests/functional/cursor_tests.js'
       // , '/new_tests/functional/find_tests.js'
       // , '/new_tests/functional/insert_tests.js'
       // , '/new_tests/functional/admin_mode_tests.js'
@@ -191,7 +203,7 @@ var functional_tests_runner = Runner
       // , '/new_tests/functional/uri_tests.js'
       // , '/new_tests/functional/url_parser_tests.js'
       // , '/new_tests/functional/objectid_tests.js'
-      // , '/new_tests/functional/connection_tests.js'
+      '/new_tests/functional/connection_tests.js'
       // , '/new_tests/functional/collection_tests.js'
       // , '/new_tests/functional/db_tests.js'
     ]
