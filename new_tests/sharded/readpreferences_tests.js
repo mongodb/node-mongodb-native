@@ -133,8 +133,6 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
       }
 
       collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{dc:'sf',s:"1"},{dc:'ma',s:"2"}])}, function(err, item) {
-        // console.dir(err)
-        // console.dir(item)
         test.ok(err != null);
         db.close();
         test.done();
@@ -182,8 +180,6 @@ exports['Should correctly read from a tagged secondary using Mongos'] = function
       }
 
       collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{"dc2":"sf"}, {"dc1":"ny"}])}, function(err, item) {
-        // console.dir(err)
-        // console.dir(item)
         test.equal(null, err);
         test.equal(1, item.test);
 
@@ -254,8 +250,6 @@ exports['Should correctly connect to MongoS using single server instance'] = fun
       test.equal(null, err);
 
       collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{"dc2":"sf"}, {"dc1":"ny"}])}, function(err, item) {
-        // console.dir(err)
-        // console.dir(item)
         test.equal(null, err);
         test.equal(1, item.test);
 
