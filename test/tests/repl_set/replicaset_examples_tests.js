@@ -34,9 +34,9 @@ exports['Should correctly connect to a replicaset'] = function(configuration, te
 exports['Connection to replicaset with secondary only read preference no secondaries should not return a connection'] = function(test) {
   // Replica configuration
   var replSet = new ReplSetServers( [
-      new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+      new Server( RS.host, RS.ports[1]),
+      new Server( RS.host, RS.ports[0]),
+      new Server( RS.host, RS.ports[2])
     ],
     {rs_name:RS.name}
   );

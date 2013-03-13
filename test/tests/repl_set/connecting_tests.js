@@ -12,8 +12,8 @@ exports['Should throw error due to shared connection usage'] = function(configur
   );
 
   try {
-    var db = new Db(MONGODB, replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-    var db1 = new Db(MONGODB, replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db(MONGODB, replSet, {w:0});
+    var db1 = new Db(MONGODB, replSet, {w:0});
   } catch(err) {
     test.done();
   }
@@ -535,9 +535,9 @@ exports['ReplSet honors connectTimeoutMS option'] = function(configuration, test
     , Db = mongo.Db;
 
   var set = new ReplSetServers([
-      new Server('localhost', 27107, { auto_reconnect: true } ),
-      new Server('localhost', 27018, { auto_reconnect: true } ),
-      new Server('localhost', 27019, { auto_reconnect: true } )
+      new Server('localhost', 27107),
+      new Server('localhost', 27018),
+      new Server('localhost', 27019)
     ],
     {socketOptions: {connectTimeoutMS: 200} }
   );

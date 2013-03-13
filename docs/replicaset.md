@@ -16,9 +16,9 @@ More information at [Replicasets](http://www.mongodb.org/display/DOCS/Replica+Se
 To create a new replicaset follow the instructions on the mongodb site to setup the config and the replicaset instances. Then using the driver.
 
     var replSet = new ReplSetServers( [ 
-        new Server( 127.0.0.1, 30000, { auto_reconnect: true } ),
-        new Server( 127.0.0.1, 30001, { auto_reconnect: true } ),
-        new Server( 127.0.0.1, 30002, { auto_reconnect: true } )
+        new Server( 127.0.0.1, 30000),
+        new Server( 127.0.0.1, 30001),
+        new Server( 127.0.0.1, 30002)
       ], 
       {rs_name:RS.name}
     );
