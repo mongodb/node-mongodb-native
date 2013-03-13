@@ -45,6 +45,24 @@ if(argv.n) run_options.test = argv.n;
 if(argv.t == 'functional') {
   var environment = argv.e ? argv.e : 'single_server'
   standalone_runners.runner.run(environment, run_options);
+} else if(argv.t == 'auth') {
+  // Trap end of tests
+  standalone_runners.runner_auth.on('end', function() {
+    replicaset_runners.runner_auth.run('replica_set_auth');
+  });
+
+  replicaset_runners.runner_auth.on('end', function() {
+    sharded_runners.runner_auth.run('sharded_auth');
+  });
+
+  // Start chain of auth tests
+  standalone_runners.runner_auth.run('single_server_auth');
+} else if(argv.t == 'ssl') {
+  ssl_runners.runner.run('none');
+} else if(argv.t == 'sharded') {
+  sharded_runners.runner.run('sharded');
+} else if(argv.t == 'replicaset') {
+  replicaset_runners.runner.run('replica_set')
 }
 
 // console.log(argv.t)
