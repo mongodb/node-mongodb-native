@@ -469,6 +469,57 @@ var format = require('util').format;
 //   })
 // }
 
+exports['Should Correctly Use Secondary Server with Query when using NEAREST'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , MongoClient = mongo.MongoClient
+    , ReadPreference = mongo.ReadPreference
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
+
+  var replicasetManager = configuration.getReplicasetManager();
+
+  // Replica configuration
+  var replSet = new ReplSetServers([
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ],
+    {readPreference: ReadPreference.NEAREST}
+  );
+
+  // Open the database
+  var db = new Db('integration_test_', replSet, {w:1});
+  db.open(function(err, db) {
+    // Force selection of a secondary
+    db.serverConfig._state.master.runtimeStats['pingMs'] = 5000;
+    // Check that we get a secondary
+    var connection = db.serverConfig.checkoutReader();
+    var keys = Object.keys(db.serverConfig._state.secondaries);
+    var found = false;
+
+    for(var i = 0; i < keys.length; i++) {
+      if(keys[i].indexOf(connection.socketOptions.port.toString()) != -1) found = true;
+    }
+
+    // Verify that checkout of Reader returns secondary
+    test.equal(true, found);
+
+    // Execute a query
+    db.collection('nearest_collection_test').insert({a:1}, {w:3, wtimeout:10000}, function(err, doc) {
+      test.equal(null, err);    
+
+      db.collection('nearest_collection_test').findOne({a:1}, function(err, doc) {
+        test.equal(null, err);
+        test.equal(1, doc.a);
+
+        db.close();
+        test.done();
+      });
+    });
+  });
+}
+
 exports['Should Correctly Pick lowest ping time'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
