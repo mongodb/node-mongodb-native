@@ -1883,3 +1883,40 @@ exports.shouldCorrectlyFindDocumentsByRegExp = function(configuration, test) {
     });      
   });    
 }
+
+exports.shouldCorrectlyDoFindMinMax = function(configuration, test) {
+  var client = configuration.db();  
+  // Serialized regexes contain extra trailing chars. Sometimes these trailing chars contain / which makes
+  // the original regex invalid, and leads to segmentation fault.
+  client.createCollection('shouldCorrectlyDoFindMinMax', function(err, collection) {
+    collection.insert({"_id": 123, "name": "some name", "min": 1, "max": 10}, {w:1}, function(err, doc) {
+      test.equal(null, err);
+
+      collection.find({"_id": {$in:['some', 'value', 123]}}, {"_id":1, "max":1}).toArray(function(err, docs) {
+        console.dir(err)
+        console.dir(docs);
+        // test.equal(null, err);
+        test.done();
+      });
+    });
+
+
+    // collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, {w:1}, function(err, r) {
+      
+    //   var count = 20,
+    //       run = function(i) {
+    //         // search by regex            
+    //         collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {            
+    //           test.equal(6, item.keywords.length);              
+    //           if (i === 0) {
+    //            test.done()
+    //          }
+    //         });
+    //       };
+    //   // loop a few times to catch the / in trailing chars case
+    //   while (count--) {
+    //     run(count);
+    //   }
+    // });      
+  });    
+}
