@@ -10,6 +10,8 @@ exports.shouldPutFileCorrectlyToGridUsingObjectId = function(configuration, test
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a new grid instance
@@ -27,6 +29,7 @@ exports.shouldPutFileCorrectlyToGridUsingObjectId = function(configuration, test
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -41,6 +44,8 @@ exports.shouldPutFileCorrectlyToGridUsingIntId = function(configuration, test) {
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a new grid instance
@@ -59,6 +64,7 @@ exports.shouldPutFileCorrectlyToGridUsingIntId = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -73,6 +79,8 @@ exports.shouldPutFileCorrectlyToGridUsingStringId = function(configuration, test
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a new grid instance
@@ -93,6 +101,7 @@ exports.shouldPutFileCorrectlyToGridUsingStringId = function(configuration, test
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -107,6 +116,8 @@ exports.shouldPutAndGetFileCorrectlyToGridUsingObjectId = function(configuration
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a new grid instance
@@ -129,6 +140,7 @@ exports.shouldPutAndGetFileCorrectlyToGridUsingObjectId = function(configuration
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -160,6 +172,8 @@ exports.shouldCorrectlyWriteFileAndThenDeleteIt = function(configuration, test) 
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a new grid instance
@@ -185,4 +199,5 @@ exports.shouldCorrectlyWriteFileAndThenDeleteIt = function(configuration, test) 
       });
     });
   });
+  // DOC_END
 }

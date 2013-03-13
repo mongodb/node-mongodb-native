@@ -1,5 +1,8 @@
 var format = require('util').format;
 
+/**
+ * @ignore
+ */
 exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -65,6 +68,9 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = function(configurat
     });
 };
 
+/**
+ * @ignore
+ */
 exports['Connection to replicaset with primary read preference'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -157,6 +163,9 @@ var identifyServers = function(mongo, rs, dbname, callback) {
   }
 }
 
+/**
+ * @ignore
+ */
 exports['Connection to replicaset with secondary read preference with no secondaries should return primary'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -212,6 +221,9 @@ exports['Connection to replicaset with secondary read preference with no seconda
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Connection to replicaset with secondary only read preference should return secondary server'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -268,6 +280,9 @@ exports['Connection to replicaset with secondary only read preference should ret
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Connection to replicaset with secondary read preference should return secondary server'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -325,6 +340,9 @@ exports['Connection to replicaset with secondary read preference should return s
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should Set read preference at collection level using collection method'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -374,6 +392,9 @@ exports['Should Set read preference at collection level using collection method'
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should Set read preference at collection level using createCollection method'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -426,6 +447,9 @@ exports['Should Set read preference at collection level using createCollection m
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should Set read preference at cursor level'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -474,6 +498,9 @@ exports['Should Set read preference at cursor level'] = function(configuration, 
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Attempt to change read preference at cursor level after object read legacy'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -542,6 +569,9 @@ exports['Attempt to change read preference at cursor level after object read leg
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Set read preference at db level'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -591,6 +621,9 @@ exports['Set read preference at db level'] = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Set read preference at collection level using collection method'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -640,6 +673,9 @@ exports['Set read preference at collection level using collection method'] = fun
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Set read preference at collection level using createCollection method'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -690,6 +726,9 @@ exports['Set read preference at collection level using createCollection method']
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Set read preference at cursor level'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -738,6 +777,9 @@ exports['Set read preference at cursor level'] = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Attempt to change read preference at cursor level after object read'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -807,6 +849,9 @@ exports['Attempt to change read preference at cursor level after object read'] =
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Connection to a arbiter host with primary preference should give error'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -838,6 +883,9 @@ exports['Connection to a arbiter host with primary preference should give error'
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Connection to a single primary host with different read preferences'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -902,6 +950,9 @@ exports['Connection to a single primary host with different read preferences'] =
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Connection to a single secondary host with different read preferences'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient
@@ -967,6 +1018,9 @@ exports['Connection to a single secondary host with different read preferences']
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Ensure tag read goes only to the correct server'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , MongoClient = mongo.MongoClient

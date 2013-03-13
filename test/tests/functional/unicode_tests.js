@@ -1,3 +1,6 @@
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySaveUnicodeContainingDocument = function(configuration, test) {
   var client = configuration.db();
 
@@ -54,7 +57,9 @@ exports.shouldCorrectlySaveUnicodeContainingDocument = function(configuration, t
   });    
 }
 
-// Test unicode characters
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyInsertUnicodeCharacters = function(configuration, test) {
   var client = configuration.db();
 
@@ -76,6 +81,9 @@ exports.shouldCorrectlyInsertUnicodeCharacters = function(configuration, test) {
   });    
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCreateObjectWithChineseObjectName = function(configuration, test) {
   var object = {'客家话' : 'Hello'};
   var client = configuration.db();
@@ -97,6 +105,9 @@ exports.shouldCreateObjectWithChineseObjectName = function(configuration, test) 
   })            
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleUT8KeyNames = function(configuration, test) { 
   var client = configuration.db();
 

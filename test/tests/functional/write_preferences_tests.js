@@ -1,3 +1,6 @@
+/**
+ * @ignore
+ */
 exports['insert with w=1 db level'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
 
@@ -11,6 +14,9 @@ exports['insert with w=1 db level'] = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports['insert with w=1 collection level'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
@@ -24,6 +30,9 @@ exports['insert with w=1 collection level'] = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports['insert with w=1 operation level'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
@@ -37,6 +46,9 @@ exports['insert with w=1 operation level'] = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports['insert with journal db level'] = function(configuration, test) {
   var db = configuration.newDbInstance({journal:true}, {poolSize:1});
 
@@ -50,6 +62,9 @@ exports['insert with journal db level'] = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports['insert with journal collection level'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
 
@@ -63,6 +78,9 @@ exports['insert with journal collection level'] = function(configuration, test) 
   });
 }
 
+/**
+ * @ignore
+ */
 exports['insert with journal collection insert level'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
 
@@ -76,6 +94,9 @@ exports['insert with journal collection insert level'] = function(configuration,
   });
 }
 
+/**
+ * @ignore
+ */
 exports['insert with journal and w == 1 at db level'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1, wtimeout:1000}, {poolSize:1});
 
@@ -89,6 +110,9 @@ exports['insert with journal and w == 1 at db level'] = function(configuration, 
   });
 }
 
+/**
+ * @ignore
+ */
 exports['throw error when combining w:0 and journal'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:0, journal:true, wtimeout:1000}, {poolSize:1});
 

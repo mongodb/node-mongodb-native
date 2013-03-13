@@ -48,6 +48,8 @@ var ISODate = function (string) {
  */
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = function(configuration, test) {
   var db = configuration.db();
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Fetch a collection to insert document into
   var collection = db.collection("simple_document_insert_collection_no_safe");
   // Insert a single document
@@ -63,6 +65,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = func
       test.done();
     })
   }, 100);
+  // DOC_END
 }
 
 /**
@@ -74,6 +77,8 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = func
  */
 exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(configuration, test) {
   var db = configuration.db();
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Fetch a collection to insert document into
   var collection = db.collection("batch_document_insert_collection_safe");
   // Insert a single document
@@ -88,6 +93,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(configuration,
       test.done();
     })
   });
+  // DOC_END
 }
 
 /**
@@ -99,6 +105,8 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(configuration,
  */
 exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(configuration, test) {
   var db = configuration.db();
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Fetch a collection to insert document into
   var collection = db.collection("simple_document_insert_with_function_safe");
   // Insert a single document
@@ -113,6 +121,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(c
       test.done();
     })
   });
+  // DOC_END
 }
 
 /**
@@ -125,6 +134,8 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(c
 exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = function(configuration, test) {
   var db = configuration.db();
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Only run the rest of the code if we have a mongodb server with version >= 1.9.1
   db.admin().serverInfo(function(err, result){
 
@@ -158,6 +169,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
       test.done();
     }
   });
+  // DOC_END
 }
 
 /**

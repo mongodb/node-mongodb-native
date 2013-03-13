@@ -37,6 +37,9 @@ var setUp = function(configuration, options, callback) {
   });      
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyValidateAndPresentCertificate = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
@@ -90,6 +93,9 @@ exports.shouldCorrectlyValidateAndPresentCertificate = function(configuration, t
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
@@ -130,6 +136,9 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyConncetToSSLBasedReplicaset = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
@@ -172,6 +181,9 @@ exports.shouldCorrectlyConncetToSSLBasedReplicaset = function(configuration, tes
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldFailToValidateServerSSLCertificate = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
@@ -207,6 +219,9 @@ exports.shouldFailToValidateServerSSLCertificate = function(configuration, test)
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldFailDueToNotPresentingCertificateToServer = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
@@ -250,6 +265,9 @@ exports.shouldFailDueToNotPresentingCertificateToServer = function(configuration
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyValidateAndPresentCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
@@ -307,6 +325,9 @@ exports.shouldCorrectlyValidateAndPresentCertificate = function(configuration, t
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
@@ -351,6 +372,9 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPresentPasswordProtectedCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
@@ -409,6 +433,9 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = function(configurat
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyValidateServerSSLCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
@@ -456,6 +483,9 @@ exports.shouldCorrectlyValidateServerSSLCertificate = function(configuration, te
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldFailToValidateServerSSLCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db

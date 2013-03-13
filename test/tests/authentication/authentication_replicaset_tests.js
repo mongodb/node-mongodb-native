@@ -1,6 +1,9 @@
 var format = require('util').format
   Step = require('step');
 
+/**
+ * @ignore
+ */
 exports['Should correctly handle replicaset master stepdown and stepup without loosing auth'] = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -38,6 +41,9 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateUsingPrimary = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db;  
   // connection string
@@ -62,6 +68,9 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = function(configuration, test) 
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateWithTwoSeeds = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db;  
   // connection string
@@ -86,6 +95,9 @@ exports.shouldCorrectlyAuthenticateWithTwoSeeds = function(configuration, test) 
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db;  
   // connection string
@@ -110,6 +122,9 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = function(configuratio
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -237,6 +252,9 @@ exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = function(confi
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticate = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -305,6 +323,9 @@ exports.shouldCorrectlyAuthenticate = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateAndEnsureIndex = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -373,6 +394,9 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = function(configuration, test
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateAndUseReadPreference = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -412,6 +436,9 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = function(configuration
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -475,6 +502,9 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -543,6 +573,9 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = function(configuratio
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -590,6 +623,9 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = function(c
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server

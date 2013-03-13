@@ -252,8 +252,29 @@ exports.buildTestHash = function(objects) {
         for(var k = 0; k < codeLines.length; k++) {
           codeLines[k] = codeLines[k].replace(/^  /, "")
         }
+
+        // Start and end of example
+        var start = 0, end = codeLines.length;
+        var additional_lines = [];
+
+        // Locate DOC_START
+        for(var k = 0; k < codeLines.length; k++) {
+          if(codeLines[k].indexOf("DOC_START") != -1) start = k + 1;
+          if(codeLines[k].indexOf("DOC_END") != -1) end = k;
+          if(codeLines[k].indexOf("DOC_LINE") != -1) {
+            additional_lines.push(codeLines[k].split("DOC_LINE")[1].substr(1));
+          }
+        }
+
+        // console.log(codeLines)
+
+        codeLines = codeLines.slice(start, end);
+        codeLines = additional_lines.concat(codeLines);
         // Reasign the code block
         block.code = codeLines.join("\n");
+
+        // console.log("------------------------------------------- CODE")
+        // console.log(block.code)
       }
     }
   }

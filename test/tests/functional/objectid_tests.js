@@ -62,6 +62,7 @@ exports.shouldCorrectlyGenerateObjectID = function(configuration, test) {
  */
 exports.shouldCorrectlyGenerate12ByteStringFromTimestamp = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
+  // DOC_START
   // Get a timestamp in seconds
   var timestamp = Math.floor(new Date().getTime()/1000);
   // Create a date with the timestamp
@@ -73,6 +74,7 @@ exports.shouldCorrectlyGenerate12ByteStringFromTimestamp = function(configuratio
   // Get the timestamp and validate correctness
   test.equal(timestampDate.toString(), objectId.getTimestamp().toString());
   test.done();
+  // DOC_END
 }
 
 /**
@@ -84,11 +86,13 @@ exports.shouldCorrectlyGenerate12ByteStringFromTimestamp = function(configuratio
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
+  // DOC_START
   // Create a new ObjectID
   var objectId = new ObjectID();  
   // Verify that the hex string is 24 characters long
   test.equal(24, objectId.toHexString().length);
   test.done();
+  // DOC_END
 }
 
 /**
@@ -100,6 +104,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(confi
  */
 exports.shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
+  // DOC_START
   // Create a new ObjectID
   var objectId = new ObjectID();  
   // Get the generation time
@@ -114,6 +119,7 @@ exports.shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty = function(c
   // Get the timestamp and validate correctness
   test.equal(timestampDate.toString(), objectId.getTimestamp().toString());
   test.done();
+  // DOC_END
 }
 
 /**
@@ -149,6 +155,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(confi
  */
 exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
+  // DOC_START
   // Create a new ObjectID
   var objectId = new ObjectID();
   // Convert the object id to a hex string
@@ -160,6 +167,7 @@ exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configurat
   // Compare the two hex strings
   test.equal(originalHex, newHex);
   test.done();
+  // DOC_END
 }
 
 /**
@@ -171,6 +179,7 @@ exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configurat
  */
 exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
+  // DOC_START
   // Create a new ObjectID
   var objectId = new ObjectID();
   // Create a new ObjectID Based on the first ObjectID
@@ -182,6 +191,7 @@ exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configurat
   // objectId and objectId2 should be different
   test.ok(!objectId.equals(objectId3));
   test.done();
+  // DOC_END
 }
 
 /**
@@ -287,7 +297,9 @@ exports.shouldCorrectlyInsertWithObjectId = function(configuration, test) {
  */
 exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
+  // DOC_START
   var objectId = ObjectID.createFromTime(1);
   test.equal("000000010000000000000000", objectId.toHexString());
   test.done();
+  // DOC_END
 }

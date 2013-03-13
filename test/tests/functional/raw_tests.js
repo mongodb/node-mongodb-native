@@ -1,3 +1,6 @@
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = function(configuration, test) {
   var client = configuration.db();
 
@@ -28,6 +31,9 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = function(configuration, tes
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyRemoveDocumentAndReturnRaw = function(configuration, test) {
   var client = configuration.db();
 
@@ -53,6 +59,9 @@ exports.shouldCorrectlyRemoveDocumentAndReturnRaw = function(configuration, test
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyUpdateDocumentAndReturnRaw = function(configuration, test) {
   var client = configuration.db();
 
@@ -92,6 +101,9 @@ exports.shouldCorrectlyUpdateDocumentAndReturnRaw = function(configuration, test
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorreclyInsertRawDocumentAndRetrieveThem = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
   var client = configuration.db();
@@ -132,6 +144,9 @@ exports.shouldCorreclyInsertRawDocumentAndRetrieveThem = function(configuration,
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPeformQueryUsingRaw = function(configuration, test) {
   var client = configuration.db();
 
@@ -170,6 +185,9 @@ exports.shouldCorrectlyPeformQueryUsingRaw = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyThrowErrorsWhenIllegalySizedMessages = function(configuration, test) {
   var client = configuration.db();
 
@@ -226,6 +244,9 @@ exports.shouldCorrectlyThrowErrorsWhenIllegalySizedMessages = function(configura
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPeformQueryUsingRawSettingRawAtCollectionLevel = function(configuration, test) {
   var client = configuration.db();
 
@@ -265,6 +286,9 @@ exports.shouldCorrectlyPeformQueryUsingRawSettingRawAtCollectionLevel = function
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorreclyInsertRawDocumentAndRetrieveThemSettingRawAtCollectionLevel = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
   var client = configuration.db();
@@ -305,6 +329,9 @@ exports.shouldCorreclyInsertRawDocumentAndRetrieveThemSettingRawAtCollectionLeve
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyUpdateDocumentAndReturnRawSettingRawAtCollectionLevel = function(configuration, test) {
   var client = configuration.db();
 

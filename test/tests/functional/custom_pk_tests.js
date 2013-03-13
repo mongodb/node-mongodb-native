@@ -1,3 +1,6 @@
+/**
+ * @ignore
+ */
 exports.shouldCreateRecordsWithCustomPKFactory = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
 

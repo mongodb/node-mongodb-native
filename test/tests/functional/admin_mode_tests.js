@@ -6,7 +6,6 @@
  */
 exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
-
   db.open(function(err, db) {
     var collection = db.collection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode');
     collection.insert({'a':1}, {w: 1}, function(err, doc) {
@@ -45,7 +44,8 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = function(c
  */
 exports.shouldCorrectlyAuthenticate = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
-
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   db.open(function(err, db) {
     // Grab a collection object
     var collection = db.collection('test');
@@ -74,6 +74,7 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -85,7 +86,8 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
  */
 exports.shouldCorrectlyAuthenticate = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
-
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   db.open(function(err, db) {
 
     // Use the admin database for the operation
@@ -95,6 +97,7 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
     db.close();
     test.done();
   });
+  // DOC_END
 }
 
 /**
@@ -107,6 +110,8 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
 exports.shouldCorrectlyAuthenticate = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
 
@@ -134,6 +139,7 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
       });
     });
   });            
+  // DOC_END
 }
 
 /**
@@ -146,6 +152,8 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
 exports.shouldCorrectlyAuthenticate = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
 
@@ -173,6 +181,7 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -185,6 +194,8 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
 exports.shouldCorrectlySetDefaultProfilingLevel = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
     
@@ -218,6 +229,7 @@ exports.shouldCorrectlySetDefaultProfilingLevel = function(configure, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -230,6 +242,8 @@ exports.shouldCorrectlySetDefaultProfilingLevel = function(configure, test) {
 exports.shouldCorrectlyChangeProfilingLevel = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
     
@@ -292,6 +306,7 @@ exports.shouldCorrectlyChangeProfilingLevel = function(configure, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -304,6 +319,8 @@ exports.shouldCorrectlyChangeProfilingLevel = function(configure, test) {
 exports.shouldCorrectlySetAndExtractProfilingInfo = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
 
@@ -353,6 +370,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = function(configure, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -365,6 +383,8 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = function(configure, test) {
 exports.shouldCorrectlyCallValidateCollection = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
   
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
 
@@ -417,6 +437,8 @@ exports.shouldCorrectlyCallValidateCollection = function(configure, test) {
 exports.shouldCorrectlyPingTheMongoDbInstance = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -444,6 +466,7 @@ exports.shouldCorrectlyPingTheMongoDbInstance = function(configure, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -455,6 +478,8 @@ exports.shouldCorrectlyPingTheMongoDbInstance = function(configure, test) {
 exports.shouldCorrectlyUseLogoutFunction = function(configure, test) {  
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -482,6 +507,7 @@ exports.shouldCorrectlyUseLogoutFunction = function(configure, test) {
       });                
     });
   });
+  // DOC_END
 }
 
 
@@ -494,6 +520,8 @@ exports.shouldCorrectlyUseLogoutFunction = function(configure, test) {
 exports.shouldCorrectlyAddAUserToAdminDb = function(configure, test) {  
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -527,6 +555,8 @@ exports.shouldCorrectlyAddAUserToAdminDb = function(configure, test) {
 exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = function(configure, test) {  
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -557,6 +587,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = function(configure, test
       });                
     });
   });
+  // DOC_END
 }
 
 /**
@@ -568,6 +599,8 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = function(configure, test
 exports.shouldCorrectlyListAllAvailableDatabases = function(configure, test) {  
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -583,6 +616,7 @@ exports.shouldCorrectlyListAllAvailableDatabases = function(configure, test) {
       test.done();
     });
   });
+  // DOC_END
 }
 
 /**
@@ -595,6 +629,8 @@ exports.shouldCorrectlyListAllAvailableDatabases = function(configure, test) {
 exports.shouldCorrectlyRetrieveServerInfo = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
 
@@ -630,6 +666,7 @@ exports.shouldCorrectlyRetrieveServerInfo = function(configure, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -642,6 +679,8 @@ exports.shouldCorrectlyRetrieveServerInfo = function(configure, test) {
 exports.shouldCorrectlyRetrieveReplSetGetStatus = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
 
@@ -676,4 +715,5 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = function(configure, test) {
       });
     });
   });
+  // DOC_END
 }

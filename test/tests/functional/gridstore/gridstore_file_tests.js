@@ -164,6 +164,8 @@ exports.shouldCorrectlySeekWithBuffer = function(configuration, test) {
   var GridStore = configuration.getMongoPackage().GridStore;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a file and open it
@@ -258,6 +260,7 @@ exports.shouldCorrectlySeekWithBuffer = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -450,6 +453,8 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = function(configuration, test) 
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -495,6 +500,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = function(configuration, test) 
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -542,6 +548,8 @@ exports.shouldCorrectlyDetectEOF = function(configuration, test) {
   var GridStore = configuration.getMongoPackage().GridStore;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -563,6 +571,7 @@ exports.shouldCorrectlyDetectEOF = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -901,6 +910,8 @@ exports.shouldCorrectlyExecuteGridstoreTell = function(configuration, test) {
   var GridStore = configuration.getMongoPackage().GridStore;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a new file
@@ -933,6 +944,7 @@ exports.shouldCorrectlyExecuteGridstoreTell = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -946,6 +958,8 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(configuration
   var GridStore = configuration.getMongoPackage().GridStore;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a file and open it
@@ -972,6 +986,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(configuration
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1014,6 +1029,8 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(configuration
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a file and open it
@@ -1063,6 +1080,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(configuration
       });
     });
   });
+  // DOC_END
 }
 
 /**

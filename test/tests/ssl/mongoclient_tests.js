@@ -1,5 +1,8 @@
 var fs = require('fs');
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyCommunicateUsingSSLSocket = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
@@ -25,6 +28,9 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = function(configuration, test)
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyValidateServerCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
@@ -65,6 +71,9 @@ exports.shouldCorrectlyValidateServerCertificate = function(configuration, test)
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
@@ -115,6 +124,9 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
@@ -166,6 +178,9 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = f
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyValidateServerCertificateReplSet = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
@@ -206,6 +221,9 @@ exports.shouldCorrectlyValidateServerCertificateReplSet = function(configuration
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
@@ -256,6 +274,9 @@ exports.shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate = fu
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldSendWrongCertificateToReplSetAndValidateServerCertificate = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db

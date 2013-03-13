@@ -28,39 +28,42 @@ var apiClasses = [
   ];
 
 // All test files
-var testClasses = [
-    {path:"./test/mongo_client_test.js"},
-    {path:"./test/replicaset/mongo_client_test.js"},
-    {path:"./test/sharded/mongo_client_test.js"},
-    {path:"./test/admin_test.js"},
-    {path:"./test/objectid_test.js"},
-    {path:"./test/insert_test.js"},
-    {path:"./test/remove_test.js"},
-    {path:"./test/collection_test.js"},
-    {path:"./test/db_test.js"},
-    {path:"./test/find_test.js"},
-    {path:"./test/map_reduce_test.js"},
-    {path:"./test/index_test.js"},
-    {path:"./test/geo_search_test.js"},
-    {path:"./test/replicaset/connect_test.js"},
-    {path:"./test/replicaset/read_preference_replicaset_test.js"},
-    {path:"./test/sharded/simple_sharded_setup_test.js"},
-    {path:"./test/connect_test.js"},
-    {path:"./test/multiple_dbs_on_connection_pool_test.js"},
-    {path:"./test/cursor_test.js"},
-    {path:"./test/cursorstream_test.js"},
-    {path:"./test/gridstore/grid_store_test.js"},
-    {path:"./test/gridstore/grid_store_file_test.js"},
-    {path:"./test/gridstore/grid_store_stream_test.js"},
-    {path:"./test/gridstore/readstream_test.js"},
-    {path:"./test/gridstore/grid_test.js"},
-    {path:"./node_modules/bson/test/node/bson_array_test.js"},
-    {path:"./node_modules/bson/test/node/bson_test.js"},
-    {path:"./node_modules/bson/test/node/test_full_bson.js"},
-    {path:"./node_modules/bson/test/node/bson_parser_comparision_test.js"},
-    {path:"./node_modules/bson/test/node/bson_typed_array_test.js"},
-    {path:"./test/aggregation_framework_test.js"}
-  ]
+var testClasses = [];
+// Read in all the test files and create a testClasses collection
+var files = fs.readdirSync("./test/tests/functional");
+files.forEach(function(file) {
+  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/" + file});
+})
+
+// Read all gridstore files
+files = fs.readdirSync("./test/tests/functional/gridstore");
+files.forEach(function(file) {
+  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/gridstore/" + file});
+})
+
+// Read all replicaset files
+files = fs.readdirSync("./test/tests/repl_set");
+files.forEach(function(file) {
+  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/repl_set/" + file});
+})
+
+// Sharded tests
+files = fs.readdirSync("./test/tests/sharded");
+files.forEach(function(file) {
+  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/sharded/" + file});
+})
+
+// Authentication tests
+files = fs.readdirSync("./test/tests/authentication");
+files.forEach(function(file) {
+  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/authentication/" + file});
+})
+
+// SSL tests
+files = fs.readdirSync("./test/tests/ssl");
+files.forEach(function(file) {
+  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/ssl/" + file});
+})
 
 // Read all the templates
 var templates = [
@@ -105,6 +108,8 @@ var apiClasses2 = [
 
 // Render the API docs
 docs.renderAPIDocs(outputDirectory2, apiClasses2, testClasses, templates, {index_title:'Binary JSON API'});
+
+// process.exit(0)
 
 // ----------------------------------------------------------------------------
 // PROCESS MARKDOWN DOCUMENTS TO STRUCTURED TEXT

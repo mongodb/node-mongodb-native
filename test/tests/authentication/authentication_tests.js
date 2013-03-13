@@ -1,5 +1,8 @@
 var Step = require('step');
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server;
@@ -110,6 +113,9 @@ exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(configurati
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticate = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server;

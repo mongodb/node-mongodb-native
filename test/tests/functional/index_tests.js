@@ -7,6 +7,8 @@
 exports.shouldCreateASimpleIndexOnASingleField = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -33,6 +35,7 @@ exports.shouldCreateASimpleIndexOnASingleField = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -44,6 +47,8 @@ exports.shouldCreateASimpleIndexOnASingleField = function(configuration, test) {
 exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -79,6 +84,7 @@ exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -90,6 +96,8 @@ exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
 exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -125,6 +133,7 @@ exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -136,6 +145,8 @@ exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -170,6 +181,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configurati
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -181,6 +193,8 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configurati
 exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -214,6 +228,7 @@ exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -225,6 +240,8 @@ exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
 exports.shouldCorrectlyCreateAndDropAllIndex = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -264,6 +281,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -275,6 +293,8 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(configuration, test) {
 exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -309,6 +329,7 @@ exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) 
       });
     });
   });
+  // DOC_END
 }
 
 /**

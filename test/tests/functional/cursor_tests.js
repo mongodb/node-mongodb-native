@@ -10,6 +10,8 @@ var Step = require('step')
 exports.shouldCorrectlyExecuteToArray = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -30,6 +32,7 @@ exports.shouldCorrectlyExecuteToArray = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -70,6 +73,8 @@ exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = function(con
 exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -102,6 +107,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(configur
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1134,6 +1140,8 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = func
 exports['Should correctly rewind and restart cursor'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     var docs = [];
@@ -1171,6 +1179,7 @@ exports['Should correctly rewind and restart cursor'] = function(configuration, 
       })
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1498,6 +1507,8 @@ exports['cursor stream pipe']= function(configuration, test) {
 exports.shouldCorrectlyUseCursorCountFunction = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1520,6 +1531,7 @@ exports.shouldCorrectlyUseCursorCountFunction = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1532,6 +1544,8 @@ exports.shouldCorrectlyUseCursorCountFunction = function(configuration, test) {
 exports.shouldCorrectlyPeformSimpleSorts = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1560,6 +1574,7 @@ exports.shouldCorrectlyPeformSimpleSorts = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1572,6 +1587,8 @@ exports.shouldCorrectlyPeformSimpleSorts = function(configuration, test) {
 exports.shouldCorrectlyPeformLimitOnCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1594,6 +1611,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1606,6 +1624,8 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(configuration, test) {
 exports.shouldCorrectlyPeformSkipOnCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1628,6 +1648,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1641,6 +1662,8 @@ exports.shouldCorrectlyPeformSkipOnCursor = function(configuration, test) {
 exports.shouldCorrectlyPeformBatchSizeOnCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1663,6 +1686,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1675,6 +1699,8 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = function(configuration, test) {
 exports.shouldCorrectlyPeformNextObjectOnCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1697,6 +1723,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = function(configuration, test) 
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1709,6 +1736,8 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = function(configuration, test) 
 exports.shouldCorrectlyPeformSimpleExplainCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1730,6 +1759,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = function(configuration, test)
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1742,6 +1772,8 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = function(configuration, test)
 exports.shouldStreamDocumentsUsingTheStreamRecords = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1772,6 +1804,7 @@ exports.shouldStreamDocumentsUsingTheStreamRecords = function(configuration, tes
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1784,6 +1817,8 @@ exports.shouldStreamDocumentsUsingTheStreamRecords = function(configuration, tes
 exports.shouldStreamDocumentsUsingTheStreamFunction = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1814,6 +1849,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = function(configuration, te
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1826,6 +1862,8 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = function(configuration, te
 exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1859,6 +1897,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, tes
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1871,6 +1910,8 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, tes
 exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1905,6 +1946,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(configuration, t
       });
     });
   });
+  // DOC_END
 }
 
 /**

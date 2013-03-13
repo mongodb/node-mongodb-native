@@ -92,6 +92,8 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(configuration, test) {
 exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -113,6 +115,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = function(configuration, te
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -126,6 +129,8 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(configuration, test) {
   var Code = configuration.getMongoPackage().Code;
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     var numberOfTests = 
@@ -190,6 +195,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(configuration, test) {
       test.done();
     });
   });
+  // DOC_END
 }
 
 /**
@@ -203,6 +209,8 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = function(co
   var Code = configuration.getMongoPackage().Code;
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -224,6 +232,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = function(co
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -288,6 +297,8 @@ exports.shouldCorrectlyDereferenceDbRef = function(configuration, test) {
 exports.shouldCorrectlyRenameCollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -367,6 +378,7 @@ exports.shouldCorrectlyRenameCollection = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -379,6 +391,8 @@ exports.shouldCorrectlyRenameCollection = function(configuration, test) {
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -386,6 +400,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configurat
     db.close();
     test.done();
   });
+  // DOC_END
 }
 
 /**
@@ -398,6 +413,8 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configurat
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -409,6 +426,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configurat
       test.done();
     });
   });
+  // DOC_END
 }
 
 /**
@@ -421,6 +439,8 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configurat
 exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -447,6 +467,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -459,6 +480,8 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
 exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -481,6 +504,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -493,6 +517,8 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
 exports.shouldCorrectlyAccessACollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -522,6 +548,7 @@ exports.shouldCorrectlyAccessACollection = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -534,6 +561,8 @@ exports.shouldCorrectlyAccessACollection = function(configuration, test) {
 exports.shouldCorrectlyRetrieveAllCollections = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -551,6 +580,7 @@ exports.shouldCorrectlyRetrieveAllCollections = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -613,6 +643,8 @@ exports.shouldCorrectlyDereferenceDbRefExamples = function(configuration, test) 
   var DBRef = configuration.getMongoPackage().DBRef;
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -647,6 +679,7 @@ exports.shouldCorrectlyDereferenceDbRefExamples = function(configuration, test) 
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -660,6 +693,8 @@ exports.shouldCorrectlyLogoutFromTheDatabase = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -682,6 +717,7 @@ exports.shouldCorrectlyLogoutFromTheDatabase = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -695,6 +731,8 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, 
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -712,6 +750,7 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, 
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -725,6 +764,8 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, 
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -737,6 +778,7 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, 
       test.done();
     });
   });
+  // DOC_END
 }
 
 /**
@@ -750,6 +792,8 @@ exports.shouldCorrectlyAddAndRemoveUser = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -781,6 +825,7 @@ exports.shouldCorrectlyAddAndRemoveUser = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -793,6 +838,8 @@ exports.shouldCorrectlyAddAndRemoveUser = function(configuration, test) {
 exports.shouldCorrectlyCreateACollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -810,6 +857,7 @@ exports.shouldCorrectlyCreateACollection = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -822,6 +870,8 @@ exports.shouldCorrectlyCreateACollection = function(configuration, test) {
 exports.shouldCorrectlyExecuteACommandAgainstTheServer = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -854,6 +904,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = function(configuration,
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -866,6 +917,8 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = function(configuration,
 exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -878,6 +931,7 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = function(config
       test.done();
     });
   });
+  // DOC_END
 }
 
 /**
@@ -890,6 +944,8 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = function(config
 exports.shouldCorrectlyRenameACollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -927,6 +983,7 @@ exports.shouldCorrectlyRenameACollection = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -939,6 +996,8 @@ exports.shouldCorrectlyRenameACollection = function(configuration, test) {
 exports.shouldCorrectlyUseLastError = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -970,6 +1029,7 @@ exports.shouldCorrectlyUseLastError = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -982,6 +1042,8 @@ exports.shouldCorrectlyUseLastError = function(configuration, test) {
 exports.shouldCorrectlyUsePreviousError = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -1013,6 +1075,7 @@ exports.shouldCorrectlyUsePreviousError = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1025,6 +1088,8 @@ exports.shouldCorrectlyUsePreviousError = function(configuration, test) {
 exports.shouldCorrectlyUseResetErrorHistory = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -1059,6 +1124,7 @@ exports.shouldCorrectlyUseResetErrorHistory = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1070,6 +1136,8 @@ exports.shouldCorrectlyUseResetErrorHistory = function(configuration, test) {
 exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1105,6 +1173,7 @@ exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1116,6 +1185,8 @@ exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
 exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1151,6 +1222,7 @@ exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1162,6 +1234,8 @@ exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
 exports.shouldCorrectlyReturnCursorInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1195,6 +1269,7 @@ exports.shouldCorrectlyReturnCursorInformation = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1206,6 +1281,8 @@ exports.shouldCorrectlyReturnCursorInformation = function(configuration, test) {
 exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1239,6 +1316,7 @@ exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1250,6 +1328,8 @@ exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
 exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1284,6 +1364,7 @@ exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) 
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1295,6 +1376,8 @@ exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) 
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1329,6 +1412,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configurati
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1340,6 +1424,8 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configurati
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1381,6 +1467,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configurati
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1453,6 +1540,8 @@ exports.shouldCorrectlyReconnectWhenError = function(configuration, test) {
 exports.shouldCorrectlyRetrieveDbStats = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     test.equal(null, err);
@@ -1465,4 +1554,5 @@ exports.shouldCorrectlyRetrieveDbStats = function(configuration, test) {
       test.done();
     })
   });
+  // DOC_END
 }

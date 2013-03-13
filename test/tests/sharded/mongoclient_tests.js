@@ -7,6 +7,7 @@
 exports['Should connect to mongos proxies using connectiong string'] = function(configuration, test) {
   var MongoClient = configuration.getMongoPackage().MongoClient;
 
+  // DOC_START
   MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1', function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -19,6 +20,7 @@ exports['Should connect to mongos proxies using connectiong string'] = function(
       test.done();
     });    
   });
+  // DOC_END
 }
 
 /**

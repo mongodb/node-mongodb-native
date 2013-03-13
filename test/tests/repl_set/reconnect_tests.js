@@ -1,5 +1,8 @@
 var Step = require("step");
 
+/**
+ * @ignore
+ */
 exports['Should retrieve correct count after primary killed'] = function(configuration, test) {
   var db = configuration.db();
 
@@ -46,6 +49,9 @@ exports['Should retrieve correct count after primary killed'] = function(configu
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly throw timeout for replication to servers on inserts'] = function(configuration, test) {
   var db = configuration.db();
 
@@ -62,6 +68,9 @@ exports['Should correctly throw timeout for replication to servers on inserts'] 
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly execute safe findAndModify'] = function(configuration, test) {
   var db = configuration.db();
 
@@ -83,6 +92,9 @@ exports['Should correctly execute safe findAndModify'] = function(configuration,
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly insert after primary comes back up'] = function(configuration, test) {
   var db = configuration.db();
   
@@ -115,6 +127,9 @@ exports['Should correctly insert after primary comes back up'] = function(config
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly query after primary comes back up'] = function(configuration, test) {
   var db = configuration.db();
 
@@ -149,6 +164,9 @@ exports['Should correctly query after primary comes back up'] = function(configu
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should work correctly with inserts after bringing master back'] = function(configuration, test) {
   var db = configuration.db();
 
@@ -232,6 +250,9 @@ exports['Should work correctly with inserts after bringing master back'] = funct
   });
 }
 
+/**
+ * @ignore
+ */
 exports['Should not timeout'] = function(configuration, test) {
   var db = configuration.db();
   var collection = db.collection('shouldnottimeout');

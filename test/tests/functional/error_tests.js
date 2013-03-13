@@ -1,4 +1,6 @@
-// Test the error reporting functionality
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyRetrieveErrorMessagesFromServer = function(configuration, test) {    
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   // Just run with one connection in the pool

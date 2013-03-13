@@ -7,6 +7,9 @@ var BaseCommand = require("../../../lib/mongodb/commands/base_command").BaseComm
   QueryCommand = require("../../../lib/mongodb/commands/query_command").QueryCommand,
   MongoReply = require("../../../lib/mongodb/responses/mongo_reply").MongoReply;
 
+/**
+ * @ignore
+ */
 exports['Should Correctly Generate an Insert Command'] = function(configuration, test) {
   var mongodb = configuration.getMongoPackage()
     , BSON = mongodb.BSON
@@ -32,6 +35,9 @@ exports['Should Correctly Generate an Insert Command'] = function(configuration,
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly Generate an Update Command'] = function(configuration, test) {
   var mongodb = configuration.getMongoPackage()
     , BSON = mongodb.BSON
@@ -57,6 +63,9 @@ exports['Should Correctly Generate an Update Command'] = function(configuration,
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly Generate a Delete Command'] = function(configuration, test) {
   var mongodb = configuration.getMongoPackage()
     , BSON = mongodb.BSON
@@ -82,6 +91,9 @@ exports['Should Correctly Generate a Delete Command'] = function(configuration, 
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly Generate a Get More Command'] = function(configuration, test) {
   var mongodb = configuration.getMongoPackage()
     , BSON = mongodb.BSON
@@ -108,6 +120,9 @@ exports['Should Correctly Generate a Get More Command'] = function(configuration
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly Generate a Kill Cursors Command'] = function(configuration, test) {
   var mongodb = configuration.getMongoPackage()
     , BSON = mongodb.BSON
@@ -133,6 +148,9 @@ exports['Should Correctly Generate a Kill Cursors Command'] = function(configura
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Should Correctly Generate a Query Command'] = function(configuration, test) {
   var mongodb = configuration.getMongoPackage()
     , BSON = mongodb.BSON
@@ -163,6 +181,9 @@ exports['Should Correctly Generate a Query Command'] = function(configuration, t
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyGetErrorOnIllegalBSON = function(configuration, test) {
   var mongodb = configuration.getMongoPackage()
     , BSON = mongodb.BSON

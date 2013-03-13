@@ -8,6 +8,8 @@
 exports.shouldRemoveAllDocumentsNoSafe = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
     
@@ -31,6 +33,7 @@ exports.shouldRemoveAllDocumentsNoSafe = function(configuration, test) {
       });
     })
   });  
+  // DOC_END
 }
 
 /**
@@ -43,6 +46,8 @@ exports.shouldRemoveAllDocumentsNoSafe = function(configuration, test) {
 exports.shouldRemoveSubsetOfDocumentsSafeMode = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
     
@@ -63,6 +68,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeMode = function(configuration, test) {
       });
     })
   });  
+  // DOC_END
 }
 
 /**

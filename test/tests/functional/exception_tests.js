@@ -1,3 +1,6 @@
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleThrownError = function(configuration, test) {
   var db = configuration.db();
   
@@ -13,6 +16,9 @@ exports.shouldCorrectlyHandleThrownError = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleThrownErrorInRename = function(configuration, test) {
   var db = configuration.db();
   // Catch unhandled exception

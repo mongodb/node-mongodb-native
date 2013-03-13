@@ -8,6 +8,7 @@ exports['Should correctly connect to a replicaset'] = function(configuration, te
   var mongo = configuration.getMongoPackage()
     MongoClient = mongo.MongoClient;
 
+  // DOC_START
   MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_?w=1", function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -20,6 +21,7 @@ exports['Should correctly connect to a replicaset'] = function(configuration, te
       test.done();
     });
   });
+  // DOC_END
 }
 
 /**
@@ -39,6 +41,12 @@ exports['Connection to replicaset with secondary only read preference no seconda
     {rs_name:RS.name}
   );
 
+  // DOC_LINE var replSet = new ReplSetServers([
+  // DOC_LINE   new Server('localhost', 30000),
+  // DOC_LINE   new Server('localhost', 30001),
+  // DOC_LINE   new Server('localhost', 30002)
+  // DOC_LINE ]);
+  // DOC_START
   // Create db instance
   var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
   // Trigger test once whole set is up
@@ -63,5 +71,6 @@ exports['Connection to replicaset with secondary only read preference no seconda
   db.open(function(err, p_db) {
     db = p_db;
   });
+  // DOC_END
 }
 

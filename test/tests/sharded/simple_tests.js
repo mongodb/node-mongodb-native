@@ -11,6 +11,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(configuration, tes
     , Db = configuration.getMongoPackage().Db
     , ReadPreference = configuration.getMongoPackage().ReadPreference;
 
+  // DOC_START
   // Set up mongos connection
   var mongos = new Mongos([
       new Server("localhost", 50000, { auto_reconnect: true }),
@@ -38,6 +39,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetup = function(configuration, tes
       })
     });
   });
+  // DOC_END
 }
 
 /**

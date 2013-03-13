@@ -215,6 +215,7 @@ exports.testConnectBadUrl = function(configuration, test) {
 exports.shouldCorrectlyDoSimpleCountExamples = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db;
 
+  // DOC_START
   // Connect to the server
   Db.connect(configuration.url(), function(err, db) {
     test.equal(null, err);
@@ -222,4 +223,5 @@ exports.shouldCorrectlyDoSimpleCountExamples = function(configuration, test) {
     db.close();
     test.done();
   });
+  // DOC_END
 }

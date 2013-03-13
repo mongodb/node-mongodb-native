@@ -131,6 +131,8 @@ exports.shouldCorrectlyReadFileUsingStream = function(configuration, test) {
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
     // Open a file for reading
@@ -180,6 +182,7 @@ exports.shouldCorrectlyReadFileUsingStream = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -193,6 +196,8 @@ exports.shouldCorrectlyPipeAGridFsToAfile = function(configuration, test) {
   var GridStore = configuration.getMongoPackage().GridStore;    
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
     // Open a file for writing
@@ -225,6 +230,7 @@ exports.shouldCorrectlyPipeAGridFsToAfile = function(configuration, test) {
       })
     })
   });
+  // DOC_END
 }
 
   

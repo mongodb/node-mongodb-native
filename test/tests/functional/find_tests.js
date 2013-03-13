@@ -1353,6 +1353,8 @@ exports.shouldPerformSimpleFindInArray = function(configuration, test) {
 exports.shouldPerformSimpleFindAndModifyOperations = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1397,6 +1399,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(configuration, tes
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1408,6 +1411,8 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(configuration, tes
 exports.shouldPerformSimpleFindAndModifyOperations = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1437,6 +1442,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(configuration, tes
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1448,6 +1454,8 @@ exports.shouldPerformSimpleFindAndModifyOperations = function(configuration, tes
 exports.shouldPeformASimpleQuery = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1470,6 +1478,7 @@ exports.shouldPeformASimpleQuery = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1481,6 +1490,8 @@ exports.shouldPeformASimpleQuery = function(configuration, test) {
 exports.shouldPeformASimpleExplainQuery = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1503,6 +1514,7 @@ exports.shouldPeformASimpleExplainQuery = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1514,6 +1526,8 @@ exports.shouldPeformASimpleExplainQuery = function(configuration, test) {
 exports.shouldPeformASimpleLimitSkipQuery = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1538,6 +1552,7 @@ exports.shouldPeformASimpleLimitSkipQuery = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 exports.shouldReturnInstanceofErrorWithBadFieldSelection = function(configuration, test) {
@@ -1568,6 +1583,8 @@ exports.shouldReturnInstanceofErrorWithBadFieldSelection = function(configuratio
 exports.shouldPeformASimpleLimitSkipFindOneQuery = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1591,6 +1608,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = function(configuration, test)
       });
     });
   });
+  // DOC_END
 }
 
 /**

@@ -95,6 +95,8 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = function(configuration
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -135,6 +137,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = function(configuration
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -201,6 +204,8 @@ exports.shouldCorrectlyExecuteGridStoreList = function(configuration, test) {
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file id
@@ -292,6 +297,7 @@ exports.shouldCorrectlyExecuteGridStoreList = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -396,6 +402,8 @@ exports.shouldCorrectlyReadlinesAndPutLines = function(configuration, test) {
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Open a file for writing
@@ -419,6 +427,7 @@ exports.shouldCorrectlyReadlinesAndPutLines = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -483,6 +492,8 @@ exports.shouldCorrectlyUnlink = function(configuration, test) {
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -534,6 +545,7 @@ exports.shouldCorrectlyUnlink = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -867,6 +879,8 @@ exports.shouldCorrectlyWriteAndReadJpgImage = function(configuration, test) {
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Read in the content of a file
@@ -900,6 +914,7 @@ exports.shouldCorrectlyWriteAndReadJpgImage = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1085,6 +1100,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = function(configu
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a new instance of the gridstore
@@ -1113,6 +1130,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = function(configu
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1127,6 +1145,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = function(configu
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1158,6 +1178,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = function(configu
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1172,6 +1193,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = function(config
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1202,6 +1225,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = function(config
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1216,6 +1240,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = funct
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1249,6 +1275,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = funct
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1263,6 +1290,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers 
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1295,6 +1324,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers 
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1309,6 +1339,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = function(configurat
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1333,6 +1365,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = function(configurat
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1347,6 +1380,8 @@ exports.shouldCorrectlyAccessChunkCollection = function(configuration, test) {
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1367,6 +1402,7 @@ exports.shouldCorrectlyAccessChunkCollection = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1381,6 +1417,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = func
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1420,6 +1458,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = func
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1434,6 +1473,8 @@ exports.shouldCorrectlyAccessFilesCollection = function(configuration, test) {
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1454,6 +1495,7 @@ exports.shouldCorrectlyAccessFilesCollection = function(configuration, test) {
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1468,6 +1510,8 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = function(co
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1504,6 +1548,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = function(co
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1518,6 +1563,8 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = fun
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Our file ID
@@ -1559,6 +1606,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = fun
       });
     });
   });
+  // DOC_END
 }
 
 /**
@@ -1573,6 +1621,8 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = function(configuration
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Create a new file
@@ -1598,6 +1648,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = function(configuration
       });
     });
   });
+  // DOC_END
 }
 
 /**

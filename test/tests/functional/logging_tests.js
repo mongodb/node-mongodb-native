@@ -1,3 +1,6 @@
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyLogContent = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var loggedOutput = false;

@@ -80,12 +80,19 @@ exports['Should correctly connect with default replicasetNoOption'] = function(c
     ]
   );
 
+  // DOC_LINE var replSet = new ReplSetServers([
+  // DOC_LINE   new Server('localhost', 30000),
+  // DOC_LINE   new Server('localhost', 30001),
+  // DOC_LINE   new Server('localhost', 30002)
+  // DOC_LINE ]);
+  // DOC_START
   var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
     test.equal(null, err);
     p_db.close();
     test.done();
   });
+  // DOC_END
 }
 
 exports['Should correctly connect with default replicaset'] = function(configuration, test) {

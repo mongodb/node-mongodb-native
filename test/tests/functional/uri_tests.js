@@ -8,6 +8,7 @@ exports['Should correctly connect using MongoClient to a single server'] = funct
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var MongoClient = configuration.getMongoPackage().MongoClient
     , Server = configuration.getMongoPackage().Server;
+  // DOC_START
   // Set up the connection to the local db
   var mongoclient = new MongoClient(new Server("localhost", 27017, {native_parser: true}));
 
@@ -31,7 +32,8 @@ exports['Should correctly connect using MongoClient to a single server'] = funct
         test.done();
       });
     });
-  });
+  });  
+  // DOC_END
 }
 
 /**
@@ -44,6 +46,7 @@ exports['Should correctly connect using MongoClient to a single server using con
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var MongoClient = configuration.getMongoPackage().MongoClient
     , Server = configuration.getMongoPackage().Server;
+  // DOC_START
   // Connect using the connection string  
   MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
     test.equal(null, err);
@@ -56,6 +59,7 @@ exports['Should correctly connect using MongoClient to a single server using con
       test.done();
     });
   });
+  // DOC_END
 }
 
 /**

@@ -8,6 +8,9 @@ var assertBuffersEqual = function(test, buffer1, buffer2) {
   }
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly parse perfectly aligned message from socket'] = function(configuration, test) {    
   // Data object
   var index = 0;
@@ -32,6 +35,9 @@ exports['Should correctly parse perfectly aligned message from socket'] = functi
   dataHandler(buffer);
 },
 
+/**
+ * @ignore
+ */
 exports['Should correctly parse perfectly aligned double message from socket'] = function(configuration, test) {    
   // Data object
   var index = 0;
@@ -70,6 +76,9 @@ exports['Should correctly parse perfectly aligned double message from socket'] =
   dataHandler(buffer);
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly parse message + in two packets from socket'] = function(configuration, test) {    
   // Data object
   var index = 0;
@@ -95,6 +104,9 @@ exports['Should correctly parse message + in two packets from socket'] = functio
   dataHandler(buffer.slice(6));
 },
 
+/**
+ * @ignore
+ */
 exports['Should correctly parse message + in two packets from socket and partial third one'] = function(configuration, test) {    
   // Data object
   var index = 0;
@@ -137,6 +149,9 @@ exports['Should correctly parse message + in two packets from socket and partial
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly parse message + in two packets from socket and smaller than 4 bytes additional one'] = function(configuration, test) {    
   // Data object
   var index = 0;
@@ -176,6 +191,9 @@ exports['Should correctly parse message + in two packets from socket and smaller
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly parse message + in two packets from socket and smaller than 4 bytes additional one then rest of the message'] = function(configuration, test) {    
   // Data object
   var index = 0;
@@ -223,6 +241,9 @@ exports['Should correctly parse message + in two packets from socket and smaller
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly parse message + in two packets from socket and smaller than 4 bytes additional one then partial message'] = function(configuration, test) {    
   // Data object
   var index = 0;
@@ -271,6 +292,9 @@ exports['Should correctly parse message + in two packets from socket and smaller
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly parse message + in two packets from socket and smaller than 4 bytes additional one then partial message'] = function(configuration, test) {    
   // Data object
   var index = 0;
@@ -322,6 +346,9 @@ exports['Should correctly parse message + in two packets from socket and smaller
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Corrupt the message baby'] = function(configuration, test) {
   // Data object
   var index = 0;
@@ -349,6 +376,9 @@ exports['Corrupt the message baby'] = function(configuration, test) {
   test.done();
 }
 
+/**
+ * @ignore
+ */
 exports['Corrupt the message baby but catch the log error'] = function(configuration, test) {
   // Data object
   var index = 0;

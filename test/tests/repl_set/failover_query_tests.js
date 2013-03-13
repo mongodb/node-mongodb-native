@@ -1,6 +1,9 @@
 var PingStrategy = require('../../../lib/mongodb/connection/strategies/ping_strategy').PingStrategy
   , StatisticsStrategy = require('../../../lib/mongodb/connection/strategies/statistics_strategy').StatisticsStrategy;
 
+/**
+ * @ignore
+ */
 exports['Should Correctly Collect ping information from servers'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , ReplSetServers = mongo.ReplSetServers
@@ -45,6 +48,9 @@ exports['Should Correctly Collect ping information from servers'] = function(con
   })
 }
 
+/**
+ * @ignore
+ */
 exports['Should correctly pick a statistics strategy for secondary'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , ReplSetServers = mongo.ReplSetServers

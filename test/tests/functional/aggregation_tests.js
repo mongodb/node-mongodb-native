@@ -8,6 +8,8 @@
 exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Some docs for insertion
@@ -55,6 +57,7 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(con
       }
     });
   });
+  // DOC_END
 }
 
 /**
@@ -67,6 +70,8 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = function(con
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Some docs for insertion
@@ -114,6 +119,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
       }
     });
   });
+  // DOC_END
 }
 
 /**
@@ -126,6 +132,8 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingleObject = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
     // Some docs for insertion
@@ -173,6 +181,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
       }
     });
   });
+  // DOC_END
 }
 
 /**
