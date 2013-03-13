@@ -1,4 +1,4 @@
-var mongodb = require('../../lib/mongodb')
+var mongodb = require('../../../lib/mongodb')
   , Db = mongodb.Db
   , Server = mongodb.Server
   , MongoClient = mongodb.MongoClient;
@@ -18,8 +18,6 @@ var simple_100_document_toArray = function(connection_string) {
     
           // Drop the collection
           db.collection('simple_100_document_toArray').drop(function(err, result) {
-            if(err) return callback(err);
-            
             // Create 100 documents
             var docs = [];
             for(var i = 0; i < 100; i++) docs.push({a:1, b:'hello world', c:1});
