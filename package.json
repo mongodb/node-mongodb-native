@@ -73,7 +73,7 @@
 	  , "gleak": "0.2.3"
 	  , "step": "0.0.5"
 	  , "async": "0.1.22"
-    , "integra": "git://github.com/christkv/integra.git"
+    , "integra": "0.0.1"
     , "optimist": "latest"
   }
 , "config":         { "native" : false }
