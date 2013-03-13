@@ -1,5 +1,0 @@
-These tests require you to set up an entry in your host file like below
-
-127.0.0.1   server
-
-otherwise openssl will fail as it won't be able to resolve the names correctly
