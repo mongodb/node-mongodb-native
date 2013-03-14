@@ -1469,19 +1469,18 @@ exports['cursor stream pipe']= function(configuration, test) {
       // hack so we don't need to create a stream filter just to
       // stringify the objects (otherwise the created file would
       // just contain a bunch of [object Object])
-      var toString = Object.prototype.toString;
-      Object.prototype.toString = function () {
-        return JSON.stringify(this);
-      }
+      // var toString = Object.prototype.toString;
+      // Object.prototype.toString = function () {
+      //   return JSON.stringify(this);
+      // }
 
-      var stream = collection.find().stream();
+      var stream = collection.find().stream({transform: function(doc) { return JSON.stringify(doc); }});
       stream.pipe(out);
-
-      stream.on('error', done);
-      stream.on('close', done);
+      // Wait for output stream to close
+      out.on('close', done);
 
       function done (err) {
-        Object.prototype.toString = toString;
+        // Object.prototype.toString = toString;
         test.strictEqual(undefined, err);
         var contents = fs.readFileSync(filename, 'utf8');
         test.ok(/Aaden/.test(contents));

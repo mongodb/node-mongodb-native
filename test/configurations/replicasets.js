@@ -48,7 +48,7 @@ var replica_set_config = function(options) {
                 new Server( replicasetManager.host, replicasetManager.ports[0]),
                 new Server( replicasetManager.host, replicasetManager.ports[2])
               ],
-              {rs_name:replicasetManager.name}
+              {rs_name:replicasetManager.name, haInterval: 500}
             );
 
         self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});

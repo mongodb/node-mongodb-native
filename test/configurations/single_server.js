@@ -14,7 +14,7 @@ var single_server_config = function(options) {
     var self = this;
     options = options != null ? options : {};
     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-     {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: true});
+     {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
 
     // Server Manager options
     var server_options = {
