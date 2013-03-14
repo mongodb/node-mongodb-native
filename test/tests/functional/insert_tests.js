@@ -1178,38 +1178,38 @@ exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = function(configuratio
   });
 }
 
-/**
- * @ignore
- */
-exports.shouldAttempToForceBsonSize = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var Binary = configuration.getMongoPackage().Binary;
+// /**
+//  * @ignore
+//  */
+// exports.shouldAttempToForceBsonSize = function(configuration, test) {
+//   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
+//   var Binary = configuration.getMongoPackage().Binary;
 
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, disableDriverBSONSizeCheck:true});
-  // Establish connection to db
-  db.open(function(err, db) {
-    db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
-      // var doc = {a:1, b:new Binary(new Buffer(16777216)/5)}
-      var doc = [
-        {a:1, b:new Binary(new Buffer(16777216/3))},
-        {a:1, b:new Binary(new Buffer(16777216/3))},
-        {a:1, b:new Binary(new Buffer(16777216/3))},
-      ]
+//   var db = configuration.newDbInstance({w:0}, {poolSize:1, disableDriverBSONSizeCheck:true});
+//   // Establish connection to db
+//   db.open(function(err, db) {
+//     db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
+//       // var doc = {a:1, b:new Binary(new Buffer(16777216)/5)}
+//       var doc = [
+//         {a:1, b:new Binary(new Buffer(16777216/3))},
+//         {a:1, b:new Binary(new Buffer(16777216/3))},
+//         {a:1, b:new Binary(new Buffer(16777216/3))},
+//       ]
 
-      collection.insert(doc, {w:1}, function(err, result) {
-        test.equal(null, err);
+//       collection.insert(doc, {w:1}, function(err, result) {
+//         test.equal(null, err);
 
-        collection.findOne({a:1}, function(err, doc) {
-          test.equal(null, err);
-          test.deepEqual(1, doc.a);
+//         collection.findOne({a:1}, function(err, doc) {
+//           test.equal(null, err);
+//           test.deepEqual(1, doc.a);
 
-          db.close();
-          test.done();
-        });
-      });
-    });
-  })
-}
+//           db.close();
+//           test.done();
+//         });
+//       });
+//     });
+//   })
+// }
 
 /**
  * @ignore
