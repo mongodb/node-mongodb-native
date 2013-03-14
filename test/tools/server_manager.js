@@ -8,11 +8,28 @@ var debug = require('util').debug,
   Db = require('../../lib/mongodb').Db,
   Server = require('../../lib/mongodb').Server;
 
+var ensureUp = function(host, port, number_of_retries, callback) {
+  var db = new Db('test', new Server(host, port, {socketOptions:{connectTimeoutMS: 1000}}), {w:1});
+  db.open(function(err, result) {
+    if(err) {
+      number_of_retries = number_of_retries - 1;
+      if(number_of_retries == 0) return callback(new Error("Failed to connect to db"));
+      
+      setTimeout(function() {
+        return ensureUp(host, port, number_of_retries, callback);
+      }, 500);
+    } else {
+      return callback(null, null);
+    }
+  });
+}
+
 var ServerManager = exports.ServerManager = function(options) {
   options = options == null ? {} : options;
   // Basic unpack values
   this.path = path.resolve("data");
   this.port = options["start_port"] != null ? options["start_port"] : 27017;
+  this.host = options["host"] != null ? options["host"] : "localhost";
   this.db_path = getPath(this, "data-" + this.port);
   this.log_path = getPath(this, "log-" + this.port);
   this.journal = options["journal"] != null ? options["journal"] : false;
@@ -63,13 +80,14 @@ ServerManager.prototype.start = function(killall, callback) {
           });
 
           // Wait for a half a second then save the pids
-          setTimeout(function() {
+          ensureUp(self.host, self.port, 100, function(err, result) {
+            if(err) throw err;
             // Mark server as running
             self.up = true;
             self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
             // Callback
             callback();
-          }, 500);
+          });
         });
       });
     } else {
@@ -85,13 +103,14 @@ ServerManager.prototype.start = function(killall, callback) {
       });
 
       // Wait for a half a second then save the pids
-      setTimeout(function() {
+      ensureUp(self.host, self.port, 100, function(err, result) {
+        if(err) throw err;
         // Mark server as running
         self.up = true;
         self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
         // Callback
         callback();
-      }, 5000);
+      });
     }
   });
 }
