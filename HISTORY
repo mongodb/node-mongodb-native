@@ -1,4 +1,4 @@
-1.2.14
+1.2.14 2013-03-14
 -----------------
 - Refactored test suite to speed up running of replicaset tests
 - Fix of async error handling when error happens in callback (Issue #909, https://github.com/medikoo)
