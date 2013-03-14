@@ -81,7 +81,7 @@
 , "homepage":         "http://mongodb.github.com/node-mongodb-native/"
 , "directories" :   { "lib" : "./lib/mongodb" }
 , "engines" :       { "node" : ">=0.6.19" }
-, "scripts": { "test" : "make test_pure" }
+, "scripts": { "test" : "make test_functional" }
 , "licenses" :    [ { "type" :  "Apache License, Version 2.0"
                     , "url" :   "http://www.apache.org/licenses/LICENSE-2.0" } ]
 }
