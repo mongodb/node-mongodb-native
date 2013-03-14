@@ -672,3 +672,59 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = function(configurat
     });
   });
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly connect and query when short connection timeout'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , Server = configuration.getMongoPackage().Server
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , ReplSetServers = configuration.getMongoPackage().ReplSetServers
+    , ReadPreference = configuration.getMongoPackage().ReadPreference;
+
+  var replicaset = configuration.getReplicasetManager();
+
+  var replSet = new ReplSetServers( [
+      new Server( replicaset.host, replicaset.ports[1]),
+      new Server( replicaset.host, replicaset.ports[0]),
+    ],
+    {rs_name:replicaset.name, poolSize:1, readPreference: ReadPreference.SECONDARY}
+  );
+
+  var dbName = configuration.db_name;
+  var connectTimeoutMS = 100;
+
+  new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
+    db_p.addUser("me", "secret", {w:3}, function runWhatever(err, result) {
+      test.equal(null, err);
+      test.ok(result != null);
+      db_p.close();
+
+      MongoClient.connect(format("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3&connectTimeoutMS=%s"
+        , replicaset.host, replicaset.ports[0], dbName, replicaset.name, connectTimeoutMS), function(err, db) {
+          test.equal(null, err);
+
+          // Insert document
+          db.collection('authcollectiontest').insert({a:1}, function(err, result) {
+            test.equal(null, err);
+
+            var numberOfItems = 100;
+            for(var i = 0; i < 100; i++) {
+              db.collection('authcollectiontest').find().toArray(function(err, docs) {
+                numberOfItems = numberOfItems - 1;
+                test.equal(null, err);
+                test.equal(1, docs.length);
+                test.equal(1, docs[0].a);
+
+                if(numberOfItems == 0) {
+                  db.close();
+                  test.done();                  
+                }
+              });
+            }
+          });
+      });
+    });
+  });
+}
