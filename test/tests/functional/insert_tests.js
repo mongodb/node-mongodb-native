@@ -1089,6 +1089,27 @@ exports.shouldFailDueToInsertBeingBiggerThanMaxDocumentSizeAllowed = function(co
 /**
  * @ignore
  */
+exports.shouldFailDueToMessageBeingBiggerThanMaxMessageSize = function(configuration, test) {
+  var Binary = configuration.getMongoPackage().Binary;
+
+  var db = configuration.newDbInstance({w:1}, {disableDriverBSONSizeCheck:true})
+  db.open(function(err, db) {
+    var binary = new Binary(new Buffer(db.serverConfig.checkoutWriter().maxBsonSize));
+    var collection = db.collection('shouldFailDueToInsertBeingBiggerThanMaxDocumentSizeAllowed');
+
+    collection.insert([{doc:binary}, {doc:binary}, {doc:binary}, {doc:binary}], {w:1}, function(err, result) {
+      test.ok(err != null);
+      test.ok(err.message.match('Command exceeds maximum'))
+
+      db.close();
+      test.done();
+    });    
+  })
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = function(configuration, test) {
   var db = configuration.db();
   var collection = db.collection('shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne');

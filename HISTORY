@@ -7,6 +7,7 @@
 - Uses setImmediate if on 0.10 otherwise nextTick for cursor stream
 - Fixed race condition in Cursor stream (NODE-31)
 - Fixed issues related to node 0.10 and process.nextTick now correctly using setImmediate where needed on node 0.10
+- Added support for maxMessageSizeBytes if available (DRIVERS-1)
 
 1.2.13 2013-02-22
 -----------------
