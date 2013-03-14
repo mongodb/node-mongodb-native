@@ -1848,6 +1848,84 @@ exports.shouldCorrectlyHandleSeekIntoSecondChunkWithStream = function(configurat
 /**
  * @ignore
  */
+exports['Should correctly handle multiple seeks'] = function(configuration, test) {
+  var GridStore = configuration.getMongoPackage().GridStore
+    , ObjectID = configuration.getMongoPackage().ObjectID;
+  var db = configuration.db();
+
+  var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w");
+  gridStore.open(function(err, gridStore) {
+    gridStore.write(new Buffer("012345678901234567890", "utf8"), function(err, gridStore) {
+      gridStore.close(function(result) {
+        var gridStore2 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+        gridStore2.open(function(err, gridStore2) {
+          
+          gridStore2.read( 5, function(err, data) {
+            test.equal("01234", data.toString());
+            
+            gridStore2.seek(-2, GridStore.IO_SEEK_CUR, function(err, gridStore2) {
+              
+              gridStore2.read( 5, function(err, data) {
+                test.equal("34567", data.toString());
+                
+                gridStore2.seek(-2, GridStore.IO_SEEK_CUR, function(err, gridStore2) {
+
+                  gridStore2.read( 5, function(err, data) {
+                    test.equal("67890", data.toString());
+                    test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly handle multiple seeks over several chunks'] = function(configuration, test) {
+  var GridStore = configuration.getMongoPackage().GridStore
+    , ObjectID = configuration.getMongoPackage().ObjectID;
+  var db = configuration.db();
+
+  var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w", {chunk_size:4});
+  gridStore.open(function(err, gridStore) {
+    gridStore.write(new Buffer("012345678901234567890", "utf8"), function(err, gridStore) {
+      gridStore.close(function(result) {
+        var gridStore2 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+        gridStore2.open(function(err, gridStore2) {
+          
+          gridStore2.read( 5, function(err, data) {
+            test.equal("01234", data.toString());
+            
+            gridStore2.seek(-2, GridStore.IO_SEEK_CUR, function(err, gridStore2) {
+              
+              gridStore2.read( 5, function(err, data) {
+                test.equal("34567", data.toString());
+                
+                gridStore2.seek(-2, GridStore.IO_SEEK_CUR, function(err, gridStore2) {
+
+                  gridStore2.read( 5, function(err, data) {
+                    test.equal("67890", data.toString());
+                    test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
 exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var GridStore = configuration.getMongoPackage().GridStore
