@@ -1191,9 +1191,9 @@ exports.shouldAttempToForceBsonSize = function(configuration, test) {
     db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
       // var doc = {a:1, b:new Binary(new Buffer(16777216)/5)}
       var doc = [
-        {a:1, b:new Binary(new Buffer(16777216/2))},
-        {a:1, b:new Binary(new Buffer(16777216/2))},
-        {a:1, b:new Binary(new Buffer(16777216/2))},
+        {a:1, b:new Binary(new Buffer(16777216/3))},
+        {a:1, b:new Binary(new Buffer(16777216/3))},
+        {a:1, b:new Binary(new Buffer(16777216/3))},
       ]
 
       collection.insert(doc, {w:1}, function(err, result) {
