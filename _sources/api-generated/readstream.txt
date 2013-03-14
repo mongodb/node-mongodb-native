@@ -57,9 +57,7 @@ Pauses this stream, then no farther events will be fired.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        // File id
@@ -136,9 +134,7 @@ Destroys the stream, then no farther events will be fired.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        // File id
@@ -203,9 +199,7 @@ Resumes this stream.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        // File id

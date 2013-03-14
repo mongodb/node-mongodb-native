@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>BSON() &mdash; MongoDB Node.JS Driver 1.2.13 documentation</title>
+    <title>BSON() &mdash; MongoDB Node.JS Driver 1.2.14 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.2.13',
+        VERSION:     '1.2.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.2.13 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.2.14 documentation" href="../index.html" />
     <link rel="next" title="ObjectID()" href="objectid.html" />
     <link rel="prev" title="ReadStream()" href="../api-generated/readstream.html" /> 
   </head>
@@ -38,7 +38,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.14 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -205,32 +205,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON.calculateObjectSize function returning the number of BSON bytes a javascript object needs.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
-<span class="c1">// Calculate the size of the object without serializing the function</span>
-<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
-<span class="c1">// Calculate the size of the object serializing the function</span>
-<span class="nx">size</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 <div class="section" id="bson-serializewithbufferandindex">
 <h2>BSON.serializeWithBufferAndIndex<a class="headerlink" href="#bson-serializewithbufferandindex" title="Permalink to this headline">¶</a></h2>
@@ -258,45 +232,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON.serializeWithBufferAndIndex function.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
-<span class="c1">// Calculate the size of the document, no function serialization</span>
-<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
-<span class="c1">// Allocate a buffer</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
-<span class="c1">// Serialize the object to the buffer, checking keys and not serializing functions</span>
-<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serializeWithBufferAndIndex</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
-
-<span class="c1">// Serialize with functions</span>
-<span class="c1">// Calculate the size of the document, no function serialization</span>
-<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Allocate a buffer</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
-<span class="c1">// Serialize the object to the buffer, checking keys and not serializing functions</span>
-<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serializeWithBufferAndIndex</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 <div class="section" id="bson-serialize">
 <h2>BSON.serialize<a class="headerlink" href="#bson-serialize" title="Permalink to this headline">¶</a></h2>
@@ -323,34 +258,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON.serialize function returning serialized BSON Buffer object.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
-<span class="c1">// Serialize the object to a buffer, checking keys and not serializing functions</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-
-<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 <div class="section" id="bson-deserializestream">
 <h2>BSON.deserializeStream<a class="headerlink" href="#bson-deserializestream" title="Permalink to this headline">¶</a></h2>
@@ -388,50 +295,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON.deserializeStream function returning deserialized Javascript objects.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">);</span> <span class="p">}}</span>
-<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-
-<span class="c1">// The array holding the number of retuned documents</span>
-<span class="kd">var</span> <span class="nx">documents</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-<span class="c1">// Deserialize the object with no eval for the functions</span>
-<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">deserializeStream</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">a</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">func</span><span class="p">);</span>
-
-<span class="c1">// Deserialize the object with eval for the functions caching the functions</span>
-<span class="c1">// The array holding the number of retuned documents</span>
-<span class="kd">var</span> <span class="nx">documents</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-<span class="c1">// Deserialize the object with no eval for the functions</span>
-<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">deserializeStream</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">{</span><span class="nx">evalFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">cacheFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">});</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">a</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">func</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 <div class="section" id="bson-deserialize">
 <h2>BSON.deserialize<a class="headerlink" href="#bson-deserialize" title="Permalink to this headline">¶</a></h2>
@@ -466,41 +329,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON.deserialize function returning a deserialized Javascript function.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">);</span> <span class="p">}}</span>
-<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-
-<span class="c1">// Deserialize the object with no eval for the functions</span>
-<span class="kd">var</span> <span class="nx">deserializedDoc</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">deserialize</span><span class="p">(</span><span class="nx">buffer</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">func</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
-
-<span class="c1">// Deserialize the object with eval for the functions caching the functions</span>
-<span class="nx">deserializedDoc</span> <span class="o">=</span> <span class="nx">BSON</span><span class="p">.</span><span class="nx">deserialize</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="p">{</span><span class="nx">evalFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">cacheFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">});</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">func</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 <div class="section" id="deserialize">
 <h2>deserialize<a class="headerlink" href="#deserialize" title="Permalink to this headline">¶</a></h2>
@@ -535,43 +363,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON instance deserialize function returning a deserialized Javascript function.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">);</span> <span class="p">}}</span>
-<span class="c1">// Create a BSON parser instance</span>
-<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
-<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-
-<span class="c1">// Deserialize the object with no eval for the functions</span>
-<span class="kd">var</span> <span class="nx">deserializedDoc</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">deserialize</span><span class="p">(</span><span class="nx">buffer</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">func</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
-
-<span class="c1">// Deserialize the object with eval for the functions caching the functions</span>
-<span class="nx">deserializedDoc</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">deserialize</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="p">{</span><span class="nx">evalFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">cacheFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">});</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">func</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">deserializedDoc</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 <div class="section" id="deserializestream">
 <h2>deserializeStream<a class="headerlink" href="#deserializestream" title="Permalink to this headline">¶</a></h2>
@@ -609,52 +400,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON instance deserializeStream function returning deserialized Javascript objects.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">);</span> <span class="p">}}</span>
-<span class="c1">// Create a BSON parser instance</span>
-<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
-<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-
-<span class="c1">// The array holding the number of retuned documents</span>
-<span class="kd">var</span> <span class="nx">documents</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-<span class="c1">// Deserialize the object with no eval for the functions</span>
-<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">deserializeStream</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">a</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">func</span><span class="p">);</span>
-
-<span class="c1">// Deserialize the object with eval for the functions caching the functions</span>
-<span class="c1">// The array holding the number of retuned documents</span>
-<span class="kd">var</span> <span class="nx">documents</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-<span class="c1">// Deserialize the object with no eval for the functions</span>
-<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">deserializeStream</span><span class="p">(</span><span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">{</span><span class="nx">evalFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">cacheFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">});</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">a</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">,</span> <span class="k">typeof</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">func</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 <div class="section" id="serialize">
 <h2>serialize<a class="headerlink" href="#serialize" title="Permalink to this headline">¶</a></h2>
@@ -681,36 +426,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON.serialize function returning serialized BSON Buffer object.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
-<span class="c1">// Create a BSON parser instance</span>
-<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
-<span class="c1">// Serialize the object to a buffer, checking keys and not serializing functions</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-
-<span class="c1">// Serialize the object to a buffer, checking keys and serializing functions</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serialize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 <div class="section" id="calculateobjectsize">
 <h2>calculateObjectSize<a class="headerlink" href="#calculateobjectsize" title="Permalink to this headline">¶</a></h2>
@@ -735,34 +450,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON.calculateObjectSize function returning the number of BSON bytes a javascript object needs.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
-<span class="c1">// Create a BSON parser instance</span>
-<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
-<span class="c1">// Calculate the size of the object without serializing the function</span>
-<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
-<span class="c1">// Calculate the size of the object serializing the function</span>
-<span class="nx">size</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 <div class="section" id="serializewithbufferandindex">
 <h2>serializeWithBufferAndIndex<a class="headerlink" href="#serializewithbufferandindex" title="Permalink to this headline">¶</a></h2>
@@ -790,47 +477,6 @@
 </table>
 </dd></dl>
 
-<p><strong>Examples</strong></p>
-<blockquote>
-<div><p>A simple example showing the usage of BSON.serializeWithBufferAndIndex function.</p>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
-    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
-    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
-    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
-    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
-    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
-    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
-    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
-    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
-    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
-
-<span class="c1">// Create a simple object</span>
-<span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">(){}}</span>
-<span class="c1">// Create a BSON parser instance</span>
-<span class="kd">var</span> <span class="nx">bson</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BSON</span><span class="p">();</span>
-<span class="c1">// Calculate the size of the document, no function serialization</span>
-<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
-<span class="c1">// Allocate a buffer</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
-<span class="c1">// Serialize the object to the buffer, checking keys and not serializing functions</span>
-<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serializeWithBufferAndIndex</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
-
-<span class="c1">// Serialize with functions</span>
-<span class="c1">// Calculate the size of the document, no function serialization</span>
-<span class="kd">var</span> <span class="nx">size</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">calculateObjectSize</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Allocate a buffer</span>
-<span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">size</span><span class="p">);</span>
-<span class="c1">// Serialize the object to the buffer, checking keys and not serializing functions</span>
-<span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">serializeWithBufferAndIndex</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">buffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
-<span class="c1">// Validate the correctness</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="nx">size</span><span class="p">);</span>
-<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="nx">index</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
 </div>
 </div>
 
@@ -1012,7 +658,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.14 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

@@ -20,6 +20,11 @@ Returns a stream interface for the **cursor**.
 
 
 
+Options
+ - **transform** {Function} function of type function(object) { return transformed }, allows for transformation of data before emitting.
+
+
+
 Events
  - **data** {function(item) {}} the data event triggers when a document is ready.
  - **error** {function(err) {}} the error event triggers if an error happens.
@@ -55,9 +60,7 @@ Pauses the stream.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -133,9 +136,7 @@ Resumes the stream.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -215,9 +216,7 @@ cursor. No more events will be emitted.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -245,130 +244,6 @@ cursor. No more events will be emitted.
            // When the stream is done
            stream.on("close", function() {
              db.close();
-           });
-         });
-       });
-     });
-     }
-     
-     exports.shouldStreamDocumentsWithPauseAndResumeForFetching = function(test) {
-     var docs = []
-     
-     for(var i = 0; i < 3000; i++) {
-       docs.push({'a':i})
-     }
-     
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 5, ssl:useSSL}), {w:0, native_parser: native_parser});
-     
-     // Establish connection to db
-     db.open(function(err, db) {
-       db.createCollection('test_streaming_function_with_limit_for_fetching', function(err, collection) {
-         assert.ok(collection instanceof Collection);
-     
-         collection.insert(docs, {w:1}, function(err, ids) {
-           // Peform a find to get a cursor
-           var stream = collection.find({}).stream();
-           var data = [];
-     
-           // For each data item
-           stream.on("data", function(item) {
-             stream.pause()
-     
-             collection.findOne({}, function(err, result) {
-               data.push(1);
-               stream.resume();
-             })
-           });
-     
-           // When the stream is done
-           stream.on("close", function() {
-             assert.equal(3000, data.length);
-             db.close();
-             test.done();
-           });
-         });
-       });
-     });
-     }
-     
-     exports.shouldStream10KDocuments = function(test) {
-     var docs = []
-     
-     for(var i = 0; i < 10000; i++) {
-       docs.push({'a':i, bin: new Binary(new Buffer(256))})
-     }
-     
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 5, ssl:useSSL}), {w:0, native_parser: native_parser});
-     
-     // Establish connection to db
-     db.open(function(err, db) {
-       db.createCollection('test_streaming_function_with_limit_for_fetching_2', function(err, collection) {
-         assert.ok(collection instanceof Collection);
-     
-         collection.insert(docs, {w:1}, function(err, ids) {
-           // Peform a find to get a cursor
-           var stream = collection.find({}).stream();
-           var data = [];
-     
-           // For each data item
-           stream.on("data", function(item) {
-             stream.pause()
-     
-             collection.findOne({}, function(err, result) {
-               data.push(1);
-               stream.resume();
-             })
-           });
-     
-           // When the stream is done
-           stream.on("close", function() {
-             assert.equal(10000, data.length);
-             db.close();
-             test.done();
-           });
-         });
-       });
-     });
-     }
-     
-     exports.shouldTriggerMassiveAmountOfGetMores = function(test) {
-     var docs = []
-     var counter = 0;
-     var counter2 = 0;
-     
-     for(var i = 0; i < 1000; i++) {
-       docs.push({'a':i, bin: new Binary(new Buffer(256))})
-     }
-     
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 5, ssl:useSSL}), {w:0, native_parser: native_parser});
-     
-     // Establish connection to db
-     db.open(function(err, db) {
-       db.createCollection('test_streaming_function_with_limit_for_fetching_3', function(err, collection) {
-         assert.ok(collection instanceof Collection);
-     
-         collection.insert(docs, {w:1}, function(err, ids) {
-           // Peform a find to get a cursor
-           var stream = collection.find({}).stream();
-           var data = [];
-     
-           // For each data item
-           stream.on("data", function(item) {
-             counter++;
-             stream.pause()
-             stream.resume();
-             counter2++;
-           });
-     
-           // When the stream is done
-           stream.on("close", function() {
-             assert.equal(1000, counter);
-             assert.equal(1000, counter2);
-             db.close();
-             test.done();
            });
          });
        });

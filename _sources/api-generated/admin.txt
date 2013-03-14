@@ -50,31 +50,28 @@ instance of the db client
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {
+       // Use the admin database for the operation
+       var adminDb = db.admin();
      
-         // Use the admin database for the operation
-         db.admin(function(err, adminDb) {
+       // Add the new user to the admin database
+       adminDb.addUser('admin3', 'admin3', function(err, result) {
      
-           // Add the new user to the admin database
-           adminDb.addUser('admin', 'admin', function(err, result) {
-     
-             // Authenticate using the newly added user
-             adminDb.authenticate('admin', 'admin', function(err, result) {
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin3', 'admin3', function(err, result) {
+           assert.ok(result);
+           
+           // Retrive the build information for the MongoDB instance
+           adminDb.buildInfo(function(err, info) {
+             assert.ok(err == null);
+             
+             adminDb.removeUser('admin3', function(err, result) {
                assert.ok(result);
-               
-               // Retrive the build information for the MongoDB instance
-               adminDb.buildInfo(function(err, info) {
-                 assert.ok(err == null);
-                 
-                 db.close();
-               });
+     
+               db.close();
              });
            });
          });
@@ -114,45 +111,41 @@ Retrieve this db's server status.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {
+       // Grab a collection object
+       var collection = db.collection('test');
      
-         // Grab a collection object
-         db.collection('test', function(err, collection) {
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
      
-           // Force the creation of the collection by inserting a document
-           // Collections are not created until the first document is inserted
-           collection.insert({'a':1}, {w: 1}, function(err, doc) {
+         // Use the admin database for the operation
+         var adminDb = db.admin();
      
-             // Use the admin database for the operation
-             db.admin(function(err, adminDb) {
+         // Add the new user to the admin database
+         adminDb.addUser('admin13', 'admin13', function(err, result) {
      
-              // Add the new user to the admin database
-              adminDb.addUser('admin', 'admin', function(err, result) {
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin13', 'admin13', function(err, result) {
+            
+             // Retrive the server Info
+             adminDb.serverStatus(function(err, info) {
+               assert.equal(null, err);
+               assert.ok(info != null);
+              
+               adminDb.removeUser('admin13', function(err, result) {
+                 assert.ok(result);
      
-                // Authenticate using the newly added user
-                adminDb.authenticate('admin', 'admin', function(err, result) {
-                  
-                  // Retrive the server Info
-                  adminDb.serverStatus(function(err, info) {
-                    assert.equal(null, err);
-                    assert.ok(info != null);
-                    
-                    db.close();
-                  })
-                });
-              });
-            });
-          });
-        });
-      });
-      });
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
 
 
 --------------
@@ -187,38 +180,33 @@ Retrieve the current profiling Level for MongoDB
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {
+       // Grab a collection object
+       var collection = db.collection('test');
      
-         // Grab a collection object
-         db.collection('test', function(err, collection) {
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
      
-           // Force the creation of the collection by inserting a document
-           // Collections are not created until the first document is inserted
-           collection.insert({'a':1}, {w: 1}, function(err, doc) {
+         // Use the admin database for the operation
+         var adminDb = db.admin();
      
-             // Use the admin database for the operation
-             db.admin(function(err, adminDb) {
+         // Add the new user to the admin database
+         adminDb.addUser('admin5', 'admin5', function(err, result) {
      
-               // Add the new user to the admin database
-               adminDb.addUser('admin', 'admin', function(err, result) {
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin5', 'admin5', function(err, replies) {
      
-                 // Authenticate using the newly added user
-                 adminDb.authenticate('admin', 'admin', function(err, replies) {
+             // Retrive the profiling level
+             adminDb.profilingLevel(function(err, level) {
      
-                   // Retrive the profiling level
-                   adminDb.profilingLevel(function(err, level) {
-                     assert.equal("off", level);                
+               adminDb.removeUser('admin5', function(err, result) {
+                 assert.ok(result);
      
-                     db.close();
-                   });
-                 });
+                 db.close();
                });
              });
            });
@@ -259,31 +247,28 @@ Ping the MongoDB server and retrieve results
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {          
-     
-         // Use the admin database for the operation
-         db.admin(function(err, adminDb) {
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+         
+       // Add the new user to the admin database
+       adminDb.addUser('admin9', 'admin9', function(err, result) {
+         
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin9', 'admin9', function(err, result) {
+           assert.ok(result);
            
-           // Add the new user to the admin database
-           adminDb.addUser('admin', 'admin', function(err, result) {
-             
-             // Authenticate using the newly added user
-             adminDb.authenticate('admin', 'admin', function(err, result) {
-               assert.ok(result);
-               
-               // Ping the server
-               adminDb.ping(function(err, pingResult) {
-                 assert.equal(null, err);
+           // Ping the server
+           adminDb.ping(function(err, pingResult) {
+             assert.equal(null, err);
      
-                 db.close();
-               });
+             adminDb.removeUser('admin9', function(err, result) {
+               assert.ok(result);
+     
+               db.close();
              });
            });
          });
@@ -325,40 +310,34 @@ Authenticate against MongoDB
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
-     // Establish connection to db  
+     var db = new Db('test', new Server('locahost', 27017));
      db.open(function(err, db) {
+       // Grab a collection object
+       var collection = db.collection('test');
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w:1}, function(err, doc) {
      
-         // Grab a collection object
-         db.collection('test', function(err, collection) {
+         // Use the admin database for the operation
+         var adminDb = db.admin();
      
-           // Force the creation of the collection by inserting a document
-           // Collections are not created until the first document is inserted
-           collection.insert({'a':1}, {w:1}, function(err, doc) {
+         // Add the new user to the admin database
+         adminDb.addUser('admin2', 'admin2', function(err, result) {
      
-             // Use the admin database for the operation
-             db.admin(function(err, adminDb) {
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin2', 'admin2', function(err, result) {
+             assert.ok(result);
      
-              // Add the new user to the admin database
-              adminDb.addUser('admin', 'admin', function(err, result) {
+             adminDb.removeUser('admin2', function(err, result) {
+               assert.ok(result);
      
-                // Authenticate using the newly added user
-                adminDb.authenticate('admin', 'admin', function(err, result) {
-                  assert.ok(result);
-     
-                  db.close();
-                });
-              });
-            });
-          });
-        });
-      });
-      });
+               db.close();
+             });
+           });
+         });
+       });
+     });
 
 
 ------
@@ -394,34 +373,31 @@ Logout current authenticated user
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {          
-     
-         // Use the admin database for the operation
-         db.admin(function(err, adminDb) {
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+         
+       // Add the new user to the admin database
+       adminDb.addUser('admin10', 'admin10', function(err, result) {
+         
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin10', 'admin10', function(err, result) {
+           assert.ok(result);
            
-           // Add the new user to the admin database
-           adminDb.addUser('admin', 'admin', function(err, result) {
+           // Logout the user
+           adminDb.logout(function(err, result) {
+             assert.equal(true, result);
              
-             // Authenticate using the newly added user
-             adminDb.authenticate('admin', 'admin', function(err, result) {
+             adminDb.removeUser('admin10', function(err, result) {
                assert.ok(result);
-               
-               // Logout the user
-               adminDb.logout(function(err, result) {
-                 assert.equal(true, result);
-                 
-                 db.close();
-               })            
-             });                
+     
+               db.close();
+             });
            });
-         });
+         });                
        });
      });
 
@@ -467,29 +443,26 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {          
-     
-         // Use the admin database for the operation
-         db.admin(function(err, adminDb) {
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+         
+       // Add the new user to the admin database
+       adminDb.addUser('admin11', 'admin11', function(err, result) {
+         
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin11', 'admin11', function(err, result) {
+           assert.ok(result);
            
-           // Add the new user to the admin database
-           adminDb.addUser('admin', 'admin', function(err, result) {
-             
-             // Authenticate using the newly added user
-             adminDb.authenticate('admin', 'admin', function(err, result) {
-               assert.ok(result);
-               
-               db.close();
-             });                
+           adminDb.removeUser('admin11', function(err, result) {
+             assert.ok(result);
+     
+             db.close();
            });
-         });
+         });                
        });
      });
 
@@ -533,41 +506,34 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {          
-     
-         // Use the admin database for the operation
-         db.admin(function(err, adminDb) {
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+         
+       // Add the new user to the admin database
+       adminDb.addUser('admin12', 'admin12', function(err, result) {
+         
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin12', 'admin12', function(err, result) {
+           assert.ok(result);
            
-           // Add the new user to the admin database
-           adminDb.addUser('admin', 'admin', function(err, result) {
+           // Remove the user
+           adminDb.removeUser('admin12', function(err, result) {              
+             assert.equal(null, err);
+             assert.equal(true, result);
              
-             // Authenticate using the newly added user
-             adminDb.authenticate('admin', 'admin', function(err, result) {
-               assert.ok(result);
-               
-               // Remove the user
-               adminDb.removeUser('admin', function(err, result) {              
-                 assert.equal(null, err);
-                 assert.equal(true, result);
-                 
-                 // Authenticate using the removed user should fail
-                 adminDb.authenticate('admin', 'admin', function(err, result) {
-                   assert.ok(err != null);
-                   assert.ok(!result);
+             // Authenticate using the removed user should fail
+             adminDb.authenticate('admin12', 'admin12', function(err, result) {
+               assert.ok(err != null);
+               assert.ok(!result);
      
-                   db.close();
-                 });
-               })            
-             });                
-           });
-         });
+               db.close();
+             });
+           })            
+         });                
        });
      });
 
@@ -606,67 +572,63 @@ Set the current profiling level of MongoDB
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {
+       // Grab a collection object
+       var collection = db.collection('test');
      
-         // Grab a collection object
-         db.collection('test', function(err, collection) {
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
      
-           // Force the creation of the collection by inserting a document
-           // Collections are not created until the first document is inserted
-           collection.insert({'a':1}, {w: 1}, function(err, doc) {
+         // Use the admin database for the operation
+         var adminDb = db.admin();
      
-             // Use the admin database for the operation
-             db.admin(function(err, adminDb) {
+         // Add the new user to the admin database
+         adminDb.addUser('admin6', 'admin6', function(err, result) {
      
-               // Add the new user to the admin database
-               adminDb.addUser('admin', 'admin', function(err, result) {
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin6', 'admin6', function(err, replies) {                                
+             
+             // Set the profiling level to only profile slow queries
+             adminDb.setProfilingLevel('slow_only', function(err, level) {
+               
+               // Retrive the profiling level and verify that it's set to slow_only
+               adminDb.profilingLevel(function(err, level) {
+                 assert.equal('slow_only', level);
      
-                 // Authenticate using the newly added user
-                 adminDb.authenticate('admin', 'admin', function(err, replies) {                                
+                 // Turn profiling off
+                 adminDb.setProfilingLevel('off', function(err, level) {
                    
-                   // Set the profiling level to only profile slow queries
-                   adminDb.setProfilingLevel('slow_only', function(err, level) {
-                     
-                     // Retrive the profiling level and verify that it's set to slow_only
-                     adminDb.profilingLevel(function(err, level) {
-                       assert.equal('slow_only', level);
+                   // Retrive the profiling level and verify that it's set to off
+                   adminDb.profilingLevel(function(err, level) {
+                     assert.equal('off', level);
      
-                       // Turn profiling off
-                       adminDb.setProfilingLevel('off', function(err, level) {
+                     // Set the profiling level to log all queries
+                     adminDb.setProfilingLevel('all', function(err, level) {
+     
+                       // Retrive the profiling level and verify that it's set to all
+                       adminDb.profilingLevel(function(err, level) {
+                         assert.equal('all', level);
+     
+                         // Attempt to set an illegal profiling level
+                         adminDb.setProfilingLevel('medium', function(err, level) {
+                           assert.ok(err instanceof Error);
+                           assert.equal("Error: illegal profiling level value medium", err.message);
                          
-                         // Retrive the profiling level and verify that it's set to off
-                         adminDb.profilingLevel(function(err, level) {
-                           assert.equal('off', level);
+                           adminDb.removeUser('admin6', function(err, result) {
+                             assert.ok(result);
      
-                           // Set the profiling level to log all queries
-                           adminDb.setProfilingLevel('all', function(err, level) {
-     
-                             // Retrive the profiling level and verify that it's set to all
-                             adminDb.profilingLevel(function(err, level) {
-                               assert.equal('all', level);
-     
-                               // Attempt to set an illegal profiling level
-                               adminDb.setProfilingLevel('medium', function(err, level) {
-                                 assert.ok(err instanceof Error);
-                                 assert.equal("Error: illegal profiling level value medium", err.message);
-                               
-                                 db.close();
-                               });
-                             })
+                             db.close();
                            });
-                         })
-                       });
-                     })
-                   });
+                         });
+                       })
+                     });
+                   })
                  });
-               });
+               })
              });
            });
          });
@@ -707,50 +669,46 @@ Retrive the current profiling information for MongoDB
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {
+       // Grab a collection object
+       var collection = db.collection('test');
      
-         // Grab a collection object
-         db.collection('test', function(err, collection) {
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(doc) {
      
-           // Force the creation of the collection by inserting a document
-           // Collections are not created until the first document is inserted
-           collection.insert({'a':1}, {w: 1}, function(doc) {
+         // Use the admin database for the operation
+         var adminDb = db.admin();
      
-             // Use the admin database for the operation
-             db.admin(function(err, adminDb) {
+         // Add the new user to the admin database
+         adminDb.addUser('admin7', 'admin7', function(err, result) {
      
-               // Add the new user to the admin database
-               adminDb.addUser('admin', 'admin', function(err, result) {
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin7', 'admin7', function(err, replies) {
+             
+             // Set the profiling level to all
+             adminDb.setProfilingLevel('all', function(err, level) {
+               
+               // Execute a query command
+               collection.find().toArray(function(err, items) {
      
-                 // Authenticate using the newly added user
-                 adminDb.authenticate('admin', 'admin', function(err, replies) {
+                 // Turn off profiling
+                 adminDb.setProfilingLevel('off', function(err, level) {
                    
-                   // Set the profiling level to all
-                   adminDb.setProfilingLevel('all', function(err, level) {
-                     
-                     // Execute a query command
-                     collection.find().toArray(function(err, items) {
+                   // Retrive the profiling information
+                   adminDb.profilingInfo(function(err, infos) {
+                     assert.ok(infos.constructor == Array);
+                     assert.ok(infos.length >= 1);
+                     assert.ok(infos[0].ts.constructor == Date);
+                     assert.ok(infos[0].millis.constructor == Number);
+                   
+                     adminDb.removeUser('admin7', function(err, result) {
+                       assert.ok(result);
      
-                       // Turn off profiling
-                       adminDb.setProfilingLevel('off', function(err, level) {
-                         
-                         // Retrive the profiling information
-                         adminDb.profilingInfo(function(err, infos) {
-                           assert.ok(infos.constructor == Array);
-                           assert.ok(infos.length >= 1);
-                           assert.ok(infos[0].ts.constructor == Date);
-                           assert.ok(infos[0].millis.constructor == Number);
-                         
-                           db.close();
-                         });
-                       });
+                       db.close();
                      });
                    });
                  });
@@ -796,36 +754,33 @@ Execute a db command against the Admin database
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {
+       // Use the admin database for the operation
+       var adminDb = db.admin();
      
-         // Use the admin database for the operation
-         db.admin(function(err, adminDb) {
+       // Add the new user to the admin database
+       adminDb.addUser('admin4', 'admin4', function(err, result) {
      
-           // Add the new user to the admin database
-           adminDb.addUser('admin', 'admin', function(err, result) {
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin4', 'admin4', function(err, result) {
+           assert.ok(result);
+           
+           // Retrive the build information using the admin command
+           adminDb.command({buildInfo:1}, function(err, info) {
+             assert.ok(err == null);
      
-             // Authenticate using the newly added user
-             adminDb.authenticate('admin', 'admin', function(err, result) {
+             adminDb.removeUser('admin4', function(err, result) {
                assert.ok(result);
-               
-               // Retrive the build information using the admin command
-               adminDb.command({buildInfo:1}, function(err, info) {
-                 assert.ok(err == null);
-                 
-                 db.close();
-               });
+     
+               db.close();
              });
            });
          });
        });
-     });            
+     });
 
 
 ------------------
@@ -863,48 +818,44 @@ Validate an existing collection
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {
-     
-         // Grab a collection object
-         db.collection('test', function(err, collection) {
+       // Grab a collection object
+       var collection = db.collection('test');
+         
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
+         
+         // Use the admin database for the operation
+         var adminDb = db.admin();
            
-           // Force the creation of the collection by inserting a document
-           // Collections are not created until the first document is inserted
-           collection.insert({'a':1}, {w: 1}, function(err, doc) {
+         // Add the new user to the admin database
+         adminDb.addUser('admin8', 'admin8', function(err, result) {
+           
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin8', 'admin8', function(err, replies) {
              
-             // Use the admin database for the operation
-             db.admin(function(err, adminDb) {
-               
-               // Add the new user to the admin database
-               adminDb.addUser('admin', 'admin', function(err, result) {
-                 
-                 // Authenticate using the newly added user
-                 adminDb.authenticate('admin', 'admin', function(err, replies) {
-                   
-                   // Validate the 'test' collection
-                   adminDb.validateCollection('test', function(err, doc) {
+             // Validate the 'test' collection
+             adminDb.validateCollection('test', function(err, doc) {
      
-                     // Pre 1.9.1 servers
-                     if(doc.result != null) {
-                       assert.ok(doc.result != null);
-                       assert.ok(doc.result.match(/firstExtent/) != null);                    
-                     } else {
-                       assert.ok(doc.firstExtent != null);
-                     }
+               // Pre 1.9.1 servers
+               if(doc.result != null) {
+                 assert.ok(doc.result != null);
+                 assert.ok(doc.result.match(/firstExtent/) != null);                    
+               } else {
+                 assert.ok(doc.firstExtent != null);
+               }
      
-                     db.close();
-                   });
-                 });                
+               adminDb.removeUser('admin8', function(err, result) {
+                 assert.ok(result);
+     
+                 db.close();
                });
              });
-           });
+           });                
          });
        });
      });
@@ -942,22 +893,19 @@ List the available databases
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-       {auto_reconnect: true, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
        // Use the admin database for the operation
-       db.admin(function(err, adminDb) {
+       var adminDb = db.admin();
          
-         // List all the available databases
-         adminDb.listDatabases(function(err, dbs) {
-           assert.equal(null, err);
-           assert.ok(dbs.databases.length > 0);
-           
-           db.close();
-         });
+       // List all the available databases
+       adminDb.listDatabases(function(err, dbs) {
+         assert.equal(null, err);
+         assert.ok(dbs.databases.length > 0);
+         
+         db.close();
        });
      });
 
@@ -994,41 +942,38 @@ Get ReplicaSet status
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
-       // Drop the current database if it exists to avoid problems
-       db.dropDatabase(function(err, done) {
+       // Grab a collection object
+       var collection = db.collection('test');
      
-         // Grab a collection object
-         db.collection('test', function(err, collection) {
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
      
-           // Force the creation of the collection by inserting a document
-           // Collections are not created until the first document is inserted
-           collection.insert({'a':1}, {w: 1}, function(err, doc) {
+         // Use the admin database for the operation
+         var adminDb = db.admin();
      
-             // Use the admin database for the operation
-             db.admin(function(err, adminDb) {
+         // Add the new user to the admin database
+         adminDb.addUser('admin14', 'admin14', function(err, result) {
      
-              // Add the new user to the admin database
-              adminDb.addUser('admin', 'admin', function(err, result) {
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin14', 'admin14', function(err, result) {
+            
+             // Retrive the server Info, returns error if we are not
+             // running a replicaset
+             adminDb.replSetGetStatus(function(err, info) {
      
-                // Authenticate using the newly added user
-                adminDb.authenticate('admin', 'admin', function(err, result) {
-                  
-                  // Retrive the server Info, returns error if we are not
-                  // running a replicaset
-                  adminDb.replSetGetStatus(function(err, info) {
-                    db.close();
-                  })
-                });
-              });
-            });
-          });
-        });
-      });
-      });
+               adminDb.removeUser('admin14', function(err, result) {
+                 assert.ok(result);
+     
+                 db.close();
+               });
+             })
+           });
+         });
+       });
+     });
 

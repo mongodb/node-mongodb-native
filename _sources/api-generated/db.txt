@@ -81,9 +81,7 @@ Initialize the database connection.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -108,14 +106,11 @@ Initialize the database connection.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     // Replica configuration
      var replSet = new ReplSetServers([
-         new Server('localhost', 30000, { auto_reconnect: true } ),
-         new Server('localhost', 30001, { auto_reconnect: true } ),
-         new Server('localhost', 30002, { auto_reconnect: true } )
-       ]
-     );
-     
+       new Server('localhost', 30000),
+       new Server('localhost', 30001),
+       new Server('localhost', 30002)
+     ]);
      var db = new Db('integration_test_', replSet, {w:0});
      db.open(function(err, p_db) {
        assert.equal(null, err);
@@ -139,15 +134,11 @@ Initialize the database connection.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     // Replica configuration
-     var replSet = new ReplSetServers( [
-         new Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-         new Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-         new Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-       ],
-       {rs_name:RS.name}
-     );
-     
+     var replSet = new ReplSetServers([
+       new Server('localhost', 30000),
+       new Server('localhost', 30001),
+       new Server('localhost', 30002)
+     ]);
      // Create db instance
      var db = new Db('integration_test_', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
      // Trigger test once whole set is up
@@ -249,9 +240,7 @@ Create a new Db instance sharing the current socket connections.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -316,26 +305,23 @@ Close the current db connection, including all the child db instances. Emits clo
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
        // Fetch a collection
-       db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb', function(err, collection) {
+       var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb');
      
-         // Insert a document
-         collection.insert({a:1}, {w:1}, function(err, result) {
-           assert.equal(null, err);
+       // Insert a document
+       collection.insert({a:1}, {w:1}, function(err, result) {
+         assert.equal(null, err);
      
-           // Force close the connection
-           db.close(true, function(err, result) {
+         // Force close the connection
+         db.close(true, function(err, result) {
      
-             // Attemp to insert should fail now with correct message 'db closed by application'
-             collection.insert({a:2}, {w:1}, function(err, result) {
-               assert.equal('db closed by application', err.message);
-             });
+           // Attemp to insert should fail now with correct message 'db closed by application'
+           collection.insert({a:2}, {w:1}, function(err, result) {
+             assert.equal('db closed by application', err.message);
            });
          });
        });
@@ -358,9 +344,7 @@ Close the current db connection, including all the child db instances. Emits clo
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -405,18 +389,14 @@ Access the Admin database
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 4}), {w: 0, native_parser: false});
-     
-     // Establish connection to db  
+     var db = new Db('test', new Server('locahost', 27017));
      db.open(function(err, db) {
      
        // Use the admin database for the operation
-       db.admin(function(err, adminDb) {
-         assert.equal(null, err);
-         
-         db.close();
-       });
+       var adminDb = db.admin()
+       assert.ok(adminDb != null);
+       
+       db.close();
      });
 
 
@@ -453,9 +433,7 @@ Returns a cursor to all the collection information.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -522,9 +500,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -553,7 +529,8 @@ collection
 ----------
 
 
-Fetch a specific collection (containing the actual collection information)
+Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you can
+can use it without a callback in the following way. var collection = db.collection('mycollection');
 
 
 
@@ -566,7 +543,7 @@ Options
  - **raw** {Boolean, default:false}, perform all operations using raw bson objects.
  - **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
  - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- - **strict**, (Boolean, default:false) throws and error if collection already exists
+ - **strict**, (Boolean, default:false) throws and error if the collection does not exist
 
 
 
@@ -600,9 +577,7 @@ Deprecated Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -665,15 +640,13 @@ Fetch all collections for the current db.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
      
        // Create the collection
-       db.createCollection('test_correctly_access_collections', function(err, result) {
+       db.createCollection('test_correctly_access_collections2', function(err, result) {
      
          // Retry to get the collection, should work as it's now created
          db.collections(function(err, collections) {
@@ -726,9 +699,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        var numberOfTests = 
@@ -747,7 +718,7 @@ Options
        // Evaluate a function on the server that writes to a server collection
        db.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
          // Locate the entry
-         client.collection('test_eval', function(err, collection) {
+         db.collection('test_eval', function(err, collection) {
            collection.findOne(function(err, item) {
              assert.equal(5, item.y);
            });
@@ -810,9 +781,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -868,31 +837,23 @@ Dereference a dbref, against a db
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
      
-       // console.dir(db.serverConfig._Db)
-     
        // Get a second db
        var secondDb = db.db('integration_tests_2');
      
-       // console.dir(secondDb.serverConfig._Db)
-     
-           // console.dir("================================= deref 0")
        // Create a dereference example
        secondDb.createCollection('test_deref_examples', function(err, collection) {
      
-           // console.dir("================================= deref 1")
          // Insert a document in the collection
          collection.insert({'a':1}, {w:1}, function(err, ids) {
      
            // Let's build a db reference and resolve it
            var dbRef = new DBRef('test_deref_examples', ids[0]._id, 'integration_tests_2');
-           // console.dir("================================= deref")
+     
            // Resolve it including a db resolve
            db.dereference(dbRef, function(err, item) {
              assert.equal(1, item.a);
@@ -944,9 +905,7 @@ Logout user from server, fire off on all connections and remove all auth info
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -980,7 +939,7 @@ Authenticate a user against the server.
 
 
 Options
- - **authdb** {String}, The database that the credentials are for,
+ - **authSource** {String}, The database that the credentials are for,
    different from the name of the current DB, for example admin
 
 .. js:function:: authenticate(username, password[, options], callback)
@@ -1011,9 +970,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -1080,9 +1037,7 @@ Deprecated Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -1143,9 +1098,7 @@ Deprecated Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -1234,9 +1187,7 @@ Deprecated Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -1288,9 +1239,7 @@ Execute a command hash against MongoDB. This lets you acess any commands not ava
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -1337,9 +1286,7 @@ Drop a collection from the database, removing it permanently. New accesses will 
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -1413,9 +1360,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -1501,15 +1446,13 @@ Connection Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
      
        // Create a collection
-       db.createCollection("simple_rename_collection", {w:1}, function(err, collection) {
+       db.createCollection("simple_rename_collection3", {w:1}, function(err, collection) {
          assert.equal(null, err);
      
          // Insert a document in the collection
@@ -1574,9 +1517,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -1647,9 +1588,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -1742,9 +1681,7 @@ Deprecated Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -1838,9 +1775,7 @@ Deprecated Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -1915,9 +1850,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -1986,9 +1919,7 @@ Drop an index on a collection.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -2055,9 +1986,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -2133,9 +2062,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -2203,9 +2130,7 @@ Drop a database.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests_to_drop', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -2287,9 +2212,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
@@ -2351,7 +2274,7 @@ Options
          assert = require('assert');
 
      // Connect to the server
-     Db.connect('mongodb://localhost:27017/integration_tests?w=0' + (useSSL == true ? '&ssl=true' : ''), function(err, db) {
+     Db.connect(configuration.url(), function(err, db) {
        assert.equal(null, err);
        
        db.close();

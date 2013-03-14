@@ -93,9 +93,7 @@ tailable, batchSizeValue, skipValue and limits are preserved.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        var docs = [];
@@ -169,9 +167,7 @@ cursor.rewind() can be used to reset the cursor.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-       {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -230,16 +226,13 @@ for making sure that the entire result can fit the memory.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
        // Create a collection
        db.createCollection('test_to_a_after_each', function(err, collection) {
          assert.equal(null, err);
-         assert.ok(collection instanceof Collection);
      
          // Insert a document in the collection
          collection.insert({'a':1}, {w:1}, function(err, ids) {
@@ -300,9 +293,7 @@ Determines how many result the query for this cursor will return
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -367,9 +358,7 @@ Sets the sort parameter of this cursor to the given value.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -432,9 +421,7 @@ Sets the limit parameter of this cursor to the given value.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -505,9 +492,7 @@ Sets the skip parameter of this cursor to the given value.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -565,9 +550,7 @@ Sets the batch size parameter of this cursor to the given value.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -621,9 +604,7 @@ Gets the next document from the cursor.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -678,9 +659,7 @@ long it took the database to process it.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -710,6 +689,11 @@ stream
 
 Returns a Node ReadStream interface for this cursor.
 
+
+
+Options
+ - **transform** {Function} function of type function(object) { return transformed }, allows for transformation of data before emitting.
+
 .. js:function:: stream()
 
    :returns: cursorstream returns a stream object.
@@ -734,9 +718,7 @@ Returns a Node ReadStream interface for this cursor.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -800,9 +782,7 @@ Close the cursor.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -868,9 +848,7 @@ Check if the cursor is closed or open.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      

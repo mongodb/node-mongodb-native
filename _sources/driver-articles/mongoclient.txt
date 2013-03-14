@@ -96,6 +96,9 @@ The URL connection format
    * true: Sync to disk.   * false: the driver does not add fsync to the getlasterror command   * Default value is false   * If conflicting values for fireAndForget, and any write concern are passed the driver should raise an exception about the conflict.
 
 
+  * **authSource=string:**  Used when the user for authentication is stored in another database using indirect authentication.   * Default value is null
+
+
   * **slaveOk=true|false:**  Whether a driver connected to a replica set will send reads to slaves/secondaries. 
    * Default value is false
   * **readPreference=enum:**  The read preference for this connection. If set, it overrides any slaveOk value. 

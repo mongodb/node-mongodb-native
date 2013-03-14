@@ -82,105 +82,6 @@ new one if file does not exist.
 
   
   
-  A simple example showing opening a file using a filename, writing to it and saving it.
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         MongoClient = require('mongodb').MongoClient,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
-     // Establish connection to db
-     db.open(function(err, db) {
-       // Create a new instance of the gridstore
-       var gridStore = new GridStore(db, 'ourexamplefiletowrite.txt', 'w');
-     
-       // Open the file
-       gridStore.open(function(err, gridStore) {
-     
-         // Write some data to the file
-         gridStore.write('bar', function(err, gridStore) {
-           assert.equal(null, err);
-     
-           // Close (Flushes the data to MongoDB)
-           gridStore.close(function(err, result) {
-             assert.equal(null, err);
-     
-             // Verify that the file exists
-             GridStore.exist(db, 'ourexamplefiletowrite.txt', function(err, result) {
-               assert.equal(null, err);
-               assert.equal(true, result);
-     
-               db.close();
-             });
-           });
-         });
-       });
-     });
-
-  
-  
-  A simple example showing opening a file using an ObjectID, writing to it and saving it.
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         MongoClient = require('mongodb').MongoClient,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
-     // Establish connection to db
-     db.open(function(err, db) {
-       // Our file ID
-       var fileId = new ObjectID();
-     
-       // Create a new instance of the gridstore
-       var gridStore = new GridStore(db, fileId, 'w');
-     
-       // Open the file
-       gridStore.open(function(err, gridStore) {
-     
-         // Write some data to the file
-         gridStore.write('bar', function(err, gridStore) {
-           assert.equal(null, err);
-     
-           // Close (Flushes the data to MongoDB)
-           gridStore.close(function(err, result) {
-             assert.equal(null, err);
-     
-             // Verify that the file exists
-             GridStore.exist(db, fileId, function(err, result) {
-               assert.equal(null, err);
-               assert.equal(true, result);
-     
-               db.close();
-             });
-           });
-         });
-       });
-     });
-
-  
-  
   A simple example showing how to save a file with a filename allowing for multiple files with the same name
 
   .. code-block:: javascript
@@ -196,9 +97,7 @@ new one if file does not exist.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a file and open it
@@ -248,6 +147,101 @@ new one if file does not exist.
        });
      });
 
+  
+  
+  A simple example showing opening a file using a filename, writing to it and saving it.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('locahost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a new instance of the gridstore
+       var gridStore = new GridStore(db, 'ourexamplefiletowrite.txt', 'w');
+     
+       // Open the file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write some data to the file
+         gridStore.write('bar', function(err, gridStore) {
+           assert.equal(null, err);
+     
+           // Close (Flushes the data to MongoDB)
+           gridStore.close(function(err, result) {
+             assert.equal(null, err);
+     
+             // Verify that the file exists
+             GridStore.exist(db, 'ourexamplefiletowrite.txt', function(err, result) {
+               assert.equal(null, err);
+               assert.equal(true, result);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+  
+  
+  A simple example showing opening a file using an ObjectID, writing to it and saving it.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('locahost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Create a new instance of the gridstore
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write some data to the file
+         gridStore.write('bar', function(err, gridStore) {
+           assert.equal(null, err);
+     
+           // Close (Flushes the data to MongoDB)
+           gridStore.close(function(err, result) {
+             assert.equal(null, err);
+     
+             // Verify that the file exists
+             GridStore.exist(db, fileId, function(err, result) {
+               assert.equal(null, err);
+               assert.equal(true, result);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
 
 ---------
 writeFile
@@ -282,9 +276,7 @@ Stores a file from the file system to the GridFS database.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
@@ -294,15 +286,15 @@ Stores a file from the file system to the GridFS database.
        var gridStore = new GridStore(db, fileId, 'w');
      
        // Read the filesize of file on disk (provide your own)
-       var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
+       var fileSize = fs.statSync('./test/tests/functional/gridstore/test_gs_weird_bug.png').size;
        // Read the buffered data for comparision reasons
-       var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png');
+       var data = fs.readFileSync('./test/tests/functional/gridstore/test_gs_weird_bug.png');
      
        // Open the new file
        gridStore.open(function(err, gridStore) {
      
          // Write the file to gridFS
-         gridStore.writeFile('./test/gridstore/test_gs_weird_bug.png', function(err, doc) {
+         gridStore.writeFile('./test/tests/functional/gridstore/test_gs_weird_bug.png', function(err, doc) {
      
            // Read back all the written content and verify the correctness
            GridStore.read(db, fileId, function(err, fileData) {
@@ -332,9 +324,7 @@ Stores a file from the file system to the GridFS database.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
@@ -344,12 +334,12 @@ Stores a file from the file system to the GridFS database.
        var gridStore = new GridStore(db, fileId, 'w');
      
        // Read the filesize of file on disk (provide your own)
-       var fileSize = fs.statSync('./test/gridstore/test_gs_weird_bug.png').size;
+       var fileSize = fs.statSync('./test/tests/functional/gridstore/test_gs_weird_bug.png').size;
        // Read the buffered data for comparision reasons
-       var data = fs.readFileSync('./test/gridstore/test_gs_weird_bug.png');
+       var data = fs.readFileSync('./test/tests/functional/gridstore/test_gs_weird_bug.png');
      
        // Open a file handle for reading the file
-       var fd = fs.openSync('./test/gridstore/test_gs_weird_bug.png', 'r', 0666);
+       var fd = fs.openSync('./test/tests/functional/gridstore/test_gs_weird_bug.png', 'r', 0666);
      
        // Open the new file
        gridStore.open(function(err, gridStore) {
@@ -403,9 +393,7 @@ already exists. This will work properly only if mode was initialized to
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
@@ -463,9 +451,7 @@ Retrieve this file's chunks collection.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
@@ -480,7 +466,6 @@ Retrieve this file's chunks collection.
          // Access the Chunk collection
          gridStore.chunkCollection(function(err, collection) {
            assert.equal(err, null);
-           assert.ok(collection instanceof Collection);
      
            db.close();
          });
@@ -520,9 +505,7 @@ Deletes all the chunks of this file in the database.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
@@ -595,9 +578,7 @@ Retrieves the file collection associated with this object.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
@@ -612,7 +593,6 @@ Retrieves the file collection associated with this object.
          // Access the Chunk collection
          gridStore.collection(function(err, collection) {
            assert.equal(err, null);
-           assert.ok(collection instanceof Collection);
      
            db.close();
          });
@@ -653,9 +633,7 @@ Reads the data of this file.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
@@ -731,9 +709,7 @@ Deletes all the chunks of this file in the database if mode was set to "w" or
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
@@ -822,13 +798,11 @@ Retrieves the contents of this file and advances the read/write head. Works with
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Read in the content of a file
-       var data = fs.readFileSync('./test/gridstore/iya_logo_final_bw.jpg');
+       var data = fs.readFileSync('./test/tests/functional/gridstore/iya_logo_final_bw.jpg');
        // Create a new file
        var gs = new GridStore(db, "test", "w");
        // Open the file
@@ -891,9 +865,7 @@ Retrieves the position of the read/write head of this file.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a new file
@@ -972,9 +944,7 @@ Seek Location Modes
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a file and open it
@@ -1101,9 +1071,7 @@ Verify if the file is at EOF.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -1158,9 +1126,7 @@ Retrieves a single character from this file.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a file and open it
@@ -1222,9 +1188,7 @@ the given string does not have one.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Open a file for writing
@@ -1289,9 +1253,7 @@ Events
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        // Open a file for reading
@@ -1299,7 +1261,7 @@ Events
        // Open a file for writing
        var gridStoreW = new GridStore(db, "test_gs_read_stream", "w");
        // Read in the data of a file
-       var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
+       var data = fs.readFileSync("./test/tests/functional/gridstore/test_gs_weird_bug.png");
      
        var readLen = 0;
        var gotEnd = 0;
@@ -1358,14 +1320,12 @@ Events
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017, 
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        // Open a file for writing
        var gridStoreWrite = new GridStore(db, "test_gs_read_stream_pipe", "w", {chunkSize:1024});
-       gridStoreWrite.writeFile("./test/gridstore/test_gs_weird_bug.png", function(err, result) {      
+       gridStoreWrite.writeFile("./test/tests/functional/gridstore/test_gs_weird_bug.png", function(err, result) {      
          // Open the gridStore for reading and pipe to a file
          var gridStore = new GridStore(db, "test_gs_read_stream_pipe", "r");
          gridStore.open(function(err, gridStore) {
@@ -1374,7 +1334,7 @@ Events
            // When the stream is finished close the database
            stream.on("end", function(err) {          
              // Read the original content
-             var originalData = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
+             var originalData = fs.readFileSync("./test/tests/functional/gridstore/test_gs_weird_bug.png");
              // Ensure we are doing writing before attempting to open the file
              fs.readFile("./test_gs_weird_bug_streamed.tmp", function(err, streamedData) {                      
                // Compare the data
@@ -1429,9 +1389,7 @@ Checks if a file exists in the database.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -1507,9 +1465,7 @@ Gets the list of files stored in the GridFS.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file id
@@ -1557,7 +1513,7 @@ Gets the list of files stored in the GridFS.
              });
      
              // List the existing files in a different root collection where the file is not located
-             GridStore.list(client, 'my_fs', function(err, items) {
+             GridStore.list(db, 'my_fs', function(err, items) {
                var found = false;
                items.forEach(function(filename) {
                  if(filename == 'foobar2') found = true;
@@ -1650,15 +1606,13 @@ This method has the following signatures
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a new file
        var gridStore = new GridStore(db, null, "w");
        // Read in the content from a file, replace with your own
-       var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
+       var data = fs.readFileSync("./test/tests/functional/gridstore/test_gs_weird_bug.png");
      
        // Open the file
        gridStore.open(function(err, gridStore) {
@@ -1668,7 +1622,7 @@ This method has the following signatures
            gridStore.close(function(err, result) {
      
              // Read in the whole file and check that it's the same content
-             GridStore.read(client, result._id, function(err, fileData) {
+             GridStore.read(db, result._id, function(err, fileData) {
                assert.equal(data.length, fileData.length);
      
                db.close();
@@ -1715,9 +1669,7 @@ Reads the data of this file.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID
@@ -1789,9 +1741,7 @@ Deletes the chunks and metadata information of a file from GridFS.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -1878,9 +1828,7 @@ Writes some data. This method will work properly only if initialized with mode "
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-      {auto_reconnect: false, poolSize: 1}), {w:0, native_parser: false});
-     
+     var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Our file ID

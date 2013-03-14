@@ -27,9 +27,9 @@ Driver usage
   .. code-block:: javascript
 
     var replSet = new ReplSetServers( [ 
-        new Server( 127.0.0.1, 30000, { auto_reconnect: true } ),
-        new Server( 127.0.0.1, 30001, { auto_reconnect: true } ),
-        new Server( 127.0.0.1, 30002, { auto_reconnect: true } )
+        new Server( 127.0.0.1, 30000),
+        new Server( 127.0.0.1, 30001),
+        new Server( 127.0.0.1, 30002)
       ], 
       {rs_name:RS.name}
     );
