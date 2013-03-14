@@ -98,6 +98,10 @@ More detailed information about write concerns can be found at [http://www.mongo
     * Default value is false
     * If conflicting values for fireAndForget, and any write concern are passed the driver should raise an exception about the conflict.
 
+### Auth options
+* **authSource=string:** Used when the user for authentication is stored in another database using indirect authentication.
+    * Default value is null
+
 ### Read Preference
 * **slaveOk=true|false:** Whether a driver connected to a replica set will send reads to slaves/secondaries.
     * Default value is false

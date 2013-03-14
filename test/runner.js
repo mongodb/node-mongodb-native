@@ -64,20 +64,3 @@ if(argv.t == 'functional') {
 } else if(argv.t == 'replicaset') {
   replicaset_runners.runner.run('replica_set', run_options);
 }
-
-// console.log(argv.t)
-
-// Replicaset runners
-// replicaset_runners.runner.run('replica_set')
-// replicaset_runners.runner_auth.run('replica_set_auth')
-
-// Standalone runners
-// standalone_runners.runner.run('single_server')
-// standalone_runners.runner_auth.run('single_server_auth');
-
-// Sharded runners
-// sharded_runners.runner.run('sharded');
-// sharded_runners.runner_auth.run('sharded_auth');
-
-// SSL
-// ssl_runners.runner.run('none');

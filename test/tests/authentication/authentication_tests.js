@@ -3,6 +3,89 @@ var Step = require('step');
 /**
  * @ignore
  */
+exports['Should Correctly Authenticate using different user source database and MongoClient'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , Server = configuration.getMongoPackage().Server;
+
+  var auth_db = new Db('foo', new Server('localhost', 27017), {w:1});
+  var db = new Db('users', new Server('localhost', 27017), {w:1});
+  db.open(function(err, db) {
+
+    // Add admin user
+    db.admin().addUser('admin', 'admin', function(err, result) {
+      test.equal(null, err);
+      test.ok(result != null);
+
+      // Authenticate
+      db.admin().authenticate('admin', 'admin', function(err, result) {
+        test.equal(null, err);
+        test.equal(true, result);
+
+        db.addUser('mallory', 'a', function(err, result) {
+          test.equal(null, err);
+          test.ok(result != null);
+
+          db.db('foo').collection('system.users').insert({user:"mallory", roles: ["readWrite"], userSource: "users"}, function(err, result) {
+            test.equal(null, err);
+
+            // Exit
+            db.close();
+
+            //
+            // Authenticate using MongoClient
+            MongoClient.connect('mongodb://mallory:a@localhost:27017/foo?authSource=users', function(err, db) {
+              test.equal(null, err);
+
+              db.collection('t').insert({a:1}, function(err, result) {
+                test.equal(null, err);
+                db.close();
+
+                //
+                // Authenticate using db.authenticate against alternative source
+                auth_db.open(function(err, db) {
+
+                  db.authenticate('mallory', 'a', {authSource:'users'}, function(err, result) {
+                    test.equal(null, err);
+                    test.equal(true, result);
+
+                    db.collection('t').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+
+                      db.close();
+                      test.done();
+                    });
+                  });
+                });
+              });
+            });
+
+            // // Attempt to log in
+            // auth_db.open(function(err, db) {
+            //   db.db('users').authenticate('mallory', 'a', function(err, result) {
+            //     console.log("==================================================== 4");
+            //     console.dir(err);
+            //     console.dir(result);
+
+            //     db.collection('t').insert({a:1}, function(err, result) {
+            //       console.log("==================================================== 5");
+            //       console.dir(err);
+            //       console.dir(result);
+            //       db.close();
+            //       test.done();
+            //     });
+            //   });
+            // });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server;

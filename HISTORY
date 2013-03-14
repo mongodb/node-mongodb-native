@@ -8,6 +8,7 @@
 - Fixed race condition in Cursor stream (NODE-31)
 - Fixed issues related to node 0.10 and process.nextTick now correctly using setImmediate where needed on node 0.10
 - Added support for maxMessageSizeBytes if available (DRIVERS-1)
+- Added support for authSource (2.4) to MongoClient URL and db.authenticate method (DRIVER-69/NODE-34)
 
 1.2.13 2013-02-22
 -----------------
