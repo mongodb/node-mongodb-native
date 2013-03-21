@@ -13,12 +13,12 @@ exports['Should Correctly Authenticate using different user source database and 
   // password: (not shown)
 
   // KDC Server
-  var server = "kdc.10gen.com";
+  var server = "kdc.10gen.me";
   var principal = "dev1@10GEN.ME";
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
-  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI", urlEncodedPrincipal, server), function(err, db) {
+  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
     console.log("+++++++++++++++++++++++++++++++++++++++++++");
     console.dir(err);
     console.dir(db)

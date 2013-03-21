@@ -41,6 +41,12 @@ var single_server_config = function(options) {
       });
     }
 
+    this.restart = function(callback) {
+      self.stop(function() {
+        self.start(callback);
+      });
+    }
+
     // Test suite stop
     this.stop = function(callback) {
       serverManager.killAll(function(err) {

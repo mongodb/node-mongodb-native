@@ -62,7 +62,7 @@
                     , "url" :   "http://github.com/mongodb/node-mongodb-native/issues" }
 , "dependencies" : {
     "bson": "0.1.8"
-  , "kerberos": "0.0.1"
+  , "kerberos": "latest"
 }
 , "devDependencies": {
       "dox": "0.2.0"

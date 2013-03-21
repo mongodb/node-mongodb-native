@@ -8,74 +8,60 @@ exports['Should Correctly Authenticate using different user source database and 
     , MongoClient = configuration.getMongoPackage().MongoClient
     , Server = configuration.getMongoPackage().Server;
 
-  var auth_db = new Db('foo', new Server('localhost', 27017), {w:1});
-  var db = new Db('users', new Server('localhost', 27017), {w:1});
-  db.open(function(err, db) {
+  // Kill server and restart
+  configuration.restart(function() {
+    var auth_db = new Db('foo', new Server('localhost', 27017), {w:1});
+    var db = new Db('users', new Server('localhost', 27017), {w:1});
+    db.open(function(err, db) {
 
-    // Add admin user
-    db.admin().addUser('admin', 'admin', function(err, result) {
-      test.equal(null, err);
-      test.ok(result != null);
-
-      // Authenticate
-      db.admin().authenticate('admin', 'admin', function(err, result) {
+      // Add admin user
+      db.admin().addUser('admin', 'admin', function(err, result) {
         test.equal(null, err);
-        test.equal(true, result);
+        test.ok(result != null);
 
-        db.addUser('mallory', 'a', function(err, result) {
+        // Authenticate
+        db.admin().authenticate('admin', 'admin', function(err, result) {
           test.equal(null, err);
-          test.ok(result != null);
+          test.equal(true, result);
 
-          db.db('foo').collection('system.users').insert({user:"mallory", roles: ["readWrite"], userSource: "users"}, function(err, result) {
+          db.addUser('mallory', 'a', function(err, result) {
             test.equal(null, err);
+            test.ok(result != null);
 
-            // Exit
-            db.close();
-
-            //
-            // Authenticate using MongoClient
-            MongoClient.connect('mongodb://mallory:a@localhost:27017/foo?authSource=users', function(err, db) {
+            db.db('foo').collection('system.users').insert({user:"mallory", roles: ["readWrite"], userSource: "users"}, function(err, result) {
               test.equal(null, err);
 
-              db.collection('t').insert({a:1}, function(err, result) {
+              // Exit
+              db.close();
+
+              //
+              // Authenticate using MongoClient
+              MongoClient.connect('mongodb://mallory:a@localhost:27017/foo?authSource=users', function(err, db) {
                 test.equal(null, err);
-                db.close();
 
-                //
-                // Authenticate using db.authenticate against alternative source
-                auth_db.open(function(err, db) {
+                db.collection('t').insert({a:1}, function(err, result) {
+                  test.equal(null, err);
+                  db.close();
 
-                  db.authenticate('mallory', 'a', {authSource:'users'}, function(err, result) {
-                    test.equal(null, err);
-                    test.equal(true, result);
+                  //
+                  // Authenticate using db.authenticate against alternative source
+                  auth_db.open(function(err, db) {
 
-                    db.collection('t').insert({a:1}, function(err, result) {
+                    db.authenticate('mallory', 'a', {authSource:'users'}, function(err, result) {
                       test.equal(null, err);
+                      test.equal(true, result);
 
-                      db.close();
-                      test.done();
+                      db.collection('t').insert({a:1}, function(err, result) {
+                        test.equal(null, err);
+
+                        db.close();
+                        test.done();
+                      });
                     });
                   });
                 });
               });
             });
-
-            // // Attempt to log in
-            // auth_db.open(function(err, db) {
-            //   db.db('users').authenticate('mallory', 'a', function(err, result) {
-            //     console.log("==================================================== 4");
-            //     console.dir(err);
-            //     console.dir(result);
-
-            //     db.collection('t').insert({a:1}, function(err, result) {
-            //       console.log("==================================================== 5");
-            //       console.dir(err);
-            //       console.dir(result);
-            //       db.close();
-            //       test.done();
-            //     });
-            //   });
-            // });
           });
         });
       });
@@ -163,8 +149,7 @@ exports.shouldCorrectlyAuthenticateWithHorribleBananaCode = function(configurati
                                                   col2.insert({a:2}, {safe:{j:true}}, function(err, result) {
                                                     // console.dir(err)
                                                     // console.dir(result)
-                                                    test.ok(err != null);
-
+                                                    test.ok(err != null); 
                                                     db1.close();
                                                     db2.close();
                                                     admin.close();
