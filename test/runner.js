@@ -36,7 +36,8 @@ var configurations = Configuration
 var replicaset_runners = require('./runners/replicaset_runner')(configurations)
   , sharded_runners = require('./runners/sharded_runner')(configurations)
   , standalone_runners = require('./runners/standalone_runner')(configurations)
-  , ssl_runners = require('./runners/ssl_runner')(configurations);
+  , ssl_runners = require('./runners/ssl_runner')(configurations)
+  , kerberos_runners = require('./runners/kerberos_runners')(configurations);
 
 // Running a specific test
 var run_options = {};
@@ -63,4 +64,6 @@ if(argv.t == 'functional') {
   sharded_runners.runner.run('sharded', run_options);
 } else if(argv.t == 'replicaset') {
   replicaset_runners.runner.run('replica_set', run_options);
+} else if(argv.t == 'kerberos') {
+  kerberos_runners.runner.run('none', run_options);
 }

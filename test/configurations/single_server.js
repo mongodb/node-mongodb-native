@@ -83,8 +83,6 @@ var single_server_config = function(options) {
       return 'mongodb://localhost:27017/' + self.db_name + '?safe=false';
     }
 
-    this.creatUrl = 
-
     // Used in tests
     this.db_name = "integration_tests";    
   }

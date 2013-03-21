@@ -321,6 +321,26 @@ exports['Write concerns parsing'] = function(configure, test) {
 /**
  * @ignore
  */
+exports['GSSAPI parsing'] = function(configure, test) {
+  var object = parse("mongodb://dev1%4010GEN.ME@kdc.10gen.com/test?authMechanism=GSSAPI");
+  test.deepEqual({user:'dev1@10GEN.ME', password:null}, object.auth);
+  test.deepEqual("GSSAPI", object.db_options.authMechanism);
+
+  // Should throw due to missing principal
+  try {
+    parse("mongodb://kdc.10gen.com/test?authMechanism=GSSAPI");
+  } catch(err) {
+  }
+
+  object = parse("mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI");
+  test.deepEqual({user:'dev1@10GEN.ME', password:'test'}, object.auth);
+  test.deepEqual("GSSAPI", object.db_options.authMechanism);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports['Read preferences parsing'] = function(configure, test) {
   var object = parse("mongodb://localhost/db?slaveOk=true");
   test.equal(true, object.server_options.slave_ok);

@@ -212,9 +212,8 @@ exports.testConnectBadUrl = function(configuration, test) {
  * @_class db
  * @_function Db.connect
  */
-exports.shouldCorrectlyDoSimpleCountExamples = function(configuration, test) {
+exports.shouldCorrectlyDoSimpleCountExamplesWithUrl = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db;
-
   // DOC_START
   // Connect to the server
   Db.connect(configuration.url(), function(err, db) {
