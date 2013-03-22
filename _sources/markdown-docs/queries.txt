@@ -326,7 +326,7 @@ Query options
     var options = {
         "limit": 20,
         "skip": 10,
-        "sort": title
+        "sort": "title"
     }
     
     collection.find({}, options).toArray(...);
