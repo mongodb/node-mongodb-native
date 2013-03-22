@@ -195,7 +195,7 @@ Query options define the behavior of the query.
     var options = {
         "limit": 20,
         "skip": 10,
-        "sort": title
+        "sort": "title"
     }
 
     collection.find({}, options).toArray(...);
