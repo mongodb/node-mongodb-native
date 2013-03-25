@@ -1,16 +1,16 @@
 var format = require('util').format;
 
+// You need to set up the kinit tab first
+// kinit dev1@10GEN.ME
+// password: (not shown)
+
 /**
  * @ignore
  */
-exports['Should Correctly Authenticate using different user source database and MongoClient'] = function(configuration, test) {
+exports['Should Correctly Authenticate using kerberos with MongoClient'] = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , MongoClient = configuration.getMongoPackage().MongoClient
     , Server = configuration.getMongoPackage().Server;
-
-  // You need to set up the kinit tab first
-  // kinit dev1@10GEN.ME
-  // password: (not shown)
 
   // KDC Server
   var server = "kdc.10gen.me";
@@ -18,27 +18,78 @@ exports['Should Correctly Authenticate using different user source database and 
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
-  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=5", urlEncodedPrincipal, server), function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
 
     // Attempt an operation
     db.admin().command({listDatabases:1}, function(err, docs) {
       test.equal(null, err);
-      console.log("+++++++++++++++++++++++++++++++++++++++++++");
-      console.dir(err);
-      console.dir(docs.documents[0].databases)
+      test.ok(docs.documents[0].databases);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Authenticate using kerberos with MongoClient and then reconnect'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , Server = configuration.getMongoPackage().Server;
+
+  // KDC Server
+  var server = "kdc.10gen.me";
+  var principal = "dev1@10GEN.ME";
+  var urlEncodedPrincipal = encodeURIComponent(principal);
+
+  // Let's write the actual connection code
+  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=5", urlEncodedPrincipal, server), function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+
+    // Close the connection
+    db.close();
+
+    // Attempt an operation
+    db.admin().command({listDatabases:1}, function(err, docs) {
       test.equal(null, err);
       test.ok(docs.documents[0].databases);
 
       db.close();
       test.done();
     });
+  });
+}
 
-    // console.log("+++++++++++++++++++++++++++++++++++++++++++");
-    // console.dir(err);
-    // console.dir(db)
-    // db.close();
-    // test.done();
+/**
+ * @ignore
+ */
+exports['Should Correctly Authenticate authenticate method manually'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , Server = configuration.getMongoPackage().Server;
+
+  // KDC Server
+  var server = "kdc.10gen.me";
+  var principal = "dev1@10GEN.ME";
+  var urlEncodedPrincipal = encodeURIComponent(principal);
+
+  var db = new Db('test', new Server('kdc.10gen.me', 27017), {w:1});
+  db.open(function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+
+    // Authenticate
+    db.authenticate(principal, null, {authMechanism: 'GSSAPI'}, function(err, result) {
+      test.equal(null, err);
+      test.ok(result);
+
+      db.close();
+      test.done();
+    });
   });
 }
