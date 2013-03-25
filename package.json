@@ -61,8 +61,7 @@
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
                     , "url" :   "http://github.com/mongodb/node-mongodb-native/issues" }
 , "dependencies" : {
-    "bson": "0.1.8"
-  , "kerberos": "latest"
+  "bson": "0.1.8"
 }
 , "devDependencies": {
       "dox": "0.2.0"
@@ -76,6 +75,9 @@
 	  , "async": "0.1.22"
     , "integra": "0.0.1"
     , "optimist": "latest"
+  }
+, "optionalDependencies": {
+    "kerberos": "latest"
   }
 , "config":         { "native" : false }
 , "main":             "./lib/mongodb/index"
