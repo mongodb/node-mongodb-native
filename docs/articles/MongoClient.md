@@ -224,28 +224,28 @@ Below are all the options supported for db/server/replset/mongos.
   *  **numberOfRetries** {Number, default:5}, number of retries off connection.
 
 ## server: A hash of options at the server level not supported by the url.
-    *  **readPreference** {String, default:null}, set's the read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST)
-    *  **ssl** {Boolean, default:false}, use ssl connection (needs to have a mongod server with ssl support)
-    *  **slaveOk** {Boolean, default:false}, legacy option allowing reads from secondary, use **readPrefrence** instead.
-    *  **poolSize** {Number, default:1}, number of connections in the connection pool, set to 1 as default for legacy reasons.
-    *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
-    *  **logger** {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error **({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})**.
-    *  **auto_reconnect** {Boolean, default:false}, reconnect on error.
-    *  **disableDriverBSONSizeCheck** {Boolean, default:false}, force the server to error if the BSON message is to big
+  *  **readPreference** {String, default:null}, set's the read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST)
+  *  **ssl** {Boolean, default:false}, use ssl connection (needs to have a mongod server with ssl support)
+  *  **slaveOk** {Boolean, default:false}, legacy option allowing reads from secondary, use **readPrefrence** instead.
+  *  **poolSize** {Number, default:1}, number of connections in the connection pool, set to 1 as default for legacy reasons.
+  *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
+  *  **logger** {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error **({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})**.
+  *  **auto_reconnect** {Boolean, default:false}, reconnect on error.
+  *  **disableDriverBSONSizeCheck** {Boolean, default:false}, force the server to error if the BSON message is to big
 
 ## replSet: A hash of options at the replSet level not supported by the url.
-    *  **ha** {Boolean, default:true}, turn on high availability.
-    *  **haInterval** {Number, default:2000}, time between each replicaset status check.
-    *  **reconnectWait** {Number, default:1000}, time to wait in milliseconds before attempting reconnect.
-    *  **retries** {Number, default:30}, number of times to attempt a replicaset reconnect.
-    *  **rs_name** {String}, the name of the replicaset to connect to.
-    *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
-    *  **readPreference** {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-    *  **strategy** {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)
-    *  **secondaryAcceptableLatencyMS** {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
-    *  **connectArbiter** {Boolean, default:false}, sets if the driver should connect to arbiters or not.
+  *  **ha** {Boolean, default:true}, turn on high availability.
+  *  **haInterval** {Number, default:2000}, time between each replicaset status check.
+  *  **reconnectWait** {Number, default:1000}, time to wait in milliseconds before attempting reconnect.
+  *  **retries** {Number, default:30}, number of times to attempt a replicaset reconnect.
+  *  **rs_name** {String}, the name of the replicaset to connect to.
+  *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
+  *  **readPreference** {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+  *  **strategy** {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)
+  *  **secondaryAcceptableLatencyMS** {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
+  *  **connectArbiter** {Boolean, default:false}, sets if the driver should connect to arbiters or not.
 
 ## mongos: A hash of options at the mongos level not supported by the url.
-    *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
-    *  **ha** {Boolean, default:true}, turn on high availability, attempts to reconnect to down proxies
-    *  **haInterval** {Number, default:2000}, time between each replicaset status check.
+  *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
+  *  **ha** {Boolean, default:true}, turn on high availability, attempts to reconnect to down proxies
+  *  **haInterval** {Number, default:2000}, time between each replicaset status check.
