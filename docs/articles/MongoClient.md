@@ -178,7 +178,7 @@ The url format can be used with MongoClient.connect. Where possible MongoClient 
 Notice that when connecting to the sharded system it's pretty much the same url as for connecting to the replicaset. This is because the driver itself figures out if it's a replicaset or a set of Mongos proxies it's connecting to. No special care is needed to specify if it's one or the other. This is in contrast to having to use the **ReplSet** or **Mongos** instances when using the **open** command.
 
 ## MongoClient.connect options
-The connect function also takes a hash of options divided into db/server/replset/mongos allowing you to tweak options not directly supported by the unified url string format. To use these options you do pass in a has like this.
+The connect function also takes a hash of options divided into db/server/replset/mongos allowing you to tweak options not directly supported by the unified url string format. To use these options you do pass in a hash like this:
 
     var MongoClient = require('mongodb').MongoClient;
 
