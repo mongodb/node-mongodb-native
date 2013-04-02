@@ -23,25 +23,6 @@ var none = function(options) {
     callback();
   };
 
-  // var mapFunction = function(replicasetManager, name) {
-  //   return function() {
-  //     var args = Array.prototype.slice.call(arguments, 0);
-  //     replicasetManager[name].apply(replicasetManager, args);        
-  //   }
-  // }
-
-  // this.killPrimary = mapFunction(replicasetManager, 'killPrimary');
-  // this.restartKilledNodes = mapFunction(replicasetManager, 'restartKilledNodes');
-  // this.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
-  // this.getNodeFromPort = mapFunction(replicasetManager, 'getNodeFromPort');
-  // this.kill = mapFunction(replicasetManager, 'kill');
-  // this.killSecondary = mapFunction(replicasetManager, 'killSecondary');
-  // this.primary = mapFunction(replicasetManager, 'primary');
-  // this.secondaries = mapFunction(replicasetManager, 'secondaries');
-  // this.arbiters = mapFunction(replicasetManager, 'arbiters');    
-  // this.setAuths = mapFunction(replicasetManager, 'setAuths');
-  // this.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
-
   // Pr test functions
   this.setup = function(callback) { 
     callback(); 

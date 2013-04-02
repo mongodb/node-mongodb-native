@@ -12,13 +12,15 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = funct
     , MongoClient = configuration.getMongoPackage().MongoClient
     , Server = configuration.getMongoPackage().Server;
 
+    console.log("============= hey")
+
   // KDC Server
   var server = "kdc.10gen.me";
   var principal = "dev1@10GEN.ME";
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
-  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=5", urlEncodedPrincipal, server), function(err, db) {
+  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
 
