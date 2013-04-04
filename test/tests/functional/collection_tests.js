@@ -1351,3 +1351,26 @@ exports.shouldCorrectlyReadBackDocumentWithNull = function(configuration, test) 
     });
   });
 }
+
+/**
+ * @ignore
+ */
+exports.shouldThrowErrorDueToIllegalUpdate = function(configuration, test) {
+  var client = configuration.db();
+
+  client.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, function(err, coll) {
+    try {
+      coll.update({}, null, function (err, res) {});
+    } catch (err) {
+      test.equal("document must be a valid JavaScript object", err.message)
+    }    
+
+    try {
+      coll.update(null, null, function (err, res) {});
+    } catch (err) {
+      test.equal("selector must be a valid JavaScript object", err.message)
+    }    
+
+    test.done()    
+  });
+}
