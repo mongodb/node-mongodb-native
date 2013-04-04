@@ -32,7 +32,7 @@ exports['Should correctly connect and then handle a mongos failure'] = function(
         });
       }
 
-      var killport = db.serverConfig._currentMongos.port;
+      var killport = db.serverConfig.servers[0].port;
 
       // Kill the mongos proxy
       configuration.killMongoS(killport, function(err, result) {
@@ -41,56 +41,6 @@ exports['Should correctly connect and then handle a mongos failure'] = function(
     });    
   });
 }
-
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(configuration, test) {
-//   var Mongos = configuration.getMongoPackage().Mongos
-//     , MongoClient = configuration.getMongoPackage().MongoClient
-//     , Server = configuration.getMongoPackage().Server
-//     , Db = configuration.getMongoPackage().Db
-//     , ReadPreference = configuration.getMongoPackage().ReadPreference;
-
-//   return test.done();
-
-//   // Set up mongos connection
-//   var mongos = new Mongos([
-//       new Server("localhost", 50000, { auto_reconnect: true })
-//     ])
-
-//   // Set up a bunch of documents
-//   var docs = [];
-//   for(var i = 0; i < 1000; i++) {
-//     docs.push({a:i, data:new Buffer(1024)});
-//   }
-
-//   // Connect using the mongos connections
-//   var db = new Db('integration_test_', mongos, {w:0});
-//   db.open(function(err, db) {
-//     test.equal(null, err);
-//     test.ok(db != null);
-
-//     var collection = db.collection("shard_all_operations_test");
-//     collection.insert(docs, {safe:{w:1, wtimeout:1000}}, function(err, result) {
-//       test.equal(null, err);
-
-//         configuration.killShard(function() {
-
-//           collection.find({}, {partial:true}).toArray(function(err, items) {
-//             // test.equal(null, err);
-//             // test.ok(items.length > 0)
-//             console.log("-------------------------------------------------------------")
-//             console.dir(err)
-//             console.dir(items)
-
-//             db.close();
-//             test.done();
-//           });
-//         });
-//     });
-//   });
-// }
 
 /**
  * @ignore
