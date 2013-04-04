@@ -7,7 +7,7 @@ var format = require('util').format;
 /**
  * @ignore
  */
-exports['Should Correctly Authenticate using kerberos with MongoClient'] = function(configuration, test) {
+exports['Should Correctly Authenticate on Win32 using kerberos with MongoClient'] = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , MongoClient = configuration.getMongoPackage().MongoClient
     , Server = configuration.getMongoPackage().Server;
@@ -15,10 +15,11 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = funct
   // KDC Server
   var server = "kdc.10gen.me";
   var principal = "dev1@10GEN.ME";
+  var pass = "a";
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
-  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+  MongoClient.connect(format("mongodb://%s:%s@%s/test?authMechanism=GSSAPI&maxPoolSize=1", urlEncodedPrincipal, pass, server), function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
 
@@ -36,7 +37,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = funct
 /**
  * @ignore
  */
-exports['Should Correctly Authenticate using kerberos with MongoClient and then reconnect'] = function(configuration, test) {
+exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient and then reconnect'] = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , MongoClient = configuration.getMongoPackage().MongoClient
     , Server = configuration.getMongoPackage().Server;
@@ -44,10 +45,11 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
   // KDC Server
   var server = "kdc.10gen.me";
   var principal = "dev1@10GEN.ME";
+  var pass = "a";
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
-  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=5", urlEncodedPrincipal, server), function(err, db) {
+  MongoClient.connect(format("mongodb://%s:%s@%s/test?authMechanism=GSSAPI&maxPoolSize=5", urlEncodedPrincipal, pass, server), function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
 
@@ -68,7 +70,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
 /**
  * @ignore
  */
-exports['Should Correctly Authenticate authenticate method manually'] = function(configuration, test) {
+exports['Should Correctly Authenticate on Win32 authenticate method manually'] = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , MongoClient = configuration.getMongoPackage().MongoClient
     , Server = configuration.getMongoPackage().Server;
@@ -77,6 +79,7 @@ exports['Should Correctly Authenticate authenticate method manually'] = function
   var server = "kdc.10gen.me";
   var principal = "dev1@10GEN.ME";
   var urlEncodedPrincipal = encodeURIComponent(principal);
+  var pass = "a";
 
   var db = new Db('test', new Server('kdc.10gen.me', 27017), {w:1});
   db.open(function(err, db) {
@@ -84,7 +87,7 @@ exports['Should Correctly Authenticate authenticate method manually'] = function
     test.ok(db != null);
 
     // Authenticate
-    db.authenticate(principal, null, {authMechanism: 'GSSAPI'}, function(err, result) {
+    db.authenticate(principal, pass, {authMechanism: 'GSSAPI'}, function(err, result) {
       test.equal(null, err);
       test.ok(result);
 
