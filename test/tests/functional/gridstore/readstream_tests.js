@@ -39,8 +39,6 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = function(configur
               // Restart the stream after 1 miliscecond
               setTimeout(function() {
                 stream.resume();
-                // Check if cursor is paused
-                test.equal(false, stream.paused);
               }, 100);          
             });
 
@@ -106,16 +104,12 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = function(configu
               test.equal(false, stream.paused);
               // Pause stream
               stream.pause();
-              // Check if cursor is paused
-              // test.equal(true, stream.paused);         
 
               fileBuffer += item.toString('utf8');
 
               // Restart the stream after 1 miliscecond
               setTimeout(function() {
                 stream.resume();
-                // Check if cursor is paused
-                test.equal(false, stream.paused);
               }, 100);
             });
 
