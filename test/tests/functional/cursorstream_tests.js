@@ -334,33 +334,33 @@ exports.shouldStreamRecordsCallsEndTheRightNumberOfTimes = function(configuratio
   });    
 }
 
-exports.shouldStreamDocumentsWithLimitForFetching = function(configuration, test) {
-  var client = configuration.db();
-  var docs = []
+// exports.shouldStreamDocumentsWithLimitForFetching = function(configuration, test) {
+//   var client = configuration.db();
+//   var docs = []
   
-  for(var i = 0; i < 3000; i++) {
-    docs.push({'a':i})
-  }
+//   for(var i = 0; i < 3000; i++) {
+//     docs.push({'a':i})
+//   }
 
-  client.createCollection('test_streaming_function_with_limit_for_fetching', function(err, collection) {
+//   client.createCollection('test_streaming_function_with_limit_for_fetching', function(err, collection) {
 
-    collection.insert(docs, {w:1}, function(err, ids) {        
-      var cursor = collection.find({});
-      // Execute find on all the documents
-      var stream = cursor.streamRecords({fetchSize:1000}); 
-      var callsToEnd = 0;
-      stream.on('end', function() { 
-        test.done();
-      });
+//     collection.insert(docs, {w:1}, function(err, ids) {        
+//       var cursor = collection.find({});
+//       // Execute find on all the documents
+//       var stream = cursor.streamRecords({fetchSize:1000}); 
+//       var callsToEnd = 0;
+//       stream.on('end', function() { 
+//         test.done();
+//       });
 
-      var callsToData = 0;
-      stream.on('data',function(data){ 
-        callsToData += 1;
-        test.ok(callsToData <= 3000);
-      }); 
-    });
-  });    
-}
+//       var callsToData = 0;
+//       stream.on('data',function(data){ 
+//         callsToData += 1;
+//         test.ok(callsToData <= 3000);
+//       }); 
+//     });
+//   });    
+// }
 
 exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID
