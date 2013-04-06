@@ -759,93 +759,184 @@ exports['Should Correctly Authenticate using different user source database and 
   var connectTimeoutMS = 100;
 
   // Kill server and restart
-  // configuration.restart(function() {
-    var auth_db = new Db(dbName, replSet1, {w:1});
-    var db = new Db('users', replSet2, {w:1});
-    db.open(function(err, db) {
+  var auth_db = new Db(dbName, replSet1, {w:1});
+  var db = new Db('users', replSet2, {w:1});
+  db.open(function(err, db) {
 
-      // Add admin user
-      db.admin().addUser('admin', 'admin', function(err, result) {
+    // Add admin user
+    db.admin().addUser('admin', 'admin', function(err, result) {
+      test.equal(null, err);
+      test.ok(result != null);
+
+      // Authenticate
+      db.admin().authenticate('admin', 'admin', function(err, result) {
         test.equal(null, err);
-        test.ok(result != null);
+        test.equal(true, result);
 
-        // Authenticate
-        db.admin().authenticate('admin', 'admin', function(err, result) {
+        db.addUser('mallory', 'a', function(err, result) {
           test.equal(null, err);
-          test.equal(true, result);
+          test.ok(result != null);
 
-          db.addUser('mallory', 'a', function(err, result) {
+          db.db(dbName).collection('system.users').insert({user:"mallory", roles: ["readWrite"], userSource: "users"}, function(err, result) {
             test.equal(null, err);
-            test.ok(result != null);
 
-            db.db(dbName).collection('system.users').insert({user:"mallory", roles: ["readWrite"], userSource: "users"}, function(err, result) {
-              test.equal(null, err);
+            // Exit
+            db.close();
 
-              // Exit
-              db.close();
+            //
+            // Authenticate using MongoClient
+            MongoClient.connect(format("mongodb://mallory:a@%s:%s/%s?rs_name=%s&authSource=users&readPreference=secondary&w=3&connectTimeoutMS=%s"
+              , replicaset.host, replicaset.ports[0], dbName, replicaset.name, connectTimeoutMS), function(err, db) {
+                test.equal(null, err);
 
-              //
-              // Authenticate using MongoClient
-              MongoClient.connect(format("mongodb://mallory:a@%s:%s/%s?rs_name=%s&authSource=users&readPreference=secondary&w=3&connectTimeoutMS=%s"
-                , replicaset.host, replicaset.ports[0], dbName, replicaset.name, connectTimeoutMS), function(err, db) {
+                // Should work correctly
+                db.collection('t').insert({a:1}, function(err, result) {
                   test.equal(null, err);
+                  db.close();
 
-                  // Should fail as we are not authenticated to write to t collection
-                  db.collection('t').insert({a:1}, function(err, result) {
-                    // test.ok(err != null);
-                    test.equal(null, err);
-                    db.close();
+                  //
+                  // Authenticate using db.authenticate against alternative source
+                  auth_db.open(function(err, db) {
 
-                    //
-                    // Authenticate using db.authenticate against alternative source
-                    auth_db.open(function(err, db) {
+                    db.authenticate('mallory', 'a', {authSource:'users'}, function(err, result) {
+                      test.equal(null, err);
+                      test.equal(true, result);
 
-                      db.authenticate('mallory', 'a', {authSource:'users'}, function(err, result) {
+                      db.collection('t').insert({a:1}, function(err, result) {
                         test.equal(null, err);
-                        test.equal(true, result);
+                        test.ok(result != null);
+
+                        // Force close
+                        db.close();
 
                         db.collection('t').insert({a:1}, function(err, result) {
                           test.equal(null, err);
                           test.ok(result != null);
-                          // console.log("============================================= 0")
-                          // console.dir(err)
-                          // console.dir(result)
-                          // test.equal(null, err);
 
-                          // Force close
-                          // db.serverConfig.close();
-                          db.close();
-
-                          db.collection('t').insert({a:1}, function(err, result) {
+                          db.logout(function(err, result) {
                             test.equal(null, err);
-                            test.ok(result != null);
-                            // console.log("============================================= 1")
-                            // console.dir(err)
-                            // console.dir(result)
+                            test.equal(true, result);
+                            test.equal(0, db.serverConfig.auth.length());
 
-                            // console.dir("--------------------------- auths 0")
-                            // console.dir(db.serverConfig.auth._auths)
-
-                            db.logout(function(err, result) {
-                              test.equal(null, err);
-                              test.equal(true, result);
-                              test.equal(0, db.serverConfig.auth.length());
-                              // console.dir("--------------------------- auths 1")
-                              // console.dir(db.serverConfig.auth._auths)
-
-                              db.close();
-                              test.done(); 
-                            });
+                            db.close();
+                            test.done(); 
                           });
                         });
                       });
                     });
                   });
+                });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Authenticate using different user source database and MongoClient on a replicaset with failover and recovery'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , Server = configuration.getMongoPackage().Server
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , ReplSetServers = configuration.getMongoPackage().ReplSetServers
+    , ReadPreference = configuration.getMongoPackage().ReadPreference;
+
+  var replicaset = configuration.getReplicasetManager();
+
+  var replSet1 = new ReplSetServers( [
+      new Server( replicaset.host, replicaset.ports[1]),
+      new Server( replicaset.host, replicaset.ports[0]),
+    ],
+    {rs_name:replicaset.name, poolSize:1, readPreference: ReadPreference.SECONDARY}
+  );
+
+  var replSet2 = new ReplSetServers( [
+      new Server( replicaset.host, replicaset.ports[1]),
+      new Server( replicaset.host, replicaset.ports[0]),
+    ],
+    {rs_name:replicaset.name, poolSize:1, readPreference: ReadPreference.SECONDARY}
+  );
+
+  var dbName = 'foo';
+  var connectTimeoutMS = 100;
+
+  // Kill server and restart
+  var auth_db = new Db(dbName, replSet1, {w:1});
+  var db = new Db('users', replSet2, {w:1});
+  db.open(function(err, db) {
+
+    // Add admin user
+    db.admin().addUser('admin', 'admin', function(err, result) {
+      test.equal(null, err);
+      test.ok(result != null);
+
+      // Authenticate
+      db.admin().authenticate('admin', 'admin', function(err, result) {
+        test.equal(null, err);
+        test.equal(true, result);
+
+        db.addUser('mallory', 'a', function(err, result) {
+          test.equal(null, err);
+          test.ok(result != null);
+
+          db.db(dbName).collection('system.users').insert({user:"mallory", roles: ["readWrite"], userSource: "users"}, function(err, result) {
+            test.equal(null, err);
+
+            // Exit
+            db.close();
+
+            //
+            // Authenticate using MongoClient
+            MongoClient.connect(format("mongodb://mallory:a@%s:%s/%s?rs_name=%s&authSource=users&readPreference=secondary&w=3&connectTimeoutMS=%s"
+              , replicaset.host, replicaset.ports[0], dbName, replicaset.name, connectTimeoutMS), function(err, db) {
+                test.equal(null, err);
+
+                db.serverConfig.damn = 1;
+                // Should fail as we are not authenticated to write to t collection
+                db.collection('t').insert({a:1}, function(err, result) {
+                  test.equal(null, err);
+                  // Set auths for the configuration
+                  configuration.setAuths("admin", "admin");
+                  // Kill primary
+                  configuration.addSecondary(function() {
+
+                    // Execute reconnect command
+                    db.command({ismaster:true}, function(err, doc) {
+                      
+                      setTimeout(function() {
+                        test.equal(null, err);
+                        test.ok(doc != null);
+
+                        var connections = db.serverConfig.allRawConnections();
+                        var totalLength = connections.length;
+                        var totalErrors = 0;
+
+                        for(var i = 0; i < connections.length; i++) {
+                          var cursor = db.collection('t').find({});
+                          // Force the connection
+                          cursor.connection = connections[i];
+                          // Execute toArray
+                          cursor.toArray(function(err, docs) {
+                            totalLength = totalLength - 1;
+
+                            if(totalLength == 0) {
+                              test.equal(0, totalErrors);
+                              db.close();                              
+                              test.done();
+                            }
+                          });
+                        }
+                      }, 2000);
+                    });
+                });
               });
             });
           });
         });
       });
+    });
   });
 }
-

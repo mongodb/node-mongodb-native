@@ -87,6 +87,7 @@ var replica_set_config = function(options) {
     this.arbiters = mapFunction(replicasetManager, 'arbiters');    
     this.setAuths = mapFunction(replicasetManager, 'setAuths');
     this.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
+    this.addSecondary = mapFunction(replicasetManager, 'addSecondary');
 
     this.newDbInstanceWithDomainSocket = function(host, db_options, server_options) {
       return new Db('integration_tests', new ReplSet([new Server(host, server_options)], {poolSize:1}), db_options);      
@@ -194,6 +195,8 @@ var replica_set_config_auth = function(options) {
       self.arbiters = mapFunction(replicasetManager, 'arbiters');    
       self.setAuths = mapFunction(replicasetManager, 'setAuths');
       self.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
+      self.addSecondary = mapFunction(replicasetManager, 'addSecondary');
+      
       // Start set
       replicasetManager.startSet(true, function(err, result) {
         if(err) throw err;

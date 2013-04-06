@@ -223,9 +223,7 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
         if(err != null) return callback(err, null);
         self.mongods[n]["start"] = self.startCmd(n);
 
-        // console.log("----------------------------------------------------- node start command")
-        // console.log(self.mongods[n]["start"])
-
+        // Start the node
         self.start(n, function() {
           // Add instance to list of members
           var member = {"_id": n, "host": self.host + ":" + self.mongods[n]["port"]};
@@ -513,7 +511,6 @@ ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
 
   var numberOfNodes = nodes.length;
   if(numberOfNodes == 0) return callback();
-  // if(numberOfNodes == 0) return self.ensureUp(callback);
 
   // Restart all the number of nodes
   for(var i = 0; i < numberOfNodes; i++) {    
@@ -527,6 +524,97 @@ ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
       }
     });
   }
+}
+
+ReplicaSetManager.prototype.addSecondary = function(options, callback) {
+  if(typeof options == 'function') {
+    callback = options;
+    options = {};
+  }
+  
+  var self = this;  
+  var retries = options.retries || 100;
+  // Add a node
+  var n = this.primaryCount + this.secondaryCount + 1;
+  
+  // Start the node
+  this.initNode(n, {}, function(err, result) {
+    if(err) return callback(err);
+
+    // Get the primary and add the secondary
+    self.primary(function(err, primary) {
+      if(err) return callback(err);
+
+      // Execute add server command
+      var mongoObject = self.mongods[n];
+      var host = mongoObject.host;
+      var port = mongoObject.port;
+
+      // Get the configuration
+      var connection = new Db("local", new Server(primary.split(":")[0], parseInt(primary.split(":")[1], 10), {
+          ssl:self.ssl
+        , poolSize:1
+        , sslKey:self.ssl_client_pem
+        , sslCert:self.ssl_client_pem
+      }), {w:0}).open(function(err, db) {
+        if(err) return callback(err);
+  
+        // Authenticate if needed
+        _authenticateIfNeeded(self, db, function(err, result) {
+          if(err) return callback(err);
+
+          // Get the current configuration        
+          db.collection('system.replset').findOne({}, function(err, doc) {
+            if(err) return callback(err);
+
+            // Create member config
+            var config = {
+                _id: (doc.members.length + 1)
+              , host: (host + ":" + port)            
+            }
+
+            // Add to list of members
+            doc.members.push(config);
+            doc.version = doc.version + 1;
+
+            // Re configure
+            db.admin().command({replSetReconfig: doc}, function(err, result) {
+              if(err) return callback(err);
+
+              var checkHealthy = function() {
+                // Wait for the secondary to come up properly
+                db.admin().command({"replSetGetStatus": 1}, function(_err, _doc) {
+                  if(_err) return callback(_err);
+                  _doc = _doc.documents[0];
+
+                  var members = _doc.members;
+                  // Adjust the number of retries
+                  retries = retries - 1;
+
+                  // Go over find the server and check the state
+                  for(var i = 0; i < members.length; i++) {
+                    if(members[i].name == (host + ":" + port) 
+                      && members[i].state == 2) {
+                      return callback(null, self.mongods[n]);
+                      process.exit(0)
+                    }
+                  }
+
+                  // No more retries
+                  if(retries == 0) return callback(new Error("Failed to add Secondary server"));
+
+                  // Execute again
+                  setTimeout(checkHealthy, 1000);
+                });                
+              }
+
+              setTimeout(checkHealthy, 1000);
+            });
+          });
+        });
+      });
+    });
+  });
 }
 
 ReplicaSetManager.prototype.getConnection = function(node, callback) {
