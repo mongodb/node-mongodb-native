@@ -41,7 +41,7 @@ var replica_set_config = function(options) {
     this.start = function(callback) {
       replicasetManager.startSet(true, function(err, result) {
         if(err) throw err;
-        // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% replicaset.start")
+        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% replicaset.start :: " + replicasetManager.name)
 
         // Set up the replicaset
         var replSet = new ReplSet( [
