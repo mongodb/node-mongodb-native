@@ -837,7 +837,7 @@ exports['Should Correctly Authenticate using different user source database and 
 /**
  * @ignore
  */
-exports['Should Correctly Authenticate using different user source database and MongoClient on a replicaset with failover and recovery'] = function(configuration, test) {
+exports['Should Correctly Authenticate using different user source database and MongoClient on a replicaset when adding another secondary'] = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
     , MongoClient = configuration.getMongoPackage().MongoClient
@@ -924,12 +924,122 @@ exports['Should Correctly Authenticate using different user source database and 
 
                             if(totalLength == 0) {
                               test.equal(0, totalErrors);
-                              db.close();                              
+                              db.close();
+                              process.exit(0)                              
                               test.done();
                             }
                           });
                         }
                       }, 2000);
+                    });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Authenticate using different user source database and MongoClient on a replicaset with failover and recovery'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , Server = configuration.getMongoPackage().Server
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , ReplSetServers = configuration.getMongoPackage().ReplSetServers
+    , ReadPreference = configuration.getMongoPackage().ReadPreference;
+
+  var replicaset = configuration.getReplicasetManager();
+
+  var replSet = new ReplSetServers( [
+      new Server( replicaset.host, replicaset.ports[1]),
+      new Server( replicaset.host, replicaset.ports[0]),
+    ],
+    {rs_name:replicaset.name, poolSize:1, readPreference: ReadPreference.PRIMARY}
+  );
+
+  var dbName = 'foo';
+  var connectTimeoutMS = 100;
+
+  // Set up config
+  var reconfigs = {}
+  reconfigs[replicaset.host + ":" + replicaset.ports[0]] = {
+    priority: 100
+  }
+
+  // Restart the replicaset with a new config
+  replicaset.reStartAndConfigure(reconfigs, function(err, result) {
+
+    // Kill server and restart
+    var db = new Db('users', replSet, {w:3});
+    db.open(function(err, db) {
+      // Add admin user
+      db.admin().addUser('admin', 'admin', function(err, result) {
+        test.equal(null, err);
+        test.ok(result != null);
+
+        // Authenticate
+        db.admin().authenticate('admin', 'admin', function(err, result) {
+          test.equal(null, err);
+          test.equal(true, result);
+
+          db.addUser('mallory', 'a', function(err, result) {
+            test.equal(null, err);
+            test.ok(result != null);
+
+            db.db(dbName).collection('system.users').insert({user:"mallory", roles: ["readWrite"], userSource: "users"}, function(err, result) {
+              test.equal(null, err);
+
+              // Exit
+              db.close();
+
+              //
+              // Authenticate using MongoClient
+              MongoClient.connect(format("mongodb://mallory:a@%s:%s/%s?rs_name=%s&authSource=users&readPreference=primary&w=3&connectTimeoutMS=%s"
+                , replicaset.host, replicaset.ports[0], dbName, replicaset.name, connectTimeoutMS), function(err, db) {
+                  test.equal(null, err);
+
+                  // Should fail as we are not authenticated to write to t collection
+                  db.collection('t').insert({a:1}, function(err, result) {
+                    test.equal(null, err);
+                    // Set auths for the configuration
+                    configuration.setAuths("admin", "admin");
+
+                    // Kill the primary
+                    configuration.killPrimary(15, function(err, deadNode) {
+
+                      db.collection('t').find().toArray(function(err, docs) {
+
+                        configuration.startS(deadNode, function(err, result) {
+
+                          // Execute reconnect command
+                          db.command({ismaster:true}, function(err, doc) {
+                            var connections = db.serverConfig.allRawConnections();
+                            var totalLength = connections.length;
+                            var totalErrors = 0;
+
+                            for(var i = 0; i < connections.length; i++) {
+                              var cursor = db.collection('t').find({});
+                              // Force the connection
+                              cursor.connection = connections[i];
+                              // Execute toArray
+                              cursor.toArray(function(err, docs) {
+                                totalLength = totalLength - 1;
+
+                                if(totalLength == 0) {
+                                  test.equal(0, totalErrors);
+                                  db.close();
+                                  process.exit(0)
+                                  test.done();
+                                }
+                              });
+                            }
+                          });
+                        });
+                      });
                     });
                 });
               });

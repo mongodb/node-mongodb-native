@@ -21,7 +21,7 @@ var replica_set_config = function(options) {
     // Setting up replicaset options
     var repl_options = { 
         retries:120, secondary_count:2
-      , passive_count:0, arbiter_count:1
+      , passive_count:0, arbiter_count:0
       , start_port: this.startPort
       , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
     }
@@ -88,6 +88,9 @@ var replica_set_config = function(options) {
     this.setAuths = mapFunction(replicasetManager, 'setAuths');
     this.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
     this.addSecondary = mapFunction(replicasetManager, 'addSecondary');
+    this.startS = mapFunction(replicasetManager, 'start');
+    this.reStart = mapFunction(replicasetManager, 'reStart');
+    this.reStartAndConfigure = mapFunction(replicasetManager, 'reStartAndConfigure');
 
     this.newDbInstanceWithDomainSocket = function(host, db_options, server_options) {
       return new Db('integration_tests', new ReplSet([new Server(host, server_options)], {poolSize:1}), db_options);      
@@ -196,6 +199,10 @@ var replica_set_config_auth = function(options) {
       self.setAuths = mapFunction(replicasetManager, 'setAuths');
       self.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
       self.addSecondary = mapFunction(replicasetManager, 'addSecondary');
+      self.reConfigure = mapFunction(replicasetManager, 'reConfigure');
+      self.startS = mapFunction(replicasetManager, 'start');
+      self.reStart = mapFunction(replicasetManager, 'reStart');
+      self.reStartAndConfigure = mapFunction(replicasetManager, 'reStartAndConfigure');
       
       // Start set
       replicasetManager.startSet(true, function(err, result) {

@@ -596,7 +596,6 @@ ReplicaSetManager.prototype.addSecondary = function(options, callback) {
                     if(members[i].name == (host + ":" + port) 
                       && members[i].state == 2) {
                       return callback(null, self.mongods[n]);
-                      process.exit(0)
                     }
                   }
 
@@ -677,6 +676,99 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
   } else {
     callback(new Error("no primary node found to do stepDownPrimary"), null);
   }
+}
+
+ReplicaSetManager.prototype.reStartAndConfigure = function(node_configs, callback) {
+  var self = this;
+
+  if(typeof node_configs == 'function') {
+    callback = node_configs;
+    node_configs = {};
+  }
+
+  // Number of retries
+  var retries = self.retries;  
+
+  // Get the primary
+  this.primary(function(err, primary) {
+
+    // Get the configuration
+    var connection = new Db("local", new Server(primary.split(":")[0], parseInt(primary.split(":")[1], 10), {
+        ssl:self.ssl
+      , auto_reconnect:true
+      , poolSize:1
+      , sslKey:self.ssl_client_pem
+      , sslCert:self.ssl_client_pem
+    }), {w:0}).open(function(err, db) {
+      if(err) return callback(err);
+
+      // Authenticate if needed
+      _authenticateIfNeeded(self, db, function(err, result) {
+        if(err) return callback(err);
+
+        // Get the current configuration        
+        db.collection('system.replset').findOne({}, function(err, doc) {
+          if(err) return callback(err);
+
+          // Iterate over all the member docs and apply and config changes
+          for(var i = 0; i < doc.members.length; i++) {
+            var member = doc.members[i];
+
+            // Add config variables
+            if(node_configs[member.host]) {
+              for(var name in node_configs[member.host]) {
+                member[name] = node_configs[member.host][name];
+              }
+            }
+          }
+
+          // Update the document version
+          doc.version = doc.version + 1;
+
+          // Re configure
+          db.admin().command({replSetReconfig: doc}, function(err, result) {
+            // Ensure severs are back and running
+            // self.ensureUp(callback);
+            var checkHealthy = function() {
+              // Wait for the secondary to come up properly
+              db.admin().command({"replSetGetStatus": 1}, function(_err, _doc) {
+                // Adjust the number of retries
+                retries = retries - 1;
+                // No more retries
+                if(retries == 0) return callback(new Error("Failed to add Secondary server"));
+
+                if(_err) {
+                  return setTimeout(checkHealthy, 1000);
+                }
+
+                // if(_err) return callback(_err);
+                _doc = _doc.documents[0];
+
+                var members = _doc.members;
+                var health_members = 0;
+
+                // Go over find the server and check the state
+                for(var i = 0; i < members.length; i++) {
+                  // console.log(members[i])
+                  if(members[i].health == 1) {
+                    health_members = health_members + 1;
+                  }
+                }
+
+                if(health_members == members.length) {
+                  return callback(null);
+                }
+
+                // Execute again
+                setTimeout(checkHealthy, 1000);
+              });                
+            }
+            setTimeout(checkHealthy, 1000);
+          });
+        });
+      });
+    });
+  });
 }
 
 var reStart = ReplicaSetManager.prototype.reStart = function(node, callback) {
