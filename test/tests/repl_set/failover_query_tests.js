@@ -54,6 +54,7 @@ exports['Should Correctly Collect ping information from servers'] = function(con
 exports['Should correctly pick a statistics strategy for secondary'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , ReplSetServers = mongo.ReplSetServers
+    , ReadPreference = mongo.ReadPreference
     , Server = mongo.Server
     , Db = mongo.Db;
 
@@ -75,7 +76,7 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
   test.ok(replSet.strategyInstance instanceof StatisticsStrategy);
 
   // Set read preference
-  replSet.setReadPreference(Server.READ_SECONDARY);
+  replSet.setReadPreference(ReadPreference.SECONDARY);
   // Open the database
   var db = new Db('integration_test_', replSet, {w:0});
   // Trigger test once whole set is up
@@ -102,12 +103,18 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
 
               // Total number of entries done
               var totalNumberOfStrategyEntries = 0;
+              
               // Check that we have correct strategy objects
               var keys = Object.keys(replSet._state.secondaries);
+              console.dir("===== keys")
+              console.dir(keys)
               for(var i = 0; i < keys.length; i++) {
                 var server = replSet._state.secondaries[keys[i]];
+                console.dir("server.queryStats.numDataValues = " + server.queryStats.numDataValues)
                 totalNumberOfStrategyEntries += server.queryStats.numDataValues;
               }
+
+              console.dir("replSet._state.master.queryStats.numDataValues = " + replSet._state.master.queryStats.numDataValues)
 
               db.close();
               console.dir(totalNumberOfStrategyEntries)
