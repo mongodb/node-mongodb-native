@@ -41,6 +41,7 @@ var replica_set_config = function(options) {
     this.start = function(callback) {
       replicasetManager.startSet(true, function(err, result) {
         if(err) throw err;
+        // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% replicaset.start")
 
         // Set up the replicaset
         var replSet = new ReplSet( [
@@ -53,12 +54,15 @@ var replica_set_config = function(options) {
 
         self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
         self._db.open(function(err, _db) {
+          // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% replicaset.start :: 0")
           var db2 = _db.db('node-native-test');
           db2.addUser("me", "secret", {w:3}, function(err, result) {
+            // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% replicaset.start :: 1")
+            // console.dir(err)
             if(err) throw err;
             callback();
           });
-        })
+        });
       });
     }
 
