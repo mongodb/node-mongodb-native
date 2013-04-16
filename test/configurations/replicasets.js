@@ -21,7 +21,7 @@ var replica_set_config = function(options) {
     // Setting up replicaset options
     var repl_options = { 
         retries:120, secondary_count:2
-      , passive_count:0, arbiter_count:0
+      , passive_count:0, arbiter_count:1
       , start_port: this.startPort
       , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
     }
@@ -41,7 +41,7 @@ var replica_set_config = function(options) {
     this.start = function(callback) {
       replicasetManager.startSet(true, function(err, result) {
         if(err) throw err;
-        console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% replicaset.start :: " + replicasetManager.name)
+        // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% replicaset.start :: " + replicasetManager.name)
 
         // Set up the replicaset
         var replSet = new ReplSet( [
@@ -49,7 +49,7 @@ var replica_set_config = function(options) {
                 new Server( replicasetManager.host, replicasetManager.ports[0]),
                 new Server( replicasetManager.host, replicasetManager.ports[2])
               ],
-              {rs_name:replicasetManager.name, haInterval: 500, strategy: "none"}
+              {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none"}
             );
 
         self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
@@ -69,6 +69,7 @@ var replica_set_config = function(options) {
     // Test suite stop
     this.stop = function(callback) {
       replicasetManager.killAll(function(err) {
+        // console.log("============================== killed all replicaset instances")
         callback();
       });
     };
@@ -115,6 +116,7 @@ var replica_set_config = function(options) {
     
     this.teardown = function(callback) { 
       replicasetManager.restartKilledNodes(function() {
+      // replicasetManager.startSet(true, function(err, result) {
         callback();
       });
     };

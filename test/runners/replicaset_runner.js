@@ -36,12 +36,12 @@ module.exports = function(configurations) {
     .add("replica_set",
       [
           '/test/tests/repl_set/reconnect_tests.js'
-        , '/test/tests/repl_set/connecting_tests.js'
-        , '/test/tests/repl_set/secondary_queries_tests.js'
-        , '/test/tests/repl_set/mongoclient_tests.js'
-        , '/test/tests/repl_set/read_preferences_tests.js'
-        , '/test/tests/repl_set/read_preferences_spec_tests.js'
-        , '/test/tests/repl_set/failover_query_tests.js'
+        // , '/test/tests/repl_set/connecting_tests.js'
+        // , '/test/tests/repl_set/secondary_queries_tests.js'
+        // , '/test/tests/repl_set/mongoclient_tests.js'
+        // , '/test/tests/repl_set/read_preferences_tests.js'
+        // , '/test/tests/repl_set/read_preferences_spec_tests.js'
+        // , '/test/tests/repl_set/failover_query_tests.js'
       ]
     );
 

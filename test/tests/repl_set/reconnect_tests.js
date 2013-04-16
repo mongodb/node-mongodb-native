@@ -144,15 +144,24 @@ exports['Should correctly query after primary comes back up'] = function(configu
       // Kill the primary
       configuration.killPrimary(9, {killNodeWaitTime:0}, function(node) {
 
+        console.log("=============================================== 0")
         // Ok let's execute same query a couple of times
         collection.find({}).toArray(function(err, items) {
+          console.log("=============================================== 1")
           test.ok(err != null);
 
           collection.find({}).toArray(function(err, items) {
+          // collection.find({}).setReadPreference('primaryPreferred').toArray(function(err, items) {
+            console.log("=============================================== 2")
+            console.dir(err)
+            console.dir(items)
             test.equal(null, err);
             test.equal(1, items.length);
 
             collection.find({}).toArray(function(err, items) {
+              console.log("=============================================== 3")
+              console.dir(err)
+              console.dir(items)
               test.ok(err == null);
               test.equal(1, items.length);
               test.done();
@@ -185,6 +194,7 @@ exports['Should work correctly with inserts after bringing master back'] = funct
 
         // Kill the primary
         configuration.killPrimary(function(node) {
+          // console.log("========================================= primary down")
 
           // Execute a set of inserts
           Step(
@@ -198,6 +208,7 @@ exports['Should work correctly with inserts after bringing master back'] = funct
             },
 
             function finishUp(err, values) {
+              // console.log("========================================= primary down 0")
               if(err != null) console.log(err.stack)
               // Restart the old master and wait for the sync to happen
               configuration.restartKilledNodes(function(err, result) {
@@ -250,26 +261,26 @@ exports['Should work correctly with inserts after bringing master back'] = funct
   });
 }
 
-/**
- * @ignore
- */
-exports['Should not timeout'] = function(configuration, test) {
-  var db = configuration.db();
-  var collection = db.collection('shouldnottimeout');
+// /**
+//  * @ignore
+//  */
+// exports['Should not timeout'] = function(configuration, test) {
+//   var db = configuration.db();
+//   var collection = db.collection('shouldnottimeout');
 
-  configuration.killPrimary(2, function(node) {
-    var pending = 2;
+//   configuration.killPrimary(2, function(node) {
+//     var pending = 2;
 
-    collection.update({name: 'a'}, {'$inc': {v: 1}}, {upsert: true, w:1}, done);
-    collection.findOne({name: 'a'}, done);
+//     collection.update({name: 'a'}, {'$inc': {v: 1}}, {upsert: true, w:1}, done);
+//     collection.findOne({name: 'a'}, done);
 
-    function done (err, result) {
-      console.log('should not timeout: ' + pending);
-      if (--pending) return;
-      test.done();
-    }
-  });
-}
+//     function done (err, result) {
+//       console.log('should not timeout: ' + pending);
+//       if (--pending) return;
+//       test.done();
+//     }
+//   });
+// }
 
 
 

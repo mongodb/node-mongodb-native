@@ -431,6 +431,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
         // We have a connection, execute command and update server object
         if(err == null && connection != null) {
           _authenticateIfNeeded(self, connection, function() {
+            // console.log("========================== ensure up :: " + connection.port)
             // Check repl set get status
             connection.admin().command({"replSetGetStatus": 1}, function(err, object) {              
               // Close connection
@@ -439,6 +440,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
               var documents = object.documents;
               // Get status object
               var status = documents[0];
+              // console.dir(status)
 
               // If no members set
               if(status["members"] == null || err != null) {
@@ -503,6 +505,9 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
 
 // Restart
 ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
+  // console.log("======================================================== RESTART KILLED NODES")
+  // console.log("======================================================== RESTART KILLED NODES")
+  // console.log("======================================================== RESTART KILLED NODES")
   var self = this;
 
   var nodes = Object.keys(self.mongods).filter(function(key) {
@@ -510,7 +515,7 @@ ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
   });
 
   var numberOfNodes = nodes.length;
-  if(numberOfNodes == 0) return callback();
+  if(numberOfNodes == 0) return self.ensureUp(callback);
 
   // Restart all the number of nodes
   for(var i = 0; i < numberOfNodes; i++) {    
