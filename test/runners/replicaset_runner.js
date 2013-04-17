@@ -21,7 +21,7 @@ module.exports = function(configurations) {
     // Add configurations to the test runner
     .configurations(configurations)
     // The number of parallel contexts we are running with
-    .parallelContexts(1)
+    .parallelContexts(4)
     // Parallelize at test or file level
     .parallelizeAtLevel(ParallelRunner.TEST)
     // Execute all tests serially in each context
@@ -36,12 +36,12 @@ module.exports = function(configurations) {
     .add("replica_set",
       [
           '/test/tests/repl_set/reconnect_tests.js'
-        // , '/test/tests/repl_set/connecting_tests.js'
-        // , '/test/tests/repl_set/secondary_queries_tests.js'
-        // , '/test/tests/repl_set/mongoclient_tests.js'
-        // , '/test/tests/repl_set/read_preferences_tests.js'
-        // , '/test/tests/repl_set/read_preferences_spec_tests.js'
-        // , '/test/tests/repl_set/failover_query_tests.js'
+        , '/test/tests/repl_set/connecting_tests.js'
+        , '/test/tests/repl_set/secondary_queries_tests.js'
+        , '/test/tests/repl_set/mongoclient_tests.js'
+        , '/test/tests/repl_set/read_preferences_tests.js'
+        , '/test/tests/repl_set/read_preferences_spec_tests.js'
+        , '/test/tests/repl_set/failover_query_tests.js'
       ]
     );
 

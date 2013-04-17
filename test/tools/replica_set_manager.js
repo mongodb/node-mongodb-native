@@ -525,10 +525,61 @@ ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
       numberOfNodes = numberOfNodes - 1;
 
       if(numberOfNodes === 0) {
-        self.ensureUp(callback);
+        self.ensureUp(function(err, result) {
+
+          // Let's make sure all the nodes are correctly marked
+          // _rearrange_nodes(self, function() {
+            callback(err, result);
+          // })
+        });
       }
     });
   }
+}
+
+var _rearrange_nodes = function(self, callback) {
+  // Execute add server command
+  var mongoObject = self.mongods[0];
+  var host = mongoObject.host;
+  var port = mongoObject.port;
+
+  // Get the configuration
+  new Db("local", new Server(host, parseInt(port, 10), {
+      ssl:self.ssl
+    , poolSize:1
+    , sslKey:self.ssl_client_pem
+    , sslCert:self.ssl_client_pem
+  }), {w:0}).open(function(err, db) {
+    if(err) return callback(err);
+    console.log("_rearrange_nodes ============================================== 0")
+
+    // Authenticate if needed
+    _authenticateIfNeeded(self, db, function(err, result) {
+      if(err) return callback(err);
+      console.log("_rearrange_nodes ============================================== 1")
+
+      // Get the current configuration        
+      db.admin().command({"replSetGetStatus": 1}, function(err, doc) {
+      // db.collection('system.replset').findOne({}, function(err, doc) {
+        db.close();
+
+        if(err) return callback(err);
+        doc = doc.documents[0];
+
+        console.log("_rearrange_nodes ============================================== 2")
+        console.dir(err)
+        console.dir(doc)
+
+        console.log("_rearrange_nodes ============================================== 3")
+        var keys = Object.keys(self.mongods);
+        for(var i = 0; i < keys.length; i++) {
+          console.dir(self.mongods[keys[i]])
+        }
+        // process.exit(0);
+        callback(null, null);
+      });
+    });
+  });
 }
 
 ReplicaSetManager.prototype.addSecondary = function(options, callback) {
@@ -589,7 +640,11 @@ ReplicaSetManager.prototype.addSecondary = function(options, callback) {
               var checkHealthy = function() {
                 // Wait for the secondary to come up properly
                 db.admin().command({"replSetGetStatus": 1}, function(_err, _doc) {
-                  if(_err) return callback(_err);
+                  if(_err) {
+                    db.close();
+                    return callback(_err);
+                  }
+
                   _doc = _doc.documents[0];
 
                   var members = _doc.members;
@@ -600,12 +655,16 @@ ReplicaSetManager.prototype.addSecondary = function(options, callback) {
                   for(var i = 0; i < members.length; i++) {
                     if(members[i].name == (host + ":" + port) 
                       && members[i].state == 2) {
+                      db.close();
                       return callback(null, self.mongods[n]);
                     }
                   }
 
                   // No more retries
-                  if(retries == 0) return callback(new Error("Failed to add Secondary server"));
+                  if(retries == 0) {
+                    db.close();                    
+                    return callback(new Error("Failed to add Secondary server"));
+                  }
 
                   // Execute again
                   setTimeout(checkHealthy, 1000);
@@ -663,7 +722,7 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
           return callback(null, connection);
         } else {
           // Close the connection
-          if(connection != null) connection.close();
+          db.close();
           // Adjust the number of retries
           numberOfRetries = numberOfRetries - 1;
           // If we have no more retries fail
@@ -709,11 +768,17 @@ ReplicaSetManager.prototype.reStartAndConfigure = function(node_configs, callbac
 
       // Authenticate if needed
       _authenticateIfNeeded(self, db, function(err, result) {
-        if(err) return callback(err);
+        if(err) {
+          db.close();
+          return callback(err);
+        }
 
         // Get the current configuration        
         db.collection('system.replset').findOne({}, function(err, doc) {
-          if(err) return callback(err);
+          if(err) {
+            db.close();
+            return callback(err);
+          }
 
           // Iterate over all the member docs and apply and config changes
           for(var i = 0; i < doc.members.length; i++) {
@@ -761,6 +826,8 @@ ReplicaSetManager.prototype.reStartAndConfigure = function(node_configs, callbac
                 }
 
                 if(health_members == members.length) {
+                  // Close the server
+                  db.close();
                   return callback(null);
                 }
 

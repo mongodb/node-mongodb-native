@@ -3,23 +3,14 @@ var ImmutablePreCursor = function() {
 
 ImmutablePreCursor.prototype.match = function(match) {
   return {match: match, sort:this.sort, limit:this.limit};
-  // var new_object = this.clone();
-  // new_object.match = match;
-  // return new_object;
 }
 
 ImmutablePreCursor.prototype.sort = function(sort) {
   return {match: this.match, sort:sort, limit:this.limit};
-  // var new_object = this.clone();
-  // new_object.sort = sort;
-  // return new_object;
 }
 
 ImmutablePreCursor.prototype.limit = function(limit) {
   return {match: this.match, sort:this.sort, limit:limit};
-  // var new_object = this.clone();
-  // new_object.limit = limit;
-  // return new_object;
 }
 
 var Collection = function() {  

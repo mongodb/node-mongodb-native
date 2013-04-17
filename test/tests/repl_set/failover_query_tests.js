@@ -103,8 +103,8 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
               // console.log("=============================================== 6")
               // console.dir(err)
               // console.dir(items)
-              // test.equal(null, err);
-              // test.equal(4, items.length);
+              test.equal(null, err);
+              test.equal(4, items.length);
 
               // Total number of entries done
               var totalNumberOfStrategyEntries = 0;

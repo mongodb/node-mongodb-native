@@ -166,6 +166,11 @@ exports['Should emit close no callback'] = function(configuration, test) {
   );
 
   new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
+    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 1")
+    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 1")
+    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 1")
+    // console.dir(err)
+
     test.equal(null, err);
     var dbCloseCount = 0, serverCloseCount = 0;
     db.on('close', function() { ++dbCloseCount; });
@@ -293,6 +298,13 @@ exports['Should connect with primary stepped down'] = function(configuration, te
 
       new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
         test.ok(err == null);
+        // console.log("====================================================")
+        // console.dir(Object.keys(p_db.serverConfig._state.addresses))
+        // console.dir(Object.keys(p_db.serverConfig._state.secondaries))
+        // console.dir(p_db.serverConfig._state.master != null)
+        // if(p_db.serverConfig._state.master)
+        //   console.dir(p_db.serverConfig._state.master.isConnected())
+
         test.equal(true, p_db.serverConfig.isConnected());
 
         p_db.close();
@@ -363,6 +375,10 @@ exports['Should connect with secondary node killed'] = function(configuration, t
 
     var db = new Db('integration_test_', replSet, {w:0});
     db.open(function(err, p_db) {
+      // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 0")
+      // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 0")
+      // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 0")
+      // console.dir(err)
       test.ok(err == null);
       test.equal(true, p_db.serverConfig.isConnected());
 
@@ -401,33 +417,6 @@ exports['Should connect with primary node killed'] = function(configuration, tes
   });
 }
 
-exports['Should correctly be able to use port accessors'] = function(configuration, test) {
-  var mongo = configuration.getMongoPackage()
-    , ReplSetServers = mongo.ReplSetServers
-    , Server = mongo.Server
-    , Db = mongo.Db;
-
-  // Replset start port
-  var replicasetManager = configuration.getReplicasetManager();
-  // Replica configuration
-  var replSet = new ReplSetServers( [
-      new Server(replicasetManager.host, replicasetManager.ports[0]),
-      new Server(replicasetManager.host, replicasetManager.ports[1]),
-      new Server(replicasetManager.host, replicasetManager.ports[2])
-    ],
-    {rs_name:replicasetManager.name}
-  );
-
-  var db = new Db('integration_test_', replSet, {w:0});
-  db.open(function(err, p_db) {
-    test.equal(replSet.host, p_db.serverConfig.primary.host);
-    test.equal(replSet.port, p_db.serverConfig.primary.port);
-
-    p_db.close();
-    test.done();
-  })
-}
-
 exports['Should correctly emit open signal and full set signal'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , ReplSetServers = mongo.ReplSetServers
@@ -463,71 +452,6 @@ exports['Should correctly emit open signal and full set signal'] = function(conf
   db.open(function(err, p_db) {})
 }
 
-exports['Should correctly connect'] = function(configuration, test) {
-  var mongo = configuration.getMongoPackage()
-    , ReplSetServers = mongo.ReplSetServers
-    , Server = mongo.Server
-    , Db = mongo.Db;
-
-  // Replset start port
-  var replicasetManager = configuration.getReplicasetManager();
-
-  // Replica configuration
-  var replSet = new ReplSetServers( [
-      new Server(replicasetManager.host, replicasetManager.ports[0]),
-      new Server(replicasetManager.host, replicasetManager.ports[1]),
-      new Server(replicasetManager.host, replicasetManager.ports[2])
-    ],
-    {rs_name:replicasetManager.name, connectArbiter:true}
-  );
-
-  // Replica configuration
-  var replSet2 = new ReplSetServers( [
-      new Server(replicasetManager.host, replicasetManager.ports[0]),
-      new Server(replicasetManager.host, replicasetManager.ports[1]),
-      new Server(replicasetManager.host, replicasetManager.ports[2])
-    ],
-    {rs_name:replicasetManager.name, connectArbiter:true}
-  );
-
-  var db = new Db('integration_test_', replSet, {w:0});
-  db.open(function(err, p_db) {
-    test.equal(true, p_db.serverConfig.isConnected());
-
-    // Test primary
-    replicasetManager.primary(function(err, primary) {
-      test.notEqual(null, primary);
-      test.equal(primary, p_db.serverConfig.primary.host + ":" + p_db.serverConfig.primary.port);
-
-      // Perform tests
-      replicasetManager.secondaries(function(err, items) {
-        // Test if we have the right secondaries
-        test.deepEqual(items.sort(), p_db.serverConfig.allSecondaries.map(function(item) {
-                                        return item.host + ":" + item.port;
-                                      }).sort());
-
-        // Test if we have the right arbiters
-        replicasetManager.arbiters(function(err, items) {
-          test.deepEqual(items.sort(), p_db.serverConfig.arbiters.map(function(item) {
-                                          return item.host + ":" + item.port;
-                                        }).sort());
-          // Force new instance
-          var db2 = new Db('integration_test_', replSet2, {w:0});
-          db2.open(function(err, p_db2) {
-            if(err != null) debug("shouldCorrectlyConnect :: " + inspect(err));
-
-            test.equal(true, p_db2.serverConfig.isConnected());
-            // Close top instance
-            db.close();
-            db2.close();
-            test.done();
-          });
-        });
-      });
-    })
-  });
-}
-
 exports['ReplSet honors connectTimeoutMS option'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
     , ReplSetServers = mongo.ReplSetServers
@@ -542,7 +466,6 @@ exports['ReplSet honors connectTimeoutMS option'] = function(configuration, test
     {socketOptions: {connectTimeoutMS: 200} }
   );
 
-  test.equal(200, set.socketOptions.connectTimeoutMS)
-  test.equal(200, set._connectTimeoutMS)
+  test.equal(200, set.options.socketOptions.connectTimeoutMS)
   test.done();
 }

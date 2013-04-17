@@ -49,7 +49,7 @@ var replica_set_config = function(options) {
                 new Server( replicasetManager.host, replicasetManager.ports[0]),
                 new Server( replicasetManager.host, replicasetManager.ports[2])
               ],
-              {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none"}
+              {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none", closeServerOnEachHA: true}
             );
 
         self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
@@ -57,6 +57,7 @@ var replica_set_config = function(options) {
           // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% replicaset.start :: 0")
           var db2 = _db.db('node-native-test');
           db2.addUser("me", "secret", {w:3}, function(err, result) {
+            self._db.close();
             // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% replicaset.start :: 1")
             // console.dir(err)
             if(err) throw err;
@@ -111,11 +112,25 @@ var replica_set_config = function(options) {
 
     // Pr test functions
     this.setup = function(callback) { 
-      callback(); 
+      var replSet = new ReplSet( [
+              new Server( replicasetManager.host, replicasetManager.ports[1]),
+              new Server( replicasetManager.host, replicasetManager.ports[0]),
+              new Server( replicasetManager.host, replicasetManager.ports[2])
+            ],
+            {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none", closeServerOnEachHA: true}
+          );
+
+      self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
+      self._db.open(function(err, _db) {
+        callback(); 
+      });      
     }
     
     this.teardown = function(callback) { 
+      self._db.close();
+
       replicasetManager.restartKilledNodes(function() {
+      // replicasetManager.killAll(function() {
       // replicasetManager.startSet(true, function(err, result) {
         callback();
       });

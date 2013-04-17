@@ -491,7 +491,7 @@ exports['Should Correctly Use Secondary Server with Query when using NEAREST'] =
   // Open the database
   var db = new Db('integration_test_', replSet, {w:1});
   db.open(function(err, db) {
-      console.log("=========================================== ADJUST")
+      // console.log("=========================================== ADJUST")
     // Force selection of a secondary
     db.serverConfig._state.master.runtimeStats['pingMs'] = 5000;
     // Check that we get a secondary
@@ -499,12 +499,12 @@ exports['Should Correctly Use Secondary Server with Query when using NEAREST'] =
     var keys = Object.keys(db.serverConfig._state.secondaries);
     var found = false;
 
-    if(connection.socketOptions) {
-      console.log("===========================================")
-      console.log("connection.port :: " + connection.socketOptions.port)      
-    }
+    // if(connection.socketOptions) {
+    //   console.log("===========================================")
+    //   console.log("connection.port :: " + connection.socketOptions.port)      
+    // }
 
-    console.dir(keys)
+    // console.dir(keys)
 
     // for(var i = 0; i < keys.length; i++) {
     //   if(keys[i].indexOf(connection.socketOptions.port.toString()) != -1) found = true;
@@ -518,14 +518,8 @@ exports['Should Correctly Use Secondary Server with Query when using NEAREST'] =
       test.equal(null, err);    
 
       db.collection('nearest_collection_test').findOne({a:1}, function(err, doc) {
-        console.log("========================================")
-        console.dir(err)
-        console.dir(doc)
-
-
-
-        // test.equal(null, err);
-        // test.equal(1, doc.a);
+        test.equal(null, err);
+        test.equal(1, doc.a);
 
         db.close();
         test.done();
@@ -586,8 +580,8 @@ exports['Should Correctly Pick lowest ping time'] = function(configuration, test
     var connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST));
     // Should match the first secondary server
     var matching_server = db.serverConfig._state.secondaries[keys[0]];
-    console.log(matching_server.host + "=" + connection.socketOptions.host)
-    console.log(matching_server.port + "=" + connection.socketOptions.port)
+    // console.log(matching_server.host + "=" + connection.socketOptions.host)
+    // console.log(matching_server.port + "=" + connection.socketOptions.port)
 
     // Host and port should match
     test.equal(matching_server.host, connection.socketOptions.host);

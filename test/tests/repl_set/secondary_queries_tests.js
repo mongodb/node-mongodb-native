@@ -15,9 +15,9 @@ exports['Should Correctly group using replicaset'] = function(configuration, tes
       collection.group(['key'], {}, {sum:0}, function reduce(record, memo){
         memo.sum += record.x;
       }, true, function(err, items){
-        console.log("====================================================")
-        console.dir(err)
-        console.dir(items)
+        // console.log("====================================================")
+        // console.dir(err)
+        // console.dir(items)
         test.equal(null, err);
         test.equal(3, items.length);
         // process.exit(0);
@@ -154,9 +154,9 @@ exports['Should correctly read from secondary even if primary is down'] = functi
       
       // Run a simple query
       collection.findOne(function (err, doc) {
-        console.log("======================================== 0")
-        console.dir(err)
-        console.dir(doc)
+        // console.log("======================================== 0")
+        // console.dir(err)
+        // console.dir(doc)
         test.ok(err == null);
         test.ok(1, doc.a);
 
@@ -166,9 +166,9 @@ exports['Should correctly read from secondary even if primary is down'] = functi
 
           // Run a simple query
           collection.findOne(function (err, doc) {
-            console.log("======================================== 1")
-            console.dir(err)
-            console.dir(doc)
+            // console.log("======================================== 1")
+            // console.dir(err)
+            // console.dir(doc)
 
             test.ok(Object.keys(replSet._state.secondaries).length > 0);
             test.equal(null, err);
