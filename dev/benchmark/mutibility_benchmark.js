@@ -25,7 +25,7 @@ Collection.prototype.find = function() {
 var warm_up = 1000000;
 var benchmark_rounds = 1000000;
 
-// Benchmark Immutable (varm up)
+// Benchmark Immutable (warm up)
 for(var i = 0; i < warm_up; i++) {
   new Collection().find().match({a:1}).sort({a:-1}).limit(1000)
 }
@@ -73,7 +73,7 @@ Collection.prototype.find = function() {
 var warm_up = 1000000;
 var benchmark_rounds = 1000000;
 
-// Benchmark Immutable (varm up)
+// Benchmark Immutable (warm up)
 for(var i = 0; i < warm_up; i++) {
   new Collection().find().match({a:1}).sort({a:-1}).limit(1000)
 }

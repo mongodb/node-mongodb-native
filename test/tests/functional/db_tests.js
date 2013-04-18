@@ -78,7 +78,8 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(configuration, test) {
 
     // Add listener to close event
     automatic_connect_client.on("close", closeListener);
-    automatic_connect_client.close();
+    // Ensure death of server instance
+    automatic_connect_client.serverConfig.connectionPool.openConnections[0].connection.destroy();
   });
 }
 
@@ -1524,6 +1525,7 @@ exports.shouldCorrectlyReconnectWhenError = function(configuration, test) {
 
     db.open(function(err, _db) {
       test.ok(err != null);
+      db.close();
 
       test.done();
     })

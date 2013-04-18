@@ -9,8 +9,11 @@ var debug = require('util').debug,
   Server = require('../../lib/mongodb').Server;
 
 var ensureUp = function(host, port, number_of_retries, callback) {
-  var db = new Db('test', new Server(host, port, {socketOptions:{connectTimeoutMS: 1000}}), {w:1});
+  // console.log("===================================== ENSURE UP")
+  var db = new Db('test', new Server(host, port, {poolSize:1, socketOptions:{connectTimeoutMS: 1000}, auto_reconnect:false}), {w:1});
   db.open(function(err, result) {
+    db.close();
+
     if(err) {
       number_of_retries = number_of_retries - 1;
       if(number_of_retries == 0) return callback(new Error("Failed to connect to db"));
@@ -52,6 +55,7 @@ var ServerManager = exports.ServerManager = function(options) {
 
 // Start up the server instance
 ServerManager.prototype.start = function(killall, callback) {
+  // console.log("=============================================== SERVERMANAGER START")
   var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
@@ -85,6 +89,8 @@ ServerManager.prototype.start = function(killall, callback) {
             // Mark server as running
             self.up = true;
             self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
+            // console.log("=============================================== SERVERMANAGER START == END")
+
             // Callback
             callback();
           });
@@ -139,6 +145,7 @@ ServerManager.prototype.stop = function(signal, callback) {
 }
 
 ServerManager.prototype.killAll = function(callback) {
+  // console.log("=============================================== SERVERMANAGER KILLALL")
   exec('killall -9 mongod', function(err, stdout, stderr) {
     if(typeof callback == 'function') callback(null, null);
   });
@@ -152,7 +159,7 @@ var getPath = function(self, name) {
 // Generate start command
 var generateStartCmd = function(self, options) {  
   // Create boot command
-  var startCmd = "mongod --noprealloc --smallfiles --logpath '" + options['log_path'] + "' " +
+  var startCmd = "mongod --rest --noprealloc --smallfiles --logpath '" + options['log_path'] + "' " +
       " --dbpath " + options['db_path'] + " --port " + options['port'] + " --fork";
   startCmd = options['journal'] ? startCmd + " --journal" : startCmd;
   startCmd = options['auth'] ? startCmd + " --auth" : startCmd;

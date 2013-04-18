@@ -30,11 +30,11 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(configuration, te
           db2.on("close", function(err) {
             numberOfCloses = numberOfCloses + 1;              
             test.equal(2, numberOfCloses)
+            db2.close();
+            db.close();
             test.done();          
           });
                               
-          db.serverConfig.connectionPool.openConnections[0].connection.destroy();
-          
           // Kill server and end test
           db.serverConfig.connectionPool.openConnections[0].connection.destroy();
         });

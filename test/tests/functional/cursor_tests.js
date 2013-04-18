@@ -1430,7 +1430,7 @@ exports['cursor stream errors']= function(configuration, test) {
         function done (err) {
           ++finished;
           setTimeout(function () {
-            test.equal('no open connections', err.message);
+            test.equal('Connection was destroyed by application', err.message);
             test.equal(5, i);
             test.equal(1, closed);
             test.equal(1, finished);
@@ -1799,54 +1799,6 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = function(configuration, te
 
         stream.on('data', function(data) {
           test.ok(data != null);
-        });
-      });
-    });
-  });
-  // DOC_END
-}
-
-/**
- * A simple example showing the use of the cursor close function.
- *
- * @_class cursor
- * @_function close
- * @ignore
- */
-exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, test) {
-  var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-
-    // Create a lot of documents to insert
-    var docs = []
-    for(var i = 0; i < 100; i++) {
-      docs.push({'a':i})
-    }
-
-    // Create a collection
-    db.createCollection('test_close_function_on_cursor', function(err, collection) {
-      test.equal(null, err);
-
-      // Insert documents into collection
-      collection.insert(docs, {w:1}, function(err, ids) {
-        // Peform a find to get a cursor
-        var cursor = collection.find();
-
-        // Fetch the first object
-        cursor.nextObject(function(err, object) {
-          test.equal(null, err);
-
-          // Close the cursor, this is the same as reseting the query
-          cursor.close(function(err, result) {
-            test.equal(null, err);
-
-            db.close();
-            test.done();
-          });
         });
       });
     });
@@ -2239,4 +2191,52 @@ exports.shouldFailToTailANormalCollection = function(configuration, test) {
       test.done();
     });
   });
+}
+
+/**
+ * A simple example showing the use of the cursor close function.
+ *
+ * @_class cursor
+ * @_function close
+ * @ignore
+ */
+exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
+  // Establish connection to db
+  db.open(function(err, db) {
+
+    // Create a lot of documents to insert
+    var docs = []
+    for(var i = 0; i < 100; i++) {
+      docs.push({'a':i})
+    }
+
+    // Create a collection
+    db.createCollection('test_close_function_on_cursor', function(err, collection) {
+      test.equal(null, err);
+
+      // Insert documents into collection
+      collection.insert(docs, {w:1}, function(err, ids) {
+        // Peform a find to get a cursor
+        var cursor = collection.find();
+
+        // Fetch the first object
+        cursor.nextObject(function(err, object) {
+          test.equal(null, err);
+
+          // Close the cursor, this is the same as reseting the query
+          cursor.close(function(err, result) {
+            test.equal(null, err);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+  // DOC_END
 }

@@ -49,10 +49,11 @@ exports['Should connect to server using domain socket with undefined port'] = fu
  */
 exports['Should fail to connect using non-domain socket with undefined port'] = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var db = configuration.newDbInstanceWithDomainSocketAndPort("localhost", undefined, {w:1}, {poolSize: 1});
-
+  var Server = configuration.getMongoPackage().Server;
+  
   var error;
-  try {
+  try {    
+    new Server("localhost", undefined, {w:1});
     db.open(function(){});
   } catch (err){
     error = err;
