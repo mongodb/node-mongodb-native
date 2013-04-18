@@ -431,7 +431,6 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
         // We have a connection, execute command and update server object
         if(err == null && connection != null) {
           _authenticateIfNeeded(self, connection, function() {
-            // console.log("========================== ensure up :: " + connection.port)
             // Check repl set get status
             connection.admin().command({"replSetGetStatus": 1}, function(err, object) {              
               // Close connection
@@ -440,7 +439,6 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
               var documents = object.documents;
               // Get status object
               var status = documents[0];
-              // console.dir(status)
 
               // If no members set
               if(status["members"] == null || err != null) {
@@ -505,9 +503,6 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
 
 // Restart
 ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
-  // console.log("======================================================== RESTART KILLED NODES")
-  // console.log("======================================================== RESTART KILLED NODES")
-  // console.log("======================================================== RESTART KILLED NODES")
   var self = this;
 
   var nodes = Object.keys(self.mongods).filter(function(key) {
@@ -526,60 +521,11 @@ ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
 
       if(numberOfNodes === 0) {
         self.ensureUp(function(err, result) {
-
-          // Let's make sure all the nodes are correctly marked
-          // _rearrange_nodes(self, function() {
-            callback(err, result);
-          // })
+          callback(err, result);
         });
       }
     });
   }
-}
-
-var _rearrange_nodes = function(self, callback) {
-  // Execute add server command
-  var mongoObject = self.mongods[0];
-  var host = mongoObject.host;
-  var port = mongoObject.port;
-
-  // Get the configuration
-  new Db("local", new Server(host, parseInt(port, 10), {
-      ssl:self.ssl
-    , poolSize:1
-    , sslKey:self.ssl_client_pem
-    , sslCert:self.ssl_client_pem
-  }), {w:0}).open(function(err, db) {
-    if(err) return callback(err);
-    console.log("_rearrange_nodes ============================================== 0")
-
-    // Authenticate if needed
-    _authenticateIfNeeded(self, db, function(err, result) {
-      if(err) return callback(err);
-      console.log("_rearrange_nodes ============================================== 1")
-
-      // Get the current configuration        
-      db.admin().command({"replSetGetStatus": 1}, function(err, doc) {
-      // db.collection('system.replset').findOne({}, function(err, doc) {
-        db.close();
-
-        if(err) return callback(err);
-        doc = doc.documents[0];
-
-        console.log("_rearrange_nodes ============================================== 2")
-        console.dir(err)
-        console.dir(doc)
-
-        console.log("_rearrange_nodes ============================================== 3")
-        var keys = Object.keys(self.mongods);
-        for(var i = 0; i < keys.length; i++) {
-          console.dir(self.mongods[keys[i]])
-        }
-        // process.exit(0);
-        callback(null, null);
-      });
-    });
-  });
 }
 
 ReplicaSetManager.prototype.addSecondary = function(options, callback) {
@@ -609,6 +555,7 @@ ReplicaSetManager.prototype.addSecondary = function(options, callback) {
       // Get the configuration
       var connection = new Db("local", new Server(primary.split(":")[0], parseInt(primary.split(":")[1], 10), {
           ssl:self.ssl
+        , auto_reconnect:false
         , poolSize:1
         , sslKey:self.ssl_client_pem
         , sslCert:self.ssl_client_pem
@@ -708,6 +655,7 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
     var intervalId = setInterval(function() {
       var connection = new Db("replicaset_test", new Server(self.host, self.mongods[node]["port"], {
           ssl:self.ssl
+        , auto_reconnect:false
         , poolSize:1
         , sslKey:self.ssl_client_pem
         , sslCert:self.ssl_client_pem
@@ -721,8 +669,8 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
           // Callback as done
           return callback(null, connection);
         } else {
-          // Close the connection
-          db.close();
+          if(err == null && db != null)
+            db.close();
           // Adjust the number of retries
           numberOfRetries = numberOfRetries - 1;
           // If we have no more retries fail
@@ -759,7 +707,7 @@ ReplicaSetManager.prototype.reStartAndConfigure = function(node_configs, callbac
     // Get the configuration
     var connection = new Db("local", new Server(primary.split(":")[0], parseInt(primary.split(":")[1], 10), {
         ssl:self.ssl
-      , auto_reconnect:true
+      , auto_reconnect:false
       , poolSize:1
       , sslKey:self.ssl_client_pem
       , sslCert:self.ssl_client_pem
@@ -819,7 +767,6 @@ ReplicaSetManager.prototype.reStartAndConfigure = function(node_configs, callbac
 
                 // Go over find the server and check the state
                 for(var i = 0; i < members.length; i++) {
-                  // console.log(members[i])
                   if(members[i].health == 1) {
                     health_members = health_members + 1;
                   }
@@ -845,9 +792,6 @@ ReplicaSetManager.prototype.reStartAndConfigure = function(node_configs, callbac
 
 var reStart = ReplicaSetManager.prototype.reStart = function(node, callback) {
   var self = this;
-  // console.log("============================================================ restart")
-  // console.dir(self.mongods[node])
-  // console.dir(self.mongods[node]["db_path"])
   // Perform cleanup of directories
   exec("rm -rf " + self.mongods[node]["db_path"], function(err, stdout, stderr) {
     if(err != null) return callback(err, null);

@@ -19,7 +19,7 @@ exports['Should Correctly Collect ping information from servers'] = function(con
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
     ],
-    {rs_name:"replica-set-foo"}
+    {rs_name:replicasetManager.name}
   );
 
   // Set read preference
@@ -67,7 +67,7 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
     ],
-    {strategy:'statistical', rs_name:"replica-set-foo"}
+    {strategy:'statistical', rs_name:replicasetManager.name}
   );
 
   // console.log("=============================================== 0")

@@ -29,12 +29,10 @@ exports['Should retrieve correct count after primary killed'] = function(configu
     db.dropCollection('testsets', function(err, r) {
 
       var collection = db.collection('testsets');
-      // console.log("==================================================== 0")
       // Insert a dummy document
       collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
         test.equal(null, err);
 
-        // console.log("==================================================== 1")
         // Execute a count
         collection.count(function(err, c) {
           test.equal(null, err);
@@ -45,12 +43,10 @@ exports['Should retrieve correct count after primary killed'] = function(configu
 
           // Ensure replication happened in time
           setTimeout(function() {
-            // console.log("==================================================== 2")
             // Kill the primary
             configuration.killPrimary(function(node) {
               test.equal(null, err);
 
-              // console.log("==================================================== 3")
               collection.insert({a:30}, {w:1}, function(err, r) {
                 test.ok(err != null);
                 test.done();
@@ -67,9 +63,6 @@ exports['Should retrieve correct count after primary killed'] = function(configu
  * @ignore
  */
 exports['Should correctly throw timeout for replication to servers on inserts'] = function(configuration, test) {
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-  // console.log('Should correctly throw timeout for replication to servers on inserts')
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
   var db = configuration.db();
 
   // Drop collection on replicaset
@@ -78,8 +71,6 @@ exports['Should correctly throw timeout for replication to servers on inserts'] 
     var collection = db.collection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts');
     // Insert a dummy document
     collection.insert({a:20}, {w:7, wtimeout: 10000}, function(err, r) {
-      // console.log("==============================================")
-      // console.dir(err)
       test.ok(err != null);
       test.ok(err.err.indexOf("time") != -1);
       test.equal(true, err.wtimeout);
@@ -92,9 +83,6 @@ exports['Should correctly throw timeout for replication to servers on inserts'] 
  * @ignore
  */
 exports['Should correctly execute safe findAndModify'] = function(configuration, test) {
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-  // console.log('Should correctly execute safe findAndModify')
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
   var db = configuration.db();
 
   // Drop collection on replicaset
@@ -119,9 +107,6 @@ exports['Should correctly execute safe findAndModify'] = function(configuration,
  * @ignore
  */
 exports['Should correctly insert after primary comes back up'] = function(configuration, test) {
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-  // console.log('Should correctly insert after primary comes back up')
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
   var db = configuration.db();
   
   // Drop collection on replicaset
@@ -157,9 +142,6 @@ exports['Should correctly insert after primary comes back up'] = function(config
  * @ignore
  */
 exports['Should correctly query after primary comes back up'] = function(configuration, test) {
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-  // console.log('Should correctly query after primary comes back up')
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
   var db = configuration.db();
 
   // Drop collection on replicaset
@@ -173,24 +155,15 @@ exports['Should correctly query after primary comes back up'] = function(configu
       // Kill the primary
       configuration.killPrimary(9, {killNodeWaitTime:0}, function(node) {
 
-        // console.log("=============================================== 0")
         // Ok let's execute same query a couple of times
         collection.find({}).toArray(function(err, items) {
-          // console.log("=============================================== 1")
           test.ok(err != null);
 
           collection.find({}).toArray(function(err, items) {
-          // collection.find({}).setReadPreference('primaryPreferred').toArray(function(err, items) {
-            // console.log("=============================================== 2")
-            // console.dir(err)
-            // console.dir(items)
             test.equal(null, err);
             test.equal(1, items.length);
 
             collection.find({}).toArray(function(err, items) {
-              // console.log("=============================================== 3")
-              // console.dir(err)
-              // console.dir(items)
               test.ok(err == null);
               test.equal(1, items.length);
               test.done();
@@ -206,9 +179,6 @@ exports['Should correctly query after primary comes back up'] = function(configu
  * @ignore
  */
 exports['Should work correctly with inserts after bringing master back'] = function(configuration, test) {
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-  // console.log('Should work correctly with inserts after bringing master back')
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
   var db = configuration.db();
 
   // Drop collection on replicaset
@@ -216,7 +186,7 @@ exports['Should work correctly with inserts after bringing master back'] = funct
 
     var collection = db.collection('shouldWorkCorrectlyWithInserts');
     // Insert a dummy document
-    collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {
+    collection.insert({a:20}, {safe: {w:'majority', wtimeout: 30000}}, function(err, r) {
       test.equal(null, err);
 
       // Execute a count
@@ -226,7 +196,6 @@ exports['Should work correctly with inserts after bringing master back'] = funct
 
         // Kill the primary
         configuration.killPrimary(function(node) {
-          // console.log("========================================= primary down")
 
           // Execute a set of inserts
           Step(
@@ -240,7 +209,6 @@ exports['Should work correctly with inserts after bringing master back'] = funct
             },
 
             function finishUp(err, values) {
-              // console.log("========================================= primary down 0")
               if(err != null) console.log(err.stack)
               // Restart the old master and wait for the sync to happen
               configuration.restartKilledNodes(function(err, result) {
@@ -297,9 +265,6 @@ exports['Should work correctly with inserts after bringing master back'] = funct
  * @ignore
  */
 exports['Should not timeout'] = function(configuration, test) {
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-  // console.log('Should not timeout')
-  // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
   var db = configuration.db();
   var collection = db.collection('shouldnottimeout');
 
@@ -310,7 +275,6 @@ exports['Should not timeout'] = function(configuration, test) {
     collection.findOne({name: 'a'}, done);
 
     function done (err, result) {
-      // console.log('should not timeout: ' + pending);
       if (--pending) return;
       test.done();
     }

@@ -485,7 +485,7 @@ exports['Should Correctly Use Secondary Server with Query when using NEAREST'] =
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
     ],
-    {readPreference: ReadPreference.NEAREST}
+    {readPreference: ReadPreference.NEAREST, rs_name:replicasetManager.name}
   );
 
   // Open the database
@@ -544,7 +544,7 @@ exports['Should Correctly Pick lowest ping time'] = function(configuration, test
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
     ],
-    {strategy:'ping', secondaryAcceptableLatencyMS: 5}
+    {strategy:'ping', secondaryAcceptableLatencyMS: 5, rs_name:replicasetManager.name}
   );
 
   // Open the database

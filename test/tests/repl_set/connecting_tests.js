@@ -4,11 +4,15 @@ exports['Should throw error due to shared connection usage'] = function(configur
     , Server = mongo.Server
     , Db = mongo.Db;
   
+    // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+
   var replSet = new ReplSetServers([
       new Server('localhost', 28390),
       new Server('localhost', 28391),
       new Server('localhost', 28392)
     ]
+    , {rs_name:replicasetManager.name}    
   );
 
   try {
@@ -25,12 +29,16 @@ exports['Should throw error due to mongos connection usage'] = function(configur
     , Server = mongo.Server
     , Mongos = mongo.Mongos;
 
+  // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+
   try {
     var replSet = new ReplSetServers([
         new Server('localhost', 28390),
         new Server('localhost', 28391),
         new Mongos([new Server('localhost', 28392)])
       ]
+    , {rs_name:replicasetManager.name}    
     );
   } catch(err) {
     test.done();
@@ -43,12 +51,16 @@ exports['Should correctly handle error when no server up in replicaset'] = funct
     , Server = mongo.Server
     , Db = mongo.Db;
 
+  // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+
   // Replica configuration
   var replSet = new ReplSetServers([
       new Server('localhost', 28390),
       new Server('localhost', 28391),
       new Server('localhost', 28392)
     ]
+    , {rs_name:replicasetManager.name}    
   );
 
   var db = new Db('integration_test_', replSet, {w:0});
@@ -78,6 +90,7 @@ exports['Should correctly connect with default replicasetNoOption'] = function(c
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
     ]
+    , {rs_name:replicasetManager.name}    
   );
 
   // DOC_LINE var replSet = new ReplSetServers([
@@ -109,8 +122,8 @@ exports['Should correctly connect with default replicaset'] = function(configura
       new Server(replicasetManager.host, replicasetManager.ports[0]),
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
-    ],
-    {}
+    ]
+    , {rs_name:replicasetManager.name}
   );
 
   var db = new Db('integration_test_', replSet, {w:0});
@@ -136,7 +149,7 @@ exports['Should correctly connect with default replicaset and socket options set
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
     ],
-    {socketOptions:{keepAlive:100}}
+    {socketOptions:{keepAlive:100}, rs_name:replicasetManager.name}
   );
 
   var db = new Db('integration_test_', replSet, {w:0});
@@ -162,7 +175,7 @@ exports['Should emit close no callback'] = function(configuration, test) {
       new Server(replicasetManager.host, replicasetManager.ports[0]),
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
-    ], {}
+    ], {rs_name:replicasetManager.name}
   );
 
   new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
@@ -174,6 +187,8 @@ exports['Should emit close no callback'] = function(configuration, test) {
     test.equal(null, err);
     var dbCloseCount = 0, serverCloseCount = 0;
     db.on('close', function() { ++dbCloseCount; });
+    // Force a close on a socket
+    // db.serverConfig._state.addresses[replicasetManager.host  + ":" + replicasetManager.ports[0]].connectionPool.openConnections[0].connection.destroy();
     db.close();
 
     setTimeout(function() {
@@ -197,7 +212,7 @@ exports['Should emit close with callback'] = function(configuration, test) {
       new Server(replicasetManager.host, replicasetManager.ports[0]),
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
-    ], {}
+    ], {rs_name:replicasetManager.name}
   );
 
   new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
@@ -458,12 +473,15 @@ exports['ReplSet honors connectTimeoutMS option'] = function(configuration, test
     , Server = mongo.Server
     , Db = mongo.Db;
 
+  // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+
   var set = new ReplSetServers([
       new Server('localhost', 27107),
       new Server('localhost', 27018),
       new Server('localhost', 27019)
     ],
-    {socketOptions: {connectTimeoutMS: 200} }
+    {socketOptions: {connectTimeoutMS: 200}, rs_name:replicasetManager.name }
   );
 
   test.equal(200, set.options.socketOptions.connectTimeoutMS)
