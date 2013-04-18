@@ -116,22 +116,23 @@ exports['Should correctly connect with default replicaset'] = function(configura
 
   // Replset start port
   var replicasetManager = configuration.getReplicasetManager();
+  replicasetManager.killSecondary(function() {
+    // Replica configuration
+    var replSet = new ReplSetServers([
+        new Server(replicasetManager.host, replicasetManager.ports[0]),
+        new Server(replicasetManager.host, replicasetManager.ports[1]),
+        new Server(replicasetManager.host, replicasetManager.ports[2])
+      ]
+      , {rs_name:replicasetManager.name}
+    );
 
-  // Replica configuration
-  var replSet = new ReplSetServers([
-      new Server(replicasetManager.host, replicasetManager.ports[0]),
-      new Server(replicasetManager.host, replicasetManager.ports[1]),
-      new Server(replicasetManager.host, replicasetManager.ports[2])
-    ]
-    , {rs_name:replicasetManager.name}
-  );
-
-  var db = new Db('integration_test_', replSet, {w:0});
-  db.open(function(err, p_db) {
-    test.equal(null, err);
-    p_db.close();
-    test.done();
-  })
+    var db = new Db('integration_test_', replSet, {w:0});
+    db.open(function(err, p_db) {
+      test.equal(null, err);
+      p_db.close();
+      test.done();
+    })
+  });
 }
 
 exports['Should correctly connect with default replicaset and socket options set'] = function(configuration, test) {
@@ -258,6 +259,7 @@ exports['Should correctly pass error when wrong replicaSet'] = function(configur
 var retries = 120;
 
 var ensureConnection = function(mongo, replicasetManager, numberOfTries, callback) {
+  // console.log("=========================== ensureConnection")
   var ReplSetServers = mongo.ReplSetServers
     , Server = mongo.Server
     , Db = mongo.Db;
@@ -268,13 +270,15 @@ var ensureConnection = function(mongo, replicasetManager, numberOfTries, callbac
       new Server(replicasetManager.host, replicasetManager.ports[1]),
       new Server(replicasetManager.host, replicasetManager.ports[2])
     ],
-    {rs_name:replicasetManager.name}
+    {rs_name:replicasetManager.name, poolSize:1}
   );
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
   // Open the db
-  new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
-    if(p_db) p_db.close();
+  var db = new Db('integration_test_', replSet, {w:0});
+  db.open(function(err, p_db) {
+    // Close the connection
+    db.close();
 
     if(err != null) {
       // Wait for a sec and retry

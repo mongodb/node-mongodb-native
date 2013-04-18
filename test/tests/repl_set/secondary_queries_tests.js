@@ -15,8 +15,6 @@ exports['Should Correctly group using replicaset'] = function(configuration, tes
       collection.group(['key'], {}, {sum:0}, function reduce(record, memo){
         memo.sum += record.x;
       }, true, function(err, items){
-        console.log("====================================================")
-        console.dir(err)
         // console.dir(items)
         test.equal(null, err);
         test.equal(3, items.length);

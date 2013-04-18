@@ -105,22 +105,22 @@ var replica_set_config = function(options) {
 
     // Pr test functions
     this.setup = function(callback) { 
-      var replSet = new ReplSet( [
-              new Server( replicasetManager.host, replicasetManager.ports[1]),
-              new Server( replicasetManager.host, replicasetManager.ports[0]),
-              new Server( replicasetManager.host, replicasetManager.ports[2])
-            ],
-            {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none"}
-          );
+      // var replSet = new ReplSet( [
+      //         new Server( replicasetManager.host, replicasetManager.ports[1]),
+      //         new Server( replicasetManager.host, replicasetManager.ports[0]),
+      //         new Server( replicasetManager.host, replicasetManager.ports[2])
+      //       ],
+      //       {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none"}
+      //     );
 
-      self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
-      self._db.open(function(err, _db) {
+      // self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
+      // self._db.open(function(err, _db) {
         callback();
-      });
+      // });
     }
     
     this.teardown = function(callback) { 
-      self._db.close();
+      // self._db.close();
 
       replicasetManager.restartKilledNodes(function() {
         callback();
