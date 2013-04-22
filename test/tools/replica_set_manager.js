@@ -102,6 +102,8 @@ ReplicaSetManager.prototype.startSet = function(killall, callback) {
   callback = args.pop();
   killall = args.length ? args.shift() : true;
   debug("** Starting a replica set with " + this.count + " nodes");
+  // Reset configuration for replicaset
+  this.config = {"_id": this.name, "version": 1, "members": []};
 
   // Kill all existing mongod instances
   exec(killall ? 'killall -9 mongod' : '', function(err, stdout, stderr) {
@@ -156,8 +158,6 @@ ReplicaSetManager.prototype.initiate = function(callback) {
   // Get master connection
   self.getConnection(function(err, connection) {
     if(err != null) return callback(err, null);
-    // console.log("-------------------------------------------------------- config")
-    // console.dir(self.config)
     // Set replica configuration
     connection.admin().command({replSetInitiate:self.config}, function(err, result) {
       // Close connection
@@ -416,6 +416,9 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
       if(!self.up) process.stdout.write(".");
       // Attemp to retrieve a connection
       self.getConnection(function(err, connection) {
+        // console.log("========================= ensureUp")
+        // console.dir(err)
+
         // Adjust the number of retries
         numberOfInitiateRetries = numberOfInitiateRetries - 1
         // If have no more retries stop
@@ -439,6 +442,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
               var documents = object.documents;
               // Get status object
               var status = documents[0];
+              // console.dir(status)
 
               // If no members set
               if(status["members"] == null || err != null) {
@@ -555,7 +559,7 @@ ReplicaSetManager.prototype.addSecondary = function(options, callback) {
       // Get the configuration
       var connection = new Db("local", new Server(primary.split(":")[0], parseInt(primary.split(":")[1], 10), {
           ssl:self.ssl
-        , auto_reconnect:false
+        , auto_reconnect:true
         , poolSize:1
         , socketOptions: {
             connectTimeoutMS: 30000
@@ -668,7 +672,7 @@ ReplicaSetManager.prototype.getConnection = function(node, callback) {
     var intervalId = setInterval(function() {
       var connection = new Db("replicaset_test", new Server(self.host, self.mongods[node]["port"], {
           ssl:self.ssl
-        , auto_reconnect:false
+        , auto_reconnect:true
         , socketOptions: {
             connectTimeoutMS: 30000
           , socketTimeoutMS: 30000
@@ -724,7 +728,7 @@ ReplicaSetManager.prototype.reStartAndConfigure = function(node_configs, callbac
     // Get the configuration
     var connection = new Db("local", new Server(primary.split(":")[0], parseInt(primary.split(":")[1], 10), {
         ssl:self.ssl
-      , auto_reconnect:false
+      , auto_reconnect:true
         , socketOptions: {
             connectTimeoutMS: 30000
           , socketTimeoutMS: 30000

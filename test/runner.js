@@ -47,17 +47,17 @@ if(argv.t == 'functional') {
   var environment = argv.e ? argv.e : 'single_server'
   standalone_runners.runner.run(environment, run_options);
 } else if(argv.t == 'auth') {
-  // Trap end of tests
-  standalone_runners.runner_auth.on('end', function() {
+  // // Trap end of tests
+  // standalone_runners.runner_auth.on('end', function() {
     replicaset_runners.runner_auth.run('replica_set_auth', run_options);
-  });
+  // });
 
-  replicaset_runners.runner_auth.on('end', function() {
-    sharded_runners.runner_auth.run('sharded_auth', run_options);
-  });
+  // replicaset_runners.runner_auth.on('end', function() {
+  //   sharded_runners.runner_auth.run('sharded_auth', run_options);
+  // });
 
-  // Start chain of auth tests
-  standalone_runners.runner_auth.run('single_server_auth', run_options);
+  // // Start chain of auth tests
+  // standalone_runners.runner_auth.run('single_server_auth', run_options);
 } else if(argv.t == 'ssl') {
   ssl_runners.runner.run('none', run_options);
 } else if(argv.t == 'sharded') {

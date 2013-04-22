@@ -16,7 +16,6 @@ var single_server_config = function(options) {
     var dbs = [];
     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-    // db.serverConfig.TAGG = "SINGLE_SERVER"
 
     // Server Manager options
     var server_options = {
@@ -36,14 +35,12 @@ var single_server_config = function(options) {
       serverManager.start(true, function(err) {
         if(err) throw err;
         db.open(function(err, result) {
-        //   if(err) throw err;
           callback();
         })
       });
     }
 
     this.restart = function(callback) {
-      console.log("======================= restart")
       self.stop(function() {
         self.start(callback);
       });
@@ -51,7 +48,6 @@ var single_server_config = function(options) {
 
     // Test suite stop
     this.stop = function(callback) {
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! FUCK")
       db.close(function() {
         // process.exit(0)
         serverManager.killAll(function(err) {
@@ -61,12 +57,11 @@ var single_server_config = function(options) {
     };
 
     // Pr test functions
-    this.setup = function(callback) { callback(); }
+    this.setup = function(callback) { 
+      callback(); 
+    }
+    
     this.teardown = function(callback) { 
-      // while(dbs.length > 0) {
-      //   console.log("======= close")
-      //   dbs.shift().close();
-      // }
       callback(); 
     };
 
@@ -76,21 +71,15 @@ var single_server_config = function(options) {
     }
 
     this.newDbInstanceWithDomainSocket = function(host, db_options, server_options) {
-      var db = new Db('integration_tests', new Server(host, server_options), db_options);
-      // dbs.push(db);
-      return db;
+      return new Db('integration_tests', new Server(host, server_options), db_options);
     }
 
     this.newDbInstanceWithDomainSocketAndPort = function(host, port, db_options, server_options) {
-      var db = new Db('integration_tests', new Server(host, port, server_options), db_options);
-      // dbs.push(db);
-      return db;
+      return new Db('integration_tests', new Server(host, port, server_options), db_options);
     }
 
     this.newDbInstance = function(db_options, server_options) {
-      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, server_options), db_options);
-      // dbs.push(db);
-      return db;
+      return new Db('integration_tests', new Server("127.0.0.1", 27017, server_options), db_options);
     }
 
     // Returns a db
