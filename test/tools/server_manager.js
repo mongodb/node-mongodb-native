@@ -8,10 +8,32 @@ var debug = require('util').debug,
   Db = require('../../lib/mongodb').Db,
   Server = require('../../lib/mongodb').Server;
 
-var ensureUp = function(host, port, number_of_retries, callback) {
-  // console.log("===================================== ENSURE UP")
-  var db = new Db('test', new Server(host, port, {poolSize:1, socketOptions:{connectTimeoutMS: 1000}, auto_reconnect:false}), {w:1});
+var ensureUp = function(self, host, port, number_of_retries, callback) {
+  // console.log("===================================== ENSURE UP :: " + port)
+  var options = {poolSize:1, socketOptions:{connectTimeoutMS: 1000}, auto_reconnect:false};
+  // console.dir(this.ssl)
+
+ // *  - **sslValidate** {Boolean, default:false}, validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher)
+ // *  - **sslCA** {Array, default:null}, Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)
+ // *  - **sslCert** {Buffer/String, default:null}, String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
+ // *  - **sslKey** {Buffer/String, default:null}, String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
+ // *  - **sslPass** {Buffer/String, default:null}, String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher)
+
+  if(self.ssl) {
+    options.ssl = self.ssl;
+    options.sslValidate = self.sslValidate || false;
+    options.sslCA = self.sslCA || null;
+    options.sslKey = self.sslKey || null;
+    options.sslCert = self.sslCert || null;
+    options.sslPass = self.sslPass || null;
+  }
+
+  // console.dir(options)
+
+  var db = new Db('test', new Server(host, port, options), {w:1});
   db.open(function(err, result) {
+    // console.log("==============================")
+    // console.dir(err)
     db.close();
 
     if(err) {
@@ -19,7 +41,7 @@ var ensureUp = function(host, port, number_of_retries, callback) {
       if(number_of_retries == 0) return callback(new Error("Failed to connect to db"));
       
       setTimeout(function() {
-        return ensureUp(host, port, number_of_retries, callback);
+        return ensureUp(self, host, port, number_of_retries, callback);
       }, 500);
     } else {
       return callback(null, null);
@@ -45,6 +67,14 @@ var ServerManager = exports.ServerManager = function(options) {
   this.ssl_ca = options['ssl_ca'] != null ? options['ssl_ca'] : null;
   this.ssl_crl = options['ssl_crl'] != null ? options['ssl_crl'] : null;
 
+  // SSL Ensure Options
+  this.sslValidate = options['sslValidate'] || false;
+  this.sslCA = options['sslCA'] || null;
+  this.sslKey = options['sslKey'] || null;
+  this.sslCert = options['sslCert'] || null;
+  this.sslPass = options['sslPass'] || null;
+
+  // Purge the directories
   this.purgedirectories = options['purgedirectories'] != null ? options['purgedirectories'] : true;
   this.configServer = options['configserver'] != null ? options['configserver'] : false;
 
@@ -84,7 +114,7 @@ ServerManager.prototype.start = function(killall, callback) {
           });
 
           // Wait for a half a second then save the pids
-          ensureUp(self.host, self.port, 100, function(err, result) {
+          ensureUp(self, self.host, self.port, 100, function(err, result) {
             if(err) throw err;
             // Mark server as running
             self.up = true;
@@ -109,7 +139,7 @@ ServerManager.prototype.start = function(killall, callback) {
       });
 
       // Wait for a half a second then save the pids
-      ensureUp(self.host, self.port, 100, function(err, result) {
+      ensureUp(self, self.host, self.port, 100, function(err, result) {
         if(err) throw err;
         // Mark server as running
         self.up = true;

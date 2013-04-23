@@ -32,11 +32,13 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.ssl_ca = options['ssl_ca'] != null ? options['ssl_ca'] : null;
   this.ssl_crl = options['ssl_crl'] != null ? options['ssl_crl'] : null;
 
+  // Set up for creating different topologies
   this.arbiterCount = options["arbiter_count"] != null ? options["arbiter_count"] : 2;
   this.secondaryCount = options["secondary_count"] != null ? options["secondary_count"] : 1;
   this.passiveCount = options["passive_count"] != null ? options["passive_count"] : 1;
   this.primaryCount = options["primary_count"] != null ? options["primary_count"] : 1;
   this.keyPath = [process.cwd(), "test", "tools", "keyfile.txt"].join("/");
+  
   try {
     fs.chmodSync(this.keyPath, 0600);
   } catch(err) {
