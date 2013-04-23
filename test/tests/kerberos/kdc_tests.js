@@ -51,16 +51,25 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
     test.equal(null, err);
     test.ok(db != null);
 
-    // Close the connection
-    db.close();
-
     // Attempt an operation
     db.admin().command({listDatabases:1}, function(err, docs) {
       test.equal(null, err);
       test.ok(docs.documents[0].databases);
 
-      db.close();
-      test.done();
+      // Close the connection
+      // db.close();
+      db.serverConfig.connectionPool.openConnections[0].connection.destroy();
+
+      setTimeout(function() {
+        // Attempt an operation
+        db.admin().command({listDatabases:1}, function(err, docs) {
+          test.equal(null, err);
+          test.ok(docs.documents[0].databases);
+
+          db.close();
+          test.done();
+        });
+      }, 1000);
     });
   });
 }
