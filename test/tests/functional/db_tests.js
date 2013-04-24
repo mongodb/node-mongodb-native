@@ -61,7 +61,7 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(configuration, test) {
     // Listener for closing event
     var closeListener = function(has_error) {
       // Let's insert a document
-      collection = automatic_connect_client.collection('test_object_id_generation.data2');
+      var collection = automatic_connect_client.collection('test_object_id_generation.data2');
       // Insert another test document and collect using ObjectId
       collection.insert({"name":"Patty", "age":34}, {w:1}, function(err, ids) {
         test.equal(1, ids.length);
@@ -77,7 +77,7 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(configuration, test) {
     };
 
     // Add listener to close event
-    automatic_connect_client.on("close", closeListener);
+    automatic_connect_client.once("close", closeListener);
     // Ensure death of server instance
     automatic_connect_client.serverConfig.connectionPool.openConnections[0].connection.destroy();
   });
@@ -398,8 +398,8 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configurat
   db.open(function(err, db) {
     test.equal(null, err);
 
+    db.on('close', test.done.bind(test));
     db.close();
-    test.done();
   });
   // DOC_END
 }
