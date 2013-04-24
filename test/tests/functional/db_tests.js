@@ -411,7 +411,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configurat
  * @_function close
  * @ignore
  */
-exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configuration, test) {
+exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
