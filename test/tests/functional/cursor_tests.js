@@ -1903,7 +1903,7 @@ exports.shouldCloseDeadTailableCursors = function(configuration, test) {
           test.equal(null, err);
         });
 
-        stream.on('close', function () {
+        stream.on('end', function () {
           // this is what we need
           closed = true;
         });
