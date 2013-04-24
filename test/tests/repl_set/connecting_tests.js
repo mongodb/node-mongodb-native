@@ -510,11 +510,18 @@ exports['ReplSet should emit close event when whole set is down'] = function(con
     {rs_name:replicasetManager.name}
   );
 
+  var count = 0;
   var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(_err, _db) {
     test.equal(null, _err);
 
     var addresses = replSet._state.addresses;
+    var db2 = db.db('test');
+    db2.once("close", function() {
+      count = count + 1;
+      test.equal(2, count);
+      test.done();    
+    });
     
     // Close all the server connections
     for(var name in addresses) {
@@ -524,6 +531,6 @@ exports['ReplSet should emit close event when whole set is down'] = function(con
   });
 
   db.once("close", function() {
-    test.done();    
+    count = count + 1;
   });
 }

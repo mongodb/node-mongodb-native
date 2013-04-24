@@ -418,7 +418,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
       if(!self.up) process.stdout.write(".");
       // Attemp to retrieve a connection
       self.getConnection(function(err, connection) {
-        // console.log("========================= ensureUp")
+        // console.log("========================= ensureUp :: " + numberOfInitiateRetries + " :: " + self.startPort)
         // console.dir(err)
 
         // Adjust the number of retries
@@ -427,10 +427,16 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
         if(numberOfInitiateRetries == 0) {
           // Close connection
           if(connection != null) connection.close();
-          // Set that we are done
-          done = true;
-          // perform callback
-          return callback(new Error("Servers did not come up again"), null);
+
+          // Attempt to restart the whole set
+          return self.startSet(true, function(err, result) {
+            if(err) {
+              // Set that we are done
+              done = true;
+              // perform callback
+              return callback(new Error("Servers did not come up again"), null);              
+            }
+          });
         }
 
         // We have a connection, execute command and update server object
@@ -509,6 +515,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
 
 // Restart
 ReplicaSetManager.prototype.restartKilledNodes = function(callback) {
+  // console.log("[ReplicaSetManager] :: restartKilledNodes :: " + this.startPort)
   var self = this;
 
   var nodes = Object.keys(self.mongods).filter(function(key) {
