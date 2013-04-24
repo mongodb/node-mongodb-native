@@ -1007,6 +1007,7 @@ exports['Should Correctly Authenticate using different user source database and 
                   // Should fail as we are not authenticated to write to t collection
                   db.collection('t').insert({a:1}, function(err, result) {
                     test.equal(null, err);
+                    // process.exit(0)
                     // Set auths for the configuration
                     configuration.setAuths("admin", "admin");
 
