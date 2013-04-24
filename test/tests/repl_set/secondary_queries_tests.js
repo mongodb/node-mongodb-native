@@ -103,18 +103,18 @@ exports['Should allow to force read with primary'] = function(configuration, tes
 
   var db = configuration.db();  
   var collection = db.collection('shouldAllowToForceReadWithPrimary');
-  console.log("=============================================================== 0")
+  // console.log("=============================================================== 0")
 
   // Insert a document
   collection.insert({a:1}, {w:2, wtimeout:10000}, function(err, result) {
     test.equal(null, err);
-    console.log("=============================================================== 1")
+    // console.log("=============================================================== 1")
     
     // Force read using primary
     var cursor = collection.find({}, {readPreference: ReadPreference.PRIMARY});
     // Get documents
     cursor.toArray(function(err, items) {
-      console.log("=============================================================== 2")
+      // console.log("=============================================================== 2")
       test.equal(1, items.length);          
       test.equal(1, items[0].a);
       test.done();

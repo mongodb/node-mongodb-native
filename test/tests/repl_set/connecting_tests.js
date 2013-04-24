@@ -491,3 +491,39 @@ exports['ReplSet honors connectTimeoutMS option'] = function(configuration, test
   test.equal(200, set.options.socketOptions.connectTimeoutMS)
   test.done();
 }
+
+exports['ReplSet should emit close event when whole set is down'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
+
+  // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+
+  // Replica configuration
+  var replSet = new ReplSetServers( [
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ],
+    {rs_name:replicasetManager.name}
+  );
+
+  var db = new Db('integration_test_', replSet, {w:0});
+  db.open(function(_err, _db) {
+    test.equal(null, _err);
+
+    var addresses = replSet._state.addresses;
+    
+    // Close all the server connections
+    for(var name in addresses) {
+      if(addresses[name].connectionPool.openConnections.length > 0)
+        addresses[name].connectionPool.openConnections[0].connection.destroy();
+    }
+  });
+
+  db.once("close", function() {
+    test.done();    
+  });
+}
