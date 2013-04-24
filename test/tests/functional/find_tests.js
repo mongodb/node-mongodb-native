@@ -666,6 +666,40 @@ exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = functi
 }
 
 /**
+ * Test findAndModify a document with no write concern set
+ * @ignore
+ */
+exports.shouldCorrectlyFindAndModifyWithNoGetLastErrorChainedW0 = function(configuration, test) {
+  var client = configuration.db();
+  client.createCollection('shouldCorrectlyFindAndModifyWithNoGetLastErrorChained', function(err, collection) {
+    // Let's modify the document in place
+    collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true, 'fields': {a:1}, w:0}, function(err, updated_doc) {
+      test.done();
+    });
+
+    // Check if we have a chained command or not
+    var ids = client.serverConfig._callBackStore.notRepliedToIds();
+    test.equal(1, ids.length);
+    test.ok(client.serverConfig._callBackStore.callbackInfo(ids[0].chained) == undefined);
+  });
+}
+
+exports.shouldCorrectlyFindAndModifyWithNoGetLastErrorChainedSafe = function(configuration, test) {
+  var client = configuration.db();
+  client.createCollection('shouldCorrectlyFindAndModifyWithNoGetLastErrorChainedSafe', function(err, collection) {
+    // Let's modify the document in place
+    collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true, 'fields': {a:1}, safe:false}, function(err, updated_doc) {
+      test.done();
+    });
+
+    // Check if we have a chained command or not
+    var ids = client.serverConfig._callBackStore.notRepliedToIds();
+    test.equal(1, ids.length);
+    test.ok(client.serverConfig._callBackStore.callbackInfo(ids[0].chained) == undefined);
+  });
+}
+
+/**
  * @ignore
  */
 exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = function(configuration, test) {
