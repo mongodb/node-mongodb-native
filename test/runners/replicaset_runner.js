@@ -21,7 +21,7 @@ module.exports = function(configurations) {
     // Add configurations to the test runner
     .configurations(configurations)
     // The number of parallel contexts we are running with
-    .parallelContexts(3)
+    .parallelContexts(1)
     // Parallelize at test or file level
     .parallelizeAtLevel(ParallelRunner.TEST)
     // Execute all tests serially in each context

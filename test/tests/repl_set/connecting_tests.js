@@ -513,6 +513,8 @@ exports['ReplSet should emit close event when whole set is down'] = function(con
   var count = 0;
   var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(_err, _db) {
+    console.log("---------------------------------------------------------------")
+    console.dir(_err)
     test.equal(null, _err);
 
     var addresses = replSet._state.addresses;

@@ -456,7 +456,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
               var documents = object.documents;
               // Get status object
               var status = documents[0];
-              // console.dir(status)
+              console.dir(status)
 
               // If no members set
               if(status["members"] == null || err != null) {
@@ -475,7 +475,9 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
               } else {
                 // Establish all health member
                 var healthyMembers = status.members.filter(function(element) {
-                  return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1
+                  return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1 
+                    && element['lastHeartbeatMessage'] == null
+                    && element['errmsg'] == null
                 });
 
                 var stateCheck = status["members"].filter(function(element, indexOf, array) {
