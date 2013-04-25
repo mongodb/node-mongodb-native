@@ -418,23 +418,29 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
       if(!self.up) process.stdout.write(".");
       // Attemp to retrieve a connection
       self.getConnection(function(err, connection) {
-        // console.log("========================= ensureUp :: " + numberOfInitiateRetries + " :: " + self.startPort)
+        console.log("[ensureUp] - " + self.startPort + " :: " + numberOfInitiateRetries)
         // console.dir(err)
 
         // Adjust the number of retries
         numberOfInitiateRetries = numberOfInitiateRetries - 1
         // If have no more retries stop
         if(numberOfInitiateRetries == 0) {
+          console.log("[ensureUp] - " + self.startPort + " :: restarting set")
+
           // Close connection
           if(connection != null) connection.close();
 
           // Attempt to restart the whole set
           return self.startSet(true, function(err, result) {
             if(err) {
+              console.log("[ensureUp] - " + self.startPort + " :: failed to restart set")
               // Set that we are done
               done = true;
               // perform callback
               return callback(new Error("Servers did not come up again"), null);              
+            } else {
+              console.log("[ensureUp] - " + self.startPort + " :: restart successful")
+              return callback(null, null);
             }
           });
         }
