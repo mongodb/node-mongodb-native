@@ -456,7 +456,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
               var documents = object.documents;
               // Get status object
               var status = documents[0];
-              console.dir(status)
+              // console.dir(status)
 
               // If no members set
               if(status["members"] == null || err != null) {
