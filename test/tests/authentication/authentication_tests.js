@@ -276,12 +276,10 @@ exports.shouldCorrectlyAuthenticate = function(configuration, test) {
       test.ok(result2);
 
       db1.collection('stuff2', function(err, collection) {
-        // collection.insert({a:2}, {safe:{j:true}}, self.parallel());
         collection.insert({a:2}, {j:true}, self.parallel());
       });
 
       db2.collection('stuff2', function(err, collection) {
-        // collection.insert({a:2}, {safe:{j:true}}, self.parallel());
         collection.insert({a:2}, {j:true}, self.parallel());
       });
     },

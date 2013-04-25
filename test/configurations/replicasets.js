@@ -20,7 +20,7 @@ var replica_set_config = function(options) {
     this.startPort = startPort;
     // Setting up replicaset options
     var repl_options = { 
-        retries:120, secondary_count:2
+        retries:60, secondary_count:2
       , passive_count:0, arbiter_count:1
       , start_port: this.startPort
       , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
@@ -41,14 +41,13 @@ var replica_set_config = function(options) {
     this.start = function(callback) {
       replicasetManager.startSet(true, function(err, result) {
         if(err) throw err;
-
         // Set up the replicaset
         var replSet = new ReplSet( [
                 new Server( replicasetManager.host, replicasetManager.ports[1]),
                 new Server( replicasetManager.host, replicasetManager.ports[0]),
                 new Server( replicasetManager.host, replicasetManager.ports[2])
               ],
-              {rs_name:replicasetManager.name, haInterval: 500}
+              {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none"}
             );
 
         self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
@@ -58,13 +57,13 @@ var replica_set_config = function(options) {
             if(err) throw err;
             callback();
           });
-        })
+        });
       });
     }
 
     // Test suite stop
     this.stop = function(callback) {
-      replicasetManager.killAll(function(err) {
+      replicasetManager.killSetServers(function(err) {
         callback();
       });
     };
@@ -88,6 +87,9 @@ var replica_set_config = function(options) {
     this.setAuths = mapFunction(replicasetManager, 'setAuths');
     this.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
     this.addSecondary = mapFunction(replicasetManager, 'addSecondary');
+    this.startS = mapFunction(replicasetManager, 'start');
+    this.reStart = mapFunction(replicasetManager, 'reStart');
+    this.reStartAndConfigure = mapFunction(replicasetManager, 'reStartAndConfigure');
 
     this.newDbInstanceWithDomainSocket = function(host, db_options, server_options) {
       return new Db('integration_tests', new ReplSet([new Server(host, server_options)], {poolSize:1}), db_options);      
@@ -103,10 +105,23 @@ var replica_set_config = function(options) {
 
     // Pr test functions
     this.setup = function(callback) { 
-      callback(); 
+      // var replSet = new ReplSet( [
+      //         new Server( replicasetManager.host, replicasetManager.ports[1]),
+      //         new Server( replicasetManager.host, replicasetManager.ports[0]),
+      //         new Server( replicasetManager.host, replicasetManager.ports[2])
+      //       ],
+      //       {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none"}
+      //     );
+
+      // self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
+      // self._db.open(function(err, _db) {
+        callback();
+      // });
     }
     
     this.teardown = function(callback) { 
+      // self._db.close();
+
       replicasetManager.restartKilledNodes(function() {
         callback();
       });
@@ -179,24 +194,28 @@ var replica_set_config_auth = function(options) {
       }
     }
 
+    // Set up replicaset manager
+    replicasetManager = new ReplicaSetManager(repl_options);
+    // Set up methods 
+    self.killPrimary = mapFunction(replicasetManager, 'killPrimary');
+    self.restartKilledNodes = mapFunction(replicasetManager, 'restartKilledNodes');
+    self.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
+    self.getNodeFromPort = mapFunction(replicasetManager, 'getNodeFromPort');
+    self.kill = mapFunction(replicasetManager, 'kill');
+    self.killSecondary = mapFunction(replicasetManager, 'killSecondary');
+    self.primary = mapFunction(replicasetManager, 'primary');
+    self.secondaries = mapFunction(replicasetManager, 'secondaries');
+    self.arbiters = mapFunction(replicasetManager, 'arbiters');    
+    self.setAuths = mapFunction(replicasetManager, 'setAuths');
+    self.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
+    self.addSecondary = mapFunction(replicasetManager, 'addSecondary');
+    self.reConfigure = mapFunction(replicasetManager, 'reConfigure');
+    self.startS = mapFunction(replicasetManager, 'start');
+    self.reStart = mapFunction(replicasetManager, 'reStart');
+    self.reStartAndConfigure = mapFunction(replicasetManager, 'reStartAndConfigure');
+
     // Pr test functions
-    this.setup = function(callback) { 
-      // Set up replicaset manager
-      replicasetManager = new ReplicaSetManager(repl_options);
-      // Set up methods 
-      self.killPrimary = mapFunction(replicasetManager, 'killPrimary');
-      self.restartKilledNodes = mapFunction(replicasetManager, 'restartKilledNodes');
-      self.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
-      self.getNodeFromPort = mapFunction(replicasetManager, 'getNodeFromPort');
-      self.kill = mapFunction(replicasetManager, 'kill');
-      self.killSecondary = mapFunction(replicasetManager, 'killSecondary');
-      self.primary = mapFunction(replicasetManager, 'primary');
-      self.secondaries = mapFunction(replicasetManager, 'secondaries');
-      self.arbiters = mapFunction(replicasetManager, 'arbiters');    
-      self.setAuths = mapFunction(replicasetManager, 'setAuths');
-      self.stepDownPrimary = mapFunction(replicasetManager, 'stepDownPrimary');
-      self.addSecondary = mapFunction(replicasetManager, 'addSecondary');
-      
+    this.setup = function(callback) {   
       // Start set
       replicasetManager.startSet(true, function(err, result) {
         if(err) throw err;

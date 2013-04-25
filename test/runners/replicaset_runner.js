@@ -21,7 +21,7 @@ module.exports = function(configurations) {
     // Add configurations to the test runner
     .configurations(configurations)
     // The number of parallel contexts we are running with
-    .parallelContexts(4)
+    .parallelContexts(1)
     // Parallelize at test or file level
     .parallelizeAtLevel(ParallelRunner.TEST)
     // Execute all tests serially in each context
@@ -47,34 +47,36 @@ module.exports = function(configurations) {
 
   // After each test is done
   repl_set_parallel_tests_runner.on('test_done', function(test_statistics) {
-      // Unpack statistics
-      var time_spent = test_statistics.end_time.getTime() - test_statistics.start_time.getTime();
-      var test = test_statistics.name;
-      var file = test_statistics.file_name;
-      var config = test_statistics.config_name;
+    // console.log("==================================== TEST_DONE")
+    // Unpack statistics
+    var time_spent = test_statistics.end_time.getTime() - test_statistics.start_time.getTime();
+    var test = test_statistics.name;
+    var file = test_statistics.file_name;
+    var config = test_statistics.config_name;
 
-      // Add to bucket
-      if(!Array.isArray(buckets[test_statistics.configuration.startPort])) {
-        buckets[test_statistics.configuration.startPort] = [];
-      }
+    // Add to bucket
+    if(!Array.isArray(buckets[test_statistics.configuration.startPort])) {
+      buckets[test_statistics.configuration.startPort] = [];
+    }
 
-      // Stat object
-      var stat = {
-          port: test_statistics.configuration.startPort
-        , time: time_spent
-        , test: test
-        , file: file
-        , config: config
-      };
+    // Stat object
+    var stat = {
+        port: test_statistics.configuration.startPort
+      , time: time_spent
+      , test: test
+      , file: file
+      , config: config
+    };
 
-      // Save statistics about test to it's bucket
-      buckets[test_statistics.configuration.startPort].push(stat);
-      // Save to list
-      test_results.push(stat);
+    // Save statistics about test to it's bucket
+    buckets[test_statistics.configuration.startPort].push(stat);
+    // Save to list
+    test_results.push(stat);
   });
 
   // After test suite is finished
   repl_set_parallel_tests_runner.on('end', function() {
+    // console.log("==================================== TEST_END")
     for(var name in buckets) {
       var tests = buckets[name];
       var total_time = 0;

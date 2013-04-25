@@ -15,8 +15,10 @@ exports['Should Correctly group using replicaset'] = function(configuration, tes
       collection.group(['key'], {}, {sum:0}, function reduce(record, memo){
         memo.sum += record.x;
       }, true, function(err, items){
+        // console.dir(items)
         test.equal(null, err);
         test.equal(3, items.length);
+        // process.exit(0);
         test.done();
       })
     });
@@ -101,15 +103,18 @@ exports['Should allow to force read with primary'] = function(configuration, tes
 
   var db = configuration.db();  
   var collection = db.collection('shouldAllowToForceReadWithPrimary');
+  // console.log("=============================================================== 0")
 
   // Insert a document
   collection.insert({a:1}, {w:2, wtimeout:10000}, function(err, result) {
     test.equal(null, err);
+    // console.log("=============================================================== 1")
     
     // Force read using primary
     var cursor = collection.find({}, {readPreference: ReadPreference.PRIMARY});
     // Get documents
     cursor.toArray(function(err, items) {
+      // console.log("=============================================================== 2")
       test.equal(1, items.length);          
       test.equal(1, items[0].a);
       test.done();

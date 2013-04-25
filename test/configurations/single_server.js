@@ -13,6 +13,7 @@ var single_server_config = function(options) {
   return function() {
     var self = this;
     options = options != null ? options : {};
+    var dbs = [];
     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
 
@@ -33,9 +34,7 @@ var single_server_config = function(options) {
     this.start = function(callback) {
       serverManager.start(true, function(err) {
         if(err) throw err;
-
         db.open(function(err, result) {
-          if(err) throw err;
           callback();
         })
       });
@@ -49,14 +48,22 @@ var single_server_config = function(options) {
 
     // Test suite stop
     this.stop = function(callback) {
-      serverManager.killAll(function(err) {
-        callback();
-      });
+      db.close(function() {
+        // process.exit(0)
+        serverManager.killAll(function(err) {
+          callback();
+        });        
+      })
     };
 
     // Pr test functions
-    this.setup = function(callback) { callback(); }
-    this.teardown = function(callback) { callback(); };
+    this.setup = function(callback) { 
+      callback(); 
+    }
+    
+    this.teardown = function(callback) { 
+      callback(); 
+    };
 
     // Returns the package for using Mongo driver classes
     this.getMongoPackage = function() {
@@ -64,16 +71,15 @@ var single_server_config = function(options) {
     }
 
     this.newDbInstanceWithDomainSocket = function(host, db_options, server_options) {
-      return new Db('integration_tests', new Server(host, server_options), db_options);      
+      return new Db('integration_tests', new Server(host, server_options), db_options);
     }
 
     this.newDbInstanceWithDomainSocketAndPort = function(host, port, db_options, server_options) {
-      return new Db('integration_tests', new Server(host, port, server_options), db_options);      
+      return new Db('integration_tests', new Server(host, port, server_options), db_options);
     }
 
     this.newDbInstance = function(db_options, server_options) {
-      return new Db('integration_tests', new Server("127.0.0.1", 27017,
-        server_options), db_options);      
+      return new Db('integration_tests', new Server("127.0.0.1", 27017, server_options), db_options);
     }
 
     // Returns a db

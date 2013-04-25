@@ -51,7 +51,7 @@ exports.shouldCorrectlyRetrieveErrorMessagesFromServer = function(configuration,
 
                         error_client.error(function(err, documents) {
                           test.ok(err instanceof Error);
-                          test.equal('no open connections', err.message);
+                          test.equal('Connection was destroyed by application', err.message);
                           test.done();
                         });
                       });
@@ -177,19 +177,19 @@ exports['safe mode should pass the disconnected error to the callback'] = functi
 
           collection.insert({ works: true }, { safe: true }, function (err) {
             test.ok(err instanceof Error);
-            test.equal('no open connections', err.message);
+            test.equal('Connection was destroyed by application', err.message);
 
             collection.update({ inserted: true }, { inserted: true, x: 1 }, { safe: true }, function (err) {
               test.ok(err instanceof Error);
-              test.equal('no open connections', err.message);
+              test.equal('Connection was destroyed by application', err.message);
 
               collection.remove({ inserted: true }, { safe: true }, function (err) {
                 test.ok(err instanceof Error);
-                test.equal('no open connections', err.message);
+                test.equal('Connection was destroyed by application', err.message);
 
                 collection.findOne({ works: true }, function (err) {
                   test.ok(err instanceof Error);
-                  test.equal('no open connections', err.message);
+                  test.equal('Connection was destroyed by application', err.message);
                   test.done();
                 });
               });

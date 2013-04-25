@@ -8,15 +8,40 @@ var debug = require('util').debug,
   Db = require('../../lib/mongodb').Db,
   Server = require('../../lib/mongodb').Server;
 
-var ensureUp = function(host, port, number_of_retries, callback) {
-  var db = new Db('test', new Server(host, port, {socketOptions:{connectTimeoutMS: 1000}}), {w:1});
+var ensureUp = function(self, host, port, number_of_retries, callback) {
+  // console.log("===================================== ENSURE UP :: " + port)
+  var options = {poolSize:1, socketOptions:{connectTimeoutMS: 1000}, auto_reconnect:false};
+  // console.dir(this.ssl)
+
+ // *  - **sslValidate** {Boolean, default:false}, validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher)
+ // *  - **sslCA** {Array, default:null}, Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)
+ // *  - **sslCert** {Buffer/String, default:null}, String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
+ // *  - **sslKey** {Buffer/String, default:null}, String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
+ // *  - **sslPass** {Buffer/String, default:null}, String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher)
+
+  if(self.ssl) {
+    options.ssl = self.ssl;
+    options.sslValidate = self.sslValidate || false;
+    options.sslCA = self.sslCA || null;
+    options.sslKey = self.sslKey || null;
+    options.sslCert = self.sslCert || null;
+    options.sslPass = self.sslPass || null;
+  }
+
+  // console.dir(options)
+
+  var db = new Db('test', new Server(host, port, options), {w:1});
   db.open(function(err, result) {
+    // console.log("==============================")
+    // console.dir(err)
+    db.close();
+
     if(err) {
       number_of_retries = number_of_retries - 1;
       if(number_of_retries == 0) return callback(new Error("Failed to connect to db"));
       
       setTimeout(function() {
-        return ensureUp(host, port, number_of_retries, callback);
+        return ensureUp(self, host, port, number_of_retries, callback);
       }, 500);
     } else {
       return callback(null, null);
@@ -42,6 +67,14 @@ var ServerManager = exports.ServerManager = function(options) {
   this.ssl_ca = options['ssl_ca'] != null ? options['ssl_ca'] : null;
   this.ssl_crl = options['ssl_crl'] != null ? options['ssl_crl'] : null;
 
+  // SSL Ensure Options
+  this.sslValidate = options['sslValidate'] || false;
+  this.sslCA = options['sslCA'] || null;
+  this.sslKey = options['sslKey'] || null;
+  this.sslCert = options['sslCert'] || null;
+  this.sslPass = options['sslPass'] || null;
+
+  // Purge the directories
   this.purgedirectories = options['purgedirectories'] != null ? options['purgedirectories'] : true;
   this.configServer = options['configserver'] != null ? options['configserver'] : false;
 
@@ -52,6 +85,7 @@ var ServerManager = exports.ServerManager = function(options) {
 
 // Start up the server instance
 ServerManager.prototype.start = function(killall, callback) {
+  // console.log("=============================================== SERVERMANAGER START")
   var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
@@ -80,11 +114,13 @@ ServerManager.prototype.start = function(killall, callback) {
           });
 
           // Wait for a half a second then save the pids
-          ensureUp(self.host, self.port, 100, function(err, result) {
+          ensureUp(self, self.host, self.port, 100, function(err, result) {
             if(err) throw err;
             // Mark server as running
             self.up = true;
             self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
+            // console.log("=============================================== SERVERMANAGER START == END")
+
             // Callback
             callback();
           });
@@ -103,7 +139,7 @@ ServerManager.prototype.start = function(killall, callback) {
       });
 
       // Wait for a half a second then save the pids
-      ensureUp(self.host, self.port, 100, function(err, result) {
+      ensureUp(self, self.host, self.port, 100, function(err, result) {
         if(err) throw err;
         // Mark server as running
         self.up = true;
@@ -139,6 +175,7 @@ ServerManager.prototype.stop = function(signal, callback) {
 }
 
 ServerManager.prototype.killAll = function(callback) {
+  // console.log("=============================================== SERVERMANAGER KILLALL")
   exec('killall -9 mongod', function(err, stdout, stderr) {
     if(typeof callback == 'function') callback(null, null);
   });
@@ -152,7 +189,7 @@ var getPath = function(self, name) {
 // Generate start command
 var generateStartCmd = function(self, options) {  
   // Create boot command
-  var startCmd = "mongod --noprealloc --smallfiles --logpath '" + options['log_path'] + "' " +
+  var startCmd = "mongod --rest --noprealloc --smallfiles --logpath '" + options['log_path'] + "' " +
       " --dbpath " + options['db_path'] + " --port " + options['port'] + " --fork";
   startCmd = options['journal'] ? startCmd + " --journal" : startCmd;
   startCmd = options['auth'] ? startCmd + " --auth" : startCmd;

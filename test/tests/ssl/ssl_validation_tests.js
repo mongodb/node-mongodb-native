@@ -139,7 +139,7 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
 /**
  * @ignore
  */
-exports.shouldCorrectlyConncetToSSLBasedReplicaset = function(configuration, test) {
+exports.shouldCorrectlyConnectToSSLBasedReplicaset = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -244,6 +244,11 @@ exports.shouldFailDueToNotPresentingCertificateToServer = function(configuration
   var docs = [];
   var errs = [];
   var insertDocs = [];
+
+  // Read the ca
+  var ca = [fs.readFileSync(__dirname + "/certificates/ca.pem")];
+  var cert = fs.readFileSync(__dirname + "/certificates/client.pem");
+  var key = fs.readFileSync(__dirname + "/certificates/client.pem");
   
   // Start server
   serverManager = new ServerManager({
@@ -254,6 +259,12 @@ exports.shouldFailDueToNotPresentingCertificateToServer = function(configuration
     , ssl_ca: '../test/tests/ssl/certificates/ca.pem'
     , ssl_crl: '../test/tests/ssl/certificates/crl.pem'    
     , ssl_server_pem: "../test/tests/ssl/certificates/server.pem"
+    // EnsureUp options
+    , host: 'server'
+    , sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
   });
 
   serverManager.start(true, function() {
@@ -302,6 +313,12 @@ exports.shouldCorrectlyValidateAndPresentCertificate = function(configuration, t
     , ssl_ca: '../test/tests/ssl/certificates/ca.pem'
     , ssl_crl: '../test/tests/ssl/certificates/crl.pem'    
     , ssl_server_pem: "../test/tests/ssl/certificates/server.pem"
+    // EnsureUp options
+    , host: 'server'
+    , sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
   });
 
   serverManager.start(true, function() {
@@ -337,6 +354,7 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
   var ca = [fs.readFileSync(__dirname + "/certificates/ca.pem")];
   var cert = fs.readFileSync(__dirname + "/certificates/smoke.pem");
   var key = fs.readFileSync(__dirname + "/certificates/smoke.pem");
+
   // Create a db connection
   var db1 = new Db(configuration.db_name, new Server("server", 27017, 
     {   auto_reconnect: false
@@ -352,6 +370,11 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
   var docs = [];
   var errs = [];
   var insertDocs = [];
+
+  // Read the ca
+  var ca = [fs.readFileSync(__dirname + "/certificates/ca.pem")];
+  var cert = fs.readFileSync(__dirname + "/certificates/client.pem");
+  var key = fs.readFileSync(__dirname + "/certificates/client.pem");
   
   // Start server
   serverManager = new ServerManager({
@@ -362,6 +385,12 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
     , ssl_ca: '../test/tests/ssl/certificates/ca.pem'
     , ssl_crl: '../test/tests/ssl/certificates/crl.pem'    
     , ssl_server_pem: "../test/tests/ssl/certificates/server.pem"
+    // EnsureUp options
+    , host: 'server'
+    , sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
   });
 
   serverManager.start(true, function() {
@@ -406,10 +435,18 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = function(configurat
       auth:false
     , purgedirectories:true
     , journal:true
+    // Server starting options
     , ssl:true
     , ssl_ca: '../test/tests/ssl/certificates/ca.pem'
     , ssl_crl: '../test/tests/ssl/certificates/crl.pem'    
     , ssl_server_pem: "../test/tests/ssl/certificates/server.pem"
+    // EnsureUp options
+    , host: 'server'
+    , sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+    , sslPass:'qwerty'    
   });
 
   serverManager.start(true, function() {
@@ -473,7 +510,7 @@ exports.shouldCorrectlyValidateServerSSLCertificate = function(configuration, te
         collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
         collection.insert([{a:1}, {b:2}, {c:'hello world'}], {w:1}, function(err, result) {
           collection.find({}).toArray(function(err, items) {
-            // test.equal(3, items.length);
+            test.equal(15, items.length);
             db.close();
             test.done();
           })

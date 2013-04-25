@@ -41,7 +41,10 @@ exports.shouldCorrectlyValidateServerCertificate = function(configuration, test)
   var docs = [];
   var errs = [];
   var insertDocs = [];
-  
+
+  // Read the ca
+  var ca = [fs.readFileSync(__dirname + "/certificates/ca.pem")];
+
   // Start server
   serverManager = new ServerManager({
       auth:false
@@ -49,11 +52,12 @@ exports.shouldCorrectlyValidateServerCertificate = function(configuration, test)
     , journal:true
     , ssl:true
     , ssl_server_pem: "../test/tests/ssl/certificates/server.pem"
+    // EnsureUp options
+    , host: 'server'
+    , sslCA:ca
   });
 
   serverManager.start(true, function() {
-    // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/certificates/ca.pem")];
     // Connect and validate the server certificate
     MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
       server: {
@@ -101,6 +105,13 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
     , ssl_server_pem: "../test/tests/ssl/certificates/server.pem"
     , ssl_force_validate_certificates: true
     , ssl_client_pem: cert
+    // EnsureUp options
+    , host: 'server'
+    , sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+    // , sslPass:'qwerty'
   });
 
   serverManager.start(true, function() {
@@ -154,6 +165,13 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = f
     , ssl_server_pem: "../test/tests/ssl/certificates/server.pem"
     , ssl_force_validate_certificates: true
     , ssl_client_pem: cert
+    // EnsureUp options
+    , host: 'server'
+    , sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+    // , sslPass:'qwerty'
   });
 
   serverManager.start(true, function() {
@@ -191,19 +209,20 @@ exports.shouldCorrectlyValidateServerCertificateReplSet = function(configuration
   var errs = [];
   var insertDocs = [];
   
+  // Read the ca
+  var ca = [fs.readFileSync(__dirname + "/certificates/ca.pem")];
+
   var RS = new ReplicaSetManager({retries:120, 
-    host: "server",
-    ssl:true,
-    ssl_server_pem: "../test/tests/ssl/certificates/server.pem",
-    arbiter_count:1,
-    secondary_count:2,
-    passive_count:1});
+      host: "server"
+    , ssl:true
+    , ssl_server_pem: "../test/tests/ssl/certificates/server.pem"
+    , arbiter_count:1
+    , secondary_count:2
+    , passive_count:1
+  });
 
   RS.startSet(true, function(err, result) {      
     if(err != null) throw err;
-
-    // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/certificates/ca.pem")];
     // Connect and validate the server certificate
     MongoClient.connect("mongodb://server:30000,server:30001/test?ssl=true&maxPoolSize=1", {
       replSet: {

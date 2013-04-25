@@ -4,7 +4,7 @@ var fs = require('fs'),
   ejs = require('ejs'),
   exec = require('child_process').exec,
   markdown = require('markdown').markdown,
-  github = require('github3'),
+  github = require('./github3'),
   format = require('util').format;  
 
 // -----------------------------------------------------------------------------------------------------
@@ -412,6 +412,9 @@ var _generateGithubPackageList = function(inputFile, outputDirectory, templates,
       new function(_repo, _username) {
         // Get the repo information
         github.getRepository(_repo, _username, function(err, result) {
+          console.log("----------------------------------------")
+          console.dir(err)
+          console.dir(result)
           // Correct the number of remaining repos
           totalNumberOfRepos = totalNumberOfRepos - 1;
           // Write the content to disk

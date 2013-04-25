@@ -1,3 +1,12 @@
+1.3.0 2013-04-25
+----------------
+- Whole High availability handling for Replicaset, Server and Mongos connections refactored to ensure better handling of failover cases.
+- Fixed issue where findAndModify would not correctly skip issuing of chained getLastError (Issue #941)
+- Fixed throw error issue on errors with findAndModify during write out operation (Issue #939, https://github.com/autopulated)
+- Gridstore.prototype.writeFile now returns gridstore object correctly (Issue #938)
+- Kerberos support is now an optional module that allows for use of GSSAPI authentication using MongoDB Subscriber edition
+- Fixed issue where cursor.toArray could blow the stack on node 0.10.X (#950)
+
 1.2.14 2013-03-14
 -----------------
 - Refactored test suite to speed up running of replicaset tests

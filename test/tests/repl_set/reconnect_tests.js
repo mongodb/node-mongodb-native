@@ -4,46 +4,56 @@ var Step = require("step");
  * @ignore
  */
 exports['Should retrieve correct count after primary killed'] = function(configuration, test) {
-  var db = configuration.db();
+  var mongo = configuration.getMongoPackage()
+    , MongoClient = mongo.MongoClient
+    , ReadPreference = mongo.ReadPreference
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
 
-  // Drop collection on replicaset
-  db.dropCollection('testsets', function(err, r) {
+  // var db = configuration.db();
+  var replicasetManager = configuration.getReplicasetManager();
 
-    var collection = db.collection('testsets');
-    // Insert a dummy document
-    collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
-      test.equal(null, err);
+  // Replica configuration
+  var replSet = new ReplSetServers( [
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ],
+    {rs_name:replicasetManager.name, readPreference:ReadPreference.SECONDARY_PREFERRED}
+  );
 
-      // Execute a count
-      collection.count(function(err, c) {
+  var db = new Db('integration_test_', replSet, {w:0});  
+  db.open(function(err, db) {    
+    // Drop collection on replicaset
+    db.dropCollection('testsets', function(err, r) {
+
+      var collection = db.collection('testsets');
+      // Insert a dummy document
+      collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
         test.equal(null, err);
-        test.equal(1, c);
-         
-        // Close starting connection
-        db.close();
 
-        // Ensure replication happened in time
-        setTimeout(function() {
-          // Kill the primary
-          configuration.killPrimary(function(node) {
-            test.equal(null, err);
+        // Execute a count
+        collection.count(function(err, c) {
+          test.equal(null, err);
+          test.equal(1, c);
+           
+          // Close starting connection
+          db.close();
 
-            collection.insert({a:30}, {w:1}, function(err, r) {
+          // Ensure replication happened in time
+          setTimeout(function() {
+            // Kill the primary
+            configuration.killPrimary(function(node) {
               test.equal(null, err);
 
-              collection.insert({a:40}, {w:1}, function(err, r) {
-                test.equal(null, err);
-
-                // Execute count
-                collection.count(function(err, c) {
-                  test.equal(null, err);
-                  test.equal(3, c);
-                  test.done();
-                });
+              collection.insert({a:30}, {w:1}, function(err, r) {
+                test.ok(err != null);
+                test.done();
               });
             });
-          });
-        }, 2000);
+          }, 2000);
+        });
       });
     });
   });
@@ -60,8 +70,9 @@ exports['Should correctly throw timeout for replication to servers on inserts'] 
 
     var collection = db.collection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts');
     // Insert a dummy document
-    collection.insert({a:20}, {safe: {w:7, wtimeout: 10000}}, function(err, r) {
-      test.equal('timeout', err.err);
+    collection.insert({a:20}, {w:7, wtimeout: 10000}, function(err, r) {
+      test.ok(err != null);
+      test.ok(err.err.indexOf("time") != -1);
       test.equal(true, err.wtimeout);
       test.done();
     });
@@ -175,7 +186,7 @@ exports['Should work correctly with inserts after bringing master back'] = funct
 
     var collection = db.collection('shouldWorkCorrectlyWithInserts');
     // Insert a dummy document
-    collection.insert({a:20}, {safe: {w:'majority', wtimeout: 10000}}, function(err, r) {
+    collection.insert({a:20}, {safe: {w:'majority', wtimeout: 30000}}, function(err, r) {
       test.equal(null, err);
 
       // Execute a count
@@ -264,7 +275,6 @@ exports['Should not timeout'] = function(configuration, test) {
     collection.findOne({name: 'a'}, done);
 
     function done (err, result) {
-      console.log('should not timeout: ' + pending);
       if (--pending) return;
       test.done();
     }

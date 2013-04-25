@@ -1356,6 +1356,7 @@ exports.shouldCorrectlyReadBackDocumentWithNull = function(configuration, test) 
  * @ignore
  */
 exports.shouldThrowErrorDueToIllegalUpdate = function(configuration, test) {
+  // console.log("================= hey")
   var client = configuration.db();
 
   client.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, function(err, coll) {

@@ -33,8 +33,6 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(configuration, te
             test.done();          
           });
                               
-          db.serverConfig.connectionPool.openConnections[0].connection.destroy();
-          
           // Kill server and end test
           db.serverConfig.connectionPool.openConnections[0].connection.destroy();
         });
