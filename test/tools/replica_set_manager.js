@@ -476,7 +476,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
                 // Establish all health member
                 var healthyMembers = status.members.filter(function(element) {
                   return element["health"] == 1 && [1, 2, 7].indexOf(element["state"]) != -1 
-                    && element['lastHeartbeatMessage'] == null
+                    // && element['lastHeartbeatMessage'] == null
                     && element['errmsg'] == null
                 });
 
