@@ -111,7 +111,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
                               db.close();
                               test.done();
                             });
-                          }, 5000);
+                          }, 10000);
                         });
                       });
                     }, 10000);

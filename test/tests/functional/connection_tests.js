@@ -57,7 +57,6 @@ exports['Should fail to connect using non-domain socket with undefined port'] = 
     var db = new Db('test', new Server("localhost", undefined), {w:0});
     db.open(function(){ });
   } catch (err){
-    console.dir(err)
     error = err;
   }
 
