@@ -23,7 +23,7 @@ var apiClasses = [
     {tag:"grid", path:"./lib/mongodb/gridfs/grid.js"},
     {tag:"server", path:"./lib/mongodb/connection/server.js"},
     {tag:"mongos", path:"./lib/mongodb/connection/mongos.js"},
-    {tag:"replset", path:"./lib/mongodb/connection/repl_set.js"},
+    {tag:"replset", path:"./lib/mongodb/connection/repl_set/repl_set.js"},
     {tag:"readpreference", path:"./lib/mongodb/connection/read_preference.js"}
   ];
 
