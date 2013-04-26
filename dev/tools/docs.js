@@ -412,9 +412,7 @@ var _generateGithubPackageList = function(inputFile, outputDirectory, templates,
       new function(_repo, _username) {
         // Get the repo information
         github.getRepository(_repo, _username, function(err, result) {
-          console.log("----------------------------------------")
-          console.dir(err)
-          console.dir(result)
+          if(err) throw err;
           // Correct the number of remaining repos
           totalNumberOfRepos = totalNumberOfRepos - 1;
           // Write the content to disk
