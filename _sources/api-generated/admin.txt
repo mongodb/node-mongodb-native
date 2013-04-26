@@ -46,6 +46,7 @@ instance of the db client
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -107,6 +108,7 @@ Retrieve this db's server status.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -176,6 +178,7 @@ Retrieve the current profiling Level for MongoDB
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -243,6 +246,7 @@ Ping the MongoDB server and retrieve results
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -306,6 +310,7 @@ Authenticate against MongoDB
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -369,6 +374,7 @@ Logout current authenticated user
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -439,6 +445,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -502,6 +509,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -568,6 +576,7 @@ Set the current profiling level of MongoDB
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -665,6 +674,7 @@ Retrive the current profiling information for MongoDB
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -750,6 +760,7 @@ Execute a db command against the Admin database
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -814,6 +825,7 @@ Validate an existing collection
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -889,6 +901,7 @@ List the available databases
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -938,6 +951,7 @@ Get ReplicaSet status
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');

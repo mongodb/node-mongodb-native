@@ -72,6 +72,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -105,6 +106,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -137,6 +139,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -169,6 +172,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -252,6 +256,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -293,6 +298,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -354,6 +360,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -483,6 +490,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -521,6 +529,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -607,6 +616,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -652,6 +662,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -692,6 +703,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -763,6 +775,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -806,6 +819,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -869,6 +883,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -929,6 +944,7 @@ Drop the collection
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1022,6 +1038,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1116,6 +1133,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1220,6 +1238,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1260,6 +1279,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1300,6 +1320,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1394,6 +1415,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1475,6 +1497,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1519,6 +1542,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1612,6 +1636,7 @@ Deprecated Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1687,6 +1712,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1756,6 +1782,7 @@ Drops an index from this collection.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1837,6 +1864,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1887,7 +1915,7 @@ Run Map Reduce across a collection. Be aware that the inline option for out will
 
 
 Options
- - **out** {Object, default:*{inline:1}*}, sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}*
+ - **out** {Object}, sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}*
  - **query** {Object}, query filter object.
  - **sort** {Object}, sorts the input objects using this key. Useful for optimization, like sorting by the emit key for fewer reduces.
  - **limit** {Number}, number of objects to return from collection.
@@ -1922,6 +1950,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -1971,6 +2000,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2027,6 +2057,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2133,6 +2164,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2270,6 +2302,7 @@ Returns the options of the collection.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2323,6 +2356,7 @@ Returns if the collection is a capped collection
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2375,6 +2409,7 @@ Checks if one or more indexes exist on the collection
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2454,6 +2489,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2522,6 +2558,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2578,6 +2615,7 @@ Retrieve all the indexes on the collection.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2644,6 +2682,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2709,6 +2748,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2774,6 +2814,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -2862,6 +2903,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');

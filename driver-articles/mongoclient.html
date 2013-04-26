@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MongoClient or how to connect in a new and better way &mdash; MongoDB Node.JS Driver 1.2.14 documentation</title>
+    <title>MongoClient or how to connect in a new and better way &mdash; MongoDB Node.JS Driver 1.3.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.2.14',
+        VERSION:     '1.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.2.14 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.0 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.14 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -248,7 +248,7 @@
 <div class="section" id="mongoclient-connect-options">
 <h2>MongoClient.connect options<a class="headerlink" href="#mongoclient-connect-options" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div><p>The connect function also takes a hash of options divided into db/server/replset/mongos allowing you to tweak options not directly supported by the unified url string format. To use these options you do pass in a has like this.</p>
+<div><p>The connect function also takes a hash of options divided into db/server/replset/mongos allowing you to tweak options not directly supported by the unified url string format. To use these options you do pass in a hash like this:</p>
 <blockquote>
 <div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">;</span>
 
@@ -304,42 +304,43 @@
 <div class="section" id="server-a-hash-of-options-at-the-server-level-not-supported-by-the-url">
 <h2>server: A hash of options at the server level not supported by the url.<a class="headerlink" href="#server-a-hash-of-options-at-the-server-level-not-supported-by-the-url" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div><div class="highlight-javascript"><pre>*  **readPreference** {String, default:null}, set's the read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST)
-*  **ssl** {Boolean, default:false}, use ssl connection (needs to have a mongod server with ssl support)
-*  **slaveOk** {Boolean, default:false}, legacy option allowing reads from secondary, use **readPrefrence** instead.
-*  **poolSize** {Number, default:1}, number of connections in the connection pool, set to 1 as default for legacy reasons.
-*  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
-*  **logger** {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error **({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})**.
-*  **auto_reconnect** {Boolean, default:false}, reconnect on error.
-*  **disableDriverBSONSizeCheck** {Boolean, default:false}, force the server to error if the BSON message is to big</pre>
-</div>
+<div><ul class="simple">
+<li><strong>readPreference</strong>  {String, default:null}, set&#8217;s the read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY <em>PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY</em> PREFERRED, ReadPreference.NEAREST)</li>
+<li><strong>ssl</strong>  {Boolean, default:false}, use ssl connection (needs to have a mongod server with ssl support)</li>
+<li><strong>slaveOk</strong>  {Boolean, default:false}, legacy option allowing reads from secondary, use  <strong>readPrefrence</strong>  instead.</li>
+<li><strong>poolSize</strong>  {Number, default:1}, number of connections in the connection pool, set to 1 as default for legacy reasons.</li>
+<li><strong>socketOptions</strong>  {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))</li>
+<li><strong>logger</strong>  {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error  <strong>({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})</strong> .</li>
+<li><strong>auto_reconnect</strong>  {Boolean, default:false}, reconnect on error.</li>
+<li><strong>disableDriverBSONSizeCheck</strong>  {Boolean, default:false}, force the server to error if the BSON message is to big</li>
+</ul>
 </div></blockquote>
 </div>
 <div class="section" id="replset-a-hash-of-options-at-the-replset-level-not-supported-by-the-url">
 <h2>replSet: A hash of options at the replSet level not supported by the url.<a class="headerlink" href="#replset-a-hash-of-options-at-the-replset-level-not-supported-by-the-url" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="o">*</span>  <span class="o">**</span><span class="nx">ha</span><span class="o">**</span> <span class="p">{</span><span class="nb">Boolean</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="nx">turn</span> <span class="nx">on</span> <span class="nx">high</span> <span class="nx">availability</span><span class="p">.</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">haInterval</span><span class="o">**</span> <span class="p">{</span><span class="nb">Number</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="mi">2000</span><span class="p">},</span> <span class="nx">time</span> <span class="nx">between</span> <span class="nx">each</span> <span class="nx">replicaset</span> <span class="nx">status</span> <span class="nx">check</span><span class="p">.</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">reconnectWait</span><span class="o">**</span> <span class="p">{</span><span class="nb">Number</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="mi">1000</span><span class="p">},</span> <span class="nx">time</span> <span class="nx">to</span> <span class="nx">wait</span> <span class="k">in</span> <span class="nx">milliseconds</span> <span class="nx">before</span> <span class="nx">attempting</span> <span class="nx">reconnect</span><span class="p">.</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">retries</span><span class="o">**</span> <span class="p">{</span><span class="nb">Number</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="mi">30</span><span class="p">},</span> <span class="nx">number</span> <span class="nx">of</span> <span class="nx">times</span> <span class="nx">to</span> <span class="nx">attempt</span> <span class="nx">a</span> <span class="nx">replicaset</span> <span class="nx">reconnect</span><span class="p">.</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">rs_name</span><span class="o">**</span> <span class="p">{</span><span class="nb">String</span><span class="p">},</span> <span class="nx">the</span> <span class="nx">name</span> <span class="nx">of</span> <span class="nx">the</span> <span class="nx">replicaset</span> <span class="nx">to</span> <span class="nx">connect</span> <span class="nx">to</span><span class="p">.</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">socketOptions</span><span class="o">**</span> <span class="p">{</span><span class="nb">Object</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="kc">null</span><span class="p">},</span> <span class="nx">an</span> <span class="nx">object</span> <span class="nx">containing</span> <span class="nx">socket</span> <span class="nx">options</span> <span class="nx">to</span> <span class="nx">use</span> <span class="p">(</span><span class="nx">noDelay</span><span class="o">:</span><span class="p">(</span><span class="kr">boolean</span><span class="p">),</span> <span class="nx">keepAlive</span><span class="o">:</span><span class="p">(</span><span class="nx">number</span><span class="p">),</span> <span class="nx">connectTimeoutMS</span><span class="o">:</span><span class="p">(</span><span class="nx">number</span><span class="p">),</span> <span class="nx">socketTimeoutMS</span><span class="o">:</span><span class="p">(</span><span class="nx">number</span><span class="p">))</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">readPreference</span><span class="o">**</span> <span class="p">{</span><span class="nb">String</span><span class="p">},</span> <span class="nx">the</span> <span class="nx">preferred</span> <span class="nx">read</span> <span class="nx">preference</span> <span class="p">(</span><span class="nx">ReadPreference</span><span class="p">.</span><span class="nx">PRIMARY</span><span class="p">,</span> <span class="nx">ReadPreference</span><span class="p">.</span><span class="nx">PRIMARY_PREFERRED</span><span class="p">,</span> <span class="nx">ReadPreference</span><span class="p">.</span><span class="nx">SECONDARY</span><span class="p">,</span> <span class="nx">ReadPreference</span><span class="p">.</span><span class="nx">SECONDARY_PREFERRED</span><span class="p">,</span> <span class="nx">ReadPreference</span><span class="p">.</span><span class="nx">NEAREST</span><span class="p">).</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">strategy</span><span class="o">**</span> <span class="p">{</span><span class="nb">String</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="kc">null</span><span class="p">},</span> <span class="nx">selection</span> <span class="nx">strategy</span> <span class="k">for</span> <span class="nx">reads</span> <span class="nx">choose</span> <span class="nx">between</span> <span class="p">(</span><span class="nx">ping</span> <span class="nx">and</span> <span class="nx">statistical</span><span class="p">,</span> <span class="k">default</span> <span class="nx">is</span> <span class="nx">round</span><span class="o">-</span><span class="nx">robin</span><span class="p">)</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">secondaryAcceptableLatencyMS</span><span class="o">**</span> <span class="p">{</span><span class="nb">Number</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="mi">15</span><span class="p">},</span> <span class="nx">sets</span> <span class="nx">the</span> <span class="nx">range</span> <span class="nx">of</span> <span class="nx">servers</span> <span class="nx">to</span> <span class="nx">pick</span> <span class="nx">when</span> <span class="nx">using</span> <span class="nx">NEAREST</span> <span class="p">(</span><span class="nx">lowest</span> <span class="nx">ping</span> <span class="nx">ms</span> <span class="o">+</span> <span class="nx">the</span> <span class="nx">latency</span> <span class="nx">fence</span><span class="p">,</span> <span class="nx">ex</span><span class="o">:</span> <span class="nx">range</span> <span class="nx">of</span> <span class="mi">1</span> <span class="nx">to</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">15</span><span class="p">)</span> <span class="nx">ms</span><span class="p">)</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">connectArbiter</span><span class="o">**</span> <span class="p">{</span><span class="nb">Boolean</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="kc">false</span><span class="p">},</span> <span class="nx">sets</span> <span class="k">if</span> <span class="nx">the</span> <span class="nx">driver</span> <span class="nx">should</span> <span class="nx">connect</span> <span class="nx">to</span> <span class="nx">arbiters</span> <span class="nx">or</span> <span class="nx">not</span><span class="p">.</span>
-</pre></div>
-</div>
+<div><ul class="simple">
+<li><strong>ha</strong>  {Boolean, default:true}, turn on high availability.</li>
+<li><strong>haInterval</strong>  {Number, default:2000}, time between each replicaset status check.</li>
+<li><strong>reconnectWait</strong>  {Number, default:1000}, time to wait in milliseconds before attempting reconnect.</li>
+<li><strong>retries</strong>  {Number, default:30}, number of times to attempt a replicaset reconnect.</li>
+<li><strong>rs_name</strong>  {String}, the name of the replicaset to connect to.</li>
+<li><strong>socketOptions</strong>  {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))</li>
+<li><strong>readPreference</strong>  {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY <em>PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY</em> PREFERRED, ReadPreference.NEAREST).</li>
+<li><strong>strategy</strong>  {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)</li>
+<li><strong>secondaryAcceptableLatencyMS</strong>  {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)</li>
+<li><strong>connectArbiter</strong>  {Boolean, default:false}, sets if the driver should connect to arbiters or not.</li>
+</ul>
 </div></blockquote>
 </div>
 <div class="section" id="mongos-a-hash-of-options-at-the-mongos-level-not-supported-by-the-url">
 <h2>mongos: A hash of options at the mongos level not supported by the url.<a class="headerlink" href="#mongos-a-hash-of-options-at-the-mongos-level-not-supported-by-the-url" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="o">*</span>  <span class="o">**</span><span class="nx">socketOptions</span><span class="o">**</span> <span class="p">{</span><span class="nb">Object</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="kc">null</span><span class="p">},</span> <span class="nx">an</span> <span class="nx">object</span> <span class="nx">containing</span> <span class="nx">socket</span> <span class="nx">options</span> <span class="nx">to</span> <span class="nx">use</span> <span class="p">(</span><span class="nx">noDelay</span><span class="o">:</span><span class="p">(</span><span class="kr">boolean</span><span class="p">),</span> <span class="nx">keepAlive</span><span class="o">:</span><span class="p">(</span><span class="nx">number</span><span class="p">),</span> <span class="nx">connectTimeoutMS</span><span class="o">:</span><span class="p">(</span><span class="nx">number</span><span class="p">),</span> <span class="nx">socketTimeoutMS</span><span class="o">:</span><span class="p">(</span><span class="nx">number</span><span class="p">))</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">ha</span><span class="o">**</span> <span class="p">{</span><span class="nb">Boolean</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="nx">turn</span> <span class="nx">on</span> <span class="nx">high</span> <span class="nx">availability</span><span class="p">,</span> <span class="nx">attempts</span> <span class="nx">to</span> <span class="nx">reconnect</span> <span class="nx">to</span> <span class="nx">down</span> <span class="nx">proxies</span>
-<span class="o">*</span>  <span class="o">**</span><span class="nx">haInterval</span><span class="o">**</span> <span class="p">{</span><span class="nb">Number</span><span class="p">,</span> <span class="k">default</span><span class="o">:</span><span class="mi">2000</span><span class="p">},</span> <span class="nx">time</span> <span class="nx">between</span> <span class="nx">each</span> <span class="nx">replicaset</span> <span class="nx">status</span> <span class="nx">check</span><span class="p">.</span>
-</pre></div>
-</div>
+<div><ul class="simple">
+<li><strong>socketOptions</strong>  {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))</li>
+<li><strong>ha</strong>  {Boolean, default:true}, turn on high availability, attempts to reconnect to down proxies</li>
+<li><strong>haInterval</strong>  {Number, default:2000}, time between each replicaset status check.</li>
+</ul>
 </div></blockquote>
 </div>
 </div>
@@ -517,7 +518,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.2.14 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

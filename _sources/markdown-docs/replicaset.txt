@@ -26,7 +26,7 @@ Driver usage
 
   .. code-block:: javascript
 
-    var replSet = new ReplSetServers( [ 
+    var replSet = new ReplSet( [ 
         new Server( 127.0.0.1, 30000),
         new Server( 127.0.0.1, 30001),
         new Server( 127.0.0.1, 30002)

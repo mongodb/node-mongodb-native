@@ -34,7 +34,6 @@ Options
  - **batchSize** {Number}, batchSize the number of the subset of results to request the database to return for every request. This should initially be greater than 1 otherwise the database will automatically close the cursor. The batch size can be set to 1 with cursorInstance.batchSize after performing the initial query to the database.
  - **raw** {Boolean}, raw return all query documents as raw buffers (default false).
  - **read** {Boolean}, read specify override of read from source (primary/secondary).
- - **slaveOk** {Boolean}, slaveOk, sets the slaveOk flag on the query wire protocol for secondaries.
  - **returnKey** {Boolean}, returnKey only return the index key.
  - **maxScan** {Number}, maxScan limit the number of items to scan.
  - **min** {Number}, min set index bounds.
@@ -89,6 +88,7 @@ tailable, batchSizeValue, skipValue and limits are preserved.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -163,6 +163,7 @@ cursor.rewind() can be used to reset the cursor.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -222,6 +223,7 @@ for making sure that the entire result can fit the memory.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -289,6 +291,7 @@ Determines how many result the query for this cursor will return
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -354,6 +357,7 @@ Sets the sort parameter of this cursor to the given value.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -417,6 +421,7 @@ Sets the limit parameter of this cursor to the given value.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -488,6 +493,7 @@ Sets the skip parameter of this cursor to the given value.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -546,6 +552,7 @@ Sets the batch size parameter of this cursor to the given value.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -600,6 +607,7 @@ Gets the next document from the cursor.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -655,6 +663,7 @@ long it took the database to process it.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -714,6 +723,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -778,6 +788,7 @@ Close the cursor.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -844,6 +855,7 @@ Check if the cursor is closed or open.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');

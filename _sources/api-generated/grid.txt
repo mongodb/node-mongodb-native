@@ -57,6 +57,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -92,6 +93,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -128,6 +130,7 @@ Options
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -183,6 +186,7 @@ Get binary data to the grid
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -240,6 +244,7 @@ Delete file from grid
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');

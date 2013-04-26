@@ -53,6 +53,7 @@ Pauses this stream, then no farther events will be fired.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -85,8 +86,6 @@ Pauses this stream, then no farther events will be fired.
                  // Restart the stream after 1 miliscecond
                  setTimeout(function() {
                    stream.resume();
-                   // Check if cursor is paused
-                   assert.equal(false, stream.paused);
                  }, 100);          
                });
      
@@ -130,6 +129,7 @@ Destroys the stream, then no farther events will be fired.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -195,6 +195,7 @@ Resumes this stream.
          ObjectID = require('mongodb').ObjectID,
          Binary = require('mongodb').Binary,
          GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
          Code = require('mongodb').Code,
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
@@ -231,16 +232,12 @@ Resumes this stream.
                  assert.equal(false, stream.paused);
                  // Pause stream
                  stream.pause();
-                 // Check if cursor is paused
-                 // assert.equal(true, stream.paused);         
      
                  fileBuffer += item.toString('utf8');
      
                  // Restart the stream after 1 miliscecond
                  setTimeout(function() {
                    stream.resume();
-                   // Check if cursor is paused
-                   assert.equal(false, stream.paused);
                  }, 100);
                });
      
