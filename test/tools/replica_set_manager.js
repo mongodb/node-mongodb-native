@@ -832,8 +832,12 @@ ReplicaSetManager.prototype.reStartAndConfigure = function(node_configs, callbac
   });
 }
 
-var reStart = ReplicaSetManager.prototype.reStart = function(node, callback) {
+var reStart = ReplicaSetManager.prototype.reStart = function(node, options, callback) {  
   var self = this;
+  if(typeof options == 'function') {
+    callback = options;
+    options = {};
+  }
   // Perform cleanup of directories
   exec("rm -rf " + self.mongods[node]["db_path"], function(err, stdout, stderr) {
     if(err != null) return callback(err, null);
@@ -848,8 +852,12 @@ var reStart = ReplicaSetManager.prototype.reStart = function(node, callback) {
 }
 
 // Fire up the mongodb instance
-var start = ReplicaSetManager.prototype.start = function(node, callback) {
+var start = ReplicaSetManager.prototype.start = function(node, options, callback) {
   var self = this;
+  if(typeof options == 'function') {
+    callback = options;
+    options = {};
+  }
 
   // Start up mongod process
   var mongodb = exec(self.mongods[node]["start"],
@@ -868,7 +876,7 @@ var start = ReplicaSetManager.prototype.start = function(node, callback) {
     self.mongods[node]["pid"]= fs.readFileSync(path.join(self.mongods[node]["db_path"], "mongod.lock"), 'ascii').trim();
     // Callback
     callback();
-  }, 5000);
+  }, options.timeout ? options.timeout : 5000);
 }
 
 ReplicaSetManager.prototype.restart = start;
