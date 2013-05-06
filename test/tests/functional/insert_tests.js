@@ -1457,3 +1457,28 @@ exports.shouldCorrectlyInsertSimpleUTF8Regexp = function(configuration, test) {
   });    
 }
 
+// exports.shouldCorrectlyPullDoc = function(configuration, test) {
+//   var client = configuration.db();
+
+//   // Collection insert
+//   client.collection('shouldCorrectlyPullDoc').insert({comments:[{_id:123}, {_id:232}]}, function(err, doc) {
+//     var _id = doc[0]._id;
+
+//     client.collection('shouldCorrectlyPullDoc').update({_id: _id}
+//       , {$pull: {comments: {_id:453}}}, {w:1}, function(err, result, result2) {
+//         test.done();
+//       })
+//   })
+
+//   // var regexp = /foobaré/;
+
+//   // client.createCollection('test_utf8_regex', function(err, collection) {
+//   //   collection.insert({'b':regexp}, {w:1}, function(err, ids) {
+//   //     collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
+//   //       test.equal(("" + regexp), ("" + items[0].b));
+//   //       // Let's close the db
+//   //       test.done();
+//   //     });
+//   //   });
+//   // });    
+// }
