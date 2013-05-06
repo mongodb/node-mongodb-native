@@ -3,7 +3,7 @@ var Step = require('step');
 /**
  * @ignore
  */
-exports['Should Correctly Authenticate using different user source database and MongoClient'] = function(configuration, test) {
+exports['Should Correctly Authenticate using different user source database and MongoClient on single server'] = function(configuration, test) {
   var Db = configuration.getMongoPackage().Db
     , MongoClient = configuration.getMongoPackage().MongoClient
     , Server = configuration.getMongoPackage().Server;
