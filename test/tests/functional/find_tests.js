@@ -1940,3 +1940,27 @@ exports.shouldCorrectlyDoFindMinMax = function(configuration, test) {
     });
   });    
 }
+
+exports.shouldCorrectlyDoFindOneWithSingleArguments = function(configuration, test) {
+  var client = configuration.db();  
+  // Serialized regexes contain extra trailing chars. Sometimes these trailing chars contain / which makes
+  // the original regex invalid, and leads to segmentation fault.
+  var collection = client.collection('shouldCorrectlyDoFindOneWithSingleArguments');
+  collection.insert({"name": "some name"}, {w:1}, function(err, doc) {
+    test.equal(null, err);
+    // Get id
+    var id = doc[0]._id;
+    var id_string = doc[0]._id.toString();
+
+    collection.findOne(id, function(err, doc) {
+      test.equal(null, err);
+      test.equal("some name", doc.name);
+
+      collection.findOne(id_string, function(err, doc) {
+        test.equal(null, err);
+        test.equal("some name", doc.name);
+        test.done();
+      });
+    });
+  });
+}
