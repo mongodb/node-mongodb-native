@@ -39,11 +39,11 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(confi
           if(item == null) {
             test.equal(1000, numberOfRecords);
 
-            // Perform a find and each
+            // Perform a find and toArray
             collection.find().toArray(function(err, items) {
               if(err) console.dir(err)
               test.equal(1000, items.length);
-
+              
               db.close();
               test.done();
             })
@@ -112,4 +112,27 @@ exports.shouldCorrectlyHandleSwitchOver = function(configuration, test) {
       });
     }, 1000);
   });
+}
+
+exports.shouldCorrectlyAggregate = function(configuration, test) {
+  var mongodb = configuration.getMongoPackage();
+  var uri = 'mongodb://localhost:50000/integration_test_';
+
+  var newMovie = {
+    title: 'Star Wars 7',
+    director: 'grobot'
+  }
+
+  var pipe = [{$match: {director: 'grobot'}}];
+
+  mongodb.connect(uri, function(err, db) {
+    db.collection('movie', function(err, collection) {
+      collection.insert(newMovie, function(err, res) {
+        collection.aggregate(pipe, function(err, res) {
+          test.equal(null, err);
+          db.close();
+        });
+      });
+    });
+  });  
 }

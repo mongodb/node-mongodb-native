@@ -1,3 +1,12 @@
+// var x = new ReplSetTest({"nodes" : {node0 : {}, node1 : {}, arbiter : {}}})
+// x.startSet();
+// var config = x.getReplSetConfig()
+// config.members[0].priority = 10
+// x.initiate(config);
+// // once running, start the node script
+// x.stopMaster(); // shut down master
+// x.start(0); // restart the master
+
 
 var assert = require('assert')
 var uri = 'mongodb://localhost:31000,localhost:31001,localhost:31002';
