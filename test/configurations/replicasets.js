@@ -20,7 +20,7 @@ var replica_set_config = function(options) {
     this.startPort = startPort;
     // Setting up replicaset options
     var repl_options = { 
-        retries:60, secondary_count:2
+        retries:120, secondary_count:2
       , passive_count:0, arbiter_count:1
       , start_port: this.startPort
       , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
@@ -37,6 +37,8 @@ var replica_set_config = function(options) {
     // Adjust startPort
     startPort = startPort + 10;
 
+    // Db variable
+    var __db = null;
     // Test suite start
     this.start = function(callback) {
       replicasetManager.startSet(true, function(err, result) {
@@ -50,7 +52,7 @@ var replica_set_config = function(options) {
               {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none"}
             );
 
-        self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
+        __db = self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
         self._db.open(function(err, _db) {
           var db2 = _db.db('node-native-test');
           db2.addUser("me", "secret", {w:3}, function(err, result) {
@@ -63,6 +65,8 @@ var replica_set_config = function(options) {
 
     // Test suite stop
     this.stop = function(callback) {
+      if(self._db) self._db.close();
+
       replicasetManager.killSetServers(function(err) {
         callback();
       });
@@ -227,7 +231,9 @@ var replica_set_config_auth = function(options) {
       });
     }
     
-    this.teardown = function(callback) {             
+    this.teardown = function(callback) {
+      if(self._db) self._db.close();
+      
       replicasetManager.killAll(function(err) {
         callback();
       });

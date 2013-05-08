@@ -47,7 +47,9 @@ module.exports = function(configurations) {
 
   // After each test is done
   repl_set_parallel_tests_runner.on('test_done', function(test_statistics) {
-    // console.log("==================================== TEST_DONE")
+    console.log("==================================== TEST_DONE")
+    console.log("==================================== TEST_DONE")
+    console.log("==================================== TEST_DONE")
     // Unpack statistics
     var time_spent = test_statistics.end_time.getTime() - test_statistics.start_time.getTime();
     var test = test_statistics.name;
@@ -76,7 +78,9 @@ module.exports = function(configurations) {
 
   // After test suite is finished
   repl_set_parallel_tests_runner.on('end', function() {
-    // console.log("==================================== TEST_END")
+    console.log("==================================== TEST_END")
+    console.log("==================================== TEST_END")
+    console.log("==================================== TEST_END")
     for(var name in buckets) {
       var tests = buckets[name];
       var total_time = 0;

@@ -845,6 +845,9 @@ var reStart = ReplicaSetManager.prototype.reStart = function(node, options, call
     // Create directory
     exec("mkdir -p " + self.mongods[node]["db_path"], function(err, stdout, stderr) {
       exec("mkdir -p " + self.mongods[node]["db_path"] + "/journal", function(err, stdout, stderr) {
+        // Clear out instances
+        this.mongods = {};
+        // Start set again
         self.start(node, callback);
       });
     });
