@@ -1,3 +1,7 @@
+1.3.3 2013-05-09
+----------------
+- Fixed auto-reconnect issue with single server instance.
+
 1.3.2 2013-05-08
 ----------------
 - Fixes for an issue where replicaset would be pronounced dead when high priority primary caused double elections.
