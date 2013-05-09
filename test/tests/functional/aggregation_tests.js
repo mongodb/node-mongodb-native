@@ -286,6 +286,7 @@ exports.shouldCorrectlyPassReadPreference = function(configure, test) {
                 , function(err, result) {
                   db.command = _command;
                   test.ok(err != null);
+                  db.close();
                   test.done();
               });
           });
