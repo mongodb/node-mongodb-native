@@ -431,8 +431,8 @@ exports.shouldCorrectlyPerformFindsWithHintTurnedOn = function(configuration, te
         });
 
         // Modify hints
-        collection.hint = 'a';
-        test.equal(1, collection.hint['a']);
+        collection.hint = 'a_1';
+        test.equal('a_1', collection.hint);
         collection.find({'a':1}).toArray(function(err, items) {
           test.equal(1, items.length);
         });

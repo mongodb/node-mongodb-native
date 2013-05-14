@@ -797,7 +797,7 @@ exports['should handle index declarations using objects from other contexts'] = 
   })
 }
 
-exports['should correctly return error message when applying unique index to dupicate documents'] = function(configuration, test) {
+exports['should correctly return error message when applying unique index to duplicate documents'] = function(configuration, test) {
   var client = configuration.db();
   var collection = client.collection("should_throw_error_due_to_duplicates");
   collection.insert([{a:1}, {a:1}, {a:1}], {w:1}, function(err, result) {
@@ -820,6 +820,28 @@ exports['should correctly drop index with no callback'] = function(configuration
       collection.dropIndex("a_1")
 
       test.done();
+    });
+  });
+}
+
+exports['should correctly apply hint to find'] = function(configuration, test) {
+  var client = configuration.db();
+  var collection = client.collection("should_correctly_apply_hint");
+  collection.insert([{a:1}], {w:1}, function(err, result) {
+    test.equal(null, err);
+
+    collection.ensureIndex({a:1}, {w:1}, function(err, result) {
+      test.equal(null, err);
+
+      collection.indexInformation({full:false}, function(err, indexInformation) {
+        test.equal(null, err);
+
+        collection.find({}, {hint:"a_1"}).toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(1, docs[0].a);
+          test.done();
+        });
+      });
     });
   });
 }
