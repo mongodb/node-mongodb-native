@@ -10,7 +10,7 @@
 
 var assert = require('assert')
 var uri = 'mongodb://localhost:31000,localhost:31001,localhost:31002';
-var mongo = require('./lib/mongodb')
+var mongo = require('../../../lib/mongodb')
 var Server = mongo.Server;
 var ReplSetServers = mongo.ReplSet;
 var Db = mongo.Db;
