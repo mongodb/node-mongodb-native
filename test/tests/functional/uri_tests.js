@@ -206,3 +206,22 @@ exports['Should correctly connect via normal url setting up poolsize of 1'] = fu
     test.done();
   });
 }
+
+exports['Should correctly connect using uri encoded username and password'] = function(configuration, test) {
+  var MongoClient = configuration.getMongoPackage().MongoClient;
+  MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
+    test.equal(null, err);
+    var user = 'u$ser'
+      , pass = '$specialch@rs'
+      ;
+
+    db.addUser(user, pass, function(err) {
+      test.equal(null, err);
+      var uri = "mongodb://" + encodeURIComponent(user) + ":" + encodeURIComponent(pass) + "@localhost:27017/integration_tests";
+      MongoClient.connect(uri, {uri_decode_auth: true, native_parser:true}, function(err, authenticatedDb) {
+        test.equal(null, err);
+        test.done();
+      });
+    });
+  });
+}
