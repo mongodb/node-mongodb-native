@@ -220,6 +220,8 @@ exports['Should correctly connect using uri encoded username and password'] = fu
       var uri = "mongodb://" + encodeURIComponent(user) + ":" + encodeURIComponent(pass) + "@localhost:27017/integration_tests";
       MongoClient.connect(uri, {uri_decode_auth: true, native_parser:true}, function(err, authenticatedDb) {
         test.equal(null, err);
+
+        db.close();
         test.done();
       });
     });
