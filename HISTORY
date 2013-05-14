@@ -1,3 +1,8 @@
+1.3.4 2013-05-14
+----------------
+- Fixed bug where options not correctly passed in for uri parser (Issue #973, https://github.com/supershabam)
+- Fixed bug when passing a named index hint (Issue #974)
+
 1.3.3 2013-05-09
 ----------------
 - Fixed auto-reconnect issue with single server instance.
