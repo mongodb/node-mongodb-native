@@ -222,6 +222,7 @@ exports['Should correctly connect using uri encoded username and password'] = fu
         test.equal(null, err);
 
         db.close();
+        authenticatedDb.close();
         test.done();
       });
     });
