@@ -410,19 +410,24 @@ var _generateGithubPackageList = function(inputFile, outputDirectory, templates,
     if(options == null || options.dontfetch == null) {
       // Get repo information
       new function(_repo, _username) {
-        // Get the repo information
-        github.getRepository(_repo, _username, function(err, result) {
-          if(err) throw err;
-          // Correct the number of remaining repos
-          totalNumberOfRepos = totalNumberOfRepos - 1;
-          // Write the content to disk
-          fs.writeFileSync(format("%s/%s.%s.json", outputDirectory, _repo, _username), JSON.stringify(result, null, 2), 'ascii');
+        setTimeout(function() {
+          // Get the repo information
+          github.getRepository(_repo, _username, function(err, result) {
+            if(err) console.dir(_repo + "::" + err.message);
+            // Correct the number of remaining repos
+            totalNumberOfRepos = totalNumberOfRepos - 1;
 
-          // If we are done skip to next processing step
-          if(totalNumberOfRepos == 0) {
-            return _processGithub(objects, outputDirectory, templateObjects, tagDescriptions);
-          }
-        });                      
+            if(!err) {
+              // Write the content to disk
+              fs.writeFileSync(format("%s/%s.%s.json", outputDirectory, _repo, _username), JSON.stringify(result, null, 2), 'ascii');      
+            }
+            
+            // If we are done skip to next processing step
+            if(totalNumberOfRepos == 0) {
+              return _processGithub(objects, outputDirectory, templateObjects, tagDescriptions);
+            }          
+          });
+        }, 200)
       }(repo, username)          
     }
   }
