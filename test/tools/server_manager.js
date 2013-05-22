@@ -32,8 +32,6 @@ var ensureUp = function(self, host, port, number_of_retries, callback) {
 
   var db = new Db('test', new Server(host, port, options), {w:1});
   db.open(function(err, result) {
-    // console.log("==============================")
-    // console.dir(err)
     db.close();
 
     if(err) {
@@ -84,13 +82,18 @@ var ServerManager = exports.ServerManager = function(options) {
 }
 
 // Start up the server instance
-ServerManager.prototype.start = function(killall, callback) {
-  // console.log("=============================================== SERVERMANAGER START")
+ServerManager.prototype.start = function(killall, options, callback) {
   var self = this;
   // Unpack callback and variables
-  var args = Array.prototype.slice.call(arguments, 0);
-  callback = args.pop();
-  killall = args.length ? args.shift() : true;
+  if(typeof options == 'function') {
+    callback = options;
+    options = {};
+  } else if(typeof killall == 'function') {
+    callback  = killall;
+    killall = true;
+    options = {};
+  }
+
   // Create start command
   var startCmd = generateStartCmd(this, {configserver:self.configServer, log_path: self.log_path,
     db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl});
@@ -113,14 +116,14 @@ ServerManager.prototype.start = function(killall, callback) {
               }
           });
 
+          if(options.ensureUp == false) return callback();
+
           // Wait for a half a second then save the pids
           ensureUp(self, self.host, self.port, 100, function(err, result) {
             if(err) throw err;
             // Mark server as running
             self.up = true;
             self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
-            // console.log("=============================================== SERVERMANAGER START == END")
-
             // Callback
             callback();
           });

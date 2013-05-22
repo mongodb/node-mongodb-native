@@ -29,6 +29,7 @@ var single_server_config = function(options) {
 
     // Server manager
     var serverManager = new ServerManager(server_options);
+    var dbs = [];
 
     // Test suite start
     this.start = function(callback) {
@@ -41,15 +42,26 @@ var single_server_config = function(options) {
     }
 
     this.restart = function(callback) {
-      self.stop(function() {
-        self.start(callback);
+      serverManager.start(true, function(err) {
+        if(err) throw err;
+        db.open(function(err, result) {
+          callback();
+        })
+      });
+    }
+
+    this.restartNoEnsureUp = function(callback) {
+      serverManager.start(true, {ensureUp:false}, function(err) {
+        if(err) throw err;
+        db.open(function(err, result) {
+          callback();
+        })
       });
     }
 
     // Test suite stop
     this.stop = function(callback) {
       db.close(function() {
-        // process.exit(0)
         serverManager.killAll(function(err) {
           callback();
         });        
@@ -71,15 +83,21 @@ var single_server_config = function(options) {
     }
 
     this.newDbInstanceWithDomainSocket = function(host, db_options, server_options) {
-      return new Db('integration_tests', new Server(host, server_options), db_options);
+      var db = new Db('integration_tests', new Server(host, server_options), db_options);
+      dbs.push(db);
+      return db;
     }
 
     this.newDbInstanceWithDomainSocketAndPort = function(host, port, db_options, server_options) {
-      return new Db('integration_tests', new Server(host, port, server_options), db_options);
+      var db = new Db('integration_tests', new Server(host, port, server_options), db_options);
+      dbs.push(db);
+      return db;
     }
 
     this.newDbInstance = function(db_options, server_options) {
-      return new Db('integration_tests', new Server("127.0.0.1", 27017, server_options), db_options);
+      var db = new Db('integration_tests', new Server("127.0.0.1", 27017, server_options), db_options);
+      dbs.push(db);
+      return db;
     }
 
     // Returns a db

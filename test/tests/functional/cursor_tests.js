@@ -2262,16 +2262,21 @@ exports.shouldNotHangOnTailableCursor = function(configuration, test) {
         var cursor = collection.find({}, {tailable:true});
         cursor.each(function(err, doc) {
           index += 1;
-          console.dir("============================")
+          // console.dir("============================")
 
-          if(index == totaldocs) {
-            cursor.close();
+          if(err) {            
             client.close();
-            test.done();
+            
+            // Ensure we have a server up and running
+            return configuration.start(function() {
+              test.done();
+            });
+          } else if(index == totaldocs) {
+            test.ok(false);
           }
 
           if(index == 10) {
-            configuration.restart(function(err) {}); 
+            configuration.restartNoEnsureUp(function(err) {}); 
           }
           // test.ok(err instanceof Error);
           // test.done();
