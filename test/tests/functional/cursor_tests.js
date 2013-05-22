@@ -2240,3 +2240,47 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, tes
   });
   // DOC_END
 }
+
+/**
+ * @ignore
+ * @api private
+ */
+exports.shouldNotHangOnTailableCursor = function(configuration, test) {
+  // var client = configuration.db();
+  var docs = [];
+  var totaldocs = 2000;
+  for(var i = 0; i < totaldocs; i++) docs.push({a:i, OrderNumber:i});
+  var options = { capped: true, size: (1024 * 1024 * 16) };
+  var index = 0;
+
+  // this.newDbInstance = function(db_options, server_options) {
+  var client = configuration.newDbInstance({w:1}, {auto_reconnect:true});
+
+  client.open(function(err, client) {
+    client.createCollection('shouldNotHangOnTailableCursor', options, function(err, collection) {
+      collection.insert(docs, {w:1}, function(err, ids) {    
+        var cursor = collection.find({}, {tailable:true});
+        cursor.each(function(err, doc) {
+          index += 1;
+          console.dir("============================")
+
+          if(index == totaldocs) {
+            cursor.close();
+            client.close();
+            test.done();
+          }
+
+          if(index == 10) {
+            configuration.restart(function(err) {}); 
+          }
+          // test.ok(err instanceof Error);
+          // test.done();
+        });
+      });
+
+      // process.nextTick(function() {
+      //   configuration.restart(function(err) {});
+      // })
+    });
+  });
+}
