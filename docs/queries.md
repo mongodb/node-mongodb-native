@@ -18,6 +18,7 @@ Where
   * `fields` - indicates which fields should be included in the response (default is all)
   * `options` - defines extra logic (sorting options, paging etc.)
   * `raw` - driver returns documents as bson binary Buffer objects, `default:false`
+  * `callback` has two parameters - an error object (if an error occured) and a cursor object.
   
 The result for the query is actually a cursor object. This can be used directly or converted to an array.
 
