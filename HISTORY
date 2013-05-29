@@ -1,3 +1,8 @@
+1.3.7 2013-05-29
+----------------
+- After reconnect, tailable getMores go on inconsistent connections (Issue #981, #982, https://github.com/glasser)
+- Updated Bson to 0.1.9 to fix ARM support (Issue #985)
+
 1.3.6 2013-05-21
 ----------------
 - Fixed issue where single server reconnect attempt would throw due to missing options variable (Issue #979)
