@@ -36,7 +36,7 @@ exports['Should Correctly Authenticate using different user source database and 
 
               //
               // Authenticate using MongoClient
-              MongoClient.connect('mongodb://mallory:a@localhost:27017/foo?authSource=users', function(err, db) {
+              new MongoClient().connect('mongodb://mallory:a@localhost:27017/foo?authSource=users', function(err, db) {
                 test.equal(null, err);
 
                 db.collection('t').insert({a:1}, function(err, result) {

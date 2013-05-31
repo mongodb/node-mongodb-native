@@ -810,13 +810,25 @@ exports['Should Correctly Authenticate using different user source database and 
                         db.serverConfig._state.master.connectionPool.openConnections[0].connection.destroy();
 
                         db.collection('t').insert({a:1}, function(err, result) {                          
-                          test.ok(err != null);
+                          test.equal(null, err);
+                          test.ok(result != null);
+                          // console.dir("========================================== 0")
+                          
+                          // console.dir(err)
+                          // console.dir(result)
+                          // test.ok(err != null);
 
                           db.collection('t').insert({a:1}, function(err, result) {                          
+                            // console.dir("========================================== 1")
+                            // console.dir(err)
+                            // console.dir(result)
                             test.equal(null, err);
                             test.ok(result != null);
 
                             db.logout(function(err, result) {
+                              // console.dir("========================================== 2")
+                              // console.dir(err)
+                              // console.dir(result)
                               test.equal(null, err);
                               test.equal(true, result);
                               test.equal(0, db.serverConfig.auth.length());

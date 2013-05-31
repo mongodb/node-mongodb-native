@@ -1,3 +1,8 @@
+1.3.8 2013-05-31
+----------------
+- Fixed issue with socket death on windows where it emits error event instead of close event (Issue #987)
+- Emit authenticate event on db after authenticate method has finished on db instance (Issue #0)
+
 1.3.7 2013-05-29
 ----------------
 - After reconnect, tailable getMores go on inconsistent connections (Issue #981, #982, https://github.com/glasser)
