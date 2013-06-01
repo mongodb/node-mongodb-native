@@ -1,7 +1,7 @@
 # MongoClient or how to connect in a new and better way
-From driver version **1.2** we are introduction a new connection Class that has the same name across all out official drivers. This is to ensure that we present a recognizable front for all our API's. This does not mean you existing application will break but that we encourage you to use the new connection api to simplify your application development.
+From driver version **1.2** we introduce a new connection Class that has the same name across all our official drivers. This is to ensure that we present a recognizable front for all our API's. This does not mean that your existing application will break, but rather that we encourage you to use the new connection api to simplify your application development.
 
-Further more we are making the new connection class **MongoClient** acknowledge all write to MongoDB in contrast to the existing connection class Db that has acknowledgements turned off. Let's take a tour of the MongoClient functions.
+Furthermore, we are making the new connection class **MongoClient** acknowledges all writes to MongoDB, in contrast to the existing connection class Db that has acknowledgements turned off. Let's take a tour of the MongoClient functions.
 
     MongoClient = function(server, options);
 
@@ -13,7 +13,7 @@ Further more we are making the new connection class **MongoClient** acknowledge 
 
     MongoClient.connect
 
-Outlined above is the complete MongoClient interface. The methods **open**, **close** and **db** work very similar to the existing methods on the **Db** class. The main difference if you noticed is that the constructor is missing the **database name** from Db. Let's show a simple connection using **open** as a code example speaks a thousand words.
+Outlined above is the complete MongoClient interface. The methods **open**, **close** and **db** work very similar to the existing methods on the **Db** class. The main difference is that the constructor is missing the **database name** from Db. Let's show a simple connection using **open** as a code example speaks a thousand words.
 
     var MongoClient = require('mongodb').MongoClient
       , Server = require('mongodb').Server;
@@ -25,20 +25,20 @@ Outlined above is the complete MongoClient interface. The methods **open**, **cl
       mongoClient.close();
     });
 
-Notice that you configure the MongoClient just as you would have done the Db object. The main difference is that you access the db instances using the **db** method on the MongoClient object instead of using the Db instance directly as you would previously. Don't that seem more intuitive then the previous API. Also MongoClient supports the same options as the previous Db instance you would have created.
+Notice that you configure the MongoClient just as you would have done the Db object. The main difference is that you access the db instances using the **db** method on the MongoClient object instead of using the Db instance directly as you would previously. MongoClient supports the same options as the previous Db instance you would have created.
 
-So with a minimal change in our app we can apply the new MongoClient connection code. But there is more and one direction you might consider int the future. That is the mongodb connection string.
+So, with a minimal change in our app, we can apply the new MongoClient connection code. But there is more and one direction you might consider int the future. That is the mongodb connection string.
 
 ## The URL connection format
 
     mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
 
-The URL format is unified across official drivers from 10gen with some options not supported on some driver due to natural reasons. The ones not supported by the Node.js driver are left out for simplicities sake.
+The URL format is unified across official drivers from 10gen with some options not supported on some drivers due to natural reasons. The ones not supported by the Node.js driver are left out for simplicities sake.
 
 ### Basic parts of the url 
   * **mongodb://** is a required prefix to identify that this is a string in the standard connection format.
 
-  * **username:password@** are optional. If given, the driver will attempt to login to a database after connecting to a database server.
+  * **username:password@** is optional. If given, the driver will attempt to login to a database after connecting to a database server.
   * **host1** is the only required part of the URI. It identifies either a hostname, IP address, or unix domain socket
   * **:portX** is optional and defaults to :27017 if not provided.
   * **/database** is the name of the database to login to and thus is only relevant if the username:password@ syntax is used. If not specified the "admin" database will be used by default.
@@ -58,11 +58,11 @@ The URL format is unified across official drivers from 10gen with some options n
 
 * **connectTimeoutMS=ms**
     * How long a connection can take to be opened before timing out.
-    * Current driver behavior already differs on this, so default must be left to each driver. For new implementations, the default should be to never timeout.
+    * Current driver behavior already differs on this, so the default must be left to each driver. For new implementations, the default should be to never timeout.
 
 * **socketTimeoutMS=ms**
     * How long a send or receive on a socket can take before timing out.
-    * Current driver behavior already differs on this, so default must be left to each driver. For new implementations, the default should be to never timeout.
+    * Current driver behavior already differs on this, so the default must be left to each driver. For new implementations, the default should be to never timeout.
 
 ### Connection pool configuration:
 * **maxPoolSize=n:** The maximum number of connections in the connection pool
