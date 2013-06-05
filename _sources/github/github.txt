@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 23:1:5 on 28/4/2013
+           - 19:53:41 on 3/5/2013
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 438
+           - 440
          * - **Watchers**
-           - 3262
+           - 3287
 
 .. topic:: mongo-model
 
@@ -214,9 +214,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 203
+           - 201
          * - **Watchers**
-           - 1100
+           - 1104
 
 Grid FS libraries or tools
 --------------------------
@@ -312,9 +312,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/masylum/mongolia.git
          * - **Forks**
-           - 12
+           - 13
          * - **Watchers**
-           - 110
+           - 109
 
 .. topic:: mongojs
 
@@ -348,9 +348,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 14:17:30 on 29/7/2012
+           - 18:31:42 on 2/5/2013
          * - **Homepage**
            - http://
          * - **Url**
@@ -459,7 +459,7 @@ REST api's around MongoDB or resource based libraries
 
 .. topic:: mongodb-rest
 
-    REST Server for MongoDB (using node.js)
+    (outdated/abandoned) REST Server for MongoDB (using node.js)
 
       .. list-table::
          :widths: 25 85
@@ -478,7 +478,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 55
          * - **Watchers**
-           - 241
+           - 242
 
 .. topic:: lazyBum
 
@@ -571,7 +571,7 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 8
+           - 9
          * - **Watchers**
            - 40
 
@@ -648,7 +648,7 @@ Queue libraries using MongoDB
          * - **Forks**
            - 6
          * - **Watchers**
-           - 80
+           - 81
 
 Logging libraries or applications
 ---------------------------------
@@ -720,7 +720,7 @@ Logging libraries or applications
          * - **Forks**
            - 0
          * - **Watchers**
-           - 24
+           - 25
 
 Monitoring applications or libraries
 ------------------------------------
@@ -870,7 +870,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 267
          * - **Watchers**
-           - 2619
+           - 2629
 
 Libraries for the connect middleware
 ------------------------------------
@@ -919,7 +919,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 79
          * - **Watchers**
-           - 262
+           - 264
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -943,9 +943,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 41
+           - 42
          * - **Watchers**
-           - 289
+           - 290
 
 Exampe applications
 -------------------
