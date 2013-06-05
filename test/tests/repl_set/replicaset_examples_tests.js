@@ -1,3 +1,5 @@
+var format = require('util').format;
+
 /**
  * Example of a simple url connection string to a replicaset, with acknowledgement of writes.
  *
@@ -6,10 +8,15 @@
  */
 exports['Should correctly connect to a replicaset'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
-    MongoClient = mongo.MongoClient;
+    , MongoClient = mongo.MongoClient;
 
-  // DOC_START
-  MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_?w=1", function(err, db) {
+  var replMan = configuration.getReplicasetManager();
+  var url = format("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?w=1"
+    , replMan.ports[0], replMan.ports[1], replMan.ports[2])
+
+  MongoClient.connect(url, function(err, db) {
+  // DOC_LINE MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_?w=1", function(err, db) {
+  // DOC_START  
     test.equal(null, err);
     test.ok(db != null);
 
@@ -31,14 +38,23 @@ exports['Should correctly connect to a replicaset'] = function(configuration, te
  * @_function open
  * @ignore
  */
-exports['Connection to replicaset with secondary only read preference no secondaries should not return a connection'] = function(test) {
+exports['Connection to replicaset with secondary only read preference no secondaries should not return a connection'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , Db = mongo.Db
+    , ReadPreference = mongo.ReadPreference
+    , ReplSet = mongo.ReplSet
+    , Server = mongo.Server;
+
+  // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+
   // Replica configuration
-  var replSet = new ReplSetServers( [
-      new Server( RS.host, RS.ports[1]),
-      new Server( RS.host, RS.ports[0]),
-      new Server( RS.host, RS.ports[2])
+  var replSet = new ReplSet( [
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
     ],
-    {rs_name:RS.name}
+    {rs_name:replicasetManager.name}
   );
 
   // DOC_LINE var replSet = new ReplSetServers([

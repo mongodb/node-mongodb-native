@@ -27,20 +27,21 @@ MongoClient.connect('mongodb://127.0.0.1:31000/test_db', function(err, db) {
 			// mark request = true as sending mongo request
 			request = true;
 
-			console.log('findAndModify request (should not be last)');
+			// console.log('findAndModify request (should not be last)');
 
-			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{w:5, wtimeout:1000, upsert:true}, function(err, object) {
-				if (err) {
-					console.warn('findAndModify error response ', err.message); // returns error if no matching object found
-				} else {
-					console.log('findAndModify response', object);
-				}
+      // collection.find({hello: 'world'}).toArray(function(err, docs) {
+			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{w:2, upsert:true}, function(err, object) {
+				// if (err) {
+				// 	console.warn('findAndModify error response ', err.message); // returns error if no matching object found
+				// } else {
+				// 	console.log('findAndModify response', object);
+				// }
 
 				// no more out standing request
 				request = false;
 
         process.nextTick(function() {
-          console.dir("number of callbacks :: " + Object.keys(db.serverConfig._callBackStore._notReplied).length);
+          // console.dir("number of callbacks :: " + Object.keys(db.serverConfig._callBackStore._notReplied).length);
   				// on result does it again
   				findAndModifyLoop();          
         })
