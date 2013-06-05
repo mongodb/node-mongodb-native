@@ -1,24 +1,26 @@
-var mongodb = require("../../lib/mongodb"),
-	request = true;
+var mongodb = require("../../../lib/mongodb")
+  , MongoClient = mongodb.MongoClient
+	, request = true;
 
-var db = new mongodb.Db('test_db', new mongodb.Server("127.0.0.1", 27017, {
-	auto_reconnect: true
-}), {});
+// var db = new mongodb.Db('test_db', new mongodb.Server("127.0.0.1", 27017, {
+// 	auto_reconnect: true
+// }), {});
 
-// listen on error
-db.on("error", function(err) {
-	console.log('open request ', request);
-	console.error('db on error');
-	console.dir(err);
-});
+// // listen on error
+// db.on("error", function(err) {
+// 	console.log('open request ', request);
+// 	console.error('db on error');
+// 	console.dir(err);
+// });
 
 // open connection
-db.open(function(err, client) {
+// db.open(function(err, client) {
+MongoClient.connect('mongodb://127.0.0.1:31000/test_db', function(err, db) {
 	if (err) {
 		console.error(err);
 	}
 
-	var collection = new mongodb.Collection(client, 'test_collection');
+	var collection = db.collection('test_collection');
 
 	// define find and modify
 	var findAndModifyLoop = function() {
@@ -27,7 +29,7 @@ db.open(function(err, client) {
 
 			console.log('findAndModify request (should not be last)');
 
-			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{w:1, upsert:true}, function(err, object) {
+			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{w:5, wtimeout:1000, upsert:true}, function(err, object) {
 				if (err) {
 					console.warn('findAndModify error response ', err.message); // returns error if no matching object found
 				} else {
@@ -38,6 +40,7 @@ db.open(function(err, client) {
 				request = false;
 
         process.nextTick(function() {
+          console.dir("number of callbacks :: " + Object.keys(db.serverConfig._callBackStore._notReplied).length);
   				// on result does it again
   				findAndModifyLoop();          
         })
@@ -48,14 +51,14 @@ db.open(function(err, client) {
 	findAndModifyLoop();
 });
 
-db.on("error", function(err) {
-  console.log('open request ', request);
-  console.error('db on error');
-  console.dir(err);
-});
+// db.on("error", function(err) {
+//   console.log('open request ', request);
+//   console.error('db on error');
+//   console.dir(err);
+// });
 
-db.on("close", function(err) {
-  console.log('open request ', request);
-  console.error('db on close');
-  console.dir(err);
-});
+// db.on("close", function(err) {
+//   console.log('open request ', request);
+//   console.error('db on close');
+//   console.dir(err);
+// });
