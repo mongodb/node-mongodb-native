@@ -30,7 +30,7 @@ MongoClient.connect('mongodb://127.0.0.1:31000/test_db', function(err, db) {
 			// console.log('findAndModify request (should not be last)');
 
       // collection.find({hello: 'world'}).toArray(function(err, docs) {
-			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{w:2, upsert:true}, function(err, object) {
+			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{w:1, upsert:true}, function(err, object) {
 				// if (err) {
 				// 	console.warn('findAndModify error response ', err.message); // returns error if no matching object found
 				// } else {
