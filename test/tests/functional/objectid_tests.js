@@ -84,7 +84,7 @@ exports.shouldCorrectlyGenerate12ByteStringFromTimestamp = function(configuratio
  * @_function toHexString
  * @ignore
  */
-exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(configuration, test) {
+exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString_A = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
   // DOC_START
   // Create a new ObjectID
@@ -125,7 +125,7 @@ exports.shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty = function(c
 /**
  * @ignore
  */
-exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(configuration, test) {
+exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString_B = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
   // Create a new ObjectID
   var objectId = new ObjectID();  
@@ -137,7 +137,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(confi
 /**
  * @ignore
  */
-exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(configuration, test) {
+exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString_C = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
   // Create a new ObjectID
   var objectId = new ObjectID();  
@@ -153,7 +153,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = function(confi
  * @_function ObjectID.createFromHexString
  * @ignore
  */
-exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configuration, test) {
+exports.shouldCorrectlyTransformObjectIDToAndFromHexString_A = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
   // DOC_START
   // Create a new ObjectID
@@ -177,7 +177,7 @@ exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configurat
  * @_function equals
  * @ignore
  */
-exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configuration, test) {
+exports.shouldCorrectlyTransformObjectIDToAndFromHexString_B = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
   // DOC_START
   // Create a new ObjectID
@@ -295,7 +295,7 @@ exports.shouldCorrectlyInsertWithObjectId = function(configuration, test) {
  * @_function ObjectID.createFromTime
  * @ignore
  */
-exports.shouldCorrectlyTransformObjectIDToAndFromHexString = function(configuration, test) {
+exports.shouldCorrectlyTransformObjectIDToAndFromHexString_C = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
   // DOC_START
   var objectId = ObjectID.createFromTime(1);
