@@ -42,7 +42,7 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = function(c
  * @_function authenticate
  * @ignore
  */
-exports.shouldCorrectlyAuthenticate = function(configure, test) {
+exports.shouldCorrectlyAuthenticate_A = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
   // DOC_START
@@ -84,7 +84,7 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
  * @_function admin
  * @ignore
  */
-exports.shouldCorrectlyAuthenticate = function(configure, test) {
+exports.shouldCorrectlyAuthenticate_B = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
   // DOC_START
@@ -107,7 +107,7 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
  * @_function buildInfo
  * @ignore
  */
-exports.shouldCorrectlyAuthenticate = function(configure, test) {
+exports.shouldCorrectlyAuthenticate_C = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -149,7 +149,7 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
  * @_function command
  * @ignore
  */
-exports.shouldCorrectlyAuthenticate = function(configure, test) {
+exports.shouldCorrectlyAuthenticate_D = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));

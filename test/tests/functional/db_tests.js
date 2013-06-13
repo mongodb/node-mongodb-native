@@ -437,7 +437,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
  * @_function collectionsInfo
  * @ignore
  */
-exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
+exports.shouldCorrectlyRetrieveCollectionInfo_A = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -478,7 +478,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
  * @_function collectionNames
  * @ignore
  */
-exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
+exports.shouldCorrectlyRetrieveCollectionInfo_B = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -728,7 +728,7 @@ exports.shouldCorrectlyLogoutFromTheDatabase = function(configuration, test) {
  * @_function authenticate
  * @ignore
  */
-exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, test) {
+exports.shouldCorrectlyAuthenticateAgainstTheDatabase_A = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
@@ -761,7 +761,7 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, 
  * @_function addUser
  * @ignore
  */
-exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, test) {
+exports.shouldCorrectlyAuthenticateAgainstTheDatabase_B = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
@@ -1374,7 +1374,7 @@ exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) 
  * @_class db
  * @_function indexInformation
  */
-exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configuration, test) {
+exports.shouldCorrectlyShowTheResultsFromIndexInformation_A = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -1422,7 +1422,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configurati
  * @_class db
  * @_function dropDatabase
  */
-exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configuration, test) {
+exports.shouldCorrectlyShowTheResultsFromIndexInformation_B = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));

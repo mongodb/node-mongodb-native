@@ -151,7 +151,7 @@ exports['Should correctly connect via normal url using require'] = function(conf
   });
 }
 
-exports['Should correctly connect via normal url'] = function(configuration, test) {
+exports['Should correctly connect via normal url A'] = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var Db = configuration.getMongoPackage().Db;
 
@@ -162,7 +162,7 @@ exports['Should correctly connect via normal url'] = function(configuration, tes
   });
 }
 
-exports['Should correctly connect via normal url'] = function(configuration, test) {
+exports['Should correctly connect via normal url B'] = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var Db = configuration.getMongoPackage().Db;
 
@@ -173,7 +173,7 @@ exports['Should correctly connect via normal url'] = function(configuration, tes
   });
 }
 
-exports['Should correctly connect via normal url'] = function(configuration, test) {
+exports['Should correctly connect via normal url C'] = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var Db = configuration.getMongoPackage().Db;
 
