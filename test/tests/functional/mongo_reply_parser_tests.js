@@ -244,7 +244,7 @@ exports['Should correctly parse message + in two packets from socket and smaller
 /**
  * @ignore
  */
-exports['Should correctly parse message + in two packets from socket and smaller than 4 bytes additional one then partial message'] = function(configuration, test) {    
+exports['Should correctly parse message + in two packets from socket and smaller than 4 bytes additional one then partial message A'] = function(configuration, test) {    
   // Data object
   var index = 0;
   var buffer = new Buffer(20);
@@ -295,7 +295,7 @@ exports['Should correctly parse message + in two packets from socket and smaller
 /**
  * @ignore
  */
-exports['Should correctly parse message + in two packets from socket and smaller than 4 bytes additional one then partial message'] = function(configuration, test) {    
+exports['Should correctly parse message + in two packets from socket and smaller than 4 bytes additional one then partial message B'] = function(configuration, test) {    
   // Data object
   var index = 0;
   var buffer = new Buffer(40);
