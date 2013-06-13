@@ -1180,8 +1180,7 @@ exports.shouldCorrectlyWrite = function(configuration, test) {
 
   var fname = 'test_large_str';
   var my_chunkSize = 1024*10
-  GridStore.unlink(client, fname, function(err, gs) {
-    
+  GridStore.unlink(client, fname, function(err, gs) {    
     var gs = new GridStore(client, fname, "w");
     gs.chunkSize = my_chunkSize;
     gs.open(function(err, gs) {

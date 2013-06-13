@@ -1,4 +1,5 @@
-var format = require('util').format;
+var format = require('util').format
+  , fs = require('fs');
 
 exports['Should Correctly Use Secondary Server with Query when using NEAREST'] = function(configuration, test) {
   var mongo = configuration.getMongoPackage()
@@ -200,6 +201,50 @@ exports['Should Correctly Vary read server when using readpreference NEAREST'] =
         test.done();
       });
     });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = function(configuration, test) {
+  var GridStore = configuration.getMongoPackage().GridStore
+    , ObjectID = configuration.getMongoPackage().ObjectID
+    , ReadPreference = configuration.getMongoPackage().ReadPreference;
+  var client = configuration.db();
+  var gridStore = new GridStore(client, null, 'w', {w:3});
+
+  // Force multiple chunks to be stored
+  gridStore.chunkSize = 5000;
+  var fileSize = fs.statSync('./test/tests/functional/gridstore/test_gs_weird_bug.png').size;
+  var data = fs.readFileSync('./test/tests/functional/gridstore/test_gs_weird_bug.png');
+
+  gridStore.open(function(err, gridStore) {
+
+    // Write the file using write
+    gridStore.write(data, function(err, doc) {
+      gridStore.close(function(err, doc) {
+
+        // Save checkout function
+        var checkout = client.serverConfig.checkoutReader;
+        // // Set up our checker method
+        client.serverConfig.checkoutReader = function() {
+          var args = Array.prototype.slice.call(arguments, 0);
+          test.equal(ReadPreference.SECONDARY, args[0]);
+          return checkout.apply(client.serverConfig, args);
+        }
+
+        // Read the file using readBuffer
+        new GridStore(client, doc._id, 'r', {readPreference:ReadPreference.SECONDARY}).open(function(err, gridStore) {
+          gridStore.read(function(err, data2) {
+            test.equal(data.toString('base64'), data2.toString('base64'));
+            client.serverConfig.checkoutReader = checkout;
+
+            test.done();
+          })
+        });
+      });
+    })
   });
 }
 

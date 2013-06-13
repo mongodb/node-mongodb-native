@@ -17,7 +17,7 @@ exports['Should correctly apply collection level read Preference to count'] = fu
     db.serverConfig.checkoutReader = function() {
       var args = Array.prototype.slice.call(arguments, 0);
       test.equal(ReadPreference.SECONDARY_PREFERRED, args[0]);
-      checkout.apply(db.serverConfig, args);
+      return checkout.apply(db.serverConfig, args);
     }
 
     // Execute count
@@ -49,7 +49,7 @@ exports['Should correctly apply collection level read Preference to group'] = fu
     db.serverConfig.checkoutReader = function() {
       var args = Array.prototype.slice.call(arguments, 0);
       test.equal(ReadPreference.SECONDARY_PREFERRED, args[0]);
-      checkout.apply(db.serverConfig, args);
+      return checkout.apply(db.serverConfig, args);
     }
 
     // Execute count
@@ -81,7 +81,7 @@ exports['Should correctly apply collection level read Preference to geoNear'] = 
     db.serverConfig.checkoutReader = function() {
       var args = Array.prototype.slice.call(arguments, 0);
       test.equal(ReadPreference.SECONDARY_PREFERRED, args[0]);
-      checkout.apply(db.serverConfig, args);
+      return checkout.apply(db.serverConfig, args);
     }
 
     // Execute count
@@ -113,7 +113,7 @@ exports['Should correctly apply collection level read Preference to geoHaystackS
     db.serverConfig.checkoutReader = function() {
       var args = Array.prototype.slice.call(arguments, 0);
       test.equal(ReadPreference.SECONDARY_PREFERRED, args[0]);
-      checkout.apply(db.serverConfig, args);
+      return checkout.apply(db.serverConfig, args);
     }
 
     // Execute count
@@ -145,7 +145,7 @@ exports['Should correctly apply collection level read Preference to mapReduce'] 
     db.serverConfig.checkoutReader = function() {
       var args = Array.prototype.slice.call(arguments, 0);
       test.equal(ReadPreference.SECONDARY_PREFERRED, args[0]);
-      checkout.apply(db.serverConfig, args);
+      return checkout.apply(db.serverConfig, args);
     }
 
     // Map function
@@ -182,7 +182,7 @@ exports['Should correctly apply collection level read Preference to aggregate'] 
     db.serverConfig.checkoutReader = function() {
       var args = Array.prototype.slice.call(arguments, 0);
       test.equal(ReadPreference.SECONDARY_PREFERRED, args[0]);
-      checkout.apply(db.serverConfig, args);
+      return checkout.apply(db.serverConfig, args);
     }
 
     // Map function
@@ -229,7 +229,7 @@ exports['Should correctly apply collection level read Preference to stats'] = fu
     db.serverConfig.checkoutReader = function() {
       var args = Array.prototype.slice.call(arguments, 0);
       test.equal(ReadPreference.SECONDARY_PREFERRED, args[0]);
-      checkout.apply(db.serverConfig, args);
+      return checkout.apply(db.serverConfig, args);
     }
 
     // Map function

@@ -767,7 +767,14 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = function(configuration, 
         // Read in the whole file and check that it's the same content
         GridStore.read(client, result._id, function(err, fileData) {
           var data = fs.readFileSync('./test_gs_working_field_read.tmp');
-          test.equal(data.toString('base64'), fileData.toString('base64'));
+          // test.equal(data.toString('base64'), fileData.toString('base64'));
+          // console.log(data.length)
+          // console.log(fileData.length)
+          // for(var i = 0; i < data.length; i++) {
+          //   if(data[i] != fileData[i]) console.log("error at :: " + i)
+          // }
+
+          test.deepEqual(data, fileData);
           test.done();
         });
       });
@@ -824,7 +831,10 @@ exports.shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes = functio
           // Read in the whole file and check that it's the same content
           GridStore.read(client, result._id, function(err, fileData) {
             var data = fs.readFileSync('./test_gs_working_field_read.tmp');
-            _test.equal(data.toString('base64'), fileData.toString('base64'));
+            // for(var i = 0; i < data.length; i++) {
+            //   if(data[i] != fileData[i]) console.log("=============== WRONG :: " + i)
+            // }
+            test.deepEqual(data, fileData);
             callback(null, null);
           });
         });

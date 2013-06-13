@@ -14,7 +14,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(configuration, te
 
     // Start server
     db.on("close", function(err) {
-      console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 1 :: " + this.databaseName)
+      // console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 1 :: " + this.databaseName)
       numberOfCloses = numberOfCloses + 1;
     })
     
@@ -29,7 +29,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(configuration, te
           var db2 = db.db('tests_2');
           // Add a close handler
           db2.on("close", function(err) {
-            console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 0 :: " + this.databaseName)
+            // console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 0 :: " + this.databaseName)
             numberOfCloses = numberOfCloses + 1;              
             test.equal(2, numberOfCloses)
             test.done();          

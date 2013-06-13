@@ -716,8 +716,6 @@ exports.shouldCorrectlyFindAndModifyWithNoGetLastErrorChainedSafe = function(con
 
     // Check if we have a chained command or not
     var ids = client.serverConfig._callBackStore.notRepliedToIds();
-    // test.equal(1, ids.length);
-    console.dir(client.serverConfig._callBackStore._notReplied)
     test.ok(client.serverConfig._callBackStore.callbackInfo(ids[0].chained) == undefined);
   });
 }
