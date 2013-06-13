@@ -431,13 +431,13 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
 }
 
 /**
- * An example of retrieveing the information of all the collections.
+ * An example of retrieving the information of all the collections.
  *
  * @_class db
  * @_function collectionsInfo
  * @ignore
  */
-exports.shouldCorrectlyRetrieveCollectionInfo_A = function(configuration, test) {
+exports.shouldCorrectlyRetrieveCollectionInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -472,13 +472,13 @@ exports.shouldCorrectlyRetrieveCollectionInfo_A = function(configuration, test) 
 }
 
 /**
- * An example of retrieveing the collection names for a database.
+ * An example of retrieving the collection names for a database.
  *
  * @_class db
  * @_function collectionNames
  * @ignore
  */
-exports.shouldCorrectlyRetrieveCollectionInfo_B = function(configuration, test) {
+exports.shouldCorrectlyRetrieveCollectionNames = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -728,7 +728,7 @@ exports.shouldCorrectlyLogoutFromTheDatabase = function(configuration, test) {
  * @_function authenticate
  * @ignore
  */
-exports.shouldCorrectlyAuthenticateAgainstTheDatabase_A = function(configuration, test) {
+exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
@@ -761,7 +761,7 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase_A = function(configuration
  * @_function addUser
  * @ignore
  */
-exports.shouldCorrectlyAuthenticateAgainstTheDatabase_B = function(configuration, test) {
+exports.shouldCorrectlyAddUserToDb = function(configuration, test) {
   if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
@@ -1374,7 +1374,7 @@ exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) 
  * @_class db
  * @_function indexInformation
  */
-exports.shouldCorrectlyShowTheResultsFromIndexInformation_A = function(configuration, test) {
+exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -1422,7 +1422,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation_A = function(configura
  * @_class db
  * @_function dropDatabase
  */
-exports.shouldCorrectlyShowTheResultsFromIndexInformation_B = function(configuration, test) {
+exports.shouldCorrectlyDropTheDatabase = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));

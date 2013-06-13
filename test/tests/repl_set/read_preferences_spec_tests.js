@@ -182,12 +182,11 @@ exports['Should Correctly Vary read server when using readpreference NEAREST'] =
   // Open the database
   var db = new Db('integration_test_', replSet, {w:1});
   db.open(function(err, db) {
-    // // Force selection of a secondary
-    // db.serverConfig._state.master.runtimeStats['pingMs'] = 5000;
-    // // Check that we get a secondary
-    // var connection = db.serverConfig.checkoutReader();
-    // var keys = Object.keys(db.serverConfig._state.secondaries);
-    // var found = false;
+    // Check that we are getting different servers
+    var connection = db.serverConfig.checkoutReader();
+    var port = connection.socketOptions.port;
+    connection = db.serverConfig.checkoutReader();
+    test.ok(port != connection.socketOptions.port);
 
     // Execute a query
     db.collection('nearest_collection_test').insert({a:1}, {w:3, wtimeout:10000}, function(err, doc) {

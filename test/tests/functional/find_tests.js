@@ -1407,7 +1407,7 @@ exports.shouldPerformSimpleFindInArray = function(configuration, test) {
  * @_class collection
  * @_function findAndModify
  */
-exports.shouldPerformSimpleFindAndModifyOperations_A = function(configuration, test) {
+exports.shouldPerformSimpleFindAndModifyOperations = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -1465,7 +1465,7 @@ exports.shouldPerformSimpleFindAndModifyOperations_A = function(configuration, t
  * @_class collection
  * @_function findAndRemove
  */
-exports.shouldPerformSimpleFindAndModifyOperations_B = function(configuration, test) {
+exports.shouldPerformSimpleFindAndRemove = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
