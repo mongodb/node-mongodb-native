@@ -1,3 +1,4 @@
+var heapdump = require('heapdump');
 var mongodb = require("../../../lib/mongodb")
   , MongoClient = mongodb.MongoClient
 	, request = true;
@@ -39,18 +40,25 @@ MongoClient.connect('mongodb://127.0.0.1:31000/test_db', function(err, db) {
 
 				// no more out standing request
 				request = false;
-
-        process.nextTick(function() {
+        heapdump.writeSnapshot();
+        // process.nextTick(function() {
+        setTimeout(function() {
+          findAndModifyLoop();                    
+        }, 1000 * 10)
           // console.dir("number of callbacks :: " + Object.keys(db.serverConfig._callBackStore._notReplied).length);
   				// on result does it again
-  				findAndModifyLoop();          
-        })
+  				// findAndModifyLoop();          
+        // })
 			});
 		};
 
 	// start the loop
 	findAndModifyLoop();
 });
+
+// setInterval(function() {
+//   heapdump.writeSnapshot();
+// }, 10000)
 
 // db.on("error", function(err) {
 //   console.log('open request ', request);

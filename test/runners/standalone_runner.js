@@ -50,6 +50,7 @@ module.exports = function(configurations) {
         , '/test/tests/functional/connection_tests.js'
         , '/test/tests/functional/collection_tests.js'
         , '/test/tests/functional/db_tests.js'
+        , '/test/tests/functional/read_preferences_tests.js'
       ]
     );
 
