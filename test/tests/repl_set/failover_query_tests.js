@@ -115,10 +115,12 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
               // console.dir(keys)
               for(var i = 0; i < keys.length; i++) {
                 var server = replSet._state.secondaries[keys[i]];
+                // console.dir(server.queryStats)
                 // console.dir("server.queryStats.numDataValues = " + server.queryStats.numDataValues)
                 totalNumberOfStrategyEntries += server.queryStats.numDataValues;
               }
 
+                // console.dir(replSet._state.master.queryStats)
               // console.dir("replSet._state.master.queryStats.numDataValues = " + replSet._state.master.queryStats.numDataValues)
 
               db.close();
