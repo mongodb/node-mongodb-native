@@ -24,7 +24,7 @@ for (var i=0; i<log_hostname.length; i++) {
 replica_servers[i] = new Server(log_hostname[i], log_port[i], {auto_reconnect: true, poolSize: 5});
 }
 var rsname = 'testReplSet';
-log_server = new ReplSetServers(replica_servers, {rs_name:rsname});
+log_server = new ReplSetServers(replica_servers, {rs_name:rsname, poolSize:100});
 
 var db = new Db('test', log_server, {safe:true});
 db.open(function(err, p_db) {
