@@ -1,3 +1,12 @@
+1.3.10 2013-06-17
+-----------------
+- Guard against possible undefined in server::canCheckoutWriter (Issue #992, https://github.com/willyaranda)
+- Fixed some duplicate test names (Issue #993, https://github.com/kawanet)
+- Introduced write and read concerns for GridFS (Issue #996)
+- Fixed commands not correctly respecting Collection level read preference (Issue #995, #999)
+- Fixed issue with pool size on replicaset connections (Issue #1000)
+- Execute all query commands on master switch (Issue #1002, https://github.com/fogaztuc)
+
 1.3.9 2013-06-05
 ----------------
 - Fixed memory leak when findAndModify errors out on w>1 and chained callbacks not properly cleaned up.
