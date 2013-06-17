@@ -428,7 +428,7 @@ Returns a cursor to all the collection information.
 
   
   
-  An example of retrieveing the information of all the collections.
+  An example of retrieving the information of all the collections.
 
   .. code-block:: javascript
 
@@ -496,7 +496,7 @@ Options
 
   
   
-  An example of retrieveing the collection names for a database.
+  An example of retrieving the collection names for a database.
 
   .. code-block:: javascript
 

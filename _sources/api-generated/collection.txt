@@ -43,6 +43,7 @@ Options
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **continueOnError/keepGoing** {Boolean, default:false}, keep inserting documents even if one document has an error, *mongodb 1.9.1 >*.
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
+ - **forceServerObjectId** {Boolean, default:false}, let server assign ObjectId instead of the driver
 
 
 

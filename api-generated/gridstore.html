@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GridStore() &mdash; MongoDB Node.JS Driver 1.3.9 documentation</title>
+    <title>GridStore() &mdash; MongoDB Node.JS Driver 1.3.10 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.9',
+        VERSION:     '1.3.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.9 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.10 documentation" href="../index.html" />
     <link rel="next" title="ReadStream()" href="readstream.html" />
     <link rel="prev" title="Grid()" href="grid.html" /> 
   </head>
@@ -38,7 +38,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -91,6 +91,11 @@
 <li><strong>content_type</strong> {String}, mime type of the file. Defaults to <strong>{GridStore.DEFAULT_CONTENT_TYPE}</strong>.</li>
 <li><strong>chunk_size</strong> {Number}, size for the chunk. Defaults to <strong>{Chunk.DEFAULT_CHUNK_SIZE}</strong>.</li>
 <li><strong>metadata</strong> {Object}, arbitrary data the user wants to store.</li>
+<li><strong>readPreference</strong> {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
+<li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
+<li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
 </ul>
 </dd>
 </dl>
@@ -1528,6 +1533,13 @@ the given string does not have one.</p>
 <div class="section" id="gridstore-exist">
 <h2>GridStore.exist<a class="headerlink" href="#gridstore-exist" title="Permalink to this headline">¶</a></h2>
 <p>Checks if a file exists in the database.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>readPreference</strong> {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
+</ul>
+</dd>
+</dl>
 <dl class="function">
 <dt id="GridStore.exist">
 <tt class="descclassname">GridStore.</tt><tt class="descname">exist</tt><big>(</big><em>db</em>, <em>name</em><span class="optional">[</span>, <em>rootCollection</em><span class="optional">]</span>, <em>callback</em><big>)</big><a class="headerlink" href="#GridStore.exist" title="Permalink to this definition">¶</a></dt>
@@ -2281,7 +2293,7 @@ the given string does not have one.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
