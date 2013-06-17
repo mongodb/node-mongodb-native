@@ -4,6 +4,8 @@
 .mongodb
 .DS_Store
 *.tmp
+*.log
+*.heapsnapshot
 
 HISTORY
 Readme.md

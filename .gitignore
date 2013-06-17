@@ -3,6 +3,7 @@
 *.seed
 *.tmp
 *.log
+*.heapsnapshot
 .project
 .settings
 .tm_properties
