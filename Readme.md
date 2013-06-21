@@ -63,30 +63,30 @@ To store and retrieve the non-JSON MongoDb primitives ([ObjectID](http://www.mon
 In particular, every document has a unique `_id` which can be almost any type, and by default a 12-byte ObjectID is created. ObjectIDs can be represented as 24-digit hexadecimal strings, but you must convert the string back into an ObjectID before you can use it in the database. For example:
 
 ```javascript
-    // Get the objectID type
-    var ObjectID = require('mongodb').ObjectID;
+  // Get the objectID type
+  var ObjectID = require('mongodb').ObjectID;
 
-    var idString = '4e4e1638c85e808431000003';
-    collection.findOne({_id: new ObjectID(idString)}, console.log)  // ok
-    collection.findOne({_id: idString}, console.log)  // wrong! callback gets undefined
+  var idString = '4e4e1638c85e808431000003';
+  collection.findOne({_id: new ObjectID(idString)}, console.log)  // ok
+  collection.findOne({_id: idString}, console.log)  // wrong! callback gets undefined
 ```
 
 Here are the constructors the non-Javascript BSON primitive types:
 
 ```javascript
-    // Fetch the library
-    var mongo = require('mongodb');
-    // Create new instances of BSON types
-    new mongo.Long(numberString)
-    new mongo.ObjectID(hexString)
-    new mongo.Timestamp()  // the actual unique number is generated on insert.
-    new mongo.DBRef(collectionName, id, dbName)
-    new mongo.Binary(buffer)  // takes a string or Buffer
-    new mongo.Code(code, [context])
-    new mongo.Symbol(string)
-    new mongo.MinKey()
-    new mongo.MaxKey()
-    new mongo.Double(number)	// Force double storage
+  // Fetch the library
+  var mongo = require('mongodb');
+  // Create new instances of BSON types
+  new mongo.Long(numberString)
+  new mongo.ObjectID(hexString)
+  new mongo.Timestamp()  // the actual unique number is generated on insert.
+  new mongo.DBRef(collectionName, id, dbName)
+  new mongo.Binary(buffer)  // takes a string or Buffer
+  new mongo.Code(code, [context])
+  new mongo.Symbol(string)
+  new mongo.MinKey()
+  new mongo.MaxKey()
+  new mongo.Double(number)	// Force double storage
 ```
 
 The C/C++ bson parser/serializer
@@ -194,14 +194,14 @@ methods `each` and `toArray` call `nextObject` until the cursor is exhausted.
 Signatures:
 
 ```javascript
-    var cursor = collection.find(query, [fields], options);
-    cursor.sort(fields).limit(n).skip(m).
+  var cursor = collection.find(query, [fields], options);
+  cursor.sort(fields).limit(n).skip(m).
 
-    cursor.nextObject(function(err, doc) {});
-    cursor.each(function(err, doc) {});
-    cursor.toArray(function(err, docs) {});
+  cursor.nextObject(function(err, doc) {});
+  cursor.each(function(err, doc) {});
+  cursor.toArray(function(err, docs) {});
 
-    cursor.rewind()  // reset the cursor to its initial state.
+  cursor.rewind()  // reset the cursor to its initial state.
 ```
 
 Useful chainable methods of cursor. These can optionally be options of `find` instead of method calls:

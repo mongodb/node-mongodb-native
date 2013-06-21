@@ -9,7 +9,9 @@ GridStore is a single file inside GridFS that can be managed by the script.
 
 Opening a GridStore (a single file in GridFS) is a bit similar to opening a database. At first you need to create a GridStore object and then `open` it. 
 
-    var gs = new mongodb.GridStore(db, filename, mode[, options])
+```javascript
+  var gs = new mongodb.GridStore(db, filename, mode[, options])
+```
 
 Where
 
@@ -23,17 +25,21 @@ Where
 
 Example:
 
-    var gs = new mongodb.GridStore(db, "test.png", "w", {
-        "content_type": "image/png",
-        "metadata":{
-            "author": "Daniel"
-        },
-        "chunk_size": 1024*4
-    });
+```javascript
+  var gs = new mongodb.GridStore(db, "test.png", "w", {
+    "content_type": "image/png",
+    "metadata":{
+        "author": "Daniel"
+    },
+    "chunk_size": 1024*4
+  });
+```
 
 When GridStore object is created, it needs to be opened.
 
-    gs.open(callback);
+```javascript
+  gs.open(callback);
+```
     
 `callback` gets two parameters - and error object (if error occured) and the GridStore object.
 
@@ -47,15 +53,19 @@ Opened GridStore object has a set of useful properties
 
 Example
 
-    gs.open(function(err, gs){
-        console.log("this file was uploaded at "+gs.uploadDate);
-    });
+```javascript
+  gs.open(function(err, gs){
+      console.log("this file was uploaded at "+gs.uploadDate);
+  });
+```
 
 ## Writing to GridStore
 
 Writing can be done with `write`
 
-    gs.write(data, callback)
+```javascript
+  gs.write(data, callback)
+```
     
 where `data` is a `Buffer` or a string, callback gets two parameters - an error object (if error occured) and result value which indicates if the write was successful or not.
 
@@ -65,20 +75,23 @@ While the GridStore is not closed, every write is appended to the opened GridSto
 
 This function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.
 
-    gs.writeFile( file, callback )
+```javascript
+  gs.writeFile( file, callback )
+```
     
 where
 
   * `file` is a file descriptor, or a string file path
   * `callback` is a function with two parameters - error object (if error occured) and the GridStore object.
 
-
 ## Reading from GridStore
 
 Reading from GridStore can be done with `read`
 
-    gs.read([size], callback)
-    
+```javascript
+  gs.read([size], callback)
+```
+
 where
 
   * `size` is the length of the data to be read
@@ -88,7 +101,9 @@ where
 
 You can stream data as it comes from the database using `stream`
 
-    gs.stream([autoclose=false])
+```javascript
+  gs.stream([autoclose=false])
+```
     
 where
     
@@ -100,7 +115,9 @@ The function returns [read stream](http://nodejs.org/docs/v0.4.12/api/streams.ht
 
 GridStore files can be unlinked with `unlink`
 
-    mongodb.GridStore.unlink(db, name, callback)
+```javascript
+  mongodb.GridStore.unlink(db, name, callback)
+```
 
 Where
 
@@ -112,13 +129,17 @@ Where
 
 GridStore needs to be closed after usage. This can be done with `close`
 
-    gs.close(callback)
+```javascript
+  gs.close(callback)
+```
     
 ## Check the existance of a GridStore file
 
 Checking if a file exists in GridFS can be done with `exist`
 
-    mongodb.GridStore.exist(db, filename, callback)
+```javascript
+  mongodb.GridStore.exist(db, filename, callback)
+```
     
 Where
 
@@ -130,6 +151,8 @@ Where
 
 Seeking can be done with `seek`
 
-    gs.seek(position);
+```javascript
+  gs.seek(position);
+```
 
 This function moves the internal pointer to the specified position.

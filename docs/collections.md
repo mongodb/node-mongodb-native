@@ -17,15 +17,19 @@ Collection object is a pointer to a specific collection in the [database](databa
 
 Collections can be created with `createCollection`
 
-    db.createCollection([[name[, options]], callback)
+```javascript
+  db.createCollection([[name[, options]], callback)
+```
 
 where `name` is the name of the collection, options a set of configuration parameters and `callback` is a callback function. `db` is the database object. 
 
 The first parameter for the callback is the error object (null if no error) and the second one is the pointer to the newly created collection. If strict mode is on and the table exists, the operation yields in error. With strict mode off (default) the function simple returns the pointer to the existing collection and does not truncate it.
 
-    db.createCollection("test", function(err, collection){
-        collection.insert({"test":"value"});
-    });
+```javascript
+  db.createCollection("test", function(err, collection){
+      collection.insert({"test":"value"});
+  });
+```
 
 ## Creating collections options
 Several options can be passed to the `createCollection` function with `options` parameter.  
@@ -47,7 +51,9 @@ Example of usage:
 
 Collections can be listed with `collectionNames`
 
-    db.collectionNames(callback);
+```javascript
+  db.collectionNames(callback);
+```
     
 `callback` gets two parameters - an error object (if error occured) and an array of collection names as strings.
 
@@ -57,21 +63,25 @@ Additionally there's system collections which should not be altered without know
 
 Example:
     
-    var mongodb = require("mongodb"),
-        mongoserver = new mongodb.Server("localhost"),
-        db_connector = new mongodb.Db("blog", mongoserver);
+```javascript
+  var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;    
 
-    db_connector.open(function(err, db){
-        db.collectionNames(function(err, collections){
-            console.log(collections); // ["blog.posts", "blog.system.indexes"]
-        });
+  MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+    if(err) throw err;
+    db.collectionNames(function(err, collections){
+        console.log(collections);
     });
+  });
+```
 
 ## List collections
 
 Collection objects can be listed with database method `collections`
 
-    db.collections(callback)
+```javascript
+  db.collections(callback)
+```
 
 Where `callback` gets two parameters - an error object (if an error occured) and an array of collection objects.
 
@@ -79,7 +89,9 @@ Where `callback` gets two parameters - an error object (if an error occured) and
 
 Existing collections can be opened with `collection`
 
-    db.collection([[name[, options]], callback);
+```javascript
+  db.collection([[name[, options]], callback);
+```
 
 If strict mode is off, then a new collection is created if not already present.
 
@@ -92,17 +104,23 @@ Several options can be passed to the `collection` function with `options` parame
 
 A collection can be renamed with collection method `rename`
 
-    collection.rename(new_name, callback);
+```javascript
+  collection.rename(new_name, callback);
+```
 
 Passing the optional dropTarget boolean as the thrid parameter will allow overwritting of existing collections
     
-    collection.rename(new_name, {dropTarget:true}, callback);
+```javascript
+  collection.rename(new_name, {dropTarget:true}, callback);
+```
 
 ## Removing records from collections
 
 Records can be erased from a collection with `remove`
 
-    collection.remove([[query[, options]], callback]);
+```javascript
+  collection.remove([[query[, options]], callback]);
+```
     
 Where
 
@@ -114,8 +132,12 @@ Where
 
 A collection can be dropped with `drop`
 
-    collection.drop(callback);
+```javascript
+  collection.drop(callback);
+```
 
 or with `dropCollection`
 
-    db.dropCollection(collection_name, callback)
+```javascript
+  db.dropCollection(collection_name, callback)
+```
