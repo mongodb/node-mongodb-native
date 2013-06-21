@@ -32,28 +32,27 @@ This is a node.js driver for MongoDB. It's a port (or close to a port) of the li
 A simple example of inserting a document.
 
 ```javascript
-    var client = new Db('test', new Server("127.0.0.1", 27017, {}), {w: 1}),
-        test = function (err, collection) {
-          collection.insert({a:2}, function(err, docs) {
+  var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;    
 
-            collection.count(function(err, count) {
-              test.assertEquals(1, count);
-            });
+  MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+    if(err) throw err;
 
-            // Locate all the entries using find
-            collection.find().toArray(function(err, results) {
-              test.assertEquals(1, results.length);
-              test.assertTrue(results[0].a === 2);
+    var collection = db.collection('test_insert');
+    collection.insert({a:2}, function(err, docs) {
+      
+      collection.count(function(err, count) {
+        console.log(format("count = %s", count));
+      });
 
-              // Let's close the db
-              client.close();
-            });
-          });
-        };
-
-    client.open(function(err, p_client) {
-      client.collection('test_insert', test);
+      // Locate all the entries using find
+      collection.find().toArray(function(err, results) {
+        console.dir(results);
+        // Let's close the db
+        db.close();
+      });      
     });
+  })
 ```
 
 Data types
@@ -96,10 +95,9 @@ The C/C++ bson parser/serializer
 If you are running a version of this library has the C/C++ parser compiled, to enable the driver to use the C/C++ bson parser pass it the option native_parser:true like below
 
 ```javascript
-    // using native_parser:
-    var client = new Db('integration_tests_20',
-                        new Server("127.0.0.1", 27017),
-                        {native_parser:true});
+  // using native_parser:
+  MongoClient.connect('mongodb://127.0.0.1:27017/test'
+    , {db: {native_parser: true}}, function(err, db) {})
 ```
 
 The C++ parser uses the js objects both for serialization and deserialization.
@@ -144,57 +142,34 @@ Defining your own primary key factory allows you to generate your own series of 
 Simple example below
 
 ```javascript
-    // Custom factory (need to provide a 12 byte array);
-    CustomPKFactory = function() {}
-    CustomPKFactory.prototype = new Object();
-    CustomPKFactory.createPk = function() {
-      return new ObjectID("aaaaaaaaaaaa");
-    }
+  var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;    
 
-    var p_client = new Db('integration_tests_20', new Server("127.0.0.1", 27017, {}), {'pk':CustomPKFactory});
-    p_client.open(function(err, p_client) {
-      p_client.dropDatabase(function(err, done) {
-        p_client.createCollection('test_custom_key', function(err, collection) {
-          collection.insert({'a':1}, function(err, docs) {
-            collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}, function(err, cursor) {
-              cursor.toArray(function(err, items) {
-                test.assertEquals(1, items.length);
+  // Custom factory (need to provide a 12 byte array);
+  CustomPKFactory = function() {}
+  CustomPKFactory.prototype = new Object();
+  CustomPKFactory.createPk = function() {
+    return new ObjectID("aaaaaaaaaaaa");
+  }
 
-                // Let's close the db
-                p_client.close();
-              });
-            });
+  MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+    if(err) throw err;
+
+    db.dropDatabase(function(err, done) {
+      
+      db.createCollection('test_custom_key', function(err, collection) {
+        
+        collection.insert({'a':1}, function(err, docs) {
+          
+          collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}).toArray(function(err, items) {
+            console.dir(items);
+            // Let's close the db
+            db.close();
           });
         });
       });
     });
-```
-
-Strict mode
------------
-
-Each database has an optional strict mode. If it is set then asking for a collection
-that does not exist will return an Error object in the callback. Similarly if you
-attempt to create a collection that already exists. Strict is provided for convenience.
-
-```javascript
-    var error_client = new Db('integration_tests_', new Server("127.0.0.1", 27017, {auto_reconnect: false}), {strict:true});
-      test.assertEquals(true, error_client.strict);
-
-      error_client.open(function(err, error_client) {
-      error_client.collection('does-not-exist', function(err, collection) {
-        test.assertTrue(err instanceof Error);
-        test.assertEquals("Collection does-not-exist does not exist. Currently in strict mode.", err.message);
-      });
-
-      error_client.createCollection('test_strict_access_collection', function(err, collection) {
-        error_client.collection('test_strict_access_collection', function(err, collection) {
-          test.assertTrue(collection instanceof Collection);
-          // Let's close the db
-          error_client.close();
-        });
-      });
-    });
+  });
 ```
 
 Documentation
@@ -231,8 +206,8 @@ Signatures:
 
 Useful chainable methods of cursor. These can optionally be options of `find` instead of method calls:
 
-* `.limit(n).skip(m)` to control paging.
-* `.sort(fields)` Order by the given fields. There are several equivalent syntaxes:
+  * `.limit(n).skip(m)` to control paging.
+  * `.sort(fields)` Order by the given fields. There are several equivalent syntaxes:
   * `.sort({field1: -1, field2: 1})` descending by field1, then ascending by field2.
   * `.sort([['field1', 'desc'], ['field2', 'asc']])` same as above
   * `.sort([['field1', 'desc'], 'field2'])` same as above
@@ -260,15 +235,20 @@ For information on how to create queries, see the
 [MongoDB section on querying](http://www.mongodb.org/display/DOCS/Querying).
 
 ```javascript
-    var mongodb = require('mongodb');
-    var server = new mongodb.Server("127.0.0.1", 27017, {});
-    new mongodb.Db('test', server, {}).open(function (error, client) {
-      if (error) throw error;
-      var collection = new mongodb.Collection(client, 'test_collection');
-      collection.find({}, {limit:10}).toArray(function(err, docs) {
+  var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;    
+
+  MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+    if(err) throw err;
+
+    var collection = db
+      .collection('test')
+      .find({})
+      .limit(10)
+      .toArray(function(err, docs) {
         console.dir(docs);
-      });
     });
+  });
 ```
 
 Insert
@@ -277,7 +257,7 @@ Insert
 Signature:
 
 ```javascript
-    collection.insert(docs, options, [callback]);
+  collection.insert(docs, options, [callback]);
 ```
 
 where `docs` can be a single document or an array of documents.
@@ -289,19 +269,19 @@ Useful options:
 See also: [MongoDB docs for insert](http://www.mongodb.org/display/DOCS/Inserting).
 
 ```javascript
-    var mongodb = require('mongodb');
-    var server = new mongodb.Server("127.0.0.1", 27017, {});
-    new mongodb.Db('test', server, {w: 1}).open(function (error, client) {
-      if (error) throw error;
-      var collection = new mongodb.Collection(client, 'test_collection');
-      collection.insert({hello: 'world'}, {safe:true},
-                        function(err, objects) {
-        if (err) console.warn(err.message);
-        if (err && err.message.indexOf('E11000 ') !== -1) {
-          // this _id was already inserted in the database
-        }
-      });
+  var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;    
+
+  MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+    if(err) throw err;
+    
+    db.collection('test').insert({hello: 'world'}, {w:1}, function(err, objects) {
+      if (err) console.warn(err.message);
+      if (err && err.message.indexOf('E11000 ') !== -1) {
+        // this _id was already inserted in the database
+      }
     });
+  });
 ```
 
 Note that there's no reason to pass a callback to the insert or update commands
@@ -321,7 +301,7 @@ the modifier (`$inc`, `$set`, `$push`, etc.) formats.
 Signature:
 
 ```javascript
-    collection.update(criteria, objNew, options, [callback]);
+  collection.update(criteria, objNew, options, [callback]);
 ```
 
 Useful options:
@@ -333,17 +313,17 @@ Useful options:
 Example for `update`:
 
 ```javascript
-    var mongodb = require('mongodb');
-    var server = new mongodb.Server("127.0.0.1", 27017, {});
-    new mongodb.Db('test', server, {w: 1}).open(function (error, client) {
-      if (error) throw error;
-      var collection = new mongodb.Collection(client, 'test_collection');
-      collection.update({hi: 'here'}, {$set: {hi: 'there'}}, {safe:true},
-                        function(err) {
-        if (err) console.warn(err.message);
-        else console.log('successfully updated');
-      });
+  var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;    
+
+  MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+    if(err) throw err;
+
+    db.collection('test').update({hi: 'here'}, {$set: {hi: 'there'}}, {w:1}, function(err) {
+      if (err) console.warn(err.message);
+      else console.log('successfully updated');
     });
+  });
 ```
 
 Find and modify
@@ -379,17 +359,16 @@ Useful options:
 Example for `findAndModify`:
 
 ```javascript
-    var mongodb = require('mongodb');
-    var server = new mongodb.Server("127.0.0.1", 27017, {});
-    new mongodb.Db('test', server, {w: 1}).open(function (error, client) {
-      if (error) throw error;
-      var collection = new mongodb.Collection(client, 'test_collection');
-      collection.findAndModify({hello: 'world'}, [['_id','asc']], {$set: {hi: 'there'}}, {},
-                        function(err, object) {
-        if (err) console.warn(err.message);
-        else console.dir(object);  // undefined if no matching object exists.
-      });
+  var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;    
+
+  MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+    if(err) throw err;
+    db.collection('test').findAndModify({hello: 'world'}, [['_id','asc']], {$set: {hi: 'there'}}, {}, function(err, object) {
+      if (err) console.warn(err.message);
+      else console.dir(object);  // undefined if no matching object exists.
     });
+  });
 ```
 
 Save
