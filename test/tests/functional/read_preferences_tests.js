@@ -154,7 +154,7 @@ exports['Should correctly apply collection level read Preference to mapReduce'] 
     var reduce = function(k,vals) { return 1; };
 
     // Peform the map reduce
-    collection.mapReduce(map, reduce, {out: 'inline'}, function(err, collection) {
+    collection.mapReduce(map, reduce, {out: {inline:1}}, function(err, collection) {
       db.serverConfig.checkoutReader = checkout;
 
       db.close();
