@@ -10,20 +10,24 @@ exports.shouldCreateNewGridStoreObject = function(configuration, test) {
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.db();
 
-  var gs1
-    , gs2
+  var gs
     , id = new ObjectID()
     , filename = 'test_create_gridstore';
 
-  var gs = new GridStore(db, id, filename, "w");
+  gs = new GridStore(db, id, filename, "w");
   test.ok(gs instanceof GridStore);
   test.equal(id, gs.fileId);
   test.equal(filename, gs.filename);
 
-  var gs = GridStore(db, id, filename, "w");
+  gs = GridStore(db, id, filename, "w");
   test.ok(gs instanceof GridStore);
   test.equal(id, gs.fileId);
   test.equal(filename, gs.filename);
+
+  gs = GridStore(db, null, filename, "r");
+  test.ok(gs instanceof GridStore);
+  test.equal(filename, gs.filename);
+  test.equal(gs.referenceBy, 0); // 0 = REFERENCE_BY_FILENAME
 
   db.close();
   test.done();
