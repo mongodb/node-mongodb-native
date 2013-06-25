@@ -1,64 +1,42 @@
-var Db = require('../lib/mongodb').Db,
-  Admin = require('../lib/mongodb').Admin,
-  DbCommand = require('../lib/mongodb/commands/db_command').DbCommand,
-  Connection = require('../lib/mongodb').Connection,
-  Server = require('../lib/mongodb').Server,
-  ReplSetServers = require('../lib/mongodb').ReplSetServers,
-  CheckMaster = require('../lib/mongodb').CheckMaster;
+var MongoClient = require('../lib/mongodb').MongoClient
+  , format = require('util').format;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : 27017;
+var url = format("mongodb://%s:%s,%s:%s,%s:%s/node-mongo-examples"
+    , host, port, host, 27018, host, 27019);
 
-var port1 = 27018;
-var port2 = 27019;
-
-
-console.log("Connecting to " + host + ":" + port);
-console.log("Connecting to " + host + ":" + port1);
-console.log("Connecting to " + host + ":" + port2);
-
-var server = new Server(host, port, {});
-var server1 = new Server(host, port1, {});
-var server2 = new Server(host, port2, {});
-var servers = new Array();
-servers[0] = server2;
-servers[1] = server1;
-servers[2] = server;
-
-var replStat = new ReplSetServers(servers);
-
-var db = new Db('mongo-example', replStat, {native_parser:true});
-db.open(function(err, db) {
+MongoClient.connect(url, function(err, db) {
+  if(err) throw err;
 
   db.dropDatabase(function(err, result) {
-          db.collection('test', function(err, collection) {
-      collection.remove(function(err, collection) {
-        // Insert 3 records
-        for(var i = 0; i < 3; i++) {
-          collection.insert({'a':i});
-        }
-        
-        collection.count(function(err, count) {
-          console.log("There are " + count + " records in the test collection. Here they are:");
+    var collection = db.collection('test');
+      
+    collection.remove(function(err, collection) {
+      // Insert 3 records
+      for(var i = 0; i < 3; i++) {
+        collection.insert({'a':i});
+      }
+      
+      collection.count(function(err, count) {
+        console.log("There are " + count + " records in the test collection. Here they are:");
 
-          collection.find(function(err, cursor) {
-            cursor.each(function(err, item) {
-              if(item != null) {
-                console.dir(item);
-                console.log("created at " + new Date(item._id.generationTime) + "\n")
-              }
-              // Null signifies end of iterator
-              if(item == null) {                
-                // Destory the collection
-                collection.drop(function(err, collection) {
-                  db.close();
-                });
-              }
+        collection.find().each(function(err, item) {
+          if(item != null) {
+            console.dir(item);
+            console.log("created at " + new Date(item._id.generationTime) + "\n")
+          }
+          
+          // Null signifies end of iterator
+          if(item == null) {                
+            // Destory the collection
+            collection.drop(function(err, collection) {
+              db.close();
             });
-          });          
+          }
         });
-      });      
-    });
+      });
+    });      
   });
 });
 

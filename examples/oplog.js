@@ -1,11 +1,8 @@
-var Db = require('../lib/mongodb').Db
-  , Connection = require('../lib/mongodb').Connection
-  , Server = require('../lib/mongodb').Server
-  , Cursor = require('../lib/mongodb').Cursor
+var MongoClient = require('../lib/mongodb').MongoClient
   , format = require('util').format;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : 27017;
 
 Slave = function() {
   this.running = false;
@@ -21,7 +18,7 @@ Slave.prototype.start = function() {
   var self = this;
   if (this.running) return;
   
-  Db.connect(format("mongodb://%s:%s/testing?w=1", host, port), function(err, db) {
+  MongoClient.connect(format("mongodb://%s:%s/testing?w=1", host, port), function(err, db) {
     if (err) {
       console.log('> MongoSlave error' + err);
       process.exit(1);
@@ -29,9 +26,10 @@ Slave.prototype.start = function() {
 
     self.db = db;
 
-    db.collection('local.oplog.$main', function(err, collection) {
+    db.collection('local.oplog.$main', {strict: true}, function(err, collection) {
       if (! collection) {
         console.log('> MongoSlave - local.oplog.$main not found');
+        db.close();
         self.stop();
         return false;
       }
@@ -41,17 +39,15 @@ Slave.prototype.start = function() {
       });
 
       //get last row for init TS
-      collection.find({}, {'limit': 1, 'sort': [['$natural', -1]]}, function(err, cursor) {
-        cursor.toArray(function(err, items) {
-          if (items.length) {
-            console.log('> MongoSlave started');
-            self.running = true;
-            self._runSlave(collection, items[0]['ts']);
-          } else if (err) {
-            console.log(err);
-            self.stop();
-          }
-        });
+      collection.find({}, {'limit': 1, 'sort': [['$natural', -1]]}).toArray(function(err, items) {
+        if (items.length) {
+          console.log('> MongoSlave started');
+          self.running = true;
+          self._runSlave(collection, items[0]['ts']);
+        } else if (err) {
+          console.log(err);
+          self.stop();
+        }
       });
     });
   });
@@ -70,30 +66,26 @@ Slave.prototype._runSlave = function(collection, time) {
   var self = this;
   
   //watch oplog INFINITE (until Slave.stop())
-  collection.find({'ts': {'$gt': time}}, {'tailable': 1, 'sort': [['$natural', 1]]}, function(err, cursor) {
-    cursor.each(function(err, item) {
-      if (cursor.state == Cursor.CLOSED) { //broken cursor
-        self.running && self._runSlave(collection, time);
-        return;
-      }
-      time = item['ts'];
+  collection.find({'ts': {'$gt': time}}, {'tailable': 1, 'sort': [['$natural', 1]]}).each(function(err, item) {
+    if (cursor.state == Cursor.CLOSED) { //broken cursor
+      self.running && self._runSlave(collection, time);
+      return;
+    }
+    time = item['ts'];
 
-      switch(item['op']) {
-        case 'i': //inserted
-          self._emitObj(item['o']);
-          break;
-        case 'u': //updated
-          self.db.collection(item['ns'], function(err, collection) {
-            collection.findOne(item['o2']['_id'], {}, function(err, item) {
-              item && self._emitObj(item);
-            });
-          });
-          break;
-        case 'd': //deleted
-          //nothing to do
-          break;
-      }
-    });
+    switch(item['op']) {
+      case 'i': //inserted
+        self._emitObj(item['o']);
+        break;
+      case 'u': //updated
+        self.db.collection(item['ns']).findOne(item['o2']['_id'], {}, function(err, item) {
+          item && self._emitObj(item);
+        });
+        break;
+      case 'd': //deleted
+        //nothing to do
+        break;
+    }
   });
 }
 

@@ -5,7 +5,7 @@ var Db = require('../lib/mongodb').Db
   , format = require('util').format;
 
 var host = process.env['MONGO_NODE_DRIVER_HOST'] != null ? process.env['MONGO_NODE_DRIVER_HOST'] : 'localhost';
-var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : Connection.DEFAULT_PORT;
+var port = process.env['MONGO_NODE_DRIVER_PORT'] != null ? process.env['MONGO_NODE_DRIVER_PORT'] : 27017;
 
 console.log("Connecting to " + host + ":" + port);
 Db.connect(format("mongodb://%s:%s/node-mongo-examples?w=1", host, port), function(err, db) {
