@@ -18,7 +18,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = funct
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
-  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
 
@@ -100,5 +100,25 @@ exports['Should Correctly Authenticate authenticate method manually'] = function
       db.close();
       test.done();
     });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should Fail to Authenticate due to illegal service name'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , Server = configuration.getMongoPackage().Server;
+
+  // KDC Server
+  var server = "kdc.10gen.me";
+  var principal = "dev1@10GEN.ME";
+  var urlEncodedPrincipal = encodeURIComponent(principal);
+
+  // Let's write the actual connection code
+  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&gssapiServiceName=mongodb2&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+    test.ok(err != null);
+    test.done();
   });
 }

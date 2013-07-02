@@ -77,7 +77,7 @@
     , "optimist": "latest"
   }
 , "optionalDependencies": {
-    "kerberos": "latest"
+    "kerberos": "0.0.3"
   }
 , "config":         { "native" : false }
 , "main":             "./lib/mongodb/index"
