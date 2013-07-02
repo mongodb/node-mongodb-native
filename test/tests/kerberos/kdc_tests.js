@@ -27,8 +27,13 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = funct
       test.equal(null, err);
       test.ok(docs.documents[0].databases);
 
-      db.close();
-      test.done();
+      db.db('admin').collection('system.users').find().toArray(function(err, users) {
+        console.log("--------------------------------")
+        console.dir(users)
+
+        db.close();
+        test.done();
+      });
     });
   });
 }

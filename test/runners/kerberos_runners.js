@@ -18,6 +18,9 @@ module.exports = function(configurations) {
     ];
   }
 
+  // Add the remaining test
+  tests.push('/test/tests/kerberos/ldap_tests.js');
+
   // Configure a Run of tests
   var kdc_runner = Runner
     // Add configurations to the test runner
