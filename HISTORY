@@ -8,6 +8,7 @@
 - Support SASL PLAIN authentication (Issue #1009)
 - Ability to use different Service Name on the driver for Kerberos Authentication (Issue #1008)
 - Remove unnecessary octal literal to allow the code to run in strict mode (Issue #1005, https://github.com/jamesallardice)
+- Proper handling of recovering nodes (when they go into recovery and when they return from recovery, Issue #1027)
 
 1.3.10 2013-06-17
 -----------------
