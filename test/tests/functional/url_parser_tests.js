@@ -337,7 +337,7 @@ exports['GSSAPI parsing'] = function(configure, test) {
   try {
     parse("mongodb://kdc.10gen.com/test?authMechanism=NONE");
   } catch(err) {
-    test.equal("only GSSAPI or MONGODB-CR is supported by authMechanism", err.message);
+    test.equal("only GSSAPI, PLAIN or MONGODB-CR is supported by authMechanism", err.message);
   }
 
   object = parse("mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI");
