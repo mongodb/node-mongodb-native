@@ -1,23 +1,18 @@
-var heapdump = require('heapdump');
 var mongodb = require("../../../lib/mongodb")
   , MongoClient = mongodb.MongoClient
 	, request = true;
 
-// var db = new mongodb.Db('test_db', new mongodb.Server("127.0.0.1", 27017, {
-// 	auto_reconnect: true
-// }), {});
+// var x = new ReplSetTest({"nodes" : {node0 : {}, node1 : {}, arbiter : {}}})
+// x.startSet();
+// var config = x.getReplSetConfig()
+// config.members[0].priority = 10
+// x.initiate(config);
+// // once running, start the node script
+// x.stopMaster(); // shut down master
+// x.start(0); // restart the master
 
-// // listen on error
-// db.on("error", function(err) {
-// 	console.log('open request ', request);
-// 	console.error('db on error');
-// 	console.dir(err);
-// });
-
-// open connection
-// db.open(function(err, client) {
 MongoClient.connect('mongodb://127.0.0.1:31000/test_db', function(err, db) {
-	if (err) {
+	if(err) {
 		console.error(err);
 	}
 
@@ -25,49 +20,11 @@ MongoClient.connect('mongodb://127.0.0.1:31000/test_db', function(err, db) {
 
 	// define find and modify
 	var findAndModifyLoop = function() {
-			// mark request = true as sending mongo request
-			request = true;
-
-			// console.log('findAndModify request (should not be last)');
-
-      // collection.find({hello: 'world'}).toArray(function(err, docs) {
-			collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{w:1, upsert:true}, function(err, object) {
-				// if (err) {
-				// 	console.warn('findAndModify error response ', err.message); // returns error if no matching object found
-				// } else {
-				// 	console.log('findAndModify response', object);
-				// }
-
-				// no more out standing request
-				request = false;
-        heapdump.writeSnapshot();
-        // process.nextTick(function() {
-        setTimeout(function() {
-          findAndModifyLoop();                    
-        }, 1000 * 10)
-          // console.dir("number of callbacks :: " + Object.keys(db.serverConfig._callBackStore._notReplied).length);
-  				// on result does it again
-  				// findAndModifyLoop();          
-        // })
-			});
-		};
+		collection.findAndModify({hello: 'world'}, [['_id', 'asc']], {$set: {hi: 'there'}},{w:0, upsert:true}, function(err, object) {
+      findAndModifyLoop();                    
+		});
+	};
 
 	// start the loop
 	findAndModifyLoop();
 });
-
-// setInterval(function() {
-//   heapdump.writeSnapshot();
-// }, 10000)
-
-// db.on("error", function(err) {
-//   console.log('open request ', request);
-//   console.error('db on error');
-//   console.dir(err);
-// });
-
-// db.on("close", function(err) {
-//   console.log('open request ', request);
-//   console.error('db on close');
-//   console.dir(err);
-// });
