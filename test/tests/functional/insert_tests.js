@@ -577,8 +577,7 @@ exports.shouldInsertAndQueryTimestamp = function(configuration, test) {
     collection.findOne({}, function(err, item) {
       test.ok(item.i instanceof Timestamp);
       test.equal(100, item.i);
-      test.ok(typeof item.j == "number");
-      test.equal(200, item.j);
+      test.equal(200, item.j.toNumber());
       test.done();
     });
   });
