@@ -76,21 +76,21 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
         // Attempt another insert
         collection.insert({test:2}, {w:1}, function(err, result) {
           test.equal(null, err);
-          test.equal(1, db.serverConfig.downServers.length);
+          test.equal(1, Object.keys(db.serverConfig.downServers).length);
 
           // Restart the other mongos
           configuration.restartMongoS(50000, function(err, result) {
 
             // Wait for the ha process to pick up the existing new server
             setTimeout(function() {
-              test.equal(0, db.serverConfig.downServers.length);
+              test.equal(0, Object.keys(db.serverConfig.downServers).length);
 
               // Kill the mongos proxy
               configuration.killMongoS(50001, function(err, result) {
                 // Attempt another insert
                 collection.insert({test:3}, {w:1}, function(err, result) {
                   test.equal(null, err);
-                  test.equal(1, db.serverConfig.downServers.length);
+                  test.equal(1, Object.keys(db.serverConfig.downServers).length);
 
                   // Restart the other mongos
                   configuration.restartMongoS(50001, function(err, result) {
@@ -104,7 +104,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
 
                           // Wait for the ha process to pick up the existing new server
                           setTimeout(function() {
-                            test.equal(1, db.serverConfig.downServers.length);
+                            test.equal(1, Object.keys(db.serverConfig.downServers).length);
 
                             configuration.restartMongoS(50000, function(err, result) {
 

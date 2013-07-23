@@ -40,6 +40,6 @@ var shard_options = {
           console.dir(doc)
         });
       });
-    }, 1000);
+    }, 5000);
   });
 // });
