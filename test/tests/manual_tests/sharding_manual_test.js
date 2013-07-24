@@ -26,20 +26,36 @@ var shard_options = {
   MongoClient.connect("mongodb://localhost:50000,localhost:50001/sharded_test_db", function(err, db) {
     if(err) throw err;
 
-    setInterval(function() {
-      console.log("++++++++++++++++++++++++++ INTERVAL")
+    var c = db.collection('test');
+    c.insert({ testing: true }, function (err) {
+      if (err) return done(err);
+      test()
+    })
 
-      db.collection('t').insert({a:1}, function(err, result) {
-        console.log("++++++++++++++++++++++++++ INSERT")
-        console.dir(err)
-        console.dir(result)
+    function test () {
+      console.log('querying'); 
+      c.findOne(console.log);
+    }
+    setInterval(test, 1000)
 
-        db.collection('t').findOne(function(err, doc) {
-          console.log("++++++++++++++++++++++++++ FINDONE")
-          console.dir(err)
-          console.dir(doc)
-        });
-      });
-    }, 5000);
+    function done (err) {
+      if (err) console.error(err);
+      db.close();
+    }
+    // setInterval(function() {
+    //   console.log("++++++++++++++++++++++++++ INTERVAL")
+
+    //   db.collection('t').insert({a:1}, function(err, result) {
+    //     console.log("++++++++++++++++++++++++++ INSERT")
+    //     console.dir(err)
+    //     console.dir(result)
+
+    //     db.collection('t').findOne(function(err, doc) {
+    //       console.log("++++++++++++++++++++++++++ FINDONE")
+    //       console.dir(err)
+    //       console.dir(doc)
+    //     });
+    //   });
+    // }, 1000);
   });
 // });
