@@ -89,29 +89,3 @@ exports['Connection to replicaset with secondary only read preference no seconda
   });
   // DOC_END
 }
-
-/**
- * Test findAndModify a document with no write concern set
- * @ignore
- */
-exports.shouldCorrectlyFindAndModifyWithNoGetLastErrorChainedW2 = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('shouldCorrectlyFindAndModifyWithNoGetLastErrorChained', function(err, collection) {
-    // Let's modify the document in place
-    collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true, 'fields': {a:1}, w:5, wtimeout:1000}, function(err, updated_doc) {
-      console.dir(err)
-      console.dir(updated_doc)
-      // Check if we have a chained command or not
-      var ids = client.serverConfig._callBackStore.notRepliedToIds();
-      test.equal(0, ids.length);
-      test.done();
-    });
-
-    // Check if we have a chained command or not
-    var ids = client.serverConfig._callBackStore.notRepliedToIds();
-    test.equal(2, ids.length);
-    test.ok(client.serverConfig._callBackStore.callbackInfo(ids[0].chained) == undefined);
-  });
-}
-
-
