@@ -20,22 +20,22 @@ var replSet = new ReplSetServers([
     }
 );
 
-// RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:0, arbiter_count:0});
-// RS.startSet(true, function(err, result) {      
-//   if(err != null) throw err;
+RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:0, arbiter_count:1});
+RS.startSet(true, function(err, result) {      
+  if(err != null) throw err;
 
   //opens the database
   // var db = new Db('foo', replSet);
   // db.open(function(err) {
-  MongoClient.connect("mongodb://localhost:30000/foo?readPreference=primary&maxPool=1&replicaSet=replica-set-foo", function(err, db) {
+  MongoClient.connect("mongodb://localhost:30000/foo?readPreference=primary&maxPool=1&replicaSet=testappset", function(err, db) {
     if (err) return console.log('database open error %o', err);
     console.log('database opened');
     console.dir(err)
 
-    db.authenticate("mallory", "a", {authSource:'users'}, function(err, result) {
-      console.log("================================================================")
-      console.dir(err)
-      console.dir(result)
+    // db.authenticate("mallory", "a", {authSource:'users'}, function(err, result) {
+    //   console.log("================================================================")
+    //   console.dir(err)
+    //   console.dir(result)
 
       db.collection('t', function(statsErr, stats) {
           if (statsErr) return console.log('error opening stats %o', err);
@@ -77,6 +77,6 @@ var replSet = new ReplSetServers([
           console.log('Server running at port 8000');
       });
     });
-  });
-// });      
+//   });
+});      
 
