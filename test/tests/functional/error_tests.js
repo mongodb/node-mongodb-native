@@ -256,3 +256,19 @@ exports['mixing included and excluded fields should return an error object with 
     });
   });
 }
+
+exports['should handle error throw in user callback'] = function(configuration, test) {
+  var client = configuration.newDbInstance({w:1}, {poolSize:1});
+  client.on('error', function(err) {
+    test.ok(err != null);
+    client.close();
+    test.done();
+  })
+
+  client.open(function(err, client) {
+    var c = client.collection('test_error_object_should_include_message');
+    c.findOne({}, function() {
+      ggg
+    })
+  });
+}
