@@ -530,3 +530,77 @@ exports['ReplSet should emit close event when whole set is down'] = function(con
     count = count + 1;
   });
 }
+
+exports['Should correctly emit all signals even if not yet connected'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
+
+  // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+
+  // Replica configuration
+  var replSet = new ReplSetServers( [
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ],
+    {rs_name:replicasetManager.name}
+  );
+
+  var db_conn = new Db('integration_test_', replSet, {w:1});
+  var db2 = db_conn.db(db_conn.databaseName);
+  var close_count = 0;
+  var open_count = 0;
+  var fullsetup_count = 0;
+
+  db2.on('close', function () { 
+    close_count = close_count + 1;
+  });                                                                             
+  
+  db_conn.on('close', function () {                                               
+    close_count = close_count + 1;
+  });                                                                             
+
+  db2.on('open', function () {                                                       
+    open_count = open_count + 1;
+  });                                                                                
+
+  db_conn.on('open', function () {
+    open_count = open_count + 1;
+  });                                                                             
+
+  db2.on('fullsetup', function () {                                               
+    fullsetup_count = fullsetup_count + 1;
+  });                                                                             
+
+  db_conn.on('fullsetup', function () {                                           
+    fullsetup_count = fullsetup_count + 1;
+  });   
+
+  db_conn.open(function (err) {                                                   
+    if (err) throw err;                                                           
+                                                                                  
+    var col1 = db_conn.collection('test');                                        
+    var col2 = db2.collection('test');                                            
+                                                                                  
+    var testData = { value : "something" };                                       
+    col1.insert(testData, function (err) {                                        
+      if (err) throw err;                                                         
+
+      var testData = { value : "something" };                                       
+      col2.insert(testData, function (err) {                                      
+        if (err) throw err;                                                       
+        db2.close(function() {
+          setTimeout(function() {
+            test.equal(2, close_count);
+            test.equal(2, open_count);
+            test.equal(2, fullsetup_count);
+            test.done();            
+          }, 100);
+        });                                                                      
+      });                                                                         
+    });                                                                           
+  });               
+}
