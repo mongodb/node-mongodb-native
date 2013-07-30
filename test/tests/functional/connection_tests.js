@@ -226,3 +226,36 @@ exports.shouldCorrectlyDoSimpleCountExamplesWithUrl = function(configuration, te
   });
   // DOC_END
 }
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = function(configuration, test) {
+  var db_conn = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+  var db2 = db_conn.db("test2");
+
+  db2.on('open', function (err, db) {
+    test.equal(db2.databaseName, db.databaseName);
+  });                                                                             
+
+  db_conn.on('open', function (err, db) {                                                
+    test.equal(db_conn.databaseName, db.databaseName);
+  });                                                                                                          
+
+  db_conn.open(function (err) {                                                   
+    if(err) throw err;                                                           
+    var col1 = db_conn.collection('test');                                        
+    var col2 = db2.collection('test');                                            
+
+    var testData = { value : "something" };                                       
+    col1.insert(testData, function (err) {                                        
+      if (err) throw err;                                                         
+      col2.insert(testData, function (err) {                                      
+        if (err) throw err;                                                       
+        db2.close();                                                              
+        console.log("done"); 
+        test.done();                                                     
+      });                                                                         
+    });                                                                           
+  });  
+}

@@ -180,16 +180,11 @@ exports['Should emit close no callback'] = function(configuration, test) {
   );
 
   new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
-    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 1")
-    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 1")
-    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 1")
-    // console.dir(err)
-
     test.equal(null, err);
     var dbCloseCount = 0, serverCloseCount = 0;
     db.on('close', function() { ++dbCloseCount; });
+
     // Force a close on a socket
-    // db.serverConfig._state.addresses[replicasetManager.host  + ":" + replicasetManager.ports[0]].connectionPool.openConnections[0].connection.destroy();
     db.close();
 
     setTimeout(function() {
@@ -317,13 +312,6 @@ exports['Should connect with primary stepped down'] = function(configuration, te
 
       new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
         test.ok(err == null);
-        // console.log("====================================================")
-        // console.dir(Object.keys(p_db.serverConfig._state.addresses))
-        // console.dir(Object.keys(p_db.serverConfig._state.secondaries))
-        // console.dir(p_db.serverConfig._state.master != null)
-        // if(p_db.serverConfig._state.master)
-        //   console.dir(p_db.serverConfig._state.master.isConnected())
-
         test.equal(true, p_db.serverConfig.isConnected());
 
         p_db.close();
@@ -394,10 +382,6 @@ exports['Should connect with secondary node killed'] = function(configuration, t
 
     var db = new Db('integration_test_', replSet, {w:0});
     db.open(function(err, p_db) {
-      // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 0")
-      // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 0")
-      // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 0")
-      // console.dir(err)
       test.ok(err == null);
       test.equal(true, p_db.serverConfig.isConnected());
 
@@ -550,34 +534,42 @@ exports['Should correctly emit all signals even if not yet connected'] = functio
   );
 
   var db_conn = new Db('integration_test_', replSet, {w:1});
-  var db2 = db_conn.db(db_conn.databaseName);
+  var db2 = db_conn.db('integration_test_2');
   var close_count = 0;
   var open_count = 0;
   var fullsetup_count = 0;
 
-  db2.on('close', function () { 
+  db2.on('close', function() {
     close_count = close_count + 1;
   });                                                                             
   
-  db_conn.on('close', function () {                                               
+  db_conn.on('close', function() {
     close_count = close_count + 1;
   });                                                                             
 
-  db2.on('open', function () {                                                       
+  db2.on('open', function(err, db) {
+    // console.log("============================================= open 1 :: " + db.databaseName)
+    test.equal('integration_test_2', db.databaseName);
     open_count = open_count + 1;
-  });                                                                                
+  }); 
 
-  db_conn.on('open', function () {
+  db_conn.on('open', function(err, db) {
+    // console.log("============================================= open 2 :: " + db.databaseName)
+    test.equal('integration_test_', db.databaseName);
     open_count = open_count + 1;
-  });                                                                             
+  });
 
-  db2.on('fullsetup', function () {                                               
+  db2.on('fullsetup', function(err, db) {
+    // console.log("============================================= fullsetup 1 :: " + db.databaseName)
+    test.equal('integration_test_2', db.databaseName);
     fullsetup_count = fullsetup_count + 1;
-  });                                                                             
+  });
 
-  db_conn.on('fullsetup', function () {                                           
+  db_conn.on('fullsetup', function(err, db) {
+    // console.log("============================================= fullsetup 2 :: " + db.databaseName)
+    test.equal('integration_test_', db.databaseName);
     fullsetup_count = fullsetup_count + 1;
-  });   
+  });
 
   db_conn.open(function (err) {                                                   
     if (err) throw err;                                                           
@@ -594,11 +586,16 @@ exports['Should correctly emit all signals even if not yet connected'] = functio
         if (err) throw err;                                                       
         db2.close(function() {
           setTimeout(function() {
+            // console.log("========================================= results")
+            // console.dir("close_count :: " + close_count)
+            // console.dir("open_count :: " + open_count)
+            // console.dir("fullsetup_count :: " + fullsetup_count)
+
             test.equal(2, close_count);
             test.equal(2, open_count);
             test.equal(2, fullsetup_count);
             test.done();            
-          }, 100);
+          }, 1000);
         });                                                                      
       });                                                                         
     });                                                                           
