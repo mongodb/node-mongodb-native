@@ -1482,28 +1482,33 @@ exports.shouldCorrectlyThrowDueToIllegalCollectionName = function(configuration,
   });
 }
 
-// exports.shouldCorrectlyPullDoc = function(configuration, test) {
-//   var client = configuration.db();
+exports.shouldCorrectlyThrowOnToLargeAnInsert = function(configuration, test) {
+  var Binary = configuration.getMongoPackage().Binary;
 
-//   // Collection insert
-//   client.collection('shouldCorrectlyPullDoc').insert({comments:[{_id:123}, {_id:232}]}, function(err, doc) {
-//     var _id = doc[0]._id;
+  var docs = [];
+  for(var i = 0; i < 30000; i++) {
+    docs.push({b: new Binary(new Buffer(1024*2))})
+  }
 
-//     client.collection('shouldCorrectlyPullDoc').update({_id: _id}
-//       , {$pull: {comments: {_id:453}}}, {w:1}, function(err, result, result2) {
-//         test.done();
-//       })
-//   })
+  var db = configuration.newDbInstance({w:1}, {disableDriverBSONSizeCheck:false, native_parser:true})
+  db.open(function(err, db) {
+    // Attempt to insert
+    db.collection('shouldCorrectlyThrowOnToLargeAnInsert', {w:1}).insert(docs, function(err, result) {
+      test.ok(err != null);
+      test.ok(err.message.indexOf("Document exceeds maximum allowed bson size") != -1);
+      db.close();
 
-//   // var regexp = /foobaré/;
+      db = configuration.newDbInstance({w:1}, {disableDriverBSONSizeCheck:true, native_parser:true})
+      db.open(function(err, db) {
+        // Attempt to insert
+        db.collection('shouldCorrectlyThrowOnToLargeAnInsert', {w:1}).insert(docs, function(err, result) {
+          test.ok(err != null);
+          test.ok(err.message.indexOf("Command exceeds maximum message size of") != -1);
 
-//   // client.createCollection('test_utf8_regex', function(err, collection) {
-//   //   collection.insert({'b':regexp}, {w:1}, function(err, ids) {
-//   //     collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
-//   //       test.equal(("" + regexp), ("" + items[0].b));
-//   //       // Let's close the db
-//   //       test.done();
-//   //     });
-//   //   });
-//   // });    
-// }
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}

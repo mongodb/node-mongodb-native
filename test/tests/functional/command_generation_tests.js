@@ -31,7 +31,11 @@ exports['Should Correctly Generate an Insert Command'] = function(configuration,
   insert_command.add({name: 'peter pan'});
   insert_command.add({name: 'monkey king'});
   // assert the length of the binary
-  test.equal(81, insert_command.toBinary().length);
+  test.equal(81, insert_command.toBinary({
+      disableDriverBSONSizeCheck:true
+    , maxBsonSize: 1000000
+    , maxMessageSizeBytes: 1000000
+  }).length);
   test.done();
 }
 
