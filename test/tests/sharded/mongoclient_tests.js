@@ -139,14 +139,5 @@ exports['Should correctly emit open and fullsetup to all db instances'] = functi
         });                                                                      
       });                                                                         
     });                                                                           
-  });               
-
-  // MongoClient.connect('mongodb://localhost:50002,localhost:50000,localhost:50001/test', {}, function(err, db) {
-  //   setTimeout(function() {
-  //     test.equal(null, err);
-  //     test.ok(db != null);
-  //     db.close();
-  //     test.done();
-  //   }, 2000)
-  // });
+  });
 }

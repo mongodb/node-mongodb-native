@@ -259,3 +259,12 @@ exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = function(configuration
     });                                                                           
   });  
 }
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = function(configuration, test) {
+  var db_conn = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+  test.equal(false, db_conn.serverConfig.isConnected());
+  test.done();
+}
