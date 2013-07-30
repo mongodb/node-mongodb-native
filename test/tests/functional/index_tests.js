@@ -290,7 +290,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(configuration, test) {
  * @_class collection
  * @_function reIndex
  */
-exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) {
+exports.shouldCorrectlyIndexAndForceReindexOnCollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
