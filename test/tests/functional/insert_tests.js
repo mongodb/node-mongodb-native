@@ -1601,7 +1601,131 @@ exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = function(configuration, test
   });
 }
 
+exports.shouldCorrectlyOverrideCheckKeysJS = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
 
+  var db = configuration.newDbInstance({w:1}, {native_parser:false})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyOverrideCheckKeysJS').insert({
+          doc: Long.fromNumber(10)
+        , o: {'$set': [[Long.fromNumber(10)]]}
+      }, function(err, doc) {
+        test.ok(err != null);
 
+        db.collection('shouldCorrectlyOverrideCheckKeysJS').insert({
+              doc: Long.fromNumber(10)
+            , o: {'$set': 'a'}
+          }, {checkKeys:false}, function(err, doc) {
+            test.equal(null, err);
 
+            db.collection('shouldCorrectlyOverrideCheckKeysJS').findOne(function(err, doc) {
+              test.equal(null, err);
+              test.equal('a', doc.o['$set']);
 
+              db.close();
+              test.done();
+            });
+        });
+      });
+  });
+}
+
+exports.shouldCorrectlyOverrideCheckKeysNative = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
+
+  var db = configuration.newDbInstance({w:1}, {native_parser:true})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyOverrideCheckKeysNative').insert({
+          doc: Long.fromNumber(10)
+        , o: {'$set': [[Long.fromNumber(10)]]}
+      }, function(err, doc) {
+        test.ok(err != null);
+
+        db.collection('shouldCorrectlyOverrideCheckKeysNative').insert({
+              doc: Long.fromNumber(10)
+            , o: {'$set': 'a'}
+          }, {checkKeys:false}, function(err, doc) {
+            test.equal(null, err);
+
+            db.collection('shouldCorrectlyOverrideCheckKeysNative').findOne(function(err, doc) {
+              test.equal(null, err);
+              test.equal('a', doc.o['$set']);
+
+              db.close();
+              test.done();
+            });
+        });
+      });
+  });
+}
+
+exports.shouldCorrectlyOverrideCheckKeysJS = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
+
+  var db = configuration.newDbInstance({w:1}, {native_parser:false})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyOverrideCheckKeysJS').insert({
+          doc: Long.fromNumber(10)
+        , o: {'$set': [[Long.fromNumber(10)]]}
+      }, function(err, doc) {
+        test.ok(err != null);
+
+        db.collection('shouldCorrectlyOverrideCheckKeysJS').insert({
+              doc: Long.fromNumber(10)
+            , o: {'$set': 'a'}
+          }, {checkKeys:false}, function(err, doc) {
+            test.equal(null, err);
+
+            db.collection('shouldCorrectlyOverrideCheckKeysJS').findOne(function(err, doc) {
+              test.equal(null, err);
+              test.equal('a', doc.o['$set']);
+
+              db.close();
+              test.done();
+            });
+        });
+      });
+  });
+}
+
+exports.shouldCorrectlyOverrideCheckKeysNativeOnUpdate = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
+
+  var db = configuration.newDbInstance({w:1}, {native_parser:true})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyOverrideCheckKeysNativeOnUpdate').update({
+        ps: {op: {'$set': 1}}
+      }, {'$set': {b: 1}}, function(err, doc) {
+        test.ok(err != null);
+
+        db.collection('shouldCorrectlyOverrideCheckKeysNativeOnUpdate').update({
+            ps: {op: {'$set': 1}}
+          }, {'$set': {b: 1}}, {checkKeys:false}, function(err, doc) {
+            test.equal(null, err);
+            db.close();
+            test.done();
+        });
+      });
+  });
+}
+
+exports.shouldCorrectlyOverrideCheckKeysJSOnUpdate = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
+
+  var db = configuration.newDbInstance({w:1}, {native_parser:false})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
+        ps: {op: {'$set': 1}}
+      }, {'$set': {b: 1}}, function(err, doc) {
+        test.ok(err != null);
+
+        db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
+            ps: {op: {'$set': 1}}
+          }, {'$set': {b: 1}}, {checkKeys:false}, function(err, doc) {
+            test.equal(null, err);
+            db.close();
+            test.done();
+        });
+      });
+  });
+}
