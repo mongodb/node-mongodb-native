@@ -577,7 +577,7 @@ exports.shouldInsertAndQueryTimestamp = function(configuration, test) {
     collection.findOne({}, function(err, item) {
       test.ok(item.i instanceof Timestamp);
       test.equal(100, item.i);
-      test.equal(200, item.j.toNumber());
+      test.equal(200, item.j);
       test.done();
     });
   });
@@ -1512,3 +1512,96 @@ exports.shouldCorrectlyThrowOnToLargeAnInsert = function(configuration, test) {
     });
   });
 }
+
+exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
+
+  var db = configuration.newDbInstance({w:1, promoteLongs:false}, {native_parser:true})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyHonorPromoteLong').insert({
+          doc: Long.fromNumber(10)
+        , array: [[Long.fromNumber(10)]]
+      }, function(err, doc) {
+        test.equal(null, err);
+
+        db.collection('shouldCorrectlyHonorPromoteLong').findOne(function(err, doc) {      test.equal(null, err);
+          test.equal(null, err);
+          test.ok(doc.doc instanceof Long);
+          test.ok(doc.array[0][0] instanceof Long);
+          db.close();
+          test.done();
+        });
+    });
+  });
+}
+
+exports.shouldCorrectlyHonorPromoteLongTrueNativeBSON = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
+
+  var db = configuration.newDbInstance({w:1}, {native_parser:true})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert({
+          doc: Long.fromNumber(10)
+        , array: [[Long.fromNumber(10)]]
+      }, function(err, doc) {
+        test.equal(null, err);
+
+        db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').findOne(function(err, doc) {      test.equal(null, err);
+          test.equal(null, err);
+          test.ok('number', typeof doc.doc);
+          test.ok('number', typeof doc.array[0][0])
+          db.close();
+          test.done();
+        });
+    });
+  });
+}
+
+exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
+
+  var db = configuration.newDbInstance({w:1, promoteLongs:false}, {native_parser:false})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insert({
+          doc: Long.fromNumber(10)
+        , array: [[Long.fromNumber(10)]]
+      }, function(err, doc) {
+        test.equal(null, err);
+
+        db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {      test.equal(null, err);
+          test.equal(null, err);
+          test.ok(doc.doc instanceof Long);
+          test.ok(doc.array[0][0] instanceof Long);
+          db.close();
+          test.done();
+        });
+      });
+  });
+}
+
+exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
+
+  var db = configuration.newDbInstance({w:1}, {native_parser:false})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert({
+          doc: Long.fromNumber(10)
+        , array: [[Long.fromNumber(10)]]
+      }, function(err, doc) {
+        test.equal(null, err);
+
+        db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(function(err, doc) {      test.equal(null, err);
+          test.equal(null, err);
+          test.ok('number', typeof doc.doc);
+          test.ok('number', typeof doc.array[0][0])
+          db.close();
+          test.done();
+        });
+      });
+  });
+}
+
+
+
+
+

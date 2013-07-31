@@ -1375,7 +1375,7 @@ exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) 
  * @_function indexInformation
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+  var db = configuration.newDbInstance({w:0, native_parser:false}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
   // DOC_START
