@@ -1,8 +1,8 @@
 var http              = require('http'),
     os                = require('os'),    
-    mongodb           = require('../../lib/mongodb'),
+    mongodb           = require('../../../lib/mongodb'),
     async             = require('async'),
-    ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
+    ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager,
     MongoClient       = mongodb.MongoClient;
 
 console.log('launching simple mongo application...');
@@ -41,6 +41,7 @@ var number_of_times = 5;
 
 RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:0, arbiter_count:0});
 RS.startSet(true, function(err, result) {
+  // process.exit(0)
   if(err != null) throw err;
 
   MongoClient.connect(connection_string, function(err, db) {
