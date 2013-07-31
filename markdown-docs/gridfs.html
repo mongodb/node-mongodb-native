@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GridStore &mdash; MongoDB Node.JS Driver 1.3.10 documentation</title>
+    <title>GridStore &mdash; MongoDB Node.JS Driver 1.3.13 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.10',
+        VERSION:     '1.3.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.10 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.13 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -55,12 +55,14 @@
 <h2>Open GridStore<a class="headerlink" href="#open-gridstore" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>Opening a GridStore (a single file in GridFS) is a bit similar to opening a database. At first you need to create a GridStore object and then  <tt class="docutils literal"><span class="pre">open</span></tt>  it.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">gs</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">filename</span><span class="p">,</span> <span class="nx">mode</span><span class="p">[,</span> <span class="nx">options</span><span class="p">])</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id1"><span class="problematic" id="id2">``</span></a>javascript</dt>
+<dd>var gs = new mongodb.GridStore(db, filename, mode[, options])</dd>
+</dl>
 </div></blockquote>
-<p>Where</p>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a></p>
+<blockquote>
+<div><p>Where</p>
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">db</span></tt>  is the database object</li>
@@ -70,24 +72,33 @@
 </ul>
 </div></blockquote>
 <p>Example:</p>
+<dl class="docutils">
+<dt><a href="#id5"><span class="problematic" id="id6">``</span></a>javascript</dt>
+<dd><dl class="first docutils">
+<dt>var gs = new mongodb.GridStore(db, &#8220;test.png&#8221;, &#8220;w&#8221;, {</dt>
+<dd><p class="first">&#8220;content_type&#8221;: &#8220;image/png&#8221;,
+&#8220;metadata&#8221;:{</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">gs</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s2">&quot;test.png&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="p">{</span>
-    <span class="s2">&quot;content_type&quot;</span><span class="o">:</span> <span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;metadata&quot;</span><span class="o">:</span><span class="p">{</span>
-        <span class="s2">&quot;author&quot;</span><span class="o">:</span> <span class="s2">&quot;Daniel&quot;</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;chunk_size&quot;</span><span class="o">:</span> <span class="mi">1024</span><span class="o">*</span><span class="mi">4</span>
-<span class="p">});</span>
-</pre></div>
-</div>
+<div>&#8220;author&#8221;: &#8220;Daniel&#8221;</div></blockquote>
+<p class="last">},
+&#8220;chunk_size&#8221;: 1024*4</p>
+</dd>
+</dl>
+<p class="last">});</p>
+</dd>
+</dl>
 </div></blockquote>
-<p>When GridStore object is created, it needs to be opened.</p>
+<p><a href="#id7"><span class="problematic" id="id8">``</span></a></p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">gs</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="nx">callback</span><span class="p">);</span>
-</pre></div>
-</div>
+<div><p>When GridStore object is created, it needs to be opened.</p>
+<dl class="docutils">
+<dt><a href="#id9"><span class="problematic" id="id10">``</span></a>javascript</dt>
+<dd>gs.open(callback);</dd>
+</dl>
 </div></blockquote>
-<p><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - and error object (if error occured) and the GridStore object.</p>
+<p><a href="#id11"><span class="problematic" id="id12">``</span></a></p>
+<blockquote>
+<div><p><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - and error object (if error occured) and the GridStore object.</p>
 <p>Opened GridStore object has a set of useful properties</p>
 <blockquote>
 <div><ul class="simple">
@@ -99,25 +110,30 @@
 </ul>
 </div></blockquote>
 <p>Example</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">gs</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gs</span><span class="p">){</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;this file was uploaded at &quot;</span><span class="o">+</span><span class="nx">gs</span><span class="p">.</span><span class="nx">uploadDate</span><span class="p">);</span>
-<span class="p">});</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id13"><span class="problematic" id="id14">``</span></a>javascript</dt>
+<dd><dl class="first docutils">
+<dt>gs.open(function(err, gs){</dt>
+<dd>console.log(&#8220;this file was uploaded at &#8220;+gs.uploadDate);</dd>
+</dl>
+<p class="last">});</p>
+</dd>
+</dl>
 </div></blockquote>
-</div></blockquote>
+<p><a href="#id15"><span class="problematic" id="id16">``</span></a></p>
 </div>
 <div class="section" id="writing-to-gridstore">
 <h2>Writing to GridStore<a class="headerlink" href="#writing-to-gridstore" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>Writing can be done with  <tt class="docutils literal"><span class="pre">write</span></tt></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">gs</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id17"><span class="problematic" id="id18">``</span></a>javascript</dt>
+<dd>gs.write(data, callback)</dd>
+</dl>
 </div></blockquote>
-<p>where  <tt class="docutils literal"><span class="pre">data</span></tt>  is a  <tt class="docutils literal"><span class="pre">Buffer</span></tt>  or a string, callback gets two parameters - an error object (if error occured) and result value which indicates if the write was successful or not.</p>
+<p><a href="#id19"><span class="problematic" id="id20">``</span></a></p>
+<blockquote>
+<div><p>where  <tt class="docutils literal"><span class="pre">data</span></tt>  is a  <tt class="docutils literal"><span class="pre">Buffer</span></tt>  or a string, callback gets two parameters - an error object (if error occured) and result value which indicates if the write was successful or not.</p>
 <p>While the GridStore is not closed, every write is appended to the opened GridStore.</p>
 </div></blockquote>
 </div>
@@ -125,12 +141,14 @@
 <h2>Writing a file to GridStore<a class="headerlink" href="#writing-a-file-to-gridstore" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>This function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">gs</span><span class="p">.</span><span class="nx">writeFile</span><span class="p">(</span> <span class="nx">file</span><span class="p">,</span> <span class="nx">callback</span> <span class="p">)</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id21"><span class="problematic" id="id22">``</span></a>javascript</dt>
+<dd>gs.writeFile( file, callback )</dd>
+</dl>
 </div></blockquote>
-<p>where</p>
+<p><a href="#id23"><span class="problematic" id="id24">``</span></a></p>
+<blockquote>
+<div><p>where</p>
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">file</span></tt>  is a file descriptor, or a string file path</li>
@@ -143,12 +161,14 @@
 <h2>Reading from GridStore<a class="headerlink" href="#reading-from-gridstore" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>Reading from GridStore can be done with  <tt class="docutils literal"><span class="pre">read</span></tt></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">gs</span><span class="p">.</span><span class="nx">read</span><span class="p">([</span><span class="nx">size</span><span class="p">],</span> <span class="nx">callback</span><span class="p">)</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id25"><span class="problematic" id="id26">``</span></a>javascript</dt>
+<dd>gs.read([size], callback)</dd>
+</dl>
 </div></blockquote>
-<p>where</p>
+<p><a href="#id27"><span class="problematic" id="id28">``</span></a></p>
+<blockquote>
+<div><p>where</p>
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">size</span></tt>  is the length of the data to be read</li>
@@ -161,12 +181,14 @@
 <h2>Streaming from GridStore<a class="headerlink" href="#streaming-from-gridstore" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>You can stream data as it comes from the database using  <tt class="docutils literal"><span class="pre">stream</span></tt></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">gs</span><span class="p">.</span><span class="nx">stream</span><span class="p">([</span><span class="nx">autoclose</span><span class="o">=</span><span class="kc">false</span><span class="p">])</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id29"><span class="problematic" id="id30">``</span></a>javascript</dt>
+<dd>gs.stream([autoclose=false])</dd>
+</dl>
 </div></blockquote>
-<p>where</p>
+<p><a href="#id31"><span class="problematic" id="id32">``</span></a></p>
+<blockquote>
+<div><p>where</p>
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">autoclose</span></tt>  If true current GridStore will be closed when EOF and &#8216;close&#8217; event will be fired</li>
@@ -179,12 +201,14 @@
 <h2>Delete a GridStore<a class="headerlink" href="#delete-a-gridstore" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>GridStore files can be unlinked with  <tt class="docutils literal"><span class="pre">unlink</span></tt></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">mongodb</span><span class="p">.</span><span class="nx">GridStore</span><span class="p">.</span><span class="nx">unlink</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id33"><span class="problematic" id="id34">``</span></a>javascript</dt>
+<dd>mongodb.GridStore.unlink(db, name, callback)</dd>
+</dl>
 </div></blockquote>
-<p>Where</p>
+<p><a href="#id35"><span class="problematic" id="id36">``</span></a></p>
+<blockquote>
+<div><p>Where</p>
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">db</span></tt>  is the database object</li>
@@ -198,23 +222,25 @@
 <h2>Closing the GridStore<a class="headerlink" href="#closing-the-gridstore" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>GridStore needs to be closed after usage. This can be done with  <tt class="docutils literal"><span class="pre">close</span></tt></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">gs</span><span class="p">.</span><span class="nx">close</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id37"><span class="problematic" id="id38">``</span></a>javascript</dt>
+<dd>gs.close(callback)</dd>
+</dl>
 </div></blockquote>
-</div></blockquote>
+<p><a href="#id39"><span class="problematic" id="id40">``</span></a></p>
 </div>
 <div class="section" id="check-the-existance-of-a-gridstore-file">
 <h2>Check the existance of a GridStore file<a class="headerlink" href="#check-the-existance-of-a-gridstore-file" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>Checking if a file exists in GridFS can be done with  <tt class="docutils literal"><span class="pre">exist</span></tt></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">mongodb</span><span class="p">.</span><span class="nx">GridStore</span><span class="p">.</span><span class="nx">exist</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="nx">filename</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id41"><span class="problematic" id="id42">``</span></a>javascript</dt>
+<dd>mongodb.GridStore.exist(db, filename, callback)</dd>
+</dl>
 </div></blockquote>
-<p>Where</p>
+<p><a href="#id43"><span class="problematic" id="id44">``</span></a></p>
+<blockquote>
+<div><p>Where</p>
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">db</span></tt>  is the database object</li>
@@ -228,13 +254,14 @@
 <h2>Seeking in a GridStore<a class="headerlink" href="#seeking-in-a-gridstore" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>Seeking can be done with  <tt class="docutils literal"><span class="pre">seek</span></tt></p>
+<dl class="docutils">
+<dt><a href="#id45"><span class="problematic" id="id46">``</span></a>javascript</dt>
+<dd>gs.seek(position);</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id47"><span class="problematic" id="id48">``</span></a></p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">gs</span><span class="p">.</span><span class="nx">seek</span><span class="p">(</span><span class="nx">position</span><span class="p">);</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>This function moves the internal pointer to the specified position.</p>
-</div></blockquote>
+<div>This function moves the internal pointer to the specified position.</div></blockquote>
 </div>
 </div>
 
@@ -413,7 +440,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Inserting and updating &mdash; MongoDB Node.JS Driver 1.3.10 documentation</title>
+    <title>Inserting and updating &mdash; MongoDB Node.JS Driver 1.3.13 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.10',
+        VERSION:     '1.3.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.10 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.13 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +36,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -60,12 +60,14 @@
 <h2>Insert<a class="headerlink" href="#insert" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>Records can be inserted to a collection with  <tt class="docutils literal"><span class="pre">insert</span></tt></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">[,</span> <span class="nx">options</span><span class="p">,</span> <span class="nx">callback</span><span class="p">])</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id1"><span class="problematic" id="id2">``</span></a>javascript</dt>
+<dd>collection.insert(docs[, options, callback])</dd>
+</dl>
 </div></blockquote>
-<p>Where</p>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a></p>
+<blockquote>
+<div><p>Where</p>
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">docs</span></tt>  is a single document object or an array of documents</li>
@@ -74,49 +76,61 @@
 </ul>
 </div></blockquote>
 <p>For example</p>
+<dl class="docutils">
+<dt><a href="#id5"><span class="problematic" id="id6">``</span></a>javascript</dt>
+<dd><p class="first">var document = {name:&#8221;David&#8221;, title:&#8221;About MongoDB&#8221;};
+collection.insert(document, {safe: true}, function(err, records){</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nb">document</span> <span class="o">=</span> <span class="p">{</span><span class="nx">name</span><span class="o">:</span><span class="s2">&quot;David&quot;</span><span class="p">,</span> <span class="nx">title</span><span class="o">:</span><span class="s2">&quot;About MongoDB&quot;</span><span class="p">};</span>
-<span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span> <span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">records</span><span class="p">){</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Record added as &quot;</span><span class="o">+</span><span class="nx">records</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">);</span>
-<span class="p">});</span>
-</pre></div>
-</div>
+<div>console.log(&#8220;Record added as &#8220;+records[0]._id);</div></blockquote>
+<p class="last">});</p>
+</dd>
+</dl>
 </div></blockquote>
-<p>If trying to insert a record with an existing  <tt class="docutils literal"><span class="pre">_id</span></tt>  value, then the operation yields in error.</p>
+<p><a href="#id7"><span class="problematic" id="id8">``</span></a></p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">){</span>
-    <span class="c1">// no error, inserted new document, with _id=1</span>
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">){</span>
-        <span class="c1">// error occured since _id=1 already existed</span>
-    <span class="p">});</span>
-<span class="p">});</span>
-</pre></div>
-</div>
+<div><p>If trying to insert a record with an existing  <tt class="docutils literal"><span class="pre">_id</span></tt>  value, then the operation yields in error.</p>
+<dl class="docutils">
+<dt><a href="#id9"><span class="problematic" id="id10">``</span></a>javascript</dt>
+<dd><dl class="first docutils">
+<dt>collection.insert({_id:1}, {safe:true}, function(err, doc){</dt>
+<dd><p class="first">// no error, inserted new document, with _id=1
+collection.insert({_id:1}, {safe:true}, function(err, doc){</p>
+<blockquote>
+<div>// error occured since _id=1 already existed</div></blockquote>
+<p class="last">});</p>
+</dd>
+</dl>
+<p class="last">});</p>
+</dd>
+</dl>
 </div></blockquote>
-</div></blockquote>
+<p><a href="#id11"><span class="problematic" id="id12">``</span></a></p>
 </div>
 <div class="section" id="save">
 <h2>Save<a class="headerlink" href="#save" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>Shorthand for insert/update is  <tt class="docutils literal"><span class="pre">save</span></tt>  - if  <tt class="docutils literal"><span class="pre">_id</span></tt>  value set, the record is updated if it exists or inserted if it does not; if the  <tt class="docutils literal"><span class="pre">_id</span></tt>  value is not set, then the record is inserted as a new one.</p>
+<dl class="docutils">
+<dt><a href="#id13"><span class="problematic" id="id14">``</span></a>javascript</dt>
+<dd>collection.save({_id:&#8221;abc&#8221;, user:&#8221;David&#8221;},{safe:true}, callback)</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id15"><span class="problematic" id="id16">``</span></a></p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">save</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="nx">user</span><span class="o">:</span><span class="s2">&quot;David&quot;</span><span class="p">},{</span><span class="nx">safe</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="nx">callback</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and the record if it was inserted or  <tt class="docutils literal"><span class="pre">1</span></tt>  if the record was updated.</p>
-</div></blockquote>
+<div><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and the record if it was inserted or  <tt class="docutils literal"><span class="pre">1</span></tt>  if the record was updated.</div></blockquote>
 </div>
 <div class="section" id="update">
 <h2>Update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>Updates can be done with  <tt class="docutils literal"><span class="pre">update</span></tt></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">criteria</span><span class="p">,</span> <span class="nx">update</span><span class="p">[,</span> <span class="nx">options</span><span class="p">[,</span> <span class="nx">callback</span><span class="p">]]);</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id17"><span class="problematic" id="id18">``</span></a>javascript</dt>
+<dd>collection.update(criteria, update[, options[, callback]]);</dd>
+</dl>
 </div></blockquote>
-<p>Where</p>
+<p><a href="#id19"><span class="problematic" id="id20">``</span></a></p>
+<blockquote>
+<div><p>Where</p>
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">criteria</span></tt>  is a query object to find records that need to be updated (see  <a class="reference external" href="queries.html)">Queries</a></li>
@@ -135,31 +149,36 @@
 </ul>
 </div></blockquote>
 <p>If the replacement object is a document, the matching documents will be replaced (except the  <tt class="docutils literal"><span class="pre">_id</span></tt>  values if no  <tt class="docutils literal"><span class="pre">_id</span></tt>  is set).</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="s2">&quot;123&quot;</span><span class="p">},</span> <span class="p">{</span><span class="nx">author</span><span class="o">:</span><span class="s2">&quot;Jessica&quot;</span><span class="p">,</span> <span class="nx">title</span><span class="o">:</span><span class="s2">&quot;Mongo facts&quot;</span><span class="p">});</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id21"><span class="problematic" id="id22">``</span></a>javascript</dt>
+<dd>collection.update({_id:&#8221;123&#8221;}, {author:&#8221;Jessica&#8221;, title:&#8221;Mongo facts&#8221;});</dd>
+</dl>
 </div></blockquote>
-<p>The example above will replace the document contents of id=123 with the replacement object.</p>
+<p><a href="#id23"><span class="problematic" id="id24">``</span></a></p>
+<blockquote>
+<div><p>The example above will replace the document contents of id=123 with the replacement object.</p>
 <p>To update only selected fields,  <tt class="docutils literal"><span class="pre">$set</span></tt>  operator needs to be used. Following replacement object replaces author value but leaves everything else intact.</p>
+<dl class="docutils">
+<dt><a href="#id25"><span class="problematic" id="id26">``</span></a>javascript</dt>
+<dd>collection.update({_id:&#8221;123&#8221;}, {$set: {author:&#8221;Jessica&#8221;}});</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id27"><span class="problematic" id="id28">``</span></a></p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">_id</span><span class="o">:</span><span class="s2">&quot;123&quot;</span><span class="p">},</span> <span class="p">{</span><span class="nx">$set</span><span class="o">:</span> <span class="p">{</span><span class="nx">author</span><span class="o">:</span><span class="s2">&quot;Jessica&quot;</span><span class="p">}});</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>See  <a class="reference external" href="http://www.mongodb.org/display/DOCS/Updating">MongoDB documentation</a>  for all possible operators.</p>
-</div></blockquote>
+<div>See  <a class="reference external" href="http://www.mongodb.org/display/DOCS/Updating">MongoDB documentation</a>  for all possible operators.</div></blockquote>
 </div>
 <div class="section" id="find-and-modify">
 <h2>Find and Modify<a class="headerlink" href="#find-and-modify" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><p>To update and retrieve the contents for one single record you can use  <tt class="docutils literal"><span class="pre">findAndModify</span></tt> .</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">findAndModify</span><span class="p">(</span><span class="nx">criteria</span><span class="p">,</span> <span class="nx">sort</span><span class="p">,</span> <span class="nx">update</span><span class="p">[,</span> <span class="nx">options</span><span class="p">,</span> <span class="nx">callback</span><span class="p">])</span>
-</pre></div>
-</div>
+<dl class="docutils">
+<dt><a href="#id29"><span class="problematic" id="id30">``</span></a>javascript</dt>
+<dd>collection.findAndModify(criteria, sort, update[, options, callback])</dd>
+</dl>
 </div></blockquote>
-<p>Where</p>
+<p><a href="#id31"><span class="problematic" id="id32">``</span></a></p>
+<blockquote>
+<div><p>Where</p>
 <blockquote>
 <div><ul class="simple">
 <li><tt class="docutils literal"><span class="pre">criteria</span></tt>  is the query object to find the record</li>
@@ -176,28 +195,44 @@
 <li><tt class="docutils literal"><span class="pre">new</span></tt>  - if set to true, callback function returns the modified record. Default is false (original record is returned)</li>
 <li><tt class="docutils literal"><span class="pre">upsert</span></tt>  - if set to true and no record matched to the query, replacement object is inserted as a new record</li>
 </ul>
-<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">mongodb</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">),</span>
-    <span class="nx">server</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">Server</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">,</span> <span class="p">{});</span>
-
-<span class="k">new</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="nx">server</span><span class="p">,</span> <span class="p">{}).</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">error</span><span class="p">,</span> <span class="nx">client</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="k">throw</span> <span class="nx">error</span><span class="p">;</span>
-    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">mongodb</span><span class="p">.</span><span class="nx">Collection</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span> <span class="s1">&#39;test_collection&#39;</span><span class="p">);</span>
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">findAndModify</span><span class="p">(</span>
-        <span class="p">{</span><span class="nx">hello</span><span class="o">:</span> <span class="s1">&#39;world&#39;</span><span class="p">},</span> <span class="c1">// query</span>
-        <span class="p">[[</span><span class="s1">&#39;_id&#39;</span><span class="p">,</span><span class="s1">&#39;asc&#39;</span><span class="p">]],</span>  <span class="c1">// sort order</span>
-        <span class="p">{</span><span class="nx">$set</span><span class="o">:</span> <span class="p">{</span><span class="nx">hi</span><span class="o">:</span> <span class="s1">&#39;there&#39;</span><span class="p">}},</span> <span class="c1">// replacement, replaces only the field &quot;hi&quot;</span>
-        <span class="p">{},</span> <span class="c1">// options</span>
-        <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">){</span>
-                <span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>  <span class="c1">// returns error if no matching object found</span>
-            <span class="p">}</span><span class="k">else</span><span class="p">{</span>
-                <span class="nx">console</span><span class="p">.</span><span class="nx">dir</span><span class="p">(</span><span class="nx">object</span><span class="p">);</span>
-            <span class="p">}</span>
-        <span class="p">});</span>
-    <span class="p">});</span>
-</pre></div>
-</div>
 </div></blockquote>
+<dl class="docutils">
+<dt><a href="#id33"><span class="problematic" id="id34">``</span></a>`` <a href="#id35"><span class="problematic" id="id36">`</span></a>javascript</dt>
+<dd><dl class="first docutils">
+<dt>var MongoClient = require(&#8216;mongodb&#8217;).MongoClient</dt>
+<dd><blockquote class="first">
+<div>, format = require(&#8216;util&#8217;).format;</div></blockquote>
+<p class="last">MongoClient.connect(&#8216;mongodb://127.0.0.1:27017/test&#8217;, function(err, db) {</p>
+</dd>
+</dl>
+<p>if(err) throw err;</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>db.collection(&#8216;test&#8217;).findAndModify(</dt>
+<dd><dl class="first docutils">
+<dt>{hello: &#8216;world&#8217;}, // query</dt>
+<dd>],  // sort order</dd>
+</dl>
+<p>{$set: {hi: &#8216;there&#8217;}}, // replacement, replaces only the field &#8220;hi&#8221;
+{}, // options
+function(err, object) {</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>if (err){</dt>
+<dd>console.warn(err.message);  // returns error if no matching object found</dd>
+<dt>}else{</dt>
+<dd>console.dir(object);</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p class="last">});</p>
+</dd>
+</dl>
+</div></blockquote>
+<p class="last">});</p>
+</dd>
+</dl>
+<p><a href="#id37"><span class="problematic" id="id38">``</span></a>`` `</p>
 </div></blockquote>
 </div>
 </div>
@@ -372,7 +407,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.10 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

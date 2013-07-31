@@ -33,6 +33,7 @@ Options
  - **numberOfRetries** {Number, default:5}, number of retries off connection.
  - **logger** {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error **({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})**.
  - **slaveOk** {Number, default:null}, force setting of SlaveOk flag on queries (only use when explicitly connecting to a secondary server).
+ - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
 
 
 
@@ -555,7 +556,7 @@ Options
  - **raw** {Boolean, default:false}, perform all operations using raw bson objects.
  - **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
  - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- - **strict**, (Boolean, default:false) throws an error if the collection does not exist
+ - **strict**, (Boolean, default:false) returns an error if the collection does not exist
 
 
 

@@ -109,6 +109,7 @@ Options
  - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
  - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
  - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+ - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
 
 .. js:function:: BSON.deserializeStream(data, startIndex, numberOfDocuments, documents, docStartIndex[, options])
 
@@ -134,6 +135,7 @@ Options
  - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
  - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
  - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+ - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
 
 .. js:function:: BSON.deserialize(buffer[, options], [isArray])
 

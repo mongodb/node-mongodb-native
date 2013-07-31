@@ -16,9 +16,10 @@ Making queries with find()
  `Collections <collections.html>`_  can be queried with  ``find`` . 
 
 
-  .. code-block:: javascript
 
-    collection.find(query[[[, fields], options], callback]);
+ ``javascript
+  collection.find(query[[[, fields], options], callback]);
+``
 
 
 
@@ -36,22 +37,24 @@ Making queries with find()
  The result for the query is actually a cursor object. This can be used directly or converted to an array.
 
 
-  .. code-block:: javascript
 
-    var cursor = collection.find({});
-    cursor.each(...);
+ ``javascript
+  var cursor = collection.find({});
+  cursor.each(...);
+``
 
 
 
  To indicate which fields must or must no be returned  ``fields``  value can be used. For example the following  ``fields``  value
 
 
-  .. code-block:: javascript
 
-    {
-        "name": true,
-        "title": true
-    }
+ ``javascript
+  {
+    "name": true,
+    "title": true
+  }
+``
 
 
 
@@ -65,9 +68,10 @@ Find first occurence with findOne()
  ``findOne``  is a convinence method finding and returning the first match of a query while regular  ``find``  returns a cursor object instead. Use it when you expect only one record, for example when querying with  ``_id``  or another unique property.
 
 
-  .. code-block:: javascript
 
-    collection.findOne([query], callback)
+ ``javascript
+  collection.findOne([query], callback)
+``
 
 
 
@@ -82,11 +86,12 @@ Find first occurence with findOne()
  Example:
 
 
-  .. code-block:: javascript
 
-    collection.findOne({_id: doc_id}, function(err, document) {
-        console.log(document.name);
-    });
+ ``javascript
+  collection.findOne({_id: doc_id}, function(err, document) {
+    console.log(document.name);
+  });
+``
 
 
 ----------
@@ -100,28 +105,31 @@ _id values
  In order to treat these binary _id values as strings it would be wise to convert binary values to hex strings. This can be done with  ``toHexString``  property.
 
 
-  .. code-block:: javascript
 
-    var idHex = document._id.toHexString();
+ ``javascript
+  var idHex = document._id.toHexString();
+``
 
 
 
  Hex strings can be reverted back to binary (for example to perform queries) with  ``ObjectID.createFromHexString``
 
 
-  .. code-block:: javascript
 
-    {_id: ObjectID.createFromHexString(idHex)}
+ ``javascript
+  {_id: ObjectID.createFromHexString(idHex)}
+``
 
 
 
  When inserting new records it is possible to use custom  ``_id``  values as well which do not need to be binary hashes, for example strings.
 
 
-  .. code-block:: javascript
 
-    collection.insert({_id: "abc", ...});
-    collection.findOne({_id: "abc"},...);
+ ``javascript
+  collection.insert({_id: "abc", ...});
+  collection.findOne({_id: "abc"},...);
+``
 
 
 
@@ -139,9 +147,10 @@ Query object
  To make a simple query where one field must match to a defined value, one can do it as simply as
 
 
-  .. code-block:: javascript
 
-    {fieldname: "fieldvalue"}  
+ ``javascript
+  {fieldname: "fieldvalue"}  
+``
 
 
 
@@ -152,25 +161,27 @@ Query object
  For example if we have a collection of blog posts where the structure of the records is  ``{title, author, contents}``  and we want to retrieve all the posts for a specific author then we can do it like this:
 
 
-  .. code-block:: javascript
 
-    posts = pointer_to_collection;
-    posts.find({author:"Daniel"}).toArray(function(err, results){
-        console.log(results); // output all records
-    });
+ ``javascript
+  posts = pointer_to_collection;
+  posts.find({author:"Daniel"}).toArray(function(err, results){
+      console.log(results); // output all records
+  });
+``
 
 
 
  If the queried field is inside an object then that can be queried also. For example if we have a record with the following structure:
 
 
-  .. code-block:: javascript
 
-    {
-        user: {
-            name: "Daniel"
-        }
+ ``javascript
+  {
+    user: {
+      name: "Daniel"
     }
+  }
+``
 
 
 
@@ -181,12 +192,13 @@ Query object
  If more than one fieldname is specified, then it's an AND query
 
 
-  .. code-block:: javascript
 
-    {
-        key1: "value1",
-        name2: "value2"
-    }
+ ``javascript
+  {
+    key1: "value1",
+    name2: "value2"
+  }
+``
 
 
 
@@ -197,14 +209,15 @@ Query object
  OR queries are a bit trickier but doable with the  ``$or``  operator. Query operator takes an array which includes a set of query objects and at least one of these must match a document before it is retrieved
 
 
-  .. code-block:: javascript
 
-    {
-        $or:[
-            {author:"Daniel"},
-            {author:"Jessica"}
-        ]
-    }
+ ``javascript
+  {
+    $or:[
+      {author:"Daniel"},
+      {author:"Jessica"}
+    ]
+  }
+``
 
 
 
@@ -215,24 +228,26 @@ Query object
  To mix AND and OR queries, you just need to use $or as one of regular query fields.
 
 
-  .. code-block:: javascript
 
-    {
-        title:"MongoDB", 
-        $or:[
-            {author:"Daniel"}, 
-            {author:"Jessica"}
-        ]
-    }
+ ``javascript
+  {
+    title:"MongoDB", 
+    $or:[
+      {author:"Daniel"}, 
+      {author:"Jessica"}
+    ]
+  }
+``
 
 
 
  Conditional operators  ``<`` ,  ``<=`` ,  ``>`` ,  ``>=``  and  ``!=``  can't be used directly, as the query object format doesn't support it but the same can be achieved with their aliases  ``$lt`` ,  ``$lte`` ,  ``$gt`` ,  ``$gte``  and  ``$ne`` . When a field value needs to match a conditional, the value must be wrapped into a separate object.
 
 
-  .. code-block:: javascript
 
-    {"fieldname":{$gte:100}}
+ ``javascript
+  {"fieldname":{$gte:100}}
+``
 
 
 
@@ -243,18 +258,20 @@ Query object
  Conditionals can also be mixed to create ranges.
 
 
-  .. code-block:: javascript
 
-    {"fieldname": {$lte:10, $gte:100}} 
+ ``javascript
+  {"fieldname": {$lte:10, $gte:100}} 
+``
 
 
 
  Queried field values can also be matched with regular expressions
 
 
-  .. code-block:: javascript
 
-    {author:/^Daniel/}
+ ``javascript
+  {author:/^Daniel/}
+``
 
 
 
@@ -280,39 +297,42 @@ Queries inside objects and arrays
  For example with the following document
 
 
-  .. code-block:: javascript
 
-    {
-        "_id": idvalue,
-        "author":{
-            "firstname":"Daniel",
-            "lastname": "Defoe"
-        },
-        "books":[
-            {
-                "title":"Robinson Crusoe"
-                "year": 1714
-            }
-        ]
-    }
+ ``javascript
+  {
+    "_id": idvalue,
+    "author":{
+      "firstname":"Daniel",
+      "lastname": "Defoe"
+    },
+    "books":[
+      {
+        "title":"Robinson Crusoe"
+        "year": 1714
+      }
+    ]
+  }
+``
 
 
 
  not only the  ``_id``  field can be used as a query field - also the  ``firstname``  and even  ``title``  can be used. This can be done when using nested field names as strings, concated with periods.
 
 
-  .. code-block:: javascript
 
-    collection.find({"author.firstname":"Daniel})
+ ``javascript
+  collection.find({"author.firstname":"Daniel})
+``
 
 
 
  Works even inside arrays
 
 
-  .. code-block:: javascript
 
-    collection.find({"books.year":1714})
+ ``javascript
+  collection.find({"books.year":1714})
+``
 
 
 -------------
@@ -322,27 +342,31 @@ Query options
  Query options define the behavior of the query.
 
 
-  .. code-block:: javascript
 
-    var options = {
-        "limit": 20,
-        "skip": 10,
-        "sort": "title"
-    }
-    
-    collection.find({}, options).toArray(...);
+ ```` `javascript
+  var options = {
+      "limit": 20,
+      "skip": 10,
+      "sort": "title"
+  }
+
+
+
+   collection.find({}, options).toArray(...);
+ ```` `
 
 
 
  Paging can be achieved with option parameters  ``limit``  and  ``skip``
 
 
-  .. code-block:: javascript
 
-    {
-        "limit": 20,
-        "skip" 10
-    }
+ ``javascript
+  {
+    "limit": 20,
+    "skip" 10
+  }
+``
 
 
 
@@ -353,22 +377,24 @@ Query options
  Sorting can be acieved with option parameter  ``sort``  which takes an array of sort preferences
 
 
-  .. code-block:: javascript
 
-    {
-        "sort": [['field1','asc'], ['field2','desc']]
-    }
+ ``javascript
+  {
+    "sort": [['field1','asc'], ['field2','desc']]
+  }
+``
 
 
 
  With single ascending field the array can be replaced with the name of the field.
 
 
-  .. code-block:: javascript
 
-    {
-        "sort": "name"
-    }
+ ``javascript
+  {
+    "sort": "name"
+  }
+``
 
 
 
@@ -394,28 +420,27 @@ Cursors
  ``cursor.toArray(function(err, docs){})``  converts the cursor object into an array of all the matching records. Probably the most convenient way to retrieve results but be careful with large datasets as every record is loaded into memory. 
 
 
-  .. code-block:: javascript
 
-    collection.find().toArray(function(err, docs){
-        console.log("retrieved records:");
-        console.log(docs);
-    });
-
-
-
- ``cursor.rewind()``  resets the internal pointer in the cursor to the beginning.    
+ ``javascript
+  collection.find().toArray(function(err, docs){
+      console.log("retrieved records:");
+      console.log(docs);
+  });
+``
 
 
-----------------
-Counting matches
-----------------
+
+ ``cursor.rewind()``  resets the internal pointer in the cursor to the beginning    ## Counting matches
+
+
 
  Counting total number of found matches can be done against cursors with method  ``count`` .
 
 
-  .. code-block:: javascript
 
-    cursor.count(callback)
+ ``javascript
+  cursor.count(callback)
+``
 
 
 
@@ -429,9 +454,10 @@ Counting matches
  Example
 
 
-  .. code-block:: javascript
 
-    cursor.count(function(err, count){
-        console.log("Total matches: "+count);
-    });
+ ``javascript
+  cursor.count(function(err, count){
+    console.log("Total matches: "+count);
+  });
+``
 

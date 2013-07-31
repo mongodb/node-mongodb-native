@@ -44,10 +44,11 @@ Options
  - **continueOnError/keepGoing** {Boolean, default:false}, keep inserting documents even if one document has an error, *mongodb 1.9.1 >*.
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
  - **forceServerObjectId** {Boolean, default:false}, let server assign ObjectId instead of the driver
+ - **checkKeys** {Boolean, default:true}, allows for disabling of document key checking (WARNING OPENS YOU UP TO INJECTION ATTACKS)
 
 
 
-Deprecated Options 
+Deprecated Options
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: insert(docs[, options], [callback])
@@ -231,7 +232,7 @@ Options
 
 
 
-Deprecated Options 
+Deprecated Options
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: remove([selector][, options], [callback])
@@ -465,7 +466,7 @@ Options
 
 
 
-Deprecated Options 
+Deprecated Options
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: save([doc][, options], [callback])
@@ -587,10 +588,11 @@ Options
  - **upsert** {Boolean, default:false}, perform an upsert operation.
  - **multi** {Boolean, default:false}, update all documents matching the selector.
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
+ - **checkKeys** {Boolean, default:true}, allows for disabling of document key checking (WARNING OPENS YOU UP TO INJECTION ATTACKS)
 
 
 
-Deprecated Options 
+Deprecated Options
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: update(selector, document[, options], [callback])
@@ -1005,7 +1007,7 @@ Options
 
 
 
-Deprecated Options 
+Deprecated Options
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: findAndModify(query, sort, doc[, options], callback)
@@ -1107,7 +1109,7 @@ Options
 
 
 
-Deprecated Options 
+Deprecated Options
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: findAndRemove(query, sort[, options], callback)
@@ -1472,7 +1474,7 @@ Options
 
 
 
-Deprecated Options 
+Deprecated Options
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: createIndex(fieldOrSpec[, options], callback)
@@ -1611,7 +1613,7 @@ Options
 
 
 
-Deprecated Options 
+Deprecated Options
  - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
 
 .. js:function:: ensureIndex(fieldOrSpec[, options], callback)

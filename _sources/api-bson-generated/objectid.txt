@@ -105,11 +105,11 @@ getTimestamp
 ------------
 
 
-Returns the generation time in seconds that this ID was generated.
+Returns the generation date (accurate up to the second) that this ID was generated.
 
 .. js:function:: getTimestamp()
 
-   :returns: number return number of seconds in the timestamp part of the 12 byte id.
+   :returns: date the generation date
 
 
 **Examples**

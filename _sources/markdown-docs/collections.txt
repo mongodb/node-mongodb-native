@@ -28,9 +28,10 @@ Creating collections
  Collections can be created with  ``createCollection``
 
 
-  .. code-block:: javascript
 
-    db.createCollection([[name[, options]], callback)
+ ``javascript
+  db.createCollection([[name[, options]], callback)
+``
 
 
 
@@ -41,11 +42,12 @@ Creating collections
  The first parameter for the callback is the error object (null if no error) and the second one is the pointer to the newly created collection. If strict mode is on and the table exists, the operation yields in error. With strict mode off (default) the function simple returns the pointer to the existing collection and does not truncate it.
 
 
-  .. code-block:: javascript
 
-    db.createCollection("test", function(err, collection){
-        collection.insert({"test":"value"});
-    });
+ ``javascript
+  db.createCollection("test", function(err, collection){
+      collection.insert({"test":"value"});
+  });
+``
 
 
 ----------------------------
@@ -80,9 +82,10 @@ List existing collections
  Collections can be listed with  ``collectionNames``
 
 
-  .. code-block:: javascript
 
-    db.collectionNames(callback);
+ ``javascript
+  db.collectionNames(callback);
+``
 
 
 
@@ -101,17 +104,20 @@ List existing collections
  Example:
 
 
-  .. code-block:: javascript
 
-    var mongodb = require("mongodb"),
-        mongoserver = new mongodb.Server("localhost"),
-        db_connector = new mongodb.Db("blog", mongoserver);
-    
-    db_connector.open(function(err, db){
-        db.collectionNames(function(err, collections){
-            console.log(collections); // ["blog.posts", "blog.system.indexes"]
-        });
+ ```` `javascript
+  var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;    
+
+
+
+   MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+    if(err) throw err;
+    db.collectionNames(function(err, collections){
+        console.log(collections);
     });
+  });
+ ```` `
 
 
 ----------------
@@ -121,9 +127,10 @@ List collections
  Collection objects can be listed with database method  ``collections``
 
 
-  .. code-block:: javascript
 
-    db.collections(callback)
+ ``javascript
+  db.collections(callback)
+``
 
 
 
@@ -137,9 +144,10 @@ Selecting collections
  Existing collections can be opened with  ``collection``
 
 
-  .. code-block:: javascript
 
-    db.collection([[name[, options]], callback);
+ ``javascript
+  db.collection([[name[, options]], callback);
+``
 
 
 
@@ -165,18 +173,20 @@ Renaming collections
  A collection can be renamed with collection method  ``rename``
 
 
-  .. code-block:: javascript
 
-    collection.rename(new_name, callback);
+ ``javascript
+  collection.rename(new_name, callback);
+``
 
 
 
  Passing the optional dropTarget boolean as the thrid parameter will allow overwritting of existing collections
 
 
-  .. code-block:: javascript
 
-    collection.rename(new_name, {dropTarget:true}, callback);
+ ``javascript
+  collection.rename(new_name, {dropTarget:true}, callback);
+``
 
 
 ---------------------------------
@@ -186,9 +196,10 @@ Removing records from collections
  Records can be erased from a collection with  ``remove``
 
 
-  .. code-block:: javascript
 
-    collection.remove([[query[, options]], callback]);
+ ``javascript
+  collection.remove([[query[, options]], callback]);
+``
 
 
 
@@ -207,16 +218,18 @@ Removing collections
  A collection can be dropped with  ``drop``
 
 
-  .. code-block:: javascript
 
-    collection.drop(callback);
+ ``javascript
+  collection.drop(callback);
+``
 
 
 
  or with  ``dropCollection``
 
 
-  .. code-block:: javascript
 
-    db.dropCollection(collection_name, callback)
+ ``javascript
+  db.dropCollection(collection_name, callback)
+``
 

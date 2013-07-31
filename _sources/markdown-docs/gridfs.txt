@@ -16,9 +16,10 @@ Open GridStore
  Opening a GridStore (a single file in GridFS) is a bit similar to opening a database. At first you need to create a GridStore object and then  ``open``  it. 
 
 
-  .. code-block:: javascript
 
-    var gs = new mongodb.GridStore(db, filename, mode[, options])
+ ``javascript
+  var gs = new mongodb.GridStore(db, filename, mode[, options])
+``
 
 
 
@@ -35,24 +36,26 @@ Open GridStore
  Example:
 
 
-  .. code-block:: javascript
 
-    var gs = new mongodb.GridStore(db, "test.png", "w", {
-        "content_type": "image/png",
-        "metadata":{
-            "author": "Daniel"
-        },
-        "chunk_size": 1024*4
-    });
+ ``javascript
+  var gs = new mongodb.GridStore(db, "test.png", "w", {
+    "content_type": "image/png",
+    "metadata":{
+        "author": "Daniel"
+    },
+    "chunk_size": 1024*4
+  });
+``
 
 
 
  When GridStore object is created, it needs to be opened.
 
 
-  .. code-block:: javascript
 
-    gs.open(callback);
+ ``javascript
+  gs.open(callback);
+``
 
 
 
@@ -74,11 +77,12 @@ Open GridStore
  Example
 
 
-  .. code-block:: javascript
 
-    gs.open(function(err, gs){
-        console.log("this file was uploaded at "+gs.uploadDate);
-    });
+ ``javascript
+  gs.open(function(err, gs){
+      console.log("this file was uploaded at "+gs.uploadDate);
+  });
+``
 
 
 --------------------
@@ -88,9 +92,10 @@ Writing to GridStore
  Writing can be done with  ``write``
 
 
-  .. code-block:: javascript
 
-    gs.write(data, callback)
+ ``javascript
+  gs.write(data, callback)
+``
 
 
 
@@ -108,9 +113,10 @@ Writing a file to GridStore
  This function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.
 
 
-  .. code-block:: javascript
 
-    gs.writeFile( file, callback )
+ ``javascript
+  gs.writeFile( file, callback )
+``
 
 
 
@@ -128,9 +134,10 @@ Reading from GridStore
  Reading from GridStore can be done with  ``read``
 
 
-  .. code-block:: javascript
 
-    gs.read([size], callback)
+ ``javascript
+  gs.read([size], callback)
+``
 
 
 
@@ -148,9 +155,10 @@ Streaming from GridStore
  You can stream data as it comes from the database using  ``stream``
 
 
-  .. code-block:: javascript
 
-    gs.stream([autoclose=false])
+ ``javascript
+  gs.stream([autoclose=false])
+``
 
 
 
@@ -171,9 +179,10 @@ Delete a GridStore
  GridStore files can be unlinked with  ``unlink``
 
 
-  .. code-block:: javascript
 
-    mongodb.GridStore.unlink(db, name, callback)
+ ``javascript
+  mongodb.GridStore.unlink(db, name, callback)
+``
 
 
 
@@ -192,9 +201,10 @@ Closing the GridStore
  GridStore needs to be closed after usage. This can be done with  ``close``
 
 
-  .. code-block:: javascript
 
-    gs.close(callback)
+ ``javascript
+  gs.close(callback)
+``
 
 
 ---------------------------------------
@@ -204,9 +214,10 @@ Check the existance of a GridStore file
  Checking if a file exists in GridFS can be done with  ``exist``
 
 
-  .. code-block:: javascript
 
-    mongodb.GridStore.exist(db, filename, callback)
+ ``javascript
+  mongodb.GridStore.exist(db, filename, callback)
+``
 
 
 
@@ -225,9 +236,10 @@ Seeking in a GridStore
  Seeking can be done with  ``seek``
 
 
-  .. code-block:: javascript
 
-    gs.seek(position);
+ ``javascript
+  gs.seek(position);
+``
 
 
 

@@ -16,9 +16,10 @@ Insert
  Records can be inserted to a collection with  ``insert``
 
 
-  .. code-block:: javascript
 
-    collection.insert(docs[, options, callback])
+ ``javascript
+  collection.insert(docs[, options, callback])
+``
 
 
 
@@ -34,26 +35,28 @@ Insert
  For example
 
 
-  .. code-block:: javascript
 
-    var document = {name:"David", title:"About MongoDB"};
-    collection.insert(document, {safe: true}, function(err, records){
-        console.log("Record added as "+records[0]._id);
-    });
+ ``javascript
+  var document = {name:"David", title:"About MongoDB"};
+  collection.insert(document, {safe: true}, function(err, records){
+    console.log("Record added as "+records[0]._id);
+  });
+``
 
 
 
  If trying to insert a record with an existing  ``_id``  value, then the operation yields in error.
 
 
-  .. code-block:: javascript
 
+ ``javascript
+  collection.insert({_id:1}, {safe:true}, function(err, doc){
+    // no error, inserted new document, with _id=1
     collection.insert({_id:1}, {safe:true}, function(err, doc){
-        // no error, inserted new document, with _id=1
-        collection.insert({_id:1}, {safe:true}, function(err, doc){
-            // error occured since _id=1 already existed
-        });
+      // error occured since _id=1 already existed
     });
+  });
+``
 
 
 ----
@@ -63,9 +66,10 @@ Save
  Shorthand for insert/update is  ``save``  - if  ``_id``  value set, the record is updated if it exists or inserted if it does not; if the  ``_id``  value is not set, then the record is inserted as a new one.
 
 
-  .. code-block:: javascript
 
-    collection.save({_id:"abc", user:"David"},{safe:true}, callback)
+ ``javascript
+  collection.save({_id:"abc", user:"David"},{safe:true}, callback)
+``
 
 
 
@@ -79,9 +83,10 @@ Update
  Updates can be done with  ``update``
 
 
-  .. code-block:: javascript
 
-    collection.update(criteria, update[, options[, callback]]);
+ ``javascript
+  collection.update(criteria, update[, options[, callback]]);
+``
 
 
 
@@ -108,9 +113,10 @@ Update
  If the replacement object is a document, the matching documents will be replaced (except the  ``_id``  values if no  ``_id``  is set).
 
 
-  .. code-block:: javascript
 
-    collection.update({_id:"123"}, {author:"Jessica", title:"Mongo facts"});
+ ``javascript
+  collection.update({_id:"123"}, {author:"Jessica", title:"Mongo facts"});
+``
 
 
 
@@ -121,9 +127,10 @@ Update
  To update only selected fields,  ``$set``  operator needs to be used. Following replacement object replaces author value but leaves everything else intact.
 
 
-  .. code-block:: javascript
 
-    collection.update({_id:"123"}, {$set: {author:"Jessica"}});
+ ``javascript
+  collection.update({_id:"123"}, {$set: {author:"Jessica"}});
+``
 
 
 
@@ -137,9 +144,10 @@ Find and Modify
  To update and retrieve the contents for one single record you can use  ``findAndModify`` .
 
 
-  .. code-block:: javascript
 
-    collection.findAndModify(criteria, sort, update[, options, callback])
+ ``javascript
+  collection.findAndModify(criteria, sort, update[, options, callback])
+``
 
 
 
@@ -162,29 +170,30 @@ Find and Modify
   * ``upsert``  - if set to true and no record matched to the query, replacement object is inserted as a new record
 
 
-  .. code-block:: javascript
 
-    var mongodb = require('mongodb'),
-        server = new mongodb.Server("127.0.0.1", 27017, {});
-    
-    new mongodb.Db('test', server, {}).open(function (error, client) {
-        if (error) throw error;
-        var collection = new mongodb.Collection(client, 'test_collection');
-        collection.findAndModify(
-            {hello: 'world'}, // query
-            [['_id','asc']],  // sort order
-            {$set: {hi: 'there'}}, // replacement, replaces only the field "hi"
-            {}, // options
-            function(err, object) {
-                if (err){
-                    console.warn(err.message);  // returns error if no matching object found
-                }else{
-                    console.dir(object);
-                }
-            });
-        });
+ ```` `javascript
+  var MongoClient = require('mongodb').MongoClient
+    , format = require('util').format;    
 
 
 
-    
+   MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+  if(err) throw err;
+
+
+
+   db.collection('test').findAndModify(
+    {hello: 'world'}, // query
+      ],  // sort order
+    {$set: {hi: 'there'}}, // replacement, replaces only the field "hi"
+    {}, // options
+    function(err, object) {
+        if (err){
+            console.warn(err.message);  // returns error if no matching object found
+        }else{
+            console.dir(object);
+        }
+    });
+  });
+ ```` `   
 
