@@ -137,7 +137,6 @@ docs.writeMarkDownFile("./docs/sphinx-docs/source/api-articles", articles, templ
 // Transform the tutorials
 var articles = [
     {name:"collections", output:"collections.rst", path:"./docs/collections.md"},
-    {name:"database", output:"database.rst", path:"./docs/database.md"},
     {name:"gridfs", output:"gridfs.rst", path:"./docs/gridfs.md"},
     {name:"indexes", output:"indexes.rst", path:"./docs/indexes.md"},
     {name:"insert", output:"insert.rst", path:"./docs/insert.md"},
