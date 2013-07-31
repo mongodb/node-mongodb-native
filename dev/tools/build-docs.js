@@ -140,8 +140,7 @@ var articles = [
     {name:"gridfs", output:"gridfs.rst", path:"./docs/gridfs.md"},
     {name:"indexes", output:"indexes.rst", path:"./docs/indexes.md"},
     {name:"insert", output:"insert.rst", path:"./docs/insert.md"},
-    {name:"queries", output:"queries.rst", path:"./docs/queries.md"},
-    {name:"replicaset", output:"replicaset.rst", path:"./docs/replicaset.md"},
+    {name:"queries", output:"queries.rst", path:"./docs/queries.md"}
   ];
 
 // Tranform the markdown to restructured text
