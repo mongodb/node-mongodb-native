@@ -2272,20 +2272,16 @@ exports.shouldNotHangOnTailableCursor = function(configuration, test) {
               test.done();
             });
           } else if(index == totaldocs) {
+
+
             test.ok(false);
           }
 
           if(index == 10) {
             configuration.restartNoEnsureUp(function(err) {}); 
           }
-          // test.ok(err instanceof Error);
-          // test.done();
         });
       });
-
-      // process.nextTick(function() {
-      //   configuration.restart(function(err) {});
-      // })
     });
   });
 }
