@@ -1,3 +1,18 @@
+1.3.13 2013-07-31
+-----------------
+- Added override for checkKeys on insert/update (Warning will expose you to injection attacks) (Issue #1046)
+- BSON size checking now done pre serialization (Issue #1037)
+- Added isConnected returns false when no connection Pool exists (Issue #1043)
+- Unified command handling to ensure same handling (Issue #1041, #1042)
+- Correctly emit "open" and "fullsetup" across all Db's associated with Mongos, ReplSet or Server (Issue #1040)
+- Correctly handles bug in authentication when attempting to connect to a recovering node in a replicaset.
+- Correctly remove recovering servers from available servers in replicaset. Piggybacks on the ping command.
+- Removed findAndModify chaining to be compliant with behavior in other official drivers and to fix a known mongos issue.
+- Fixed issue with Kerberos authentication on Windows for re-authentication.
+- Fixed Mongos failover behavior to correctly throw out old servers.
+- Ensure stored queries/write ops are executed correctly after connection timeout
+- Added promoteLongs option for to allow for overriding the promotion of Longs to Numbers and return the actual Long.
+
 1.3.12 2013-07-19
 -----------------
 - Fixed issue where timeouts sometimes would behave wrongly (Issue #1032)
