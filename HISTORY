@@ -1,3 +1,7 @@
+1.3.13 2013-08-01
+-----------------
+- Fixed issue with checkKeys where it would error on X.X
+
 1.3.13 2013-07-31
 -----------------
 - Added override for checkKeys on insert/update (Warning will expose you to injection attacks) (Issue #1046)
