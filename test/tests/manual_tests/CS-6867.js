@@ -1,4 +1,5 @@
-// var x = new ReplSetTest({"nodes" : {node0 : {}, node1 : {}, arbiter : {}}})
+// var x = new ReplSetTest({"useHostName":"false", "nodes" : {node0 : {}, node1 : {}, arbiter : {}}})
+// var x = new ReplSetTest({"useHostName":"false", "nodes" : {node0 : {}, node1 : {}, node2 : {}, arbiter : {}}})
 // x.startSet();
 // var config = x.getReplSetConfig()
 // config.members[0].priority = 10
