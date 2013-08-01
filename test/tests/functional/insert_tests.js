@@ -1695,7 +1695,7 @@ exports.shouldCorrectlyOverrideCheckKeysNativeOnUpdate = function(configuration,
   db.open(function(err, db) {
     db.collection('shouldCorrectlyOverrideCheckKeysNativeOnUpdate').update({
         ps: {op: {'$set': 1}}
-      }, {'$set': {b: 1}}, function(err, doc) {
+      }, {'$set': {b: 1}}, {checkKeys:true}, function(err, doc) {
         test.ok(err != null);
 
         db.collection('shouldCorrectlyOverrideCheckKeysNativeOnUpdate').update({
@@ -1716,7 +1716,7 @@ exports.shouldCorrectlyOverrideCheckKeysJSOnUpdate = function(configuration, tes
   db.open(function(err, db) {
     db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
         ps: {op: {'$set': 1}}
-      }, {'$set': {b: 1}}, function(err, doc) {
+      }, {'$set': {b: 1}}, {checkKeys:true}, function(err, doc) {
         test.ok(err != null);
 
         db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
@@ -1726,6 +1726,21 @@ exports.shouldCorrectlyOverrideCheckKeysJSOnUpdate = function(configuration, tes
             db.close();
             test.done();
         });
+      });
+  });
+}
+
+exports.shouldCorrectlyWorkWithCheckKeys = function(configuration, test) {
+  var Long = configuration.getMongoPackage().Long;
+
+  var db = configuration.newDbInstance({w:1}, {native_parser:false})
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
+        "ps.op.t":1
+      }, {'$set': {b: 1}}, function(err, doc) {
+        test.equal(null, err);
+        db.close();
+        test.done();
       });
   });
 }
