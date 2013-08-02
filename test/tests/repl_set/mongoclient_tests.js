@@ -62,8 +62,8 @@ exports['Should correctly connect to a replicaset with readPreference set'] = fu
     , "primary");
 
   MongoClient.connect(url, function(err, db) {
-    // console.log("========================================================")
-    // console.dir(err)
+    console.log("========================================================")
+    console.dir(err)
     test.equal(null, err);
 
     db.collection("test_collection").insert({a:1}, function(err, result) {

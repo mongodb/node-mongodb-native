@@ -114,6 +114,7 @@ var replica_set_config = function(options) {
     
     this.teardown = function(callback) { 
       replicasetManager.restartKilledNodes(function() {
+      // replicasetManager.startSet(true, function() {
         callback();
       });
     };
