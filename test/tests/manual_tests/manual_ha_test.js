@@ -30,8 +30,9 @@ var replSet = new ReplSetServers([
     }
 );
 
-// RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
+// RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:0, arbiter_count:0, auth:true});
 // RS.startSet(true, function(err, result) {
+//   process.exit(0)
 //   if(err != null) throw err;
 
   // setInterval(function() {
@@ -42,7 +43,14 @@ var replSet = new ReplSetServers([
   //opens the database
   // var db = new Db('testapp', replSet);
   // db.open(function(err) {
-  MongoClient.connect("mongodb://mallory:a@localhost:30000,localhost:30001,localhost:30002/foo?authSource=users&readPreference=primary", function(err, db) {
+  MongoClient.connect("mongodb://a:a@localhost:30000,localhost:30001,localhost:30002/foo?authSource=admin&readPreference=primary", {
+    replSet: {
+      socketOptions: {connectTimeoutMS: 1000, socketTimeoutMS: 1000}      
+    },
+    server: {
+      socketOptions: {connectTimeoutMS: 1000, socketTimeoutMS: 1000}      
+    }
+  }, function(err, db) {
       if (err) return console.log('database open error %o', err);
       console.log('database opened');
 
