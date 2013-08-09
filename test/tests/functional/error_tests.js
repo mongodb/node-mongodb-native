@@ -272,3 +272,62 @@ exports['should handle error throw in user callback'] = function(configuration, 
     })
   });
 }
+
+exports['Should handle uncaught error correctly'] = function(configuration, test) {
+  var client = configuration.db();
+
+  process.on("uncaughtException", function(err) {
+    test.done();
+  })
+
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    testdfdma();
+    test.ok(false);
+  });
+}
+
+exports['Should handle throw error in db operation correctly'] = function(configuration, test) {
+  var client = configuration.db();
+  
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.on("error", function(err) {
+      db.close();
+      test.done();      
+    });
+
+    db.collection('t').findOne(function() {
+      testdfdma();
+    });
+  });
+}
+
+exports['Should handle MongoClient uncaught error correctly'] = function(configuration, test) {
+  // var client = configuration.db();
+  var MongoClient = configuration.getMongoPackage().MongoClient;
+
+  process.on("uncaughtException", function(err) {
+    test.done();
+  })
+
+  MongoClient.connect(configuration.url(), function(err, db) {
+    testdfdma();
+    test.ok(false);
+  });
+}
+
+exports['Should handle MongoClient throw error in db operation correctly'] = function(configuration, test) {
+  // var client = configuration.db();
+  var MongoClient = configuration.getMongoPackage().MongoClient;
+  MongoClient.connect(configuration.url(), function(err, db) {
+    db.on("error", function(err) {
+      db.close();
+      test.done();      
+    });
+
+    db.collection('t').findOne(function() {
+      testdfdma();
+    });
+  });
+}
