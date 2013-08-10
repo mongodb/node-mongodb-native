@@ -1,3 +1,8 @@
+1.3.18 2013-08-10
+-----------------
+- Fixed issue when throwing exceptions in MongoClient.connect/Db.open (Issue #1057)
+- Fixed an issue where _events is not cleaned up correctly causing a slow steady memory leak.
+
 1.3.17 2013-08-07
 -----------------
 - Ignore return commands that have no registered callback

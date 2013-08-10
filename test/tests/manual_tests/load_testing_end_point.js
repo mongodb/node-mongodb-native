@@ -10,8 +10,10 @@ var http            = require('http'),
 
 console.log('launching simple mongo application...');
 // var url = "mongodb://localhost:30000,localhost:30001,localhost:30002/foo&readPreference=secondaryPreferred"
-var url = "mongodb://192.168.2.173:30000,192.168.2.173:30001,192.168.2.173:30002/foo&readPreference=secondaryPreferred";
-var writeOptions = {w:3};
+// var url = "mongodb://192.168.2.173:30000,192.168.2.173:30001,192.168.2.173:30002/foo&readPreference=secondaryPreferred";
+var url = "mongodb://localhost:27017/test"
+// var writeOptions = {w:3};
+var writeOptions = {w:1};
 
 // Connect
 MongoClient.connect(url, function(err, db) {
