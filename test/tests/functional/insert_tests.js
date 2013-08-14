@@ -1444,16 +1444,21 @@ exports.shouldCorrectlyInsertSimpleRegExpDocument = function(configuration, test
 exports.shouldCorrectlyInsertSimpleUTF8Regexp = function(configuration, test) {
   var regexp = /foobaré/;
   var client = configuration.db();
+  var collection = client.collection('shouldCorrectlyInsertSimpleUTF8Regexp');
 
-  client.createCollection('test_utf8_regex', function(err, collection) {
-    collection.insert({'b':regexp}, {w:1}, function(err, ids) {
-      collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
-        test.equal(("" + regexp), ("" + items[0].b));
-        // Let's close the db
-        test.done();
-      });
+  collection.insert({'b':regexp}, {w:1}, function(err, ids) {
+    test.equal(null, err)
+
+    collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
+      console.log("=============================================")
+      console.dir(err)
+      console.dir(items)
+      test.equal(null, err)
+      test.equal(("" + regexp), ("" + items[0].b));
+      // Let's close the db
+      test.done();
     });
-  });    
+  });
 }
 
 exports.shouldCorrectlyThrowDueToIllegalCollectionName = function(configuration, test) {

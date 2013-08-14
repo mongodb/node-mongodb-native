@@ -131,7 +131,7 @@ For more information have a look at [Gridstore](https://github.com/mongodb/node-
 
 Replicasets
 ===========
-For more information about how to connect to a replicaset have a look at [Replicasets](https://github.com/mongodb/node-mongodb-native/blob/master/docs/replicaset.md)
+For more information about how to connect to a replicaset have a look at the extensive documentation [Documentation](http://mongodb.github.com/node-mongodb-native/)
 
 Primary Key Factories
 ---------------------

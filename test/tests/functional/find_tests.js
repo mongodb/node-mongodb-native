@@ -1427,7 +1427,7 @@ exports.shouldPerformSimpleFindAndRemove = function(configuration, test) {
   db.open(function(err, db) {
 
     // Create a collection we want to drop later
-    db.createCollection('simple_find_and_modify_operations_', function(err, collection) {
+    db.createCollection('simple_find_and_modify_operations_2', function(err, collection) {
       test.equal(null, err);
 
       // Insert some test documentations

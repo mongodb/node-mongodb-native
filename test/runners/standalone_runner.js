@@ -10,7 +10,17 @@ module.exports = function(configurations) {
   var functional_tests_runner = Runner
     // Add configurations to the test runner
     .configurations(configurations)
+    // Parallelize at test or file level
+    .parallelizeAtLevel(Runner.TEST)
+    // Execute serially
     .exeuteSerially(true)
+    // What to print out
+    // .debugLevel(Runner.INFO)
+    // No hints
+    .schedulerHints(null)
+    // Single running thread
+    // .parallelContexts(1)
+    // Execute all tests serially in each context
     // First parameter is test suite name
     // Second parameter is the configuration used
     // Third parameter is the list of files to execute

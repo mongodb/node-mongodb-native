@@ -19,21 +19,31 @@ exports.shouldCorrectlyHandleThrownError = function(configuration, test) {
 /**
  * @ignore
  */
-exports.shouldCorrectlyHandleThrownErrorInRename = function(configuration, test) {
-  var db = configuration.db();
-  // Catch unhandled exception
-  process.on("uncaughtException", function(err) {
-    // Remove listener
-    process.removeAllListeners("uncaughtException");
-    test.done()
-  })
+exports.shouldCorrectlyHandleThrownErrorInRename = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {node: ">0.10.X"},
   
-  // Execute code
-  db.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {      
-    db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
-      db.rename("shouldCorrectlyHandleThrownErrorInRename2", function(err, result) {
-        debug(someUndefinedVariable);            
-      })
-    });        
-  });
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var domain = require('domain');
+    var d = domain.create();
+    d.on('error', function(err) {
+      test.done()
+    })
+
+    d.run(function() {
+      db.open(function(err, db) {
+        // Execute code
+        db.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {      
+          db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
+            db.rename("shouldCorrectlyHandleThrownErrorInRename2", function(err, result) {
+              debug(someUndefinedVariable);            
+            })
+          });        
+        });
+      });
+    })
+  }
 }

@@ -16,6 +16,18 @@ var single_server_config = function(options) {
     var dbs = [];
     var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
      {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
+    // db.on("error", function(err) {
+    //   console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ERROR")
+    //   console.dir(err)
+    // })
+    // db.on("close", function(err) {
+    //   console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ CLOSE")
+    // })
+    var close = db.close;
+    db.close = function() {
+      console.log("= ERR = TEST CALLED CLOSE ON SHARED CONNECTION")
+      process.exit(0)
+    }
 
     // Server Manager options
     var server_options = {
@@ -61,6 +73,7 @@ var single_server_config = function(options) {
 
     // Test suite stop
     this.stop = function(callback) {
+      db.close = close;
       db.close(function() {
         serverManager.killAll(function(err) {
           callback();

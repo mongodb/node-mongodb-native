@@ -1,6 +1,5 @@
 var fs = require('fs')
-  , Runner = require('integra').Runner
-  , ParallelRunner = require('integra').ParallelRunner;
+  , Runner = require('integra').Runner;
 
 module.exports = function(configurations) {
   //
@@ -17,13 +16,13 @@ module.exports = function(configurations) {
   } catch(err) {}
 
   // Configure a Run of tests
-  var repl_set_parallel_tests_runner = ParallelRunner
+  var repl_set_parallel_tests_runner = Runner
     // Add configurations to the test runner
     .configurations(configurations)
     // The number of parallel contexts we are running with
     .parallelContexts(4)
     // Parallelize at test or file level
-    .parallelizeAtLevel(ParallelRunner.TEST)
+    .parallelizeAtLevel(Runner.TEST)
     // Execute all tests serially in each context
     .exeuteSerially(true)
     // Load runtime information data (used by scheduler)

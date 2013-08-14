@@ -5,9 +5,7 @@ exports['Should correctly apply collection level read Preference to count'] = fu
   var mongo = configuration.getMongoPackage()
     , ReadPreference = mongo.ReadPreference;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-  db.open(function(err, db) {
+  configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
@@ -37,9 +35,7 @@ exports['Should correctly apply collection level read Preference to group'] = fu
   var mongo = configuration.getMongoPackage()
     , ReadPreference = mongo.ReadPreference;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-  db.open(function(err, db) {
+  configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
@@ -69,9 +65,7 @@ exports['Should correctly apply collection level read Preference to geoNear'] = 
   var mongo = configuration.getMongoPackage()
     , ReadPreference = mongo.ReadPreference;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-  db.open(function(err, db) {
+  configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
@@ -101,9 +95,7 @@ exports['Should correctly apply collection level read Preference to geoHaystackS
   var mongo = configuration.getMongoPackage()
     , ReadPreference = mongo.ReadPreference;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-  db.open(function(err, db) {
+  configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
@@ -133,9 +125,7 @@ exports['Should correctly apply collection level read Preference to mapReduce'] 
   var mongo = configuration.getMongoPackage()
     , ReadPreference = mongo.ReadPreference;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-  db.open(function(err, db) {
+  configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
@@ -170,9 +160,7 @@ exports['Should correctly apply collection level read Preference to mapReduce ba
   var mongo = configuration.getMongoPackage()
     , ReadPreference = mongo.ReadPreference;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-  db.open(function(err, db) {
+  configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
@@ -207,9 +195,7 @@ exports['Should fail due to not using mapreduce inline with read preference'] = 
   var mongo = configuration.getMongoPackage()
     , ReadPreference = mongo.ReadPreference;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-  db.open(function(err, db) {
+  configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
@@ -245,9 +231,7 @@ exports['Should correctly apply collection level read Preference to aggregate'] 
   var mongo = configuration.getMongoPackage()
     , ReadPreference = mongo.ReadPreference;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-  db.open(function(err, db) {
+  configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
@@ -292,9 +276,7 @@ exports['Should correctly apply collection level read Preference to stats'] = fu
   var mongo = configuration.getMongoPackage()
     , ReadPreference = mongo.ReadPreference;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-  db.open(function(err, db) {
+  configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
