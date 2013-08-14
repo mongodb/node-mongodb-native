@@ -21,8 +21,6 @@ module.exports = function(configurations) {
     .configurations(configurations)
     // The number of parallel contexts we are running with
     .parallelContexts(4)
-    // Parallelize at test or file level
-    .parallelizeAtLevel(Runner.TEST)
     // Execute all tests serially in each context
     .exeuteSerially(true)
     // Load runtime information data (used by scheduler)

@@ -10,8 +10,6 @@ module.exports = function(configurations) {
   var functional_tests_runner = Runner
     // Add configurations to the test runner
     .configurations(configurations)
-    // Parallelize at test or file level
-    .parallelizeAtLevel(Runner.TEST)
     // Execute serially
     .exeuteSerially(true)
     // What to print out
