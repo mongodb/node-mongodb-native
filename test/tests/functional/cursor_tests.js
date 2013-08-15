@@ -2241,6 +2241,31 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, tes
   // DOC_END
 }
 
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyHandleThrownErrorInCursorNext = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  var domain = require('domain');
+  var d = domain.create();
+  d.on('error', function(err) {
+    test.done()
+  })
+
+  d.run(function() {
+    db.open(function(err, db) {
+      var collection = db.collection('shouldCorrectlyHandleThrownErrorInCursorNext');
+      collection.insert([{a:1, b:2}], function(err, result) {
+        test.equal(null, err);
+
+        collection.find().nextObject(function(err, doc) {
+          dfdsfdfds
+        });
+      });
+    });
+  })
+}
+
 // /**
 //  * @ignore
 //  * @api private

@@ -6,22 +6,63 @@ module.exports = function(configurations) {
   //
   //
 
+  // Get environmental variables that are known
+  var node_version_array = process
+      .version
+      .replace(/v/g, '')
+      .split('.')
+      .map(function(x) { return parseInt(x, 10) });
+  var mongodb_version = 0;
+
+  // Check if we have a valid node.js method
+  var validNodeVersion = function(node_version, version) {
+    var comparator = version.slice(0, 1)
+    var node_version_array = version
+        .slice(1).split(/\./).map(function(x) { return parseInt(x, 10); });
+
+    // Comparator
+    if(comparator == '>') {
+      if(node_version[0] >= node_version_array[0]
+        && node_version[1] >= node_version_array[1]
+        && node_version[2] >= node_version_array[2])
+        return true;
+    }
+    // No valid node version
+    return false;
+  }
+
   // Configure a Run of tests
   var functional_tests_runner = Runner
     // Add configurations to the test runner
     .configurations(configurations)
+    
     // Execute serially
     .exeuteSerially(true)
-    // What to print out
-    // .debugLevel(Runner.INFO)
+    
     // No hints
     .schedulerHints(null)
-    // Single running thread
-    // .parallelContexts(1)
-    // Execute all tests serially in each context
-    // First parameter is test suite name
-    // Second parameter is the configuration used
-    // Third parameter is the list of files to execute
+    
+    // Query configuration for any variables we need to know
+    .queryConfiguration(function(configuration, callback) {
+      configuration.db().command({buildInfo:true}, function(err, result) {
+        if(err) throw err;
+        mongodb_version = parseInt(result.versionArray.join(""), 10);
+        callback();
+      });
+    })
+
+    // We wish to filter out tests based on tags
+    .filter(function(test) {
+      if(typeof test != 'function') {        
+        // If we have a node.js version check
+        if(test.requires && test.requires.node) 
+          return validNodeVersion(node_version_array, test.requires.node);
+      }
+
+      return true
+    })
+
+    // The list of files to execute
     .add("functional_tests",
       [
         '/test/tests/functional/mongo_reply_parser_tests.js'
