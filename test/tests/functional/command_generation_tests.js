@@ -246,7 +246,7 @@ exports.shouldCorrectlyGetErrorOnIllegalBSON = function(configuration, test) {
   mongoReply.parseHeader(buffer, bson);
   // Fire up parseBody
   mongoReply.parseBody(buffer, bson, false, function(err, result) {
-    test.equal("corrupt bson message", err.message);
+    test.ok(err != null);
     test.done();
   });      
 }
