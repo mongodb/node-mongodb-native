@@ -1,128 +1,140 @@
 /**
  * @ignore
  */
-exports.shouldCorrectlyRetrieveErrorMessagesFromServer = function(configuration, test) {    
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  // Just run with one connection in the pool
-  var error_client = configuration.newDbInstance({w:1}, {poolSize:1});
-  // Open the db
-  error_client.open(function(err, error_client) {
-    error_client.resetErrorHistory(function() {
-      error_client.error(function(err, documents) {
-        test.equal(true, documents[0].ok);
-        test.equal(0, documents[0].n);
+exports.shouldCorrectlyRetrieveErrorMessagesFromServer = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {    
+    // Just run with one connection in the pool
+    var error_client = configuration.newDbInstance({w:1}, {poolSize:1});
+    // Open the db
+    error_client.open(function(err, error_client) {
+      error_client.resetErrorHistory(function() {
+        error_client.error(function(err, documents) {
+          test.equal(true, documents[0].ok);
+          test.equal(0, documents[0].n);
 
-        // Force error on server
-        error_client.executeDbCommand({forceerror: 1}, function(err, r) {
-          test.equal(0, r.documents[0].ok);
-          test.ok(r.documents[0].errmsg.length > 0);
+          // Force error on server
+          error_client.executeDbCommand({forceerror: 1}, function(err, r) {
+            test.equal(0, r.documents[0].ok);
+            test.ok(r.documents[0].errmsg.length > 0);
 
-          // Check for previous errors
-          error_client.previousErrors(function(err, documents) {
-            test.equal(true, documents[0].ok);
-            test.equal(1, documents[0].nPrev);
-            test.equal("forced error", documents[0].err);
-
-            // Check for the last error
-            error_client.error(function(err, documents) {
+            // Check for previous errors
+            error_client.previousErrors(function(err, documents) {
+              test.equal(true, documents[0].ok);
+              test.equal(1, documents[0].nPrev);
               test.equal("forced error", documents[0].err);
 
-              // Force another error
-              var collection = error_client.collection('test_error_collection');
-              collection.findOne({name:"Fred"}, function(err, document) {
-                
-                // Check that we have two previous errors
-                error_client.previousErrors(function(err, documents) {
-                  test.equal(true, documents[0].ok);
-                  test.equal(2, documents[0].nPrev);
-                  test.equal("forced error", documents[0].err);
+              // Check for the last error
+              error_client.error(function(err, documents) {
+                test.equal("forced error", documents[0].err);
 
-                  error_client.resetErrorHistory(function() {
-                    error_client.previousErrors(function(err, documents) {
-                      test.equal(true, documents[0].ok);
-                      test.equal(-1, documents[0].nPrev);
+                // Force another error
+                var collection = error_client.collection('test_error_collection');
+                collection.findOne({name:"Fred"}, function(err, document) {
+                  
+                  // Check that we have two previous errors
+                  error_client.previousErrors(function(err, documents) {
+                    test.equal(true, documents[0].ok);
+                    test.equal(2, documents[0].nPrev);
+                    test.equal("forced error", documents[0].err);
 
-                      error_client.error(function(err, documents) {                            
+                    error_client.resetErrorHistory(function() {
+                      error_client.previousErrors(function(err, documents) {
                         test.equal(true, documents[0].ok);
-                        test.equal(0, documents[0].n);
+                        test.equal(-1, documents[0].nPrev);
 
-                        // Let's close the db
-                        error_client.close();
+                        error_client.error(function(err, documents) {                            
+                          test.equal(true, documents[0].ok);
+                          test.equal(0, documents[0].n);
 
-                        error_client.error(function(err, documents) {
-                          test.ok(err instanceof Error);
-                          test.equal('Connection was destroyed by application', err.message);
-                          test.done();
+                          // Let's close the db
+                          error_client.close();
+
+                          error_client.error(function(err, documents) {
+                            test.ok(err instanceof Error);
+                            test.equal('Connection was destroyed by application', err.message);
+                            test.done();
+                          });
                         });
-                      });
-                    })
+                      })
+                    });
                   });
                 });
-              });
-            })
+              })
+            });
           });
         });
       });
-    });
-  });    
+    });    
+  }
 }
 
 // Test the last status functionality of the driver
-exports.shouldCorrectlyExecuteLastStatus = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var Collection = configuration.getMongoPackage().Collection;
-  // Just run with one connection in the pool
-  var error_client = configuration.newDbInstance({w:0}, {poolSize:1});
-  // Open the db
-  error_client.open(function(err, client) {
-    var collection = client.collection('test_last_status');
-    test.ok(collection instanceof Collection);
-    test.equal('test_last_status', collection.collectionName);
+exports.shouldCorrectlyExecuteLastStatus = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Collection = configuration.getMongoPackage().Collection;
+    // Just run with one connection in the pool
+    var error_client = configuration.newDbInstance({w:0}, {poolSize:1});
+    // Open the db
+    error_client.open(function(err, client) {
+      var collection = client.collection('test_last_status');
+      test.ok(collection instanceof Collection);
+      test.equal('test_last_status', collection.collectionName);
 
-    // Get the collection
-    var collection = client.collection('test_last_status');
-    // Remove all the elements of the collection
-    collection.remove(function(err, result) {          
-      // Check update of a document
-      collection.insert({i:1}, function(err, ids) {
-        test.equal(1, ids.length);
-        test.ok(ids[0]._id.toHexString().length == 24);
+      // Get the collection
+      var collection = client.collection('test_last_status');
+      // Remove all the elements of the collection
+      collection.remove(function(err, result) {          
+        // Check update of a document
+        collection.insert({i:1}, function(err, ids) {
+          test.equal(1, ids.length);
+          test.ok(ids[0]._id.toHexString().length == 24);
 
-        // Update the record
-        collection.update({i:1}, {"$set":{i:2}}, function(err, result) {
-          // Check for the last message from the server
-          client.lastStatus(function(err, status) {
-            test.equal(true, status[0].ok);
-            test.equal(true, status[0].updatedExisting);
-            // Check for failed update of document
-            collection.update({i:1}, {"$set":{i:500}}, function(err, result) {
-              client.lastStatus(function(err, status) {
-                test.equal(true, status[0].ok);
-                test.equal(false, status[0].updatedExisting);
+          // Update the record
+          collection.update({i:1}, {"$set":{i:2}}, function(err, result) {
+            // Check for the last message from the server
+            client.lastStatus(function(err, status) {
+              test.equal(true, status[0].ok);
+              test.equal(true, status[0].updatedExisting);
+              // Check for failed update of document
+              collection.update({i:1}, {"$set":{i:500}}, function(err, result) {
+                client.lastStatus(function(err, status) {
+                  test.equal(true, status[0].ok);
+                  test.equal(false, status[0].updatedExisting);
 
-                // Check safe update of a document
-                collection.insert({x:1}, function(err, ids) {
-                  collection.update({x:1}, {"$set":{x:2}}, {'safe':true}, function(err, document) {
-                  });
-                
-                  collection.update({x:1}, {"$set":{x:2}});
+                  // Check safe update of a document
+                  collection.insert({x:1}, function(err, ids) {
+                    collection.update({x:1}, {"$set":{x:2}}, {'safe':true}, function(err, document) {
+                    });
+                  
+                    collection.update({x:1}, {"$set":{x:2}});
 
-                  collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, result) {
-                    test.equal(0, result);
+                    collection.update({y:1}, {"$set":{y:2}}, {'safe':true}, function(err, result) {
+                      test.equal(0, result);
 
-                    // Let's close the db
-                    error_client.close();
-                    // Let's close the db
-                    test.done();
+                      // Let's close the db
+                      error_client.close();
+                      // Let's close the db
+                      test.done();
+                    });
                   });
                 });
               });
             });
           });
         });
-      });
-    });    
-  });
+      });    
+    });
+  }
 }
 
 exports.shouldFailInsertDueToUniqueIndex = function(configuration, test) {
@@ -305,8 +317,6 @@ exports['Should handle uncaught error correctly'] = function(configuration, test
 }
 
 exports['Should handle throw error in db operation correctly'] = function(configuration, test) {
-  var client = configuration.db();
-  
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
     db.on("error", function(err) {
@@ -344,7 +354,6 @@ exports['Should handle MongoClient uncaught error correctly'] = {
 }
 
 exports['Should handle MongoClient throw error in db operation correctly'] = function(configuration, test) {
-  // var client = configuration.db();
   var MongoClient = configuration.getMongoPackage().MongoClient;
   MongoClient.connect(configuration.url(), function(err, db) {
     db.on("error", function(err) {

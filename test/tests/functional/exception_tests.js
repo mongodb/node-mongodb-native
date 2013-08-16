@@ -2,17 +2,19 @@
  * @ignore
  */
 exports.shouldCorrectlyHandleThrownError = function(configuration, test) {
-  var db = configuration.db();
-  
-  db.createCollection('shouldCorrectlyHandleThrownError', function(err, r) {
-    try {
-      db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
-        debug(someUndefinedVariable);
-      });        
-    } catch (err) {
-      test.ok(err != null);
-      test.done();        
-    }
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('shouldCorrectlyHandleThrownError', function(err, r) {
+      try {
+        db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
+          debug(someUndefinedVariable);
+        });        
+      } catch (err) {
+        test.ok(err != null);
+        db.close();
+        test.done();        
+      }
+    });
   });
 }
 
