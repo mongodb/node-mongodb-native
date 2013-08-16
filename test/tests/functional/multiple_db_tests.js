@@ -1,49 +1,54 @@
 /**
  * @ignore
  */
-exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  if(process.platform !== 'linux') {
-    // var db = new Db('tests', new Server("127.0.0.1", 27027, {auto_reconnect: true}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    // All inserted docs
-    var docs = [];
-    var errs = [];
-    var insertDocs = [];
-    var numberOfCloses = 0;
+exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    if(process.platform !== 'linux') {
+      var db = configuration.newDbInstance({w:1}, {poolSize:1});
+      // All inserted docs
+      var docs = [];
+      var errs = [];
+      var insertDocs = [];
+      var numberOfCloses = 0;
 
-    // Start server
-    db.on("close", function(err) {
-      // console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 1 :: " + this.databaseName)
-      numberOfCloses = numberOfCloses + 1;
-    })
-    
-    db.open(function(err, db) {
-      db.createCollection('shouldCorrectlyErrorOnAllDbs', function(err, collection) {
-        test.equal(null, err);
-
-        collection.insert({a:1}, {w:1}, function(err, result) {
+      // Start server
+      db.on("close", function(err) {
+        // console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 1 :: " + this.databaseName)
+        numberOfCloses = numberOfCloses + 1;
+      })
+      
+      db.open(function(err, db) {
+        db.createCollection('shouldCorrectlyErrorOnAllDbs', function(err, collection) {
           test.equal(null, err);
 
-          // Open a second db
-          var db2 = db.db('tests_2');
-          // Add a close handler
-          db2.on("close", function(err) {
-            // console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 0 :: " + this.databaseName)
-            numberOfCloses = numberOfCloses + 1;              
-            test.equal(2, numberOfCloses)
-            test.done();          
-          });
+          collection.insert({a:1}, {w:1}, function(err, result) {
+            test.equal(null, err);
 
-          db.close();
-                              
-          // // Kill server and end test
-          // db.serverConfig.connectionPool.openConnections[0].connection.destroy();
+            // Open a second db
+            var db2 = db.db('tests_2');
+            // Add a close handler
+            db2.on("close", function(err) {
+              // console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 0 :: " + this.databaseName)
+              numberOfCloses = numberOfCloses + 1;              
+              test.equal(2, numberOfCloses)
+              test.done();          
+            });
+
+            db.close();
+                                
+            // // Kill server and end test
+            // db.serverConfig.connectionPool.openConnections[0].connection.destroy();
+          });
         });
-      });
-    });      
-  } else {
-    test.done();
+      });      
+    } else {
+      test.done();
+    }
   }
 }
 
@@ -139,15 +144,17 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = function(
  * @ignore
  */
 exports.shouldCorrectlyHandleMultipleDbsFindAndModifies = function(configuration, test) {
-  var db = configuration.db();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var db_instance = db.db('site1');
+    db_instance = db.db('site2');
+    db_instance = db.db('rss');
 
-  var db_instance = db.db('site1');
-  db_instance = db.db('site2');
-  db_instance = db.db('rss');
-
-  db_instance.collection('counters', function(err, collection) {
-    collection.findAndModify({}, {}, {'$inc': {'db': 1}}, {new:true}, function(error, counters){
-      test.done();
+    db_instance.collection('counters', function(err, collection) {
+      collection.findAndModify({}, {}, {'$inc': {'db': 1}}, {new:true}, function(error, counters) {
+        db.close();
+        test.done();
+      });
     });
   });
 }

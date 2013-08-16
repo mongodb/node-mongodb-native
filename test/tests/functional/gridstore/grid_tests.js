@@ -149,15 +149,17 @@ exports.shouldPutAndGetFileCorrectlyToGridUsingObjectId = function(configuration
 exports.shouldFailToPutFileDueToDataObjectNotBeingBuffer = function(configuration, test) {
   var Grid = configuration.getMongoPackage().Grid
     , ObjectID = configuration.getMongoPackage().ObjectID;
-  var client = configuration.db();
-
-  var grid = new Grid(client, 'fs');
-  var originalData = 'Hello world';
-  // Write data to grid
-  grid.put(originalData, {}, function(err, result) {
-    test.ok(err != null);
-    test.done();
-  })
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var grid = new Grid(db, 'fs');
+    var originalData = 'Hello world';
+    // Write data to grid
+    grid.put(originalData, {}, function(err, result) {
+      test.ok(err != null);
+      db.close();
+      test.done();
+    });
+  });
 }
 
 /**

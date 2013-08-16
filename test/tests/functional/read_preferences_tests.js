@@ -199,15 +199,6 @@ exports['Should fail due to not using mapreduce inline with read preference'] = 
     test.equal(null, err);
     // Set read preference
     var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
-    // // Save checkout function
-    // var checkout = db.serverConfig.checkoutReader;
-    // // Set up our checker method
-    // db.serverConfig.checkoutReader = function() {
-    //   var args = Array.prototype.slice.call(arguments, 0);
-    //   test.equal(ReadPreference.SECONDARY_PREFERRED, args[0]);
-    //   return checkout.apply(db.serverConfig, args);
-    // }
-
     // Map function
     var map = function() { emit(this.user_id, 1); };
     // Reduce function

@@ -75,76 +75,82 @@ exports.shouldRemoveSubsetOfDocumentsSafeMode = function(configuration, test) {
  * @ignore
  */
 exports.shouldCorrectlyClearOutCollection = function(configuration, test) {
-  var client = configuration.db();
-
-  client.createCollection('test_clear', function(err, r) {
-    client.collection('test_clear', function(err, collection) {
-      collection.insert({i:1}, {w:1}, function(err, ids) {
-        collection.insert({i:2}, {w:1}, function(err, ids) {
-          collection.count(function(err, count) {
-            test.equal(2, count);
-            // Clear the collection
-            collection.remove({}, {w:1}, function(err, result) {
-              test.equal(2, result);
-              
-              collection.count(function(err, count) {
-                test.equal(0, count);
-                // Let's close the db
-                test.done();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_clear', function(err, r) {
+      db.collection('test_clear', function(err, collection) {
+        collection.insert({i:1}, {w:1}, function(err, ids) {
+          collection.insert({i:2}, {w:1}, function(err, ids) {
+            collection.count(function(err, count) {
+              test.equal(2, count);
+              // Clear the collection
+              collection.remove({}, {w:1}, function(err, result) {
+                test.equal(2, result);
+                
+                collection.count(function(err, count) {
+                  test.equal(0, count);
+                  // Let's close the db
+                  db.close();
+                  test.done();
+                });
               });
             });
           });
         });
       });
     });
-  });    
+  });
 }
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyRemoveDocumentUsingRegExp = function(configuration, test) {
-  var client = configuration.db();
-
-  client.createCollection('test_remove_regexp', function(err, r) {
-    client.collection('test_remove_regexp', function(err, collection) {
-      collection.insert({address:'485 7th ave new york'}, {w:1}, function(err, ids) {
-        // Clear the collection
-        collection.remove({address:/485 7th ave/}, {w:1}, function(err, result) {
-          test.equal(1, result);
-          
-          collection.count(function(err, count) {
-            test.equal(0, count);
-            // Let's close the db
-            test.done();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_remove_regexp', function(err, r) {
+      db.collection('test_remove_regexp', function(err, collection) {
+        collection.insert({address:'485 7th ave new york'}, {w:1}, function(err, ids) {
+          // Clear the collection
+          collection.remove({address:/485 7th ave/}, {w:1}, function(err, result) {
+            test.equal(1, result);
+            
+            collection.count(function(err, count) {
+              test.equal(0, count);
+              // Let's close the db
+              db.close();
+              test.done();
+            });
           });
         });
       });
     });
-  });    
+  });
 }
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyRemoveOnlyFirstDocument = function(configuration, test) {
-  var client = configuration.db();
-
-  client.createCollection('shouldCorrectlyRemoveOnlyFirstDocument', function(err, r) {
-    client.collection('shouldCorrectlyRemoveOnlyFirstDocument', function(err, collection) {
-      collection.insert([{a:1}, {a:1}, {a:1}, {a:1}], {w:1}, function(err, result) {
-        test.equal(null, err);
-        
-        // Remove the first
-        collection.remove({a:1}, {w:1, single:true}, function(err, number) {
-          test.equal(1, number);
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('shouldCorrectlyRemoveOnlyFirstDocument', function(err, r) {
+      db.collection('shouldCorrectlyRemoveOnlyFirstDocument', function(err, collection) {
+        collection.insert([{a:1}, {a:1}, {a:1}, {a:1}], {w:1}, function(err, result) {
+          test.equal(null, err);
           
-          collection.find({a:1}).count(function(err, result) {
-            test.equal(3, result);
-            test.done();
+          // Remove the first
+          collection.remove({a:1}, {w:1, single:true}, function(err, number) {
+            test.equal(1, number);
+            
+            collection.find({a:1}).count(function(err, result) {
+              test.equal(3, result);
+              db.close();
+              test.done();
+            });
           });
         });
       });
     });
-  });    
+  });
 }
