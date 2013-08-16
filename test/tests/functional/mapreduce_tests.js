@@ -120,25 +120,27 @@ exports.shouldCorrectlyExecuteGroupFunction = function(configuration, test) {
 * @ignore
 */
 exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_group2', function(err, collection) {
+      collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
+        test.deepEqual([], results);
 
-  client.createCollection('test_group2', function(err, collection) {
-    collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
-      test.deepEqual([], results);
-
-      // Trigger some inserts
-      collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], {w:1}, function(err, ids) {
-        collection.group([], {}, {count: 0, running_average: 0}
-          , function (doc, out) {
-              out.count++;
-              out.running_average += doc.a;
-            }
-          , function(out) {
-              out.average = out.running_average / out.count;
-            }, true, function(err, results) {
-              test.equal(3, results[0].running_average)
-              test.equal(0.75, results[0].average)
-              test.done();
+        // Trigger some inserts
+        collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], {w:1}, function(err, ids) {
+          collection.group([], {}, {count: 0, running_average: 0}
+            , function (doc, out) {
+                out.count++;
+                out.running_average += doc.a;
+              }
+            , function(out) {
+                out.average = out.running_average / out.count;
+              }, true, function(err, results) {
+                test.equal(3, results[0].running_average)
+                test.equal(0.75, results[0].average)
+                db.close();
+                test.done();
+          });
         });
       });
     });
@@ -196,50 +198,47 @@ exports.shouldPerformSimpleMapReduceFunctions = function(configuration, test) {
  * @_class collection
  * @_function mapReduce
  */
-exports.shouldPerformMapReduceFunctionInline = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+exports.shouldPerformMapReduceFunctionInline = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">1.7.6"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
 
-    // Parse version of server if available
-    db.admin().serverInfo(function(err, result){
+      // Create a test collection
+      db.createCollection('test_map_reduce_functions_inline', function(err, collection) {
 
-      // Only run if the MongoDB version is higher than 1.7.6
-      if(parseInt((result.version.replace(/\./g, ''))) >= 176) {
+        // Insert some test documents
+        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
-        // Create a test collection
-        db.createCollection('test_map_reduce_functions_inline', function(err, collection) {
+          // Map function
+          var map = function() { emit(this.user_id, 1); };
+          // Reduce function
+          var reduce = function(k,vals) { return 1; };
 
-          // Insert some test documents
-          collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+          // Execute map reduce and return results inline
+          collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}, function(err, results, stats) {
+            test.equal(2, results.length);
+            test.ok(stats != null);
 
-            // Map function
-            var map = function() { emit(this.user_id, 1); };
-            // Reduce function
-            var reduce = function(k,vals) { return 1; };
-
-            // Execute map reduce and return results inline
-            collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}, function(err, results, stats) {
-              test.equal(2, results.length);
+            collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}, function(err, results, stats) {
               test.ok(stats != null);
-
-              collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}, function(err, results, stats) {
-                test.ok(stats != null);
-                db.close();
-                test.done();
-              });
+              db.close();
+              test.done();
             });
           });
         });
-      } else {
-        test.done();
-      }
+      });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }
 
 /**
@@ -322,22 +321,24 @@ exports.shouldPerformMapReduceInContext = function(configuration, test) {
 * @ignore
 */
 exports.shouldPerformMapReduceWithStringFunctions = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_map_reduce', function(err, collection) {
+      collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        // String functions
+        var map = "function() { emit(this.user_id, 1); }";
+        var reduce = "function(k,vals) { return 1; }";
 
-  client.createCollection('test_map_reduce', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
-      // String functions
-      var map = "function() { emit(this.user_id, 1); }";
-      var reduce = "function(k,vals) { return 1; }";
+        collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
+          collection.findOne({'_id':1}, function(err, result) {
+            test.equal(1, result.value);
+          });
 
-      collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
-        collection.findOne({'_id':1}, function(err, result) {
-          test.equal(1, result.value);
-        });
-
-        collection.findOne({'_id':2}, function(err, result) {
-          test.equal(1, result.value);
-          test.done();
+          collection.findOne({'_id':2}, function(err, result) {
+            test.equal(1, result.value);
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -348,51 +349,54 @@ exports.shouldPerformMapReduceWithStringFunctions = function(configuration, test
 * Mapreduce tests
 * @ignore
 */
-exports.shouldForceMapReduceError = function(configuration, test) {
-  var client = configuration.db();
-
-  client.createCollection('test_map_reduce', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
-      // String functions
-      var map = "function() { emiddft(this.user_id, 1); }";
-      var reduce = "function(k,vals) { return 1; }";
-
-      // Parse version of server if available
-      client.admin().serverInfo(function(err, result){
-
-        // Only run if the MongoDB version is higher than 1.7.6
-        if(parseInt((result.version.replace(/\./g, ''))) >= 176) {
+exports.shouldForceMapReduceError = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">1.7.6"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('test_map_reduce', function(err, collection) {
+        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+          // String functions
+          var map = "function() { emiddft(this.user_id, 1); }";
+          var reduce = "function(k,vals) { return 1; }";
 
           collection.mapReduce(map, reduce, {out: {inline : 1}}, function(err, collection) {
             test.ok(err != null);
+            db.close();
             test.done();
           });
-        };
+        });
       });
     });
-  });
+  }
 }
 
 /**
 * @ignore
 */
 exports.shouldPerformMapReduceWithParametersBeingFunctions = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_map_reduce_with_functions_as_arguments', function(err, collection) {
+      collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        // String functions
+        var map = function() { emit(this.user_id, 1); };
+        var reduce = function(k,vals) { return 1; };
 
-  client.createCollection('test_map_reduce_with_functions_as_arguments', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
-      // String functions
-      var map = function() { emit(this.user_id, 1); };
-      var reduce = function(k,vals) { return 1; };
+        collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
+          collection.findOne({'_id':1}, function(err, result) {
+            test.equal(1, result.value);
+          });
 
-      collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
-        collection.findOne({'_id':1}, function(err, result) {
-          test.equal(1, result.value);
-        });
-
-        collection.findOne({'_id':2}, function(err, result) {
-          test.equal(1, result.value);
-          test.done();
+          collection.findOne({'_id':2}, function(err, result) {
+            test.equal(1, result.value);
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -404,22 +408,25 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = function(configurat
 */
 exports.shouldPerformMapReduceWithCodeObjects = function(configuration, test) {
   var Code = configuration.getMongoPackage().Code;
-  var client = configuration.db();
+  
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
+      collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        // String functions
+        var map = new Code("function() { emit(this.user_id, 1); }");
+        var reduce = new Code("function(k,vals) { return 1; }");
 
-  client.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
-      // String functions
-      var map = new Code("function() { emit(this.user_id, 1); }");
-      var reduce = new Code("function(k,vals) { return 1; }");
+        collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
+          collection.findOne({'_id':1}, function(err, result) {
+            test.equal(1, result.value);
+          });
 
-      collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
-        collection.findOne({'_id':1}, function(err, result) {
-          test.equal(1, result.value);
-        });
-
-        collection.findOne({'_id':2}, function(err, result) {
-          test.equal(1, result.value);
-          test.done();
+          collection.findOne({'_id':2}, function(err, result) {
+            test.equal(1, result.value);
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -431,25 +438,28 @@ exports.shouldPerformMapReduceWithCodeObjects = function(configuration, test) {
 */
 exports.shouldPerformMapReduceWithOptions = function(configuration, test) {
   var Code = configuration.getMongoPackage().Code;
-  var client = configuration.db();
 
-  client.createCollection('test_map_reduce_with_options', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
-      // String functions
-      var map = new Code("function() { emit(this.user_id, 1); }");
-      var reduce = new Code("function(k,vals) { return 1; }");
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_map_reduce_with_options', function(err, collection) {
+      collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
+        // String functions
+        var map = new Code("function() { emit(this.user_id, 1); }");
+        var reduce = new Code("function(k,vals) { return 1; }");
 
-      collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}, 'query': {'user_id':{'$gt':1}}}, function(err, collection) {
-        collection.count(function(err, count) {
-          test.equal(2, count);
+        collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}, 'query': {'user_id':{'$gt':1}}}, function(err, collection) {
+          collection.count(function(err, count) {
+            test.equal(2, count);
 
-          collection.findOne({'_id':2}, function(err, result) {
-            test.equal(1, result.value);
-          });
+            collection.findOne({'_id':2}, function(err, result) {
+              test.equal(1, result.value);
+            });
 
-          collection.findOne({'_id':3}, function(err, result) {
-            test.equal(1, result.value);
-            test.done();
+            collection.findOne({'_id':3}, function(err, result) {
+              test.equal(1, result.value);
+              db.close();
+              test.done();
+            });
           });
         });
       });
@@ -462,17 +472,20 @@ exports.shouldPerformMapReduceWithOptions = function(configuration, test) {
 */
 exports.shouldHandleMapReduceErrors = function(configuration, test) {
   var Code = configuration.getMongoPackage().Code;
-  var client = configuration.db();
 
-  client.createCollection('test_map_reduce_error', function(err, collection) {
-    collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
-      // String functions
-      var map = new Code("function() { throw 'error'; }");
-      var reduce = new Code("function(k,vals) { throw 'error'; }");
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_map_reduce_error', function(err, collection) {
+      collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
+        // String functions
+        var map = new Code("function() { throw 'error'; }");
+        var reduce = new Code("function(k,vals) { throw 'error'; }");
 
-      collection.mapReduce(map, reduce, {out : {inline: 1}, 'query': {'user_id':{'$gt':1}}}, function(err, r) {
-        test.ok(err != null);
-        test.done();
+        collection.mapReduce(map, reduce, {out : {inline: 1}, 'query': {'user_id':{'$gt':1}}}, function(err, r) {
+          test.ok(err != null);
+          db.close();
+          test.done();
+        });
       });
     });
   });
@@ -522,45 +535,48 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = function(configuration, test)
 * @ignore
 */
 exports.shouldCorrectlyReturnNestedKeys = function(configuration, test) {
-  var client = configuration.db();
-  var start = new Date().setTime(new Date().getTime() - 10000);
-  var end = new Date().setTime(new Date().getTime() + 10000);
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var start = new Date().setTime(new Date().getTime() - 10000);
+    var end = new Date().setTime(new Date().getTime() + 10000);
 
-  var keys =  {
-     "data.lastname": true
-  };
+    var keys =  {
+       "data.lastname": true
+    };
 
-  var condition = {
-   "data.date": {
-         $gte: start,
-         $lte: end
-     }
-  };
+    var condition = {
+     "data.date": {
+           $gte: start,
+           $lte: end
+       }
+    };
 
-  condition = {}
+    condition = {}
 
-  var initial = {
-     count : 0
-  };
+    var initial = {
+       count : 0
+    };
 
-  var reduce = function(doc, output) {
-    output.count++;
-  }
+    var reduce = function(doc, output) {
+      output.count++;
+    }
 
-  // Execute the group
-  client.createCollection('data', function(err, collection) {
-    collection.insert({
-        data: {
-          lastname:'smith',
-          date:new Date()
-        }
-      }, {w:1}, function(err, result) {
+    // Execute the group
+    db.createCollection('data', function(err, collection) {
+      collection.insert({
+          data: {
+            lastname:'smith',
+            date:new Date()
+          }
+        }, {w:1}, function(err, result) {
 
-      // Execute the group
-      collection.group(keys, condition, initial, reduce, true, function(err, r) {
-        test.equal(1, r[0].count)
-        test.equal('smith', r[0]['data.lastname']);
-        test.done();
+        // Execute the group
+        collection.group(keys, condition, initial, reduce, true, function(err, r) {
+          test.equal(1, r[0].count)
+          test.equal('smith', r[0]['data.lastname']);
+          db.close();
+          test.done();
+        });
       });
     });
   });
