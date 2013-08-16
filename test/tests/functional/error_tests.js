@@ -126,72 +126,36 @@ exports.shouldCorrectlyExecuteLastStatus = function(configuration, test) {
 }
 
 exports.shouldFailInsertDueToUniqueIndex = function(configuration, test) {
-  var client = configuration.db();
-
-  var collection = client.collection('test_failing_insert_due_to_unique_index');
-  collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
-    collection.insert({a:2}, {safe: true}, function(err, r) {
-      test.ok(err == null);
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var collection = db.collection('test_failing_insert_due_to_unique_index');
+    collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
       collection.insert({a:2}, {safe: true}, function(err, r) {
-        test.ok(err != null);
-        test.done();
-      })
-    })
-  })
-}
-
-// Test the error reporting functionality
-exports.shouldFailInsertDueToUniqueIndexStrict = function(configuration, test) {
-  var error_client = configuration.db();
-
-  error_client.dropCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
-    error_client.createCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
-      error_client.collection('test_failing_insert_due_to_unique_index_strict', function(err, collection) {
-        collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
-          collection.insert({a:2}, {w:1}, function(err, r) {
-            test.ok(err == null);
-            collection.insert({a:2}, {w:1}, function(err, r) {
-              test.ok(err != null);
-              test.done();
-            });
-          });
+        test.ok(err == null);
+        collection.insert({a:2}, {safe: true}, function(err, r) {
+          test.ok(err != null);
+          db.close();
+          test.done();
         });
       });
     });
   });
 }
 
-exports['safe mode should pass the disconnected error to the callback'] = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var error_client = configuration.newDbInstance({w:0}, {poolSize:1});
-  var name = 'test_safe_mode_when_disconnected';
-  error_client.open(function(err, error_client) {
-    test.ok(err == null);
-    error_client.resetErrorHistory(function() {
-      error_client.dropCollection(name, function() {
-        
-        var collection = error_client.collection(name);        
-        collection.insert({ inserted: true }, { safe: true }, function (err) {
-          test.ok(err == null);
-          error_client.close();
-
-          collection.insert({ works: true }, { safe: true }, function (err) {
-            test.ok(err instanceof Error);
-            test.equal('Connection was destroyed by application', err.message);
-
-            collection.update({ inserted: true }, { inserted: true, x: 1 }, { safe: true }, function (err) {
-              test.ok(err instanceof Error);
-              test.equal('Connection was destroyed by application', err.message);
-
-              collection.remove({ inserted: true }, { safe: true }, function (err) {
-                test.ok(err instanceof Error);
-                test.equal('Connection was destroyed by application', err.message);
-
-                collection.findOne({ works: true }, function (err) {
-                  test.ok(err instanceof Error);
-                  test.equal('Connection was destroyed by application', err.message);
-                  test.done();
-                });
+// Test the error reporting functionality
+exports.shouldFailInsertDueToUniqueIndexStrict = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.dropCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
+      db.createCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
+        db.collection('test_failing_insert_due_to_unique_index_strict', function(err, collection) {
+          collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
+            collection.insert({a:2}, {w:1}, function(err, r) {
+              test.ok(err == null);
+              collection.insert({a:2}, {w:1}, function(err, r) {
+                test.ok(err != null);
+                db.close();
+                test.done();
               });
             });
           });
@@ -201,58 +165,112 @@ exports['safe mode should pass the disconnected error to the callback'] = functi
   });
 }
 
-exports.shouldHandleAssertionError = function(configuration, test) {
-  var client = configuration.db();
-
-  client.admin().serverInfo(function(err, result){
-    var collection = client.collection('test_handle_assertion_error');
-    collection.insert({a:{lat:50, lng:10}}, {safe: true}, function(err, docs) {
+exports['safe mode should pass the disconnected error to the callback'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var error_client = configuration.newDbInstance({w:0}, {poolSize:1});
+    var name = 'test_safe_mode_when_disconnected';
+    error_client.open(function(err, error_client) {
       test.ok(err == null);
-
-      var query = {a:{$within:{$box:[[1,-10],[80,120]]}}};
-
-      // We don't have a geospatial index at this point
-      collection.findOne(query, function(err, docs) {
-        if(parseInt((result.version.replace(/\./g, ''))) < 223) test.ok(err instanceof Error);
-        
-        collection.ensureIndex([['a', '2d' ]], {unique:true, w:1}, function(err, indexName) {
-          test.ok(err == null);
+      error_client.resetErrorHistory(function() {
+        error_client.dropCollection(name, function() {
           
-          collection.findOne(query, function(err, doc) {
+          var collection = error_client.collection(name);        
+          collection.insert({ inserted: true }, { safe: true }, function (err) {
             test.ok(err == null);
-            
-            var invalidQuery = {a:{$within:{$box:[[-10,-180],[10,180]]}}};
+            error_client.close();
 
-            collection.findOne(invalidQuery, function(err, doc) {
-              if(parseInt((result.version.replace(/\./g, ''))) < 200) {
+            collection.insert({ works: true }, { safe: true }, function (err) {
+              test.ok(err instanceof Error);
+              test.equal('Connection was destroyed by application', err.message);
+
+              collection.update({ inserted: true }, { inserted: true, x: 1 }, { safe: true }, function (err) {
                 test.ok(err instanceof Error);
-              } else {                        
-                test.equal(null, err);
-                test.equal(null, doc);
-              }
+                test.equal('Connection was destroyed by application', err.message);
 
-              test.done();
-            });  
+                collection.remove({ inserted: true }, { safe: true }, function (err) {
+                  test.ok(err instanceof Error);
+                  test.equal('Connection was destroyed by application', err.message);
+
+                  collection.findOne({ works: true }, function (err) {
+                    test.ok(err instanceof Error);
+                    test.equal('Connection was destroyed by application', err.message);
+                    test.done();
+                  });
+                });
+              });
+            });
           });
         });
-      });          
+      });
     });
-  });
+  }
+}
+
+exports.shouldHandleAssertionError = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.2.3"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('test_handle_assertion_error');
+      collection.insert({a:{lat:50, lng:10}}, {safe: true}, function(err, docs) {
+        test.ok(err == null);
+
+        var query = {a:{$within:{$box:[[1,-10],[80,120]]}}};
+
+        // We don't have a geospatial index at this point
+        collection.findOne(query, function(err, docs) {
+          
+          collection.ensureIndex([['a', '2d' ]], {unique:true, w:1}, function(err, indexName) {
+            test.ok(err == null);
+            
+            collection.findOne(query, function(err, doc) {
+              test.ok(err == null);
+              
+              var invalidQuery = {a:{$within:{$box:[[-10,-180],[10,180]]}}};
+
+              collection.findOne(invalidQuery, function(err, doc) {
+                if(parseInt((result.version.replace(/\./g, ''))) < 200) {
+                  test.ok(err instanceof Error);
+                } else {                        
+                  test.equal(null, err);
+                  test.equal(null, doc);
+                }
+
+                db.close();
+                test.done();
+              });  
+            });
+          });
+        });          
+      });
+    });
+  }
 }
 
 exports['mixing included and excluded fields should return an error object with message'] = function(configuration, test) {
-  var client = configuration.db();
-
-  var c = client.collection('test_error_object_should_include_message');
-  c.insert({a:2, b: 5}, {w:1}, function(err, r) {
-    test.equal(err, null);
-    
-    c.findOne({a:2}, {fields: {a:1, b:0}}, function(err) {
-      test.ok(err);
-      test.equal('object', typeof err);
-      var rgx = /You cannot currently mix including and excluding fields/;
-      test.ok(rgx.test(err.message), 'missing error message property');
-      test.done();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var c = db.collection('test_error_object_should_include_message');
+    c.insert({a:2, b: 5}, {w:1}, function(err, r) {
+      test.equal(err, null);
+      
+      c.findOne({a:2}, {fields: {a:1, b:0}}, function(err) {
+        test.ok(err);
+        test.equal('object', typeof err);
+        var rgx = /You cannot currently mix including and excluding fields/;
+        test.ok(rgx.test(err.message), 'missing error message property');
+        db.close();
+        test.done();
+      });
     });
   });
 }
@@ -302,19 +320,28 @@ exports['Should handle throw error in db operation correctly'] = function(config
   });
 }
 
-// exports['Should handle MongoClient uncaught error correctly'] = function(configuration, test) {
-//   // var client = configuration.db();
-//   var MongoClient = configuration.getMongoPackage().MongoClient;
+exports['Should handle MongoClient uncaught error correctly'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {node: ">0.10.0"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.getMongoPackage().MongoClient;
+    var domain = require('domain');
+    var d = domain.create();
+    d.on('error', function(err) {
+      test.done()
+    })
 
-//   process.on("uncaughtException", function(err) {
-//     test.done();
-//   })
-
-//   MongoClient.connect(configuration.url(), function(err, db) {
-//     testdfdma();
-//     test.ok(false);
-//   });
-// }
+    d.run(function() {
+      MongoClient.connect(configuration.url(), function(err, db) {
+        testdfdma();
+        test.ok(false);
+      });
+    })
+  }
+}
 
 exports['Should handle MongoClient throw error in db operation correctly'] = function(configuration, test) {
   // var client = configuration.db();

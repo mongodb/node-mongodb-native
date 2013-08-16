@@ -291,37 +291,41 @@ exports.shouldTriggerMassiveAmountOfGetMores = function(configuration, test) {
 exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID
     , Binary = configuration.getMongoPackage().Binary;
-  var client = configuration.db();
-  var docs = []
 
-  for(var i = 0; i < 2000; i++) {
-    docs.push({'a':i, b: new Binary(new Buffer(1024))})
-  }
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var docs = []
 
-  var collection = client.collection('test_streaming_function_with_limit_for_fetching');
-  var updateCollection = client.collection('test_streaming_function_with_limit_for_fetching_update');
-  
-  // Insert the docs
-  collection.insert(docs, {w:1}, function(err, ids) {        
-    var cursor = collection.find({});
-    // Execute find on all the documents
-    var stream = cursor.stream(); 
+    for(var i = 0; i < 2000; i++) {
+      docs.push({'a':i, b: new Binary(new Buffer(1024))})
+    }
 
-    stream.on('end', function() { 
-      updateCollection.findOne({id:1}, function(err, doc) {
-        test.equal(null, err);
-        test.equal(2000, doc.count);
+    var collection = db.collection('test_streaming_function_with_limit_for_fetching');
+    var updateCollection = db.collection('test_streaming_function_with_limit_for_fetching_update');
+    
+    // Insert the docs
+    collection.insert(docs, {w:1}, function(err, ids) {        
+      var cursor = collection.find({});
+      // Execute find on all the documents
+      var stream = cursor.stream(); 
 
-        test.done();
-      })
-    });
+      stream.on('end', function() { 
+        updateCollection.findOne({id:1}, function(err, doc) {
+          test.equal(null, err);
+          test.equal(2000, doc.count);
 
-    stream.on('data',function(data){ 
-      stream.pause();
-
-      updateCollection.update({id: 1}, {$inc: {count: 1}}, {w:1, upsert:true}, function(err, result) {
-        stream.resume();
+          db.close();
+          test.done();
+        })
       });
-    }); 
+
+      stream.on('data',function(data){ 
+        stream.pause();
+
+        updateCollection.update({id: 1}, {$inc: {count: 1}}, {w:1, upsert:true}, function(err, result) {
+          stream.resume();
+        });
+      }); 
+    });
   });
 }

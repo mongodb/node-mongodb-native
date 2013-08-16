@@ -1,68 +1,86 @@
 /**
  * @ignore
  */
-exports['Should correctly connect to server using domain socket'] = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var db = configuration.newDbInstanceWithDomainSocket("/tmp/mongodb-27017.sock", {w:1}, {poolSize: 1});
-  db.open(function(err, db) {
-    test.equal(null, err);
-
-    db.collection("domainSocketCollection").insert({a:1}, {w:1}, function(err, item) {
-      test.equal(null, err);
-
-      db.collection("domainSocketCollection").find({a:1}).toArray(function(err, items) {
-        test.equal(null, err);
-        test.equal(1, items.length);
-
-        db.close();
-        test.done();
-      });
-    });
-  });
-}
-
-/**
- * @ignore
- */
-exports['Should connect to server using domain socket with undefined port'] = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var db = configuration.newDbInstanceWithDomainSocketAndPort("/tmp/mongodb-27017.sock", undefined, {w:1}, {poolSize: 1});
-  db.open(function(err, db) {
-    test.equal(null, err);
-
-    db.collection("domainSocketCollection").insert({x:1}, {w:1}, function(err, item) {
-      test.equal(null, err);
-
-      db.collection("domainSocketCollection").find({x:1}).toArray(function(err, items) {
-        test.equal(null, err);
-        test.equal(1, items.length);
-
-        db.close();
-        test.done();
-      });
-    });
-  });
-}
-
-/**
- * @ignore
- */
-exports['Should fail to connect using non-domain socket with undefined port'] = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var Server = configuration.getMongoPackage().Server
-    , Db = configuration.getMongoPackage().Db;
+exports['Should correctly connect to server using domain socket'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
   
-  var error;
-  try {    
-    var db = new Db('test', new Server("localhost", undefined), {w:0});
-    db.open(function(){ });
-  } catch (err){
-    error = err;
-  }
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstanceWithDomainSocket("/tmp/mongodb-27017.sock", {w:1}, {poolSize: 1});
+    db.open(function(err, db) {
+      test.equal(null, err);
 
-  test.ok(error instanceof Error);
-  test.ok(/port must be specified/.test(error));
-  test.done();
+      db.collection("domainSocketCollection").insert({a:1}, {w:1}, function(err, item) {
+        test.equal(null, err);
+
+        db.collection("domainSocketCollection").find({a:1}).toArray(function(err, items) {
+          test.equal(null, err);
+          test.equal(1, items.length);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should connect to server using domain socket with undefined port'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstanceWithDomainSocketAndPort("/tmp/mongodb-27017.sock", undefined, {w:1}, {poolSize: 1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection("domainSocketCollection").insert({x:1}, {w:1}, function(err, item) {
+        test.equal(null, err);
+
+        db.collection("domainSocketCollection").find({x:1}).toArray(function(err, items) {
+          test.equal(null, err);
+          test.equal(1, items.length);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should fail to connect using non-domain socket with undefined port'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Server = configuration.getMongoPackage().Server
+      , Db = configuration.getMongoPackage().Db;
+    
+    var error;
+    try {    
+      var db = new Db('test', new Server("localhost", undefined), {w:0});
+      db.open(function(){ });
+    } catch (err){
+      error = err;
+    }
+
+    test.ok(error instanceof Error);
+    test.ok(/port must be specified/.test(error));
+    test.done();
+  }
 }
 
 /**
@@ -116,36 +134,48 @@ exports.testConnectDbOptions = function(configuration, test) {
 /**
  * @ignore
  */
-exports.testConnectServerOptions = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var connect = configuration.getMongoPackage().connect;
+exports.testConnectServerOptions = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var connect = configuration.getMongoPackage().connect;
 
-  connect(configuration.url(),
-          { server: {auto_reconnect: true, poolSize: 4} },
-          connectionTester(test, 'testConnectServerOptions', function(db) {            
-    test.equal(4, db.serverConfig.poolSize);
-    test.equal(true, db.serverConfig.autoReconnect);
-    test.done();
-  }));
-};
+    connect(configuration.url(),
+            { server: {auto_reconnect: true, poolSize: 4} },
+            connectionTester(test, 'testConnectServerOptions', function(db) {            
+      test.equal(4, db.serverConfig.poolSize);
+      test.equal(true, db.serverConfig.autoReconnect);
+      test.done();
+    }));
+  }
+}
 
 /**
  * @ignore
  */
-exports.testConnectAllOptions = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var connect = configuration.getMongoPackage().connect;
+exports.testConnectAllOptions = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var connect = configuration.getMongoPackage().connect;
 
-  connect(configuration.url(),
-          { server: {auto_reconnect: true, poolSize: 4},
-            db: {native_parser: (process.env['TEST_NATIVE'] != null)} },
-          connectionTester(test, 'testConnectAllOptions', function(db) {
-    test.equal(process.env['TEST_NATIVE'] != null, db.native_parser);
-    test.equal(4, db.serverConfig.poolSize);
-    test.equal(true, db.serverConfig.autoReconnect);
-    test.done();
-  }));
-};
+    connect(configuration.url(),
+            { server: {auto_reconnect: true, poolSize: 4},
+              db: {native_parser: (process.env['TEST_NATIVE'] != null)} },
+            connectionTester(test, 'testConnectAllOptions', function(db) {
+      test.equal(process.env['TEST_NATIVE'] != null, db.native_parser);
+      test.equal(4, db.serverConfig.poolSize);
+      test.equal(true, db.serverConfig.autoReconnect);
+      test.done();
+    }));
+  }
+}
 
 /**
  * @ignore

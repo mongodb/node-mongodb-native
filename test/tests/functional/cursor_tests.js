@@ -40,22 +40,24 @@ exports.shouldCorrectlyExecuteToArray = function(configuration, test) {
  * @api private
  */
 exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_to_a', function(err, collection) {
 
-  client.createCollection('test_to_a', function(err, collection) {
-
-    collection.insert({'a':1}, {w:1}, function(err, ids) {
-      var cursor = collection.find({});
-      cursor.toArray(function(err, items) {
-        // Should fail if called again (cursor should be closed)
+      collection.insert({'a':1}, {w:1}, function(err, ids) {
+        var cursor = collection.find({});
         cursor.toArray(function(err, items) {
-          test.equal("Cursor is closed", err.message);
-
           // Should fail if called again (cursor should be closed)
-          cursor.each(function(err, item) {
+          cursor.toArray(function(err, items) {
             test.equal("Cursor is closed", err.message);
-            // Let's close the db
-            test.done();
+
+            // Should fail if called again (cursor should be closed)
+            cursor.each(function(err, item) {
+              test.equal("Cursor is closed", err.message);
+              // Let's close the db
+              db.close();
+              test.done();
+            });
           });
         });
       });
@@ -99,8 +101,8 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(configur
               test.ok(err != null);
 
               // Let's close the db
-              test.done();
               db.close();
+              test.done();
             });
           };
         });
@@ -115,17 +117,20 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(configur
  * @api private
  */
 exports.shouldCorrectlyExecuteCursorExplain = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_explain', function(err, collection) {
-    collection.insert({'a':1}, {w:1}, function(err, r) {
-      collection.find({'a':1}).explain(function(err, explaination) {
-        test.ok(explaination.cursor != null);
-        test.ok(explaination.n.constructor == Number);
-        test.ok(explaination.millis.constructor == Number);
-        test.ok(explaination.nscanned.constructor == Number);
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_explain', function(err, collection) {
+      collection.insert({'a':1}, {w:1}, function(err, r) {
+        collection.find({'a':1}).explain(function(err, explaination) {
+          test.ok(explaination.cursor != null);
+          test.ok(explaination.n.constructor == Number);
+          test.ok(explaination.millis.constructor == Number);
+          test.ok(explaination.nscanned.constructor == Number);
 
-        // Let's close the db
-        test.done();
+          // Let's close the db
+          db.close();
+          test.done();
+        });
       });
     });
   });
@@ -136,52 +141,156 @@ exports.shouldCorrectlyExecuteCursorExplain = function(configuration, test) {
  * @api private
  */
 exports.shouldCorrectlyExecuteCursorCount = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_count', function(err, collection) {
-    collection.find().count(function(err, count) {
-      test.equal(0, count);
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_count', function(err, collection) {
+      collection.find().count(function(err, count) {
+        test.equal(0, count);
 
+        Step(
+          function insert() {
+            var group = this.group();
+
+            for(var i = 0; i < 10; i++) {
+              collection.insert({'x':i}, {w:1}, group());
+            }
+          },
+
+          function finished() {
+            collection.find().count(function(err, count) {
+              test.equal(10, count);
+              test.ok(count.constructor == Number);
+            });
+
+            collection.find({}, {'limit':5}).count(function(err, count) {
+              test.equal(10, count);
+            });
+
+            collection.find({}, {'skip':5}).count(function(err, count) {
+              test.equal(10, count);
+            });
+
+            var cursor = collection.find();
+            cursor.count(function(err, count) {
+              test.equal(10, count);
+
+              cursor.each(function(err, item) {
+                if(item == null) {
+                  cursor.count(function(err, count2) {
+                    test.equal(10, count2);
+                    test.equal(count, count2);
+                    // Let's close the db
+                    db.close();
+                    test.done();
+                  });
+                }
+              });
+            });
+
+            db.collection('acollectionthatdoesn').count(function(err, count) {
+              test.equal(0, count);
+            });
+          }
+        )
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports.shouldCorrectlyExecuteSortOnCursor = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_sort', function(err, collection) {
       Step(
         function insert() {
           var group = this.group();
 
-          for(var i = 0; i < 10; i++) {
-            collection.insert({'x':i}, {w:1}, group());
+          for(var i = 0; i < 5; i++) {
+            collection.insert({'a':i}, {w:1}, group());
           }
         },
 
         function finished() {
-          collection.find().count(function(err, count) {
-            test.equal(10, count);
-            test.ok(count.constructor == Number);
+          collection.find().sort(['a', 1], function(err, cursor) {
+            test.deepEqual(['a', 1], cursor.sortValue);
           });
 
-          collection.find({}, {'limit':5}).count(function(err, count) {
-            test.equal(10, count);
+          collection.find().sort('a', 1).nextObject(function(err, doc) {
+            test.equal(0, doc.a);
           });
 
-          collection.find({}, {'skip':5}).count(function(err, count) {
-            test.equal(10, count);
+          collection.find().sort('a', -1).nextObject(function(err, doc) {
+            test.equal(4, doc.a);
+          });
+
+          collection.find().sort('a', "asc").nextObject(function(err, doc) {
+            test.equal(0, doc.a);
+          });
+
+          collection.find().sort([['a', -1], ['b', 1]], function(err, cursor) {
+            test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);
+          });
+
+          collection.find().sort('a', 1).sort('a', -1).nextObject(function(err, doc) {
+            test.equal(4, doc.a);
+          });
+
+          collection.find().sort('a', -1).sort('a', 1).nextObject(function(err, doc) {
+            test.equal(0, doc.a);
           });
 
           var cursor = collection.find();
-          cursor.count(function(err, count) {
-            test.equal(10, count);
-
-            cursor.each(function(err, item) {
-              if(item == null) {
-                cursor.count(function(err, count2) {
-                  test.equal(10, count2);
-                  test.equal(count, count2);
-                  // Let's close the db
-                  test.done();
-                });
-              }
+          cursor.nextObject(function(err, doc) {
+            cursor.sort(['a'], function(err, cursor) {
+              test.equal("Cursor is closed", err.message);
             });
           });
 
-          client.collection('acollectionthatdoesn').count(function(err, count) {
-            test.equal(0, count);
+          collection.find().sort('a', 25).nextObject(function(err, doc) {
+            test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+          });
+
+          collection.find().sort(25).nextObject(function(err, doc) {
+            test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+            // Let's close the db
+            db.close();
+            test.done();
+          });
+        }
+      );
+    });
+  });
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_to_array', function(err, collection) {
+      Step(
+        function insert() {
+          var group = this.group();
+
+          for(var i = 0; i < 2; i++) {
+            collection.save({'x':1}, {w:1}, group());
+          }
+        },
+
+        function finished() {
+          collection.find(function(err, cursor) {
+            test.throws(function () {
+              cursor.toArray();
+            });
+
+            db.close();
+            test.done();
           });
         }
       )
@@ -193,121 +302,31 @@ exports.shouldCorrectlyExecuteCursorCount = function(configuration, test) {
  * @ignore
  * @api private
  */
-exports.shouldCorrectlyExecuteSortOnCursor = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_sort', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
-
-        for(var i = 0; i < 5; i++) {
-          collection.insert({'a':i}, {w:1}, group());
-        }
-      },
-
-      function finished() {
-        collection.find().sort(['a', 1], function(err, cursor) {
-          test.deepEqual(['a', 1], cursor.sortValue);
-        });
-
-        collection.find().sort('a', 1).nextObject(function(err, doc) {
-          test.equal(0, doc.a);
-        });
-
-        collection.find().sort('a', -1).nextObject(function(err, doc) {
-          test.equal(4, doc.a);
-        });
-
-        collection.find().sort('a', "asc").nextObject(function(err, doc) {
-          test.equal(0, doc.a);
-        });
-
-        collection.find().sort([['a', -1], ['b', 1]], function(err, cursor) {
-          test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);
-        });
-
-        collection.find().sort('a', 1).sort('a', -1).nextObject(function(err, doc) {
-          test.equal(4, doc.a);
-        });
-
-        collection.find().sort('a', -1).sort('a', 1).nextObject(function(err, doc) {
-          test.equal(0, doc.a);
-        });
-
-        var cursor = collection.find();
-        cursor.nextObject(function(err, doc) {
-          cursor.sort(['a'], function(err, cursor) {
-            test.equal("Cursor is closed", err.message);
-          });
-        });
-
-        collection.find().sort('a', 25).nextObject(function(err, doc) {
-          test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
-        });
-
-        collection.find().sort(25).nextObject(function(err, doc) {
-          test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
-          // Let's close the db
-          test.done();
-        });
-      }
-    );
-  });
-}
-
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_to_array', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
-
-        for(var i = 0; i < 2; i++) {
-          collection.save({'x':1}, {w:1}, group());
-        }
-      },
-
-      function finished() {
-        collection.find(function(err, cursor) {
-          test.throws(function () {
-            cursor.toArray();
-          });
-          test.done();
-        });
-      }
-    )
-  });
-}
-
-/**
- * @ignore
- * @api private
- */
 exports.shouldThrowErrorOnEachWhenMissingCallback = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_each', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_each', function(err, collection) {
+      Step(
+        function insert() {
+          var group = this.group();
 
-        for(var i = 0; i < 2; i++) {
-          collection.save({'x':1}, {w:1}, group());
-        }
-      },
+          for(var i = 0; i < 2; i++) {
+            collection.save({'x':1}, {w:1}, group());
+          }
+        },
 
-      function finished() {
-        collection.find(function(err, cursor) {
-          test.throws(function () {
-            cursor.each();
+        function finished() {
+          collection.find(function(err, cursor) {
+            test.throws(function () {
+              cursor.each();
+            });
+
+            db.close();
+            test.done();
           });
-          test.done();
-        });
-      }
-    )
+        }
+      )
+    });
   });
 }
 
@@ -316,29 +335,33 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = function(configuration, test
  * @api private
  */
 exports.shouldCorrectlyHandleLimitOnCursor = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_cursor_limit', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_cursor_limit', function(err, collection) {
+      Step(
+        function insert() {
+          var group = this.group();
 
-        for(var i = 0; i < 10; i++) {
-          collection.save({'x':1}, {w:1}, group());
+          for(var i = 0; i < 10; i++) {
+            collection.save({'x':1}, {w:1}, group());
+          }
+        },
+
+        function finished() {
+          collection.find().count(function(err, count) {
+            test.equal(10, count);
+          });
+
+          collection.find().limit(5).toArray(function(err, items) {
+            test.equal(5, items.length);
+            
+            // Let's close the db
+            db.close();
+            test.done();
+          });
         }
-      },
-
-      function finished() {
-        collection.find().count(function(err, count) {
-          test.equal(10, count);
-        });
-
-        collection.find().limit(5).toArray(function(err, items) {
-          test.equal(5, items.length);
-          // Let's close the db
-          test.done();
-        });
-      }
-    );
+      );
+    });
   });
 }
 
@@ -347,25 +370,29 @@ exports.shouldCorrectlyHandleLimitOnCursor = function(configuration, test) {
  * @api private
  */
 exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_cursor_negative_one_limit', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_cursor_negative_one_limit', function(err, collection) {
+      Step(
+        function insert() {
+          var group = this.group();
 
-        for(var i = 0; i < 10; i++) {
-          collection.save({'x':1}, {w:1}, group());
+          for(var i = 0; i < 10; i++) {
+            collection.save({'x':1}, {w:1}, group());
+          }
+        },
+
+        function finished() {
+          collection.find().limit(-1).toArray(function(err, items) {
+            test.equal(1, items.length);
+            
+            // Let's close the db
+            db.close();
+            test.done();
+          });
         }
-      },
-
-      function finished() {
-        collection.find().limit(-1).toArray(function(err, items) {
-          test.equal(1, items.length);
-          // Let's close the db
-          test.done();
-        });
-      }
-    );
+      );
+    });
   });
 }
 
@@ -374,25 +401,29 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = function(configuration, 
  * @api private
  */
 exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_cursor_any_negative_limit', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_cursor_any_negative_limit', function(err, collection) {
+      Step(
+        function insert() {
+          var group = this.group();
 
-        for(var i = 0; i < 10; i++) {
-          collection.save({'x':1}, {w:1}, group());
+          for(var i = 0; i < 10; i++) {
+            collection.save({'x':1}, {w:1}, group());
+          }
+        },
+
+        function finished() {
+          collection.find().limit(-5).toArray(function(err, items) {
+            test.equal(5, items.length);
+            
+            // Let's close the db
+            db.close();
+            test.done();
+          });
         }
-      },
-
-      function finished() {
-        collection.find().limit(-5).toArray(function(err, items) {
-          test.equal(5, items.length);
-          // Let's close the db
-          test.done();
-        });
-      }
-    );
+      );
+    });
   });
 }
 
@@ -401,50 +432,53 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = function(configuration, 
  * @api private
  */
 exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_limit_exceptions', function(err, collection) {
-    collection.insert({'a':1}, {w:1}, function(err, docs) {});
-    collection.find(function(err, cursor) {
-      cursor.limit('not-an-integer', function(err, cursor) {
-        test.equal("limit requires an integer", err.message);
-      });
-
-      try {
-        cursor.limit('not-an-integer');
-        test.ok(false);
-      } catch(err) {
-        test.equal("limit requires an integer", err.message);
-      }
-    });
-
-    collection.find(function(err, cursor) {
-      cursor.nextObject(function(err, doc) {
-        cursor.limit(1, function(err, cursor) {
-          test.equal("Cursor is closed", err.message);
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_limit_exceptions', function(err, collection) {
+      collection.insert({'a':1}, {w:1}, function(err, docs) {});
+      collection.find(function(err, cursor) {
+        cursor.limit('not-an-integer', function(err, cursor) {
+          test.equal("limit requires an integer", err.message);
         });
 
         try {
-          cursor.limit(1);
+          cursor.limit('not-an-integer');
           test.ok(false);
         } catch(err) {
-          test.equal("Cursor is closed", err.message);
+          test.equal("limit requires an integer", err.message);
         }
       });
-    });
 
-    collection.find(function(err, cursor) {
-      cursor.close(function(err, cursor) {
-        cursor.limit(1, function(err, cursor) {
-          test.equal("Cursor is closed", err.message);
-          test.done();
+      collection.find(function(err, cursor) {
+        cursor.nextObject(function(err, doc) {
+          cursor.limit(1, function(err, cursor) {
+            test.equal("Cursor is closed", err.message);
+          });
+
+          try {
+            cursor.limit(1);
+            test.ok(false);
+          } catch(err) {
+            test.equal("Cursor is closed", err.message);
+          }
         });
+      });
 
-        try {
-          cursor.limit(1);
-          test.ok(false);
-        } catch(err) {
-          test.equal("Cursor is closed", err.message);
-        }
+      collection.find(function(err, cursor) {
+        cursor.close(function(err, cursor) {
+          cursor.limit(1, function(err, cursor) {
+            test.equal("Cursor is closed", err.message);
+            db.close();
+            test.done();
+          });
+
+          try {
+            cursor.limit(1);
+            test.ok(false);
+          } catch(err) {
+            test.equal("Cursor is closed", err.message);
+          }
+        });
       });
     });
   });
@@ -455,47 +489,50 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = function(configuration
  * @api private
  */
 exports.shouldCorrectlySkipRecordsOnCursor = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_skip', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_skip', function(err, collection) {
+      Step(
+        function insert() {
+          var group = this.group();
 
-        for(var i = 0; i < 10; i++) {
-          collection.insert({'x':i}, {w:1}, group());
-        }
-      },
+          for(var i = 0; i < 10; i++) {
+            collection.insert({'x':i}, {w:1}, group());
+          }
+        },
 
-      function finished() {
-        collection.find(function(err, cursor) {
-          cursor.count(function(err, count) {
-            test.equal(10, count);
-          });
-        });
-
-        collection.find(function(err, cursor) {
-          cursor.toArray(function(err, items) {
-            test.equal(10, items.length);
-
-            collection.find().skip(2).toArray(function(err, items2) {
-              test.equal(8, items2.length);
-
-              // Check that we have the same elements
-              var numberEqual = 0;
-              var sliced = items.slice(2, 10);
-
-              for(var i = 0; i < sliced.length; i++) {
-                if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-              }
-              test.equal(8, numberEqual);
-
-              // Let's close the db
-              test.done();
+        function finished() {
+          collection.find(function(err, cursor) {
+            cursor.count(function(err, count) {
+              test.equal(10, count);
             });
           });
-        });
-      }
-    )
+
+          collection.find(function(err, cursor) {
+            cursor.toArray(function(err, items) {
+              test.equal(10, items.length);
+
+              collection.find().skip(2).toArray(function(err, items2) {
+                test.equal(8, items2.length);
+
+                // Check that we have the same elements
+                var numberEqual = 0;
+                var sliced = items.slice(2, 10);
+
+                for(var i = 0; i < sliced.length; i++) {
+                  if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+                }
+                test.equal(8, numberEqual);
+
+                // Let's close the db
+                db.close();
+                test.done();
+              });
+            });
+          });
+        }
+      )
+    });
   });
 }
 
@@ -504,26 +541,29 @@ exports.shouldCorrectlySkipRecordsOnCursor = function(configuration, test) {
  * @api private
  */
 exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_skip_exceptions', function(err, collection) {
-    collection.insert({'a':1}, {w:1}, function(err, docs) {});
-    collection.find().skip('not-an-integer', function(err, cursor) {
-      test.equal("skip requires an integer", err.message);
-    });
-
-    var cursor = collection.find()
-    cursor.nextObject(function(err, doc) {
-      cursor.skip(1, function(err, cursor) {
-        test.equal("Cursor is closed", err.message);
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_skip_exceptions', function(err, collection) {
+      collection.insert({'a':1}, {w:1}, function(err, docs) {});
+      collection.find().skip('not-an-integer', function(err, cursor) {
+        test.equal("skip requires an integer", err.message);
       });
-    });
 
-    var cursor = collection.find()
-    cursor.close(function(err, cursor) {
-      cursor.skip(1, function(err, cursor) {
-        test.equal("Cursor is closed", err.message);
+      var cursor = collection.find()
+      cursor.nextObject(function(err, doc) {
+        cursor.skip(1, function(err, cursor) {
+          test.equal("Cursor is closed", err.message);
+        });
+      });
 
-        test.done();
+      var cursor = collection.find()
+      cursor.close(function(err, cursor) {
+        cursor.skip(1, function(err, cursor) {
+          test.equal("Cursor is closed", err.message);
+
+          db.close();
+          test.done();
+        });
       });
     });
   });
@@ -534,26 +574,45 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = function(configuration,
  * @api private
  */
 exports.shouldReturnErrorsOnIllegalBatchSizes = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_batchSize_exceptions', function(err, collection) {
-    collection.insert({'a':1}, {w:1}, function(err, docs) {});
-    var cursor = collection.find();
-    cursor.batchSize('not-an-integer', function(err, cursor) {
-      test.equal("batchSize requires an integer", err.message);
-    });
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_batchSize_exceptions', function(err, collection) {
+      collection.insert({'a':1}, {w:1}, function(err, docs) {});
+      var cursor = collection.find();
+      cursor.batchSize('not-an-integer', function(err, cursor) {
+        test.equal("batchSize requires an integer", err.message);
+      });
 
-    try {
-      cursor.batchSize('not-an-integer');
-      test.ok(false);
-    } catch (err) {
-      test.equal("batchSize requires an integer", err.message);
-    }
+      try {
+        cursor.batchSize('not-an-integer');
+        test.ok(false);
+      } catch (err) {
+        test.equal("batchSize requires an integer", err.message);
+      }
 
-    var cursor = collection.find();
-    cursor.nextObject(function(err, doc) {
+      var cursor = collection.find();
       cursor.nextObject(function(err, doc) {
+        cursor.nextObject(function(err, doc) {
+          cursor.batchSize(1, function(err, cursor) {
+            test.equal("Cursor is closed", err.message);
+          });
+
+          try {
+            cursor.batchSize(1);
+            test.ok(false);
+          } catch (err) {
+            test.equal("Cursor is closed", err.message);
+          }
+        });
+      });
+
+      var cursor = collection.find()
+      cursor.close(function(err, cursor) {
         cursor.batchSize(1, function(err, cursor) {
           test.equal("Cursor is closed", err.message);
+
+          db.close();
+          test.done();
         });
 
         try {
@@ -564,22 +623,6 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = function(configuration, test) {
         }
       });
     });
-
-    var cursor = collection.find()
-    cursor.close(function(err, cursor) {
-      cursor.batchSize(1, function(err, cursor) {
-        test.equal("Cursor is closed", err.message);
-
-        test.done();
-      });
-
-      try {
-        cursor.batchSize(1);
-        test.ok(false);
-      } catch (err) {
-        test.equal("Cursor is closed", err.message);
-      }
-    });
   });
 }
 
@@ -588,58 +631,61 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = function(configuration, test) {
  * @api private
  */
 exports.shouldCorrectlyHandleChangesInBatchSizes = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_not_multiple_batch_size', function(err, collection) {
-    var records = 6;
-    var batchSize = 2;
-    var docs = [];
-    for(var i = 0; i < records; i++) {
-      docs.push({'a':i});
-    }
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_not_multiple_batch_size', function(err, collection) {
+      var records = 6;
+      var batchSize = 2;
+      var docs = [];
+      for(var i = 0; i < records; i++) {
+        docs.push({'a':i});
+      }
 
-    collection.insert(docs, {w:1}, function() {
-      collection.find({}, {batchSize : batchSize}, function(err, cursor) {
-        //1st
-        cursor.nextObject(function(err, items) {
-          //cursor.items should contain 1 since nextObject already popped one
-          test.equal(1, cursor.items.length);
-          test.ok(items != null);
-
-          //2nd
+      collection.insert(docs, {w:1}, function() {
+        collection.find({}, {batchSize : batchSize}, function(err, cursor) {
+          //1st
           cursor.nextObject(function(err, items) {
-            test.equal(0, cursor.items.length);
+            //cursor.items should contain 1 since nextObject already popped one
+            test.equal(1, cursor.items.length);
             test.ok(items != null);
 
-            //test batch size modification on the fly
-            batchSize = 3;
-            cursor.batchSize(batchSize);
-
-            //3rd
+            //2nd
             cursor.nextObject(function(err, items) {
-              test.equal(2, cursor.items.length);
+              test.equal(0, cursor.items.length);
               test.ok(items != null);
 
-              //4th
+              //test batch size modification on the fly
+              batchSize = 3;
+              cursor.batchSize(batchSize);
+
+              //3rd
               cursor.nextObject(function(err, items) {
-                test.equal(1, cursor.items.length);
+                test.equal(2, cursor.items.length);
                 test.ok(items != null);
 
-                //5th
+                //4th
                 cursor.nextObject(function(err, items) {
-                  test.equal(0, cursor.items.length);
+                  test.equal(1, cursor.items.length);
                   test.ok(items != null);
 
-                  //6th
+                  //5th
                   cursor.nextObject(function(err, items) {
                     test.equal(0, cursor.items.length);
                     test.ok(items != null);
 
-                    //No more
+                    //6th
                     cursor.nextObject(function(err, items) {
-                      test.ok(items == null);
-                      test.ok(cursor.isClosed());
+                      test.equal(0, cursor.items.length);
+                      test.ok(items != null);
 
-                      test.done();
+                      //No more
+                      cursor.nextObject(function(err, items) {
+                        test.ok(items == null);
+                        test.ok(cursor.isClosed());
+
+                        db.close();
+                        test.done();
+                      });
                     });
                   });
                 });
@@ -657,44 +703,47 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = function(configuration, test)
  * @api private
  */
 exports.shouldCorrectlyHandleBatchSize = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_multiple_batch_size', function(err, collection) {
-    //test with the last batch that is a multiple of batchSize
-    var records = 4;
-    var batchSize = 2;
-    var docs = [];
-    for(var i = 0; i < records; i++) {
-      docs.push({'a':i});
-    }
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_multiple_batch_size', function(err, collection) {
+      //test with the last batch that is a multiple of batchSize
+      var records = 4;
+      var batchSize = 2;
+      var docs = [];
+      for(var i = 0; i < records; i++) {
+        docs.push({'a':i});
+      }
 
-    collection.insert(docs, {w:1}, function() {
-      collection.find({}, {batchSize : batchSize}, function(err, cursor) {
-        //1st
-        cursor.nextObject(function(err, items) {
-          test.equal(1, cursor.items.length);
-          test.ok(items != null);
-
-          //2nd
+      collection.insert(docs, {w:1}, function() {
+        collection.find({}, {batchSize : batchSize}, function(err, cursor) {
+          //1st
           cursor.nextObject(function(err, items) {
-            test.equal(0, cursor.items.length);
+            test.equal(1, cursor.items.length);
             test.ok(items != null);
 
-            //3rd
+            //2nd
             cursor.nextObject(function(err, items) {
-              test.equal(1, cursor.items.length);
+              test.equal(0, cursor.items.length);
               test.ok(items != null);
 
-              //4th
+              //3rd
               cursor.nextObject(function(err, items) {
-                test.equal(0, cursor.items.length);
+                test.equal(1, cursor.items.length);
                 test.ok(items != null);
 
-                //No more
+                //4th
                 cursor.nextObject(function(err, items) {
-                  test.ok(items == null);
-                  test.ok(cursor.isClosed());
+                  test.equal(0, cursor.items.length);
+                  test.ok(items != null);
 
-                  test.done();
+                  //No more
+                  cursor.nextObject(function(err, items) {
+                    test.ok(items == null);
+                    test.ok(cursor.isClosed());
+
+                    db.close();
+                    test.done();
+                  });
                 });
               });
             });
@@ -710,40 +759,43 @@ exports.shouldCorrectlyHandleBatchSize = function(configuration, test) {
  * @api private
  */
 exports.shouldHandleWhenLimitBiggerThanBatchSize = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_limit_greater_than_batch_size', function(err, collection) {
-    var limit = 4;
-    var records = 10;
-    var batchSize = 3;
-    var docs = [];
-    for(var i = 0; i < records; i++) {
-      docs.push({'a':i});
-    }
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_limit_greater_than_batch_size', function(err, collection) {
+      var limit = 4;
+      var records = 10;
+      var batchSize = 3;
+      var docs = [];
+      for(var i = 0; i < records; i++) {
+        docs.push({'a':i});
+      }
 
-    collection.insert(docs, {w:1}, function() {
-      var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
-      //1st
-      cursor.nextObject(function(err, items) {
-        test.equal(2, cursor.items.length);
-
-        //2nd
+      collection.insert(docs, {w:1}, function() {
+        var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
+        //1st
         cursor.nextObject(function(err, items) {
-          test.equal(1, cursor.items.length);
+          test.equal(2, cursor.items.length);
 
-          //3rd
+          //2nd
           cursor.nextObject(function(err, items) {
-            test.equal(0, cursor.items.length);
+            test.equal(1, cursor.items.length);
 
-            //4th
+            //3rd
             cursor.nextObject(function(err, items) {
               test.equal(0, cursor.items.length);
 
-              //No more
+              //4th
               cursor.nextObject(function(err, items) {
-                test.ok(items == null);
-                test.ok(cursor.isClosed());
+                test.equal(0, cursor.items.length);
 
-                test.done();
+                //No more
+                cursor.nextObject(function(err, items) {
+                  test.ok(items == null);
+                  test.ok(cursor.isClosed());
+
+                  db.close();
+                  test.done();
+                });
               });
             });
           });
@@ -758,32 +810,35 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = function(configuration, test)
  * @api private
  */
 exports.shouldHandleLimitLessThanBatchSize = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_limit_less_than_batch_size', function(err, collection) {
-    var limit = 2;
-    var records = 10;
-    var batchSize = 4;
-    var docs = [];
-    for(var i = 0; i < records; i++) {
-      docs.push({'a':i});
-    }
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_limit_less_than_batch_size', function(err, collection) {
+      var limit = 2;
+      var records = 10;
+      var batchSize = 4;
+      var docs = [];
+      for(var i = 0; i < records; i++) {
+        docs.push({'a':i});
+      }
 
-    collection.insert(docs, {w:1}, function() {
-      var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
-      //1st
-      cursor.nextObject(function(err, items) {
-        test.equal(1, cursor.items.length);
-
-        //2nd
+      collection.insert(docs, {w:1}, function() {
+        var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
+        //1st
         cursor.nextObject(function(err, items) {
-          test.equal(0, cursor.items.length);
+          test.equal(1, cursor.items.length);
 
-          //No more
+          //2nd
           cursor.nextObject(function(err, items) {
-            test.ok(items == null);
-            test.ok(cursor.isClosed());
+            test.equal(0, cursor.items.length);
 
-            test.done();
+            //No more
+            cursor.nextObject(function(err, items) {
+              test.ok(items == null);
+              test.ok(cursor.isClosed());
+
+              db.close();
+              test.done();
+            });
           });
         });
       });
@@ -796,39 +851,42 @@ exports.shouldHandleLimitLessThanBatchSize = function(configuration, test) {
  * @api private
  */
 exports.shouldHandleSkipLimitChaining = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_limit_skip_chaining', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_limit_skip_chaining', function(err, collection) {
+      Step(
+        function insert() {
+          var group = this.group();
 
-        for(var i = 0; i < 10; i++) {
-          collection.insert({'x':1}, {w:1}, group());
-        }
-      },
+          for(var i = 0; i < 10; i++) {
+            collection.insert({'x':1}, {w:1}, group());
+          }
+        },
 
-      function finished() {
-        collection.find().toArray(function(err, items) {
-          test.equal(10, items.length);
+        function finished() {
+          collection.find().toArray(function(err, items) {
+            test.equal(10, items.length);
 
-          collection.find().limit(5).skip(3).toArray(function(err, items2) {
-            test.equal(5, items2.length);
+            collection.find().limit(5).skip(3).toArray(function(err, items2) {
+              test.equal(5, items2.length);
 
-            // Check that we have the same elements
-            var numberEqual = 0;
-            var sliced = items.slice(3, 8);
+              // Check that we have the same elements
+              var numberEqual = 0;
+              var sliced = items.slice(3, 8);
 
-            for(var i = 0; i < sliced.length; i++) {
-              if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-            }
-            test.equal(5, numberEqual);
+              for(var i = 0; i < sliced.length; i++) {
+                if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+              }
+              test.equal(5, numberEqual);
 
-            // Let's close the db
-            test.done();
+              // Let's close the db
+              db.close();
+              test.done();
+            });
           });
-        });
-      }
-    )
+        }
+      )
+    });
   });
 }
 
@@ -837,39 +895,42 @@ exports.shouldHandleSkipLimitChaining = function(configuration, test) {
  * @api private
  */
 exports.shouldCorrectlyHandleLimitSkipChainingInline = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_limit_skip_chaining_inline', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_limit_skip_chaining_inline', function(err, collection) {
+      Step(
+        function insert() {
+          var group = this.group();
 
-        for(var i = 0; i < 10; i++) {
-          collection.insert({'x':1}, {w:1}, group());
-        }
-      },
+          for(var i = 0; i < 10; i++) {
+            collection.insert({'x':1}, {w:1}, group());
+          }
+        },
 
-      function finished() {
-        collection.find().toArray(function(err, items) {
-          test.equal(10, items.length);
+        function finished() {
+          collection.find().toArray(function(err, items) {
+            test.equal(10, items.length);
 
-          collection.find().limit(5).skip(3).toArray(function(err, items2) {
-            test.equal(5, items2.length);
+            collection.find().limit(5).skip(3).toArray(function(err, items2) {
+              test.equal(5, items2.length);
 
-            // Check that we have the same elements
-            var numberEqual = 0;
-            var sliced = items.slice(3, 8);
+              // Check that we have the same elements
+              var numberEqual = 0;
+              var sliced = items.slice(3, 8);
 
-            for(var i = 0; i < sliced.length; i++) {
-              if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-            }
-            test.equal(5, numberEqual);
+              for(var i = 0; i < sliced.length; i++) {
+                if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+              }
+              test.equal(5, numberEqual);
 
-            // Let's close the db
-            test.done();
+              // Let's close the db
+              db.close();
+              test.done();
+            });
           });
-        });
-      }
-    )
+        }
+      )
+    });
   });
 }
 
@@ -878,12 +939,15 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = function(configuration, t
  * @api private
  */
 exports.shouldCloseCursorNoQuerySent = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_close_no_query_sent', function(err, collection) {
-    collection.find().close(function(err, cursor) {
-      test.equal(true, cursor.isClosed());
-      // Let's close the db
-      test.done();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_close_no_query_sent', function(err, collection) {
+      collection.find().close(function(err, cursor) {
+        test.equal(true, cursor.isClosed());
+        // Let's close the db
+        db.close();
+        test.done();
+      });
     });
   });
 }
@@ -895,93 +959,37 @@ exports.shouldCloseCursorNoQuerySent = function(configuration, test) {
 exports.shouldCorrectlyRefillViaGetMoreCommand = function(configuration, test) {
   var COUNT = 1000;
 
-  var client = configuration.db();
-  client.createCollection('test_refill_via_get_more', function(err, collection) {
-    Step(
-      function insert() {
-        var group = this.group();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_refill_via_get_more', function(err, collection) {
+      Step(
+        function insert() {
+          var group = this.group();
 
-        for(var i = 0; i < COUNT; i++) {
-          collection.save({'a': i}, {w:1}, group());
-        }
-      },
+          for(var i = 0; i < COUNT; i++) {
+            collection.save({'a': i}, {w:1}, group());
+          }
+        },
 
-      function finished() {
-        collection.count(function(err, count) {
-          test.equal(COUNT, count);
-        });
-
-        var total = 0;
-        var i = 0;
-        var cursor = collection.find({}, {}).each(function(err, item) {
-        if(item != null) {
-          total = total + item.a;
-        } else {
-          test.equal(499500, total);
-
+        function finished() {
           collection.count(function(err, count) {
             test.equal(COUNT, count);
           });
 
-          collection.count(function(err, count) {
-            test.equal(COUNT, count);
-
-            var total2 = 0;
-            collection.find().each(function(err, item) {
-              if(item != null) {
-                total2 = total2 + item.a;
-              } else {
-                test.equal(499500, total2);
-                collection.count(function(err, count) {
-                  test.equal(COUNT, count);
-                  test.equal(total, total2);
-                  // Let's close the db
-                  test.done();
-                });
-              }
-            });
-          });
-        }
-      })
-    })
-  });
-}
-
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_refill_via_get_more_alt_coll', function(err, collection) {
-
-    Step(
-      function insert() {
-        var group = this.group();
-
-        for(var i = 0; i < 1000; i++) {
-          collection.save({'a': i}, {w:1}, group());
-        }
-      },
-
-      function finished() {
-        collection.count(function(err, count) {
-          test.equal(1000, count);
-        });
-
-        var total = 0;
-        collection.find().each(function(err, item) {
+          var total = 0;
+          var i = 0;
+          var cursor = collection.find({}, {}).each(function(err, item) {
           if(item != null) {
             total = total + item.a;
           } else {
             test.equal(499500, total);
 
             collection.count(function(err, count) {
-              test.equal(1000, count);
+              test.equal(COUNT, count);
             });
 
             collection.count(function(err, count) {
-              test.equal(1000, count);
+              test.equal(COUNT, count);
 
               var total2 = 0;
               collection.find().each(function(err, item) {
@@ -990,18 +998,82 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = function(configur
                 } else {
                   test.equal(499500, total2);
                   collection.count(function(err, count) {
-                    test.equal(1000, count);
+                    test.equal(COUNT, count);
                     test.equal(total, total2);
+                    
                     // Let's close the db
+                    db.close();
                     test.done();
                   });
                 }
               });
             });
           }
-        });
-      }
-    )
+        })
+      })
+    });
+  });
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_refill_via_get_more_alt_coll', function(err, collection) {
+
+      Step(
+        function insert() {
+          var group = this.group();
+
+          for(var i = 0; i < 1000; i++) {
+            collection.save({'a': i}, {w:1}, group());
+          }
+        },
+
+        function finished() {
+          collection.count(function(err, count) {
+            test.equal(1000, count);
+          });
+
+          var total = 0;
+          collection.find().each(function(err, item) {
+            if(item != null) {
+              total = total + item.a;
+            } else {
+              test.equal(499500, total);
+
+              collection.count(function(err, count) {
+                test.equal(1000, count);
+              });
+
+              collection.count(function(err, count) {
+                test.equal(1000, count);
+
+                var total2 = 0;
+                collection.find().each(function(err, item) {
+                  if(item != null) {
+                    total2 = total2 + item.a;
+                  } else {
+                    test.equal(499500, total2);
+                    collection.count(function(err, count) {
+                      test.equal(1000, count);
+                      test.equal(total, total2);
+                      
+                      // Let's close the db
+                      db.close();
+                      test.done();
+                    });
+                  }
+                });
+              });
+            }
+          });
+        }
+      )
+    });
   });
 }
 
@@ -1010,16 +1082,19 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = function(configur
  * @api private
  */
 exports.shouldCloseCursorAfterQueryHasBeenSent = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_close_after_query_sent', function(err, collection) {
-    collection.insert({'a':1}, {w:1}, function(err, r) {
-      var cursor = collection.find({'a':1});
-      cursor.nextObject(function(err, item) {
-        cursor.close(function(err, cursor) {
-          test.equal(true, cursor.isClosed());
-          // Let's close the db
-          test.done();
-        })
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_close_after_query_sent', function(err, collection) {
+      collection.insert({'a':1}, {w:1}, function(err, r) {
+        var cursor = collection.find({'a':1});
+        cursor.nextObject(function(err, item) {
+          cursor.close(function(err, cursor) {
+            test.equal(true, cursor.isClosed());
+            // Let's close the db
+            db.close();
+            test.done();
+          })
+        });
       });
     });
   });
@@ -1030,19 +1105,22 @@ exports.shouldCloseCursorAfterQueryHasBeenSent = function(configuration, test) {
  * @api private
  */
 exports.shouldCorrectlyExecuteCursorCountWithFields = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_count_with_fields', function(err, collection) {
-    collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
-      collection.find({}, {'fields':['a']}).toArray(function(err, items) {
-        test.equal(1, items.length);
-        test.equal(2, items[0].a);
-        test.equal(null, items[0].x);
-      });
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_count_with_fields', function(err, collection) {
+      collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
+        collection.find({}, {'fields':['a']}).toArray(function(err, items) {
+          test.equal(1, items.length);
+          test.equal(2, items[0].a);
+          test.equal(null, items[0].x);
+        });
 
-      collection.findOne({}, {'fields':['a']}, function(err, item) {
-        test.equal(2, item.a);
-        test.equal(null, item.x);
-        test.done();
+        collection.findOne({}, {'fields':['a']}, function(err, item) {
+          test.equal(2, item.a);
+          test.equal(null, item.x);
+          db.close();
+          test.done();
+        });
       });
     });
   });
@@ -1053,14 +1131,17 @@ exports.shouldCorrectlyExecuteCursorCountWithFields = function(configuration, te
  * @api private
  */
 exports.shouldCorrectlyCountWithFieldsUsingExclude = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
-    collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
-      collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
-        test.equal(1, items.length);
-        test.equal(2, items[0].a);
-        test.equal(null, items[0].x);
-        test.done();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
+      collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
+        collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
+          test.equal(1, items.length);
+          test.equal(2, items[0].a);
+          test.equal(null, items[0].x);
+          db.close();
+          test.done();
+        });
       });
     });
   });
@@ -1078,22 +1159,25 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = function(configuration
     docs[i] = {createdAt:new Date(d)};
   }
 
-  var client = configuration.db();
-  // Create collection
-  client.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
-    // ensure index of createdAt index
-    collection.ensureIndex({createdAt:1})
-    // insert all docs
-    collection.insert(docs, {w:1}, function(err, result) {
-      test.equal(null, err);
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    // Create collection
+    db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
+      // ensure index of createdAt index
+      collection.ensureIndex({createdAt:1})
+      // insert all docs
+      collection.insert(docs, {w:1}, function(err, result) {
+        test.equal(null, err);
 
-      // Find with sort
-      collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
-        if (err) logger.error("error in collection_info.find: " + err);
-        test.equal(1, items.length);
-        test.done();
+        // Find with sort
+        collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
+          if (err) logger.error("error in collection_info.find: " + err);
+          test.equal(1, items.length);
+          db.close();
+          test.done();
+        })
       })
-    })
+    });
   });
 }
 
@@ -1109,24 +1193,27 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = func
     docs[i] = {createdAt:new Date(d)};
   }
 
-  var client = configuration.db();
-  // Create collection
-  client.createCollection('shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex', function(err, collection) {
-    // ensure index of createdAt index
-    collection.ensureIndex({createdAt:1}, function(err, indexName) {
-      test.equal(null, err);
-
-      // insert all docs
-      collection.insert(docs, {w:1}, function(err, result) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    // Create collection
+    db.createCollection('shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex', function(err, collection) {
+      // ensure index of createdAt index
+      collection.ensureIndex({createdAt:1}, function(err, indexName) {
         test.equal(null, err);
 
-        // Find with sort
-        collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
-          if (err) logger.error("error in collection_info.find: " + err);
-          test.equal(5000, items.length);
-          test.done();
+        // insert all docs
+        collection.insert(docs, {w:1}, function(err, result) {
+          test.equal(null, err);
+
+          // Find with sort
+          collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
+            if (err) logger.error("error in collection_info.find: " + err);
+            test.equal(5000, items.length);
+            db.close();
+            test.done();
+          })
         })
-      })
+      });
     });
   });
 }
@@ -1194,32 +1281,35 @@ exports['Should correctly execute count on cursor'] = function(configuration, te
     docs[i] = {'a':i, createdAt:new Date(d)};
   }
 
-  var client = configuration.db();
-  // Create collection
-  client.createCollection('Should_correctly_execute_count_on_cursor', function(err, collection) {
-    test.equal(null, err);
-
-    // insert all docs
-    collection.insert(docs, {w:1}, function(err, result) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    // Create collection
+    db.createCollection('Should_correctly_execute_count_on_cursor', function(err, collection) {
       test.equal(null, err);
-      var total = 0;
-      // Create a cursor for the content
-      var cursor = collection.find({});
-      cursor.count(function(err, c) {
-        // Ensure each returns all documents
-        cursor.each(function(err, item) {
-          if(item != null) {
-            total++;
-          } else {
-            cursor.count(function(err, c) {
-              test.equal(1000, c);
-              test.equal(1000, total);
-              test.done();
-            })
-          }
-        });
+
+      // insert all docs
+      collection.insert(docs, {w:1}, function(err, result) {
+        test.equal(null, err);
+        var total = 0;
+        // Create a cursor for the content
+        var cursor = collection.find({});
+        cursor.count(function(err, c) {
+          // Ensure each returns all documents
+          cursor.each(function(err, item) {
+            if(item != null) {
+              total++;
+            } else {
+              cursor.count(function(err, c) {
+                test.equal(1000, c);
+                test.equal(1000, total);
+                db.close();
+                test.done();
+              })
+            }
+          });
+        })
       })
-    })
+    });
   });
 }
 
@@ -1234,70 +1324,73 @@ exports['should be able to stream documents'] = function(configuration, test) {
     docs[i] = { a: i+1 };
   }
 
-  var client = configuration.db();
-  // Create collection
-  client.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
-    test.equal(null, err);
-
-    // insert all docs
-    collection.insert(docs, {w:1}, function(err, result) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    // Create collection
+    db.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
       test.equal(null, err);
 
-      var paused = 0
-        , closed = 0
-        , resumed = 0
-        , i = 0
-        , err
+      // insert all docs
+      collection.insert(docs, {w:1}, function(err, result) {
+        test.equal(null, err);
 
-      var stream = collection.find().stream();
+        var paused = 0
+          , closed = 0
+          , resumed = 0
+          , i = 0
+          , err
 
-      stream.on('data', function (doc) {
-        test.equal(true, !! doc);
-        test.equal(true, !! doc.a);
+        var stream = collection.find().stream();
 
-        if (paused > 0 && 0 === resumed) {
-          err = new Error('data emitted during pause');
-          return done();
-        }
+        stream.on('data', function (doc) {
+          test.equal(true, !! doc);
+          test.equal(true, !! doc.a);
 
-        if (++i === 3) {
-          test.equal(false, stream.paused);
-          stream.pause();
-          test.equal(true, stream.paused);
-          paused++;
+          if (paused > 0 && 0 === resumed) {
+            err = new Error('data emitted during pause');
+            return done();
+          }
 
-          setTimeout(function () {
+          if (++i === 3) {
+            test.equal(false, stream.paused);
+            stream.pause();
             test.equal(true, stream.paused);
-            stream.resume();
-            process.nextTick(function() {
-              test.equal(false, stream.paused);
-              resumed++;
-            })
-          }, 20);
+            paused++;
+
+            setTimeout(function () {
+              test.equal(true, stream.paused);
+              stream.resume();
+              process.nextTick(function() {
+                test.equal(false, stream.paused);
+                resumed++;
+              })
+            }, 20);
+          }
+        });
+
+        stream.on('error', function (er) {
+          err = er;
+          done();
+        });
+
+        stream.on('close', function () {
+          closed++;
+          done();
+        });
+
+        function done () {
+          test.equal(undefined, err);
+          test.equal(i, docs.length);
+          test.equal(1, closed);
+          test.equal(1, paused);
+          test.equal(1, resumed);
+          test.strictEqual(stream._cursor.isClosed(), true);
+          db.close();
+          test.done();
         }
       });
-
-      stream.on('error', function (er) {
-        err = er;
-        done();
-      });
-
-      stream.on('close', function () {
-        closed++;
-        done();
-      });
-
-      function done () {
-        test.equal(undefined, err);
-        test.equal(i, docs.length);
-        test.equal(1, closed);
-        test.equal(1, paused);
-        test.equal(1, resumed);
-        test.strictEqual(stream._cursor.isClosed(), true);
-        test.done();
-      }
-    })
-  })
+    });
+  });
 }
 
 /**
@@ -1309,31 +1402,34 @@ exports['immediately destroying a stream prevents the query from executing'] = f
     , docs = [{ b: 2 }, { b: 3 }]
     , doneCalled = 0
 
-  var client = configuration.db();
-  client.createCollection('immediately_destroying_a_stream_prevents_the_query_from_executing', function(err, collection) {
-    test.equal(null, err);
-
-    // insert all docs
-    collection.insert(docs, {w:1}, function(err, result) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('immediately_destroying_a_stream_prevents_the_query_from_executing', function(err, collection) {
       test.equal(null, err);
 
-      var stream = collection.find().stream();
+      // insert all docs
+      collection.insert(docs, {w:1}, function(err, result) {
+        test.equal(null, err);
 
-      stream.on('data', function () {
-        i++;
-      })
-      stream.on('close', done);
-      stream.on('error', done);
+        var stream = collection.find().stream();
 
-      stream.destroy();
+        stream.on('data', function () {
+          i++;
+        })
+        stream.on('close', done);
+        stream.on('error', done);
 
-      function done (err) {
-        test.equal(++doneCalled, 1);
-        test.equal(undefined, err);
-        test.strictEqual(0, i);
-        test.strictEqual(true, stream._destroyed);
-        test.done();
-      }
+        stream.destroy();
+
+        function done (err) {
+          test.equal(++doneCalled, 1);
+          test.equal(undefined, err);
+          test.strictEqual(0, i);
+          test.strictEqual(true, stream._destroyed);
+          db.close();
+          test.done();
+        }
+      });
     });
   });
 }
@@ -1343,100 +1439,47 @@ exports['immediately destroying a stream prevents the query from executing'] = f
  * @api private
  */
 exports['destroying a stream stops it'] = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('destroying_a_stream_stops_it', function(err, collection) {
-    test.equal(null, err);
-
-    var docs = [];
-    for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
-
-    var client = configuration.db();
-    // insert all docs
-    collection.insert(docs, {w:1}, function(err, result) {
-      test.equal(null, err);
-
-      var finished = 0
-        , i = 0
-
-      var stream = collection.find().stream();
-
-      test.strictEqual(null, stream._destroyed);
-      test.strictEqual(true, stream.readable);
-
-      stream.on('data', function (doc) {
-        if (++i === 5) {
-          stream.destroy();
-          test.strictEqual(false, stream.readable);
-        }
-      });
-
-      stream.on('close', done);
-      stream.on('error', done);
-
-      function done (err) {
-        ++finished;
-        setTimeout(function () {
-          test.strictEqual(undefined, err);
-          test.strictEqual(5, i);
-          test.strictEqual(1, finished);
-          test.strictEqual(true, stream._destroyed);
-          test.strictEqual(false, stream.readable);
-          test.strictEqual(true, stream._cursor.isClosed());
-          test.done();
-        }, 150)
-      }
-    });
-  });
-}
-
-/**
- * @ignore
- * @api private
- */
-exports['cursor stream errors']= function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-  client.open(function(err, db_p) {
-    test.equal(null, err);
-
-    client.createCollection('cursor_stream_errors', function(err, collection) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('destroying_a_stream_stops_it', function(err, collection) {
       test.equal(null, err);
 
       var docs = [];
       for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
 
+      var client = configuration.db();
       // insert all docs
       collection.insert(docs, {w:1}, function(err, result) {
         test.equal(null, err);
 
         var finished = 0
-          , closed = 0
           , i = 0
 
-        var stream = collection.find({}, { batchSize: 5 }).stream();
+        var stream = collection.find().stream();
+
+        test.strictEqual(null, stream._destroyed);
+        test.strictEqual(true, stream.readable);
 
         stream.on('data', function (doc) {
           if (++i === 5) {
-            client.close();
+            stream.destroy();
+            test.strictEqual(false, stream.readable);
           }
         });
 
-        stream.on('close', function () {
-          closed++;
-        });
-
+        stream.on('close', done);
         stream.on('error', done);
 
         function done (err) {
           ++finished;
           setTimeout(function () {
-            test.equal('Connection was destroyed by application', err.message);
-            test.equal(5, i);
-            test.equal(1, closed);
-            test.equal(1, finished);
-            test.equal(true, stream._destroyed);
-            test.equal(false, stream.readable);
-            test.equal(true, stream._cursor.isClosed());
+            test.strictEqual(undefined, err);
+            test.strictEqual(5, i);
+            test.strictEqual(1, finished);
+            test.strictEqual(true, stream._destroyed);
+            test.strictEqual(false, stream.readable);
+            test.strictEqual(true, stream._cursor.isClosed());
+            db.close();
             test.done();
           }, 150)
         }
@@ -1449,49 +1492,115 @@ exports['cursor stream errors']= function(configuration, test) {
  * @ignore
  * @api private
  */
-exports['cursor stream pipe']= function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('cursor_stream_pipe', function(err, collection) {
-    test.equal(null, err);
-
-    var docs = [];
-    ;('Aaden Aaron Adrian Aditya Bob Joe').split(' ').forEach(function (name) {
-      docs.push({ name: name });
-    });
-
-    // insert all docs
-    collection.insert(docs, {w:1}, function(err, result) {
+exports['cursor stream errors'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    client.open(function(err, db_p) {
       test.equal(null, err);
 
-      var filename = '/tmp/_nodemongodbnative_stream_out.txt'
-        , out = fs.createWriteStream(filename)
+      client.createCollection('cursor_stream_errors', function(err, collection) {
+        test.equal(null, err);
 
-      // hack so we don't need to create a stream filter just to
-      // stringify the objects (otherwise the created file would
-      // just contain a bunch of [object Object])
-      // var toString = Object.prototype.toString;
-      // Object.prototype.toString = function () {
-      //   return JSON.stringify(this);
-      // }
+        var docs = [];
+        for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
 
-      var stream = collection.find().stream({transform: function(doc) { return JSON.stringify(doc); }});
-      stream.pipe(out);
-      // Wait for output stream to close
-      out.on('close', done);
+        // insert all docs
+        collection.insert(docs, {w:1}, function(err, result) {
+          test.equal(null, err);
 
-      function done (err) {
-        // Object.prototype.toString = toString;
-        test.strictEqual(undefined, err);
-        var contents = fs.readFileSync(filename, 'utf8');
-        test.ok(/Aaden/.test(contents));
-        test.ok(/Aaron/.test(contents));
-        test.ok(/Adrian/.test(contents));
-        test.ok(/Aditya/.test(contents));
-        test.ok(/Bob/.test(contents));
-        test.ok(/Joe/.test(contents));
-        fs.unlink(filename);
-        test.done();
-      }
+          var finished = 0
+            , closed = 0
+            , i = 0
+
+          var stream = collection.find({}, { batchSize: 5 }).stream();
+
+          stream.on('data', function (doc) {
+            if (++i === 5) {
+              client.close();
+            }
+          });
+
+          stream.on('close', function () {
+            closed++;
+          });
+
+          stream.on('error', done);
+
+          function done (err) {
+            ++finished;
+            setTimeout(function () {
+              test.equal('Connection was destroyed by application', err.message);
+              test.equal(5, i);
+              test.equal(1, closed);
+              test.equal(1, finished);
+              test.equal(true, stream._destroyed);
+              test.equal(false, stream.readable);
+              test.equal(true, stream._cursor.isClosed());
+              client.close();
+              test.done();
+            }, 150)
+          }
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['cursor stream pipe']= function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('cursor_stream_pipe', function(err, collection) {
+      test.equal(null, err);
+
+      var docs = [];
+      ;('Aaden Aaron Adrian Aditya Bob Joe').split(' ').forEach(function (name) {
+        docs.push({ name: name });
+      });
+
+      // insert all docs
+      collection.insert(docs, {w:1}, function(err, result) {
+        test.equal(null, err);
+
+        var filename = '/tmp/_nodemongodbnative_stream_out.txt'
+          , out = fs.createWriteStream(filename)
+
+        // hack so we don't need to create a stream filter just to
+        // stringify the objects (otherwise the created file would
+        // just contain a bunch of [object Object])
+        // var toString = Object.prototype.toString;
+        // Object.prototype.toString = function () {
+        //   return JSON.stringify(this);
+        // }
+
+        var stream = collection.find().stream({transform: function(doc) { return JSON.stringify(doc); }});
+        stream.pipe(out);
+        // Wait for output stream to close
+        out.on('close', done);
+
+        function done (err) {
+          // Object.prototype.toString = toString;
+          test.strictEqual(undefined, err);
+          var contents = fs.readFileSync(filename, 'utf8');
+          test.ok(/Aaden/.test(contents));
+          test.ok(/Aaron/.test(contents));
+          test.ok(/Adrian/.test(contents));
+          test.ok(/Aditya/.test(contents));
+          test.ok(/Bob/.test(contents));
+          test.ok(/Joe/.test(contents));
+          fs.unlink(filename);
+          db.close();
+          test.done();
+        }
+      });
     });
   });
 }
@@ -1913,6 +2022,7 @@ exports.shouldCloseDeadTailableCursors = function(configuration, test) {
         db.close();
         test.equal(2, insert.ran);
         test.equal(true, closed);
+        db.close();
         test.done();
       }, 800);
     });
@@ -1968,28 +2078,31 @@ exports.shouldCorrectExecuteExplainHonoringLimit = function(configuration, test)
   docs[18] = { "_keywords" : [ "catena", "diameter", "621455", "8mm", "rings", "brd", "legend", "red" ]};
   docs[19] = { "_keywords" : [ "catena", "diameter", "621464", "rings", "5mm", "brd", "legend", "red" ]};
 
-  var client = configuration.db();
-  // Insert all the docs
-  var collection = client.collection('shouldCorrectExecuteExplainHonoringLimit');
-  collection.insert(docs, {w:1}, function(err, result) {
-    test.equal(null, err);
-
-    collection.ensureIndex({_keywords:1}, {w:1}, function(err, result) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    // Insert all the docs
+    var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
+    collection.insert(docs, {w:1}, function(err, result) {
       test.equal(null, err);
 
-      // collection.find({_keywords:'red'},{}).limit(10).explain(function(err, result) {
-      collection.find({_keywords:'red'}, {}, {explain:true}).limit(10).toArray(function(err, result) {
-        test.equal(10, result[0].n);
-        test.equal(10, result[0].nscanned);
+      collection.ensureIndex({_keywords:1}, {w:1}, function(err, result) {
+        test.equal(null, err);
 
-        collection.find({_keywords:'red'},{}).limit(10).explain(function(err, result) {
-          test.equal(10, result.n);
-          test.equal(10, result.nscanned);
-          test.done();
+        // collection.find({_keywords:'red'},{}).limit(10).explain(function(err, result) {
+        collection.find({_keywords:'red'}, {}, {explain:true}).limit(10).toArray(function(err, result) {
+          test.equal(10, result[0].n);
+          test.equal(10, result[0].nscanned);
+
+          collection.find({_keywords:'red'},{}).limit(10).explain(function(err, result) {
+            test.equal(10, result.n);
+            test.equal(10, result.nscanned);
+            db.close();
+            test.done();
+          });
         });
       });
     });
-  })
+  });
 }
 
 /**
@@ -2103,25 +2216,28 @@ exports.shouldFailToSetReadPreferenceOnCursor = function(configuration, test) {
  * @api private
  */
 exports.shouldNotFailDueToStackOverflowEach = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('shouldNotFailDueToStackOverflowEach', function(err, collection) {
-    var docs = [];
-    var total = 0;
-    for(var i = 0; i < 30000; i++) docs.push({a:i});
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('shouldNotFailDueToStackOverflowEach', function(err, collection) {
+      var docs = [];
+      var total = 0;
+      for(var i = 0; i < 30000; i++) docs.push({a:i});
 
-    collection.insert(docs, {w:1}, function(err, ids) {
-      var s = new Date().getTime();
+      collection.insert(docs, {w:1}, function(err, ids) {
+        var s = new Date().getTime();
 
-      collection.find({}).each(function(err, item) {
-        if(item == null) {
-          var e = new Date().getTime();
-          
-          test.equal(30000, total);
-          test.done();
-        }
+        collection.find({}).each(function(err, item) {
+          if(item == null) {
+            var e = new Date().getTime();
+            
+            test.equal(30000, total);
+            db.close();
+            test.done();
+          }
 
-        total++;
-      })
+          total++;
+        })
+      });
     });
   });
 }
@@ -2131,23 +2247,26 @@ exports.shouldNotFailDueToStackOverflowEach = function(configuration, test) {
  * @api private
  */
 exports.shouldNotFailDueToStackOverflowToArray = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('shouldNotFailDueToStackOverflowToArray', function(err, collection) {
-    var docs = [];
-    var total = 0;
-    var s = new Date().getTime();
-    for(var i = 0; i < 30000; i++) docs.push({a:i});
-
-    collection.insert(docs, {w:1}, function(err, ids) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('shouldNotFailDueToStackOverflowToArray', function(err, collection) {
+      var docs = [];
+      var total = 0;
       var s = new Date().getTime();
+      for(var i = 0; i < 30000; i++) docs.push({a:i});
 
-      collection.find({}).toArray(function(err, items) {
-        var e = new Date().getTime();
-        // console.log("================== total time :: " + (e - s));
+      collection.insert(docs, {w:1}, function(err, ids) {
+        var s = new Date().getTime();
 
-        test.equal(30000, items.length);
-        test.done();
-      })
+        collection.find({}).toArray(function(err, items) {
+          var e = new Date().getTime();
+          // console.log("================== total time :: " + (e - s));
+
+          test.equal(30000, items.length);
+          db.close();
+          test.done();
+        })
+      });
     });
   });
 }
@@ -2157,21 +2276,24 @@ exports.shouldNotFailDueToStackOverflowToArray = function(configuration, test) {
  * @api private
  */
 exports.shouldCorrectlySkipAndLimit = function(configuration, test) {
-  var client = configuration.db();
-  var collection = client.collection('shouldCorrectlySkipAndLimit')
-  var docs = [];
-  for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var collection = db.collection('shouldCorrectlySkipAndLimit')
+    var docs = [];
+    for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
 
-  collection.insert(docs, {w:1}, function(err, ids) {
+    collection.insert(docs, {w:1}, function(err, ids) {
 
-    collection.find({}, {OrderNumber:1}).skip(10).limit(10).toArray(function(err, items) {
-      test.equal(10, items[0].OrderNumber);
+      collection.find({}, {OrderNumber:1}).skip(10).limit(10).toArray(function(err, items) {
+        test.equal(10, items[0].OrderNumber);
 
-      collection.find({}, {OrderNumber:1}).skip(10).limit(10).count(true, function(err, count) {
-        test.equal(10, count);
-        test.done();
-      });
-    })
+        collection.find({}, {OrderNumber:1}).skip(10).limit(10).count(true, function(err, count) {
+          test.equal(10, count);
+          db.close();
+          test.done();
+        });
+      })
+    });
   });
 }
 
@@ -2180,15 +2302,18 @@ exports.shouldCorrectlySkipAndLimit = function(configuration, test) {
  * @api private
  */
 exports.shouldFailToTailANormalCollection = function(configuration, test) {
-  var client = configuration.db();
-  var collection = client.collection('shouldFailToTailANormalCollection')
-  var docs = [];
-  for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var collection = db.collection('shouldFailToTailANormalCollection')
+    var docs = [];
+    for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
 
-  collection.insert(docs, {w:1}, function(err, ids) {
-    collection.find({}, {tailable:true}).each(function(err, doc) {
-      test.ok(err instanceof Error);
-      test.done();
+    collection.insert(docs, {w:1}, function(err, ids) {
+      collection.find({}, {tailable:true}).each(function(err, doc) {
+        test.ok(err instanceof Error);
+        db.close();
+        test.done();
+      });
     });
   });
 }

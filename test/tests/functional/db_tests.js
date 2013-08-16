@@ -242,36 +242,39 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = function(co
 exports.shouldCorrectlyDereferenceDbRef = function(configuration, test) {
   var DBRef = configuration.getMongoPackage().DBRef
     , ObjectID = configuration.getMongoPackage().ObjectID;
-  var client = configuration.db();
 
-  client.createCollection('test_deref', function(err, collection) {
-    collection.insert({'a':1}, {w:1}, function(err, ids) {
-      collection.remove({}, {w:1}, function(err, result) {
-        collection.count(function(err, count) {
-          test.equal(0, count);
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_deref', function(err, collection) {
+      collection.insert({'a':1}, {w:1}, function(err, ids) {
+        collection.remove({}, {w:1}, function(err, result) {
+          collection.count(function(err, count) {
+            test.equal(0, count);
 
-          // Execute deref a db reference
-          client.dereference(new DBRef("test_deref", new ObjectID()), function(err, result) {
-            collection.insert({'x':'hello'}, {w:1}, function(err, ids) {
-              collection.findOne(function(err, document) {
-                test.equal('hello', document.x);
-
-                client.dereference(new DBRef("test_deref", document._id), function(err, result) {
+            // Execute deref a db reference
+            db.dereference(new DBRef("test_deref", new ObjectID()), function(err, result) {
+              collection.insert({'x':'hello'}, {w:1}, function(err, ids) {
+                collection.findOne(function(err, document) {
                   test.equal('hello', document.x);
 
-                  client.dereference(new DBRef("test_deref", 4), function(err, result) {
-                    var obj = {'_id':4};
+                  db.dereference(new DBRef("test_deref", document._id), function(err, result) {
+                    test.equal('hello', document.x);
 
-                    collection.insert(obj, {w:1}, function(err, ids) {
-                      client.dereference(new DBRef("test_deref", 4), function(err, document) {
+                    db.dereference(new DBRef("test_deref", 4), function(err, result) {
+                      var obj = {'_id':4};
 
-                        test.equal(obj['_id'], document._id);
-                        collection.remove({}, {w:1}, function(err, result) {
-                          collection.insert({'x':'hello'}, {w:1}, function(err, ids) {
-                            client.dereference(new DBRef("test_deref", null), function(err, result) {
-                              test.equal(null, result);
-                              // Let's close the db
-                              test.done();
+                      collection.insert(obj, {w:1}, function(err, ids) {
+                        db.dereference(new DBRef("test_deref", 4), function(err, document) {
+
+                          test.equal(obj['_id'], document._id);
+                          collection.remove({}, {w:1}, function(err, result) {
+                            collection.insert({'x':'hello'}, {w:1}, function(err, ids) {
+                              db.dereference(new DBRef("test_deref", null), function(err, result) {
+                                test.equal(null, result);
+                                // Let's close the db
+                                db.close();
+                                test.done();
+                              });
                             });
                           });
                         });
@@ -281,10 +284,10 @@ exports.shouldCorrectlyDereferenceDbRef = function(configuration, test) {
                 });
               });
             });
-          });
+          })
         })
       })
-    })
+    });
   });
 }
 
@@ -603,31 +606,34 @@ exports.shouldCorrectlyHandleFailedConnection = function(configuration, test) {
  */
 exports.shouldCorrectlyResaveDBRef = function(configuration, test) {
   var DBRef = configuration.getMongoPackage().DBRef;
-  var client = configuration.db();
 
-  client.dropCollection('test_resave_dbref', function() {
-    client.createCollection('test_resave_dbref', function(err, collection) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.dropCollection('test_resave_dbref', function() {
+      db.createCollection('test_resave_dbref', function(err, collection) {
 
-      collection.insert({'name': 'parent'}, {safe : true}, function(err, objs) {
-         test.ok(objs && objs.length == 1 && objs[0]._id != null);
-         var parent = objs[0];
-         var child = {'name' : 'child', 'parent' : new DBRef("test_resave_dbref",  parent._id)};
+        collection.insert({'name': 'parent'}, {safe : true}, function(err, objs) {
+           test.ok(objs && objs.length == 1 && objs[0]._id != null);
+           var parent = objs[0];
+           var child = {'name' : 'child', 'parent' : new DBRef("test_resave_dbref",  parent._id)};
 
-         collection.insert(child, {safe : true}, function(err, objs) {
+           collection.insert(child, {safe : true}, function(err, objs) {
 
-           collection.findOne({'name' : 'child'}, function(err, child) { //Child deserialized
-              test.ok(child != null);
+             collection.findOne({'name' : 'child'}, function(err, child) { //Child deserialized
+                test.ok(child != null);
 
-              collection.save(child, {save : true}, function(err) {
+                collection.save(child, {save : true}, function(err) {
 
-                collection.findOne({'parent' : new DBRef("test_resave_dbref",  parent._id)},
-                  function(err, child) {
-                    test.ok(child != null);//!!!! Main test point!
-                    test.done();
-                  })
-              });
+                  collection.findOne({'parent' : new DBRef("test_resave_dbref",  parent._id)},
+                    function(err, child) {
+                      test.ok(child != null);//!!!! Main test point!
+                      db.close();
+                      test.done();
+                    })
+                });
+             });
            });
-         });
+        });
       });
     });
   });
@@ -690,35 +696,41 @@ exports.shouldCorrectlyDereferenceDbRefExamples = function(configuration, test) 
  * @_function logout
  * @ignore
  */
-exports.shouldCorrectlyLogoutFromTheDatabase = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+exports.shouldCorrectlyLogoutFromTheDatabase = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    test.equal(null, err);
-
-    // Add a user to the database
-    db.addUser('user', 'name', function(err, result) {
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
       test.equal(null, err);
 
-      // Authenticate
-      db.authenticate('user', 'name', function(err, result) {
-        test.equal(true, result);
+      // Add a user to the database
+      db.addUser('user', 'name', function(err, result) {
+        test.equal(null, err);
 
-        // Logout the db
-        db.logout(function(err, result) {
+        // Authenticate
+        db.authenticate('user', 'name', function(err, result) {
           test.equal(true, result);
 
-          db.close();
-          test.done();
+          // Logout the db
+          db.logout(function(err, result) {
+            test.equal(true, result);
+
+            db.close();
+            test.done();
+          });
         });
       });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }
 
 /**
@@ -728,30 +740,36 @@ exports.shouldCorrectlyLogoutFromTheDatabase = function(configuration, test) {
  * @_function authenticate
  * @ignore
  */
-exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    test.equal(null, err);
-
-    // Add a user to the database
-    db.addUser('user', 'name', function(err, result) {
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
       test.equal(null, err);
 
-      // Authenticate
-      db.authenticate('user', 'name', function(err, result) {
-        test.equal(true, result);
+      // Add a user to the database
+      db.addUser('user', 'name', function(err, result) {
+        test.equal(null, err);
 
-        db.close();
-        test.done();
+        // Authenticate
+        db.authenticate('user', 'name', function(err, result) {
+          test.equal(true, result);
+
+          db.close();
+          test.done();
+        });
       });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }
 
 /**
@@ -761,25 +779,31 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = function(configuration, 
  * @_function addUser
  * @ignore
  */
-exports.shouldCorrectlyAddUserToDb = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+exports.shouldCorrectlyAddUserToDb = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    test.equal(null, err);
-
-    // Add a user to the database
-    db.addUser('user', 'name', function(err, result) {
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
       test.equal(null, err);
 
-      db.close();
-      test.done();
+      // Add a user to the database
+      db.addUser('user', 'name', function(err, result) {
+        test.equal(null, err);
+
+        db.close();
+        test.done();
+      });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }
 
 /**
@@ -789,44 +813,50 @@ exports.shouldCorrectlyAddUserToDb = function(configuration, test) {
  * @_function removeUser
  * @ignore
  */
-exports.shouldCorrectlyAddAndRemoveUser = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+exports.shouldCorrectlyAddAndRemoveUser = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    test.equal(null, err);
-
-    // Add a user to the database
-    db.addUser('user', 'name', function(err, result) {
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
       test.equal(null, err);
 
-      // Authenticate
-      db.authenticate('user', 'name', function(err, result) {
-        test.equal(true, result);
+      // Add a user to the database
+      db.addUser('user', 'name', function(err, result) {
+        test.equal(null, err);
 
-        // Logout the db
-        db.logout(function(err, result) {
+        // Authenticate
+        db.authenticate('user', 'name', function(err, result) {
           test.equal(true, result);
 
-          // Remove the user from the db
-          db.removeUser('user', function(err, result) {
+          // Logout the db
+          db.logout(function(err, result) {
+            test.equal(true, result);
 
-            // Authenticate
-            db.authenticate('user', 'name', function(err, result) {
-              test.equal(false, result);
+            // Remove the user from the db
+            db.removeUser('user', function(err, result) {
 
-              db.close();
-              test.done();
+              // Authenticate
+              db.authenticate('user', 'name', function(err, result) {
+                test.equal(false, result);
+
+                db.close();
+                test.done();
+              });
             });
           });
         });
       });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }
 
 /**

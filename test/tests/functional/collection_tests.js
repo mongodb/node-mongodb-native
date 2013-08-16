@@ -87,48 +87,49 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = function(configu
  * @ignore
  */
 exports.shouldCorrectExecuteBasicCollectionMethods = function(configuration, test) {
-  var client = configuration.db();
-
-  var collection = client.createCollection('test_collection_methods', function(err, collection) {
-    // Verify that all the result are correct coming back (should contain the value ok)
-    test.equal('test_collection_methods', collection.collectionName);
-    // Let's check that the collection was created correctly
-    client.collectionNames(function(err, documents) {
-      var found = false;
-      documents.forEach(function(document) {
-        if(document.name == "integration_tests_.test_collection_methods") found = true;
-      });
-      test.ok(true, found);
-
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, client) {    
+    var collection = client.createCollection('test_collection_methods', function(err, collection) {
+      // Verify that all the result are correct coming back (should contain the value ok)
+      test.equal('test_collection_methods', collection.collectionName);
       // Let's check that the collection was created correctly
-      client.collectionNames({namesOnly:true}, function(err, names) {
-        test.ok(typeof names[0] == 'string');
-
-        // Rename the collection and check that it's gone
-        client.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
-          test.equal(null, err);
-          // Drop the collection and check that it's gone
-          client.dropCollection("test_collection_methods2", function(err, result) {
-            test.equal(true, result);
-          });
+      db.collectionNames(function(err, documents) {
+        var found = false;
+        documents.forEach(function(document) {
+          if(document.name == "integration_tests_.test_collection_methods") found = true;
         });
+        test.ok(true, found);
 
+        // Let's check that the collection was created correctly
+        db.collectionNames({namesOnly:true}, function(err, names) {
+          test.ok(typeof names[0] == 'string');
 
-        client.createCollection('test_collection_methods3', function(err, collection) {
-          // Verify that all the result are correct coming back (should contain the value ok)
-          test.equal('test_collection_methods3', collection.collectionName);
-        
-          client.createCollection('test_collection_methods4', function(err, collection) {
+          // Rename the collection and check that it's gone
+          db.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
+            test.equal(null, err);
+            // Drop the collection and check that it's gone
+            db.dropCollection("test_collection_methods2", function(err, result) {
+              test.equal(true, result);
+            });
+          });
+
+          db.createCollection('test_collection_methods3', function(err, collection) {
             // Verify that all the result are correct coming back (should contain the value ok)
-            test.equal('test_collection_methods4', collection.collectionName);
-        
-            // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
-            client.renameCollection("test_collection_methods4", "test_collection_methods3", {dropTarget:true}, function(err, reply) {
-              test.equal(null, err);
+            test.equal('test_collection_methods3', collection.collectionName);
+          
+            db.createCollection('test_collection_methods4', function(err, collection) {
+              // Verify that all the result are correct coming back (should contain the value ok)
+              test.equal('test_collection_methods4', collection.collectionName);
+          
+              // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
+              db.renameCollection("test_collection_methods4", "test_collection_methods3", {dropTarget:true}, function(err, reply) {
+                test.equal(null, err);
 
-              client.dropCollection("test_collection_methods3", function(err, result) {
-                test.equal(true, result);
-                test.done();
+                db.dropCollection("test_collection_methods3", function(err, result) {
+                  test.equal(true, result);
+                  db.close();
+                  test.done();
+                });
               });
             });
           });
@@ -142,32 +143,35 @@ exports.shouldCorrectExecuteBasicCollectionMethods = function(configuration, tes
  * @ignore
  */
 exports.shouldAccessToCollections = function(configuration, test) {
-  var client = configuration.db();
-  // Create two collections
-  client.createCollection('test.spiderman', function(r) {
-    client.createCollection('test.mario', function(r) {
-      // Insert test documents (creates collections)
-      client.collection('test.spiderman', function(err, spiderman_collection) {
-        spiderman_collection.insert({foo:5}, {w: 1}, function(err, r) {
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, client) {
+    // Create two collections
+    db.createCollection('test.spiderman', function(r) {
+      db.createCollection('test.mario', function(r) {
+        // Insert test documents (creates collections)
+        db.collection('test.spiderman', function(err, spiderman_collection) {
+          spiderman_collection.insert({foo:5}, {w: 1}, function(err, r) {
 
-          client.collection('test.mario', function(err, mario_collection) {
-            mario_collection.insert({bar:0}, {w: 1}, function(err, r) {
-              // Assert collections
-              client.collections(function(err, collections) {
-                var found_spiderman = false;
-                var found_mario = false;
-                var found_does_not_exist = false;
+            db.collection('test.mario', function(err, mario_collection) {
+              mario_collection.insert({bar:0}, {w: 1}, function(err, r) {
+                // Assert collections
+                db.collections(function(err, collections) {
+                  var found_spiderman = false;
+                  var found_mario = false;
+                  var found_does_not_exist = false;
 
-                collections.forEach(function(collection) {
-                  if(collection.collectionName == "test.spiderman") found_spiderman = true;
-                  if(collection.collectionName == "test.mario") found_mario = true;
-                  if(collection.collectionName == "does_not_exist") found_does_not_exist = true;
+                  collections.forEach(function(collection) {
+                    if(collection.collectionName == "test.spiderman") found_spiderman = true;
+                    if(collection.collectionName == "test.mario") found_mario = true;
+                    if(collection.collectionName == "does_not_exist") found_does_not_exist = true;
+                  });
+
+                  test.ok(found_spiderman);
+                  test.ok(found_mario);
+                  test.ok(!found_does_not_exist);
+                  db.close();
+                  test.done();
                 });
-
-                test.ok(found_spiderman);
-                test.ok(found_mario);
-                test.ok(!found_does_not_exist);
-                test.done();
               });
             });
           });
@@ -181,25 +185,27 @@ exports.shouldAccessToCollections = function(configuration, test) {
  * @ignore
  */
 exports.shouldCorrectlyDropCollection = function(configuration, test) {
-  var client = configuration.db();
-
-  client.createCollection('test_drop_collection2', function(err, r) {
-    client.dropCollection('test_drop_collection', function(err, r) {
-      test.ok(err instanceof Error);
-      test.equal("ns not found", err.message);
-      var found = false;
-      // Ensure we don't have the collection in the set of names
-      client.collectionNames(function(err, replies) {
-        replies.forEach(function(err, document) {
-          if(document.name == "test_drop_collection") {
-            found = true;
-            return;
-          }
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_drop_collection2', function(err, r) {
+      db.dropCollection('test_drop_collection', function(err, r) {
+        test.ok(err instanceof Error);
+        test.equal("ns not found", err.message);
+        var found = false;
+        // Ensure we don't have the collection in the set of names
+        db.collectionNames(function(err, replies) {
+          replies.forEach(function(err, document) {
+            if(document.name == "test_drop_collection") {
+              found = true;
+              return;
+            }
+          });
+          // If we have an instance of the index throw and error
+          if(found) throw new Error("should not fail");
+          // Let's close the db
+          db.close();
+          test.done();
         });
-        // If we have an instance of the index throw and error
-        if(found) throw new Error("should not fail");
-        // Let's close the db
-        test.done();
       });
     });
   });
@@ -257,31 +263,36 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = function(configuration, 
  * @ignore
  */
 exports.shouldCorrectlyRetriveCollectionNames = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_collection_names', function(err, r) {
+      db.collectionNames(function(err, documents) {
+        var found = false;
+        var found2 = false;
+  
+        documents.forEach(function(document) {
+          if(document.name == configuration.db_name + '.test_collection_names') found = true;
+        });
+  
+        test.ok(found);
+        // Insert a document in an non-existing collection should create the collection
+        db.collection('test_collection_names2', function(err, collection) {
+          collection.insert({a:1}, {w: 1}, function(err, r) {
+            db.collectionNames(function(err, documents) {
+              documents.forEach(function(document) {
+                if(document.name == configuration.db_name + '.test_collection_names2') found = true;
+                if(document.name == configuration.db_name + '.test_collection_names') found2 = true;
+              });
 
-  client.createCollection('test_collection_names', function(err, r) {
-    client.collectionNames(function(err, documents) {
-      var found = false;
-      var found2 = false;
-      documents.forEach(function(document) {
-        if(document.name == configuration.db_name + '.test_collection_names') found = true;
-      });
-      test.ok(found);
-      // Insert a document in an non-existing collection should create the collection
-      client.collection('test_collection_names2', function(err, collection) {
-        collection.insert({a:1}, {w: 1}, function(err, r) {
-          client.collectionNames(function(err, documents) {
-            documents.forEach(function(document) {
-              if(document.name == configuration.db_name + '.test_collection_names2') found = true;
-              if(document.name == configuration.db_name + '.test_collection_names') found2 = true;
+              test.ok(found);
+              test.ok(found2);
+              
+              // Let's close the db
+              db.close();
+              test.done();
             });
-
-            test.ok(found);
-            test.ok(found2);
-            // Let's close the db
-            test.done();
-          });
-        })
+          })
+        });
       });
     });
   });
@@ -292,22 +303,26 @@ exports.shouldCorrectlyRetriveCollectionNames = function(configuration, test) {
  */
 exports.shouldCorrectlyRetrieveCollectionInfo = function(configuration, test) {
   var Cursor = configuration.getMongoPackage().Cursor;
-  var client = configuration.db();
 
-  client.createCollection('test_collections_info', function(err, r) {
-    client.collectionsInfo(function(err, cursor) {
-      test.ok((cursor instanceof Cursor));
-      // Fetch all the collection info
-      cursor.toArray(function(err, documents) {
-        test.ok(documents.length > 1);
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_collections_info', function(err, r) {
+      db.collectionsInfo(function(err, cursor) {
+        test.ok((cursor instanceof Cursor));
+        // Fetch all the collection info
+        cursor.toArray(function(err, documents) {
+          test.ok(documents.length > 1);
 
-        var found = false;
-        documents.forEach(function(document) {
-          if(document.name == configuration.db_name + '.test_collections_info') found = true;
+          var found = false;
+          documents.forEach(function(document) {
+            if(document.name == configuration.db_name + '.test_collections_info') found = true;
+          });
+          
+          test.ok(found);
+          // Let's close the db
+          db.close();
+          test.done();
         });
-        test.ok(found);
-        // Let's close the db
-        test.done();
       });
     });
   });
@@ -428,42 +443,19 @@ exports.shouldCorrectlyExecuteIndexExists = function(configuration, test) {
  */
 exports.shouldEnsureStrictAccessCollection = function(configuration, test) {
   var Collection = configuration.getMongoPackage().Collection;
-  var error_client = configuration.db();
-
-  error_client.collection('does-not-exist', {strict: true}, function(err, collection) {
-    test.ok(err instanceof Error);
-    test.equal("Collection does-not-exist does not exist. Currently in safe mode.", err.message);
-  });
-
-  error_client.createCollection('test_strict_access_collection', function(err, collection) {
-    error_client.collection('test_strict_access_collection', {w: 1}, function(err, collection) {
-      test.ok(collection instanceof Collection);
-      // Let's close the db
-      test.done();
-    });
-  });
-}
-
-/**
- * @ignore
- */
-exports.shouldPerformStrictCreateCollection = function(configuration, test) {
-  var error_client = configuration.db();
-  var Collection = configuration.getMongoPackage().Collection;
-
-  error_client.createCollection('test_strict_create_collection', function(err, collection) {
-    test.ok(collection instanceof Collection);
-
-    // Creating an existing collection should fail
-    error_client.createCollection('test_strict_create_collection', {strict: true}, function(err, collection) {
+  
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.collection('does-not-exist', {strict: true}, function(err, collection) {
       test.ok(err instanceof Error);
-      test.equal("Collection test_strict_create_collection already exists. Currently in safe mode.", err.message);
+      test.equal("Collection does-not-exist does not exist. Currently in safe mode.", err.message);
+    });
 
-      // Switch out of strict mode and try to re-create collection
-      error_client.createCollection('test_strict_create_collection', {strict: false}, function(err, collection) {
+    db.createCollection('test_strict_access_collection', function(err, collection) {
+      db.collection('test_strict_access_collection', {w: 1}, function(err, collection) {
         test.ok(collection instanceof Collection);
-
         // Let's close the db
+        db.close();
         test.done();
       });
     });
@@ -473,50 +465,81 @@ exports.shouldPerformStrictCreateCollection = function(configuration, test) {
 /**
  * @ignore
  */
-exports.shouldFailToInsertDueToIllegalKeys = function(configuration, test) {
-  var client = configuration.db();
+exports.shouldPerformStrictCreateCollection = function(configuration, test) {
+  var Collection = configuration.getMongoPackage().Collection;
 
-  client.createCollection('test_invalid_key_names', function(err, collection) {
-    // Legal inserts
-    collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}], {w: 1}, function(err, r) {
-      // Illegal insert for key
-      collection.insert({'$hello':'world'}, {w: 1}, function(err, doc) {
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_strict_create_collection', function(err, collection) {
+      test.ok(collection instanceof Collection);
+
+      // Creating an existing collection should fail
+      db.createCollection('test_strict_create_collection', {strict: true}, function(err, collection) {
         test.ok(err instanceof Error);
-        test.equal("key $hello must not start with '$'", err.message);
+        test.equal("Collection test_strict_create_collection already exists. Currently in safe mode.", err.message);
 
-        collection.insert({'hello':{'$hello':'world'}}, {w: 1}, function(err, doc) {
+        // Switch out of strict mode and try to re-create collection
+        db.createCollection('test_strict_create_collection', {strict: false}, function(err, collection) {
+          test.ok(collection instanceof Collection);
+
+          // Let's close the db
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldFailToInsertDueToIllegalKeys = function(configuration, test) {
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_invalid_key_names', function(err, collection) {
+      // Legal inserts
+      collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}], {w: 1}, function(err, r) {
+        // Illegal insert for key
+        collection.insert({'$hello':'world'}, {w: 1}, function(err, doc) {
           test.ok(err instanceof Error);
           test.equal("key $hello must not start with '$'", err.message);
 
-          collection.insert({'he$llo':'world'}, {w: 1}, function(err, docs) {
-            test.ok(docs[0].constructor == Object);
+          collection.insert({'hello':{'$hello':'world'}}, {w: 1}, function(err, doc) {
+            test.ok(err instanceof Error);
+            test.equal("key $hello must not start with '$'", err.message);
 
-            collection.insert({'hello':{'hell$o':'world'}}, {w: 1}, function(err, docs) {
-              test.ok(err == null);
+            collection.insert({'he$llo':'world'}, {w: 1}, function(err, docs) {
+              test.ok(docs[0].constructor == Object);
 
-              collection.insert({'.hello':'world'}, {w: 1}, function(err, doc) {
-                test.ok(err instanceof Error);
-                test.equal("key .hello must not contain '.'", err.message);
+              collection.insert({'hello':{'hell$o':'world'}}, {w: 1}, function(err, docs) {
+                test.ok(err == null);
 
-                collection.insert({'hello':{'.hello':'world'}}, {w: 1}, function(err, doc) {
+                collection.insert({'.hello':'world'}, {w: 1}, function(err, doc) {
                   test.ok(err instanceof Error);
                   test.equal("key .hello must not contain '.'", err.message);
 
-                  collection.insert({'hello.':'world'}, {w: 1}, function(err, doc) {
+                  collection.insert({'hello':{'.hello':'world'}}, {w: 1}, function(err, doc) {
                     test.ok(err instanceof Error);
-                    test.equal("key hello. must not contain '.'", err.message);
+                    test.equal("key .hello must not contain '.'", err.message);
 
-                    collection.insert({'hello':{'hello.':'world'}}, {w: 1}, function(err, doc) {
+                    collection.insert({'hello.':'world'}, {w: 1}, function(err, doc) {
                       test.ok(err instanceof Error);
                       test.equal("key hello. must not contain '.'", err.message);
-                      // Let's close the db
-                      test.done();
+
+                      collection.insert({'hello':{'hello.':'world'}}, {w: 1}, function(err, doc) {
+                        test.ok(err instanceof Error);
+                        test.equal("key hello. must not contain '.'", err.message);
+                        // Let's close the db
+                        db.close();
+                        test.done();
+                      });
                     });
                   });
                 });
-              });
+              })
             })
-          })
+          });
         });
       });
     });
@@ -527,31 +550,33 @@ exports.shouldFailToInsertDueToIllegalKeys = function(configuration, test) {
  * @ignore
  */
 exports.shouldFailDueToIllegalCollectionNames = function(configuration, test) {
-  var client = configuration.db();
-  
-  client.collection(5, function(err, collection) {
-    test.equal("collection name must be a String", err.message);
-  });
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.collection(5, function(err, collection) {
+      test.equal("collection name must be a String", err.message);
+    });
 
-  client.collection("", function(err, collection) {
-    test.equal("collection names cannot be empty", err.message);
-  });
+    db.collection("", function(err, collection) {
+      test.equal("collection names cannot be empty", err.message);
+    });
 
-  client.collection("te$t", function(err, collection) {
-    test.equal("collection names must not contain '$'", err.message);
-  });
+    db.collection("te$t", function(err, collection) {
+      test.equal("collection names must not contain '$'", err.message);
+    });
 
-  client.collection(".test", function(err, collection) {
-    test.equal("collection names must not start or end with '.'", err.message);
-  });
+    db.collection(".test", function(err, collection) {
+      test.equal("collection names must not start or end with '.'", err.message);
+    });
 
-  client.collection("test.", function(err, collection) {
-    test.equal("collection names must not start or end with '.'", err.message);
-  });
+    db.collection("test.", function(err, collection) {
+      test.equal("collection names must not start or end with '.'", err.message);
+    });
 
-  client.collection("test..t", function(err, collection) {
-    test.equal("collection names cannot be empty", err.message);
-    test.done();
+    db.collection("test..t", function(err, collection) {
+      test.equal("collection names cannot be empty", err.message);
+      db.close();
+      test.done();
+    });
   });
 }
 
@@ -559,12 +584,15 @@ exports.shouldFailDueToIllegalCollectionNames = function(configuration, test) {
  * @ignore
  */
 exports.shouldCorrectlyCountOnNonExistingCollection = function(configuration, test) {
-  var client = configuration.db();
-  client.collection('test_multiple_insert_2', function(err, collection) {
-    collection.count(function(err, count) {
-      test.equal(0, count);
-      // Let's close the db
-      test.done();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.collection('test_multiple_insert_2', function(err, collection) {
+      collection.count(function(err, count) {
+        test.equal(0, count);
+        // Let's close the db
+        db.close();
+        test.done();
+      });
     });
   });
 }
@@ -574,40 +602,43 @@ exports.shouldCorrectlyCountOnNonExistingCollection = function(configuration, te
  */
 exports.shouldCorrectlyExecuteSave = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
-  var client = configuration.db();
+  
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_save', function(err, collection) {
+      var doc = {'hello':'world'};
+      collection.save(doc, {w: 1}, function(err, docs) {
+        test.ok(docs._id instanceof ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
 
-  client.createCollection('test_save', function(err, collection) {
-    var doc = {'hello':'world'};
-    collection.save(doc, {w: 1}, function(err, docs) {
-      test.ok(docs._id instanceof ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
+        collection.count(function(err, count) {
+          test.equal(1, count);
+          doc = docs;
 
-      collection.count(function(err, count) {
-        test.equal(1, count);
-        doc = docs;
+          collection.save(doc, {w: 1}, function(err, doc2) {
 
-        collection.save(doc, {w: 1}, function(err, doc2) {
+            collection.count(function(err, count) {
+              test.equal(1, count);
 
-          collection.count(function(err, count) {
-            test.equal(1, count);
+              collection.findOne(function(err, doc3) {
+                test.equal('world', doc3.hello);
 
-            collection.findOne(function(err, doc3) {
-              test.equal('world', doc3.hello);
+                doc3.hello = 'mike';
 
-              doc3.hello = 'mike';
+                collection.save(doc3, {w: 1}, function(err, doc4) {
+                  collection.count(function(err, count) {
+                    test.equal(1, count);
 
-              collection.save(doc3, {w: 1}, function(err, doc4) {
-                collection.count(function(err, count) {
-                  test.equal(1, count);
+                    collection.findOne(function(err, doc5) {
+                      test.equal('mike', doc5.hello);
 
-                  collection.findOne(function(err, doc5) {
-                    test.equal('mike', doc5.hello);
-
-                    // Save another document
-                    collection.save({hello:'world'}, {w: 1}, function(err, doc) {
-                      collection.count(function(err, count) {
-                        test.equal(2, count);
-                        // Let's close the db
-                        test.done();
+                      // Save another document
+                      collection.save({hello:'world'}, {w: 1}, function(err, doc) {
+                        collection.count(function(err, count) {
+                          test.equal(2, count);
+                          // Let's close the db
+                          db.close();
+                          test.done();
+                        });
                       });
                     });
                   });
@@ -626,14 +657,17 @@ exports.shouldCorrectlyExecuteSave = function(configuration, test) {
  */
 exports.shouldCorrectlySaveDocumentWithLongValue = function(configuration, test) {
   var Long = configuration.getMongoPackage().Long;
-  var client = configuration.db();
 
-  client.createCollection('test_save_long', function(err, collection) {
-    collection.insert({'x':Long.fromNumber(9223372036854775807)}, {w: 1}, function(err, r) {
-      collection.findOne(function(err, doc) {
-        test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
-        // Let's close the db
-        test.done();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_save_long', function(err, collection) {
+      collection.insert({'x':Long.fromNumber(9223372036854775807)}, {w: 1}, function(err, r) {
+        collection.findOne(function(err, doc) {
+          test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
+          // Let's close the db
+          db.close();
+          test.done();
+        });
       });
     });
   });
@@ -643,26 +677,29 @@ exports.shouldCorrectlySaveDocumentWithLongValue = function(configuration, test)
  * @ignore
  */
 exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = function(configuration, test) {
-  var client = configuration.db();
-  client.createCollection('test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection', function(err, collection) {
-    var a = {'_id':'1', 'hello':'world'};
-    collection.save(a, {w: 1}, function(err, docs) {
-      collection.count(function(err, count) {
-        test.equal(1, count);
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection', function(err, collection) {
+      var a = {'_id':'1', 'hello':'world'};
+      collection.save(a, {w: 1}, function(err, docs) {
+        collection.count(function(err, count) {
+          test.equal(1, count);
 
-        collection.findOne(function(err, doc) {
-          test.equal('world', doc.hello);
+          collection.findOne(function(err, doc) {
+            test.equal('world', doc.hello);
 
-          doc.hello = 'mike';
-          collection.save(doc, {w: 1}, function(err, doc) {
-            collection.count(function(err, count) {
-              test.equal(1, count);
-            });
+            doc.hello = 'mike';
+            collection.save(doc, {w: 1}, function(err, doc) {
+              collection.count(function(err, count) {
+                test.equal(1, count);
+              });
 
-            collection.findOne(function(err, doc) {
-              test.equal('mike', doc.hello);
-              // Let's close the db
-              test.done();
+              collection.findOne(function(err, doc) {
+                test.equal('mike', doc.hello);
+                // Let's close the db
+                db.close();
+                test.done();
+              });
             });
           });
         });
@@ -676,54 +713,57 @@ exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = function(configur
  */
 exports.shouldCorrectlyPerformUpsert = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
-  var client = configuration.db();
 
-  client.createCollection('test_should_correctly_do_upsert', function(err, collection) {
-    var id = new ObjectID(null)
-    var doc = {_id:id, a:1};
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_should_correctly_do_upsert', function(err, collection) {
+      var id = new ObjectID(null)
+      var doc = {_id:id, a:1};
 
-    Step(
-      function test1() {
-        var self = this;
+      Step(
+        function test1() {
+          var self = this;
 
-        collection.update({"_id":id}, doc, {upsert:true, w: 1}, function(err, result) {
-          test.equal(null, err);
-          test.equal(1, result);
+          collection.update({"_id":id}, doc, {upsert:true, w: 1}, function(err, result) {
+            test.equal(null, err);
+            test.equal(1, result);
 
-          collection.findOne({"_id":id}, self);
-        });
-      },
-
-      function test2(err, doc) {
-        var self = this;
-        test.equal(1, doc.a);
-
-        id = new ObjectID(null)
-        doc = {_id:id, a:2};
-
-        collection.update({"_id":id}, doc, {w: 1, upsert:true}, function(err, result) {
-          test.equal(null, err);
-          test.equal(1, result);
-
-          collection.findOne({"_id":id}, self);
-        });
-      },
-
-      function test3(err, doc2) {
-        var self = this;
-        test.equal(2, doc2.a);
-
-        collection.update({"_id":id}, doc2, {w: 1, upsert:true}, function(err, result) {
-          test.equal(null, err);
-          test.equal(1, result);
-
-          collection.findOne({"_id":id}, function(err, doc) {
-            test.equal(2, doc.a);
-            test.done();
+            collection.findOne({"_id":id}, self);
           });
-        });
-      }
-    );
+        },
+
+        function test2(err, doc) {
+          var self = this;
+          test.equal(1, doc.a);
+
+          id = new ObjectID(null)
+          doc = {_id:id, a:2};
+
+          collection.update({"_id":id}, doc, {w: 1, upsert:true}, function(err, result) {
+            test.equal(null, err);
+            test.equal(1, result);
+
+            collection.findOne({"_id":id}, self);
+          });
+        },
+
+        function test3(err, doc2) {
+          var self = this;
+          test.equal(2, doc2.a);
+
+          collection.update({"_id":id}, doc2, {w: 1, upsert:true}, function(err, result) {
+            test.equal(null, err);
+            test.equal(1, result);
+
+            collection.findOne({"_id":id}, function(err, doc) {
+              test.equal(2, doc.a);
+              db.close();
+              test.done();
+            });
+          });
+        }
+      );
+    });
   });
 }
 
@@ -732,16 +772,19 @@ exports.shouldCorrectlyPerformUpsert = function(configuration, test) {
  */
 exports.shouldCorrectlyUpdateWithNoDocs = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
-  var client = configuration.db();
+  
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
+      var id = new ObjectID(null)
+      var doc = {_id:id, a:1};
+      collection.update({"_id":id}, doc, {w: 1}, function(err, numberofupdateddocs) {
+        test.equal(null, err);
+        test.equal(0, numberofupdateddocs);
 
-  client.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
-    var id = new ObjectID(null)
-    var doc = {_id:id, a:1};
-    collection.update({"_id":id}, doc, {w: 1}, function(err, numberofupdateddocs) {
-      test.equal(null, err);
-      test.equal(0, numberofupdateddocs);
-
-      test.done();
+        db.close();
+        test.done();
+      });
     });
   });
 }
@@ -988,25 +1031,27 @@ exports.shouldCorrectlyDoSimpleCountExamples = function(configuration, test) {
  * @ignore
  */
 exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
+      test.equal('test_should_execute_insert_update_delete_safe_mode', collection.collectionName);
 
-  client.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
-    test.equal('test_should_execute_insert_update_delete_safe_mode', collection.collectionName);
+      collection.insert({i:1}, {w: 1}, function(err, ids) {
+        test.equal(1, ids.length);
+        test.ok(ids[0]._id.toHexString().length == 24);
 
-    collection.insert({i:1}, {w: 1}, function(err, ids) {
-      test.equal(1, ids.length);
-      test.ok(ids[0]._id.toHexString().length == 24);
-
-      // Update the record
-      collection.update({i:1}, {"$set":{i:2}}, {w: 1}, function(err, result) {
-        test.equal(null, err);
-        test.equal(1, result);
-
-        // Remove safely
-        collection.remove({}, {w: 1}, function(err, result) {
+        // Update the record
+        collection.update({i:1}, {"$set":{i:2}}, {w: 1}, function(err, result) {
           test.equal(null, err);
+          test.equal(1, result);
 
-          test.done();
+          // Remove safely
+          collection.remove({}, {w: 1}, function(err, result) {
+            test.equal(null, err);
+
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -1017,32 +1062,34 @@ exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = function(configuratio
  * @ignore
  */
 exports.shouldPerformMultipleSaves = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection("multiple_save_test", function(err, collection) {
+      var doc = {
+        name: 'amit',
+        text: 'some text'
+      };
 
-  client.createCollection("multiple_save_test", function(err, collection) {
-    var doc = {
-      name: 'amit',
-      text: 'some text'
-    };
+      //insert new user
+      collection.save(doc, {w: 1}, function(err, r) {
+        collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
+          var user = users[0]
 
-    //insert new user
-    collection.save(doc, {w: 1}, function(err, r) {
-      collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
-        var user = users[0]
+          if(err) {
+            throw new Error(err)
+          } else if(user) {
+            user.pants = 'worn'
 
-        if(err) {
-          throw new Error(err)
-        } else if(user) {
-          user.pants = 'worn'
-
-          collection.save(user, {w: 1}, function(err, result){
-            test.equal(null, err);
-            test.equal(1, result);
-            test.done();
-          })
-        }
-      });
-    })
+            collection.save(user, {w: 1}, function(err, result){
+              test.equal(null, err);
+              test.equal(1, result);
+              db.close();
+              test.done();
+            })
+          }
+        });
+      })
+    });
   });
 }
 
@@ -1051,45 +1098,47 @@ exports.shouldPerformMultipleSaves = function(configuration, test) {
  */
 exports.shouldCorrectlySaveDocumentWithNestedArray = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
-  var db = configuration.db();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection("save_error_on_save_test", function(err, collection) {
+      // Create unique index for username
+      collection.createIndex([['username', 1]], {w: 1}, function(err, result) {
+        var doc = {
+          email: 'email@email.com',
+          encrypted_password: 'password',
+          friends:
+            [ '4db96b973d01205364000006',
+              '4db94a1948a683a176000001',
+              '4dc77b24c5ba38be14000002' ],
+          location: [ 72.4930088, 23.0431957 ],
+          name: 'Amit Kumar',
+          password_salt: 'salty',
+          profile_fields: [],
+          username: 'amit' };
+        //insert new user
+        collection.save(doc, {w: 1}, function(err, doc) {
 
-  db.createCollection("save_error_on_save_test", function(err, collection) {
-    // Create unique index for username
-    collection.createIndex([['username', 1]], {w: 1}, function(err, result) {
-      var doc = {
-        email: 'email@email.com',
-        encrypted_password: 'password',
-        friends:
-          [ '4db96b973d01205364000006',
-            '4db94a1948a683a176000001',
-            '4dc77b24c5ba38be14000002' ],
-        location: [ 72.4930088, 23.0431957 ],
-        name: 'Amit Kumar',
-        password_salt: 'salty',
-        profile_fields: [],
-        username: 'amit' };
-      //insert new user
-      collection.save(doc, {w: 1}, function(err, doc) {
-
-          collection.find({}).limit(1).toArray(function(err, users) {
-            test.equal(null, err);
-            var user = users[0]
-            user.friends.splice(1,1)
-
-            collection.save(user, function(err, doc) {
+            collection.find({}).limit(1).toArray(function(err, users) {
               test.equal(null, err);
+              var user = users[0]
+              user.friends.splice(1,1)
 
-              // Update again
-              collection.update({_id:new ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, w: 1}, function(err, result) {
+              collection.save(user, function(err, doc) {
                 test.equal(null, err);
-                test.equal(1, result);
 
-                test.done();
+                // Update again
+                collection.update({_id:new ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, w: 1}, function(err, result) {
+                  test.equal(null, err);
+                  test.equal(1, result);
+
+                  db.close();
+                  test.done();
+                });
               });
             });
-          });
-      });
-    })
+        });
+      })
+    });
   });
 }
 
@@ -1097,22 +1146,24 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = function(configuration, tes
  * @ignore
  */
 exports.shouldPeformCollectionRemoveWithNoCallback = function(configuration, test) {
-  var client = configuration.db();
-
-  client.collection("remove_with_no_callback_bug_test", function(err, collection) {
-    collection.save({a:1}, {w: 1}, function(){
-      collection.save({b:1}, {w: 1}, function(){
-        collection.save({c:1}, {w: 1}, function(){
-           collection.remove({a:1}, {w: 1}, function() {
-             // Let's perform a count
-             collection.count(function(err, count) {
-               test.equal(null, err);
-               test.equal(2, count);
-               test.done();
-             });
-           })
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.collection("remove_with_no_callback_bug_test", function(err, collection) {
+      collection.save({a:1}, {w: 1}, function(){
+        collection.save({b:1}, {w: 1}, function(){
+          collection.save({c:1}, {w: 1}, function(){
+             collection.remove({a:1}, {w: 1}, function() {
+               // Let's perform a count
+               collection.count(function(err, count) {
+                 test.equal(null, err);
+                 test.equal(2, count);
+                 db.close();
+                 test.done();
+               });
+             })
+           });
          });
-       });
+      });
     });
   });
 },
@@ -1195,21 +1246,22 @@ exports.shouldCorrectlyReturnACollectionsStats = function(configuration, test) {
  * @ignore
  */
 exports.shouldThrowErrorOnAttemptingSafeRemoveWithNoCallback = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('shouldThrowErrorOnAttemptingSafeRemoveWithNoCallback', function(err, collection) {
+      // insert a doc
+      collection.insert({a:1}, {w: 1}, function(err, result) {
+        test.equal(null, err);
 
-  client.createCollection('shouldThrowErrorOnAttemptingSafeRemoveWithNoCallback', function(err, collection) {
+        // attemp a safe remove with no callback (should throw)
+        try {
+          collection.remove({a:1}, {w: 1})
+          test.ok(false);
+        } catch(err) {}
 
-    // insert a doc
-    collection.insert({a:1}, {w: 1}, function(err, result) {
-      test.equal(null, err);
-
-      // attemp a safe remove with no callback (should throw)
-      try {
-        collection.remove({a:1}, {w: 1})
-        test.ok(false);
-      } catch(err) {}
-
-      test.done();
+        db.close();
+        test.done();
+      });
     });
   });
 }
@@ -1218,17 +1270,19 @@ exports.shouldThrowErrorOnAttemptingSafeRemoveWithNoCallback = function(configur
  * @ignore
  */
 exports.shouldThrowErrorOnAttemptingSafeInsertWithNoCallback = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('shouldThrowErrorOnAttemptingSafeInsertWithNoCallback', function(err, collection) {
 
-  client.createCollection('shouldThrowErrorOnAttemptingSafeInsertWithNoCallback', function(err, collection) {
+      try {
+        // insert a doc
+        collection.insert({a:1}, {w: 1});
+        test.ok(false);
+      } catch(err) {}
 
-    try {
-      // insert a doc
-      collection.insert({a:1}, {w: 1});
-      test.ok(false);
-    } catch(err) {}
-
-    test.done();
+      db.close();
+      test.done();
+    });
   });
 }
 
@@ -1236,33 +1290,35 @@ exports.shouldThrowErrorOnAttemptingSafeInsertWithNoCallback = function(configur
  * @ignore
  */
 exports.shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback = function(configuration, test) {
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
 
-  client.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
+      try {
+        // insert a doc
+        collection.update({a:1}, {$set:{b:1}}, {w: 1, upsert:true});
+        test.ok(false);
+      } catch(err) {}
 
-    try {
-      // insert a doc
-      collection.update({a:1}, {$set:{b:1}}, {w: 1, upsert:true});
-      test.ok(false);
-    } catch(err) {}
-
-    test.done();
+      db.close();
+      test.done();
+    });
   });
 }
 
 /**
  * @ignore
  */
-exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = function(configuration, test) {
-  var client = configuration.db();
-
-  // Parse version of server if available
-  client.admin().serverInfo(function(err, result){
-
-    // Only run if the MongoDB version is higher than 1.7.6
-    if(parseInt((result.version.replace(/\./g, ''))) >= 212) {
-
-      client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex', function(err, collection) {
+exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.1.0"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex', function(err, collection) {
         collection.ensureIndex({createdAt:1}, {expireAfterSeconds:1, w: 1}, function(err, result) {
           test.equal(null, err);
 
@@ -1280,30 +1336,29 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = function(c
                 }
               }
 
+              db.close();
               test.done();
             });
           });
         })
       });
-    } else {
-      test.done();
-    }
-  })
+    });
+  }
 }
 
 /**
  * @ignore
  */
-exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(configuration, test) {
-  var client = configuration.db();
-
-  // Parse version of server if available
-  client.admin().serverInfo(function(err, result){
-
-    // Only run if the MongoDB version is higher than 1.7.6
-    if(parseInt((result.version.replace(/\./g, ''))) >= 212) {
-
-      client.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex', {}, function(err, collection) {
+exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.1.0"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex', {}, function(err, collection) {
         collection.createIndex({createdAt:1}, {expireAfterSeconds:1, w: 1}, function(err, result) {
           test.equal(null, err);
 
@@ -1321,33 +1376,34 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = function(config
                 }
               }
 
+              db.close();
               test.done();
             });
           });
         })
       });
-    } else {
-      test.done();
-    }
-  })
+    });
+  }
 }
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyReadBackDocumentWithNull = function(configuration, test) {
-  var client = configuration.db();
-
-  client.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, function(err, collection) {
-    // Insert a document with a date
-    collection.insert({test:null}, {w: 1}, function(err, result) {
-        test.equal(null, err);
-
-        collection.findOne(function(err, item) {
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, function(err, collection) {
+      // Insert a document with a date
+      collection.insert({test:null}, {w: 1}, function(err, result) {
           test.equal(null, err);
 
-          test.done();
-        });
+          collection.findOne(function(err, item) {
+            test.equal(null, err);
+
+            db.close();
+            test.done();
+          });
+      });
     });
   });
 }
@@ -1356,22 +1412,23 @@ exports.shouldCorrectlyReadBackDocumentWithNull = function(configuration, test) 
  * @ignore
  */
 exports.shouldThrowErrorDueToIllegalUpdate = function(configuration, test) {
-  // console.log("================= hey")
-  var client = configuration.db();
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, function(err, coll) {
+      try {
+        coll.update({}, null, function (err, res) {});
+      } catch (err) {
+        test.equal("document must be a valid JavaScript object", err.message)
+      }    
 
-  client.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, function(err, coll) {
-    try {
-      coll.update({}, null, function (err, res) {});
-    } catch (err) {
-      test.equal("document must be a valid JavaScript object", err.message)
-    }    
+      try {
+        coll.update(null, null, function (err, res) {});
+      } catch (err) {
+        test.equal("selector must be a valid JavaScript object", err.message)
+      }    
 
-    try {
-      coll.update(null, null, function (err, res) {});
-    } catch (err) {
-      test.equal("selector must be a valid JavaScript object", err.message)
-    }    
-
-    test.done()    
+      db.close();
+      test.done()    
+    });
   });
 }
