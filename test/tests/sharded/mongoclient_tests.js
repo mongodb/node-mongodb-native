@@ -112,6 +112,7 @@ exports['Should correctly emit open and fullsetup to all db instances'] = functi
   });
 
   db_conn.open(function (err) {                                                   
+    // console.log("================================================ 0")
     if (err) throw err;                                                           
                                                                                   
     var col1 = db_conn.collection('test');                                        
@@ -119,13 +120,17 @@ exports['Should correctly emit open and fullsetup to all db instances'] = functi
                                                                                   
     var testData = { value : "something" };                                       
     col1.insert(testData, function (err) {                                        
+      // console.log("================================================ 1")
       if (err) throw err;                                                         
 
       var testData = { value : "something" };                                       
       col2.insert(testData, function (err) {                                      
-        if (err) throw err;                                                       
+        // console.log("================================================ 2")
+        if (err) throw err;  
         db2.close(function() {
+          // console.log("================================================ 3")
           setTimeout(function() {
+            // console.log("================================================ 4")
             // console.log("========================================= results")
             // console.dir("close_count :: " + close_count)
             // console.dir("open_count :: " + open_count)

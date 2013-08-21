@@ -227,56 +227,56 @@ exports['Should correctly perform gridstore read and write'] = function(configur
   });
 }
 
-/**
- * @ignore
- */
-exports['Should correctly connect to MongoS using single server instance'] = function(configuration, test) {
-  var Mongos = configuration.getMongoPackage().Mongos
-    , Server = configuration.getMongoPackage().Server
-    , Db = configuration.getMongoPackage().Db
-    , ReadPreference = configuration.getMongoPackage().ReadPreference;
+// /**
+//  * @ignore
+//  */
+// exports['Should correctly connect to MongoS using single server instance'] = function(configuration, test) {
+//   var Mongos = configuration.getMongoPackage().Mongos
+//     , Server = configuration.getMongoPackage().Server
+//     , Db = configuration.getMongoPackage().Db
+//     , ReadPreference = configuration.getMongoPackage().ReadPreference;
 
-  var mongos = new Server("localhost", 50000, { auto_reconnect: true });
-  // Connect using the mongos connections
-  var db = new Db('integration_test_', mongos, {w:0});
-  db.open(function(err, db) {
-    test.equal(null, err);
-    test.ok(db != null);
+//   var mongos = new Server("localhost", 50000, { auto_reconnect: true });
+//   // Connect using the mongos connections
+//   var db = new Db('integration_test_', mongos, {w:0});
+//   db.open(function(err, db) {
+//     test.equal(null, err);
+//     test.ok(db != null);
 
-    // Perform a simple insert into a collection
-    var collection = db.collection("shard_test5");
-    // Insert a simple doc
-    collection.insert({test:1}, {w:2, wtimeout:10000}, function(err, result) {
-      test.equal(null, err);
+//     // Perform a simple insert into a collection
+//     var collection = db.collection("shard_test5");
+//     // Insert a simple doc
+//     collection.insert({test:1}, {w:2, wtimeout:10000}, function(err, result) {
+//       test.equal(null, err);
 
-      collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{"dc2":"sf"}, {"dc1":"ny"}])}, function(err, item) {
-        test.equal(null, err);
-        test.equal(1, item.test);
+//       collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{"dc2":"sf"}, {"dc1":"ny"}])}, function(err, item) {
+//         test.equal(null, err);
+//         test.equal(1, item.test);
 
-        db.close();
-        test.done();
-      })
-    });
-  });
-}
+//         db.close();
+//         test.done();
+//       })
+//     });
+//   });
+// }
 
-/**
- * @ignore
- */
-exports['Should correctly connect to the mongos using Server connection'] = function(configuration, test) {
-  var Mongos = configuration.getMongoPackage().Mongos
-    , Server = configuration.getMongoPackage().Server
-    , Db = configuration.getMongoPackage().Db
-    , ReadPreference = configuration.getMongoPackage().ReadPreference;
-  var db = new Db("test", new Server("localhost", 50000), {w:0});
-  db.open(function(e, db) {
-    test.equal(null, e);
+// /**
+//  * @ignore
+//  */
+// exports['Should correctly connect to the mongos using Server connection'] = function(configuration, test) {
+//   var Mongos = configuration.getMongoPackage().Mongos
+//     , Server = configuration.getMongoPackage().Server
+//     , Db = configuration.getMongoPackage().Db
+//     , ReadPreference = configuration.getMongoPackage().ReadPreference;
+//   var db = new Db("test", new Server("localhost", 50000), {w:0});
+//   db.open(function(e, db) {
+//     test.equal(null, e);
 
-    db.createCollection("GabeTest", function(e,collection) { 
-      test.equal(null, e);
+//     db.createCollection("GabeTest", function(e,collection) { 
+//       test.equal(null, e);
 
-      db.close();
-      test.done();
-    });
-  });
-}
+//       db.close();
+//       test.done();
+//     });
+//   });
+// }

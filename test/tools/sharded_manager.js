@@ -188,6 +188,29 @@ ShardedManager.prototype.restartMongoS = function(port, callback) {
   }
 }
 
+// Restart any downed mongo's
+ShardedManager.prototype.restartAllMongos = function(callback) {
+  var number_of_mongos = this.mongosProxies.length;
+  // // Locate the server instance and kill it
+  for(var i = 0; i < this.mongosProxies.length; i++) {
+    if(this.mongosProxies[i].up) {
+      number_of_mongos = number_of_mongos - 1;
+    } else {
+      this.mongosProxies[i].start(false, function(err) {
+        number_of_mongos = number_of_mongos - 1;
+
+        if(number_of_mongos == 0) {
+          callback();
+        }        
+      });
+    }
+
+    if(number_of_mongos == 0) {
+      callback();
+    }
+  };
+}
+
 // Shard a db
 ShardedManager.prototype.shardDb = function(dbname, callback) {
   if(this.mongosProxies.length == 0) throw new Error("need at least one mongos server");

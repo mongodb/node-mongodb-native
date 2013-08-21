@@ -75,7 +75,10 @@ var sharded_config = function(options) {
 
     // Pr test functions
     this.setup = function(callback) { 
-      callback(); 
+      // Start the shard
+      self.shardManager.restartAllMongos(function(err, result) {
+        callback(); 
+      });
     }
     
     this.teardown = function(callback) { 

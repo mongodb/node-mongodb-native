@@ -8,7 +8,8 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(confi
 
   // Set up mongos connection
   var mongos = new Mongos([
-      new Server("localhost", 50000, { auto_reconnect: true })
+        new Server("localhost", 50000, { auto_reconnect: true })
+      , new Server("localhost", 50001, { auto_reconnect: true })
     ])
 
   // Set up a bunch of documents
@@ -116,7 +117,7 @@ exports.shouldCorrectlyHandleSwitchOver = function(configuration, test) {
 
 exports.shouldCorrectlyAggregate = function(configuration, test) {
   var mongodb = configuration.getMongoPackage();
-  var uri = 'mongodb://localhost:50000/integration_test_';
+  var uri = 'mongodb://localhost:50000,localhost:50001/integration_test_';
 
   var newMovie = {
     title: 'Star Wars 7',
@@ -126,12 +127,14 @@ exports.shouldCorrectlyAggregate = function(configuration, test) {
   var pipe = [{$match: {director: 'grobot'}}];
 
   mongodb.connect(uri, function(err, db) {
-    db.collection('movie', function(err, collection) {
-      collection.insert(newMovie, function(err, res) {
-        collection.aggregate(pipe, function(err, res) {
-          test.equal(null, err);
-          db.close();
-        });
+    test.equal(null, err);
+
+    var collection = db.collection('movie')
+    collection.insert(newMovie, function(err, res) {
+      collection.aggregate(pipe, function(err, res) {
+        test.equal(null, err);
+        db.close();
+        test.done();
       });
     });
   });  
