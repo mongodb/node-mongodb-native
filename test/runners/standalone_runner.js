@@ -45,10 +45,13 @@ module.exports = function(configurations) {
     
     // Query configuration for any variables we need to know
     .afterConfigurationStart(function(configuration, callback) {
-      configuration.db().command({buildInfo:true}, function(err, result) {
-        if(err) throw err;
-        mongodb_version = result.versionArray;
-        callback();
+      configuration.newDbInstance({w:1}).open(function(err, db) {
+        db.command({buildInfo:true}, function(err, result) {
+          if(err) throw err;
+          mongodb_version = result.versionArray;
+          db.close();
+          callback();
+        });
       });
     })
 

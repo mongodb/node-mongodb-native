@@ -14,20 +14,6 @@ var single_server_config = function(options) {
     var self = this;
     options = options != null ? options : {};
     var dbs = [];
-    var db = new Db('integration_tests', new Server("127.0.0.1", 27017,
-     {auto_reconnect: false, poolSize: 4}), {w:0, native_parser: false});
-    // db.on("error", function(err) {
-    //   console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ERROR")
-    //   console.dir(err)
-    // })
-    // db.on("close", function(err) {
-    //   console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ CLOSE")
-    // })
-    var close = db.close;
-    db.close = function() {
-      console.log("= ERR = TEST CALLED CLOSE ON SHARED CONNECTION")
-      process.exit(0)
-    }
 
     // Server Manager options
     var server_options = {
@@ -47,38 +33,29 @@ var single_server_config = function(options) {
     this.start = function(callback) {
       serverManager.start(true, function(err) {
         if(err) throw err;
-        db.open(function(err, result) {
-          callback();
-        })
+        callback();
       });
     }
 
     this.restart = function(callback) {
       serverManager.start(true, function(err) {
         if(err) throw err;
-        db.open(function(err, result) {
-          callback();
-        })
+        callback();
       });
     }
 
     this.restartNoEnsureUp = function(callback) {
       serverManager.start(true, {ensureUp:false}, function(err) {
         if(err) throw err;
-        db.open(function(err, result) {
-          callback();
-        })
+        callback();
       });
     }
 
     // Test suite stop
     this.stop = function(callback) {
-      db.close = close;
-      db.close(function() {
-        serverManager.killAll(function(err) {
-          callback();
-        });        
-      })
+      serverManager.killAll(function(err) {
+        callback();
+      });        
     };
 
     // Pr test functions
@@ -110,11 +87,6 @@ var single_server_config = function(options) {
     this.newDbInstance = function(db_options, server_options) {
       var db = new Db('integration_tests', new Server("127.0.0.1", 27017, server_options), db_options);
       dbs.push(db);
-      return db;
-    }
-
-    // Returns a db
-    this.db = function() {
       return db;
     }
 
