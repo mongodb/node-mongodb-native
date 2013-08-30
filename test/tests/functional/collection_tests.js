@@ -1432,3 +1432,21 @@ exports.shouldThrowErrorDueToIllegalUpdate = function(configuration, test) {
     });
   });
 }
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyHandle0asIdForSave = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.collection('shouldCorrectlyHandle0asIdForSave').save({_id:0}, function(err, r) {
+      test.equal(null, err);
+
+      db.collection('shouldCorrectlyHandle0asIdForSave').save({_id:0}, function(err, r) {
+        test.equal(null, err);
+        db.close();
+        test.done();
+      });
+    });
+  });
+}
