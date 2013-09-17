@@ -317,6 +317,81 @@ exports.shouldPerformMapReduceInContext = function(configuration, test) {
 }
 
 /**
+ * Mapreduce different test with a provided scope containing javascript objects with functions.
+ *
+ * @_class collection
+ * @_function mapReduce
+ */
+exports.shouldPerformMapReduceInContextObjects = function(configuration, test) {
+  var Code = configuration.getMongoPackage().Code;
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
+  // Establish connection to db
+  db.open(function(err, db) {
+
+    // Create a test collection
+    db.createCollection('test_map_reduce_functions_scope_objects', function(err, collection) {
+
+      // Insert some test documents
+      collection.insert([{'user_id':1, 'timestamp':new Date()}
+        , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
+
+        // Map function
+        var map = function(){
+          emit(obj.fn(this.timestamp.getYear()), 1);
+        }
+
+        // Reduce function
+        var reduce = function(k, v){
+          count = 0;
+          for(i = 0; i < v.length; i++) {
+            count += v[i];
+          }
+          return count;
+        }
+
+        // Javascript function available in the map reduce scope
+        var t = function(val){ return val+1; }
+
+        // Execute the map reduce with the custom scope containing objects
+        var o = {};
+        o.scope =  { obj: {fn: new Code(t.toString())} }
+        o.out = { replace: 'replacethiscollection' }
+
+        collection.mapReduce(map, reduce, o, function(err, outCollection) {
+          test.equal(null, err);
+
+          // Find all entries in the map-reduce collection
+          outCollection.find().toArray(function(err, results) {
+            test.equal(null, err);
+            test.equal(2, results[0].value)
+
+            // mapReduce with scope containing plain function
+            var o = {};
+            o.scope =  { obj: {fn: t} }
+            o.out = { replace: 'replacethiscollection' }
+
+            collection.mapReduce(map, reduce, o, function(err, outCollection) {
+              test.equal(null, err);
+
+              // Find all entries in the map-reduce collection
+              outCollection.find().toArray(function(err, results) {
+                test.equal(2, results[0].value)
+                db.close();
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  // DOC_END
+}
+
+/**
 * Mapreduce tests
 * @ignore
 */
