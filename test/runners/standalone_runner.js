@@ -118,6 +118,7 @@ module.exports = function(configurations) {
         , '/test/tests/functional/db_tests.js'
         , '/test/tests/functional/read_preferences_tests.js'
         , '/test/tests/functional/fluent_api/aggregation_tests.js'
+        , '/test/tests/functional/maxtimems_tests.js'
       ]
     );
 

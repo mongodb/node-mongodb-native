@@ -197,6 +197,7 @@ var generateStartCmd = function(self, options) {
   startCmd = options['journal'] ? startCmd + " --journal" : startCmd;
   startCmd = options['auth'] ? startCmd + " --auth" : startCmd;
   startCmd = options['configserver'] ? startCmd + " --configsvr" : startCmd;
+  startCmd = startCmd + " --setParameter enableTestCommands=1";
   // If we have ssl defined set up with test certificate
   if(options['ssl']) {
     var path = getPath(self, self.ssl_server_pem);
