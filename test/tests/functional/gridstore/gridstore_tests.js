@@ -2024,7 +2024,6 @@ exports['Should correctly handle multiple seeks over several chunks'] = function
  * @ignore
  */
 exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = function(configuration, test) {
-  if(configuration.db().serverConfig instanceof configuration.getMongoPackage().ReplSet) return test.done();
   var GridStore = configuration.getMongoPackage().GridStore
     , ObjectID = configuration.getMongoPackage().ObjectID;
 

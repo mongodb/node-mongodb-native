@@ -303,18 +303,18 @@ exports['should handle error throw in user callback'] = function(configuration, 
   });
 }
 
-// exports['Should handle uncaught error correctly'] = function(configuration, test) {
-//   var db = configuration.newDbInstance({w:1}, {poolSize:1});
-//   process.on("uncaughtException", function(err) {
-//     db.close();
-//     test.done();
-//   })
+exports['Should handle uncaught error correctly'] = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  process.on("uncaughtException", function(err) {
+    db.close();
+    test.done();
+  })
 
-//   db.open(function(err, db) {
-//     testdfdma();
-//     test.ok(false);
-//   });
-// }
+  db.open(function(err, db) {
+    testdfdma();
+    test.ok(false);
+  });
+}
 
 exports['Should handle throw error in db operation correctly'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});

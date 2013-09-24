@@ -1164,19 +1164,20 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = function(configuration
     // Create collection
     db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
       // ensure index of createdAt index
-      collection.ensureIndex({createdAt:1})
-      // insert all docs
-      collection.insert(docs, {w:1}, function(err, result) {
-        test.equal(null, err);
+      collection.ensureIndex({createdAt:1}, function(err, result) {
+        // insert all docs
+        collection.insert(docs, {w:1}, function(err, result) {
+          test.equal(null, err);
 
-        // Find with sort
-        collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
-          if (err) logger.error("error in collection_info.find: " + err);
-          test.equal(1, items.length);
-          db.close();
-          test.done();
+          // Find with sort
+          collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
+            if (err) logger.error("error in collection_info.find: " + err);
+            test.equal(1, items.length);
+            db.close();
+            test.done();
+          })
         })
-      })
+      });
     });
   });
 }
@@ -1441,13 +1442,14 @@ exports['immediately destroying a stream prevents the query from executing'] = f
 exports['destroying a stream stops it'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
+    test.equal(null, err);
+
     db.createCollection('destroying_a_stream_stops_it', function(err, collection) {
       test.equal(null, err);
 
       var docs = [];
       for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
 
-      var client = configuration.db();
       // insert all docs
       collection.insert(docs, {w:1}, function(err, result) {
         test.equal(null, err);
@@ -2366,30 +2368,30 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, tes
   // DOC_END
 }
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyHandleThrownErrorInCursorNext = function(configuration, test) {
-//   var db = configuration.newDbInstance({w:1}, {poolSize:1});
-//   var domain = require('domain');
-//   var d = domain.create();
-//   d.on('error', function(err) {
-//     test.done()
-//   })
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyHandleThrownErrorInCursorNext = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  var domain = require('domain');
+  var d = domain.create();
+  d.on('error', function(err) {
+    test.done()
+  })
 
-//   d.run(function() {
-//     db.open(function(err, db) {
-//       var collection = db.collection('shouldCorrectlyHandleThrownErrorInCursorNext');
-//       collection.insert([{a:1, b:2}], function(err, result) {
-//         test.equal(null, err);
+  d.run(function() {
+    db.open(function(err, db) {
+      var collection = db.collection('shouldCorrectlyHandleThrownErrorInCursorNext');
+      collection.insert([{a:1, b:2}], function(err, result) {
+        test.equal(null, err);
 
-//         collection.find().nextObject(function(err, doc) {
-//           dfdsfdfds
-//         });
-//       });
-//     });
-//   })
-// }
+        collection.find().nextObject(function(err, doc) {
+          dfdsfdfds
+        });
+      });
+    });
+  })
+}
 
 // /**
 //  * @ignore

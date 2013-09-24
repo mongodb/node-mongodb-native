@@ -58,42 +58,46 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
  * @ignore
  */
 exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = function(configuration, test) {
-  var client = configuration.db();
+  var client = configuration.newDbInstance({w:1}, {poolSize:1});
   var second_test_database = configuration.newDbInstance({w:1}, {poolSize:1});
   // Just create second database
-  second_test_database.open(function(err, second_test_database) {
-    // Close second database
-    second_test_database.close();
-    // Let's grab a connection to the different db resusing our connection pools
-    var secondDb = client.db(configuration.db_name + "_2");
-    secondDb.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(err, collection) {
-      // Insert a dummy document
-      collection.insert({a:20}, {safe: true}, function(err, r) {            
-        test.equal(null, err);
+  client.open(function(err, client) {
+    second_test_database.open(function(err, second_test_database) {
+      // Close second database
+      second_test_database.close();
+      // Let's grab a connection to the different db resusing our connection pools
+      var secondDb = client.db(configuration.db_name + "_2");
+      secondDb.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(err, collection) {
+        // Insert a dummy document
+        collection.insert({a:20}, {safe: true}, function(err, r) {            
+          test.equal(null, err);
 
-        // Query it
-        collection.findOne({}, function(err, item) {
-          test.equal(20, item.a);
+          // Query it
+          collection.findOne({}, function(err, item) {
+            test.equal(20, item.a);
 
-          // Use the other db
-          client.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(err, collection) {
-            // Insert a dummy document
-            collection.insert({b:20}, {safe: true}, function(err, r) {            
-              test.equal(null, err);            
-
-              // Query it
-              collection.findOne({}, function(err, item) {
-                test.equal(20, item.b);
-
+            // Use the other db
+            client.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(err, collection) {
+              // Insert a dummy document
+              collection.insert({b:20}, {safe: true}, function(err, r) {            
                 test.equal(null, err);            
-                test.done();                
-              })              
+
+                // Query it
+                collection.findOne({}, function(err, item) {
+                  test.equal(20, item.b);
+
+                  test.equal(null, err);
+                  client.close();
+                  second_test_database.close();            
+                  test.done();                
+                });              
+              });
             });
-          });
-        })              
+          });              
+        });
       });
     });
-  });    
+  });
 }
 
 /**

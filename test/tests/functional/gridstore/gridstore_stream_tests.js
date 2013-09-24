@@ -249,8 +249,8 @@ exports['Should return same data for streaming as for direct read'] = function(c
 
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
-    var gridStoreR = new GridStore(client, "test_gs_read_stream", "r");
-    var gridStoreW = new GridStore(client, "test_gs_read_stream", "w", {chunkSize:56});
+    var gridStoreR = new GridStore(db, "test_gs_read_stream", "r");
+    var gridStoreW = new GridStore(db, "test_gs_read_stream", "w", {chunkSize:56});
     // var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
     var data = new Buffer(100);
     for(var i = 0; i < 100; i++) {
@@ -279,7 +279,7 @@ exports['Should return same data for streaming as for direct read'] = function(c
               test.equal(1, gotEnd);
 
               // Read entire file in one go and compare
-              var gridStoreRead = new GridStore(client, "test_gs_read_stream", "r");
+              var gridStoreRead = new GridStore(db, "test_gs_read_stream", "r");
               gridStoreRead.open(function(err, gs) {
                 gridStoreRead.read(function(err, data2) {
                   // Put together all the chunks
