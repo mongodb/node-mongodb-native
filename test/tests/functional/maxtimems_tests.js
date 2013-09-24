@@ -90,9 +90,6 @@ exports['Should Correctly respect the maxtimeMs property on aggregation cursor']
 	        	.find({agg_pipe: {$gt: 5}})
 	        	.maxTimeMS(10)
 	        	.get(function(err, results) {
-	        		console.log("---------------------------------- 0")
-	        		console.dir(err)
-	        		console.dir(results)
 		        	test.equal(null, err);
 
 			        db.admin().command({configureFailPoint: "maxTimeAlwaysTimeOut", mode: "off"}, function(err, result) {
@@ -162,6 +159,7 @@ exports['Should Correctly fail with maxTimeMS error'] = {
         		test.ok(err != null);
 
 		        db.admin().command({configureFailPoint: "maxTimeAlwaysTimeOut", mode: "off"}, function(err, result) {
+              test.equal(true, result.documents[0].ok);
 		          db.close();
 		    	    test.done();
 		    	  });

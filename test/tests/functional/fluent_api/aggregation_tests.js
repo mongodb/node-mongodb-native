@@ -115,7 +115,7 @@ exports['Should correctly perform a simple pipe aggregation command and explain'
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.1"},
+  requires: {mongodb: ">2.5.3"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -134,8 +134,7 @@ exports['Should correctly perform a simple pipe aggregation command and explain'
         // Execute the aggregation
         col.pipe().find({agg_pipe3: {$gt: 5}}).explain(function(err, result) {
         	test.equal(null, err);
-        	test.ok(result[0].query != null);
-        	test.ok(result[0].cursor != null);
+        	test.ok(result[0]['$cursor'] != null);
           db.close();
     	    test.done();
         });
