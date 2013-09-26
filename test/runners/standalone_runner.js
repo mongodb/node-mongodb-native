@@ -58,9 +58,6 @@ module.exports = function(configurations) {
     // We wish to filter out tests based on tags
     .filter(function(test) {
       if(typeof test != 'function') {      
-        // console.log("============================ filter")
-        // console.dir(test.requires)
-
         // If we have a node.js version check
         if(test.requires && test.requires.node) 
           return validVersions(node_version_array, test.requires.node);
