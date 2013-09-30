@@ -14,7 +14,7 @@
     - `for(..) {`
     - `while(..) {`
     - `function(err) {`
-- Write tests and make sure they pass (execute `make test` from the cmd line to run the test suite).
+- Write tests and make sure they pass (execute `npm test` from the cmd line to run the test suite).
 
 ### Documentation
 
