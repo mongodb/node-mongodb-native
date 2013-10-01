@@ -5,8 +5,6 @@ var fs = require('fs');
  */
 exports.shouldCorrectlyCommunicateUsingSSLSocket = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
-    , Db = configuration.getMongoPackage().Db
-    , Server = configuration.getMongoPackage().Server
     , MongoClient = configuration.getMongoPackage().MongoClient;
 
   // All inserted docs
@@ -33,8 +31,6 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = function(configuration, test)
  */
 exports.shouldCorrectlyValidateServerCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
-    , Db = configuration.getMongoPackage().Db
-    , Server = configuration.getMongoPackage().Server
     , MongoClient = configuration.getMongoPackage().MongoClient;
 
   // All inserted docs
@@ -80,8 +76,6 @@ exports.shouldCorrectlyValidateServerCertificate = function(configuration, test)
  */
 exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
-    , Db = configuration.getMongoPackage().Db
-    , Server = configuration.getMongoPackage().Server
     , MongoClient = configuration.getMongoPackage().MongoClient;
 
   // All inserted docs
@@ -140,8 +134,6 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
  */
 exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
-    , Db = configuration.getMongoPackage().Db
-    , Server = configuration.getMongoPackage().Server
     , MongoClient = configuration.getMongoPackage().MongoClient;
 
   // All inserted docs
@@ -201,8 +193,6 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = f
  */
 exports.shouldCorrectlyValidateServerCertificateReplSet = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
-    , Db = configuration.getMongoPackage().Db
-    , Server = configuration.getMongoPackage().Server
     , MongoClient = configuration.getMongoPackage().MongoClient;
   // All inserted docs
   var docs = [];
@@ -245,8 +235,6 @@ exports.shouldCorrectlyValidateServerCertificateReplSet = function(configuration
  */
 exports.shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
-    , Db = configuration.getMongoPackage().Db
-    , Server = configuration.getMongoPackage().Server
     , MongoClient = configuration.getMongoPackage().MongoClient;
   // All inserted docs
   var docs = [];
@@ -298,8 +286,6 @@ exports.shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate = fu
  */
 exports.shouldSendWrongCertificateToReplSetAndValidateServerCertificate = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
-    , Db = configuration.getMongoPackage().Db
-    , Server = configuration.getMongoPackage().Server
     , MongoClient = configuration.getMongoPackage().MongoClient;
   // All inserted docs
   var docs = [];
@@ -348,3 +334,49 @@ exports.shouldSendWrongCertificateToReplSetAndValidateServerCertificate = functi
     });
   });
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly shut down if attempting to connect to ssl server with wrong parameters'] = function(configuration, test) {
+  var ServerManager = require('../../tools/server_manager').ServerManager
+    , MongoClient = configuration.getMongoPackage().MongoClient;
+
+  // All inserted docs
+  var docs = [];
+  var errs = [];
+  var insertDocs = [];
+
+  // Start server
+  serverManager = new ServerManager({auth:false, purgedirectories:true, journal:true, ssl:true, ssl_server_pem: "../test/tests/ssl/certificates/server.pem"})
+  serverManager.start(true, function() {
+    MongoClient.connect("mongodb://localhost:27017/test?ssl=false", function(err, db) {
+      if(db == null) {
+        test.ok(err != null)
+      } else {
+        db.close();
+      }
+      // test.ok(err != null);
+
+      // console.log("================================================ 0")
+      // console.dir(err)
+      // console.dir(db)
+      // test.equal(null, err);
+      // test.ok(db != null);
+
+
+      // db.close();
+      serverManager.killAll();
+      test.done();
+    });
+  });
+}
+
+
+
+
+
+
+
+
+

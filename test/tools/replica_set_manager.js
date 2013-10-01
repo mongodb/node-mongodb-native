@@ -260,6 +260,7 @@ ReplicaSetManager.prototype.killAll = function(options, callback) {
     options = {};
   }
 
+  options = options == null ? {} : options;
   if(options.skip) return callback();
 
   if(Object.keys(this.mongods).length > 0) {

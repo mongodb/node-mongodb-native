@@ -12,6 +12,7 @@ var Configuration = require('integra').Configuration
 // Simple replicaset configuration
 var none = function(options) {
   var self = this;
+  var dbs = [];
 
   // Test suite start
   this.start = function(callback) {
@@ -40,6 +41,12 @@ var none = function(options) {
   // Get the star port
   this.getReplicasetManager = function() {
     return null;
+  }
+
+  this.newDbInstance = function(db_options, server_options) {
+    var db = new Db('integration_tests', new Server("127.0.0.1", 27017, server_options), db_options);
+    dbs.push(db);
+    return db;
   }
 
   // Returns a db
