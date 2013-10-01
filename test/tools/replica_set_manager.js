@@ -490,7 +490,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
                   return callback(new Error("Operation Failure"), null);
                 } else {
                   // Execute function again
-                  setTimeout(ensureUpFunction, 1000);
+                  setTimeout(ensureUpFunction, 5000);
                 }
               } else {
                 // Establish all health member
@@ -524,7 +524,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
                     return callback(new Error("Operation Failure"), null);
                   } else {
                     // Execute function again
-                    setTimeout(ensureUpFunction, 1000);
+                    setTimeout(ensureUpFunction, 5000);
                   }
                 }
               }
