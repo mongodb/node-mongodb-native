@@ -703,8 +703,6 @@ exports.shouldCorrectlyLogoutFromTheDatabase = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-    return test.done();
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -714,19 +712,24 @@ exports.shouldCorrectlyLogoutFromTheDatabase = {
       test.equal(null, err);
 
       // Add a user to the database
-      db.addUser('user', 'name', function(err, result) {
+      db.addUser('user3', 'name', function(err, result) {
         test.equal(null, err);
 
         // Authenticate
-        db.authenticate('user', 'name', function(err, result) {
+        db.authenticate('user3', 'name', function(err, result) {
           test.equal(true, result);
 
           // Logout the db
           db.logout(function(err, result) {
             test.equal(true, result);
 
-            db.close();
-            test.done();
+            // Remove the user
+            db.removeUser('user3', function(err, result) {
+              test.equal(true, result);
+  
+              db.close();
+              test.done();
+            });
           });
         });
       });
@@ -749,8 +752,6 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-    return test.done();
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -760,11 +761,11 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
       test.equal(null, err);
 
       // Add a user to the database
-      db.addUser('user', 'name', function(err, result) {
+      db.addUser('user2', 'name', function(err, result) {
         test.equal(null, err);
 
         // Authenticate
-        db.authenticate('user', 'name', function(err, result) {
+        db.authenticate('user2', 'name', function(err, result) {
           test.equal(true, result);
 
           db.close();
@@ -790,8 +791,6 @@ exports.shouldCorrectlyAddUserToDb = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-    return test.done();
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -826,8 +825,6 @@ exports.shouldCorrectlyAddAndRemoveUser = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-    return test.done();
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));

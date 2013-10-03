@@ -269,8 +269,6 @@ exports['Should correctly connect using uri encoded username and password'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-    return test.done();
     var MongoClient = configuration.getMongoPackage().MongoClient;
     MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
       test.equal(null, err);

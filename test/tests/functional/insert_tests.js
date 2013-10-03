@@ -1213,9 +1213,6 @@ exports.shouldFailDueToMessageBeingBiggerThanMaxMessageSize = function(configura
  * @ignore
  */
 exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = function(configuration, test) {
-  console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-  return test.done();
-
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
     var collection = db.collection('shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne');
@@ -1786,10 +1783,7 @@ exports.shouldCorrectlyOverrideCheckKeysJS = function(configuration, test) {
 }
 
 exports.shouldCorrectlyOverrideCheckKeysNative = function(configuration, test) {
-  console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-  return test.done();
   var Long = configuration.getMongoPackage().Long;
-
   var db = configuration.newDbInstance({w:1}, {native_parser:true})
   db.open(function(err, db) {
     db.collection('shouldCorrectlyOverrideCheckKeysNative').insert({
@@ -1807,7 +1801,6 @@ exports.shouldCorrectlyOverrideCheckKeysNative = function(configuration, test) {
             db.collection('shouldCorrectlyOverrideCheckKeysNative').findOne(function(err, doc) {
               test.equal(null, err);
               test.equal('a', doc.o['$set']);
-              process.exit(0)
 
               db.close();
               test.done();
@@ -1818,8 +1811,6 @@ exports.shouldCorrectlyOverrideCheckKeysNative = function(configuration, test) {
 }
 
 exports.shouldCorrectlyOverrideCheckKeysJS = function(configuration, test) {
-  console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-  return test.done();
   var Long = configuration.getMongoPackage().Long;
 
   var db = configuration.newDbInstance({w:1}, {native_parser:false})

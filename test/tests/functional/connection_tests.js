@@ -181,8 +181,6 @@ exports.testConnectAllOptions = {
  * @ignore
  */
 exports.testConnectGoodAuth = function(configuration, test) {
-  console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-  return test.done();
   var connect = configuration.getMongoPackage().connect;
   var user = 'testConnectGoodAuth', password = 'password';
   // First add a user.

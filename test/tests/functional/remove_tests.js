@@ -132,8 +132,6 @@ exports.shouldCorrectlyRemoveDocumentUsingRegExp = function(configuration, test)
  * @ignore
  */
 exports.shouldCorrectlyRemoveOnlyFirstDocument = function(configuration, test) {
-  console.log("+++++++++++++++++++++++++++++++++++++++ Broken behavior for 2.6 QA-349")
-  return test.done();
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
     db.createCollection('shouldCorrectlyRemoveOnlyFirstDocument', function(err, r) {
