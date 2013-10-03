@@ -45,6 +45,9 @@ if(argv.n) run_options.test = argv.n;
 // Handle the targets
 if(argv.t == 'functional') {
   var environment = argv.e ? argv.e : 'single_server'
+  standalone_runners.runner.on('end', function() {
+    process.exit(0);
+  });
   standalone_runners.runner.run(environment, run_options);
 } else if(argv.t == 'auth') {
   // Trap end of tests
