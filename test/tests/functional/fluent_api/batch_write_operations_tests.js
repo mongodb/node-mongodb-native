@@ -18,7 +18,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
         test.equal(err, null);
 
         // Initialize the unOrdered Batch
-        var batch = col.initializeUnorderedBatch();
+        var batch = col.initializeBulkOp();
         // Perform some operations
         for(var i = 0; i < 2; i++) {
           batch.insert({a:i});
@@ -26,12 +26,12 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
 
         // Perform some operations
         for(var i = 0; i < 2; i++) {
-          batch.update({a:i}, {$set: {b: 10}}, {upsert:false});
+          batch.find({a:i}).upsert().update({$set: {b: 10}});
         }
 
         // Remove a couple of operations
         for(var i = 0; i < 2; i++) {
-          batch.remove({a:i}, {single:true})
+          batch.find({a:i}).removeOne()
         }
 
         // Execute the batch
@@ -54,3 +54,40 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
     });
   }
 }
+
+exports['Should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  requires: {mongodb: ">2.5.3"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      // Get the collection
+      var col = db.collection('batch_write_ops_2');
+
+      // Initialize the Ordered Batch
+      var batch = col.initializeOrderedBulkOp();
+
+      // Add some operations to be executed in order
+      batch.insert({a:1});
+      batch.find({a:1}).update({$set: {b: 1}});
+      batch.find({a:1}).removeOne();
+      batch.insert({a:1, c:1})
+
+      // Execute the operations
+      batch.execute(function(err, result) {
+        // test.equal(null, err);
+        console.log("---------------------------------------------------")
+        console.dir(err)
+        console.dir(result)
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+
