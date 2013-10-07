@@ -68,23 +68,36 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
       // Get the collection
       var col = db.collection('batch_write_ops_2');
 
-      // Initialize the Ordered Batch
-      var batch = col.initializeOrderedBulkOp();
+      // Add unique index on b field causing all updates to fail
+      col.ensureIndex({b:1}, {unique:true, sparse:true}, function(err, result) {
+        test.equal(err, null);
 
-      // Add some operations to be executed in order
-      batch.insert({a:1});
-      batch.find({a:1}).update({$set: {b: 1}});
-      batch.find({a:1}).removeOne();
-      batch.insert({a:1, c:1})
+        // Initialize the Ordered Batch
+        var batch = col.initializeOrderedBulkOp();
 
-      // Execute the operations
-      batch.execute(function(err, result) {
-        // test.equal(null, err);
-        console.log("---------------------------------------------------")
-        console.dir(err)
-        console.dir(result)
-        db.close();
-        test.done();
+        // Add some operations to be executed in order
+        batch.insert({a:1});
+        batch.find({a:1}).update({$set: {b: 1}});
+        batch.insert({b:1});
+        batch.find({a:1}).removeOne();
+        batch.insert({a:1, c:1})
+
+        // Execute the operations
+        batch.execute(function(err, result) {
+          test.equal(null, err);
+          test.equal(false, result.ok);
+          test.equal(4, result.n);
+          test.equal(0, result.upserted);
+          test.equal(11000, result.errCode);
+          test.ok(result.errMessage.indexOf("E11000 duplicate key error index:") != -1);
+          test.equal("", result.errmsg);
+          test.equal(1, result.errDetails.length);
+          test.equal(2, result.errDetails[0].index);
+          test.equal(11000, result.errDetails[0].errCode);
+          test.ok(result.errDetails[0].errMessage.indexOf("E11000 duplicate key error index:") != -1);
+          db.close();
+          test.done();
+        });
       });
     });
   }
