@@ -49,3 +49,18 @@ exports.shouldCorrectlyHandleThrownErrorInRename = {
     })
   }
 }
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyHandleExceptionsInCursorNext = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var col = db.collection('shouldCorrectlyHandleExceptionsInCursorNext');
+    col.insert({a:1}, function(err, result) {
+      col.find().nextObject(function(err, result) {
+        boom
+      });
+    });
+  });
+}
