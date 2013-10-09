@@ -54,7 +54,8 @@
 											"John Le Drew",
                       "Lucasfilm Singapore",
                       "Roman Shtylman",
-                      "Matt Self"]
+                      "Matt Self",
+                      "Gregory Langlais"]
 
 , "repository" :    { "type" :  "git"
                     , "url" :   "http://github.com/mongodb/node-mongodb-native.git" }
