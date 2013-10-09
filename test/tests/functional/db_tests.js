@@ -134,17 +134,26 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(configuration, test) {
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
-    var numberOfTests = 
+    var numberOfTests = 10;
+
+    var tests_done = function() {
+      numberOfTests = numberOfTests - 1;
+
+      if(numberOfTests == 0) {
+        db.close();
+        test.done();
+      }
+    }
 
     // Evaluate a function on the server with the parameter 3 passed in
     db.eval('function (x) {return x;}', [3], function(err, result) {
-      test.equal(3, result);
+      test.equal(3, result); tests_done();
     });
 
     // Evaluate a function on the server with the parameter 3 passed in no lock aquired for eval
     // on server
     db.eval('function (x) {return x;}', [3], {nolock:true}, function(err, result) {
-      test.equal(3, result);
+      test.equal(3, result); tests_done();
     });
 
     // Evaluate a function on the server that writes to a server collection
@@ -152,48 +161,49 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(configuration, test) {
       // Locate the entry
       db.collection('test_eval', function(err, collection) {
         collection.findOne(function(err, item) {
-          test.equal(5, item.y);
+          test.equal(5, item.y); tests_done();
         });
       });
     });
 
     // Evaluate a function with 2 parameters passed in
     db.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
-      test.equal(5, result);
+      test.equal(5, result); tests_done();
     });
 
     // Evaluate a function with no parameters passed in
     db.eval('function () {return 5;}', function(err, result) {
-      test.equal(5, result);
+      test.equal(5, result); tests_done();
     });
 
     // Evaluate a statement
     db.eval('2 + 3;', function(err, result) {
-      test.equal(5, result);
+      test.equal(5, result); tests_done();
     });
 
     // Evaluate a statement using the code object
     db.eval(new Code("2 + 3;"), function(err, result) {
-      test.equal(5, result);
+      test.equal(5, result); tests_done();
     });
 
     // Evaluate a statement using the code object including a scope
     db.eval(new Code("return i;", {'i':2}), function(err, result) {
-      test.equal(2, result);
+      test.equal(2, result); tests_done();
     });
 
     // Evaluate a statement using the code object including a scope
     db.eval(new Code("i + 3;", {'i':2}), function(err, result) {
-      test.equal(5, result);
+      test.equal(5, result); tests_done();
     });
 
     // Evaluate an illegal statement
     db.eval("5 ++ 5;", function(err, result) {
       test.ok(err instanceof Error);
       test.ok(err.message != null);
+      tests_done();
       // Let's close the db
-      db.close();
-      test.done();
+      // db.close();
+      // test.done();
     });
   });
   // DOC_END

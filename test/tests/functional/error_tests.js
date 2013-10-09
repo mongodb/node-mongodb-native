@@ -223,51 +223,6 @@ exports['safe mode should pass the disconnected error to the callback'] = {
   }
 }
 
-exports.shouldHandleAssertionError = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.2.3"},
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
-      var collection = db.collection('test_handle_assertion_error');
-      collection.insert({a:{lat:50, lng:10}}, {safe: true}, function(err, docs) {
-        test.ok(err == null);
-
-        var query = {a:{$within:{$box:[[1,-10],[80,120]]}}};
-
-        // We don't have a geospatial index at this point
-        collection.findOne(query, function(err, docs) {
-          
-          collection.ensureIndex([['a', '2d' ]], {unique:true, w:1}, function(err, indexName) {
-            test.ok(err == null);
-            
-            collection.findOne(query, function(err, doc) {
-              test.ok(err == null);
-              
-              var invalidQuery = {a:{$within:{$box:[[-10,-180],[10,180]]}}};
-
-              collection.findOne(invalidQuery, function(err, doc) {
-                if(parseInt((result.version.replace(/\./g, ''))) < 200) {
-                  test.ok(err instanceof Error);
-                } else {                        
-                  test.equal(null, err);
-                  test.equal(null, doc);
-                }
-
-                db.close();
-                test.done();
-              });  
-            });
-          });
-        });          
-      });
-    });
-  }
-}
-
 exports['mixing included and excluded fields should return an error object with message'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
@@ -305,7 +260,7 @@ exports['should handle error throw in user callback'] = function(configuration, 
 
 exports['Should handle uncaught error correctly'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
-  process.on("uncaughtException", function(err) {
+  process.once("uncaughtException", function(err) {
     db.close();
     test.done();
   })

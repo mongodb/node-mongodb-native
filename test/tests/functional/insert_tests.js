@@ -686,23 +686,22 @@ exports.shouldCorrectlyPerformSafeInsert = function(configuration, test) {
       },
 
       function done() {
-        collection.count(function(err, count) {
-          test.equal(3, count);
-
-          collection.find().toArray(function(err, docs) {
-            test.equal(3, docs.length)
-          });
-        });
-
-
         var cursor = collection.find({}, {});
         var counter = 0;
 
         cursor.each(function(err, doc) {
           if(doc == null) {
             test.equal(3, counter);
-            db.close();
-            test.done();
+
+            collection.count(function(err, count) {
+              test.equal(3, count);
+
+              collection.find().toArray(function(err, docs) {
+                test.equal(3, docs.length)
+                db.close();
+                test.done();
+              });
+            });
           } else {
             counter = counter + 1;
           }

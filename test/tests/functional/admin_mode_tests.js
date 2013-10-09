@@ -696,15 +696,20 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = function(configure, test) {
 
       // Add the new user to the admin database
       adminDb.addUser('admin14', 'admin14', function(err, result) {
+        test.equal(null, err);
+        test.ok(result != null);
 
         // Authenticate using the newly added user
         adminDb.authenticate('admin14', 'admin14', function(err, result) {
+          test.equal(null, err); 
+          test.equal(true, result);
          
           // Retrive the server Info, returns error if we are not
           // running a replicaset
           adminDb.replSetGetStatus(function(err, info) {
 
             adminDb.removeUser('admin14', function(err, result) {
+              test.equal(null, err);
               test.ok(result);
 
               db.close();

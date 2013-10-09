@@ -215,50 +215,56 @@ exports.shouldCorrectlyExecuteSortOnCursor = function(configuration, test) {
         },
 
         function finished() {
+          var number_of_functions = 10;
+          var finished = function() {
+            number_of_functions = number_of_functions - 1;
+            if(number_of_functions == 0) {
+              db.close();
+              test.done();
+            }
+          }
+
           collection.find().sort(['a', 1], function(err, cursor) {
-            test.deepEqual(['a', 1], cursor.sortValue);
+            test.deepEqual(['a', 1], cursor.sortValue);finished();
           });
 
           collection.find().sort('a', 1).nextObject(function(err, doc) {
-            test.equal(0, doc.a);
+            test.equal(0, doc.a);finished();
           });
 
           collection.find().sort('a', -1).nextObject(function(err, doc) {
-            test.equal(4, doc.a);
+            test.equal(4, doc.a);finished();
           });
 
           collection.find().sort('a', "asc").nextObject(function(err, doc) {
-            test.equal(0, doc.a);
+            test.equal(0, doc.a);finished();
           });
 
           collection.find().sort([['a', -1], ['b', 1]], function(err, cursor) {
-            test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);
+            test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);finished();
           });
 
           collection.find().sort('a', 1).sort('a', -1).nextObject(function(err, doc) {
-            test.equal(4, doc.a);
+            test.equal(4, doc.a);finished();
           });
 
           collection.find().sort('a', -1).sort('a', 1).nextObject(function(err, doc) {
-            test.equal(0, doc.a);
+            test.equal(0, doc.a);finished();
           });
 
           var cursor = collection.find();
           cursor.nextObject(function(err, doc) {
             cursor.sort(['a'], function(err, cursor) {
-              test.equal("Cursor is closed", err.message);
+              test.equal("Cursor is closed", err.message);finished();
             });
           });
 
           collection.find().sort('a', 25).nextObject(function(err, doc) {
-            test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
+            test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);finished();
           });
 
           collection.find().sort(25).nextObject(function(err, doc) {
-            test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);
-            // Let's close the db
-            db.close();
-            test.done();
+            test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);finished();
           });
         }
       );
@@ -450,26 +456,27 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = function(configuration
       });
 
       collection.find(function(err, cursor) {
-        cursor.nextObject(function(err, doc) {
-          cursor.limit(1, function(err, cursor) {
-            test.equal("Cursor is closed", err.message);
-          });
-
-          try {
-            cursor.limit(1);
-            test.ok(false);
-          } catch(err) {
-            test.equal("Cursor is closed", err.message);
-          }
-        });
-      });
-
-      collection.find(function(err, cursor) {
         cursor.close(function(err, cursor) {
           cursor.limit(1, function(err, cursor) {
             test.equal("Cursor is closed", err.message);
-            db.close();
-            test.done();
+
+            collection.find(function(err, cursor) {
+              cursor.nextObject(function(err, doc) {
+                cursor.limit(1, function(err, cursor) {
+                  test.equal("Cursor is closed", err.message);
+                });
+
+                try {
+                  cursor.limit(1);
+                  test.ok(false);
+                } catch(err) {
+                  test.equal("Cursor is closed", err.message);
+                }
+
+                db.close();
+                test.done();                
+              });
+            });
           });
 
           try {

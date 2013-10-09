@@ -116,13 +116,14 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = function(configu
             // For each data item
             stream.on("end", function(item) {
             });
+
             // When the stream is done
             stream.on("close", function() {
               // Have we received the same file back?
               test.equal(fileBuffer, fileBody);
               db.close();
               test.done();          
-            });        
+            });     
 
             // Resume the stream
             stream.resume();
