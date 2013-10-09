@@ -250,7 +250,7 @@ Paging can be achieved with option parameters `limit` and `skip`
 ```javascript
   {
     "limit": 20,
-    "skip" 10
+    "skip": 10
   }
 ```
 
