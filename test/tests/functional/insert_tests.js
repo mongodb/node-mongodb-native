@@ -1895,3 +1895,27 @@ exports.shouldCorrectlyWorkWithCheckKeys = function(configuration, test) {
       });
   });
 }
+
+exports.shouldCorrectlyApplyBitOperator = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {native_parser:false})
+  db.open(function(err, db) {
+    var col = db.collection('shouldCorrectlyApplyBitOperator');
+
+    col.insert({a:1, b:1}, function(err, result) {
+      test.equal(null, err);
+
+      col.update({a:1}, {$bit: {b: {and: 0}}}, function(err, result) {
+        test.equal(null, err);
+
+        col.findOne({a:1}, function(err, doc) {
+          test.equal(null, err);
+          test.equal(1, doc.a);
+          test.equal(0, doc.b);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}

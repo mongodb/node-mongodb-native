@@ -101,7 +101,7 @@ module.exports = function(configurations) {
         // , '/test/tests/functional/index_tests.js'
         // , '/test/tests/functional/cursor_tests.js'
         // , '/test/tests/functional/find_tests.js'
-        // , '/test/tests/functional/insert_tests.js'
+        , '/test/tests/functional/insert_tests.js'
         // , '/test/tests/functional/admin_mode_tests.js'
         // , '/test/tests/functional/aggregation_tests.js'
         // , '/test/tests/functional/exception_tests.js'
@@ -117,7 +117,7 @@ module.exports = function(configurations) {
         // , '/test/tests/functional/fluent_api/aggregation_tests.js'
         // , '/test/tests/functional/maxtimems_tests.js'
         // , '/test/tests/functional/mongo_client_tests.js'
-        , '/test/tests/functional/fluent_api/batch_write_operations_tests.js'
+        // , '/test/tests/functional/fluent_api/batch_write_operations_tests.js'
       ]
     );
 
