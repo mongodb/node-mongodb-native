@@ -97,7 +97,7 @@ See [MongoDB documentation](http://www.mongodb.org/display/DOCS/Updating) for al
 To update and retrieve the contents for one single record you can use `findAndModify`.
 
 ```javascript
-  collection.findAndModify(criteria, sort, update[, options, callback])
+  collection.findAndModify(criteria, sort, update[, options], callback)
 ```
     
 Where
