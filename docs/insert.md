@@ -11,7 +11,7 @@ See also:
 Records can be inserted to a collection with `insert`
 
 ```javascript
-  collection.insert(docs[, options, callback])
+  collection.insert(docs[[, options], callback])
 ```
     
 Where
@@ -55,7 +55,7 @@ Shorthand for insert/update is `save` - if `_id` value set, the record is update
 Updates can be done with `update`
 
 ```javascript
-  collection.update(criteria, update[, options[, callback]]);
+  collection.update(criteria, update[[, options], callback]);
 ```
 
 Where
@@ -97,7 +97,7 @@ See [MongoDB documentation](http://www.mongodb.org/display/DOCS/Updating) for al
 To update and retrieve the contents for one single record you can use `findAndModify`.
 
 ```javascript
-  collection.findAndModify(criteria, sort, update[, options], callback)
+  collection.findAndModify(criteria[, sort[, update[, options]]], callback)
 ```
     
 Where
