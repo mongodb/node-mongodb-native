@@ -1,7 +1,10 @@
 # MongoClient or how to connect in a new and better way
-From driver version **1.2** we introduce a new connection Class that has the same name across all our official drivers. This is to ensure that we present a recognizable front for all our API's. This does not mean that your existing application will break, but rather that we encourage you to use the new connection api to simplify your application development.
+From driver version **1.2** we introduced a new connection Class that has the same name across all of our official drivers.
+This is to ensure that we present a recognizable front for all our API's. This does not mean that your existing application will break, 
+but rather that we encourage you to use the new connection api to simplify your application development.
 
-Furthermore, we are making the new connection class **MongoClient** acknowledges all writes to MongoDB, in contrast to the existing connection class Db that has acknowledgements turned off. Let's take a tour of the MongoClient functions.
+Furthermore, we are making the new connection class **MongoClient** that acknowledges all writes to MongoDB, in contrast to the existing connection class 
+DB that has acknowledgements turned off. Let's take a tour of the MongoClient functions.
 
     MongoClient = function(server, options);
 
@@ -13,7 +16,8 @@ Furthermore, we are making the new connection class **MongoClient** acknowledges
 
     MongoClient.connect
 
-Outlined above is the complete MongoClient interface. The methods **open**, **close** and **db** work very similar to the existing methods on the **Db** class. The main difference is that the constructor is missing the **database name** from Db. Let's show a simple connection using **open** as a code example speaks a thousand words.
+Outlined above is the complete MongoClient interface. The methods **open**, **close** and **db** work 
+very similar to the existing methods on the **Db** class. The main difference is that the constructor is missing the **database name** from Db. Let's show a simple connection using **open** as a code example speaks a thousand words.
 
     var MongoClient = require('mongodb').MongoClient
       , Server = require('mongodb').Server;
