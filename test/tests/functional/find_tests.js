@@ -1532,14 +1532,15 @@ exports.shouldPerformSimpleFindAndRemove = function(configuration, test) {
       test.equal(null, err);
 
       // Insert some test documentations
-      collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err, result) {
+      collection.insert([{a:1}, {b:1, d:1}, {c:1}], {w:1}, function(err, result) {
         test.equal(null, err);
 
-        // Simple findAndModify command returning the new document and
+        // Simple findAndModify command returning the old document and
         // removing it at the same time
         collection.findAndRemove({b:1}, [['b', 1]], function(err, doc) {
           test.equal(null, err);
           test.equal(1, doc.b);
+          test.equal(1, doc.d);
 
           // Verify that the document is gone
           collection.findOne({b:1}, function(err, item) {
