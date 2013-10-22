@@ -1,10 +1,26 @@
-Up to date documentation
-========================
+## MongoDB Node.JS Driver
+ 
+ type          | location
+ --------------|---------------------------------------------
+ documentation | http://mongodb.github.io/node-mongodb-native/
+ --------------|---------------------------------------------
 
-[Documentation](http://mongodb.github.com/node-mongodb-native/)
+ * apidoc: http://mongodb.github.io/node-mongodb-native/
 
-Install
-=======
+ * source code: https://github.com/mongodb/node-mongodb-native
+
+mongodb home: http://www.mongodb.org/
+
+### Questions and Bug Reports
+
+ * mailing list: https://groups.google.com/forum/#!forum/node-mongodb-native
+ * jira: http://jira.mongodb.org/
+
+### Change Log
+
+http://jira.mongodb.org/browse/NODE
+
+## Install
 
 To install the most recent release from npm, run:
 
@@ -16,16 +32,10 @@ To install the latest from the repository, run::
 
     npm install path/to/node-mongodb-native
 
-Community
-=========
-Check out the google group [node-mongodb-native](http://groups.google.com/group/node-mongodb-native) for questions/answers from users of the driver.
-
-Live Examples
-============
+## Live Examples
 <a href="https://runnable.com/node-mongodb-native" target="_blank"><img src="https://runnable.com/external/styles/assets/runnablebtn.png" style="width:67px;height:25px;"></a>
 
-Introduction
-============
+## Introduction
 
 This is a node.js driver for MongoDB. It's a port (or close to a port) of the library for ruby at http://github.com/mongodb/mongo-ruby-driver/.
 
@@ -55,8 +65,7 @@ A simple example of inserting a document.
   })
 ```
 
-Data types
-==========
+## Data types
 
 To store and retrieve the non-JSON MongoDb primitives ([ObjectID](http://www.mongodb.org/display/DOCS/Object+IDs), Long, Binary, [Timestamp](http://www.mongodb.org/display/DOCS/Timestamp+data+type), [DBRef](http://www.mongodb.org/display/DOCS/Database+References#DatabaseReferences-DBRef), Code).
 
@@ -89,8 +98,7 @@ Here are the constructors the non-Javascript BSON primitive types:
   new mongo.Double(number)	// Force double storage
 ```
 
-The C/C++ bson parser/serializer
---------------------------------
+### The C/C++ bson parser/serializer
 
 If you are running a version of this library has the C/C++ parser compiled, to enable the driver to use the C/C++ bson parser pass it the option native_parser:true like below
 
@@ -102,8 +110,7 @@ If you are running a version of this library has the C/C++ parser compiled, to e
 
 The C++ parser uses the js objects both for serialization and deserialization.
 
-GitHub information
-==================
+## GitHub information
 
 The source code is available at http://github.com/mongodb/node-mongodb-native.
 You can either clone the repository or download a tarball of the latest release.
@@ -114,27 +121,24 @@ Once you have the source you can test the driver by running
 
 in the main directory. You will need to have a mongo instance running on localhost for the integration tests to pass.
 
-Examples
-========
+## Examples
 
 For examples look in the examples/ directory. You can execute the examples using node.
 
     $ cd examples
     $ node queries.js
 
-GridStore
-=========
+## GridStore
 
 The GridStore class allows for storage of binary files in mongoDB using the mongoDB defined files and chunks collection definition.
 
 For more information have a look at [Gridstore](https://github.com/mongodb/node-mongodb-native/blob/master/docs/gridfs.md)
 
-Replicasets
-===========
+## Replicasets
+
 For more information about how to connect to a replicaset have a look at the extensive documentation [Documentation](http://mongodb.github.com/node-mongodb-native/)
 
-Primary Key Factories
----------------------
+### Primary Key Factories
 
 Defining your own primary key factory allows you to generate your own series of id's
 (this could f.ex be to use something like ISBN numbers). The generated the id needs to be a 12 byte long "string".
@@ -172,16 +176,14 @@ Simple example below
   });
 ```
 
-Documentation
-=============
+## Documentation
 
 If this document doesn't answer your questions, see the source of
 [Collection](https://github.com/mongodb/node-mongodb-native/blob/master/lib/mongodb/collection.js)
 or [Cursor](https://github.com/mongodb/node-mongodb-native/blob/master/lib/mongodb/cursor.js),
 or the documentation at MongoDB for query and update formats.
 
-Find
-----
+### Find
 
 The find method is actually a factory method to create
 Cursor objects. A Cursor lazily uses the connection the first time
@@ -230,7 +232,6 @@ from being returned multiple times. See more
 * `timeout` if false, asks MongoDb not to time out this cursor after an
 inactivity period.
 
-
 For information on how to create queries, see the
 [MongoDB section on querying](http://www.mongodb.org/display/DOCS/Querying).
 
@@ -251,8 +252,7 @@ For information on how to create queries, see the
   });
 ```
 
-Insert
-------
+### Insert
 
 Signature:
 
@@ -288,8 +288,7 @@ Note that there's no reason to pass a callback to the insert or update commands
 unless you use the `safe:true` option. If you don't specify `safe:true`, then
 your callback will be called immediately.
 
-Update; update and insert (upsert)
-----------------------------------
+### Update: update and insert (upsert)
 
 The update operation will update the first document that matches your query
 (or all documents that match if you use `multi:true`).
@@ -326,8 +325,7 @@ Example for `update`:
   });
 ```
 
-Find and modify
----------------
+### Find and modify
 
 `findAndModify` is like `update`, but it also gives the updated document to
 your callback. But there are a few key differences between findAndModify and
@@ -371,41 +369,28 @@ Example for `findAndModify`:
   });
 ```
 
-Save
-----
+### Save
 
 The `save` method is a shorthand for upsert if the document contains an
 `_id`, or an insert if there is no `_id`.
 
-Sponsors
-========
-Just as Felix Geisendörfer I'm also working on the driver for my own startup and this driver is a big project that also benefits other companies who are using MongoDB.
-
-If your company could benefit from a even better-engineered node.js mongodb driver I would appreciate any type of sponsorship you may be able to provide. All the sponsors will get a lifetime display in this readme, priority support and help on problems and votes on the roadmap decisions for the driver. If you are interested contact me on [christkv AT g m a i l.com](mailto:christkv@gmail.com) for details.
-
-And I'm very thankful for code contributions. If you are interested in working on features please contact me so we can discuss API design and testing.
-
-Release Notes
-=============
+## Release Notes
 
 See HISTORY
 
-Credits
-=======
+## Credits
 
 1. [10gen](http://github.com/mongodb/mongo-ruby-driver/)
 2. [Google Closure Library](http://code.google.com/closure/library/)
 3. [Jonas Raoni Soares Silva](http://jsfromhell.com/classes/binary-parser)
 
-Contributors
-============
+## Contributors
 
 Aaron Heckmann, Christoph Pojer, Pau Ramon Revilla, Nathan White, Emmerman, Seth LaForge, Boris Filipov, Stefan Schärmeli, Tedde Lundgren, renctan, Sergey Ukustov, Ciaran Jessup, kuno, srimonti, Erik Abele, Pratik Daga, Slobodan Utvic, Kristina Chodorow, Yonathan Randolph, Brian Noguchi, Sam Epstein, James Harrison Fisher, Vladimir Dronnikov, Ben Hockey, Henrik Johansson, Simon Weare, Alex Gorbatchev, Shimon Doodkin, Kyle Mueller, Eran Hammer-Lahav, Marcin Ciszak, François de Metz, Vinay Pulim, nstielau, Adam Wiggins, entrinzikyl, Jeremy Selier, Ian Millington, Public Keating, andrewjstone, Christopher Stott, Corey Jewett, brettkiefer, Rob Holland, Senmiao Liu, heroic, gitfy
 
-License
-=======
+## License
 
- Copyright 2009 - 2012 Christian Amor Kvalheim.
+ Copyright 2009 - 2013 MongoDb Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
