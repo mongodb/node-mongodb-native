@@ -1,3 +1,7 @@
+1.4
+-----------------
+- All node exceptions will no longer be caught if on('error') is defined
+
 1.3.19 2013-08-21
 -----------------
 - Correctly rethrowing errors after change from event emission to callbacks, compatibility with 0.10.X domains without breaking 0.8.X support.

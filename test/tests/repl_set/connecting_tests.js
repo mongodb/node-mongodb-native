@@ -214,12 +214,14 @@ exports['Should emit close with callback'] = function(configuration, test) {
   new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
     test.equal(null, err);
     var dbCloseCount = 0;
-    db.on('close', function() { ++dbCloseCount; });
+    db.on('close', function() { 
+      ++dbCloseCount; 
+    });
 
     db.close(function() {
       // Let all events fire.
       process.nextTick(function() {
-        test.equal(dbCloseCount, 0);
+        test.equal(dbCloseCount, 1);
         test.done();
       });
     });

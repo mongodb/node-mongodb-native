@@ -45,16 +45,11 @@ exports['Should fail to do map reduce to out collection'] = function(configurati
       // Reduce function
       var reduce = function(k,vals) { return 1; };
 
-      try {
-        // Execute map reduce and return results inline
-        collection.mapReduce(map, reduce
-          , {out : {replace:'replacethiscollection'}, readPreference:ReadPreference.SECONDARY}, function(err, results) {
-        });
-
-        test.ok(false);
-      } catch (err) {            
-        test.done();
-      }
+      // Execute map reduce and return results inline
+      collection.mapReduce(map, reduce
+        , {out : {replace:'replacethiscollection'}, readPreference:ReadPreference.SECONDARY}, function(err, results) {
+        test.done();            
+      });
     } else {
       test.done();
     }

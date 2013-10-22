@@ -243,15 +243,14 @@ exports['mixing included and excluded fields should return an error object with 
 }
 
 exports['should handle error throw in user callback'] = function(configuration, test) {
-  var client = configuration.newDbInstance({w:1}, {poolSize:1});
-  client.on('error', function(err) {
-    test.ok(err != null);
-    client.close();
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  process.once("uncaughtException", function(err) {
+    db.close();
     test.done();
   })
 
-  client.open(function(err, client) {
-    var c = client.collection('test_error_object_should_include_message');
+  db.open(function(err, client) {
+    var c = db.collection('test_error_object_should_include_message');
     c.findOne({}, function() {
       ggg
     })
@@ -274,10 +273,10 @@ exports['Should handle uncaught error correctly'] = function(configuration, test
 exports['Should handle throw error in db operation correctly'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
-    db.on("error", function(err) {
+    process.once("uncaughtException", function(err) {
       db.close();
-      test.done();      
-    });
+      test.done();
+    })
 
     db.collection('t').findOne(function() {
       testdfdma();
@@ -311,10 +310,10 @@ exports['Should handle MongoClient uncaught error correctly'] = {
 exports['Should handle MongoClient throw error in db operation correctly'] = function(configuration, test) {
   var MongoClient = configuration.getMongoPackage().MongoClient;
   MongoClient.connect(configuration.url(), function(err, db) {
-    db.on("error", function(err) {
+    process.once("uncaughtException", function(err) {
       db.close();
-      test.done();      
-    });
+      test.done();
+    })
 
     db.collection('t').findOne(function() {
       testdfdma();
