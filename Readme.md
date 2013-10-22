@@ -1,15 +1,14 @@
 ## MongoDB Node.JS Driver
  
-type          | location
---------------|---------------------------------------------
-documentation | http://mongodb.github.io/node-mongodb-native/
---------------|---------------------------------------------
-apidoc        | http://mongodb.github.io/node-mongodb-native/
---------------|---------------------------------------------
-source        | https://github.com/mongodb/node-mongodb-native
---------------|---------------------------------------------
-mongodb       | http://www.mongodb.org/
---------------|---------------------------------------------
+| type          | location                                       |
+|---------------|------------------------------------------------|
+| documentation | http://mongodb.github.io/node-mongodb-native/  |
+|---------------|------------------------------------------------|
+| apidoc        | http://mongodb.github.io/node-mongodb-native/  |
+|---------------|------------------------------------------------|
+| source        | https://github.com/mongodb/node-mongodb-native |
+|---------------|------------------------------------------------|
+| mongodb       | http://www.mongodb.org/                        |
 
 ### Questions and Bug Reports
 
