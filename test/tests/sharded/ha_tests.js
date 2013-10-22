@@ -58,6 +58,21 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
       new Server("localhost", 50001, { auto_reconnect: true })
     ], {ha:true})
 
+  // Counters to track emitting of events
+  var numberOfJoins = 0;
+  var numberLeaving = 0;
+
+  // Add some listeners
+  mongos.on("left", function(_server_type, _server) {
+    numberLeaving += 1;
+    // console.log("========================= " + _server_type + " at " + _server.host + ":" + _server.port + " left")
+  });
+
+  mongos.on("joined", function(_server_type, _doc, _server) {
+    numberOfJoins += 1;
+    // console.log("========================= " + _server_type + " at " + _server.host + ":" + _server.port + " joined")
+  });
+
   // Connect using the mongos connections
   var db = new Db('integration_test_', mongos, {w:0});
   db.open(function(err, db) {
@@ -108,6 +123,8 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
 
                             configuration.restartMongoS(50000, function(err, result) {
 
+                              test.equal(3, numberOfJoins);
+                              test.equal(3, numberLeaving);
                               db.close();
                               test.done();
                             });
