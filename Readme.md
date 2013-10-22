@@ -1,6 +1,6 @@
 ## MongoDB Node.JS Driver
  
-| type          | location                                       |
+| what          | where                                          |
 |---------------|------------------------------------------------|
 | documentation | http://mongodb.github.io/node-mongodb-native/  |
 | apidoc        | http://mongodb.github.io/node-mongodb-native/  |
