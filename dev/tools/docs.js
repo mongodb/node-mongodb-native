@@ -5,6 +5,7 @@ var fs = require('fs'),
   exec = require('child_process').exec,
   markdown = require('markdown').markdown,
   github = require('./github3'),
+  spawn = require('child_process').spawn,
   format = require('util').format;  
 
 // -----------------------------------------------------------------------------------------------------
@@ -12,128 +13,6 @@ var fs = require('fs'),
 //  Markdown converter
 //
 // -----------------------------------------------------------------------------------------------------
-// Parse markdown to Rich text format
-var transformMarkdownToStructuredText = exports.transformMarkdownToStructuredText = function(markDownText) {
-  // Parse the md file and generate a json tree
-  var jsonTree = markdown.parse(markDownText);
-  var documentLines = [];
-  return convert_tree_to_rs(jsonTree, documentLines).join('\n');
-}
-
-var addLine = function(char, length) {
-  var chars = [];  
-  for(var i = 0; i < length; i++) chars[i] = char;
-  return chars.join('');
-}
-
-var convert_tree_to_rs = function(nodes, documentLines) {
-  if(!Array.isArray(nodes)) throw new Error("Malformed tree structure");
-  // Go through all the tags and render
-  for(var i = 0; i < nodes.length; i++) {
-    var line = nodes[i];
-    
-    if(Array.isArray(line)) {
-      switch(line[0]) {
-        case 'header':
-          // Unpack the parts
-          var options = line[1];
-          var title = line[2];
-          // Add lines to the document
-          if(options.level == 1) {
-            documentLines.push(addLine("=", title.length))
-            documentLines.push(title);
-            documentLines.push(addLine("=", title.length))
-          } else if(options.level == 2) {
-            documentLines.push(addLine("-", title.length))
-            documentLines.push(title);
-            documentLines.push(addLine("-", title.length))
-          }
-          break;
-        case 'para':
-          var paraLines = [];
-          paraLines.push("\n");
-        
-          for(var j = 1; j < line.length; j++) {
-            // bullet list item
-            if(Array.isArray(line[j])) {
-              var subdocs = [];
-              convert_tree_to_rs([line[j]], subdocs);
-              paraLines.push(subdocs.join(''));
-            } else {
-              paraLines.push(line[j]);
-            }
-          }          
-        
-          // Merge the docs in
-          documentLines.push(paraLines.join(' '));
-          documentLines.push('\n');
-          break;
-        case 'link':
-          documentLines.push(format("`%s <%s>`_", line[2], line[1].href.replace(".md", ".html")));
-          break;
-        case 'inlinecode':
-          documentLines.push(format("``%s``", line[1]));
-          break;
-        case 'code_block':
-          // Unpack code block
-          var codeLines = line[1].split("\n");
-          // Format all the lines
-          documentLines.push("  .. code-block:: javascript\n");
-          for(var j = 0; j < codeLines.length; j++) {
-            documentLines.push(format("    %s", codeLines[j]));
-          }
-          
-          documentLines.push("\n");
-          break;
-        case 'bulletlist':
-          // Render the list (line.length - 1)
-          for(var j = 1; j < line.length; j++) {
-            // bullet list item
-            if(Array.isArray(line[j])) {
-              var subdocs = [];
-              convert_tree_to_rs([line[j]], subdocs);
-              documentLines.push(subdocs.join(' '));
-            } else {
-              documentLines.push(line[j]);
-            }
-          }
-          
-          // Add an empty line
-          documentLines.push("\n");          
-          break;
-        case 'listitem':
-          var listitemLines = [];
-          
-          for(var j = 1; j < line.length; j++) {
-            // bullet list item
-            if(Array.isArray(line[j])) {
-              var subdocs = [];
-              convert_tree_to_rs([line[j]], subdocs);
-              listitemLines.push(subdocs.join(' '));
-            } else {
-              listitemLines.push(line[j]);
-            }
-          }          
-          
-          // Merge the docs in
-          documentLines.push(format("  * %s", listitemLines.join(' ').trim()));
-          break;
-        case 'em':
-          documentLines.push(format("*%s*", line[1]));
-          break;
-        case 'strong':
-          documentLines.push(format("**%s**", line[1]));
-          break;
-        default:
-          console.dir(line)
-          break;
-      }      
-    }    
-  }
-  
-  return documentLines;
-}
-
 exports.writeMarkDownFile = function(outputDirectory, articles, templates, options) {
   // Read all the templates
   var templateObjects = exports.readAllTemplates(templates);
@@ -146,13 +25,27 @@ exports.writeMarkDownFile = function(outputDirectory, articles, templates, optio
 
       // Process all the articles
       for(var i = 0 ; i < articles.length; i++) {
-        // Fetch the article markdown content
-        var article = fs.readFileSync(articles[i].path).toString();
-        // Convert the text into restructured text for sphinx
-        var text = transformMarkdownToStructuredText(article);
-        // Write out the content
-        fs.writeFileSync(format("%s/%s", outputDirectory, articles[i].output.toLowerCase()), text);
         names.push(articles[i].name.toLowerCase());
+        var params = [];
+        // Add original article
+        params.push(articles[i].path);
+        // Add output option
+        params.push("-o")
+        params.push(format("%s/%s", outputDirectory, articles[i].output.toLowerCase()))
+
+        var pandoc = spawn('pandoc', params)
+        pandoc.stdout.on('data', function (data) {
+          console.log('stdout: ' + data);
+        });
+
+        pandoc.stderr.on('data', function (data) {
+          console.log('stderr: ' + data);
+        });
+
+        pandoc.on('close', function (code) {
+          if(code != 0)
+            console.log('child process exited with code ' + code);
+        });
       }
 
       // Just write out the index

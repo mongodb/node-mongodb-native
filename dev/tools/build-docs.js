@@ -194,7 +194,6 @@ var tagDescriptions = {
 }
 
 // Create the github documents
-// docs.generateGithubPackageList(inputFile, outputDirectory, templates, tagDescriptions, {dontfetch:true});
 docs.generateGithubPackageList(inputFile, outputDirectoryGithub, templates, tagDescriptions, {});
 
 

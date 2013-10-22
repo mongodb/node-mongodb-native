@@ -65,7 +65,7 @@
   "bson": "0.2.3"
 }
 , "devDependencies": {
-      "dox": "0.2.0"
+      "dox": "0.4.4"
     , "uglify-js": "1.2.5"
     , "ejs": "0.6.1"
     , "request": "2.12.0"
