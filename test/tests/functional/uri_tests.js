@@ -15,7 +15,7 @@ exports['Should correctly connect using MongoClient to a single server'] = {
       , Server = configuration.getMongoPackage().Server;
     // DOC_START
     // Set up the connection to the local db
-    var mongoclient = new MongoClient(new Server("localhost", 27017, {native_parser: true}));
+    var mongoclient = new MongoClient(new Server("localhost", 27017), {native_parser: true});
 
     // Open the connection to the server
     mongoclient.open(function(err, mongoclient) {
