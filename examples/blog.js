@@ -79,8 +79,8 @@ MongoClient.connect(format("mongodb://%s:%s/node-mongo-blog?w=1", host, port), f
                 if(article != null) {
                   console.log("[" + article.title + "]:[" + article.body + "]:[" + article.author_id.toHexString() + "]");
                   console.log(">> Closing connection");
-                  db.close();
                 }
+                db.close();
               });
             }
           });
