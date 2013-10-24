@@ -63,6 +63,9 @@ if(argv.t == 'functional') {
   standalone_runners.runner_auth.run('single_server_auth', run_options);
 } else if(argv.t == 'ssl') {
   ssl_runners.runner.run('none', run_options);
+  ssl_runners.runner.on('end', function() {
+    process.exit(0);
+  });
 } else if(argv.t == 'sharded') {
   sharded_runners.runner.run('sharded', run_options);
 } else if(argv.t == 'replicaset') {

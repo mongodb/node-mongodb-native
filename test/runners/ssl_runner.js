@@ -22,9 +22,9 @@ module.exports = function(configurations) {
     // Third parameter is the list of files to execute
     .add("ssl_tests",
       [
-          // '/test/tests/ssl/mongoclient_tests.js'
-          // , '/test/tests/ssl/ssl_validation_tests.js'
-          , '/test/tests/ssl/x509_validation_tests.js'
+          '/test/tests/ssl/mongoclient_tests.js'
+        , '/test/tests/ssl/ssl_validation_tests.js'
+        , '/test/tests/ssl/x509_validation_tests.js'
       ]
     );
 
