@@ -6,6 +6,12 @@ module.exports = function(configurations) {
   //
   //
 
+  // NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+  // NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+  // NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+  // Add the following line to /etc/hosts
+  //    127.0.0.1 server 
+
   // Configure a Run of tests
   var ssl_server_runner = Runner
     // Add configurations to the test runner
@@ -16,8 +22,9 @@ module.exports = function(configurations) {
     // Third parameter is the list of files to execute
     .add("ssl_tests",
       [
-          '/test/tests/ssl/mongoclient_tests.js'
-          , '/test/tests/ssl/ssl_validation_tests.js'
+          // '/test/tests/ssl/mongoclient_tests.js'
+          // , '/test/tests/ssl/ssl_validation_tests.js'
+          , '/test/tests/ssl/x509_validation_tests.js'
       ]
     );
 

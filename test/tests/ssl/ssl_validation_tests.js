@@ -478,8 +478,10 @@ exports.shouldCorrectlyValidateServerSSLCertificate = function(configuration, te
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
     , MongoClient = configuration.getMongoPackage().MongoClient;
+  
   // Read the ca
   var ca = [fs.readFileSync(__dirname + "/certificates/ca.pem")];
+  
   // Create a db connection
   var db1 = new Db(configuration.db_name, new Server("server", 27017, 
     {   auto_reconnect: false
@@ -487,6 +489,7 @@ exports.shouldCorrectlyValidateServerSSLCertificate = function(configuration, te
       , ssl:true
       , sslValidate:true
       , sslCA:ca }), {w:0});
+  
   // All inserted docs
   var docs = [];
   var errs = [];
@@ -500,8 +503,11 @@ exports.shouldCorrectlyValidateServerSSLCertificate = function(configuration, te
     , ssl:true
     , ssl_server_pem: "../test/tests/ssl/certificates/server.pem"
     })
+
   serverManager.start(true, function() {
-    db1.open(function(err, db) {        
+    db1.open(function(err, db) {    
+      test.equal(null, err)
+
       // Create a collection
       db.createCollection('shouldCorrectlyCommunicateUsingSSLSocket', function(err, collection) {
         collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
