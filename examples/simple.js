@@ -22,7 +22,7 @@ MongoClient.connect(format("mongodb://%s:%s/node-mongo-examples?w=1", host, port
         collection.find().each(function(err, item) {
           if(item != null) {
             console.dir(item);
-            console.log("created at " + new Date(item._id.generationTime) + "\n")
+            console.log("created at " + new Date(item._id.generationTime) + "\n");
           }
 
           // Null signifies end of iterator
