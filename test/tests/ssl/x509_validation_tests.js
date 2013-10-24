@@ -45,31 +45,41 @@ exports['Should correctly authenticate using x509'] = function(configuration, te
       test.equal(null, err);
       test.ok(db != null);
 
-      // Add the X509 auth user to the $external db
-      var ext = db.db('$external');
-      ext.addUser(userName, {roles: [
-        {'role': 'readWriteAnyDatabase', 'db': 'admin'},
-        {'role': 'userAdminAnyDatabase', 'db': 'admin'}        
-      ]}, function(err, result) {
+      // Execute build info
+      db.command({buildInfo:1}, function(err, result) {
         test.equal(null, err);
-        test.equal(userName, result[0].user);
-        test.equal('', result[0].pwd);
-        db.close();
-
-        // Connect using X509 authentication
-        MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&ssl=true&maxPoolSize=1'
-            , encodeURIComponent(userName), 'MONGODB-X509'), {
-          server: {
-              sslKey:key
-            , sslCert:cert
-          }
-        }, function(err, db) {
-          test.equal(null, err);
-          test.ok(db != null);
-
+        var version = parseInt(result.versionArray.slice(0, 3).join(""), 10);
+        if(version < 253) {
           db.close();
-          serverManager.killAll();
-          test.done();
+          return test.done();
+        }
+
+        // Add the X509 auth user to the $external db
+        var ext = db.db('$external');
+        ext.addUser(userName, {roles: [
+          {'role': 'readWriteAnyDatabase', 'db': 'admin'},
+          {'role': 'userAdminAnyDatabase', 'db': 'admin'}        
+        ]}, function(err, result) {
+          test.equal(null, err);
+          test.equal(userName, result[0].user);
+          test.equal('', result[0].pwd);
+          db.close();
+
+          // Connect using X509 authentication
+          MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&ssl=true&maxPoolSize=1'
+              , encodeURIComponent(userName), 'MONGODB-X509'), {
+            server: {
+                sslKey:key
+              , sslCert:cert
+            }
+          }, function(err, db) {
+            test.equal(null, err);
+            test.ok(db != null);
+
+            db.close();
+            serverManager.killAll();
+            test.done();
+          });
         });
       });
     });
