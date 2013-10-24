@@ -222,7 +222,9 @@ exports.shouldCorrectlyPipeAGridFsToAfile = function(configuration, test) {
           // Ensure we are doing writing before attempting to open the file
           fs.readFile("./test_gs_weird_bug_streamed.tmp", function(err, streamedData) {                      
             // Compare the data
-            test.ok(originalData.toString('hex') == streamedData.toString('hex'));
+            for(var i = 0; i < originalData.length; i++) {
+              test.equal(originalData[i], streamedData[i])
+            }
             
             // Close the database
             db.close();
