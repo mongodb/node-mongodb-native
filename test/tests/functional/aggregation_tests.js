@@ -295,3 +295,193 @@ exports.shouldCorrectlyPassReadPreference = {
     });
   }
 }
+
+/**
+ * Correctly call the aggregation framework to return a cursor
+ *
+ * @_class collection
+ * @_function aggregate
+ * @ignore
+ */
+exports['Should correctly return and iterate over all the cursor results'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.1.0"},
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([
+            { $project : {
+              author : 1,
+              tags : 1
+            }},
+            { $unwind : "$tags" },
+            { $group : {
+              _id : {tags : "$tags"},
+              authors : { $addToSet : "$author" }
+            }}
+          ], {
+            cursor: {batchSize:100}
+          });
+
+        // Iterate over all the items in the cursor
+        cursor.get(function(err, results) {
+          test.equal(null, err);
+          test.equal('good', results[0]._id.tags);
+          test.deepEqual(['bob'], results[0].authors);
+          test.equal('fun', results[1]._id.tags);
+          test.deepEqual(['bob'], results[1].authors);
+
+          db.close();
+          test.done();        
+        });
+      });
+    });
+    // DOC_END
+  }
+}
+
+/**
+ * Correctly call the aggregation framework to return a cursor and call explain
+ *
+ * @_class collection
+ * @_function aggregate
+ * @ignore
+ */
+exports['Should correctly return a cursor and call explain'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.5.3"},
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([
+            { $project : {
+              author : 1,
+              tags : 1
+            }},
+            { $unwind : "$tags" },
+            { $group : {
+              _id : {tags : "$tags"},
+              authors : { $addToSet : "$author" }
+            }}
+          ], {
+            cursor: {batchSize:100}
+          });
+
+        // Iterate over all the items in the cursor
+        cursor.explain(function(err, results) {
+          test.equal(null, err);
+          test.equal(4, results.length);
+
+          db.close();
+          test.done();        
+        });
+      });
+    });
+    // DOC_END
+  }
+}
+
+/**
+ * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+ *
+ * @_class collection
+ * @_function aggregate
+ * @ignore
+ */
+exports['Should correctly return a cursor with batchSize 1 and call next'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.5.3"},
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([
+            { $project : {
+              author : 1,
+              tags : 1
+            }},
+            { $unwind : "$tags" },
+            { $group : {
+              _id : {tags : "$tags"},
+              authors : { $addToSet : "$author" }
+            }}
+          ], {
+            cursor: {batchSize:1}
+          });
+
+        // Iterate over all the items in the cursor
+        cursor.next(function(err, result) {
+          test.equal(null, err);
+          test.equal('good', result._id.tags);
+          test.deepEqual(['bob'], result.authors);
+
+          db.close();
+          test.done();        
+        });
+      });
+    });
+    // DOC_END
+  }
+}
