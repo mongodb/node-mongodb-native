@@ -485,3 +485,62 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
     // DOC_END
   }
 }
+
+/**
+ * Correctly call the aggregation framework and write the results to a new collection
+ *
+ * @_class collection
+ * @_function aggregate
+ * @ignore
+ */
+exports['Should correctly write the results out to a new collection'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.5.3"},
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([
+            { $project : {
+              author : 1,
+              tags : 1
+            }},
+            { $unwind : "$tags" },
+            { $group : {
+              _id : {tags : "$tags"},
+              authors : { $addToSet : "$author" }
+            }}
+          ], {
+            out: "testingOutCollectionForAggregation"
+          }, function(err, results) {
+            test.equal(null, err);
+            test.equal(0, results.length);
+
+            db.close();
+            test.done();        
+          });
+      });
+    });
+    // DOC_END
+  }
+}
