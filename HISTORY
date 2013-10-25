@@ -1,3 +1,5 @@
+## WHY NO ISSUES?
+
 1.4
 -----------------
 - All node exceptions will no longer be caught if on('error') is defined
