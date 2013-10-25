@@ -307,6 +307,8 @@ exports['Should correctly return and iterate over all the cursor results'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {mongodb: ">2.1.0"},
+  requires: {serverType: 'Server'},
+  requires: {node: ">0.10.0"},
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -372,7 +374,9 @@ exports['Should correctly return a cursor and call explain'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {mongodb: ">2.5.3"},
-  
+  requires: {serverType: 'Server'},
+  requires: {node: ">0.10.0"},
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -434,6 +438,8 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {mongodb: ">2.5.3"},
+  requires: {serverType: 'Server'},
+  requires: {node: ">0.10.0"},
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -614,6 +620,8 @@ exports['Should correctly use allowDiskUsage when performing an aggregation with
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {mongodb: ">2.5.3"},
+  requires: {serverType: 'Server'},
+  requires: {node: ">0.10.0"},
   
   // The actual test we wish to run
   test: function(configure, test) {
