@@ -9,7 +9,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
-      var col = db.collection('batch_write_ops_2');
+      var col = db.collection('batch_write_ordered_ops_1');
 
       // Add unique index on b field causing all updates to fail
       col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
@@ -55,7 +55,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
-      var col = db.collection('batch_write_ops_2');
+      var col = db.collection('batch_write_ordered_ops_2');
 
       // Add unique index on b field causing all updates to fail
       col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
@@ -106,7 +106,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with mixed m
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
-      var col = db.collection('batch_write_ops_2');
+      var col = db.collection('batch_write_ordered_ops_3');
 
       // Add unique index on b field causing all updates to fail
       col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
@@ -145,6 +145,123 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with mixed m
 
           db.close();
           test.done();
+        });
+      });
+    });
+  }
+}
+
+exports['Should Correctly perform update, updateOne and replaceOne ordered batch operations'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  requires: {mongodb: ">2.5.3"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(err, null);
+
+      // Get the collection
+      var col = db.collection('batch_write_ordered_ops_4');
+
+      // Initialize the unOrdered Batch
+      var batch = col.initializeBulkOp();
+      // Perform some inserts then exercise all the operations available
+      batch.insert([{a:1}, {a:1}, {a:2}, {a:3}]);
+      batch.execute(function(err, result) {
+        test.equal(null, err);
+        test.equal(1, result.ok);
+        test.equal(4, result.n);
+
+        // Update using updateOne, update and replaceOne
+        var batch = col.initializeOrderedBulkOp();
+        batch.find({a:1}).update({$set: {b:1}});
+        batch.find({a:2}).updateOne({$set: {b:2}});
+        batch.find({a:3}).replaceOne({a:3, b:3});
+
+        // Execute the batch
+        batch.execute(function(err, result) {
+          test.equal(null, err);
+          test.equal(1, result.ok);
+          test.equal(4, result.n);
+
+          // Get all the items and check for the validity
+          col.find({a:1, b:1}).count(function(err, c) {
+            test.equal(null, err);
+            test.equal(2, c);
+
+            col.find({a:2, b:2}).count(function(err, c) {
+              test.equal(null, err);
+              test.equal(1, c);
+
+              col.find({a:3, b:3}).count(function(err, c) {
+                test.equal(null, err);
+                test.equal(1, c);
+
+                db.close();
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['Should Correctly perform upsert with update, updateOne and replaceOne ordered batch operations'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  requires: {mongodb: ">2.5.3"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(err, null);
+
+      // Get the collection
+      var col = db.collection('batch_write_ordered_ops_5');
+
+      // Update using updateOne, update and replaceOne
+      var batch = col.initializeOrderedBulkOp();
+      batch.find({a:1}).upsert().update({$set: {b:1}});
+      batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+      batch.find({a:3}).upsert().replaceOne({a:3, b:3});
+
+      // Execute the batch
+      batch.execute(function(err, result) {
+        test.equal(null, err);
+        test.equal(1, result.ok);
+
+        test.equal(3, result.upserted.length);
+        test.equal(0, result.upserted[0].index);
+        test.ok(result.upserted[0]._id != null);
+        test.equal(1, result.upserted[1].index);
+        test.ok(result.upserted[1]._id != null);
+        test.equal(2, result.upserted[2].index);
+        test.ok(result.upserted[2]._id != null);
+
+        // Get all the items and check for the validity
+        col.find({a:1, b:1}).count(function(err, c) {
+          test.equal(null, err);
+          test.equal(1, c);
+
+          col.find({a:2, b:2}).count(function(err, c) {
+            test.equal(null, err);
+            test.equal(1, c);
+
+            col.find({a:3, b:3}).count(function(err, c) {
+              test.equal(null, err);
+              test.equal(1, c);
+
+              db.close();
+              test.done();
+            });
+          });
         });
       });
     });

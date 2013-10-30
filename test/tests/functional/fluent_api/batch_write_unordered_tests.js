@@ -12,7 +12,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
-      var col = db.collection('batch_write_ops_1');
+      var col = db.collection('batch_write_unordered_ops_1');
       // Add unique index on b field causing all updates to fail
       col.ensureIndex({b:1}, {unique:true, sparse:true}, function(err, result) {
         test.equal(err, null);
@@ -58,7 +58,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
   }
 }
 
-exports['Should Correctly perform update, updateOne and replaceOne batch operations'] = {
+exports['Should Correctly perform update, updateOne and replaceOne unordered batch operations'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
@@ -71,7 +71,7 @@ exports['Should Correctly perform update, updateOne and replaceOne batch operati
       test.equal(err, null);
 
       // Get the collection
-      var col = db.collection('batch_write_ops_1');
+      var col = db.collection('batch_write_unordered_ops_2');
 
       // Initialize the unOrdered Batch
       var batch = col.initializeBulkOp();
@@ -118,7 +118,7 @@ exports['Should Correctly perform update, updateOne and replaceOne batch operati
   }
 }
 
-exports['Should Correctly perform upsert with update, updateOne and replaceOne batch operations'] = {
+exports['Should Correctly perform upsert with update, updateOne and replaceOne unordered batch operations'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
@@ -131,7 +131,7 @@ exports['Should Correctly perform upsert with update, updateOne and replaceOne b
       test.equal(err, null);
 
       // Get the collection
-      var col = db.collection('batch_write_ops_1');
+      var col = db.collection('batch_write_unordered_ops_3');
 
       // Update using updateOne, update and replaceOne
       var batch = col.initializeBulkOp();
@@ -186,7 +186,7 @@ exports['Should Correctly perform upsert with update, updateOne and replaceOne b
 //     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 //     db.open(function(err, db) {
 //       // Get the collection
-//       var col = db.collection('batch_write_ops_1');
+//       var col = db.collection('batch_write_unordered_ops_4');
 //       // Add unique index on b field causing all updates to fail
 //       col.ensureIndex({b:1}, {unique:true, sparse:true}, function(err, result) {
 //         test.equal(err, null);
