@@ -223,11 +223,8 @@ var replica_set_config_auth = function(options) {
 
         self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
         self._db.open(function(err, _db) {
-          var db2 = _db.db('node-native-test');
-          db2.addUser("me", "secret", {w:3}, function(err, result) {
-            if(err) throw err;
-            callback();
-          });
+          if(err) throw err;
+          callback();
         })
       });
     }

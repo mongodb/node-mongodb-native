@@ -439,7 +439,6 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
       // Attemp to retrieve a connection
       self.getConnection(function(err, connection) {
         console.log("[ensureUp] - " + self.startPort + " :: " + numberOfInitiateRetries)
-        // console.dir(err)
 
         // Adjust the number of retries
         numberOfInitiateRetries = numberOfInitiateRetries - 1
@@ -470,6 +469,9 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
           _authenticateIfNeeded(self, connection, function() {
             // Check repl set get status
             connection.admin().command({"replSetGetStatus": 1}, function(err, object) {              
+              // console.log("=====================================================")
+              // console.dir(err)
+              // console.dir(object)
               // Close connection
               if(connection != null) connection.close();
               // Get documents
