@@ -20,10 +20,8 @@ module.exports = function(configurations) {
     // No hints
     .schedulerHints(null)
 
-    // Add the default Filters    
-    .afterConfigurationStart(defaultFilters.afterConfigurationStart)
-    // Add the filter method
-    .filter(defaultFilters.filter)
+    // Add default filters
+    .addFilter(defaultFilters)
 
     // The list of files to execute
     .add("functional_tests",
@@ -84,6 +82,10 @@ module.exports = function(configurations) {
     // Add configurations to the test runner
     .configurations(configurations)
     .exeuteSerially(true)
+
+    // Add default filters
+    .addFilter(defaultFilters)
+
     // First parameter is test suite name
     // Second parameter is the configuration used
     // Third parameter is the list of files to execute
