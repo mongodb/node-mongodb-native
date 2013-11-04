@@ -1,36 +1,13 @@
-var Runner = require('integra').Runner;
+var Runner = require('integra').Runner
+  , createVersionFilters = require('./shared/filters').createVersionFilters;
+
+var defaultFilters = createVersionFilters();
 
 module.exports = function(configurations) {
   //
   //  Single server runner
   //
   //
-
-  // Get environmental variables that are known
-  var node_version_array = process
-      .version
-      .replace(/v/g, '')
-      .split('.')
-      .map(function(x) { return parseInt(x, 10) });
-  var mongodb_version_array = null;
-
-  // Check if we have a valid node.js method
-  var validVersions = function(compare_version, version) {
-    var comparator = version.slice(0, 1)
-    var version_array = version
-        .slice(1).split(/\./).map(function(x) { return parseInt(x, 10); });
-
-    // Comparator
-    if(comparator == '>') {
-      if(compare_version[0] >= version_array[0]
-        && compare_version[1] >= version_array[1]
-        && compare_version[2] >= version_array[2])
-        return true;
-    }
-    
-    // No valid node version
-    return false;
-  }
 
   // Configure a Run of tests
   var functional_tests_runner = Runner
@@ -42,39 +19,11 @@ module.exports = function(configurations) {
     
     // No hints
     .schedulerHints(null)
-    
-    // Query configuration for any variables we need to know
-    .afterConfigurationStart(function(configuration, callback) {
-      configuration.newDbInstance({w:1}).open(function(err, db) {
-        db.command({buildInfo:true}, function(err, result) {
-          if(err) throw err;
-          mongodb_version = result.versionArray;
-          db.close();
-          callback();
-        });
-      });
-    })
 
-    // We wish to filter out tests based on tags
-    .filter(function(test) {
-      if(typeof test != 'function') {      
-        // If we have a node.js version check
-        if(test.requires && test.requires.node) 
-          return validVersions(node_version_array, test.requires.node);
-
-        if(test.requires && test.requires.mongodb) {
-          return validVersions(mongodb_version, test.requires.mongodb);
-        }
-
-        if(test.requires 
-          && test.requires.serverType 
-          && test.requires.serverType.toLowerCase() != 'server') {
-          return false;
-        }
-      }
-
-      return true
-    })
+    // Add the default Filters    
+    .afterConfigurationStart(defaultFilters.afterConfigurationStart)
+    // Add the filter method
+    .filter(defaultFilters.filter)
 
     // The list of files to execute
     .add("functional_tests",
