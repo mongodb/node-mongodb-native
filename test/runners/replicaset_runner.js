@@ -1,5 +1,8 @@
 var fs = require('fs')
-  , Runner = require('integra').Runner;
+  , Runner = require('integra').Runner
+  , createVersionFilters = require('./shared/filters').createVersionFilters;
+
+var defaultFilters = createVersionFilters();
 
 module.exports = function(configurations) {
   //
@@ -9,32 +12,6 @@ module.exports = function(configurations) {
   var buckets = {};
   var test_results = [];
   var schedulingData = null;
-
-  // Get environmental variables that are known
-  var node_version_array = process
-      .version
-      .replace(/v/g, '')
-      .split('.')
-      .map(function(x) { return parseInt(x, 10) });
-  var mongodb_version_array = null;
-
-  // Check if we have a valid node.js method
-  var validVersions = function(compare_version, version) {
-    var comparator = version.slice(0, 1)
-    var version_array = version
-        .slice(1).split(/\./).map(function(x) { return parseInt(x, 10); });
-
-    // Comparator
-    if(comparator == '>') {
-      if(compare_version[0] >= version_array[0]
-        && compare_version[1] >= version_array[1]
-        && compare_version[2] >= version_array[2])
-        return true;
-    }
-    
-    // No valid node version
-    return false;
-  }
 
   try {
     schedulingData = fs.readFileSync('./stats.tmp', 'utf8');
@@ -51,6 +28,9 @@ module.exports = function(configurations) {
 
     // Execute all tests serially in each context
     .exeuteSerially(true)
+
+    // Add default filters
+    .addFilter(defaultFilters)
 
     // Load runtime information data (used by scheduler)
     // to balance execution as much as possible
@@ -129,6 +109,10 @@ module.exports = function(configurations) {
     // Add configurations to the test runner
     .configurations(configurations)
     .exeuteSerially(true)
+
+    // Add default filters
+    .addFilter(defaultFilters)
+
     // First parameter is test suite name
     // Second parameter is the configuration used
     // Third parameter is the list of files to execute

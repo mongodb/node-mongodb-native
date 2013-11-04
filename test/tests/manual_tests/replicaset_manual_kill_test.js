@@ -40,12 +40,10 @@ RS.startSet(true, function(err, result) {
       db.collection('t', function(statsErr, stats) {
           if (statsErr) return console.log('error opening stats %o', err);
           stats.remove({}, {w:1}, function(err, result) {
-            console.log("================================================================")
-            console.dir(err)
+            // console.log("================================================================")
+            // console.dir(err)
             
             stats.insert({name:'reqcount', value:0}, {w:1}, function(err, result) {
-              console.log("================================================================")
-              console.dir(err)
               //create server
               http.createServer(function (req, res) {
                   if (req.url !== '/') {
@@ -68,7 +66,6 @@ RS.startSet(true, function(err, result) {
                   });
 
                   //increment amount of requests
-                  console.log('incrementing request by 1!');
                   stats.update({name: 'reqcount'}, {'$inc': {value: 1}}, {upsert: true, w:0});
               }).listen(8000);                
             });              

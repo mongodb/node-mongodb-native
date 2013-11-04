@@ -6,7 +6,6 @@ var node_version_array = process
     .replace(/v/g, '')
     .split('.')
     .map(function(x) { return parseInt(x, 10) });
-var mongodb_version_array = null;
 
 // Check if we have a valid node.js method
 var validVersions = function(compare_version, version) {

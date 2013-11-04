@@ -1,6 +1,6 @@
 // console.log(argv._);
 var argv = require('optimist')
-    .usage('Usage: $0 -t [target] -e [environment] -n [name]')
+    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename]')
     .demand(['t'])
     .argv;
 
@@ -42,6 +42,7 @@ var replicaset_runners = require('./runners/replicaset_runner')(configurations)
 // Running a specific test
 var run_options = {};
 if(argv.n) run_options.test = argv.n;
+if(argv.f) run_options.file = argv.f;
 // Handle the targets
 if(argv.t == 'functional') {
   var environment = argv.e ? argv.e : 'single_server'

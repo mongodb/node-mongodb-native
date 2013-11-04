@@ -25,9 +25,6 @@ module.exports = function(configurations) {
 
     // The list of files to execute
     .add("functional_tests",
-      // [
-      //   , '/test/tests/functional/db_tests.js'
-      // ]
       [
         '/test/tests/functional/mongo_reply_parser_tests.js'
         , '/test/tests/functional/connection_pool_tests.js'
