@@ -74,7 +74,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
         batch.execute(function(err, result) {
           test.equal(null, err);
           test.equal(0, result.ok);
-          test.equal(2, result.n);
+          test.equal(3, result.n);
           test.equal(11000, result.errCode);
           test.ok(result.errmsg.indexOf("E11000 duplicate key error index:") != -1);
 
@@ -128,7 +128,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with mixed m
         batch.execute(function(err, result) {
           test.equal(null, err);
           test.equal(0, result.ok);
-          test.equal(4, result.n);
+          test.equal(6, result.n);
           test.equal(99999, result.errCode);
           test.ok(result.errmsg.indexOf("batch op errors occurred") != -1);
 

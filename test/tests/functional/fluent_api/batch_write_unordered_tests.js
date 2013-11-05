@@ -35,7 +35,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
           test.equal(99999, result.errCode);
           test.equal('batch op errors occurred', result.errmsg);
           test.equal(0, result.ok);
-          test.equal(1, result.n);
+          test.equal(2, result.n);
           test.equal(2, result.errDetails.length);
           
           test.equal(1, result.errDetails[0].index);
