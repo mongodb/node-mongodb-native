@@ -169,10 +169,10 @@ var replica_set_config_auth = function(options) {
     // Set up replicaset manager
     var replicasetManager = null;
 
-    // Test suite start
-    this.start = function(callback) {
-      callback();
-    }
+    // // Test suite start
+    // this.start = function(callback) {
+    //   callback();
+    // }
 
     // Test suite stop
     this.stop = function(callback) {
@@ -185,6 +185,21 @@ var replica_set_config_auth = function(options) {
         replicasetManager[name].apply(replicasetManager, args);        
       }
     }
+
+    // Test suite start
+    this.start = function(callback) {
+      this.setup(callback);
+    }
+
+    // // Test suite stop
+    // this.stop = function(callback) {
+    //   if(self._db) self._db.close();
+
+    //   replicasetManager.killSetServers(function(err) {
+    //     callback();
+    //   });
+    // };
+
 
     // Set up replicaset manager
     replicasetManager = new ReplicaSetManager(repl_options);
@@ -206,6 +221,10 @@ var replica_set_config_auth = function(options) {
     self.reStart = mapFunction(replicasetManager, 'reStart');
     self.reStartAndConfigure = mapFunction(replicasetManager, 'reStartAndConfigure');
 
+    this.newDbInstance = function(db_options, server_options) {
+      return new Db('integration_tests', new ReplSet([new Server("127.0.0.1", self.startPort, server_options)], {poolSize:1}), db_options);      
+    }
+
     // Pr test functions
     this.setup = function(callback) {   
       // Start set
@@ -214,12 +233,12 @@ var replica_set_config_auth = function(options) {
 
         // Set up the replicaset
         var replSet = new ReplSet( [
-                new Server( replicasetManager.host, replicasetManager.ports[1]),
-                new Server( replicasetManager.host, replicasetManager.ports[0]),
-                new Server( replicasetManager.host, replicasetManager.ports[2])
-              ],
-              {rs_name:replicasetManager.name}
-            );
+            new Server( replicasetManager.host, replicasetManager.ports[1]),
+            new Server( replicasetManager.host, replicasetManager.ports[0]),
+            new Server( replicasetManager.host, replicasetManager.ports[2])
+          ],
+          {rs_name:replicasetManager.name}
+        );
 
         self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
         self._db.open(function(err, _db) {

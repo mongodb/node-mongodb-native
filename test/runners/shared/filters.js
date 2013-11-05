@@ -19,6 +19,22 @@ var validVersions = function(compare_version, version) {
       && compare_version[1] >= version_array[1]
       && compare_version[2] >= version_array[2])
       return true;
+  } else if(comparator == '=') {
+    // Deal with X operator
+    if(isNaN(version_array[0])) return true;
+    
+    if(compare_version[0] == version_array[0]
+      && isNaN(version_array[1])) return true;
+    
+    if(compare_version[0] == version_array[0]
+      && compare_version[1] == version_array[1]
+      && isNaN(version_array[2])) return true;
+
+    // No wildcard operator do a full check
+    if(compare_version[0] == version_array[0]
+      && compare_version[1] == version_array[1]
+      && compare_version[2] == version_array[2])
+      return true;
   }
   
   // No valid node version

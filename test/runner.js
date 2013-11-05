@@ -60,6 +60,10 @@ if(argv.t == 'functional') {
     sharded_runners.runner_auth.run('sharded_auth', run_options);
   });
 
+  sharded_runners.runner_auth.on('end', function() {
+    process.exit(0);
+  });
+
   // Start chain of auth tests
   standalone_runners.runner_auth.run('single_server_auth', run_options);
 } else if(argv.t == 'ssl') {
@@ -69,8 +73,18 @@ if(argv.t == 'functional') {
   });
 } else if(argv.t == 'sharded') {
   sharded_runners.runner.run('sharded', run_options);
+  sharded_runners.runner_auth.on('end', function() {
+    process.exit(0);
+  });
 } else if(argv.t == 'replicaset') {
   replicaset_runners.runner.run('replica_set', run_options);
+  replicaset_runners.runner_auth.on('end', function() {
+    process.exit(0);
+  });
 } else if(argv.t == 'kerberos') {
   kerberos_runners.runner.run('none', run_options);
+  kerberos_runners.runner_auth.on('end', function() {
+    process.exit(0);
+  });
 }
+
