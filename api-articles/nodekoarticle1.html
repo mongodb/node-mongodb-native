@@ -147,11 +147,11 @@ dispatch and read from the tcp connection.</p>
 </div></blockquote>
 <p>This function will not actually create a collection on the database until you actually insert the first document.</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">strict</span><span class="o">:</span><span class="mi">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>Notice the  <strong>{w:1}</strong>  option. This option will make the driver check if the collection exists and issue an error if it does not.</p>
+<p>Notice the  <strong>{strict:true}</strong>  option. This option will make the driver check if the collection exists and issue an error if it does not.</p>
 <blockquote>
 <div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
@@ -159,11 +159,11 @@ dispatch and read from the tcp connection.</p>
 </div></blockquote>
 <p>This command will create the collection on the Mongo DB database before returning the collection object. If the collection already exists it will ignore the creation of the collection.</p>
 <blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
+<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">strict</span><span class="o">:</span><span class="mi">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>The  <strong>{w:1}</strong>  option will make the method return an error if the collection already exists.</p>
+<p>The  <strong>{strict:true}</strong>  option will make the method return an error if the collection already exists.</p>
 <p>With an open db connection and a collection defined we are ready to do some CRUD operation on the data.</p>
 </div></blockquote>
 </div>
