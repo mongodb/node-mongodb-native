@@ -651,3 +651,44 @@ exports['Should receive all events for primary and secondary leaving'] = functio
   });
 }
 
+exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
+
+  // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+  // Replica configuration
+  var replSet = new ReplSetServers([
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ]
+    , {rs_name:replicasetManager.name}
+  );
+
+  // Counters to track emitting of events
+  var numberOfJoins = 0;
+  var numberLeaving = 0;
+
+  // Connect to the replicaset
+  var db = new Db('integration_test_', replSet, {w:1, bufferMaxEntries: 0});
+  db.open(function(err, p_db) {
+    // Kill the secondary
+    replicasetManager.killPrimary(9, {killNodeWaitTime:100}, function() {
+      test.equal(null, err);
+
+      setTimeout(function() {
+        // Attempt an insert
+        db.collection('_should_fail_due_to_bufferMaxEntries_0').insert({a:1}, function(err, ids) {
+          test.ok(err != null);
+          test.ok(err.message.indexOf("0") != -1)
+
+          // db.close();
+          test.done();
+        });
+      }, 3000);
+    });
+  });
+}

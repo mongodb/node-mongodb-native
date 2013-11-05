@@ -84,6 +84,33 @@ exports.shouldCorrectlyPerformAutomaticConnect = function(configuration, test) {
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = function(configuration, test) {
+  var automatic_connect_client = configuration.newDbInstance({w:1, bufferMaxEntries:0}, {poolSize:1, auto_reconnect:true});
+  automatic_connect_client.open(function(err, automatic_connect_client) {
+    // Listener for closing event
+    var closeListener = function(has_error) {
+      // Let's insert a document
+      var collection = automatic_connect_client.collection('test_object_id_generation.data2');
+      // Insert another test document and collect using ObjectId
+      collection.insert({"name":"Patty", "age":34}, {w:1}, function(err, ids) {
+        test.ok(err != null);
+        test.ok(err.message.indexOf("0") != -1)
+        // Let's close the db
+        automatic_connect_client.close();
+        test.done();
+      });
+    };
+
+    // Add listener to close event
+    automatic_connect_client.once("close", closeListener);
+    // Ensure death of server instance
+    automatic_connect_client.serverConfig.connectionPool.openConnections[0].connection.destroy();
+  });
+}
+
+/**
  * An example that shows how to force close a db connection so it cannot be reused.
  *
  * @_class db

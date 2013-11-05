@@ -9,15 +9,7 @@ var debug = require('util').debug,
   Server = require('../../lib/mongodb').Server;
 
 var ensureUp = function(self, host, port, number_of_retries, callback) {
-  // console.log("===================================== ENSURE UP :: " + port)
   var options = {poolSize:1, socketOptions:{connectTimeoutMS: 1000}, auto_reconnect:false};
-  // console.dir(this.ssl)
-
- // *  - **sslValidate** {Boolean, default:false}, validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher)
- // *  - **sslCA** {Array, default:null}, Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)
- // *  - **sslCert** {Buffer/String, default:null}, String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
- // *  - **sslKey** {Buffer/String, default:null}, String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
- // *  - **sslPass** {Buffer/String, default:null}, String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher)
 
   if(self.ssl) {
     options.ssl = self.ssl;
