@@ -39,7 +39,7 @@ A simple example of inserting a document.
 
 ```javascript
   var MongoClient = require('mongodb').MongoClient
-    , format = require('util').format;    
+    , format = require('util').format;
 
   MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
     if(err) throw err;
@@ -56,7 +56,7 @@ A simple example of inserting a document.
         console.dir(results);
         // Let's close the db
         db.close();
-      });      
+      });
     });
   })
 ```
