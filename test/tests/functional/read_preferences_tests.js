@@ -294,3 +294,35 @@ exports['Should correctly apply collection level read Preference to stats'] = fu
     });
   });  
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly honor the readPreferences at DB and individual command level'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , ReadPreference = mongo.ReadPreference;
+
+  configuration.newDbInstance({w:1, readPreference:'secondary'}, {poolSize:1}).open(function(err, db) {
+    var store = db._executeQueryCommand;
+
+    db._executeQueryCommand = function(command, options, callback) {
+      test.equal('secondary', options.readPreference);
+      callback("error");
+    }
+
+    db.command({dbStats:true}, function(err, result) {
+    });
+
+    db._executeQueryCommand = function(command, options, callback) {
+      test.equal('secondaryPreferred', options.readPreference);
+      callback("error");
+    }
+
+    db.command({dbStats:true}, {readPreference:'secondaryPreferred'}, function(err, result) {
+      db._executeQueryCommand = store;
+      db.close();
+      test.done();
+    });
+  });
+}
+

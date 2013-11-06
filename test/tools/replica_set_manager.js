@@ -12,6 +12,7 @@ var debug = require('util').debug,
 var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   options = options == null ? {} : options;
 
+  this.fullLogging = options["fullLogging"] || false;
   this.startPort = options["start_port"] || 30000;
   this.ports = [];
   this.name = options["name"] != null ? options["name"] : "replica-set-foo";
@@ -914,6 +915,10 @@ ReplicaSetManager.prototype.startCmd = function(n) {
 
   if(this.auth) {
     this.mongods[n]["start"] = this.auth ? this.mongods[n]["start"] + " --auth --keyFile " + this.keyPath : this.mongods[n]["start"];
+  }
+
+  if(this.fullLogging) {
+    this.mongods[n]["start"] = this.mongods[n]["start"] + " -vvvvv";
   }
 
   // If we have ssl defined set up with test certificate
