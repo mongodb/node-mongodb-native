@@ -9,23 +9,19 @@ exports['Should correctly connect and then handle a mongos failure'] = function(
     , ReadPreference = configuration.getMongoPackage().ReadPreference;
 
   MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1', {}, function(err, db) {
-    console.log("------------------------------------------------------ 0")
     test.equal(null, err);
     test.ok(db != null);
 
     db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
-      console.log("------------------------------------------------------ 1")
       test.equal(null, err);
       test.equal(1, result);
-      process.exit(0)
+      // process.exit(0)
       var numberOfTicks = 10;
 
       var ticker = function() {
-        console.log("------------------------------------------------------ 2")
         numberOfTicks = numberOfTicks - 1;
 
         db.collection('replicaset_mongo_client_collection').findOne(function(err, doc) {
-          console.log("------------------------------------------------------ 3")
           if(numberOfTicks == 0) {
             configuration.restartMongoS(killport, function(err, result) {
               db.close();
@@ -41,7 +37,6 @@ exports['Should correctly connect and then handle a mongos failure'] = function(
 
       // Kill the mongos proxy
       configuration.killMongoS(killport, function(err, result) {
-        console.log("------------------------------------------------------ 4")
         setTimeout(ticker, 1000);
       });
     });    

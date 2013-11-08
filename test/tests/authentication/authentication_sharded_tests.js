@@ -47,8 +47,14 @@ exports['Should correctly connect to the mongoses using the connection string an
 
                     if(totalLength == 0) {
                       test.equal(0, totalErrors);
-                      db.close();                              
-                      test.done();
+
+                      db.admin().removeUser("root", function(err, result) {
+                        test.equal(null, err);
+                        test.ok(result);
+
+                        db.close();                              
+                        test.done();
+                      })
                     }
                   });
                 }
