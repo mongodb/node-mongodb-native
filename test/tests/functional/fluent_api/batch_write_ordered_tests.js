@@ -33,7 +33,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Delete'] =
           test.ok(typeof result.errmsg == 'string');
           test.equal(1, result.errDetails.length);
           test.equal(2, result.errDetails[0].index);
-          test.equal(10068, result.errDetails[0].code);
+          test.ok(typeof result.errDetails[0].code == 'number');
           test.ok(typeof result.errDetails[0].errmsg == 'string');
           db.close();
           test.done();

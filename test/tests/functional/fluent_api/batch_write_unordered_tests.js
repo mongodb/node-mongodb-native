@@ -32,18 +32,18 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
         // Execute the batch
         batch.execute(function(err, result) {
           test.equal(err, null);
-          test.equal(99999, result.errCode);
+          test.equal(99999, result.code);
           test.equal('batch op errors occurred', result.errmsg);
           test.equal(0, result.ok);
           test.equal(2, result.n);
           test.equal(2, result.errDetails.length);
           
           test.equal(1, result.errDetails[0].index);
-          test.equal(11000, result.errDetails[0].errCode);
+          test.equal(11000, result.errDetails[0].code);
           test.equal('string', typeof result.errDetails[0].errmsg);
           
           test.equal(3, result.errDetails[1].index);
-          test.equal(11000, result.errDetails[1].errCode);
+          test.equal(11000, result.errDetails[1].code);
           test.equal('string', typeof result.errDetails[1].errmsg);
 
           test.equal(1, result.upserted.length);
@@ -218,12 +218,12 @@ exports['Should Correctly perform upsert with update, updateOne and replaceOne u
 //           // test.equal(false, result.ok);
 //           // test.equal(5, result.n);
 //           // test.equal(0, result.upserted);
-//           // test.equal(99999, result.errCode);
+//           // test.equal(99999, result.code);
 //           // test.equal('batch op errors occurred', result.errMessage);
 //           // test.equal('', result.errmsg);
 //           // test.equal(1, result.errDetails.length);
 //           // test.equal(3, result.errDetails[0].index);
-//           // test.equal(11000, result.errDetails[0].errCode);
+//           // test.equal(11000, result.errDetails[0].code);
 //           // test.ok(result.errDetails[0].errMessage.indexOf('Update validation failed: DuplicateKey E11000 duplicate') != -1);
 
 //           db.close();
