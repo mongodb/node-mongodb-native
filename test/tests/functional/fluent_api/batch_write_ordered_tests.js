@@ -1,8 +1,53 @@
+exports['Should Correctly Fail Ordered Batch Operation due to illegal Delete'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  // requires: {mongodb: ">2.5.3"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      // Get the collection
+      var col = db.collection('batch_write_ordered_ops_0');
+
+      // Add unique index on b field causing all updates to fail
+      col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
+        test.equal(err, null);
+
+        // Initialize the Ordered Batch
+        var batch = col.initializeOrderedBulkOp();
+
+        // Add some operations to be executed in order
+        batch.insert({a:1});
+        batch.find({a:1}).update({$set: {b: 1}});
+        batch.find({$set:{a:1}}).removeOne();
+        batch.insert({a:1});
+
+        // Execute the operations
+        batch.execute(function(err, result) {
+          test.equal(null, err);
+          test.equal(0, result.ok);
+          test.equal(2, result.n);
+          test.ok(typeof result.code == 'number');
+          test.ok(typeof result.errmsg == 'string');
+          test.equal(1, result.errDetails.length);
+          test.equal(2, result.errDetails[0].index);
+          test.equal(10068, result.errDetails[0].code);
+          test.ok(typeof result.errDetails[0].errmsg == 'string');
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
 exports['Should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.3"},
+  // requires: {mongodb: ">2.5.3"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -30,11 +75,11 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
           test.equal(null, err);
           test.equal(0, result.ok);
           test.equal(2, result.n);
-          test.equal(11000, result.errCode);
-          test.ok(result.errmsg.indexOf("E11000 duplicate key error index:") != -1);
+          test.ok(typeof result.code == 'number');
+          test.ok(typeof result.errmsg == 'string');
           test.equal(1, result.errDetails.length);
           test.equal(2, result.errDetails[0].index);
-          test.equal(11000, result.errDetails[0].errCode);
+          test.equal(11000, result.errDetails[0].code);
           test.ok(result.errDetails[0].errmsg.indexOf("E11000 duplicate key error index:") != -1);
           db.close();
           test.done();
@@ -48,7 +93,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.3"},
+  // requires: {mongodb: ">2.5.3"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -75,12 +120,12 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
           test.equal(null, err);
           test.equal(0, result.ok);
           test.equal(3, result.n);
-          test.equal(11000, result.errCode);
-          test.ok(result.errmsg.indexOf("E11000 duplicate key error index:") != -1);
+          test.ok(typeof result.code == 'number');
+          test.ok(typeof result.errmsg == 'string');
 
           test.equal(1, result.errDetails.length);
           test.equal(3, result.errDetails[0].index);
-          test.equal(11000, result.errDetails[0].errCode);
+          test.equal(11000, result.errDetails[0].code);
           test.ok(result.errDetails[0].errmsg.indexOf("E11000 duplicate key error index:") != -1);
 
           test.equal(1, result.upserted.length);
@@ -99,7 +144,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with mixed m
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.3"},
+  // requires: {mongodb: ">2.5.3"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -129,13 +174,13 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with mixed m
           test.equal(null, err);
           test.equal(0, result.ok);
           test.equal(6, result.n);
-          test.equal(99999, result.errCode);
+          test.equal(99999, result.code);
           test.ok(result.errmsg.indexOf("batch op errors occurred") != -1);
 
           test.equal(1, result.errDetails.length);
           test.equal(6, result.errDetails[0].index);
-          test.equal(99999, result.errDetails[0].errCode);
-          test.ok(result.errDetails[0].errmsg.indexOf("batch op errors occurred") != -1);
+          test.ok(typeof result.errDetails[0].code == 'number');
+          test.ok(typeof result.errDetails[0].errmsg == 'string');
 
           test.equal(2, result.upserted.length);
           test.equal(2, result.upserted[0].index);
@@ -155,7 +200,7 @@ exports['Should Correctly perform update, updateOne and replaceOne ordered batch
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.3"},
+  // requires: {mongodb: ">2.5.3"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -167,7 +212,7 @@ exports['Should Correctly perform update, updateOne and replaceOne ordered batch
       var col = db.collection('batch_write_ordered_ops_4');
 
       // Initialize the unOrdered Batch
-      var batch = col.initializeBulkOp();
+      var batch = col.initializeOrderedBulkOp();
       // Perform some inserts then exercise all the operations available
       batch.insert([{a:1}, {a:1}, {a:2}, {a:3}]);
       batch.execute(function(err, result) {
@@ -215,7 +260,7 @@ exports['Should Correctly perform upsert with update, updateOne and replaceOne o
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.3"},
+  // requires: {mongodb: ">2.5.3"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
