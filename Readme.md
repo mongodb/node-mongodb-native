@@ -7,6 +7,18 @@
 | source        | https://github.com/mongodb/node-mongodb-native |
 | mongodb       | http://www.mongodb.org/                        |
 
+### Bugs / Feature Requests
+
+Think you’ve found a bug? Want to see a new feature in PyMongo? Please open a
+case in our issue management tool, JIRA:
+
+- Create an account and login <https://jira.mongodb.org>.
+- Navigate to the NODE project <https://jira.mongodb.org/browse/NODE>.
+- Click **Create Issue** - Please provide as much information as possible about the issue type and how to reproduce it.
+
+Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the
+Core Server (i.e. SERVER) project are **public**.
+
 ### Questions and Bug Reports
 
  * mailing list: https://groups.google.com/forum/#!forum/node-mongodb-native
