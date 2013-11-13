@@ -4,6 +4,7 @@
 *.tmp
 *.log
 *.heapsnapshot
+*.dat
 .project
 .settings
 .tm_properties
@@ -14,5 +15,6 @@ output
 build
 upload.py
 rcover_html/
+results/
 .coverage_data/
 docs/sphinx-docs/source/driver-articles/

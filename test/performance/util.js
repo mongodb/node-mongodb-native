@@ -8,41 +8,68 @@ var read_all_tests = function(directory) {
   })
 }
 
-var run_test = function(url, file, number_of_times, warm_up_iterations, concurrent, concurrent_batch_size, test_name, callback) {
+var run_test = function(url, file, number_of_times, warm_up_iterations, concurrent, concurrent_batch_size, options, callback) {
   var final_results = {};  
   var number_of_test_to_run = 0;
-  // If we have not test_name set up
-  if(typeof test_name == 'function') {
-    callback = test_name;
-    test_name = null;
+  // Set the options
+  if(typeof options == 'function') {
+    callback = options;
+    options = {};
   }
+
+  // Ensure options is set
+  options = options == null ? {} : options
   // Ensure the batch size is correct
   if(concurrent && (number_of_times % concurrent_batch_size > 0)) return callback("Number of iterations must be divisible by batch size");
 
   // Load the file
   var _module = require(file);
+  var test_name = options.test_name;
+  
   // No test set run all the available tests and store the results
-  if(test_name == null) {
-    // Execute the setup
-    var keys = Object.keys(_module);
-    var number_of_tests = keys.length;
-    // Go over all the tests
-    for(var i = 0; i < keys.length; i++) {
-      // Wrap the scope so we can execute it by itself
-      new function(_key, _module_func) {
-        run_single_test(url, _key, _module_func, number_of_times, warm_up_iterations, concurrent, concurrent_batch_size, function(err, results) {          
-          // Final results
-          final_results[_key] = { results: results};
-          if(err) { final_results[_key].err = err; }
-          // Adjust number of tests left to run
-          number_of_tests = number_of_tests - 1;
-          if(number_of_tests == 0) callback(null, final_results)
-        });
-      }(keys[i], _module[keys[i]])
-    }
-  } else {
+  run_file_tests(_module, Object.keys(_module), {
+      url: url
+    , file: file
+    , final_results: final_results
+    , number_of_times: number_of_times
+    , warm_up_iterations: warm_up_iterations
+    , concurrent: concurrent
+    , concurrent_batch_size: concurrent_batch_size
+    , test_name: test_name
+  }, function(err, results) {
+    callback(null, final_results);
+  });
+}
 
+var run_file_tests = function(module, keys, options, callback) {
+  if(keys.length == 0) return callback();  
+
+  // Get the next key
+  var _key = keys.shift();
+  var _module_func = module[_key];
+  var final_results = options.final_results;
+  var test_name = options.test_name;
+
+  // Skip the test if we have test_name specified
+  if(test_name != null && test_name != _key) {
+    return run_file_tests(module, keys, options, callback);
   }
+
+  // Execute the test
+  run_single_test(options.url
+    , _key
+    , _module_func
+    , options.number_of_times
+    , options.warm_up_iterations
+    , options.concurrent
+    , options.concurrent_batch_size
+    , function(err, results) { 
+      // Final results
+      final_results[_key] = { results: results};
+      if(err) { final_results[_key].err = err; }
+      // Run all the tests
+      run_file_tests(module, keys, options, callback);
+  });
 }
 
 var run_single_test = function(url, func_name, func, number_of_times, warm_up_iterations, concurrent, concurrent_batch_size, callback) {
@@ -116,13 +143,16 @@ var execute_test_batches = function(func_name, test, number_left_to_run_batch, n
 
 var exceute_test_serially = function(func_name, test, number_of_times, results, callback) {
   if(number_of_times == 0) return callback(null, results);
+
   // Set start function
   var start = new Date();
+
   // Execute function
   test.test(function(err, result) {
     var end = new Date();
     var time = end.getTime() - start.getTime();
     results.push({start: start, end: end, time: time});
+    
     // Execute the next tick
     process.nextTick(function() {
       exceute_test_serially(func_name, test, number_of_times - 1, results, callback);
@@ -175,6 +205,7 @@ var RunningStats = function() {
 RunningStats.prototype.push = function(x) {
   // Update the number of samples
   this.m_n = this.m_n + 1;
+  
   // See Knuth TAOCP vol 2, 3rd edition, page 232
   if(this.m_n == 1) {
     this.m_oldM = this.m_newM = x;

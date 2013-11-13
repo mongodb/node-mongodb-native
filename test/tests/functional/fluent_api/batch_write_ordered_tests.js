@@ -245,6 +245,12 @@ exports['Should Correctly perform update, updateOne and replaceOne ordered batch
                 test.equal(null, err);
                 test.equal(1, c);
 
+                // Should fail
+                try {
+                  batch.execute(function(err, result) {});
+                  test.ok(false);
+                } catch(err) {}
+
                 db.close();
                 test.done();
               });
