@@ -320,3 +320,36 @@ exports['Should handle MongoClient throw error in db operation correctly'] = fun
     });
   });
 }
+
+exports['Should handle Error thrown during operation'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {node: ">0.10.0"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = null;
+
+    process.once("uncaughtException", function(err) {
+      db.close();
+      test.done();
+    });
+
+    var MongoClient = configuration.getMongoPackage().MongoClient;
+    MongoClient.connect(configuration.url(), function(err, _db) {
+      test.equal(null, err);
+      db = _db;
+
+      db.collection('throwerrorduringoperation').insert([{a:1}, {a:1}], function(err, result) {
+        test.equal(null, err);
+
+        process.nextTick(function() {
+          db.collection('throwerrorduringoperation').find().toArray(function(err, result) {
+            // Throws error
+            err = a;
+          });
+        });
+      });
+    });
+  }
+}
