@@ -30,6 +30,7 @@ Options
  - **recordQueryStats** {Boolean, default:false}, record query statistics during execution.
  - **retryMiliSeconds** {Number, default:5000}, number of miliseconds between retries.
  - **numberOfRetries** {Number, default:5}, number of retries off connection.
+ - **bufferMaxEntries** {Boolean, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited
 
 
 
@@ -98,29 +99,29 @@ Initialize the database connection.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     // Set up the connection to the local db
-     var mongoclient = new MongoClient(new Server("localhost", 27017, {native_parser: true}));
+       // Set up the connection to the local db
+       var mongoclient = new MongoClient(new Server("localhost", 27017), {native_parser: true});
      
-     // Open the connection to the server
-     mongoclient.open(function(err, mongoclient) {
+       // Open the connection to the server
+       mongoclient.open(function(err, mongoclient) {
      
-       // Get the first db and do an update document on it
-       var db = mongoclient.db("integration_tests");
-       db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
-         assert.equal(null, err);
-         assert.equal(1, result);
-     
-         // Get another db and do an update document on it
-         var db2 = mongoclient.db("integration_tests2");
-         db2.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+         // Get the first db and do an update document on it
+         var db = mongoclient.db("integration_tests");
+         db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
            assert.equal(null, err);
            assert.equal(1, result);
      
-           // Close the connection
-           mongoclient.close();
+           // Get another db and do an update document on it
+           var db2 = mongoclient.db("integration_tests2");
+           db2.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+             assert.equal(null, err);
+             assert.equal(1, result);
+     
+             // Close the connection
+             mongoclient.close();
+           });
          });
-       });
-     });  
+       });  
 
 
 -----
@@ -197,17 +198,17 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     // Connect using the connection string  
-     MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
-       assert.equal(null, err);
-     
-       db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+       // Connect using the connection string  
+       MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
          assert.equal(null, err);
-         assert.equal(1, result);
      
-         db.close();
+         db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+           assert.equal(null, err);
+           assert.equal(1, result);
+     
+           db.close();
+         });
        });
-     });
 
   
   

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
@@ -8,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Inserting and updating &mdash; MongoDB Node.JS Driver 1.3.13 documentation</title>
+    <title>Inserting and updating &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.13',
+        VERSION:     '1.3.20',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.13 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -47,193 +46,157 @@
             
   <div class="section" id="inserting-and-updating">
 <h1>Inserting and updating<a class="headerlink" href="#inserting-and-updating" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div><p>See also:</p>
-<blockquote>
-<div><ul class="simple">
-<li><a class="reference external" href="database.html">Database</a></li>
-<li><a class="reference external" href="collections.html">Collections</a></li>
+<p>See also:</p>
+<ul class="simple">
+<li><a class="reference external" href="database.md">Database</a></li>
+<li><a class="reference external" href="collections.md">Collections</a></li>
 </ul>
-</div></blockquote>
-</div></blockquote>
 <div class="section" id="insert">
 <h2>Insert<a class="headerlink" href="#insert" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>Records can be inserted to a collection with  <tt class="docutils literal"><span class="pre">insert</span></tt></p>
-<dl class="docutils">
-<dt><a href="#id1"><span class="problematic" id="id2">``</span></a>javascript</dt>
-<dd>collection.insert(docs[, options, callback])</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id3"><span class="problematic" id="id4">``</span></a></p>
-<blockquote>
-<div><p>Where</p>
-<blockquote>
-<div><ul class="simple">
-<li><tt class="docutils literal"><span class="pre">docs</span></tt>  is a single document object or an array of documents</li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt>  is an object of parameters, if you use a callback, set  <tt class="docutils literal"><span class="pre">safe</span></tt>  to true - this way the callback is executed  <em>after</em>  the record is saved to the database, if  <tt class="docutils literal"><span class="pre">safe</span></tt>  is false (default) callback is fired immediately and thus doesn&#8217;t make much sense.</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt>  - callback function to run after the record is inserted. Set  <tt class="docutils literal"><span class="pre">safe</span></tt>  to true in  <tt class="docutils literal"><span class="pre">options</span></tt>  when using callback. First parameter for callback is the error object (if an error occured) and the second is an array of records inserted.</li>
+<p>Records can be inserted to a collection with <tt class="docutils literal"><span class="pre">insert</span></tt></p>
+<div class="highlight-python"><pre>collection.insert(docs[[, options], callback])</pre>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">docs</span></tt> is a single document object or an array of documents</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> is an object of parameters, if you use a callback, set
+<tt class="docutils literal"><span class="pre">safe</span></tt> to true - this way the callback is executed <em>after</em> the
+record is saved to the database, if <tt class="docutils literal"><span class="pre">safe</span></tt> is false (default)
+callback is fired immediately and thus doesn&#8217;t make much sense.</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> - callback function to run after the record is inserted.
+Set <tt class="docutils literal"><span class="pre">safe</span></tt> to true in <tt class="docutils literal"><span class="pre">options</span></tt> when using callback. First
+parameter for callback is the error object (if an error occured) and
+the second is an array of records inserted.</li>
 </ul>
-</div></blockquote>
 <p>For example</p>
-<dl class="docutils">
-<dt><a href="#id5"><span class="problematic" id="id6">``</span></a>javascript</dt>
-<dd><p class="first">var document = {name:&#8221;David&#8221;, title:&#8221;About MongoDB&#8221;};
-collection.insert(document, {safe: true}, function(err, records){</p>
-<blockquote>
-<div>console.log(&#8220;Record added as &#8220;+records[0]._id);</div></blockquote>
-<p class="last">});</p>
-</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id7"><span class="problematic" id="id8">``</span></a></p>
-<blockquote>
-<div><p>If trying to insert a record with an existing  <tt class="docutils literal"><span class="pre">_id</span></tt>  value, then the operation yields in error.</p>
-<dl class="docutils">
-<dt><a href="#id9"><span class="problematic" id="id10">``</span></a>javascript</dt>
-<dd><dl class="first docutils">
-<dt>collection.insert({_id:1}, {safe:true}, function(err, doc){</dt>
-<dd><p class="first">// no error, inserted new document, with _id=1
-collection.insert({_id:1}, {safe:true}, function(err, doc){</p>
-<blockquote>
-<div>// error occured since _id=1 already existed</div></blockquote>
-<p class="last">});</p>
-</dd>
-</dl>
-<p class="last">});</p>
-</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id11"><span class="problematic" id="id12">``</span></a></p>
+<div class="highlight-python"><pre>var document = {name:"David", title:"About MongoDB"};
+collection.insert(document, {safe: true}, function(err, records){
+  console.log("Record added as "+records[0]._id);
+});</pre>
+</div>
+<p>If trying to insert a record with an existing <tt class="docutils literal"><span class="pre">_id</span></tt> value, then the
+operation yields in error.</p>
+<div class="highlight-python"><pre>collection.insert({_id:1}, {safe:true}, function(err, doc){
+  // no error, inserted new document, with _id=1
+  collection.insert({_id:1}, {safe:true}, function(err, doc){
+    // error occured since _id=1 already existed
+  });
+});</pre>
+</div>
 </div>
 <div class="section" id="save">
 <h2>Save<a class="headerlink" href="#save" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>Shorthand for insert/update is  <tt class="docutils literal"><span class="pre">save</span></tt>  - if  <tt class="docutils literal"><span class="pre">_id</span></tt>  value set, the record is updated if it exists or inserted if it does not; if the  <tt class="docutils literal"><span class="pre">_id</span></tt>  value is not set, then the record is inserted as a new one.</p>
-<dl class="docutils">
-<dt><a href="#id13"><span class="problematic" id="id14">``</span></a>javascript</dt>
-<dd>collection.save({_id:&#8221;abc&#8221;, user:&#8221;David&#8221;},{safe:true}, callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id15"><span class="problematic" id="id16">``</span></a></p>
-<blockquote>
-<div><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and the record if it was inserted or  <tt class="docutils literal"><span class="pre">1</span></tt>  if the record was updated.</div></blockquote>
+<p>Shorthand for insert/update is <tt class="docutils literal"><span class="pre">save</span></tt> - if <tt class="docutils literal"><span class="pre">_id</span></tt> value set, the
+record is updated if it exists or inserted if it does not; if the
+<tt class="docutils literal"><span class="pre">_id</span></tt> value is not set, then the record is inserted as a new one.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">save</span><span class="p">({</span><span class="n">_id</span><span class="p">:</span><span class="s">&quot;abc&quot;</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span><span class="s">&quot;David&quot;</span><span class="p">},{</span><span class="n">safe</span><span class="p">:</span><span class="n">true</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error occured)
+and the record if it was inserted or <tt class="docutils literal"><span class="pre">1</span></tt> if the record was updated.</p>
 </div>
 <div class="section" id="update">
 <h2>Update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>Updates can be done with  <tt class="docutils literal"><span class="pre">update</span></tt></p>
-<dl class="docutils">
-<dt><a href="#id17"><span class="problematic" id="id18">``</span></a>javascript</dt>
-<dd>collection.update(criteria, update[, options[, callback]]);</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id19"><span class="problematic" id="id20">``</span></a></p>
-<blockquote>
-<div><p>Where</p>
-<blockquote>
-<div><ul class="simple">
-<li><tt class="docutils literal"><span class="pre">criteria</span></tt>  is a query object to find records that need to be updated (see  <a class="reference external" href="queries.html)">Queries</a></li>
-<li><tt class="docutils literal"><span class="pre">update</span></tt>  is the replacement object</li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt>  is an options object (see below)</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt>  is the callback to be run after the records are updated. Has two parameters, the first is an error object (if error occured), the second is the count of records that were modified.</li>
+<p>Updates can be done with <tt class="docutils literal"><span class="pre">update</span></tt></p>
+<div class="highlight-python"><pre>collection.update(criteria, update[[, options], callback]);</pre>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">criteria</span></tt> is a query object to find records that need to be
+updated (see <a class="reference external" href="queries.md">Queries</a>)</li>
+<li><tt class="docutils literal"><span class="pre">update</span></tt> is the replacement object</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> is an options object (see below)</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> is the callback to be run after the records are updated.
+Has two parameters, the first is an error object (if error occured),
+the second is the count of records that were modified.</li>
 </ul>
-</div></blockquote>
+<div class="section" id="update-options">
+<h3>Update options<a class="headerlink" href="#update-options" title="Permalink to this headline">¶</a></h3>
 <p>There are several option values that can be used with an update</p>
-<blockquote>
-<div><ul class="simple">
-<li><tt class="docutils literal"><span class="pre">safe</span></tt>  - run callback only after the update is done, defaults to false</li>
-<li><tt class="docutils literal"><span class="pre">multi</span></tt>  - update all records that match the query object, default is false (only the first one found is updated)</li>
-<li><tt class="docutils literal"><span class="pre">upsert</span></tt>  - if true and no records match the query, insert  <tt class="docutils literal"><span class="pre">update</span></tt>  as a new record</li>
-<li><tt class="docutils literal"><span class="pre">raw</span></tt>  - driver returns updated document as bson binary Buffer,  <tt class="docutils literal"><span class="pre">default:false</span></tt></li>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">safe</span></tt> - run callback only after the update is done, defaults to
+false</li>
+<li><tt class="docutils literal"><span class="pre">multi</span></tt> - update all records that match the query object, default
+is false (only the first one found is updated)</li>
+<li><tt class="docutils literal"><span class="pre">upsert</span></tt> - if true and no records match the query, insert
+<tt class="docutils literal"><span class="pre">update</span></tt> as a new record</li>
+<li><tt class="docutils literal"><span class="pre">raw</span></tt> - driver returns updated document as bson binary Buffer,
+<tt class="docutils literal"><span class="pre">default:false</span></tt></li>
 </ul>
-</div></blockquote>
-<p>If the replacement object is a document, the matching documents will be replaced (except the  <tt class="docutils literal"><span class="pre">_id</span></tt>  values if no  <tt class="docutils literal"><span class="pre">_id</span></tt>  is set).</p>
-<dl class="docutils">
-<dt><a href="#id21"><span class="problematic" id="id22">``</span></a>javascript</dt>
-<dd>collection.update({_id:&#8221;123&#8221;}, {author:&#8221;Jessica&#8221;, title:&#8221;Mongo facts&#8221;});</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id23"><span class="problematic" id="id24">``</span></a></p>
-<blockquote>
-<div><p>The example above will replace the document contents of id=123 with the replacement object.</p>
-<p>To update only selected fields,  <tt class="docutils literal"><span class="pre">$set</span></tt>  operator needs to be used. Following replacement object replaces author value but leaves everything else intact.</p>
-<dl class="docutils">
-<dt><a href="#id25"><span class="problematic" id="id26">``</span></a>javascript</dt>
-<dd>collection.update({_id:&#8221;123&#8221;}, {$set: {author:&#8221;Jessica&#8221;}});</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id27"><span class="problematic" id="id28">``</span></a></p>
-<blockquote>
-<div>See  <a class="reference external" href="http://www.mongodb.org/display/DOCS/Updating">MongoDB documentation</a>  for all possible operators.</div></blockquote>
+</div>
+<div class="section" id="replacement-object">
+<h3>Replacement object<a class="headerlink" href="#replacement-object" title="Permalink to this headline">¶</a></h3>
+<p>If the replacement object is a document, the matching documents will be
+replaced (except the <tt class="docutils literal"><span class="pre">_id</span></tt> values if no <tt class="docutils literal"><span class="pre">_id</span></tt> is set).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">_id</span><span class="p">:</span><span class="s">&quot;123&quot;</span><span class="p">},</span> <span class="p">{</span><span class="n">author</span><span class="p">:</span><span class="s">&quot;Jessica&quot;</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="s">&quot;Mongo facts&quot;</span><span class="p">});</span>
+</pre></div>
+</div>
+<p>The example above will replace the document contents of id=123 with the
+replacement object.</p>
+<p>To update only selected fields, <tt class="docutils literal"><span class="pre">$set</span></tt> operator needs to be used.
+Following replacement object replaces author value but leaves everything
+else intact.</p>
+<div class="highlight-python"><pre>collection.update({_id:"123"}, {$set: {author:"Jessica"}});</pre>
+</div>
+<p>See <a class="reference external" href="http://www.mongodb.org/display/DOCS/Updating">MongoDB
+documentation</a> for all
+possible operators.</p>
+</div>
 </div>
 <div class="section" id="find-and-modify">
 <h2>Find and Modify<a class="headerlink" href="#find-and-modify" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>To update and retrieve the contents for one single record you can use  <tt class="docutils literal"><span class="pre">findAndModify</span></tt> .</p>
-<dl class="docutils">
-<dt><a href="#id29"><span class="problematic" id="id30">``</span></a>javascript</dt>
-<dd>collection.findAndModify(criteria, sort, update[, options, callback])</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id31"><span class="problematic" id="id32">``</span></a></p>
-<blockquote>
-<div><p>Where</p>
-<blockquote>
-<div><ul class="simple">
-<li><tt class="docutils literal"><span class="pre">criteria</span></tt>  is the query object to find the record</li>
-<li><tt class="docutils literal"><span class="pre">sort</span></tt>  indicates the order of the matches if there&#8217;s more than one matching record. The first record on the result set will be used. See  <a class="reference external" href="queries.html">Queries-&gt;find-&gt;options-&gt;sort</a>  for the format.</li>
-<li><tt class="docutils literal"><span class="pre">update</span></tt>  is the replacement object</li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt>  define the behavior of the function</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt>  is the function to run after the update is done. Has two parameters - error object (if error occured) and the record that was updated.</li>
+<p>To update and retrieve the contents for one single record you can use
+<tt class="docutils literal"><span class="pre">findAndModify</span></tt>.</p>
+<div class="highlight-python"><pre>collection.findAndModify(criteria[, sort[, update[, options]]], callback)</pre>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">criteria</span></tt> is the query object to find the record</li>
+<li><tt class="docutils literal"><span class="pre">sort</span></tt> indicates the order of the matches if there&#8217;s more than one
+matching record. The first record on the result set will be used. See
+<a class="reference external" href="queries.md">Queries-&gt;find-&gt;options-&gt;sort</a> for the format.</li>
+<li><tt class="docutils literal"><span class="pre">update</span></tt> is the replacement object</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> define the behavior of the function</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> is the function to run after the update is done. Has two
+parameters - error object (if error occured) and the record that was
+updated.</li>
 </ul>
-</div></blockquote>
+<div class="section" id="options">
+<h3>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h3>
 <p>Options object can be used for the following options:</p>
-<blockquote>
-<div><ul class="simple">
-<li><tt class="docutils literal"><span class="pre">remove</span></tt>  - if set to true (default is false), removes the record from the collection. Callback function still gets the object but it doesn&#8217;t exist in the collection any more.</li>
-<li><tt class="docutils literal"><span class="pre">new</span></tt>  - if set to true, callback function returns the modified record. Default is false (original record is returned)</li>
-<li><tt class="docutils literal"><span class="pre">upsert</span></tt>  - if set to true and no record matched to the query, replacement object is inserted as a new record</li>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">remove</span></tt> - if set to true (default is false), removes the record
+from the collection. Callback function still gets the object but it
+doesn&#8217;t exist in the collection any more.</li>
+<li><tt class="docutils literal"><span class="pre">new</span></tt> - if set to true, callback function returns the modified
+record. Default is false (original record is returned)</li>
+<li><tt class="docutils literal"><span class="pre">upsert</span></tt> - if set to true and no record matched to the query,
+replacement object is inserted as a new record</li>
 </ul>
-</div></blockquote>
-<dl class="docutils">
-<dt><a href="#id33"><span class="problematic" id="id34">``</span></a>`` <a href="#id35"><span class="problematic" id="id36">`</span></a>javascript</dt>
-<dd><dl class="first docutils">
-<dt>var MongoClient = require(&#8216;mongodb&#8217;).MongoClient</dt>
-<dd><blockquote class="first">
-<div>, format = require(&#8216;util&#8217;).format;</div></blockquote>
-<p class="last">MongoClient.connect(&#8216;mongodb://127.0.0.1:27017/test&#8217;, function(err, db) {</p>
-</dd>
-</dl>
-<p>if(err) throw err;</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>db.collection(&#8216;test&#8217;).findAndModify(</dt>
-<dd><dl class="first docutils">
-<dt>{hello: &#8216;world&#8217;}, // query</dt>
-<dd>],  // sort order</dd>
-</dl>
-<p>{$set: {hi: &#8216;there&#8217;}}, // replacement, replaces only the field &#8220;hi&#8221;
-{}, // options
-function(err, object) {</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>if (err){</dt>
-<dd>console.warn(err.message);  // returns error if no matching object found</dd>
-<dt>}else{</dt>
-<dd>console.dir(object);</dd>
-</dl>
-<p>}</p>
-</div></blockquote>
-<p class="last">});</p>
-</dd>
-</dl>
-</div></blockquote>
-<p class="last">});</p>
-</dd>
-</dl>
-<p><a href="#id37"><span class="problematic" id="id38">``</span></a>`` `</p>
-</div></blockquote>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , format = require('util').format;
+
+MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+if(err) throw err;
+
+db.collection('test').findAndModify(
+  {hello: 'world'}, // query
+  [['_id','asc']],  // sort order
+  {$set: {hi: 'there'}}, // replacement, replaces only the field "hi"
+  {}, // options
+  function(err, object) {
+      if (err){
+          console.warn(err.message);  // returns error if no matching object found
+      }else{
+          console.dir(object);
+      }
+  });
+});</pre>
+</div>
+</div>
 </div>
 </div>
 
@@ -248,8 +211,16 @@ function(err, object) {</p>
 <li><a class="reference internal" href="#">Inserting and updating</a><ul>
 <li><a class="reference internal" href="#insert">Insert</a></li>
 <li><a class="reference internal" href="#save">Save</a></li>
-<li><a class="reference internal" href="#update">Update</a></li>
-<li><a class="reference internal" href="#find-and-modify">Find and Modify</a></li>
+<li><a class="reference internal" href="#update">Update</a><ul>
+<li><a class="reference internal" href="#update-options">Update options</a></li>
+<li><a class="reference internal" href="#replacement-object">Replacement object</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#find-and-modify">Find and Modify</a><ul>
+<li><a class="reference internal" href="#options">Options</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -407,12 +378,12 @@ function(err, object) {</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

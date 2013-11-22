@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
@@ -8,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Collection() &mdash; MongoDB Node.JS Driver 1.3.13 documentation</title>
+    <title>Collection() &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.13',
+        VERSION:     '1.3.20',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.13 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" />
     <link rel="next" title="Admin()" href="admin.html" />
     <link rel="prev" title="Db()" href="db.html" /> 
   </head>
@@ -38,7 +37,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -51,7 +50,7 @@
 <h1>Collection()<a class="headerlink" href="#collection" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="constructor">
 <h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
-<p>Create a new Collection instance (INTERNAL TYPE)</p>
+<p>Create a new Collection instance (INTERNAL TYPE, do not instantiate directly)</p>
 <blockquote>
 <div><dl class="class">
 <dt id="Collection">
@@ -148,19 +147,22 @@
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
 <span class="c1">// Fetch a collection to insert document into</span>
-<span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s2">&quot;simple_document_insert_collection_no_safe&quot;</span><span class="p">);</span>
-<span class="c1">// Insert a single document</span>
-<span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_no_safe&#39;</span><span class="p">});</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s2">&quot;simple_document_insert_collection_no_safe&quot;</span><span class="p">);</span>
+  <span class="c1">// Insert a single document</span>
+  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_no_safe&#39;</span><span class="p">});</span>
 
-<span class="c1">// Wait for a second before finishing up, to ensure we have written the item to disk</span>
-<span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// Wait for a second before finishing up, to ensure we have written the item to disk</span>
+  <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 
-  <span class="c1">// Fetch the document</span>
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_no_safe&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;world_no_safe&#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">hello</span><span class="p">);</span>
-  <span class="p">})</span>
-<span class="p">},</span> <span class="mi">100</span><span class="p">);</span>
+    <span class="c1">// Fetch the document</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_no_safe&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;world_no_safe&#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">hello</span><span class="p">);</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="p">})</span>
+  <span class="p">},</span> <span class="mi">100</span><span class="p">);</span>
+<span class="p">});</span>
 </pre></div>
 </div>
 <p>A batch document insert example, using safe mode to ensure document persistance on MongoDB</p>
@@ -177,18 +179,21 @@
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Fetch a collection to insert document into</span>
-<span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s2">&quot;batch_document_insert_collection_safe&quot;</span><span class="p">);</span>
-<span class="c1">// Insert a single document</span>
-<span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_safe1&#39;</span><span class="p">}</span>
-  <span class="p">,</span> <span class="p">{</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_safe2&#39;</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-
-  <span class="c1">// Fetch the document</span>
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_safe2&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Fetch a collection to insert document into</span>
+  <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s2">&quot;batch_document_insert_collection_safe&quot;</span><span class="p">);</span>
+  <span class="c1">// Insert a single document</span>
+  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_safe1&#39;</span><span class="p">}</span>
+    <span class="p">,</span> <span class="p">{</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_safe2&#39;</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;world_safe2&#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">hello</span><span class="p">);</span>
-  <span class="p">})</span>
+
+    <span class="c1">// Fetch the document</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world_safe2&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;world_safe2&#39;</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">hello</span><span class="p">);</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="p">})</span>
+  <span class="p">});</span>
 <span class="p">});</span>
 </pre></div>
 </div>
@@ -206,18 +211,21 @@
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Fetch a collection to insert document into</span>
-<span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s2">&quot;simple_document_insert_with_function_safe&quot;</span><span class="p">);</span>
-<span class="c1">// Insert a single document</span>
-<span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world&#39;</span>
-  <span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span> <span class="nx">serializeFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-
-  <span class="c1">// Fetch the document</span>
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Fetch a collection to insert document into</span>
+  <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s2">&quot;simple_document_insert_with_function_safe&quot;</span><span class="p">);</span>
+  <span class="c1">// Insert a single document</span>
+  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world&#39;</span>
+    <span class="p">,</span> <span class="nx">func</span><span class="o">:</span><span class="kd">function</span><span class="p">()</span> <span class="p">{}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span> <span class="nx">serializeFunctions</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="s2">&quot;function() {}&quot;</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">code</span><span class="p">);</span>
-  <span class="p">})</span>
+
+    <span class="c1">// Fetch the document</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="nx">hello</span><span class="o">:</span><span class="s1">&#39;world&#39;</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="s2">&quot;function() {}&quot;</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">code</span><span class="p">);</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="p">})</span>
+  <span class="p">});</span>
 <span class="p">});</span>
 </pre></div>
 </div>
@@ -235,11 +243,8 @@
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Only run the rest of the code if we have a mongodb server with version &gt;= 1.9.1</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">().</span><span class="nx">serverInfo</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">){</span>
-
-  <span class="c1">// Ensure we are running at least MongoDB v1.9.1</span>
-  <span class="k">if</span><span class="p">(</span><span class="nb">parseInt</span><span class="p">((</span><span class="nx">result</span><span class="p">.</span><span class="nx">version</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\./g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)))</span> <span class="o">&gt;=</span> <span class="mi">191</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Only run the rest of the code if we have a mongodb server with version &gt;= 1.9.1</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
 
     <span class="c1">// Create a collection</span>
     <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;keepGoingExample&#39;</span><span class="p">);</span>
@@ -263,10 +268,7 @@
         <span class="p">});</span>
       <span class="p">});</span>
     <span class="p">});</span>
-  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
-  <span class="p">}</span>
-<span class="p">});</span>
+  <span class="p">});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -821,7 +823,7 @@ operators and update instead for more efficient operations.</p>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>readPreference</strong> {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 </ul>
 </dd>
 </dl>
@@ -934,7 +936,7 @@ operators and update instead for more efficient operations.</p>
 <dd><ul class="first last simple">
 <li><strong>skip</strong> {Number}, The number of documents to skip for the count.</li>
 <li><strong>limit</strong> {Number}, The limit of documents to count.</li>
-<li><strong>readPreference</strong> {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 </ul>
 </dd>
 </dl>
@@ -1257,18 +1259,19 @@ The second findAndModify command upserts a document and returns the new document
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
 
   <span class="c1">// Create a collection we want to drop later</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;simple_find_and_modify_operations_&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;simple_find_and_modify_operations_2&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
     <span class="c1">// Insert some test documentations</span>
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">b</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">c</span><span class="o">:</span><span class="mi">1</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">b</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span> <span class="nx">d</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">c</span><span class="o">:</span><span class="mi">1</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
-      <span class="c1">// Simple findAndModify command returning the new document and</span>
+      <span class="c1">// Simple findAndModify command returning the old document and</span>
       <span class="c1">// removing it at the same time</span>
       <span class="nx">collection</span><span class="p">.</span><span class="nx">findAndRemove</span><span class="p">({</span><span class="nx">b</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">[[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">doc</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
         <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">b</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">d</span><span class="p">);</span>
 
         <span class="c1">// Verify that the document is gone</span>
         <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="nx">b</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
@@ -1314,6 +1317,7 @@ The second findAndModify command upserts a document and returns the new document
 <li><strong>tailableRetryInterval</strong> {Number, default:100}, specify the miliseconds between getMores on tailable cursor.</li>
 <li><strong>numberOfRetries</strong> {Number, default:5}, specify the number of times to retry the tailable cursor.</li>
 <li><strong>awaitdata</strong> {Boolean, default:false} allow the cursor to wait for data, only applicable for tailable cursor.</li>
+<li><strong>oplogReplay</strong> {Boolean, default:false} sets an internal flag, only applicable for tailable cursor.</li>
 <li><strong>exhaust</strong> {Boolean, default:false} have the server send all the documents at once as getMore packets, not recommended.</li>
 <li><strong>batchSize</strong> {Number, default:0}, set the batchSize for the getMoreCommand when iterating over the query results.</li>
 <li><strong>returnKey</strong> {Boolean, default:false}, only return the index key.</li>
@@ -1323,7 +1327,7 @@ The second findAndModify command upserts a document and returns the new document
 <li><strong>showDiskLoc</strong> {Boolean, default:false}, Show disk location of results.</li>
 <li><strong>comment</strong> {String}, You can put a $comment field on a query to make looking in the profiler logs simpler.</li>
 <li><strong>raw</strong> {Boolean, default:false}, Return all BSON documents as Raw Buffer documents.</li>
-<li><strong>readPreference</strong> {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 <li><strong>numberOfRetries</strong> {Number, default:5}, if using awaidata specifies the number of times to retry on timeout.</li>
 <li><strong>partial</strong> {Boolean, default:false}, specify if the cursor should return partial results when querying against a sharded system</li>
 </ul>
@@ -1501,7 +1505,7 @@ The second findAndModify command upserts a document and returns the new document
 <li><strong>showDiskLoc</strong> {Boolean, default:false}, Show disk location of results.</li>
 <li><strong>comment</strong> {String}, You can put a $comment field on a query to make looking in the profiler logs simpler.</li>
 <li><strong>raw</strong> {Boolean, default:false}, Return all BSON documents as Raw Buffer documents.</li>
-<li><strong>readPreference</strong> {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 <li><strong>partial</strong> {Boolean, default:false}, specify if the cursor should return partial results when querying against a sharded system</li>
 </ul>
 </dd>
@@ -2086,7 +2090,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <li><strong>scope</strong> {Object}, can pass in variables that can be access from map/reduce/finalize.</li>
 <li><strong>jsMode</strong> {Boolean, default:false}, it is possible to make the execution stay in JS. Provided in MongoDB &gt; 2.0.X.</li>
 <li><strong>verbose</strong> {Boolean, default:false}, provide statistics on job execution time.</li>
-<li><strong>readPreference</strong> {String, only for inline results}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String, only for inline results}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 </ul>
 </dd>
 </dl>
@@ -2143,7 +2147,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
       <span class="kd">var</span> <span class="nx">reduce</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span><span class="nx">vals</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">};</span>
 
       <span class="c1">// Peform the map reduce</span>
-      <span class="nx">collection</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="p">{</span><span class="nx">out</span><span class="o">:</span> <span class="p">{</span><span class="nx">replace</span> <span class="o">:</span> <span class="s1">&#39;tempCollection&#39;</span><span class="p">}},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="p">{</span><span class="nx">out</span><span class="o">:</span> <span class="p">{</span><span class="nx">replace</span> <span class="o">:</span> <span class="s1">&#39;tempCollection&#39;</span><span class="p">,</span> <span class="nx">readPreference</span> <span class="o">:</span> <span class="s1">&#39;secondary&#39;</span><span class="p">}},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// Mapreduce returns the temporary collection with the results</span>
         <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="s1">&#39;_id&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
           <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
@@ -2174,43 +2178,33 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
 
-  <span class="c1">// Parse version of server if available</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">().</span><span class="nx">serverInfo</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">){</span>
+    <span class="c1">// Create a test collection</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test_map_reduce_functions_inline&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
 
-    <span class="c1">// Only run if the MongoDB version is higher than 1.7.6</span>
-    <span class="k">if</span><span class="p">(</span><span class="nb">parseInt</span><span class="p">((</span><span class="nx">result</span><span class="p">.</span><span class="nx">version</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\./g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)))</span> <span class="o">&gt;=</span> <span class="mi">176</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Insert some test documents</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="s1">&#39;user_id&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;user_id&#39;</span><span class="o">:</span><span class="mi">2</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span> <span class="p">{</span>
 
-      <span class="c1">// Create a test collection</span>
-      <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test_map_reduce_functions_inline&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Map function</span>
+        <span class="kd">var</span> <span class="nx">map</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">emit</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">user_id</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span> <span class="p">};</span>
+        <span class="c1">// Reduce function</span>
+        <span class="kd">var</span> <span class="nx">reduce</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span><span class="nx">vals</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">};</span>
 
-        <span class="c1">// Insert some test documents</span>
-        <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="s1">&#39;user_id&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;user_id&#39;</span><span class="o">:</span><span class="mi">2</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Execute map reduce and return results inline</span>
+        <span class="nx">collection</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="p">{</span><span class="nx">out</span> <span class="o">:</span> <span class="p">{</span><span class="nx">inline</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="nx">verbose</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">,</span> <span class="nx">stats</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">results</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">stats</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
 
-          <span class="c1">// Map function</span>
-          <span class="kd">var</span> <span class="nx">map</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">emit</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">user_id</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span> <span class="p">};</span>
-          <span class="c1">// Reduce function</span>
-          <span class="kd">var</span> <span class="nx">reduce</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span><span class="nx">vals</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="p">};</span>
-
-          <span class="c1">// Execute map reduce and return results inline</span>
-          <span class="nx">collection</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="p">{</span><span class="nx">out</span> <span class="o">:</span> <span class="p">{</span><span class="nx">inline</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="nx">verbose</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">,</span> <span class="nx">stats</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">results</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+          <span class="nx">collection</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="p">{</span><span class="nx">out</span> <span class="o">:</span> <span class="p">{</span><span class="nx">replace</span><span class="o">:</span> <span class="s1">&#39;mapreduce_integration_test&#39;</span><span class="p">},</span> <span class="nx">verbose</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">,</span> <span class="nx">stats</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">stats</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
-
-            <span class="nx">collection</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="p">{</span><span class="nx">out</span> <span class="o">:</span> <span class="p">{</span><span class="nx">replace</span><span class="o">:</span> <span class="s1">&#39;mapreduce_integration_test&#39;</span><span class="p">},</span> <span class="nx">verbose</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">,</span> <span class="nx">stats</span><span class="p">)</span> <span class="p">{</span>
-              <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">stats</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
-              <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-            <span class="p">});</span>
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
           <span class="p">});</span>
         <span class="p">});</span>
       <span class="p">});</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-      <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
-    <span class="p">}</span>
+    <span class="p">});</span>
   <span class="p">});</span>
-<span class="p">});</span>
 </pre></div>
 </div>
 <p>Mapreduce different test with a provided scope containing a javascript function.</p>
@@ -2288,6 +2282,81 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <span class="p">});</span>
 </pre></div>
 </div>
+<p>Mapreduce different test with a provided scope containing javascript objects with functions.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a test collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test_map_reduce_functions_scope_objects&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Insert some test documents</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="s1">&#39;user_id&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="o">:</span><span class="k">new</span> <span class="nb">Date</span><span class="p">()}</span>
+      <span class="p">,</span> <span class="p">{</span><span class="s1">&#39;user_id&#39;</span><span class="o">:</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="o">:</span><span class="k">new</span> <span class="nb">Date</span><span class="p">()}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Map function</span>
+      <span class="kd">var</span> <span class="nx">map</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">emit</span><span class="p">(</span><span class="nx">obj</span><span class="p">.</span><span class="nx">fn</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">timestamp</span><span class="p">.</span><span class="nx">getYear</span><span class="p">()),</span> <span class="mi">1</span><span class="p">);</span>
+      <span class="p">}</span>
+
+      <span class="c1">// Reduce function</span>
+      <span class="kd">var</span> <span class="nx">reduce</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">v</span><span class="p">){</span>
+        <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">v</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">count</span> <span class="o">+=</span> <span class="nx">v</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">count</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="c1">// Javascript function available in the map reduce scope</span>
+      <span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">val</span><span class="p">){</span> <span class="k">return</span> <span class="nx">val</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span> <span class="p">}</span>
+
+      <span class="c1">// Execute the map reduce with the custom scope containing objects</span>
+      <span class="kd">var</span> <span class="nx">o</span> <span class="o">=</span> <span class="p">{};</span>
+      <span class="nx">o</span><span class="p">.</span><span class="nx">scope</span> <span class="o">=</span>  <span class="p">{</span> <span class="nx">obj</span><span class="o">:</span> <span class="p">{</span><span class="nx">fn</span><span class="o">:</span> <span class="k">new</span> <span class="nx">Code</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">toString</span><span class="p">())}</span> <span class="p">}</span>
+      <span class="nx">o</span><span class="p">.</span><span class="nx">out</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">replace</span><span class="o">:</span> <span class="s1">&#39;replacethiscollection&#39;</span> <span class="p">}</span>
+
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="nx">o</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">outCollection</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+        <span class="c1">// Find all entries in the map-reduce collection</span>
+        <span class="nx">outCollection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">)</span>
+
+          <span class="c1">// mapReduce with scope containing plain function</span>
+          <span class="kd">var</span> <span class="nx">o</span> <span class="o">=</span> <span class="p">{};</span>
+          <span class="nx">o</span><span class="p">.</span><span class="nx">scope</span> <span class="o">=</span>  <span class="p">{</span> <span class="nx">obj</span><span class="o">:</span> <span class="p">{</span><span class="nx">fn</span><span class="o">:</span> <span class="nx">t</span><span class="p">}</span> <span class="p">}</span>
+          <span class="nx">o</span><span class="p">.</span><span class="nx">out</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">replace</span><span class="o">:</span> <span class="s1">&#39;replacethiscollection&#39;</span> <span class="p">}</span>
+
+          <span class="nx">collection</span><span class="p">.</span><span class="nx">mapReduce</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span> <span class="nx">reduce</span><span class="p">,</span> <span class="nx">o</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">outCollection</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+            <span class="c1">// Find all entries in the map-reduce collection</span>
+            <span class="nx">outCollection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">)</span>
+              <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+            <span class="p">});</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
 </div></blockquote>
 </div>
 <div class="section" id="group">
@@ -2296,7 +2365,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>readPreference</strong> {String}, the preferred read preference (Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 </ul>
 </dd>
 </dl>
@@ -2651,7 +2720,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <li><strong>spherical</strong> {Boolean, default:false}, perform query using a spherical model.</li>
 <li><strong>uniqueDocs</strong> {Boolean, default:false}, the closest location in a document to the center of the search region will always be returned MongoDB &gt; 2.X.</li>
 <li><strong>includeLocs</strong> {Boolean, default:false}, include the location data fields in the top level of the results MongoDB &gt; 2.X.</li>
-<li><strong>readPreference</strong> {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 </ul>
 </dd>
 </dl>
@@ -2728,7 +2797,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <li><strong>maxDistance</strong> {Number}, include results up to maxDistance from the point.</li>
 <li><strong>search</strong> {Object}, filter the results by a query.</li>
 <li><strong>limit</strong> {Number}, max number of results to return.</li>
-<li><strong>readPreference</strong> {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 </ul>
 </dd>
 </dl>
@@ -2863,11 +2932,11 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 </div>
 <div class="section" id="aggregate">
 <h2>aggregate<a class="headerlink" href="#aggregate" title="Permalink to this headline">¶</a></h2>
-<p>Execute an aggregation framework pipeline against the collection, needs MongoDB &gt;= 2.1</p>
+<p>Execute an aggregation framework pipeline against the collection, needs MongoDB &gt;= 2.2</p>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>readPreference</strong> {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 </ul>
 </dd>
 </dl>
@@ -2908,52 +2977,43 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// Some docs for insertion</span>
-  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
-      <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
-      <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
-      <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
-        <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
-      <span class="p">]}];</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Some docs for insertion</span>
+    <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
+        <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
+        <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
+        <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
+          <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
+        <span class="p">]}];</span>
 
-  <span class="c1">// Validate that we are running on at least version 2.1 of MongoDB</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">().</span><span class="nx">serverInfo</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">){</span>
+    <span class="c1">// Create a collection</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray&#39;</span><span class="p">);</span>
+    <span class="c1">// Insert the docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
 
-    <span class="k">if</span><span class="p">(</span><span class="nb">parseInt</span><span class="p">((</span><span class="nx">result</span><span class="p">.</span><span class="nx">version</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\./g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)))</span> <span class="o">&gt;=</span> <span class="mi">210</span><span class="p">)</span> <span class="p">{</span>
-      <span class="c1">// Create a collection</span>
-      <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray&#39;</span><span class="p">);</span>
-      <span class="c1">// Insert the docs</span>
-      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Execute aggregate, notice the pipeline is expressed as an Array</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">([</span>
+          <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+          <span class="p">}},</span>
+          <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+            <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+          <span class="p">}}</span>
+        <span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;fun&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
 
-        <span class="c1">// Execute aggregate, notice the pipeline is expressed as an Array</span>
-        <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">([</span>
-            <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
-              <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-              <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
-            <span class="p">}},</span>
-            <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
-            <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
-              <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
-              <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
-            <span class="p">}}</span>
-          <span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;fun&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
-
-            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-        <span class="p">});</span>
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
       <span class="p">});</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-      <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
-    <span class="p">}</span>
+    <span class="p">});</span>
   <span class="p">});</span>
-<span class="p">});</span>
 </pre></div>
 </div>
 <p>Correctly call the aggregation framework using a pipeline expressed as an argument list.</p>
@@ -2970,52 +3030,43 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// Some docs for insertion</span>
-  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
-      <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
-      <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
-      <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
-        <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
-      <span class="p">]}];</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Some docs for insertion</span>
+    <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
+        <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
+        <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
+        <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
+          <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
+        <span class="p">]}];</span>
 
-  <span class="c1">// Validate that we are running on at least version 2.1 of MongoDB</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">().</span><span class="nx">serverInfo</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">){</span>
+    <span class="c1">// Create a collection</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments&#39;</span><span class="p">);</span>
+    <span class="c1">// Insert the docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Execute aggregate, notice the pipeline is expressed as function call parameters</span>
+      <span class="c1">// instead of an Array.</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">(</span>
+          <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+          <span class="p">}},</span>
+          <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+            <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+          <span class="p">}}</span>
+        <span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;fun&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
 
-    <span class="k">if</span><span class="p">(</span><span class="nb">parseInt</span><span class="p">((</span><span class="nx">result</span><span class="p">.</span><span class="nx">version</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\./g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)))</span> <span class="o">&gt;=</span> <span class="mi">210</span><span class="p">)</span> <span class="p">{</span>
-      <span class="c1">// Create a collection</span>
-      <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments&#39;</span><span class="p">);</span>
-      <span class="c1">// Insert the docs</span>
-      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// Execute aggregate, notice the pipeline is expressed as function call parameters</span>
-        <span class="c1">// instead of an Array.</span>
-        <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">(</span>
-            <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
-              <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-              <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
-            <span class="p">}},</span>
-            <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
-            <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
-              <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
-              <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
-            <span class="p">}}</span>
-          <span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;fun&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
-
-            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-        <span class="p">});</span>
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
       <span class="p">});</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-      <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
-    <span class="p">}</span>
+    <span class="p">});</span>
   <span class="p">});</span>
-<span class="p">});</span>
 </pre></div>
 </div>
 <p>Correctly call the aggregation framework using a pipeline expressed as an argument list.</p>
@@ -3032,52 +3083,319 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// Some docs for insertion</span>
-  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
-      <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
-      <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
-      <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
-        <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
-      <span class="p">]}];</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Some docs for insertion</span>
+    <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
+        <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
+        <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
+        <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
+          <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
+        <span class="p">]}];</span>
 
-  <span class="c1">// Validate that we are running on at least version 2.1 of MongoDB</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">admin</span><span class="p">().</span><span class="nx">serverInfo</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">){</span>
+    <span class="c1">// Create a collection</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments&#39;</span><span class="p">);</span>
+    <span class="c1">// Insert the docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Execute aggregate, notice the pipeline is expressed as function call parameters</span>
+      <span class="c1">// instead of an Array.</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">(</span>
+          <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+          <span class="p">}},</span>
+          <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+            <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+          <span class="p">}}</span>
+        <span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;fun&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
 
-    <span class="k">if</span><span class="p">(</span><span class="nb">parseInt</span><span class="p">((</span><span class="nx">result</span><span class="p">.</span><span class="nx">version</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\./g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)))</span> <span class="o">&gt;=</span> <span class="mi">210</span><span class="p">)</span> <span class="p">{</span>
-      <span class="c1">// Create a collection</span>
-      <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments&#39;</span><span class="p">);</span>
-      <span class="c1">// Insert the docs</span>
-      <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// Execute aggregate, notice the pipeline is expressed as function call parameters</span>
-        <span class="c1">// instead of an Array.</span>
-        <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">(</span>
-            <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
-              <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-              <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
-            <span class="p">}},</span>
-            <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
-            <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
-              <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
-              <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
-            <span class="p">}}</span>
-          <span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;fun&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
-
-            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-        <span class="p">});</span>
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
       <span class="p">});</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-      <span class="nx">test</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
-    <span class="p">}</span>
+    <span class="p">});</span>
   <span class="p">});</span>
-<span class="p">});</span>
+</pre></div>
+</div>
+<p>Correctly call the aggregation framework to return a cursor</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Some docs for insertion</span>
+    <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
+        <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
+        <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
+        <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
+          <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
+        <span class="p">]}];</span>
+
+    <span class="c1">// Create a collection</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyDoAggWithCursorGet&#39;</span><span class="p">);</span>
+    <span class="c1">// Insert the docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Execute aggregate, notice the pipeline is expressed as an Array</span>
+      <span class="kd">var</span> <span class="nx">cursor</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">([</span>
+          <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+          <span class="p">}},</span>
+          <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+            <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+          <span class="p">}}</span>
+        <span class="p">],</span> <span class="p">{</span>
+          <span class="nx">cursor</span><span class="o">:</span> <span class="p">{</span><span class="nx">batchSize</span><span class="o">:</span><span class="mi">100</span><span class="p">}</span>
+        <span class="p">});</span>
+
+      <span class="c1">// Iterate over all the items in the cursor</span>
+      <span class="nx">cursor</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="nx">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;fun&#39;</span><span class="p">,</span> <span class="nx">results</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">results</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+</pre></div>
+</div>
+<p>Correctly call the aggregation framework to return a cursor and call explain</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Some docs for insertion</span>
+    <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
+        <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
+        <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
+        <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
+          <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
+        <span class="p">]}];</span>
+
+    <span class="c1">// Create a collection</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyDoAggWithCursorGet&#39;</span><span class="p">);</span>
+    <span class="c1">// Insert the docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Execute aggregate, notice the pipeline is expressed as an Array</span>
+      <span class="kd">var</span> <span class="nx">cursor</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">([</span>
+          <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+          <span class="p">}},</span>
+          <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+            <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+          <span class="p">}}</span>
+        <span class="p">],</span> <span class="p">{</span>
+          <span class="nx">cursor</span><span class="o">:</span> <span class="p">{</span><span class="nx">batchSize</span><span class="o">:</span><span class="mi">100</span><span class="p">}</span>
+        <span class="p">});</span>
+
+      <span class="c1">// Iterate over all the items in the cursor</span>
+      <span class="nx">cursor</span><span class="p">.</span><span class="nx">explain</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="nx">results</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+</pre></div>
+</div>
+<p>Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Some docs for insertion</span>
+    <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
+        <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
+        <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
+        <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
+          <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
+        <span class="p">]}];</span>
+
+    <span class="c1">// Create a collection</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyDoAggWithCursorGet&#39;</span><span class="p">);</span>
+    <span class="c1">// Insert the docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Execute aggregate, notice the pipeline is expressed as an Array</span>
+      <span class="kd">var</span> <span class="nx">cursor</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">([</span>
+          <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+          <span class="p">}},</span>
+          <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+            <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+          <span class="p">}}</span>
+        <span class="p">],</span> <span class="p">{</span>
+          <span class="nx">cursor</span><span class="o">:</span> <span class="p">{</span><span class="nx">batchSize</span><span class="o">:</span><span class="mi">1</span><span class="p">}</span>
+        <span class="p">});</span>
+
+      <span class="c1">// Iterate over all the items in the cursor</span>
+      <span class="nx">cursor</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">result</span><span class="p">.</span><span class="nx">authors</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+</pre></div>
+</div>
+<p>Correctly call the aggregation framework and write the results to a new collection</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Some docs for insertion</span>
+    <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
+        <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
+        <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
+        <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
+          <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
+        <span class="p">]}];</span>
+
+    <span class="c1">// Create a collection</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyDoAggWithCursorGet&#39;</span><span class="p">);</span>
+    <span class="c1">// Insert the docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Execute aggregate, notice the pipeline is expressed as an Array</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">([</span>
+          <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+          <span class="p">}},</span>
+          <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+            <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+          <span class="p">}}</span>
+        <span class="p">],</span> <span class="p">{</span>
+          <span class="nx">out</span><span class="o">:</span> <span class="s2">&quot;testingOutCollectionForAggregation&quot;</span>
+        <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">results</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+</pre></div>
+</div>
+<p>Correctly use allowDiskUsage when performing an aggregation</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Some docs for insertion</span>
+    <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span>
+        <span class="nx">title</span> <span class="o">:</span> <span class="s2">&quot;this is my title&quot;</span><span class="p">,</span> <span class="nx">author</span> <span class="o">:</span> <span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="nx">posted</span> <span class="o">:</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">()</span> <span class="p">,</span>
+        <span class="nx">pageViews</span> <span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">tags</span> <span class="o">:</span> <span class="p">[</span> <span class="s2">&quot;fun&quot;</span> <span class="p">,</span> <span class="s2">&quot;good&quot;</span> <span class="p">,</span> <span class="s2">&quot;fun&quot;</span> <span class="p">],</span> <span class="nx">other</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">foo</span> <span class="o">:</span> <span class="mi">5</span> <span class="p">},</span>
+        <span class="nx">comments</span> <span class="o">:</span> <span class="p">[</span>
+          <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;joe&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is cool&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nx">author</span> <span class="o">:</span><span class="s2">&quot;sam&quot;</span><span class="p">,</span> <span class="nx">text</span> <span class="o">:</span> <span class="s2">&quot;this is bad&quot;</span> <span class="p">}</span>
+        <span class="p">]}];</span>
+
+    <span class="c1">// Create a collection</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;shouldCorrectlyDoAggWithCursorGet&#39;</span><span class="p">);</span>
+    <span class="c1">// Insert the docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Execute aggregate, notice the pipeline is expressed as an Array</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">aggregate</span><span class="p">([</span>
+          <span class="p">{</span> <span class="nx">$project</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">author</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nx">tags</span> <span class="o">:</span> <span class="mi">1</span>
+          <span class="p">}},</span>
+          <span class="p">{</span> <span class="nx">$unwind</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span> <span class="p">},</span>
+          <span class="p">{</span> <span class="nx">$group</span> <span class="o">:</span> <span class="p">{</span>
+            <span class="nx">_id</span> <span class="o">:</span> <span class="p">{</span><span class="nx">tags</span> <span class="o">:</span> <span class="s2">&quot;$tags&quot;</span><span class="p">},</span>
+            <span class="nx">authors</span> <span class="o">:</span> <span class="p">{</span> <span class="nx">$addToSet</span> <span class="o">:</span> <span class="s2">&quot;$author&quot;</span> <span class="p">}</span>
+          <span class="p">}}</span>
+        <span class="p">],</span> <span class="p">{</span>
+          <span class="nx">allowDiskUsage</span><span class="o">:</span> <span class="kc">true</span>
+        <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">results</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;good&#39;</span><span class="p">,</span> <span class="nx">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">results</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="s1">&#39;fun&#39;</span><span class="p">,</span> <span class="nx">results</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">_id</span><span class="p">.</span><span class="nx">tags</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="s1">&#39;bob&#39;</span><span class="p">],</span> <span class="nx">results</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">authors</span><span class="p">);</span>
+
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -3089,7 +3407,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <dt>Options</dt>
 <dd><ul class="first last simple">
 <li><strong>scale</strong> {Number}, divide the returned sizes by scale value.</li>
-<li><strong>readPreference</strong> {String}, the preferred read preference ((Server.PRIMARY, Server.PRIMARY_PREFERRED, Server.SECONDARY, Server.SECONDARY_PREFERRED, Server.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference, require(&#8216;mongodb&#8217;).ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 </ul>
 </dd>
 </dl>
@@ -3348,12 +3666,12 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

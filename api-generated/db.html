@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
@@ -8,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Db() &mdash; MongoDB Node.JS Driver 1.3.13 documentation</title>
+    <title>Db() &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.13',
+        VERSION:     '1.3.20',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.13 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" />
     <link rel="next" title="Collection()" href="collection.html" />
     <link rel="prev" title="MongoClient()" href="mongoclient.html" /> 
   </head>
@@ -38,7 +37,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -75,22 +74,23 @@
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &lt; 1 is no acknowledgement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
 <li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
 <li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
 <li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
-<li><strong>readPreference</strong> {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 <li><strong>native_parser</strong> {Boolean, default:false}, use c++ bson parser.</li>
 <li><strong>forceServerObjectId</strong> {Boolean, default:false}, force server to create _id fields instead of client.</li>
 <li><strong>pkFactory</strong> {Object}, object overriding the basic ObjectID primary key generation.</li>
 <li><strong>serializeFunctions</strong> {Boolean, default:false}, serialize functions.</li>
-<li><strong>raw</strong> {Boolean, default:false}, peform operations using raw bson buffers.</li>
+<li><strong>raw</strong> {Boolean, default:false}, perform operations using raw bson buffers.</li>
 <li><strong>recordQueryStats</strong> {Boolean, default:false}, record query statistics during execution.</li>
-<li><strong>retryMiliSeconds</strong> {Number, default:5000}, number of miliseconds between retries.</li>
+<li><strong>retryMiliSeconds</strong> {Number, default:5000}, number of milliseconds between retries.</li>
 <li><strong>numberOfRetries</strong> {Number, default:5}, number of retries off connection.</li>
 <li><strong>logger</strong> {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error <strong>({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})</strong>.</li>
 <li><strong>slaveOk</strong> {Number, default:null}, force setting of SlaveOk flag on queries (only use when explicitly connecting to a secondary server).</li>
 <li><strong>promoteLongs</strong> {Boolean, default:true}, when deserializing a Long will fit it into a Number if it&#8217;s smaller than 53 bits</li>
+<li><strong>bufferMaxEntries</strong> {Boolean, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited</li>
 </ul>
 </dd>
 <dt>Deprecated Options</dt>
@@ -133,7 +133,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the index information or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the index information or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -363,7 +363,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[forceClose]</strong> (<em>boolean</em>) &#8211; connection can never be reused.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -502,7 +502,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[collectionName]</strong> (<em>string</em>) &#8211; the collection name we wish to retrieve the information from.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the options or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the options or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -578,7 +578,7 @@
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[collectionName]</strong> (<em>string</em>) &#8211; the collection name we wish to filter by.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the collection names or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collection names or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -637,14 +637,14 @@ can use it without a callback in the following way. var collection = db.collecti
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowledgement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
 <li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
 <li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
 <li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
 <li><strong>serializeFunctions</strong> {Boolean, default:false}, serialize functions on the document.</li>
 <li><strong>raw</strong> {Boolean, default:false}, perform all operations using raw bson objects.</li>
 <li><strong>pkFactory</strong> {Object}, object overriding the basic ObjectID primary key generation.</li>
-<li><strong>readPreference</strong> {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 <li><strong>strict</strong>, (Boolean, default:false) returns an error if the collection does not exist</li>
 </ul>
 </dd>
@@ -664,7 +664,7 @@ can use it without a callback in the following way. var collection = db.collecti
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>collectionName</strong> (<em>string</em>) &#8211; the collection name we wish to access.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; returns option results.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the collection or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collection or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -734,7 +734,7 @@ can use it without a callback in the following way. var collection = db.collecti
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the collections or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collections or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -802,7 +802,7 @@ can use it without a callback in the following way. var collection = db.collecti
 <li><strong>code</strong> (<em>code</em>) &#8211; javascript to execute on server.</li>
 <li><strong>[parameters]</strong> (<em>object</em>) &#8211; the parameters for the call.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; the options</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from eval or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from eval or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -831,17 +831,25 @@ can use it without a callback in the following way. var collection = db.collecti
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
 <span class="c1">// Establish connection to db</span>
 <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">numberOfTests</span> <span class="o">=</span>
+  <span class="kd">var</span> <span class="nx">numberOfTests</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">tests_done</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">numberOfTests</span> <span class="o">=</span> <span class="nx">numberOfTests</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="nx">numberOfTests</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
 
   <span class="c1">// Evaluate a function on the server with the parameter 3 passed in</span>
   <span class="nx">db</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;function (x) {return x;}&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span> <span class="nx">tests_done</span><span class="p">();</span>
   <span class="p">});</span>
 
   <span class="c1">// Evaluate a function on the server with the parameter 3 passed in no lock aquired for eval</span>
   <span class="c1">// on server</span>
   <span class="nx">db</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;function (x) {return x;}&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="p">{</span><span class="nx">nolock</span><span class="o">:</span><span class="kc">true</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span> <span class="nx">tests_done</span><span class="p">();</span>
   <span class="p">});</span>
 
   <span class="c1">// Evaluate a function on the server that writes to a server collection</span>
@@ -849,47 +857,49 @@ can use it without a callback in the following way. var collection = db.collecti
     <span class="c1">// Locate the entry</span>
     <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test_eval&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="p">);</span> <span class="nx">tests_done</span><span class="p">();</span>
       <span class="p">});</span>
     <span class="p">});</span>
   <span class="p">});</span>
 
   <span class="c1">// Evaluate a function with 2 parameters passed in</span>
   <span class="nx">db</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;function (x, y) {return x + y;}&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span> <span class="nx">tests_done</span><span class="p">();</span>
   <span class="p">});</span>
 
   <span class="c1">// Evaluate a function with no parameters passed in</span>
   <span class="nx">db</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;function () {return 5;}&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span> <span class="nx">tests_done</span><span class="p">();</span>
   <span class="p">});</span>
 
   <span class="c1">// Evaluate a statement</span>
   <span class="nx">db</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;2 + 3;&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span> <span class="nx">tests_done</span><span class="p">();</span>
   <span class="p">});</span>
 
   <span class="c1">// Evaluate a statement using the code object</span>
   <span class="nx">db</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="k">new</span> <span class="nx">Code</span><span class="p">(</span><span class="s2">&quot;2 + 3;&quot;</span><span class="p">),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span> <span class="nx">tests_done</span><span class="p">();</span>
   <span class="p">});</span>
 
   <span class="c1">// Evaluate a statement using the code object including a scope</span>
   <span class="nx">db</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="k">new</span> <span class="nx">Code</span><span class="p">(</span><span class="s2">&quot;return i;&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;i&#39;</span><span class="o">:</span><span class="mi">2</span><span class="p">}),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span> <span class="nx">tests_done</span><span class="p">();</span>
   <span class="p">});</span>
 
   <span class="c1">// Evaluate a statement using the code object including a scope</span>
   <span class="nx">db</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="k">new</span> <span class="nx">Code</span><span class="p">(</span><span class="s2">&quot;i + 3;&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;i&#39;</span><span class="o">:</span><span class="mi">2</span><span class="p">}),</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span> <span class="nx">tests_done</span><span class="p">();</span>
   <span class="p">});</span>
 
   <span class="c1">// Evaluate an illegal statement</span>
   <span class="nx">db</span><span class="p">.</span><span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;5 ++ 5;&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span> <span class="k">instanceof</span> <span class="nb">Error</span><span class="p">);</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">message</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+    <span class="nx">tests_done</span><span class="p">();</span>
     <span class="c1">// Let&#39;s close the db</span>
-    <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="c1">// db.close();</span>
+    <span class="c1">// test.done();</span>
   <span class="p">});</span>
 <span class="p">});</span>
 </pre></div>
@@ -944,7 +954,7 @@ can use it without a callback in the following way. var collection = db.collecti
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>dbRef</strong> (<em>dbref</em>) &#8211; db reference object we wish to resolve.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dereference or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dereference or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1019,7 +1029,7 @@ can use it without a callback in the following way. var collection = db.collecti
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from logout or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from logout or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1046,27 +1056,32 @@ can use it without a callback in the following way. var collection = db.collecti
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-
-  <span class="c1">// Add a user to the database</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
-    <span class="c1">// Authenticate</span>
-    <span class="nx">db</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="c1">// Add a user to the database</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;user3&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
-      <span class="c1">// Logout the db</span>
-      <span class="nx">db</span><span class="p">.</span><span class="nx">logout</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Authenticate</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;user3&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
 
-        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="c1">// Logout the db</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">logout</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+
+          <span class="c1">// Remove the user</span>
+          <span class="nx">db</span><span class="p">.</span><span class="nx">removeUser</span><span class="p">(</span><span class="s1">&#39;user3&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">});</span>
       <span class="p">});</span>
     <span class="p">});</span>
   <span class="p">});</span>
-<span class="p">});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -1078,8 +1093,6 @@ authMechanism
 Options</p>
 <blockquote>
 <div><ul class="simple">
-<li><strong>authSource</strong> {String}, The database that the credentials are for,
-different from the name of the current DB, for example admin</li>
 <li><strong>authMechanism</strong> {String, default:MONGODB-CR}, The authentication mechanism to use, GSSAPI or MONGODB-CR</li>
 </ul>
 </div></blockquote>
@@ -1094,7 +1107,7 @@ different from the name of the current DB, for example admin</li>
 <li><strong>username</strong> (<em>string</em>) &#8211; username.</li>
 <li><strong>password</strong> (<em>string</em>) &#8211; password.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; the options</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from authentication or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from authentication or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1121,22 +1134,22 @@ different from the name of the current DB, for example admin</li>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-
-  <span class="c1">// Add a user to the database</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
-    <span class="c1">// Authenticate</span>
-    <span class="nx">db</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="c1">// Add a user to the database</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;user2&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
-      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="c1">// Authenticate</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;user2&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
     <span class="p">});</span>
   <span class="p">});</span>
-<span class="p">});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -1147,10 +1160,12 @@ different from the name of the current DB, for example admin</li>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowledgement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
 <li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
 <li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
 <li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
+<li><strong>customData</strong>, (Object, default:{}) custom data associated with the user (only Mongodb 2.6 or higher)</li>
+<li><strong>roles</strong>, (Array, default:[]) roles associated with the created user (only Mongodb 2.6 or higher)</li>
 </ul>
 </dd>
 <dt>Deprecated Options</dt>
@@ -1170,7 +1185,7 @@ different from the name of the current DB, for example admin</li>
 <li><strong>username</strong> (<em>string</em>) &#8211; username.</li>
 <li><strong>password</strong> (<em>string</em>) &#8211; password.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from addUser or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from addUser or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1197,17 +1212,17 @@ different from the name of the current DB, for example admin</li>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-
-  <span class="c1">// Add a user to the database</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
-    <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="c1">// Add a user to the database</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="p">});</span>
   <span class="p">});</span>
-<span class="p">});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -1218,7 +1233,7 @@ different from the name of the current DB, for example admin</li>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowledgement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
 <li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
 <li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
 <li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
@@ -1240,7 +1255,7 @@ different from the name of the current DB, for example admin</li>
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>username</strong> (<em>string</em>) &#8211; username.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from removeUser or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from removeUser or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1267,36 +1282,36 @@ different from the name of the current DB, for example admin</li>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
-
-  <span class="c1">// Add a user to the database</span>
-  <span class="nx">db</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
-    <span class="c1">// Authenticate</span>
-    <span class="nx">db</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+    <span class="c1">// Add a user to the database</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">addUser</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
-      <span class="c1">// Logout the db</span>
-      <span class="nx">db</span><span class="p">.</span><span class="nx">logout</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Authenticate</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
 
-        <span class="c1">// Remove the user from the db</span>
-        <span class="nx">db</span><span class="p">.</span><span class="nx">removeUser</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Logout the db</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">logout</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
 
-          <span class="c1">// Authenticate</span>
-          <span class="nx">db</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+          <span class="c1">// Remove the user from the db</span>
+          <span class="nx">db</span><span class="p">.</span><span class="nx">removeUser</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
 
-            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+            <span class="c1">// Authenticate</span>
+            <span class="nx">db</span><span class="p">.</span><span class="nx">authenticate</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="nx">result</span><span class="p">);</span>
+
+              <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+            <span class="p">});</span>
           <span class="p">});</span>
         <span class="p">});</span>
       <span class="p">});</span>
     <span class="p">});</span>
   <span class="p">});</span>
-<span class="p">});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -1307,7 +1322,7 @@ different from the name of the current DB, for example admin</li>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowledgement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
 <li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
 <li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
 <li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
@@ -1318,7 +1333,7 @@ different from the name of the current DB, for example admin</li>
 <li><strong>size</strong> {Number}, the size of the capped collection in bytes.</li>
 <li><strong>max</strong> {Number}, the maximum number of documents in the capped collection.</li>
 <li><strong>autoIndexId</strong> {Boolean, default:true}, create an index on the _id field of the document, True by default on MongoDB 2.2 or higher off for version &amp;lt; 2.2.</li>
-<li><strong>readPreference</strong> {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 <li><strong>strict</strong>, (Boolean, default:false) throws an error if collection already exists</li>
 </ul>
 </dd>
@@ -1338,7 +1353,7 @@ different from the name of the current DB, for example admin</li>
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>collectionName</strong> (<em>string</em>) &#8211; the collection name we wish to access.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; returns option results.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from createCollection or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from createCollection or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1388,15 +1403,25 @@ different from the name of the current DB, for example admin</li>
 <div class="section" id="command">
 <h2>command<a class="headerlink" href="#command" title="Permalink to this headline">¶</a></h2>
 <p>Execute a command hash against MongoDB. This lets you acess any commands not available through the api on the server.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>maxTimeMS</strong> {Number}, number of miliseconds to wait before aborting the query.</li>
+<li><strong>ignoreCommandFilter</strong> {Boolean}, overrides the default redirection of certain commands to primary.</li>
+<li><strong>writeCommand</strong> {Boolean, default: false}, signals this is a write command and to ignore read preferences</li>
+</ul>
+</dd>
+</dl>
 <dl class="function">
 <dt>
-<tt class="descname">command</tt><big>(</big><em>selector</em>, <em>callback</em><big>)</big></dt>
+<tt class="descname">command</tt><big>(</big><em>selector</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>selector</strong> (<em>object</em>) &#8211; the command hash to send to the server, ex: {ping:1}.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options for the command.</li>
 <li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The command always return the whole result of the command as the second parameter.</li>
 </ul>
 </td>
@@ -1451,7 +1476,7 @@ different from the name of the current DB, for example admin</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>collectionName</strong> (<em>string</em>) &#8211; the name of the collection we wish to drop.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dropCollection or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dropCollection or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1534,7 +1559,7 @@ different from the name of the current DB, for example admin</li>
 <li><strong>fromCollection</strong> (<em>string</em>) &#8211; the name of the current collection we wish to rename.</li>
 <li><strong>toCollection</strong> (<em>string</em>) &#8211; the new name of the collection.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; returns option results.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from renameCollection or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from renameCollection or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1629,7 +1654,7 @@ different from the name of the current DB, for example admin</li>
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[options]</strong> (<em>object</em>) &#8211; returns option results.</li>
 <li><strong>[connectionOptions]</strong> (<em>object</em>) &#8211; returns option results.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from lastError or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from lastError or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1709,7 +1734,7 @@ different from the name of the current DB, for example admin</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[options]</strong> (<em>object</em>) &#8211; returns option results.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from previousErrors or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from previousErrors or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1789,7 +1814,7 @@ different from the name of the current DB, for example admin</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[options]</strong> (<em>object</em>) &#8211; returns option results.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from resetErrorHistory or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from resetErrorHistory or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1859,7 +1884,7 @@ different from the name of the current DB, for example admin</li>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowledgement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
 <li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
 <li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
 <li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
@@ -1891,7 +1916,7 @@ different from the name of the current DB, for example admin</li>
 <li><strong>collectionName</strong> (<em>string</em>) &#8211; name of the collection to create the index on.</li>
 <li><strong>fieldOrSpec</strong> (<em>object</em>) &#8211; fieldOrSpec that defines the index.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from createIndex or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from createIndex or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -1962,7 +1987,7 @@ different from the name of the current DB, for example admin</li>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowledgement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
 <li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
 <li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
 <li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
@@ -1994,7 +2019,7 @@ different from the name of the current DB, for example admin</li>
 <li><strong>collectionName</strong> (<em>string</em>) &#8211; name of the collection to create the index on.</li>
 <li><strong>fieldOrSpec</strong> (<em>object</em>) &#8211; fieldOrSpec that defines the index.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from ensureIndex or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from ensureIndex or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -2065,7 +2090,7 @@ different from the name of the current DB, for example admin</li>
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>readPreference</strong> {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
 </ul>
 </dd>
 </dl>
@@ -2078,7 +2103,7 @@ different from the name of the current DB, for example admin</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from cursorInfo or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from cursorInfo or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -2154,7 +2179,7 @@ different from the name of the current DB, for example admin</li>
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>collectionName</strong> (<em>string</em>) &#8211; the name of the collection where the command will drop an index.</li>
 <li><strong>indexName</strong> (<em>string</em>) &#8211; name of the index to drop.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dropIndex or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dropIndex or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -2230,7 +2255,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
 <li><strong>collectionName</strong> (<em>string</em>) &#8211; the name of the collection.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from reIndex or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from reIndex or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -2312,7 +2337,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>collectionName</strong> (<em>string</em>) &#8211; the name of the collection.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from indexInformation or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from indexInformation or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -2387,7 +2412,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dropDatabase or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dropDatabase or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -2478,7 +2503,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>[options]</strong> (<em>objects</em>) &#8211; options for the stats command</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from stats or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from stats or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -2545,7 +2570,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
 <li><strong>url</strong> (<em>string</em>) &#8211; connection url for MongoDB.</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; optional options for insert command</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the db instance or null if an error occured.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the db instance or null if an error occurred.</li>
 </ul>
 </td>
 </tr>
@@ -2781,12 +2806,12 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

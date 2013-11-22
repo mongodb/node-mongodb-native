@@ -18,22 +18,23 @@ Create a new Db instance.
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where < 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where < 1 is no acknowledgement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
- - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **readPreference** {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  - **native_parser** {Boolean, default:false}, use c++ bson parser.
  - **forceServerObjectId** {Boolean, default:false}, force server to create _id fields instead of client.
  - **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
  - **serializeFunctions** {Boolean, default:false}, serialize functions.
- - **raw** {Boolean, default:false}, peform operations using raw bson buffers.
+ - **raw** {Boolean, default:false}, perform operations using raw bson buffers.
  - **recordQueryStats** {Boolean, default:false}, record query statistics during execution.
- - **retryMiliSeconds** {Number, default:5000}, number of miliseconds between retries.
+ - **retryMiliSeconds** {Number, default:5000}, number of milliseconds between retries.
  - **numberOfRetries** {Number, default:5}, number of retries off connection.
  - **logger** {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error **({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})**.
  - **slaveOk** {Number, default:null}, force setting of SlaveOk flag on queries (only use when explicitly connecting to a secondary server).
  - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
+ - **bufferMaxEntries** {Boolean, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited
 
 
 
@@ -60,7 +61,7 @@ Initialize the database connection.
 
 .. js:function:: open(callback)
 
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the index information or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the index information or null if an error occurred.
    :returns: null 
 
 
@@ -290,7 +291,7 @@ Close the current db connection, including all the child db instances. Emits clo
 .. js:function:: close([forceClose], callback)
 
    :param boolean [forceClose]: connection can never be reused.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results or null if an error occurred.
    :returns: null 
 
 
@@ -421,7 +422,7 @@ Returns a cursor to all the collection information.
 .. js:function:: collectionsInfo([collectionName], callback)
 
    :param string [collectionName]: the collection name we wish to retrieve the information from.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the options or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the options or null if an error occurred.
    :returns: null 
 
 
@@ -489,7 +490,7 @@ Options
 
    :param string [collectionName]: the collection name we wish to filter by.
    :param object [options]: additional options during update.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the collection names or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collection names or null if an error occurred.
    :returns: null 
 
 
@@ -548,14 +549,14 @@ can use it without a callback in the following way. var collection = db.collecti
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowledgement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
  - **raw** {Boolean, default:false}, perform all operations using raw bson objects.
  - **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
- - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **readPreference** {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  - **strict**, (Boolean, default:false) returns an error if the collection does not exist
 
 
@@ -567,7 +568,7 @@ Deprecated Options
 
    :param string collectionName: the collection name we wish to access.
    :param object [options]: returns option results.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the collection or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collection or null if an error occurred.
    :returns: null 
 
 
@@ -631,7 +632,7 @@ Fetch all collections for the current db.
 
 .. js:function:: collections(callback)
 
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the collections or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collections or null if an error occurred.
    :returns: null 
 
 
@@ -691,7 +692,7 @@ Options
    :param code code: javascript to execute on server.
    :param object [parameters]: the parameters for the call.
    :param object [options]: the options
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from eval or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from eval or null if an error occurred.
    :returns: null 
 
 
@@ -718,17 +719,25 @@ Options
      var db = new Db('test', new Server('locahost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-       var numberOfTests = 
+       var numberOfTests = 10;
+     
+       var tests_done = function() {
+         numberOfTests = numberOfTests - 1;
+     
+         if(numberOfTests == 0) {
+           db.close();
+         }
+       }
      
        // Evaluate a function on the server with the parameter 3 passed in
        db.eval('function (x) {return x;}', [3], function(err, result) {
-         assert.equal(3, result);
+         assert.equal(3, result); tests_done();
        });
      
        // Evaluate a function on the server with the parameter 3 passed in no lock aquired for eval
        // on server
        db.eval('function (x) {return x;}', [3], {nolock:true}, function(err, result) {
-         assert.equal(3, result);
+         assert.equal(3, result); tests_done();
        });
      
        // Evaluate a function on the server that writes to a server collection
@@ -736,47 +745,49 @@ Options
          // Locate the entry
          db.collection('test_eval', function(err, collection) {
            collection.findOne(function(err, item) {
-             assert.equal(5, item.y);
+             assert.equal(5, item.y); tests_done();
            });
          });
        });
      
        // Evaluate a function with 2 parameters passed in
        db.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
-         assert.equal(5, result);
+         assert.equal(5, result); tests_done();
        });
      
        // Evaluate a function with no parameters passed in
        db.eval('function () {return 5;}', function(err, result) {
-         assert.equal(5, result);
+         assert.equal(5, result); tests_done();
        });
      
        // Evaluate a statement
        db.eval('2 + 3;', function(err, result) {
-         assert.equal(5, result);
+         assert.equal(5, result); tests_done();
        });
      
        // Evaluate a statement using the code object
        db.eval(new Code("2 + 3;"), function(err, result) {
-         assert.equal(5, result);
+         assert.equal(5, result); tests_done();
        });
      
        // Evaluate a statement using the code object including a scope
        db.eval(new Code("return i;", {'i':2}), function(err, result) {
-         assert.equal(2, result);
+         assert.equal(2, result); tests_done();
        });
      
        // Evaluate a statement using the code object including a scope
        db.eval(new Code("i + 3;", {'i':2}), function(err, result) {
-         assert.equal(5, result);
+         assert.equal(5, result); tests_done();
        });
      
        // Evaluate an illegal statement
        db.eval("5 ++ 5;", function(err, result) {
          assert.ok(err instanceof Error);
          assert.ok(err.message != null);
+         tests_done();
          // Let's close the db
-         db.close();
+         // db.close();
+         // test.done();
        });
      });
 
@@ -831,7 +842,7 @@ Dereference a dbref, against a db
 .. js:function:: dereference(dbRef, callback)
 
    :param dbref dbRef: db reference object we wish to resolve.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dereference or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dereference or null if an error occurred.
    :returns: null 
 
 
@@ -900,7 +911,7 @@ Logout user from server, fire off on all connections and remove all auth info
 
 .. js:function:: logout(callback)
 
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from logout or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from logout or null if an error occurred.
    :returns: null 
 
 
@@ -925,27 +936,32 @@ Logout user from server, fire off on all connections and remove all auth info
          assert = require('assert');
 
      var db = new Db('test', new Server('locahost', 27017));
-     // Establish connection to db
-     db.open(function(err, db) {
-       assert.equal(null, err);
-     
-       // Add a user to the database
-       db.addUser('user', 'name', function(err, result) {
+       // Establish connection to db
+       db.open(function(err, db) {
          assert.equal(null, err);
      
-         // Authenticate
-         db.authenticate('user', 'name', function(err, result) {
-           assert.equal(true, result);
+         // Add a user to the database
+         db.addUser('user3', 'name', function(err, result) {
+           assert.equal(null, err);
      
-           // Logout the db
-           db.logout(function(err, result) {
+           // Authenticate
+           db.authenticate('user3', 'name', function(err, result) {
              assert.equal(true, result);
      
-             db.close();
+             // Logout the db
+             db.logout(function(err, result) {
+               assert.equal(true, result);
+     
+               // Remove the user
+               db.removeUser('user3', function(err, result) {
+                 assert.equal(true, result);
+     
+                 db.close();
+               });
+             });
            });
          });
        });
-     });
 
 
 ------------
@@ -956,8 +972,6 @@ authenticate
 Authenticate a user against the server.
 authMechanism
 Options
- - **authSource** {String}, The database that the credentials are for,
-   different from the name of the current DB, for example admin
  - **authMechanism** {String, default:MONGODB-CR}, The authentication mechanism to use, GSSAPI or MONGODB-CR
 
 .. js:function:: authenticate(username, password[, options], callback)
@@ -965,7 +979,7 @@ Options
    :param string username: username.
    :param string password: password.
    :param object [options]: the options
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from authentication or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from authentication or null if an error occurred.
    :returns: null 
 
 
@@ -990,22 +1004,22 @@ Options
          assert = require('assert');
 
      var db = new Db('test', new Server('locahost', 27017));
-     // Establish connection to db
-     db.open(function(err, db) {
-       assert.equal(null, err);
-     
-       // Add a user to the database
-       db.addUser('user', 'name', function(err, result) {
+       // Establish connection to db
+       db.open(function(err, db) {
          assert.equal(null, err);
      
-         // Authenticate
-         db.authenticate('user', 'name', function(err, result) {
-           assert.equal(true, result);
+         // Add a user to the database
+         db.addUser('user2', 'name', function(err, result) {
+           assert.equal(null, err);
      
-           db.close();
+           // Authenticate
+           db.authenticate('user2', 'name', function(err, result) {
+             assert.equal(true, result);
+     
+             db.close();
+           });
          });
        });
-     });
 
 
 -------
@@ -1018,10 +1032,12 @@ Add a user to the database.
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowledgement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
+ - **customData**, (Object, default:{}) custom data associated with the user (only Mongodb 2.6 or higher)
+ - **roles**, (Array, default:[]) roles associated with the created user (only Mongodb 2.6 or higher)
 
 
 
@@ -1033,7 +1049,7 @@ Deprecated Options
    :param string username: username.
    :param string password: password.
    :param object [options]: additional options during update.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from addUser or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from addUser or null if an error occurred.
    :returns: null 
 
 
@@ -1058,17 +1074,17 @@ Deprecated Options
          assert = require('assert');
 
      var db = new Db('test', new Server('locahost', 27017));
-     // Establish connection to db
-     db.open(function(err, db) {
-       assert.equal(null, err);
-     
-       // Add a user to the database
-       db.addUser('user', 'name', function(err, result) {
+       // Establish connection to db
+       db.open(function(err, db) {
          assert.equal(null, err);
      
-         db.close();
+         // Add a user to the database
+         db.addUser('user', 'name', function(err, result) {
+           assert.equal(null, err);
+     
+           db.close();
+         });
        });
-     });
 
 
 ----------
@@ -1081,7 +1097,7 @@ Remove a user from a database
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowledgement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -1095,7 +1111,7 @@ Deprecated Options
 
    :param string username: username.
    :param object [options]: additional options during update.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from removeUser or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from removeUser or null if an error occurred.
    :returns: null 
 
 
@@ -1120,36 +1136,36 @@ Deprecated Options
          assert = require('assert');
 
      var db = new Db('test', new Server('locahost', 27017));
-     // Establish connection to db
-     db.open(function(err, db) {
-       assert.equal(null, err);
-     
-       // Add a user to the database
-       db.addUser('user', 'name', function(err, result) {
+       // Establish connection to db
+       db.open(function(err, db) {
          assert.equal(null, err);
      
-         // Authenticate
-         db.authenticate('user', 'name', function(err, result) {
-           assert.equal(true, result);
+         // Add a user to the database
+         db.addUser('user', 'name', function(err, result) {
+           assert.equal(null, err);
      
-           // Logout the db
-           db.logout(function(err, result) {
+           // Authenticate
+           db.authenticate('user', 'name', function(err, result) {
              assert.equal(true, result);
      
-             // Remove the user from the db
-             db.removeUser('user', function(err, result) {
+             // Logout the db
+             db.logout(function(err, result) {
+               assert.equal(true, result);
      
-               // Authenticate
-               db.authenticate('user', 'name', function(err, result) {
-                 assert.equal(false, result);
+               // Remove the user from the db
+               db.removeUser('user', function(err, result) {
      
-                 db.close();
+                 // Authenticate
+                 db.authenticate('user', 'name', function(err, result) {
+                   assert.equal(false, result);
+     
+                   db.close();
+                 });
                });
              });
            });
          });
        });
-     });
 
 
 ----------------
@@ -1162,7 +1178,7 @@ Creates a collection on a server pre-allocating space, need to create f.ex cappe
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowledgement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -1173,7 +1189,7 @@ Options
  - **size** {Number}, the size of the capped collection in bytes.
  - **max** {Number}, the maximum number of documents in the capped collection.
  - **autoIndexId** {Boolean, default:true}, create an index on the _id field of the document, True by default on MongoDB 2.2 or higher off for version &lt; 2.2.
- - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **readPreference** {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  - **strict**, (Boolean, default:false) throws an error if collection already exists
 
 
@@ -1185,7 +1201,7 @@ Deprecated Options
 
    :param string collectionName: the collection name we wish to access.
    :param object [options]: returns option results.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from createCollection or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from createCollection or null if an error occurred.
    :returns: null 
 
 
@@ -1235,9 +1251,17 @@ command
 
 Execute a command hash against MongoDB. This lets you acess any commands not available through the api on the server.
 
-.. js:function:: command(selector, callback)
+
+
+Options
+ - **maxTimeMS** {Number}, number of miliseconds to wait before aborting the query.
+ - **ignoreCommandFilter** {Boolean}, overrides the default redirection of certain commands to primary.
+ - **writeCommand** {Boolean, default: false}, signals this is a write command and to ignore read preferences
+
+.. js:function:: command(selector[, options], callback)
 
    :param object selector: the command hash to send to the server, ex: {ping:1}.
+   :param object [options]: additional options for the command.
    :param function callback: this will be called after executing this method. The command always return the whole result of the command as the second parameter.
    :returns: null 
 
@@ -1286,7 +1310,7 @@ Drop a collection from the database, removing it permanently. New accesses will 
 .. js:function:: dropCollection(collectionName, callback)
 
    :param string collectionName: the name of the collection we wish to drop.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dropCollection or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dropCollection or null if an error occurred.
    :returns: null 
 
 
@@ -1361,7 +1385,7 @@ Options
    :param string fromCollection: the name of the current collection we wish to rename.
    :param string toCollection: the new name of the collection.
    :param object [options]: returns option results.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from renameCollection or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from renameCollection or null if an error occurred.
    :returns: null 
 
 
@@ -1448,7 +1472,7 @@ Connection Options
 
    :param object [options]: returns option results.
    :param object [connectionOptions]: returns option results.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from lastError or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from lastError or null if an error occurred.
    :returns: null 
 
 
@@ -1520,7 +1544,7 @@ Options
 .. js:function:: previousErrors([options], callback)
 
    :param object [options]: returns option results.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from previousErrors or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from previousErrors or null if an error occurred.
    :returns: null 
 
 
@@ -1592,7 +1616,7 @@ Options
 .. js:function:: resetErrorHistory([options], callback)
 
    :param object [options]: returns option results.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from resetErrorHistory or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from resetErrorHistory or null if an error occurred.
    :returns: null 
 
 
@@ -1662,7 +1686,7 @@ Creates an index on the collection.
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowledgement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -1686,7 +1710,7 @@ Deprecated Options
    :param string collectionName: name of the collection to create the index on.
    :param object fieldOrSpec: fieldOrSpec that defines the index.
    :param object [options]: additional options during update.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from createIndex or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from createIndex or null if an error occurred.
    :returns: null 
 
 
@@ -1757,7 +1781,7 @@ Ensures that an index exists, if it does not it creates it
 
 
 Options
- - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowledgement of write and w >= 1, w = 'majority' or tag acknowledges the write
  - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
  - **fsync**, (Boolean, default:false) write waits for fsync before returning
  - **journal**, (Boolean, default:false) write waits for journal sync before returning
@@ -1781,7 +1805,7 @@ Deprecated Options
    :param string collectionName: name of the collection to create the index on.
    :param object fieldOrSpec: fieldOrSpec that defines the index.
    :param object [options]: additional options during update.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from ensureIndex or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from ensureIndex or null if an error occurred.
    :returns: null 
 
 
@@ -1852,12 +1876,12 @@ Returns the information available on allocated cursors.
 
 
 Options
- - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **readPreference** {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
 
 .. js:function:: cursorInfo([options], callback)
 
    :param object [options]: additional options during update.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from cursorInfo or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from cursorInfo or null if an error occurred.
    :returns: null 
 
 
@@ -1927,7 +1951,7 @@ Drop an index on a collection.
 
    :param string collectionName: the name of the collection where the command will drop an index.
    :param string indexName: name of the index to drop.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dropIndex or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dropIndex or null if an error occurred.
    :returns: null 
 
 
@@ -1997,7 +2021,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 .. js:function:: reIndex(collectionName, callback)
 
    :param string collectionName: the name of the collection.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from reIndex or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from reIndex or null if an error occurred.
 
 **Examples**
 
@@ -2072,7 +2096,7 @@ Options
 
    :param string collectionName: the name of the collection.
    :param object [options]: additional options during update.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from indexInformation or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from indexInformation or null if an error occurred.
    :returns: null 
 
 
@@ -2141,7 +2165,7 @@ Drop a database.
 
 .. js:function:: dropDatabase(callback)
 
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from dropDatabase or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dropDatabase or null if an error occurred.
    :returns: null 
 
 
@@ -2224,7 +2248,7 @@ Options
 .. js:function:: stats([options], callback)
 
    :param objects [options]: options for the stats command
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from stats or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from stats or null if an error occurred.
    :returns: null 
 
 
@@ -2286,7 +2310,7 @@ Options
 
    :param string url: connection url for MongoDB.
    :param object [options]: optional options for insert command
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the db instance or null if an error occured.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the db instance or null if an error occurred.
    :returns: null 
 
 

@@ -244,12 +244,13 @@ Resumes this stream.
                // For each data item
                stream.on("end", function(item) {
                });
+     
                // When the stream is done
                stream.on("close", function() {
                  // Have we received the same file back?
                  assert.equal(fileBuffer, fileBody);
                  db.close();          
-               });        
+               });     
      
                // Resume the stream
                stream.resume();

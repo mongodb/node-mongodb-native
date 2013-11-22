@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
@@ -8,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Indexes &mdash; MongoDB Node.JS Driver 1.3.13 documentation</title>
+    <title>Indexes &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.13',
+        VERSION:     '1.3.20',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.13 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -47,126 +46,93 @@
             
   <div class="section" id="indexes">
 <h1>Indexes<a class="headerlink" href="#indexes" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div><p>Indexes are needed to make queries faster. For example if you need to find records by a field named  <em>username</em>  and the field has a related index set, then the query will be a lot faster compared to if the index was not present.</p>
-<p>See  <a class="reference external" href="http://www.mongodb.org/display/DOCS/Indexes">MongoDB documentation</a>  for details.</p>
-</div></blockquote>
+<p>Indexes are needed to make queries faster. For example if you need to
+find records by a field named <em>username</em> and the field has a related
+index set, then the query will be a lot faster compared to if the index
+was not present.</p>
+<p>See <a class="reference external" href="http://www.mongodb.org/display/DOCS/Indexes">MongoDB
+documentation</a> for
+details.</p>
 <div class="section" id="create-indexes-with-createindex">
 <h2>Create indexes with createIndex()<a class="headerlink" href="#create-indexes-with-createindex" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p><tt class="docutils literal"><span class="pre">createIndex</span></tt>  adds a new index to a collection. For checking if the index was already set, use  <tt class="docutils literal"><span class="pre">ensureIndex</span></tt>  instead.</p>
-<dl class="docutils">
-<dt><a href="#id1"><span class="problematic" id="id2">``</span></a>javascript</dt>
-<dd>collection.createIndex(index[, options], callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id3"><span class="problematic" id="id4">``</span></a></p>
-<blockquote>
-<div><p>or</p>
-<dl class="docutils">
-<dt><a href="#id5"><span class="problematic" id="id6">``</span></a>javascript</dt>
-<dd>db.createIndex(collectionname, index[, options], callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id7"><span class="problematic" id="id8">``</span></a></p>
-<blockquote>
-<div><p>where</p>
-<blockquote>
-<div><ul class="simple">
-<li><tt class="docutils literal"><span class="pre">index</span></tt>  is the field or fields to be indexed. See  <em>index field</em></li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt>  are options, for example  <tt class="docutils literal"><span class="pre">{sparse:</span> <span class="pre">true}</span></tt>  to include only records that have indexed field set or  <tt class="docutils literal"><span class="pre">{unique:</span> <span class="pre">true}</span></tt>  for unique indexes. If the  <tt class="docutils literal"><span class="pre">options</span></tt>  is a boolean value, then it indicates if it&#8217;s an unique index or not.</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and the name for the newly created index</li>
+<p><tt class="docutils literal"><span class="pre">createIndex</span></tt> adds a new index to a collection. For checking if the
+index was already set, use <tt class="docutils literal"><span class="pre">ensureIndex</span></tt> instead.</p>
+<div class="highlight-python"><pre>collection.createIndex(index[, options], callback)</pre>
+</div>
+<p>or</p>
+<div class="highlight-python"><pre>db.createIndex(collectionname, index[, options], callback)</pre>
+</div>
+<p>where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">index</span></tt> is the field or fields to be indexed. See <em>index field</em></li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> are options, for example <tt class="docutils literal"><span class="pre">{sparse:</span> <span class="pre">true}</span></tt> to include
+only records that have indexed field set or <tt class="docutils literal"><span class="pre">{unique:</span> <span class="pre">true}</span></tt> for
+unique indexes. If the <tt class="docutils literal"><span class="pre">options</span></tt> is a boolean value, then it
+indicates if it&#8217;s an unique index or not.</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error
+occured) and the name for the newly created index</li>
 </ul>
-</div></blockquote>
-</div></blockquote>
 </div>
 <div class="section" id="ensure-indexes-with-ensureindex">
 <h2>Ensure indexes with ensureIndex()<a class="headerlink" href="#ensure-indexes-with-ensureindex" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div>Same as  <tt class="docutils literal"><span class="pre">createIndex</span></tt>  with the difference that the index is checked for existence before adding to avoid duplicate indexes.</div></blockquote>
+<p>Same as <tt class="docutils literal"><span class="pre">createIndex</span></tt> with the difference that the index is checked
+for existence before adding to avoid duplicate indexes.</p>
 </div>
 <div class="section" id="index-field">
 <h2>Index field<a class="headerlink" href="#index-field" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>Index field can be a simple string like  <tt class="docutils literal"><span class="pre">&quot;username&quot;</span></tt>  to index certain field (in this case, a field named as  <em>username</em> ).</p>
-<dl class="docutils">
-<dt><a href="#id9"><span class="problematic" id="id10">``</span></a>javascript</dt>
-<dd>collection.ensureIndex(&#8220;username&#8221;,callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id11"><span class="problematic" id="id12">``</span></a></p>
-<blockquote>
-<div><p>It is possible to index fields inside nested objects, for example  <tt class="docutils literal"><span class="pre">&quot;user.firstname&quot;</span></tt>  to index field named  <em>firstname</em>  inside a document named  <em>user</em> .</p>
-<dl class="docutils">
-<dt><a href="#id13"><span class="problematic" id="id14">``</span></a>javascript</dt>
-<dd>collection.ensureIndex(&#8220;user.firstname&#8221;,callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id15"><span class="problematic" id="id16">``</span></a></p>
-<blockquote>
-<div><p>It is also possible to create mixed indexes to include several fields at once.</p>
-<dl class="docutils">
-<dt><a href="#id17"><span class="problematic" id="id18">``</span></a>javascript</dt>
-<dd>collection.ensureIndex({firstname:1, lastname:1}, callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id19"><span class="problematic" id="id20">``</span></a></p>
-<blockquote>
-<div><p>or with tuples</p>
-<dl class="docutils">
-<dt><a href="#id21"><span class="problematic" id="id22">``</span></a>javascript</dt>
-<dd>collection.ensureIndex([[&#8220;firstname&#8221;, 1], [&#8220;lastname&#8221;, 1]], callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id23"><span class="problematic" id="id24">``</span></a></p>
-<blockquote>
-<div><p>The number value indicates direction - if it&#8217;s 1, then it is an ascending value, if it&#8217;s -1 then it&#8217;s descending. For example if you have documents with a field  <em>date</em>  and you want to sort these records in descending order then you might want to add corresponding index</p>
-<dl class="docutils">
-<dt><a href="#id25"><span class="problematic" id="id26">``</span></a>javascript</dt>
-<dd>collection.ensureIndex({date:-1}, callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id27"><span class="problematic" id="id28">``</span></a></p>
+<p>Index field can be a simple string like <tt class="docutils literal"><span class="pre">&quot;username&quot;</span></tt> to index certain
+field (in this case, a field named as <em>username</em>).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">(</span><span class="s">&quot;username&quot;</span><span class="p">,</span><span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It is possible to index fields inside nested objects, for example
+<tt class="docutils literal"><span class="pre">&quot;user.firstname&quot;</span></tt> to index field named <em>firstname</em> inside a document
+named <em>user</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">(</span><span class="s">&quot;user.firstname&quot;</span><span class="p">,</span><span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It is also possible to create mixed indexes to include several fields at
+once.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">({</span><span class="n">firstname</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="n">lastname</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or with tuples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">([[</span><span class="s">&quot;firstname&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s">&quot;lastname&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The number value indicates direction - if it&#8217;s 1, then it is an
+ascending value, if it&#8217;s -1 then it&#8217;s descending. For example if you
+have documents with a field <em>date</em> and you want to sort these records in
+descending order then you might want to add corresponding index</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">({</span><span class="n">date</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="remove-indexes-with-dropindex">
 <h2>Remove indexes with dropIndex()<a class="headerlink" href="#remove-indexes-with-dropindex" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>All indexes can be dropped at once with  <tt class="docutils literal"><span class="pre">dropIndexes</span></tt></p>
-<dl class="docutils">
-<dt><a href="#id29"><span class="problematic" id="id30">``</span></a>javascript</dt>
-<dd>collection.dropIndexes(callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id31"><span class="problematic" id="id32">``</span></a></p>
-<blockquote>
-<div><tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and a boolean value true if operation succeeded.</div></blockquote>
+<p>All indexes can be dropped at once with <tt class="docutils literal"><span class="pre">dropIndexes</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">dropIndexes</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error occured)
+and a boolean value true if operation succeeded.</p>
 </div>
 <div class="section" id="get-index-information-with-indexinformation">
 <h2>Get index information with indexInformation()<a class="headerlink" href="#get-index-information-with-indexinformation" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p><tt class="docutils literal"><span class="pre">indexInformation</span></tt>  can be used to fetch some useful information about collection indexes.</p>
-<dl class="docutils">
-<dt><a href="#id33"><span class="problematic" id="id34">``</span></a>javascript</dt>
-<dd>collection.indexInformation(callback)</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id35"><span class="problematic" id="id36">``</span></a></p>
-<blockquote>
-<div><p>Where  <tt class="docutils literal"><span class="pre">callback</span></tt>  gets two parameters - an error object (if an error occured) and an index information object.</p>
-<p>The keys in the index object are the index names and the values are tuples of included fields.</p>
-<p>For example if a collection has two indexes - as a default an ascending index for the  <tt class="docutils literal"><span class="pre">_id</span></tt>  field and an additonal descending index for  <tt class="docutils literal"><span class="pre">&quot;username&quot;</span></tt>  field, then the index information object would look like the following</p>
-<dl class="docutils">
-<dt><a href="#id37"><span class="problematic" id="id38">``</span></a>javascript</dt>
-<dd><dl class="first docutils">
-<dt>{</dt>
-<dd>&#8220;_id&#8221;:[[&#8220;_id&#8221;, 1]],
-&#8220;<a href="#id41"><span class="problematic" id="id42">username_</span></a>-1&#8221;:[[&#8220;username&#8221;, -1]]</dd>
-</dl>
-<p class="last">}</p>
-</dd>
-</dl>
-</div></blockquote>
-<p><a href="#id39"><span class="problematic" id="id40">``</span></a></p>
+<p><tt class="docutils literal"><span class="pre">indexInformation</span></tt> can be used to fetch some useful information about
+collection indexes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">indexInformation</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where <tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error
+occured) and an index information object.</p>
+<p>The keys in the index object are the index names and the values are
+tuples of included fields.</p>
+<p>For example if a collection has two indexes - as a default an ascending
+index for the <tt class="docutils literal"><span class="pre">_id</span></tt> field and an additonal descending index for
+<tt class="docutils literal"><span class="pre">&quot;username&quot;</span></tt> field, then the index information object would look like
+the following</p>
+<p><tt class="docutils literal"><span class="pre">javascript</span>&nbsp;&nbsp; <span class="pre">{</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="pre">&quot;_id&quot;:[[&quot;_id&quot;,</span> <span class="pre">1]],</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="pre">&quot;username_-1&quot;:[[&quot;username&quot;,</span> <span class="pre">-1]]</span>&nbsp;&nbsp; <span class="pre">}</span></tt></p>
 </div>
 </div>
 
@@ -341,12 +307,12 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

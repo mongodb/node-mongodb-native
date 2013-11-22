@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
@@ -8,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GridStore() &mdash; MongoDB Node.JS Driver 1.3.13 documentation</title>
+    <title>GridStore() &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.13',
+        VERSION:     '1.3.20',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.13 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" />
     <link rel="next" title="ReadStream()" href="readstream.html" />
     <link rel="prev" title="Grid()" href="grid.html" /> 
   </head>
@@ -38,7 +37,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -895,7 +894,7 @@ already exists. This will work properly only if mode was initialized to
 <div class="section" id="read">
 <h2>read<a class="headerlink" href="#read" title="Permalink to this headline">¶</a></h2>
 <p>Retrieves the contents of this file and advances the read/write head. Works with Buffers only.</p>
-<p><strong>There are 3 signatures for this method</strong></p>
+<p>There are 3 signatures for this method:</p>
 <p>(callback)
 (length, callback)
 (length, buffer, callback)</p>
@@ -1493,39 +1492,41 @@ the given string does not have one.</p>
     <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
 
 <span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;locahost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
-<span class="c1">// Establish connection to db</span>
-<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// Open a file for writing</span>
-  <span class="kd">var</span> <span class="nx">gridStoreWrite</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s2">&quot;test_gs_read_stream_pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="p">{</span><span class="nx">chunkSize</span><span class="o">:</span><span class="mi">1024</span><span class="p">});</span>
-  <span class="nx">gridStoreWrite</span><span class="p">.</span><span class="nx">writeFile</span><span class="p">(</span><span class="s2">&quot;./test/tests/functional/gridstore/test_gs_weird_bug.png&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// Ensure we correctly returning a Gridstore object</span>
-    <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">result</span><span class="p">.</span><span class="nx">close</span> <span class="o">==</span> <span class="s1">&#39;function&#39;</span><span class="p">);</span>
-    <span class="c1">// Open the gridStore for reading and pipe to a file</span>
-    <span class="kd">var</span> <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s2">&quot;test_gs_read_stream_pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">);</span>
-    <span class="nx">gridStore</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
-      <span class="c1">// Grab the read stream</span>
-      <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">gridStore</span><span class="p">.</span><span class="nx">stream</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-      <span class="c1">// When the stream is finished close the database</span>
-      <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// Read the original content</span>
-        <span class="kd">var</span> <span class="nx">originalData</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s2">&quot;./test/tests/functional/gridstore/test_gs_weird_bug.png&quot;</span><span class="p">);</span>
-        <span class="c1">// Ensure we are doing writing before attempting to open the file</span>
-        <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s2">&quot;./test_gs_weird_bug_streamed.tmp&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">streamedData</span><span class="p">)</span> <span class="p">{</span>
-          <span class="c1">// Compare the data</span>
-          <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">(</span><span class="nx">originalData</span><span class="p">,</span> <span class="nx">streamedData</span><span class="p">);</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Open a file for writing</span>
+    <span class="kd">var</span> <span class="nx">gridStoreWrite</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s2">&quot;test_gs_read_stream_pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="p">{</span><span class="nx">chunkSize</span><span class="o">:</span><span class="mi">1024</span><span class="p">});</span>
+    <span class="nx">gridStoreWrite</span><span class="p">.</span><span class="nx">writeFile</span><span class="p">(</span><span class="s2">&quot;./test/tests/functional/gridstore/test_gs_weird_bug.png&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Ensure we correctly returning a Gridstore object</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">result</span><span class="p">.</span><span class="nx">close</span> <span class="o">==</span> <span class="s1">&#39;function&#39;</span><span class="p">);</span>
+      <span class="c1">// Open the gridStore for reading and pipe to a file</span>
+      <span class="kd">var</span> <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s2">&quot;test_gs_read_stream_pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">);</span>
+      <span class="nx">gridStore</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Grab the read stream</span>
+        <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">gridStore</span><span class="p">.</span><span class="nx">stream</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+        <span class="c1">// When the stream is finished close the database</span>
+        <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+          <span class="c1">// Read the original content</span>
+          <span class="kd">var</span> <span class="nx">originalData</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s2">&quot;./test/tests/functional/gridstore/test_gs_weird_bug.png&quot;</span><span class="p">);</span>
+          <span class="c1">// Ensure we are doing writing before attempting to open the file</span>
+          <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s2">&quot;./test_gs_weird_bug_streamed.tmp&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">streamedData</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">// Compare the data</span>
+            <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">originalData</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">originalData</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">streamedData</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+            <span class="p">}</span>
 
-          <span class="c1">// Close the database</span>
-          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-        <span class="p">});</span>
+            <span class="c1">// Close the database</span>
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">})</span>
+
+        <span class="c1">// Create a file write stream</span>
+        <span class="kd">var</span> <span class="nx">fileStream</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">createWriteStream</span><span class="p">(</span><span class="s2">&quot;./test_gs_weird_bug_streamed.tmp&quot;</span><span class="p">);</span>
+        <span class="c1">// Pipe out the data</span>
+        <span class="nx">stream</span><span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">fileStream</span><span class="p">);</span>
       <span class="p">})</span>
-
-      <span class="c1">// Create a file write stream</span>
-      <span class="kd">var</span> <span class="nx">fileStream</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">createWriteStream</span><span class="p">(</span><span class="s2">&quot;./test_gs_weird_bug_streamed.tmp&quot;</span><span class="p">);</span>
-      <span class="c1">// Pipe out the data</span>
-      <span class="nx">stream</span><span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">fileStream</span><span class="p">);</span>
     <span class="p">})</span>
-  <span class="p">})</span>
-<span class="p">});</span>
+  <span class="p">});</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -2293,12 +2294,12 @@ the given string does not have one.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

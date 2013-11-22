@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
@@ -8,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.3.13 documentation</title>
+    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.13',
+        VERSION:     '1.3.20',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.13 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -36,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -47,341 +46,387 @@
             
   <div class="section" id="a-basic-introduction-to-mongo-db">
 <h1>A Basic introduction to Mongo DB<a class="headerlink" href="#a-basic-introduction-to-mongo-db" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div><p>Mongo DB has rapidly grown to become a popular database for web applications and is a perfect fit for Node.JS applications, letting you write Javascript for the client, backend and database layer. Its schemaless nature is a better match to our constantly evolving data structures in web applications, and the integrated support for location queries is a bonus that&#8217;s hard to ignore. Throw in Replica Sets for scaling, and we&#8217;re looking at really nice platform to grow your storage needs now and in the future.</p>
-<p>Now to shamelessly plug my driver. It can be downloaded via npm, or fetched from the github repository. To install via npm, do the following:</p>
+<p>Mongo DB has rapidly grown to become a popular database for web
+applications and is a perfect fit for Node.JS applications, letting you
+write Javascript for the client, backend and database layer. Its
+schemaless nature is a better match to our constantly evolving data
+structures in web applications, and the integrated support for location
+queries is a bonus that&#8217;s hard to ignore. Throw in Replica Sets for
+scaling, and we&#8217;re looking at really nice platform to grow your storage
+needs now and in the future.</p>
+<p>Now to shamelessly plug my driver. It can be downloaded via npm, or
+fetched from the github repository. To install via npm, do the
+following:</p>
 <p><tt class="docutils literal"><span class="pre">npm</span> <span class="pre">install</span> <span class="pre">mongodb</span></tt></p>
-<p>or go fetch it from github at  <a class="reference external" href="https://github.com/christkv/node-mongodb-native">https://github.com/christkv/node-mongodb-native</a></p>
-<p>Once this business is taken care of, let&#8217;s move through the types available for the driver and then how to connect to your Mongo DB instance before facing the usage of some CRUD operations.</p>
-</div></blockquote>
+<p>or go fetch it from github at
+<a class="reference external" href="https://github.com/christkv/node-mongodb-native">https://github.com/christkv/node-mongodb-native</a></p>
+<p>Once this business is taken care of, let&#8217;s move through the types
+available for the driver and then how to connect to your Mongo DB
+instance before facing the usage of some CRUD operations.</p>
 <div class="section" id="mongo-db-data-types">
 <h2>Mongo DB data types<a class="headerlink" href="#mongo-db-data-types" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>So there is an important thing to keep in mind when working with Mongo DB, and that is the slight mapping difference between types Mongo DB supports and native Javascript data types. Let&#8217;s have a look at the types supported out of the box and then how types are promoted by the driver to fit as close to native Javascript types as possible.</p>
-<blockquote>
-<div><ul class="simple">
-<li><strong>Float</strong>  is a 8 byte and is directly convertible to the Javascript type Number</li>
-<li><strong>Double class</strong>  a special class representing a float value, this is especially useful when using capped collections where you need to ensure your values are always floats.</li>
-<li><strong>Integers</strong>  is a bit trickier due to the fact that Javascript represents all Numbers as 64 bit floats meaning that the maximum integer value is at a 53 bit. Mongo has two types for integers, a 32 bit and a 64 bit. The driver will try to fit the value into 32 bits if it can and promote it to 64 bits if it has to. Similarly it will deserialize attempting to fit it into 53 bits if it can. If it cannot it will return an instance of  <strong>Long</strong>  to avoid loosing precession.</li>
-<li><strong>Long class</strong>  a special class that let&#8217;s you store 64 bit integers and also let&#8217;s you operate on the 64 bits integers.</li>
-<li><strong>Date</strong>  maps directly to a Javascript Date</li>
-<li><strong>RegExp</strong>  maps directly to a Javascript RegExp</li>
-<li><strong>String</strong>  maps directly to a Javascript String (encoded in utf8)</li>
-<li><strong>Binary class</strong>  a special class that let&#8217;s you store data in Mongo DB</li>
-<li><strong>Code class</strong>  a special class that let&#8217;s you store javascript functions in Mongo DB, can also provide a scope to run the method in</li>
-<li><strong>ObjectID class</strong>  a special class that holds a MongoDB document identifier (the equivalent to a Primary key)</li>
-<li><strong>DbRef class</strong>  a special class that let&#8217;s you include a reference in a document pointing to another object</li>
-<li><strong>Symbol class</strong>  a special class that let&#8217;s you specify a symbol, not really relevant for javascript but for languages that supports the concept of symbols.</li>
+<p>So there is an important thing to keep in mind when working with Mongo
+DB, and that is the slight mapping difference between types Mongo DB
+supports and native Javascript data types. Let&#8217;s have a look at the
+types supported out of the box and then how types are promoted by the
+driver to fit as close to native Javascript types as possible.</p>
+<ul class="simple">
+<li><strong>Float</strong> is a 8 byte and is directly convertible to the Javascript
+type Number</li>
+<li><strong>Double class</strong> a special class representing a float value, this is
+especially useful when using capped collections where you need to
+ensure your values are always floats.</li>
+<li><strong>Integers</strong> is a bit trickier due to the fact that Javascript
+represents all Numbers as 64 bit floats meaning that the maximum
+integer value is at a 53 bit. Mongo has two types for integers, a 32
+bit and a 64 bit. The driver will try to fit the value into 32 bits
+if it can and promote it to 64 bits if it has to. Similarly it will
+deserialize attempting to fit it into 53 bits if it can. If it cannot
+it will return an instance of <strong>Long</strong> to avoid loosing precession.</li>
+<li><strong>Long class</strong> a special class that let&#8217;s you store 64 bit integers
+and also let&#8217;s you operate on the 64 bits integers.</li>
+<li><strong>Date</strong> maps directly to a Javascript Date</li>
+<li><strong>RegExp</strong> maps directly to a Javascript RegExp</li>
+<li><strong>String</strong> maps directly to a Javascript String (encoded in utf8)</li>
+<li><strong>Binary class</strong> a special class that let&#8217;s you store data in Mongo
+DB</li>
+<li><strong>Code class</strong> a special class that let&#8217;s you store javascript
+functions in Mongo DB, can also provide a scope to run the method in</li>
+<li><strong>ObjectID class</strong> a special class that holds a MongoDB document
+identifier (the equivalent to a Primary key)</li>
+<li><strong>DbRef class</strong> a special class that let&#8217;s you include a reference in
+a document pointing to another object</li>
+<li><strong>Symbol class</strong> a special class that let&#8217;s you specify a symbol, not
+really relevant for javascript but for languages that supports the
+concept of symbols.</li>
 </ul>
-</div></blockquote>
-<p>As we see the number type can be a little tricky due to the way integers are implemented in Javascript. The latest driver will do correct conversion up to 53 bit&#8217;s of complexity. If you need to handle big integers the recommendation is to use the Long class to operate on the numbers.</p>
-</div></blockquote>
+<p>As we see the number type can be a little tricky due to the way integers
+are implemented in Javascript. The latest driver will do correct
+conversion up to 53 bit&#8217;s of complexity. If you need to handle big
+integers the recommendation is to use the Long class to operate on the
+numbers.</p>
 </div>
 <div class="section" id="getting-that-connection-to-the-database">
 <h2>Getting that connection to the database<a class="headerlink" href="#getting-that-connection-to-the-database" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>Let&#8217;s get around to setting up a connection with the Mongo DB database. Jumping straight into the code let&#8217;s do direct connection and then look at the code.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="c1">// Retrieve</span>
-<span class="kd">var</span> <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">;</span>
+<p>Let&#8217;s get around to setting up a connection with the Mongo DB database.
+Jumping straight into the code let&#8217;s do direct connection and then look
+at the code.</p>
+<div class="highlight-python"><pre>// Retrieve
+var MongoClient = require('mongodb').MongoClient;
 
-<span class="c1">// Connect to the db</span>
-<span class="nx">MongoClient</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s2">&quot;mongodb://localhost:27017/exampleDb&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;We are connected&quot;</span><span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">});</span>
-</pre></div>
+// Connect to the db
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  if(!err) {
+    console.log("We are connected");
+  }
+});</pre>
 </div>
-</div></blockquote>
-<p>Let&#8217;s have a quick look at how the connection code works. The  <strong>Db.connect</strong></p>
-</div></blockquote>
-<dl class="docutils">
-<dt>method let&#8217;s use use a uri to connect to the Mongo database, where</dt>
-<dd><strong>localhost:27017</strong>  is the server host and port and  <strong>exampleDb</strong>  the db</dd>
-<dt>we wish to connect to. After the url notice the hash containing the</dt>
-<dd><strong>auto_reconnect</strong>  key. Auto reconnect tells the driver to retry sending</dd>
-</dl>
-<p>a command to the server if there is a failure during it&#8217;s execution.</p>
-<blockquote>
-<div><p>Another useful option you can pass in is</p>
-<p><strong>poolSize</strong> , this allows you to control how many tcp connections are</p>
-</div></blockquote>
-<p>opened in parallel. The default value for this is 5 but you can set it
+<p>Let&#8217;s have a quick look at how the connection code works. The
+<strong>Db.connect</strong> method let&#8217;s use use a uri to connect to the Mongo
+database, where <strong>localhost:27017</strong> is the server host and port and
+<strong>exampleDb</strong> the db we wish to connect to. After the url notice the
+hash containing the <strong>auto_reconnect</strong> key. Auto reconnect tells the
+driver to retry sending a command to the server if there is a failure
+during it&#8217;s execution.</p>
+<p>Another useful option you can pass in is</p>
+<p><strong>poolSize</strong>, this allows you to control how many tcp connections are
+opened in parallel. The default value for this is 5 but you can set it
 as high as you want. The driver will use a round-robin strategy to
 dispatch and read from the tcp connection.</p>
-<blockquote>
-<div>We are up and running with a connection to the database. Let&#8217;s move on</div></blockquote>
-<p>and look at what collections are and how they work.</p>
+<p>We are up and running with a connection to the database. Let&#8217;s move on
+and look at what collections are and how they work.</p>
 </div>
 <div class="section" id="mongo-db-and-collections">
 <h2>Mongo DB and Collections<a class="headerlink" href="#mongo-db-and-collections" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>Collections are the equivalent of tables in traditional databases and contain all your documents. A database can have many collections. So how do we go about defining and using collections. Well there are a couple of methods that we can use. Let&#8217;s jump straight into code and then look at the code.</p>
+<p>Collections are the equivalent of tables in traditional databases and
+contain all your documents. A database can have many collections. So how
+do we go about defining and using collections. Well there are a couple
+of methods that we can use. Let&#8217;s jump straight into code and then look
+at the code.</p>
 <p><strong>the requires and and other initializing stuff omitted for brevity</strong></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="c1">// Retrieve</span>
-<span class="kd">var</span> <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">;</span>
+<div class="highlight-python"><pre>// Retrieve
+var MongoClient = require('mongodb').MongoClient;
 
-<span class="c1">// Connect to the db</span>
-<span class="nx">MongoClient</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s2">&quot;mongodb://localhost:27017/exampleDb&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">dir</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span> <span class="p">}</span>
+// Connect to the db
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  if(err) { return console.dir(err); }
 
-  <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
+  db.collection('test', function(err, collection) {});
 
-  <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
+  db.collection('test', {w:1}, function(err, collection) {});
 
-  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
+  db.createCollection('test', function(err, collection) {});
 
-  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
+  db.createCollection('test', {w:1}, function(err, collection) {});
 
-<span class="p">});</span>
-</pre></div>
+});</pre>
 </div>
-</div></blockquote>
-<p>Three different ways of creating a collection object but slightly different in behavior. Let&#8217;s go through them and see what they do</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
+<p>Three different ways of creating a collection object but slightly
+different in behavior. Let&#8217;s go through them and see what they do</p>
+<div class="highlight-python"><pre>db.collection('test', function(err, collection) {});</pre>
 </div>
-</div></blockquote>
-<p>This function will not actually create a collection on the database until you actually insert the first document.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
+<p>This function will not actually create a collection on the database
+until you actually insert the first document.</p>
+<div class="highlight-python"><pre>db.collection('test', {w:1}, function(err, collection) {});</pre>
 </div>
-</div></blockquote>
-<p>Notice the  <strong>{w:1}</strong>  option. This option will make the driver check if the collection exists and issue an error if it does not.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
+<p>Notice the <strong>{w:1}</strong> option. This option will make the driver check if
+the collection exists and issue an error if it does not.</p>
+<div class="highlight-python"><pre>db.createCollection('test', function(err, collection) {});</pre>
 </div>
-</div></blockquote>
-<p>This command will create the collection on the Mongo DB database before returning the collection object. If the collection already exists it will ignore the creation of the collection.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
+<p>This command will create the collection on the Mongo DB database before
+returning the collection object. If the collection already exists it
+will ignore the creation of the collection.</p>
+<div class="highlight-python"><pre>db.createCollection('test', {w:1}, function(err, collection) {});</pre>
 </div>
-</div></blockquote>
-<p>The  <strong>{w:1}</strong>  option will make the method return an error if the collection already exists.</p>
-<p>With an open db connection and a collection defined we are ready to do some CRUD operation on the data.</p>
-</div></blockquote>
+<p>The <strong>{w:1}</strong> option will make the method return an error if the
+collection already exists.</p>
+<p>With an open db connection and a collection defined we are ready to do
+some CRUD operation on the data.</p>
 </div>
 <div class="section" id="and-then-there-was-crud">
 <h2>And then there was CRUD<a class="headerlink" href="#and-then-there-was-crud" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>So let&#8217;s get dirty with the basic operations for Mongo DB. The Mongo DB wire protocol is built around 4 main operations  <strong>insert/update/remove/query</strong> . Most operations on the database are actually queries with special json objects defining the operation on the database. But I&#8217;m getting ahead of myself. Let&#8217;s go back and look at insert first and do it with some code.</p>
+<p>So let&#8217;s get dirty with the basic operations for Mongo DB. The Mongo DB
+wire protocol is built around 4 main operations
+<strong>insert/update/remove/query</strong>. Most operations on the database are
+actually queries with special json objects defining the operation on the
+database. But I&#8217;m getting ahead of myself. Let&#8217;s go back and look at
+insert first and do it with some code.</p>
 <p><strong>the requires and and other initializing stuff omitted for brevity</strong></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="c1">// Retrieve</span>
-<span class="kd">var</span> <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">;</span>
+<div class="highlight-python"><pre>// Retrieve
+var MongoClient = require('mongodb').MongoClient;
 
-<span class="c1">// Connect to the db</span>
-<span class="nx">MongoClient</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s2">&quot;mongodb://localhost:27017/exampleDb&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">dir</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span> <span class="p">}</span>
+// Connect to the db
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  if(err) { return console.dir(err); }
 
-  <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">);</span>
-  <span class="kd">var</span> <span class="nx">doc1</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="o">:</span><span class="s1">&#39;doc1&#39;</span><span class="p">};</span>
-  <span class="kd">var</span> <span class="nx">doc2</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="o">:</span><span class="s1">&#39;doc2&#39;</span><span class="p">};</span>
-  <span class="kd">var</span> <span class="nx">lotsOfDocs</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;hello&#39;</span><span class="o">:</span><span class="s1">&#39;doc3&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;hello&#39;</span><span class="o">:</span><span class="s1">&#39;doc4&#39;</span><span class="p">}];</span>
+  var collection = db.collection('test');
+  var doc1 = {'hello':'doc1'};
+  var doc2 = {'hello':'doc2'};
+  var lotsOfDocs = [{'hello':'doc3'}, {'hello':'doc4'}];
 
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc1</span><span class="p">);</span>
+  collection.insert(doc1);
 
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc2</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+  collection.insert(doc2, {w:1}, function(err, result) {});
 
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">lotsOfDocs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+  collection.insert(lotsOfDocs, {w:1}, function(err, result) {});
 
-<span class="p">});</span>
+});</pre>
+</div>
+<p>A couple of variations on the theme of inserting a document as we can
+see. To understand why it&#8217;s important to understand how Mongo DB works
+during inserts of documents.</p>
+<p>Mongo DB has asynchronous <strong>insert/update/remove</strong> operations. This
+means that when you issue an <strong>insert</strong> operation its a fire and forget
+operation where the database does not reply with the status of the
+insert operation. To retrieve the status of the operation you have to
+issue a query to retrieve the last error status of the connection. To
+make it simpler to the developer the driver implements the <strong>{w:1}</strong>
+options so that this is done automatically when inserting the document.
+<strong>{w:1}</strong> becomes especially important when you do <strong>update</strong> or
+<strong>remove</strong> as otherwise it&#8217;s not possible to determine the amount of
+documents modified or removed.</p>
+<p>Now let&#8217;s go through the different types of inserts shown in the code
+above.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">doc1</span><span class="p">);</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p>A couple of variations on the theme of inserting a document as we can see. To understand why it&#8217;s important to understand how Mongo DB works during inserts of documents.</p>
-<p>Mongo DB has asynchronous  <strong>insert/update/remove</strong>  operations. This means that when you issue an  <strong>insert</strong>  operation its a fire and forget operation where the database does not reply with the status of the insert operation. To retrieve the status of the operation you have to issue a query to retrieve the last error status of the connection. To make it simpler to the developer the driver implements the  <strong>{w:1}</strong>  options so that this is done automatically when inserting the document.  <strong>{w:1}</strong>  becomes especially important when you do  <strong>update</strong>  or  <strong>remove</strong>  as otherwise it&#8217;s not possible to determine the amount of documents modified or removed.</p>
-<p>Now let&#8217;s go through the different types of inserts shown in the code above.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc1</span><span class="p">);</span>
-</pre></div>
+<p>Taking advantage of the async behavior and not needing confirmation
+about the persisting of the data to Mongo DB we just fire off the insert
+(we are doing live analytics, loosing a couple of records does not
+matter).</p>
+<div class="highlight-python"><pre>collection.insert(doc2, {w:1}, function(err, result) {});</pre>
 </div>
-</div></blockquote>
-<p>Taking advantage of the async behavior and not needing confirmation about the persisting of the data to Mongo DB we just fire off the insert (we are doing live analytics, loosing a couple of records does not matter).</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc2</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
+<p>That document needs to stick. Using the <strong>{w:1}</strong> option ensure you get
+the error back if the document fails to insert correctly.</p>
+<div class="highlight-python"><pre>collection.insert(lotsOfDocs, {w:1}, function(err, result) {});</pre>
 </div>
-</div></blockquote>
-<p>That document needs to stick. Using the  <strong>{w:1}</strong>  option ensure you get the error back if the document fails to insert correctly.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">lotsOfDocs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>A batch insert of document with any errors being reported. This is much more efficient if you need to insert large batches of documents as you incur a lot less overhead.</p>
-<p>Right that&#8217;s the basics of insert&#8217;s ironed out. We got some documents in there but want to update them as we need to change the content of a field. Let&#8217;s have a look at a simple example and then we will dive into how Mongo DB updates work and how to do them efficiently.</p>
+<p>A batch insert of document with any errors being reported. This is much
+more efficient if you need to insert large batches of documents as you
+incur a lot less overhead.</p>
+<p>Right that&#8217;s the basics of insert&#8217;s ironed out. We got some documents in
+there but want to update them as we need to change the content of a
+field. Let&#8217;s have a look at a simple example and then we will dive into
+how Mongo DB updates work and how to do them efficiently.</p>
 <p><strong>the requires and and other initializing stuff omitted for brevity</strong></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="c1">// Retrieve</span>
-<span class="kd">var</span> <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">;</span>
+<div class="highlight-python"><pre>// Retrieve
+var MongoClient = require('mongodb').MongoClient;
 
-<span class="c1">// Connect to the db</span>
-<span class="nx">MongoClient</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s2">&quot;mongodb://localhost:27017/exampleDb&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">dir</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span> <span class="p">}</span>
+// Connect to the db
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  if(err) { return console.dir(err); }
 
-  <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">);</span>
-  <span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="p">{</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span> <span class="nx">fieldtoupdate</span><span class="o">:</span><span class="mi">1</span><span class="p">};</span>
+  var collection = db.collection('test');
+  var doc = {mykey:1, fieldtoupdate:1};
 
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">$set</span><span class="o">:</span><span class="p">{</span><span class="nx">fieldtoupdate</span><span class="o">:</span><span class="mi">2</span><span class="p">}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
-  <span class="p">});</span>
+  collection.insert(doc, {w:1}, function(err, result) {
+    collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});
+  });
 
-  <span class="kd">var</span> <span class="nx">doc2</span> <span class="o">=</span> <span class="p">{</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">,</span> <span class="nx">docs</span><span class="o">:</span><span class="p">[{</span><span class="nx">doc1</span><span class="o">:</span><span class="mi">1</span><span class="p">}]};</span>
+  var doc2 = {mykey:2, docs:[{doc1:1}]};
 
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">doc2</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">$push</span><span class="o">:</span><span class="p">{</span><span class="nx">docs</span><span class="o">:</span><span class="p">{</span><span class="nx">doc2</span><span class="o">:</span><span class="mi">1</span><span class="p">}}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
-  <span class="p">});</span>
-<span class="p">});</span>
-</pre></div>
+  collection.insert(doc2, {w:1}, function(err, result) {
+    collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {w:1}, function(err, result) {});
+  });
+});</pre>
 </div>
-</div></blockquote>
-<p>Alright before we look at the code we want to understand how document updates work and how to do the efficiently. The most basic and less efficient way is to replace the whole document, this is not really the way to go if you want to change just a field in your document. Luckily Mongo DB provides a whole set of operations that let you modify just pieces of the document  <a class="reference external" href="http://www.mongodb.org/display/DOCS/Atomic+Operations">Atomic operations documentation</a> . Basically outlined below.</p>
-<blockquote>
-<div><ul class="simple">
+<p>Alright before we look at the code we want to understand how document
+updates work and how to do the efficiently. The most basic and less
+efficient way is to replace the whole document, this is not really the
+way to go if you want to change just a field in your document. Luckily
+Mongo DB provides a whole set of operations that let you modify just
+pieces of the document <a class="reference external" href="http://www.mongodb.org/display/DOCS/Atomic+Operations">Atomic operations
+documentation</a>.
+Basically outlined below.</p>
+<ul class="simple">
 <li>$inc - increment a particular value by a certain amount</li>
 <li>$set - set a particular value</li>
 <li>$unset - delete a particular field (v1.3+)</li>
 <li>$push - append a value to an array</li>
 <li>$pushAll - append several values to an array</li>
-<li>$addToSet - adds value to the array only if its not in the array already</li>
+<li>$addToSet - adds value to the array only if its not in the array
+already</li>
 <li>$pop - removes the last element in an array</li>
 <li>$pull - remove a value(s) from an existing array</li>
 <li>$pullAll - remove several value(s) from an existing array</li>
 <li>$rename - renames the field</li>
 <li>$bit - bitwise operations</li>
 </ul>
-</div></blockquote>
-<p>Now that the operations are outline let&#8217;s dig into the specific cases show in the code example.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">$set</span><span class="o">:</span><span class="p">{</span><span class="nx">fieldtoupdate</span><span class="o">:</span><span class="mi">2</span><span class="p">}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
+<p>Now that the operations are outline let&#8217;s dig into the specific cases
+show in the code example.</p>
+<div class="highlight-python"><pre>collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});</pre>
 </div>
-</div></blockquote>
-<p>Right so this update will look for the document that has a field  <strong>mykey</strong>  equal to  <strong>1</strong>  and apply an update to the field  <strong>fieldtoupdate</strong>  setting the value to  <strong>2</strong> . Since we are using the  <strong>{w:1}</strong>  option the result parameter in the callback will return the value  <strong>1</strong>  indicating that 1 document was modified by the update statement.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">update</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">$push</span><span class="o">:</span><span class="p">{</span><span class="nx">docs</span><span class="o">:</span><span class="p">{</span><span class="nx">doc2</span><span class="o">:</span><span class="mi">1</span><span class="p">}}},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
+<p>Right so this update will look for the document that has a field
+<strong>mykey</strong> equal to <strong>1</strong> and apply an update to the field
+<strong>fieldtoupdate</strong> setting the value to <strong>2</strong>. Since we are using the
+<strong>{w:1}</strong> option the result parameter in the callback will return the
+value <strong>1</strong> indicating that 1 document was modified by the update
+statement.</p>
+<div class="highlight-python"><pre>collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {w:1}, function(err, result) {});</pre>
 </div>
-</div></blockquote>
-<p>This updates adds another document to the field  <strong>docs</strong>  in the document identified by  <strong>{mykey:2}</strong>  using the atomic operation  <strong>$push</strong> . This allows you to modify keep such structures as queues in Mongo DB.</p>
-<p>Let&#8217;s have a look at the remove operation for the driver. As before let&#8217;s start with a piece of code.</p>
+<p>This updates adds another document to the field <strong>docs</strong> in the document
+identified by <strong>{mykey:2}</strong> using the atomic operation <strong>$push</strong>. This
+allows you to modify keep such structures as queues in Mongo DB.</p>
+<p>Let&#8217;s have a look at the remove operation for the driver. As before
+let&#8217;s start with a piece of code.</p>
 <p><strong>the requires and and other initializing stuff omitted for brevity</strong></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="c1">// Retrieve</span>
-<span class="kd">var</span> <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">;</span>
+<div class="highlight-python"><pre>// Retrieve
+var MongoClient = require('mongodb').MongoClient;
 
-<span class="c1">// Connect to the db</span>
-<span class="nx">MongoClient</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s2">&quot;mongodb://localhost:27017/exampleDb&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">dir</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span> <span class="p">}</span>
+// Connect to the db
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  if(err) { return console.dir(err); }
 
-  <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">);</span>
-  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">3</span><span class="p">}];</span>
+  var collection = db.collection('test');
+  var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
 
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+  collection.insert(docs, {w:1}, function(err, result) {
 
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">remove</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">});</span>
+    collection.remove({mykey:1});
 
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">remove</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+    collection.remove({mykey:2}, {w:1}, function(err, result) {});
 
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
-  <span class="p">});</span>
-<span class="p">});</span>
-</pre></div>
+    collection.remove();
+  });
+});</pre>
 </div>
-</div></blockquote>
 <p>Let&#8217;s examine the 3 remove variants and what they do.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">remove</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">});</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">remove</span><span class="p">({</span><span class="n">mykey</span><span class="p">:</span><span class="mi">1</span><span class="p">});</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p>This leverages the fact that Mongo DB is asynchronous and that it does not return a result for  <strong>insert/update/remove</strong>  to allow for  <strong>synchronous</strong>  style execution. This particular remove query will remove the document where  <strong>mykey</strong>  equals  <strong>1</strong> .</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">remove</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{});</span>
+<p>This leverages the fact that Mongo DB is asynchronous and that it does
+not return a result for <strong>insert/update/remove</strong> to allow for
+<strong>synchronous</strong> style execution. This particular remove query will
+remove the document where <strong>mykey</strong> equals <strong>1</strong>.</p>
+<div class="highlight-python"><pre>collection.remove({mykey:2}, {w:1}, function(err, result) {});</pre>
+</div>
+<p>This remove statement removes the document where <strong>mykey</strong> equals <strong>2</strong>
+but since we are using <strong>{w:1}</strong> it will back to Mongo DB to get the
+status of the remove operation and return the number of documents
+removed in the result variable.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">remove</span><span class="p">();</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p>This remove statement removes the document where  <strong>mykey</strong>  equals  <strong>2</strong>  but since we are using  <strong>{w:1}</strong>  it will back to Mongo DB to get the status of the remove operation and return the number of documents removed in the result variable.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">remove</span><span class="p">();</span>
-</pre></div>
-</div>
-</div></blockquote>
 <p>This last one will remove all documents in the collection.</p>
-</div></blockquote>
 </div>
 <div class="section" id="time-to-query">
 <h2>Time to Query<a class="headerlink" href="#time-to-query" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><p>Queries is of course a fundamental part of interacting with a database and Mongo DB is no exception. Fortunately for us it has a rich query interface with cursors and close to SQL concepts for slicing and dicing your datasets. To build queries we have lots of operators to choose from  <a class="reference external" href="http://www.mongodb.org/display/DOCS/Advanced+Queries">Mongo DB advanced queries</a> . There are literarily tons of ways to search and ways to limit the query. Let&#8217;s look at some simple code for dealing with queries in different ways.</p>
+<p>Queries is of course a fundamental part of interacting with a database
+and Mongo DB is no exception. Fortunately for us it has a rich query
+interface with cursors and close to SQL concepts for slicing and dicing
+your datasets. To build queries we have lots of operators to choose from
+<a class="reference external" href="http://www.mongodb.org/display/DOCS/Advanced+Queries">Mongo DB advanced
+queries</a>. There
+are literarily tons of ways to search and ways to limit the query. Let&#8217;s
+look at some simple code for dealing with queries in different ways.</p>
 <p><strong>the requires and and other initializing stuff omitted for brevity</strong></p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="c1">// Retrieve</span>
-<span class="kd">var</span> <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">;</span>
+<div class="highlight-python"><pre>// Retrieve
+var MongoClient = require('mongodb').MongoClient;
 
-<span class="c1">// Connect to the db</span>
-<span class="nx">MongoClient</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s2">&quot;mongodb://localhost:27017/exampleDb&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">if</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">dir</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span> <span class="p">}</span>
+// Connect to the db
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  if(err) { return console.dir(err); }
 
-  <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">);</span>
-  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[{</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">3</span><span class="p">}];</span>
+  var collection = db.collection('test');
+  var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
 
-  <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+  collection.insert(docs, {w:1}, function(err, result) {
 
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{});</span>
+    collection.find().toArray(function(err, items) {});
 
-    <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="p">{</span><span class="nx">$ne</span><span class="o">:</span><span class="mi">2</span><span class="p">}}).</span><span class="nx">stream</span><span class="p">();</span>
-    <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{});</span>
-    <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{});</span>
+    var stream = collection.find({mykey:{$ne:2}}).stream();
+    stream.on("data", function(item) {});
+    stream.on("end", function() {});
 
-    <span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{});</span>
+    collection.findOne({mykey:1}, function(err, item) {});
 
-  <span class="p">});</span>
-<span class="p">});</span>
-</pre></div>
+  });
+});</pre>
 </div>
-</div></blockquote>
-<p>Before we start picking apart the code there is one thing that needs to be understood, the  <strong>find</strong>  method does not execute the actual query. It builds an instance of  <strong>Cursor</strong>  that you then use to retrieve the data. This lets you manage how you retrieve the data from Mongo DB and keeps state about your current Cursor state on Mongo DB. Now let&#8217;s pick apart the queries we have here and look at what they do.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
+<p>Before we start picking apart the code there is one thing that needs to
+be understood, the <strong>find</strong> method does not execute the actual query. It
+builds an instance of <strong>Cursor</strong> that you then use to retrieve the data.
+This lets you manage how you retrieve the data from Mongo DB and keeps
+state about your current Cursor state on Mongo DB. Now let&#8217;s pick apart
+the queries we have here and look at what they do.</p>
+<div class="highlight-python"><pre>collection.find().toArray(function(err, items) {});</pre>
 </div>
-</div></blockquote>
-<p>This query will fetch all the document in the collection and return them as an array of items. Be careful with the function  <strong>toArray</strong>  as it might cause a lot of memory usage as it will instantiate all the document into memory before returning the final array of items. If you have a big resultset you could run into memory issues.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="p">{</span><span class="nx">$ne</span><span class="o">:</span><span class="mi">2</span><span class="p">}}).</span><span class="nx">stream</span><span class="p">();</span>
-<span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{});</span>
-<span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{});</span>
-</pre></div>
+<p>This query will fetch all the document in the collection and return them
+as an array of items. Be careful with the function <strong>toArray</strong> as it
+might cause a lot of memory usage as it will instantiate all the
+document into memory before returning the final array of items. If you
+have a big resultset you could run into memory issues.</p>
+<div class="highlight-python"><pre>var stream = collection.find({mykey:{$ne:2}}).stream();
+stream.on("data", function(item) {});
+stream.on("end", function() {});</pre>
 </div>
-</div></blockquote>
-<p>This is the preferred way if you have to retrieve a lot of data for streaming, as data is deserialized a  <strong>data</strong>  event is emitted. This keeps the resident memory usage low as the documents are streamed to you. Very useful if you are pushing documents out via websockets or some other streaming socket protocol. Once there is no more document the driver will emit the  <strong>end</strong>  event to notify the application that it&#8217;s done.</p>
-<blockquote>
-<div><div class="highlight-javascript"><div class="highlight"><pre><span class="nx">collection</span><span class="p">.</span><span class="nx">findOne</span><span class="p">({</span><span class="nx">mykey</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{});</span>
-</pre></div>
+<p>This is the preferred way if you have to retrieve a lot of data for
+streaming, as data is deserialized a <strong>data</strong> event is emitted. This
+keeps the resident memory usage low as the documents are streamed to
+you. Very useful if you are pushing documents out via websockets or some
+other streaming socket protocol. Once there is no more document the
+driver will emit the <strong>end</strong> event to notify the application that it&#8217;s
+done.</p>
+<div class="highlight-python"><pre>collection.findOne({mykey:1}, function(err, item) {});</pre>
 </div>
-</div></blockquote>
-<p>This is special supported function to retrieve just one specific document bypassing the need for a cursor object.</p>
-<p>That&#8217;s pretty much it for the quick intro on how to use the database. I have also included a list of links to where to go to find more information and also a sample crude location application I wrote using express JS and mongo DB.</p>
-</div></blockquote>
+<p>This is special supported function to retrieve just one specific
+document bypassing the need for a cursor object.</p>
+<p>That&#8217;s pretty much it for the quick intro on how to use the database. I
+have also included a list of links to where to go to find more
+information and also a sample crude location application I wrote using
+express JS and mongo DB.</p>
 </div>
 <div class="section" id="links-and-stuff">
 <h2>Links and stuff<a class="headerlink" href="#links-and-stuff" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><ul class="simple">
-<li><a class="reference external" href="https://github.com/mongodb/node-mongodb-native/tree/master/examples">The driver examples, good starting point for basic usage</a></li>
-<li><a class="reference external" href="https://github.com/mongodb/node-mongodb-native/tree/master/test">All the integration tests, they have tons of different usage cases</a></li>
-<li><a class="reference external" href="http://www.mongodb.org/display/DOCS/Advanced+Queries">The Mongo DB wiki pages such as the advanced query link</a></li>
-<li><a class="reference external" href="https://github.com/christkv/mongodb-presentation">A silly simple location based application using Express JS and Mongo DB</a></li>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/mongodb/node-mongodb-native/tree/master/examples">The driver examples, good starting point for basic
+usage</a></li>
+<li><a class="reference external" href="https://github.com/mongodb/node-mongodb-native/tree/master/test">All the integration tests, they have tons of different usage
+cases</a></li>
+<li><a class="reference external" href="http://www.mongodb.org/display/DOCS/Advanced+Queries">The Mongo DB wiki pages such as the advanced query
+link</a></li>
+<li><a class="reference external" href="https://github.com/christkv/mongodb-presentation">A silly simple location based application using Express JS and Mongo
+DB</a></li>
 </ul>
-</div></blockquote>
 </div>
 </div>
 
@@ -557,12 +602,12 @@ dispatch and read from the tcp connection.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.13 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
