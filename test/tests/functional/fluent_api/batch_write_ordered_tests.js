@@ -7,7 +7,7 @@ exports['Should correctly execute batch with no errors using write commands'] = 
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.3"},
+  requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -27,8 +27,6 @@ exports['Should correctly execute batch with no errors using write commands'] = 
 
       // Execute the operations
       batch.execute(function(err, result) {
-        // console.log("=============================================")
-        // console.dir(result.getRawResponse())
         // Check state of result
         test.equal(5, result.n);
         var upserts = result.getUpsertedIds();
@@ -51,7 +49,7 @@ exports['Should correctly handle single batch api write command error'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.3"},
+  requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -113,7 +111,7 @@ exports['Should correctly handle multiple batch api write command error'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.3"},
+  requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -168,7 +166,7 @@ exports['Should fail due to document being to big'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.3"},
+  requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -203,7 +201,7 @@ exports['Should correctly split up messages into more batches'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.3"},
+  requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -246,7 +244,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.3"},
+  requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -332,7 +330,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.3"},
+  requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -380,7 +378,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.3"},
+  requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -463,8 +461,6 @@ exports['Should correctly execute batch with no errors using legacy operations']
 
       // Execute the operations
       batch.execute(function(err, result) {
-        // console.log("=============================================")
-        // console.dir(result.getRawResponse())
         // Check state of result
         test.equal(5, result.n);
         var upserts = result.getUpsertedIds();
@@ -510,8 +506,6 @@ exports['Should correctly handle single batch api legacy ops error'] = {
 
         // Execute the operations
         batch.execute(function(err, result) {
-          // console.log("=============================================")
-          // console.dir(result.getRawResponse())
           // Basic properties check
           test.equal(1, result.n);
           test.equal(true, result.hasErrors());
@@ -577,8 +571,6 @@ exports['Should correctly handle multiple batch api legacy op errors'] = {
 
         // Execute the operations
         batch.execute(function(err, result) {
-          // console.log("=============================================")
-          // console.dir(result.getRawResponse())
           // Basic properties check
           test.equal(1, result.n);
           test.equal(true, result.hasErrors());
