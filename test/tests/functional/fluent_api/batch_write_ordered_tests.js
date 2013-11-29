@@ -678,7 +678,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.3"},
+  requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {

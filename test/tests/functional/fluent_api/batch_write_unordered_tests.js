@@ -7,7 +7,7 @@ exports['Should correctly execute unordered batch with no errors using write com
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -49,7 +49,7 @@ exports['Should correctly handle single unordered batch api write command error'
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -111,7 +111,7 @@ exports['Should correctly handle multiple unordered batch api write command erro
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -192,7 +192,7 @@ exports['Should fail due to document being to big for unordered batch'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -227,7 +227,7 @@ exports['Should correctly split up messages into more batches for unordered batc
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -356,7 +356,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -388,7 +388,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
           // Individual error checking
           var error = result.getErrorAt(0);
           test.equal(1, error.index);
-          test.equal(11000, error.code);
+          test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
           test.equal(1, error.getOperation().u['$set'].b);
 
@@ -404,7 +404,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with upser
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -438,7 +438,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with upser
           // Individual error checking
           var error = result.getErrorAt(0);
           test.equal(1, error.index);
-          test.equal(11000, error.code);
+          test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
           test.equal(1, error.getOperation().u['$set'].b);
 
@@ -467,7 +467,7 @@ exports['Should correctly execute unordered batch with no errors using legacy op
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -509,7 +509,7 @@ exports['Should correctly handle single unordered batch api legacy op error'] = 
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -571,7 +571,7 @@ exports['Should correctly handle multiple unordered batch api legacy op errors']
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -597,9 +597,6 @@ exports['Should correctly handle multiple unordered batch api legacy op errors']
 
         // Execute the operations
         batch.execute(function(err, result) {
-          // console.log("====================================================")
-          // console.dir(err)
-          // console.dir(result.getRawResponse().errDetails)
           // Basic properties check
           test.equal(3, result.n);
           test.equal(true, result.hasErrors());
@@ -655,7 +652,7 @@ exports['Should fail due to document being to big for unordered batch using lega
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -690,7 +687,7 @@ exports['Should correctly split up messages into more batches for unordered batc
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -819,7 +816,7 @@ exports['Should Correctly Execute Unordered Batch of legacy ops with duplicate k
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -851,7 +848,7 @@ exports['Should Correctly Execute Unordered Batch of legacy ops with duplicate k
           // Individual error checking
           var error = result.getErrorAt(0);
           test.equal(1, error.index);
-          test.equal(11000, error.code);
+          test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
           test.equal(1, error.getOperation().u['$set'].b);
 
@@ -867,7 +864,7 @@ exports['Should Correctly Execute Ordered Batch of legacy ops with upserts causi
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -901,7 +898,7 @@ exports['Should Correctly Execute Ordered Batch of legacy ops with upserts causi
           // Individual error checking
           var error = result.getErrorAt(0);
           test.equal(1, error.index);
-          test.equal(11000, error.code);
+          test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
           test.equal(1, error.getOperation().u['$set'].b);
 
