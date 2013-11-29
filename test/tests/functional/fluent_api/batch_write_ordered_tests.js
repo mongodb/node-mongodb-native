@@ -279,7 +279,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
           test.equal(1, error.getOperation()['$set'].a);
 
           // Initialize the Ordered Batch
-          var batch = col.initializeOrderedBulkOp({useLegacyOps:true});
+          var batch = col.initializeOrderedBulkOp();
           // Add illegal remove
           batch.find({$set:{a:1}}).removeOne();
           // Execute the operations
@@ -298,7 +298,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             test.equal(1, error.getOperation().q['$set'].a);
 
             // Initialize the Ordered Batch
-            var batch = col.initializeOrderedBulkOp({useLegacyOps:true});
+            var batch = col.initializeOrderedBulkOp();
             // Add illegal update
             batch.find({$set:{a:1}}).updateOne({c: {$set:{a:1}}});
             // Execute the operations
