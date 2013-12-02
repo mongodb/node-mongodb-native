@@ -25,6 +25,9 @@ var single_server_config = function(options) {
       server_options[name] = options[name];
     }
 
+    // No journal set
+    server_options.journal = false;
+
     // Server manager
     var serverManager = new ServerManager(server_options);
     var dbs = [];

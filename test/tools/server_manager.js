@@ -47,7 +47,7 @@ var ServerManager = exports.ServerManager = function(options) {
   this.host = options["host"] != null ? options["host"] : "localhost";
   this.db_path = getPath(this, "data-" + this.port);
   this.log_path = getPath(this, "log-" + this.port);
-  this.journal = options["journal"] != null ? options["journal"] : false;
+  this.journal = options["journal"] != null ? options["journal"] : true;
   this.auth = options['auth'] != null ? options['auth'] : false;
   this.ssl = options['ssl'] != null ? options['ssl'] : false;
   this.ssl_server_pem = options['ssl_server_pem'] != null ? options['ssl_server_pem'] : null;
@@ -186,7 +186,7 @@ var generateStartCmd = function(self, options) {
   // Create boot command
   var startCmd = "mongod --rest --noprealloc --smallfiles --logpath '" + options['log_path'] + "' " +
       " --dbpath " + options['db_path'] + " --port " + options['port'] + " --fork";
-  startCmd = options['journal'] ? startCmd + " --journal" : startCmd;
+  startCmd = options['journal'] ? startCmd + " --journal" : startCmd + " --nojournal";
   startCmd = options['auth'] ? startCmd + " --auth" : startCmd;
   startCmd = options['configserver'] ? startCmd + " --configsvr" : startCmd;
   startCmd = startCmd + " --setParameter enableTestCommands=1";

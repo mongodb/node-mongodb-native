@@ -15,7 +15,7 @@ exports['Should correctly execute unordered batch with no errors using write com
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_0');
-      // Initialize the Ordered Batch
+      // Initialize the unordered Batch
       var batch = col.initializeUnorderedBulkOp();
 
       // Add some operations to be executed in order
@@ -62,7 +62,7 @@ exports['Should correctly handle single unordered batch api write command error'
       col.ensureIndex({a:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
@@ -124,7 +124,7 @@ exports['Should correctly handle multiple unordered batch api write command erro
       col.ensureIndex({a:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
@@ -283,7 +283,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
       col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp();
 
         // Add illegal insert operation
@@ -304,7 +304,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
           test.ok(error.errmsg != null);
           test.equal(1, error.getOperation()['$set'].a);
 
-          // Initialize the Ordered Batch
+          // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
           // Add illegal remove
           batch.find({$set:{a:1}}).removeOne();
@@ -323,7 +323,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
             test.ok(error.errmsg != null);
             test.equal(1, error.getOperation().q['$set'].a);
 
-            // Initialize the Ordered Batch
+            // Initialize the unordered Batch
             var batch = col.initializeUnorderedBulkOp();
             // Add illegal update
             batch.find({$set:{a:1}}).updateOne({c: {$set:{a:1}}});
@@ -369,7 +369,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with dupli
       col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
@@ -417,7 +417,7 @@ exports['Should Correctly Execute Unordered Batch of Write Operations with upser
       col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
@@ -475,7 +475,7 @@ exports['Should correctly execute unordered batch with no errors using legacy op
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_0');
-      // Initialize the Ordered Batch
+      // Initialize the unordered Batch
       var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
 
       // Add some operations to be executed in order
@@ -522,7 +522,7 @@ exports['Should correctly handle single unordered batch api legacy op error'] = 
       col.ensureIndex({a:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
 
         // Add some operations to be executed in order
@@ -584,7 +584,7 @@ exports['Should correctly handle multiple unordered batch api legacy op errors']
       col.ensureIndex({a:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
 
         // Add some operations to be executed in order
@@ -743,7 +743,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
       col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
 
         // Add illegal insert operation
@@ -764,7 +764,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
           test.ok(error.errmsg != null);
           test.equal(1, error.getOperation()['$set'].a);
 
-          // Initialize the Ordered Batch
+          // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
           // Add illegal remove
           batch.find({$set:{a:1}}).removeOne();
@@ -783,7 +783,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
             test.ok(error.errmsg != null);
             test.equal(1, error.getOperation().q['$set'].a);
 
-            // Initialize the Ordered Batch
+            // Initialize the unordered Batch
             var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
             // Add illegal update
             batch.find({$set:{a:1}}).updateOne({c: {$set:{a:1}}});
@@ -829,7 +829,7 @@ exports['Should Correctly Execute Unordered Batch of legacy ops with duplicate k
       col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
 
         // Add some operations to be executed in order
@@ -860,7 +860,7 @@ exports['Should Correctly Execute Unordered Batch of legacy ops with duplicate k
   }
 }
 
-exports['Should Correctly Execute Ordered Batch of legacy ops with upserts causing duplicate key errors on updates'] = {
+exports['Should Correctly Execute Unordered Batch of legacy ops with upserts causing duplicate key errors on updates'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
@@ -877,7 +877,7 @@ exports['Should Correctly Execute Ordered Batch of legacy ops with upserts causi
       col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
         test.equal(err, null);
 
-        // Initialize the Ordered Batch
+        // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
 
         // Add some operations to be executed in order
