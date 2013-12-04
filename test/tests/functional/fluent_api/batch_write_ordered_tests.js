@@ -29,6 +29,10 @@ exports['Should correctly execute batch with no errors using write commands'] = 
       batch.execute(function(err, result) {
         // Check state of result
         test.equal(5, result.n);
+        test.equal(2, result.nInserted);
+        test.equal(1, result.nUpserted);
+        test.equal(1, result.nUpdated);
+        test.equal(1, result.nRemoved);
         var upserts = result.getUpsertedIds();
         test.equal(1, upserts.length);
         test.equal(2, upserts[0].index);
