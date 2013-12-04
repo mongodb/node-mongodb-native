@@ -2,6 +2,16 @@
 -----------------
 - All node exceptions will no longer be caught if on('error') is defined
 - Added X509 auth support
+- Fix for MongoClient connection timeout issue (NODE-97)
+- New Bulk API implementation using write commands for 2.6 and down converts for pre 2.6
+- Pass through error messages from parseError instead of just text (Issue #1125)
+- Close db connection on error (Issue #1128, https://github.com/benighted)
+- Fixed documentation generation
+- Added aggregation cursor for 2.6 and emulated cursor for pre 2.6 (uses stream2)
+- Insert/Update/Remove using new write commands when available
+- Added support for new roles based API's in 2.6 for addUser/removeUser
+- Added bufferMaxEntries to start failing if the buffer hits the specified number of entries
+- Upgraded BSON parser to work with 0.12.X C++ API changes
 
 1.3.19 2013-08-21
 -----------------
