@@ -159,15 +159,11 @@ exports.buildTestHash = function(objects) {
           }
         }
 
-        // console.log(codeLines)
-
         codeLines = codeLines.slice(start, end);
         codeLines = additional_lines.concat(codeLines);
-        // Reasign the code block
+        
+        // Reassign the code block
         block.code = codeLines.join("\n");
-
-        // console.log("------------------------------------------- CODE")
-        // console.log(block.code)
       }
     }
   }
@@ -187,7 +183,31 @@ exports.renderAllTemplates = function(outputDirectory, templates, dataObjects, t
   }
   
   var isFunction = function(entry) {
-    return entry.ctx != null && entry.ctx.type == 'method' && entry.isPrivate == false;
+    console.log("============================================== classMetaData")
+    console.log(JSON.stringify(entry, true, 4))
+
+    // If we have a context
+    if(entry.ctx != null 
+      && (entry.ctx.type == 'method' || entry.ctx.type == 'function')
+      && entry.isPrivate == false
+      && entry.tags.length >= 1
+      && entry.tags[0].type == 'param') {
+      return true;
+    }
+
+    // // If no context but a param
+    // if(entry.isPrivate == false 
+    //   && entry.tags.length >= 1
+    //   && entry.tags[0].type == 'param') {
+    //   return true;
+    // }
+
+    return false;
+    // return entry.ctx != null 
+    //   && (entry.ctx.type == 'method' || entry.ctx.type == 'function')
+    //   && entry.isPrivate == false
+    //   && entry.tags.length >= 1
+    //   && entry.tags[0].type == 'param';
   }
   
   var isProperty = function(entry) {
@@ -214,12 +234,20 @@ exports.renderAllTemplates = function(outputDirectory, templates, dataObjects, t
     var className = classNames[i];
     // The meta data object
     var classMetaData = dataObjects[className];
+    // console.log("============================================== classMetaData")
+    // console.log(JSON.stringify(classMetaData, true, 4))
+
     // Grab the examples for this Metadata class
     var classExamplesData = testObjects[className];
     // Render the class template
     var classContent = ejs.render(templates['class'], 
-      {entries:classMetaData, examples:classExamplesData, isClass:isClass, 
-        isFunction:isFunction, isProperty:isProperty, isClassConstant:isClassConstant, 
+      {
+          entries: classMetaData
+        , examples: classExamplesData
+        , isClass: isClass
+        , isFunction: isFunction
+        , isProperty: isProperty
+        , isClassConstant: isClassConstant, 
         format:format});
     // Write out the content to disk
     fs.writeFileSync(format("%s/%s.rst", outputDirectory, className), classContent);
