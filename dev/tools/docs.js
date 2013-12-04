@@ -183,31 +183,19 @@ exports.renderAllTemplates = function(outputDirectory, templates, dataObjects, t
   }
   
   var isFunction = function(entry) {
-    console.log("============================================== classMetaData")
-    console.log(JSON.stringify(entry, true, 4))
+    // console.log("============================================== classMetaData")
+    // console.log(JSON.stringify(entry, true, 4))
 
     // If we have a context
     if(entry.ctx != null 
       && (entry.ctx.type == 'method' || entry.ctx.type == 'function')
       && entry.isPrivate == false
       && entry.tags.length >= 1
-      && entry.tags[0].type == 'param') {
+      && (entry.tags[0].type == 'param' || entry.tags[0].type == 'return')) {
       return true;
     }
 
-    // // If no context but a param
-    // if(entry.isPrivate == false 
-    //   && entry.tags.length >= 1
-    //   && entry.tags[0].type == 'param') {
-    //   return true;
-    // }
-
     return false;
-    // return entry.ctx != null 
-    //   && (entry.ctx.type == 'method' || entry.ctx.type == 'function')
-    //   && entry.isPrivate == false
-    //   && entry.tags.length >= 1
-    //   && entry.tags[0].type == 'param';
   }
   
   var isProperty = function(entry) {

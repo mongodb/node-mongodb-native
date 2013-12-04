@@ -116,6 +116,28 @@ for(var i = 0; i < entries.length; i++) {
 
 for(var i = 0; i < entries.length; i++) {
   if(isProperty(entries[i])) {
+
+    // If we have a class property
+    if(entries[i].tags[0].type == 'class') {
+%>
+.. csv-table:: 
+   :header: "Property"
+   :widths: 30
+
+<%
+
+      // Write out all of the properties
+      for(var j = 0; j < entries[i].tags.length; j++) {
+        if(entries[i].tags[j].type == 'property') {
+          %><%- format("   \"%s\"\n", entries[i].tags[j].string) %><%
+        }
+      }
+
+      // Skip to next entry
+      continue;
+    }
+
+
     // Extract values
     var attributeName = "";
     var getterSetters = [];
@@ -249,7 +271,7 @@ for(var i = 0; i < entries.length; i++) {
     var examplesName = entries[i].ctx.name;
         
     // Write header depending on if it's class or instance level
-    if(entries[i].ctx.receiver != "this") {   
+    if(entries[i].ctx.receiver != null && entries[i].ctx.receiver != "this") {   
       // Change examples Name to include class name
       var examplesName = format("%s.%s", className, entries[i].ctx.name);      
       var _length = format("%s.%s", className, entries[i].ctx.name).length;      

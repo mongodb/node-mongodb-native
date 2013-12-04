@@ -26,7 +26,8 @@ var apiClasses = [
     {tag:"replset", path:"./lib/mongodb/connection/repl_set/repl_set.js"},
     {tag:"readpreference", path:"./lib/mongodb/connection/read_preference.js"},
     {tag:"ordered", path:"./lib/mongodb/collection/batch/ordered.js"},
-    {tag:"unordered", path:"./lib/mongodb/collection/batch/unordered.js"}
+    {tag:"unordered", path:"./lib/mongodb/collection/batch/unordered.js"},
+    {tag:"batchwriteresult", path:"./lib/mongodb/collection/batch/common.js"}
 ];
 
 // All test files
