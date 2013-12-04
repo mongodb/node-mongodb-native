@@ -23,11 +23,11 @@ exports['Should correctly connect to a replicaset with additional options'] = fu
       }
     }
   }, function(err, db) {
-    // console.log("=========================================================")
-    // console.dir(err)
     test.equal(null, err);
     test.ok(db != null);
     test.equal(500, db.serverConfig.options.socketOptions.connectTimeoutMS);
+    test.equal(0, db.serverConfig.options.socketOptions.socketTimeoutMS);
+    test.equal(0, db.serverConfig.socketTimeoutMS);
     test.equal(false, db.native_parser);
     test.equal(500, db.serverConfig.options.haInterval)
 
@@ -55,17 +55,11 @@ exports['Should correctly connect to a replicaset with readPreference set'] = fu
   var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
     , format("%s:%s", replMan.host, replMan.ports[0])
     , format("%s:%s", replMan.host, replMan.ports[1])
-    // , format("%s:%s", "127.0.0.1", replMan.ports[0])
-    // , format("%s:%s", "127.0.0.1", replMan.ports[1])
     , "integration_test_"
     , configuration.getReplicasetManager().name
     , "primary");
 
   MongoClient.connect(url, function(err, db) {
-    console.log("========================================================")
-    console.dir(err)
-    test.equal(null, err);
-
     db.collection("test_collection").insert({a:1}, function(err, result) {
       test.equal(null, err);
 
