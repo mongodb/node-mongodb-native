@@ -85,17 +85,17 @@ Three different ways of creating a collection object but slightly different in b
 
 This function will not actually create a collection on the database until you actually insert the first document.
 
-    db.collection('test', {w:1}, function(err, collection) {});
+    db.collection('test', {strict:true}, function(err, collection) {});
 
-Notice the **{w:1}** option. This option will make the driver check if the collection exists and issue an error if it does not.
+Notice the **{strict:true}** option. This option will make the driver check if the collection exists and issue an error if it does not.
 
     db.createCollection('test', function(err, collection) {});
 
 This command will create the collection on the Mongo DB database before returning the collection object. If the collection already exists it will ignore the creation of the collection.
 
-    db.createCollection('test', {w:1}, function(err, collection) {});
+    db.createCollection('test', {strict:true}, function(err, collection) {});
 
-The **{w:1}** option will make the method return an error if the collection already exists.
+The **{strict:true}** option will make the method return an error if the collection already exists.
 
 With an open db connection and a collection defined we are ready to do some CRUD operation on the data.
 
