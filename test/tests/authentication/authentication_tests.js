@@ -31,8 +31,11 @@ exports['Should correctly authenticate against admin db'] = function(configurati
                 db.collection('test').insert({a:1}, function(err, result) {
                   test.ok(err != null);
 
-                  db1.close();
-                  test.done();
+                  // restart server
+                  configuration.restart({purgedirectories: true}, function() {
+                    db1.close();
+                    test.done();
+                  });
                 });
               });
             });
@@ -79,8 +82,11 @@ exports['Should correctly authenticate against normal db'] = function(configurat
                   db.collection('test').insert({a:1}, function(err, result) {
                     test.ok(err != null);
 
-                    db1.close();
-                    test.done();
+                    // restart server
+                    configuration.restart({purgedirectories: true}, function() {
+                      db1.close();
+                      test.done();
+                    });
                   });
                 });
               });
@@ -124,8 +130,11 @@ exports['Should correctly reapply the authentications'] = function(configuration
                 db.collection('test').insert({a:1}, function(err, result) {
                   test.equal(null, err);
 
-                  db1.close();
-                  test.done();
+                  // restart server
+                  configuration.restart({purgedirectories: true}, function() {
+                    db1.close();
+                    test.done();
+                  });
                 });
               });
             });
