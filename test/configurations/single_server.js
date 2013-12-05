@@ -40,8 +40,14 @@ var single_server_config = function(options) {
       });
     }
 
-    this.restart = function(callback) {
-      serverManager.start(true, function(err) {
+    this.restart = function(options, callback) {
+      if(typeof options == 'function') {
+        callback = options;
+        options = {}
+      }
+
+      // Restart servers
+      serverManager.start(true, options, function(err) {
         if(err) throw err;
         callback();
       });

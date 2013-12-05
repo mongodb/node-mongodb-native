@@ -76,6 +76,7 @@ var ServerManager = exports.ServerManager = function(options) {
 // Start up the server instance
 ServerManager.prototype.start = function(killall, options, callback) {
   var self = this;
+
   // Unpack callback and variables
   if(typeof options == 'function') {
     callback = options;
@@ -86,12 +87,15 @@ ServerManager.prototype.start = function(killall, options, callback) {
     options = {};
   }
 
+  // Get the purge directories
+  var purgedirectories = typeof options.purgedirectories == 'boolean' ? options.purgedirectories : true;
+
   // Create start command
   var startCmd = generateStartCmd(this, {configserver:self.configServer, log_path: self.log_path,
     db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl});
 
   exec(killall ? 'killall -9 mongod' : '', function(err, stdout, stderr) {
-    if(self.purgedirectories) {
+    if(purgedirectories) {
       // Remove directory
       exec("rm -rf " + self.db_path, function(err, stdout, stderr) {
         if(err != null) return callback(err, null);
