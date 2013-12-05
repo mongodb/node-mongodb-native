@@ -140,7 +140,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
-      var col = db.collection('batch_write_concerns_ops_0');
+      var col = db.collection('batch_write_concerns_ops_3');
       // Initialize the Ordered Batch
       var batch = col.initializeOrderedBulkOp({useLegacyOps:true});
       // Add some operations to be executed in order
@@ -187,7 +187,7 @@ exports['Should fail unordered batch with journal write concern due to --nojourn
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
-      var col = db.collection('batch_write_concerns_ops_0');
+      var col = db.collection('batch_write_concerns_ops_4');
       // Initialize the Ordered Batch
       var batch = col.initializeUnorderedBulkOp();
       // Add some operations to be executed in order
@@ -252,7 +252,7 @@ exports['Should fail unordered batch with w:2 and wtimeout write concern due sin
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
-      var col = db.collection('batch_write_concerns_ops_1');
+      var col = db.collection('batch_write_concerns_ops_5');
       // Initialize the Ordered Batch
       var batch = col.initializeUnorderedBulkOp();
       // Add some operations to be executed in order
@@ -262,6 +262,8 @@ exports['Should fail unordered batch with w:2 and wtimeout write concern due sin
 
       // Execute the operations
       batch.execute({w:2, wtimeout:1000}, function(err, result) {
+        console.log("======================================================")
+        console.dir(result.getRawResponse().errDetails)
         // Check state of result
         test.equal(3, result.n);
         test.equal(65, result.getSingleError().code);
@@ -317,7 +319,7 @@ exports['Should fail unordered batch with journal write concern due to --nojourn
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
-      var col = db.collection('batch_write_concerns_ops_2');
+      var col = db.collection('batch_write_concerns_ops_6');
       // Initialize the Ordered Batch
       var batch = col.initializeOrderedBulkOp({useLegacyOps:true});
       // Add some operations to be executed in order
@@ -382,7 +384,7 @@ exports['Should fail unordered batch with w:2 and wtimeout write concern due sin
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
-      var col = db.collection('batch_write_concerns_ops_0');
+      var col = db.collection('batch_write_concerns_ops_7');
       // Initialize the Ordered Batch
       var batch = col.initializeOrderedBulkOp({useLegacyOps:true});
       // Add some operations to be executed in order
