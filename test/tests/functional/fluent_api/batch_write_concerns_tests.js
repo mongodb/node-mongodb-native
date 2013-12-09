@@ -262,6 +262,8 @@ exports['Should fail unordered batch with w:2 and wtimeout write concern due sin
 
       // Execute the operations
       batch.execute({w:2, wtimeout:1000}, function(err, result) {
+        console.log("========================================================")
+        console.dir(result.getRawResponse())
         // Check state of result
         test.equal(3, result.n);
         test.equal(65, result.getSingleError().code);

@@ -40,7 +40,7 @@ var setUp = function(configuration, options, callback) {
 /**
  * @ignore
  */
-exports.shouldCorrectlyValidateAndPresentCertificate = function(configuration, test) {
+exports.shouldCorrectlyValidateAndPresentCertificateReplSet = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -74,21 +74,26 @@ exports.shouldCorrectlyValidateAndPresentCertificate = function(configuration, t
     db.open(function(err, db) {
       test.equal(null, err);
 
-      // Create a collection
-      db.createCollection('shouldCorrectlyValidateAndPresentCertificateReplSet', function(err, collection) {
-        collection.remove({});
-        collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-        collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-        collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-        collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-        collection.insert([{a:1}, {b:2}, {c:'hello world'}], {w:1}, function(err, result) {
-          collection.find({}).toArray(function(err, items) {
-            test.equal(15, items.length);
-            db.close();
-            test.done();
-          })
-        });
-      });
+      setInterval(function() {
+        db.collection('test').count(function() {});
+      }, 1000);
+
+      // process.exit(0)
+      // // Create a collection
+      // db.createCollection('shouldCorrectlyValidateAndPresentCertificateReplSet', function(err, collection) {
+      //   collection.remove({});
+      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}], {w:1}, function(err, result) {
+      //     collection.find({}).toArray(function(err, items) {
+      //       test.equal(15, items.length);
+      //       db.close();
+      //       test.done();
+      //     })
+      //   });
+      // });
     });
   });
 }
