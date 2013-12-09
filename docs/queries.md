@@ -45,12 +45,14 @@ retrieves fields `name` and `title` (and as a default also `_id`) but not any ot
 `findOne` is a convinence method finding and returning the first match of a query while regular `find` returns a cursor object instead. Use it when you expect only one record, for example when querying with `_id` or another unique property.
 
 ```javascript
-  collection.findOne([query], callback)
+  collection.findOne(query, [fields, [options]], callback);
 ```
 
 Where
 
   * `query` is a query object or an `_id` value
+  * `fields` - indicates which fields should be included in the response (default is all)
+  * `options` - defines extra logic (sorting options, paging etc.)
   * `callback` has two parameters - an error object (if an error occured) and the document object. 
 
 Example:
