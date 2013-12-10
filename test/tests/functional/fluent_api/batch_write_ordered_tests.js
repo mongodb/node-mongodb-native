@@ -304,9 +304,9 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             // Initialize the Ordered Batch
             var batch = col.initializeOrderedBulkOp();
             // Add illegal update
-            batch.find({$set:{a:1}}).updateOne({c: {$set:{a:1}}});
+            batch.find({a:{$set2:1}}).updateOne({c: {$set:{a:1}}});
             // Execute the operations
-            batch.execute(function(err, result) {              
+            batch.execute(function(err, result) {
               // Test basic settings
               test.equal(0, result.n);
               test.equal(true, result.hasErrors());
