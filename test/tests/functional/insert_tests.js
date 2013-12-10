@@ -1887,7 +1887,7 @@ exports.shouldCorrectlyWorkWithCheckKeys = function(configuration, test) {
   db.open(function(err, db) {
     db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
         "ps.op.t":1
-      }, {'$set': {b: 1}}, function(err, doc) {
+      }, {'$set': {b: 1}}, {checkKeys:false}, function(err, doc) {
         test.equal(null, err);
         db.close();
         test.done();
