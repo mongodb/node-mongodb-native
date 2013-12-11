@@ -51,7 +51,6 @@ module.exports = function(configurations) {
         , '/test/tests/repl_set/failover_query_tests.js'
         , '/test/tests/repl_set/replicaset_examples_tests.js'
         , '/test/tests/repl_set/recovering_server_tests.js'
-        , '/test/tests/repl_set/batch_api_tests.js'
       ]
     );
 
