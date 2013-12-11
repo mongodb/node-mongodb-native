@@ -1454,12 +1454,63 @@ exports.shouldCorrectlyHandle0asIdForSave = function(configuration, test) {
 /**
  * @ignore
  */
-exports['Should correctly execute update with $elemMatch field in selector'] = function(configuration, test) {
+exports['Should correctly execute update with . field in selector'] = function(configuration, test) {
   var ObjectID = configuration.getMongoPackage().ObjectID;
 
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
   db.open(function(err, db) {
     db.collection('executeUpdateWithElemMatch').update({'item.i': 1}, {$set: {a:1}}, function(err, result, full) {
+      test.equal(null, err);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly execute update with $elemMatch field in selector'] = function(configuration, test) {
+  var ObjectID = configuration.getMongoPackage().ObjectID;
+
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.collection('executeUpdateWithElemMatch').update({item: {$elemMatch: {name: 'my_name'}}}, {$set: {a:1}}, function(err, result, full) {
+      test.equal(null, err);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly execute find with $elemMatch field in selector'] = function(configuration, test) {
+  var ObjectID = configuration.getMongoPackage().ObjectID;
+
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.collection('executeUpdateWithElemMatch').findOne({item: {$elemMatch: {name: 'my_name'}}}, function(err, result, full) {
+      test.equal(null, err);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly execute remove with $elemMatch field in selector'] = function(configuration, test) {
+  var ObjectID = configuration.getMongoPackage().ObjectID;
+
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+  db.open(function(err, db) {
+    db.collection('executeUpdateWithElemMatch').remove({item: {$elemMatch: {name: 'my_name'}}}, function(err, result, full) {
       test.equal(null, err);
 
       db.close();
