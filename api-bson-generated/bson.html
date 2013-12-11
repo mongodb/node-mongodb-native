@@ -331,8 +331,8 @@
 </dd></dl>
 
 </div>
-<div class="section" id="id1">
-<h2>BSON.deserialize<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="deserialize">
+<h2>deserialize<a class="headerlink" href="#deserialize" title="Permalink to this headline">¶</a></h2>
 <p>Deserialize data as BSON.</p>
 <dl class="docutils">
 <dt>Options</dt>
@@ -345,7 +345,7 @@
 </dl>
 <dl class="function">
 <dt>
-<tt class="descclassname">BSON.</tt><tt class="descname">deserialize</tt><big>(</big><em>buffer</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="optional">[</span>, <em>isArray</em><span class="optional">]</span><big>)</big></dt>
+<tt class="descname">deserialize</tt><big>(</big><em>buffer</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="optional">[</span>, <em>isArray</em><span class="optional">]</span><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -365,8 +365,8 @@
 </dd></dl>
 
 </div>
-<div class="section" id="id2">
-<h2>BSON.deserializeStream<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="deserializestream">
+<h2>deserializeStream<a class="headerlink" href="#deserializestream" title="Permalink to this headline">¶</a></h2>
 <p>Deserialize stream data as BSON documents.</p>
 <dl class="docutils">
 <dt>Options</dt>
@@ -378,8 +378,8 @@
 </dd>
 </dl>
 <dl class="function">
-<dt>
-<tt class="descclassname">BSON.</tt><tt class="descname">deserializeStream</tt><big>(</big><em>data</em>, <em>startIndex</em>, <em>numberOfDocuments</em>, <em>documents</em>, <em>docStartIndex</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><big>)</big></dt>
+<dt id="deserializeStream">
+<tt class="descname">deserializeStream</tt><big>(</big><em>data</em>, <em>startIndex</em>, <em>numberOfDocuments</em>, <em>documents</em>, <em>docStartIndex</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#deserializeStream" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -402,12 +402,12 @@
 </dd></dl>
 
 </div>
-<div class="section" id="id3">
-<h2>BSON.serialize<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="serialize">
+<h2>serialize<a class="headerlink" href="#serialize" title="Permalink to this headline">¶</a></h2>
 <p>Serialize a Javascript object.</p>
 <dl class="function">
 <dt>
-<tt class="descclassname">BSON.</tt><tt class="descname">serialize</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>asBuffer</em>, <em>serializeFunctions</em><big>)</big></dt>
+<tt class="descname">serialize</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>asBuffer</em>, <em>serializeFunctions</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -428,12 +428,12 @@
 </dd></dl>
 
 </div>
-<div class="section" id="id4">
-<h2>BSON.calculateObjectSize<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="calculateobjectsize">
+<h2>calculateObjectSize<a class="headerlink" href="#calculateobjectsize" title="Permalink to this headline">¶</a></h2>
 <p>Calculate the bson size for a passed in Javascript object.</p>
 <dl class="function">
-<dt>
-<tt class="descclassname">BSON.</tt><tt class="descname">calculateObjectSize</tt><big>(</big><em>object</em><span class="optional">[</span>, <em>serializeFunctions</em><span class="optional">]</span><big>)</big></dt>
+<dt id="calculateObjectSize">
+<tt class="descname">calculateObjectSize</tt><big>(</big><em>object</em><span class="optional">[</span>, <em>serializeFunctions</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#calculateObjectSize" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -452,12 +452,12 @@
 </dd></dl>
 
 </div>
-<div class="section" id="id5">
-<h2>BSON.serializeWithBufferAndIndex<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="serializewithbufferandindex">
+<h2>serializeWithBufferAndIndex<a class="headerlink" href="#serializewithbufferandindex" title="Permalink to this headline">¶</a></h2>
 <p>Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.</p>
 <dl class="function">
-<dt>
-<tt class="descclassname">BSON.</tt><tt class="descname">serializeWithBufferAndIndex</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>buffer</em>, <em>index</em>, <em>serializeFunctions</em><big>)</big></dt>
+<dt id="serializeWithBufferAndIndex">
+<tt class="descname">serializeWithBufferAndIndex</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>buffer</em>, <em>index</em>, <em>serializeFunctions</em><big>)</big><a class="headerlink" href="#serializeWithBufferAndIndex" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -497,11 +497,11 @@
 <li><a class="reference internal" href="#bson-serialize">BSON.serialize</a></li>
 <li><a class="reference internal" href="#bson-deserializestream">BSON.deserializeStream</a></li>
 <li><a class="reference internal" href="#bson-deserialize">BSON.deserialize</a></li>
-<li><a class="reference internal" href="#id1">BSON.deserialize</a></li>
-<li><a class="reference internal" href="#id2">BSON.deserializeStream</a></li>
-<li><a class="reference internal" href="#id3">BSON.serialize</a></li>
-<li><a class="reference internal" href="#id4">BSON.calculateObjectSize</a></li>
-<li><a class="reference internal" href="#id5">BSON.serializeWithBufferAndIndex</a></li>
+<li><a class="reference internal" href="#deserialize">deserialize</a></li>
+<li><a class="reference internal" href="#deserializestream">deserializeStream</a></li>
+<li><a class="reference internal" href="#serialize">serialize</a></li>
+<li><a class="reference internal" href="#calculateobjectsize">calculateObjectSize</a></li>
+<li><a class="reference internal" href="#serializewithbufferandindex">serializeWithBufferAndIndex</a></li>
 </ul>
 </li>
 </ul>

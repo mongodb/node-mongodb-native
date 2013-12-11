@@ -90,12 +90,15 @@ but not any others.</p>
 of a query while regular <tt class="docutils literal"><span class="pre">find</span></tt> returns a cursor object instead. Use
 it when you expect only one record, for example when querying with
 <tt class="docutils literal"><span class="pre">_id</span></tt> or another unique property.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">findOne</span><span class="p">([</span><span class="n">query</span><span class="p">],</span> <span class="n">callback</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">findOne</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">[</span><span class="n">fields</span><span class="p">,</span> <span class="p">[</span><span class="n">options</span><span class="p">]],</span> <span class="n">callback</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Where</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">query</span></tt> is a query object or an <tt class="docutils literal"><span class="pre">_id</span></tt> value</li>
+<li><tt class="docutils literal"><span class="pre">fields</span></tt> - indicates which fields should be included in the
+response (default is all)</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> - defines extra logic (sorting options, paging etc.)</li>
 <li><tt class="docutils literal"><span class="pre">callback</span></tt> has two parameters - an error object (if an error
 occured) and the document object.</li>
 </ul>

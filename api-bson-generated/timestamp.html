@@ -88,12 +88,63 @@ Note that we must ALWAYS check specially whether those values are MIN_VALUE
 a positive number, it overflows back into a negative).  Not handling this
 case would often result in infinite recursion.</p>
 </div>
-<div class="section" id="timestamp-tostring">
-<h2>Timestamp.toString<a class="headerlink" href="#timestamp-tostring" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="toint">
+<h2>toInt<a class="headerlink" href="#toint" title="Permalink to this headline">¶</a></h2>
+<p>Return the int value.</p>
+<dl class="function">
+<dt id="toInt">
+<tt class="descname">toInt</tt><big>(</big><big>)</big><a class="headerlink" href="#toInt" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the value, assuming it is a 32-bit integer.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="tonumber">
+<h2>toNumber<a class="headerlink" href="#tonumber" title="Permalink to this headline">¶</a></h2>
+<p>Return the Number value.</p>
+<dl class="function">
+<dt id="toNumber">
+<tt class="descname">toNumber</tt><big>(</big><big>)</big><a class="headerlink" href="#toNumber" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the closest floating-point representation to this value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="tojson">
+<h2>toJSON<a class="headerlink" href="#tojson" title="Permalink to this headline">¶</a></h2>
+<p>Return the JSON value.</p>
+<dl class="function">
+<dt id="toJSON">
+<tt class="descname">toJSON</tt><big>(</big><big>)</big><a class="headerlink" href="#toJSON" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string the JSON representation.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="tostring">
+<h2>toString<a class="headerlink" href="#tostring" title="Permalink to this headline">¶</a></h2>
 <p>Return the String value.</p>
 <dl class="function">
-<dt id="Timestamp.toString">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">toString</tt><big>(</big><span class="optional">[</span><em>opt_radix</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#Timestamp.toString" title="Permalink to this definition">¶</a></dt>
+<dt id="toString">
+<tt class="descname">toString</tt><big>(</big><span class="optional">[</span><em>opt_radix</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#toString" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -111,12 +162,131 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-equals">
-<h2>Timestamp.equals<a class="headerlink" href="#timestamp-equals" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gethighbits">
+<h2>getHighBits<a class="headerlink" href="#gethighbits" title="Permalink to this headline">¶</a></h2>
+<p>Return the high 32-bits value.</p>
+<dl class="function">
+<dt id="getHighBits">
+<tt class="descname">getHighBits</tt><big>(</big><big>)</big><a class="headerlink" href="#getHighBits" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the high 32-bits as a signed value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getlowbits">
+<h2>getLowBits<a class="headerlink" href="#getlowbits" title="Permalink to this headline">¶</a></h2>
+<p>Return the low 32-bits value.</p>
+<dl class="function">
+<dt id="getLowBits">
+<tt class="descname">getLowBits</tt><big>(</big><big>)</big><a class="headerlink" href="#getLowBits" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the low 32-bits as a signed value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getlowbitsunsigned">
+<h2>getLowBitsUnsigned<a class="headerlink" href="#getlowbitsunsigned" title="Permalink to this headline">¶</a></h2>
+<p>Return the low unsigned 32-bits value.</p>
+<dl class="function">
+<dt id="getLowBitsUnsigned">
+<tt class="descname">getLowBitsUnsigned</tt><big>(</big><big>)</big><a class="headerlink" href="#getLowBitsUnsigned" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the low 32-bits as an unsigned value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getnumbitsabs">
+<h2>getNumBitsAbs<a class="headerlink" href="#getnumbitsabs" title="Permalink to this headline">¶</a></h2>
+<p>Returns the number of bits needed to represent the absolute value of this Timestamp.</p>
+<dl class="function">
+<dt id="getNumBitsAbs">
+<tt class="descname">getNumBitsAbs</tt><big>(</big><big>)</big><a class="headerlink" href="#getNumBitsAbs" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number Returns the number of bits needed to represent the absolute value of this Timestamp.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="iszero">
+<h2>isZero<a class="headerlink" href="#iszero" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this value is zero.</p>
+<dl class="function">
+<dt id="isZero">
+<tt class="descname">isZero</tt><big>(</big><big>)</big><a class="headerlink" href="#isZero" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean whether this value is zero.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="isnegative">
+<h2>isNegative<a class="headerlink" href="#isnegative" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this value is negative.</p>
+<dl class="function">
+<dt id="isNegative">
+<tt class="descname">isNegative</tt><big>(</big><big>)</big><a class="headerlink" href="#isNegative" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean whether this value is negative.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="isodd">
+<h2>isOdd<a class="headerlink" href="#isodd" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this value is odd.</p>
+<dl class="function">
+<dt id="isOdd">
+<tt class="descname">isOdd</tt><big>(</big><big>)</big><a class="headerlink" href="#isOdd" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean whether this value is odd.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="equals">
+<h2>equals<a class="headerlink" href="#equals" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Timestamp equals the other</p>
 <dl class="function">
-<dt id="Timestamp.equals">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">equals</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.equals" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">equals</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -134,12 +304,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-notequals">
-<h2>Timestamp.notEquals<a class="headerlink" href="#timestamp-notequals" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="notequals">
+<h2>notEquals<a class="headerlink" href="#notequals" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Timestamp does not equal the other.</p>
 <dl class="function">
-<dt id="Timestamp.notEquals">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">notEquals</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.notEquals" title="Permalink to this definition">¶</a></dt>
+<dt id="notEquals">
+<tt class="descname">notEquals</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#notEquals" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -157,12 +327,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-lessthan">
-<h2>Timestamp.lessThan<a class="headerlink" href="#timestamp-lessthan" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="lessthan">
+<h2>lessThan<a class="headerlink" href="#lessthan" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Timestamp is less than the other.</p>
 <dl class="function">
-<dt id="Timestamp.lessThan">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">lessThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.lessThan" title="Permalink to this definition">¶</a></dt>
+<dt id="lessThan">
+<tt class="descname">lessThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#lessThan" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -180,12 +350,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-lessthanorequal">
-<h2>Timestamp.lessThanOrEqual<a class="headerlink" href="#timestamp-lessthanorequal" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="lessthanorequal">
+<h2>lessThanOrEqual<a class="headerlink" href="#lessthanorequal" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Timestamp is less than or equal to the other.</p>
 <dl class="function">
-<dt id="Timestamp.lessThanOrEqual">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">lessThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.lessThanOrEqual" title="Permalink to this definition">¶</a></dt>
+<dt id="lessThanOrEqual">
+<tt class="descname">lessThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#lessThanOrEqual" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -203,12 +373,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-greaterthan">
-<h2>Timestamp.greaterThan<a class="headerlink" href="#timestamp-greaterthan" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="greaterthan">
+<h2>greaterThan<a class="headerlink" href="#greaterthan" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Timestamp is greater than the other.</p>
 <dl class="function">
-<dt id="Timestamp.greaterThan">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">greaterThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.greaterThan" title="Permalink to this definition">¶</a></dt>
+<dt id="greaterThan">
+<tt class="descname">greaterThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#greaterThan" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -226,12 +396,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-greaterthanorequal">
-<h2>Timestamp.greaterThanOrEqual<a class="headerlink" href="#timestamp-greaterthanorequal" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="greaterthanorequal">
+<h2>greaterThanOrEqual<a class="headerlink" href="#greaterthanorequal" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Timestamp is greater than or equal to the other.</p>
 <dl class="function">
-<dt id="Timestamp.greaterThanOrEqual">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">greaterThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.greaterThanOrEqual" title="Permalink to this definition">¶</a></dt>
+<dt id="greaterThanOrEqual">
+<tt class="descname">greaterThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#greaterThanOrEqual" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -249,12 +419,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-compare">
-<h2>Timestamp.compare<a class="headerlink" href="#timestamp-compare" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="compare">
+<h2>compare<a class="headerlink" href="#compare" title="Permalink to this headline">¶</a></h2>
 <p>Compares this Timestamp with the given one.</p>
 <dl class="function">
-<dt id="Timestamp.compare">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">compare</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.compare" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">compare</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -272,12 +442,29 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-add">
-<h2>Timestamp.add<a class="headerlink" href="#timestamp-add" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="negate">
+<h2>negate<a class="headerlink" href="#negate" title="Permalink to this headline">¶</a></h2>
+<p>The negation of this value.</p>
+<dl class="function">
+<dt>
+<tt class="descname">negate</tt><big>(</big><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">timestamp the negation of this value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="add">
+<h2>add<a class="headerlink" href="#add" title="Permalink to this headline">¶</a></h2>
 <p>Returns the sum of this and the given Timestamp.</p>
 <dl class="function">
-<dt id="Timestamp.add">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">add</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.add" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">add</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -295,12 +482,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-subtract">
-<h2>Timestamp.subtract<a class="headerlink" href="#timestamp-subtract" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="subtract">
+<h2>subtract<a class="headerlink" href="#subtract" title="Permalink to this headline">¶</a></h2>
 <p>Returns the difference of this and the given Timestamp.</p>
 <dl class="function">
-<dt id="Timestamp.subtract">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">subtract</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.subtract" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">subtract</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -318,12 +505,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-multiply">
-<h2>Timestamp.multiply<a class="headerlink" href="#timestamp-multiply" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="multiply">
+<h2>multiply<a class="headerlink" href="#multiply" title="Permalink to this headline">¶</a></h2>
 <p>Returns the product of this and the given Timestamp.</p>
 <dl class="function">
-<dt id="Timestamp.multiply">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">multiply</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.multiply" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">multiply</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -341,12 +528,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-div">
-<h2>Timestamp.div<a class="headerlink" href="#timestamp-div" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="div">
+<h2>div<a class="headerlink" href="#div" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Timestamp divided by the given one.</p>
 <dl class="function">
-<dt id="Timestamp.div">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">div</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.div" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">div</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -364,12 +551,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-modulo">
-<h2>Timestamp.modulo<a class="headerlink" href="#timestamp-modulo" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="modulo">
+<h2>modulo<a class="headerlink" href="#modulo" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Timestamp modulo the given one.</p>
 <dl class="function">
-<dt id="Timestamp.modulo">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">modulo</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.modulo" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">modulo</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -387,12 +574,29 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-and">
-<h2>Timestamp.and<a class="headerlink" href="#timestamp-and" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="not">
+<h2>not<a class="headerlink" href="#not" title="Permalink to this headline">¶</a></h2>
+<p>The bitwise-NOT of this value.</p>
+<dl class="function">
+<dt>
+<tt class="descname">not</tt><big>(</big><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">timestamp the bitwise-NOT of this value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="and">
+<h2>and<a class="headerlink" href="#and" title="Permalink to this headline">¶</a></h2>
 <p>Returns the bitwise-AND of this Timestamp and the given one.</p>
 <dl class="function">
-<dt id="Timestamp.and">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">and</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.and" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">and</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -410,12 +614,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-or">
-<h2>Timestamp.or<a class="headerlink" href="#timestamp-or" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="or">
+<h2>or<a class="headerlink" href="#or" title="Permalink to this headline">¶</a></h2>
 <p>Returns the bitwise-OR of this Timestamp and the given one.</p>
 <dl class="function">
-<dt id="Timestamp.or">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">or</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.or" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">or</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -433,12 +637,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-xor">
-<h2>Timestamp.xor<a class="headerlink" href="#timestamp-xor" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="xor">
+<h2>xor<a class="headerlink" href="#xor" title="Permalink to this headline">¶</a></h2>
 <p>Returns the bitwise-XOR of this Timestamp and the given one.</p>
 <dl class="function">
-<dt id="Timestamp.xor">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">xor</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Timestamp.xor" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">xor</tt><big>(</big><em>other</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -456,12 +660,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-shiftleft">
-<h2>Timestamp.shiftLeft<a class="headerlink" href="#timestamp-shiftleft" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="shiftleft">
+<h2>shiftLeft<a class="headerlink" href="#shiftleft" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Timestamp with bits shifted to the left by the given amount.</p>
 <dl class="function">
-<dt id="Timestamp.shiftLeft">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">shiftLeft</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#Timestamp.shiftLeft" title="Permalink to this definition">¶</a></dt>
+<dt id="shiftLeft">
+<tt class="descname">shiftLeft</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#shiftLeft" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -479,12 +683,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-shiftright">
-<h2>Timestamp.shiftRight<a class="headerlink" href="#timestamp-shiftright" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="shiftright">
+<h2>shiftRight<a class="headerlink" href="#shiftright" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Timestamp with bits shifted to the right by the given amount.</p>
 <dl class="function">
-<dt id="Timestamp.shiftRight">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">shiftRight</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#Timestamp.shiftRight" title="Permalink to this definition">¶</a></dt>
+<dt id="shiftRight">
+<tt class="descname">shiftRight</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#shiftRight" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -502,12 +706,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="timestamp-shiftrightunsigned">
-<h2>Timestamp.shiftRightUnsigned<a class="headerlink" href="#timestamp-shiftrightunsigned" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="shiftrightunsigned">
+<h2>shiftRightUnsigned<a class="headerlink" href="#shiftrightunsigned" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Timestamp with bits shifted to the right by the given amount, with the new top bits matching the current sign bit.</p>
 <dl class="function">
-<dt id="Timestamp.shiftRightUnsigned">
-<tt class="descclassname">Timestamp.</tt><tt class="descname">shiftRightUnsigned</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#Timestamp.shiftRightUnsigned" title="Permalink to this definition">¶</a></dt>
+<dt id="shiftRightUnsigned">
+<tt class="descname">shiftRightUnsigned</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#shiftRightUnsigned" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -631,25 +835,37 @@ case would often result in infinite recursion.</p>
 <ul>
 <li><a class="reference internal" href="#">Timestamp()</a><ul>
 <li><a class="reference internal" href="#constructor">Constructor</a></li>
-<li><a class="reference internal" href="#timestamp-tostring">Timestamp.toString</a></li>
-<li><a class="reference internal" href="#timestamp-equals">Timestamp.equals</a></li>
-<li><a class="reference internal" href="#timestamp-notequals">Timestamp.notEquals</a></li>
-<li><a class="reference internal" href="#timestamp-lessthan">Timestamp.lessThan</a></li>
-<li><a class="reference internal" href="#timestamp-lessthanorequal">Timestamp.lessThanOrEqual</a></li>
-<li><a class="reference internal" href="#timestamp-greaterthan">Timestamp.greaterThan</a></li>
-<li><a class="reference internal" href="#timestamp-greaterthanorequal">Timestamp.greaterThanOrEqual</a></li>
-<li><a class="reference internal" href="#timestamp-compare">Timestamp.compare</a></li>
-<li><a class="reference internal" href="#timestamp-add">Timestamp.add</a></li>
-<li><a class="reference internal" href="#timestamp-subtract">Timestamp.subtract</a></li>
-<li><a class="reference internal" href="#timestamp-multiply">Timestamp.multiply</a></li>
-<li><a class="reference internal" href="#timestamp-div">Timestamp.div</a></li>
-<li><a class="reference internal" href="#timestamp-modulo">Timestamp.modulo</a></li>
-<li><a class="reference internal" href="#timestamp-and">Timestamp.and</a></li>
-<li><a class="reference internal" href="#timestamp-or">Timestamp.or</a></li>
-<li><a class="reference internal" href="#timestamp-xor">Timestamp.xor</a></li>
-<li><a class="reference internal" href="#timestamp-shiftleft">Timestamp.shiftLeft</a></li>
-<li><a class="reference internal" href="#timestamp-shiftright">Timestamp.shiftRight</a></li>
-<li><a class="reference internal" href="#timestamp-shiftrightunsigned">Timestamp.shiftRightUnsigned</a></li>
+<li><a class="reference internal" href="#toint">toInt</a></li>
+<li><a class="reference internal" href="#tonumber">toNumber</a></li>
+<li><a class="reference internal" href="#tojson">toJSON</a></li>
+<li><a class="reference internal" href="#tostring">toString</a></li>
+<li><a class="reference internal" href="#gethighbits">getHighBits</a></li>
+<li><a class="reference internal" href="#getlowbits">getLowBits</a></li>
+<li><a class="reference internal" href="#getlowbitsunsigned">getLowBitsUnsigned</a></li>
+<li><a class="reference internal" href="#getnumbitsabs">getNumBitsAbs</a></li>
+<li><a class="reference internal" href="#iszero">isZero</a></li>
+<li><a class="reference internal" href="#isnegative">isNegative</a></li>
+<li><a class="reference internal" href="#isodd">isOdd</a></li>
+<li><a class="reference internal" href="#equals">equals</a></li>
+<li><a class="reference internal" href="#notequals">notEquals</a></li>
+<li><a class="reference internal" href="#lessthan">lessThan</a></li>
+<li><a class="reference internal" href="#lessthanorequal">lessThanOrEqual</a></li>
+<li><a class="reference internal" href="#greaterthan">greaterThan</a></li>
+<li><a class="reference internal" href="#greaterthanorequal">greaterThanOrEqual</a></li>
+<li><a class="reference internal" href="#compare">compare</a></li>
+<li><a class="reference internal" href="#negate">negate</a></li>
+<li><a class="reference internal" href="#add">add</a></li>
+<li><a class="reference internal" href="#subtract">subtract</a></li>
+<li><a class="reference internal" href="#multiply">multiply</a></li>
+<li><a class="reference internal" href="#div">div</a></li>
+<li><a class="reference internal" href="#modulo">modulo</a></li>
+<li><a class="reference internal" href="#not">not</a></li>
+<li><a class="reference internal" href="#and">and</a></li>
+<li><a class="reference internal" href="#or">or</a></li>
+<li><a class="reference internal" href="#xor">xor</a></li>
+<li><a class="reference internal" href="#shiftleft">shiftLeft</a></li>
+<li><a class="reference internal" href="#shiftright">shiftRight</a></li>
+<li><a class="reference internal" href="#shiftrightunsigned">shiftRightUnsigned</a></li>
 <li><a class="reference internal" href="#timestamp-fromint">Timestamp.fromInt</a></li>
 <li><a class="reference internal" href="#timestamp-fromnumber">Timestamp.fromNumber</a></li>
 <li><a class="reference internal" href="#timestamp-frombits">Timestamp.fromBits</a></li>

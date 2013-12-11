@@ -73,12 +73,51 @@
 
 </div></blockquote>
 </div>
-<div class="section" id="objectid-equals">
-<h2>ObjectID.equals<a class="headerlink" href="#objectid-equals" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="tohexstring">
+<h2>toHexString<a class="headerlink" href="#tohexstring" title="Permalink to this headline">¶</a></h2>
+<p>Return the ObjectID id as a 24 byte hex string representation</p>
+<dl class="function">
+<dt id="toHexString">
+<tt class="descname">toHexString</tt><big>(</big><big>)</big><a class="headerlink" href="#toHexString" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string return the 24 byte hex string representation.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Generate a 24 character hex string representation of the ObjectID</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a new ObjectID</span>
+<span class="kd">var</span> <span class="nx">objectId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
+<span class="c1">// Verify that the hex string is 24 characters long</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="nx">objectId</span><span class="p">.</span><span class="nx">toHexString</span><span class="p">().</span><span class="nx">length</span><span class="p">);</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="equals">
+<h2>equals<a class="headerlink" href="#equals" title="Permalink to this headline">¶</a></h2>
 <p>Compares the equality of this ObjectID with &lt;code&gt;otherID&lt;/code&gt;.</p>
 <dl class="function">
-<dt id="ObjectID.equals">
-<tt class="descclassname">ObjectID.</tt><tt class="descname">equals</tt><big>(</big><em>otherID</em><big>)</big><a class="headerlink" href="#ObjectID.equals" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">equals</tt><big>(</big><em>otherID</em><big>)</big></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -95,6 +134,80 @@
 </table>
 </dd></dl>
 
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Compare two different ObjectID&#8217;s using the equals method</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Create a new ObjectID</span>
+<span class="kd">var</span> <span class="nx">objectId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
+<span class="c1">// Create a new ObjectID Based on the first ObjectID</span>
+<span class="kd">var</span> <span class="nx">objectId2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">(</span><span class="nx">objectId</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+<span class="c1">// Create another ObjectID</span>
+<span class="kd">var</span> <span class="nx">objectId3</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">();</span>
+<span class="c1">// objectId and objectId2 should be the same</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">objectId</span><span class="p">.</span><span class="nx">equals</span><span class="p">(</span><span class="nx">objectId2</span><span class="p">));</span>
+<span class="c1">// objectId and objectId2 should be different</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="o">!</span><span class="nx">objectId</span><span class="p">.</span><span class="nx">equals</span><span class="p">(</span><span class="nx">objectId3</span><span class="p">));</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="gettimestamp">
+<h2>getTimestamp<a class="headerlink" href="#gettimestamp" title="Permalink to this headline">¶</a></h2>
+<p>Returns the generation date (accurate up to the second) that this ID was generated.</p>
+<dl class="function">
+<dt id="getTimestamp">
+<tt class="descname">getTimestamp</tt><big>(</big><big>)</big><a class="headerlink" href="#getTimestamp" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">date the generation date</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Generate 12 byte binary string representation using a second based timestamp or
+default value</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="c1">// Get a timestamp in seconds</span>
+<span class="kd">var</span> <span class="nx">timestamp</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">().</span><span class="nx">getTime</span><span class="p">()</span><span class="o">/</span><span class="mi">1000</span><span class="p">);</span>
+<span class="c1">// Create a date with the timestamp</span>
+<span class="kd">var</span> <span class="nx">timestampDate</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="nx">timestamp</span><span class="o">*</span><span class="mi">1000</span><span class="p">);</span>
+
+<span class="c1">// Create a new ObjectID with a specific timestamp</span>
+<span class="kd">var</span> <span class="nx">objectId</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ObjectID</span><span class="p">(</span><span class="nx">timestamp</span><span class="p">);</span>
+
+<span class="c1">// Get the timestamp and validate correctness</span>
+<span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="nx">timestampDate</span><span class="p">.</span><span class="nx">toString</span><span class="p">(),</span> <span class="nx">objectId</span><span class="p">.</span><span class="nx">getTimestamp</span><span class="p">().</span><span class="nx">toString</span><span class="p">());</span>
+</pre></div>
+</div>
+</div></blockquote>
 </div>
 <div class="section" id="objectid-createfromtime">
 <h2>ObjectID.createFromTime<a class="headerlink" href="#objectid-createfromtime" title="Permalink to this headline">¶</a></h2>
@@ -202,7 +315,9 @@
 <ul>
 <li><a class="reference internal" href="#">ObjectID()</a><ul>
 <li><a class="reference internal" href="#constructor">Constructor</a></li>
-<li><a class="reference internal" href="#objectid-equals">ObjectID.equals</a></li>
+<li><a class="reference internal" href="#tohexstring">toHexString</a></li>
+<li><a class="reference internal" href="#equals">equals</a></li>
+<li><a class="reference internal" href="#gettimestamp">getTimestamp</a></li>
 <li><a class="reference internal" href="#objectid-createfromtime">ObjectID.createFromTime</a></li>
 <li><a class="reference internal" href="#objectid-createfromhexstring">ObjectID.createFromHexString</a></li>
 </ul>

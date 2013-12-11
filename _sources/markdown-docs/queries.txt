@@ -58,11 +58,14 @@ it when you expect only one record, for example when querying with
 
 ::
 
-      collection.findOne([query], callback)
+      collection.findOne(query, [fields, [options]], callback);
 
 Where
 
 -  ``query`` is a query object or an ``_id`` value
+-  ``fields`` - indicates which fields should be included in the
+   response (default is all)
+-  ``options`` - defines extra logic (sorting options, paging etc.)
 -  ``callback`` has two parameters - an error object (if an error
    occured) and the document object.
 
