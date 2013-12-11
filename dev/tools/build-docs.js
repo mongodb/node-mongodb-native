@@ -86,87 +86,87 @@ var outputDirectory = "./docs/sphinx-docs/source/api-generated"
 // ----------------------------------------------------------------------------
 docs.renderAPIDocs(outputDirectory, apiClasses, testClasses, templates, {index_title:'Driver API'});
 
-// // ----------------------------------------------------------------------------
-// // PROCESS BSON API
-// // ----------------------------------------------------------------------------
-// // Output directory
-// var outputDirectory2 = "./docs/sphinx-docs/source/api-bson-generated"
-// // Force create the directory for the generated docs
-// exec('rm -rf ' + outputDirectory2, function (error, stdout, stderr) {});
-// exec('mkdir ' + outputDirectory2, function (error, stdout, stderr) {});
+// ----------------------------------------------------------------------------
+// PROCESS BSON API
+// ----------------------------------------------------------------------------
+// Output directory
+var outputDirectory2 = "./docs/sphinx-docs/source/api-bson-generated"
+// Force create the directory for the generated docs
+exec('rm -rf ' + outputDirectory2, function (error, stdout, stderr) {});
+exec('mkdir ' + outputDirectory2, function (error, stdout, stderr) {});
 
-// var apiClasses2 = [
-//     {tag:"objectid", path:"./node_modules/bson/lib/bson/objectid.js"},
-//     {tag:"binary", path:"./node_modules/bson/lib/bson/binary.js"},
-//     {tag:"code", path:"./node_modules/bson/lib/bson/code.js"},
-//     {tag:"db_ref", path:"./node_modules/bson/lib/bson/db_ref.js"},
-//     {tag:"double", path:"./node_modules/bson/lib/bson/double.js"},
-//     {tag:"minkey", path:"./node_modules/bson/lib/bson/min_key.js"},
-//     {tag:"maxkey", path:"./node_modules/bson/lib/bson/max_key.js"},
-//     {tag:"symbol", path:"./node_modules/bson/lib/bson/symbol.js"},
-//     {tag:"timestamp", path:"./node_modules/bson/lib/bson/timestamp.js"},
-//     {tag:"long", path:"./node_modules/bson/lib/bson/long.js"},
-//     {tag:"bson", path:"./node_modules/bson/lib/bson/bson.js"}
-//   ];
+var apiClasses2 = [
+    {tag:"objectid", path:"./node_modules/bson/lib/bson/objectid.js"},
+    {tag:"binary", path:"./node_modules/bson/lib/bson/binary.js"},
+    {tag:"code", path:"./node_modules/bson/lib/bson/code.js"},
+    {tag:"db_ref", path:"./node_modules/bson/lib/bson/db_ref.js"},
+    {tag:"double", path:"./node_modules/bson/lib/bson/double.js"},
+    {tag:"minkey", path:"./node_modules/bson/lib/bson/min_key.js"},
+    {tag:"maxkey", path:"./node_modules/bson/lib/bson/max_key.js"},
+    {tag:"symbol", path:"./node_modules/bson/lib/bson/symbol.js"},
+    {tag:"timestamp", path:"./node_modules/bson/lib/bson/timestamp.js"},
+    {tag:"long", path:"./node_modules/bson/lib/bson/long.js"},
+    {tag:"bson", path:"./node_modules/bson/lib/bson/bson.js"}
+  ];
 
-// // Render the API docs
-// docs.renderAPIDocs(outputDirectory2, apiClasses2, testClasses, templates, {index_title:'Binary JSON API'});
+// Render the API docs
+docs.renderAPIDocs(outputDirectory2, apiClasses2, testClasses, templates, {index_title:'Binary JSON API'});
 
-// // process.exit(0)
+// process.exit(0)
 
-// // ----------------------------------------------------------------------------
-// // PROCESS MARKDOWN DOCUMENTS TO STRUCTURED TEXT
-// // ----------------------------------------------------------------------------
-// // Transform the versionb based content
-// var articles = [
-//     {name:"MongoClient", output:"MongoClient.rst", path:"./docs/articles/MongoClient.md"},
-//     {name:"AnIntroductionTo1_1And2_2", output:"AnIntroductionTo1_1And2_2.rst", path:"./docs/articles/AnIntroductionTo1_1And2_2.md"}
-//   ];
+// ----------------------------------------------------------------------------
+// PROCESS MARKDOWN DOCUMENTS TO STRUCTURED TEXT
+// ----------------------------------------------------------------------------
+// Transform the versionb based content
+var articles = [
+    {name:"MongoClient", output:"MongoClient.rst", path:"./docs/articles/MongoClient.md"},
+    {name:"AnIntroductionTo1_1And2_2", output:"AnIntroductionTo1_1And2_2.rst", path:"./docs/articles/AnIntroductionTo1_1And2_2.md"}
+  ];
 
-// // Tranform the markdown to restructured text
-// docs.writeMarkDownFile("./docs/sphinx-docs/source/driver-articles", articles, templates,
-//   {title:'Updates', template:'index'});
+// Tranform the markdown to restructured text
+docs.writeMarkDownFile("./docs/sphinx-docs/source/driver-articles", articles, templates,
+  {title:'Updates', template:'index'});
 
-// // Transform the tutorials
-// var articles = [
-//     {name:"NodeKOArticle1", output:"NodeKOArticle1.rst", path:"./docs/articles/NodeKOArticle1.md"},
-//     {name:"NodeKOArticle2", output:"NodeKOArticle2.rst", path:"./docs/articles/NodeKOArticle2.md"}
-//   ];
+// Transform the tutorials
+var articles = [
+    {name:"NodeKOArticle1", output:"NodeKOArticle1.rst", path:"./docs/articles/NodeKOArticle1.md"},
+    {name:"NodeKOArticle2", output:"NodeKOArticle2.rst", path:"./docs/articles/NodeKOArticle2.md"}
+  ];
 
-// // Tranform the markdown to restructured text
-// docs.writeMarkDownFile("./docs/sphinx-docs/source/api-articles", articles, templates,
-//   {title:'Articles', template:'index'});
+// Tranform the markdown to restructured text
+docs.writeMarkDownFile("./docs/sphinx-docs/source/api-articles", articles, templates,
+  {title:'Articles', template:'index'});
 
-// // Transform the tutorials
-// var articles = [
-//     {name:"collections", output:"collections.rst", path:"./docs/collections.md"},
-//     {name:"gridfs", output:"gridfs.rst", path:"./docs/gridfs.md"},
-//     {name:"indexes", output:"indexes.rst", path:"./docs/indexes.md"},
-//     {name:"insert", output:"insert.rst", path:"./docs/insert.md"},
-//     {name:"queries", output:"queries.rst", path:"./docs/queries.md"}
-//   ];
+// Transform the tutorials
+var articles = [
+    {name:"collections", output:"collections.rst", path:"./docs/collections.md"},
+    {name:"gridfs", output:"gridfs.rst", path:"./docs/gridfs.md"},
+    {name:"indexes", output:"indexes.rst", path:"./docs/indexes.md"},
+    {name:"insert", output:"insert.rst", path:"./docs/insert.md"},
+    {name:"queries", output:"queries.rst", path:"./docs/queries.md"}
+  ];
 
-// // Tranform the markdown to restructured text
-// docs.writeMarkDownFile("./docs/sphinx-docs/source/markdown-docs", articles, templates,
-//   {title:'Using the driver', template:'index_no_header'});
+// Tranform the markdown to restructured text
+docs.writeMarkDownFile("./docs/sphinx-docs/source/markdown-docs", articles, templates,
+  {title:'Using the driver', template:'index_no_header'});
 
-// // ----------------------------------------------------------------------------
-// // WRITE CHANGELOG TO THE DOCUMENTATION
-// // ----------------------------------------------------------------------------
-// // Outputdiectory
-// var outputDirectoryChangelog = "./docs/sphinx-docs/source/changelog";
-// // Force create the directory for the generated docs
-// exec('rm -rf ' + outputDirectoryChangelog, function (error, stdout, stderr) {});
-// exec('mkdir ' + outputDirectoryChangelog, function (error, stdout, stderr) {
-//   // Read all the templates
-//   var templateObjects = docs.readAllTemplates(templates);
-//   // Read the changelog
-//   var changelog = fs.readFileSync('./HISTORY').toString();
-//   // Just write out the index
-//   var content = ejs.render(templateObjects["changelog"], {content:changelog});
-//   // Write it out
-//   fs.writeFileSync(format("%s/changelog.rst", outputDirectoryChangelog), content);
-// });
+// ----------------------------------------------------------------------------
+// WRITE CHANGELOG TO THE DOCUMENTATION
+// ----------------------------------------------------------------------------
+// Outputdiectory
+var outputDirectoryChangelog = "./docs/sphinx-docs/source/changelog";
+// Force create the directory for the generated docs
+exec('rm -rf ' + outputDirectoryChangelog, function (error, stdout, stderr) {});
+exec('mkdir ' + outputDirectoryChangelog, function (error, stdout, stderr) {
+  // Read all the templates
+  var templateObjects = docs.readAllTemplates(templates);
+  // Read the changelog
+  var changelog = fs.readFileSync('./HISTORY').toString();
+  // Just write out the index
+  var content = ejs.render(templateObjects["changelog"], {content:changelog});
+  // Write it out
+  fs.writeFileSync(format("%s/changelog.rst", outputDirectoryChangelog), content);
+});
 
 // ----------------------------------------------------------------------------
 // Generate using the driver pages
