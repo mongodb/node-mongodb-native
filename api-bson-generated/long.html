@@ -88,63 +88,12 @@ Note that we must ALWAYS check specially whether those values are MIN_VALUE
 a positive number, it overflows back into a negative).  Not handling this
 case would often result in infinite recursion.</p>
 </div>
-<div class="section" id="toint">
-<h2>toInt<a class="headerlink" href="#toint" title="Permalink to this headline">¶</a></h2>
-<p>Return the int value.</p>
-<dl class="function">
-<dt id="toInt">
-<tt class="descname">toInt</tt><big>(</big><big>)</big><a class="headerlink" href="#toInt" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the value, assuming it is a 32-bit integer.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="tonumber">
-<h2>toNumber<a class="headerlink" href="#tonumber" title="Permalink to this headline">¶</a></h2>
-<p>Return the Number value.</p>
-<dl class="function">
-<dt id="toNumber">
-<tt class="descname">toNumber</tt><big>(</big><big>)</big><a class="headerlink" href="#toNumber" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the closest floating-point representation to this value.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="tojson">
-<h2>toJSON<a class="headerlink" href="#tojson" title="Permalink to this headline">¶</a></h2>
-<p>Return the JSON value.</p>
-<dl class="function">
-<dt id="toJSON">
-<tt class="descname">toJSON</tt><big>(</big><big>)</big><a class="headerlink" href="#toJSON" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string the JSON representation.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="tostring">
-<h2>toString<a class="headerlink" href="#tostring" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-tostring">
+<h2>Long.toString<a class="headerlink" href="#long-tostring" title="Permalink to this headline">¶</a></h2>
 <p>Return the String value.</p>
 <dl class="function">
-<dt id="toString">
-<tt class="descname">toString</tt><big>(</big><span class="optional">[</span><em>opt_radix</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#toString" title="Permalink to this definition">¶</a></dt>
+<dt id="Long.toString">
+<tt class="descclassname">Long.</tt><tt class="descname">toString</tt><big>(</big><span class="optional">[</span><em>opt_radix</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#Long.toString" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -162,131 +111,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="gethighbits">
-<h2>getHighBits<a class="headerlink" href="#gethighbits" title="Permalink to this headline">¶</a></h2>
-<p>Return the high 32-bits value.</p>
-<dl class="function">
-<dt id="getHighBits">
-<tt class="descname">getHighBits</tt><big>(</big><big>)</big><a class="headerlink" href="#getHighBits" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the high 32-bits as a signed value.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="getlowbits">
-<h2>getLowBits<a class="headerlink" href="#getlowbits" title="Permalink to this headline">¶</a></h2>
-<p>Return the low 32-bits value.</p>
-<dl class="function">
-<dt id="getLowBits">
-<tt class="descname">getLowBits</tt><big>(</big><big>)</big><a class="headerlink" href="#getLowBits" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the low 32-bits as a signed value.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="getlowbitsunsigned">
-<h2>getLowBitsUnsigned<a class="headerlink" href="#getlowbitsunsigned" title="Permalink to this headline">¶</a></h2>
-<p>Return the low unsigned 32-bits value.</p>
-<dl class="function">
-<dt id="getLowBitsUnsigned">
-<tt class="descname">getLowBitsUnsigned</tt><big>(</big><big>)</big><a class="headerlink" href="#getLowBitsUnsigned" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the low 32-bits as an unsigned value.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="getnumbitsabs">
-<h2>getNumBitsAbs<a class="headerlink" href="#getnumbitsabs" title="Permalink to this headline">¶</a></h2>
-<p>Returns the number of bits needed to represent the absolute value of this Long.</p>
-<dl class="function">
-<dt id="getNumBitsAbs">
-<tt class="descname">getNumBitsAbs</tt><big>(</big><big>)</big><a class="headerlink" href="#getNumBitsAbs" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number Returns the number of bits needed to represent the absolute value of this Long.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="iszero">
-<h2>isZero<a class="headerlink" href="#iszero" title="Permalink to this headline">¶</a></h2>
-<p>Return whether this value is zero.</p>
-<dl class="function">
-<dt id="isZero">
-<tt class="descname">isZero</tt><big>(</big><big>)</big><a class="headerlink" href="#isZero" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean whether this value is zero.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="isnegative">
-<h2>isNegative<a class="headerlink" href="#isnegative" title="Permalink to this headline">¶</a></h2>
-<p>Return whether this value is negative.</p>
-<dl class="function">
-<dt id="isNegative">
-<tt class="descname">isNegative</tt><big>(</big><big>)</big><a class="headerlink" href="#isNegative" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean whether this value is negative.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="isodd">
-<h2>isOdd<a class="headerlink" href="#isodd" title="Permalink to this headline">¶</a></h2>
-<p>Return whether this value is odd.</p>
-<dl class="function">
-<dt id="isOdd">
-<tt class="descname">isOdd</tt><big>(</big><big>)</big><a class="headerlink" href="#isOdd" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean whether this value is odd.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="equals">
-<h2>equals<a class="headerlink" href="#equals" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-equals">
+<h2>Long.equals<a class="headerlink" href="#long-equals" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Long equals the other</p>
 <dl class="function">
-<dt>
-<tt class="descname">equals</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.equals">
+<tt class="descclassname">Long.</tt><tt class="descname">equals</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.equals" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -304,12 +134,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="notequals">
-<h2>notEquals<a class="headerlink" href="#notequals" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-notequals">
+<h2>Long.notEquals<a class="headerlink" href="#long-notequals" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Long does not equal the other.</p>
 <dl class="function">
-<dt id="notEquals">
-<tt class="descname">notEquals</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#notEquals" title="Permalink to this definition">¶</a></dt>
+<dt id="Long.notEquals">
+<tt class="descclassname">Long.</tt><tt class="descname">notEquals</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.notEquals" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -327,12 +157,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="lessthan">
-<h2>lessThan<a class="headerlink" href="#lessthan" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-lessthan">
+<h2>Long.lessThan<a class="headerlink" href="#long-lessthan" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Long is less than the other.</p>
 <dl class="function">
-<dt id="lessThan">
-<tt class="descname">lessThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#lessThan" title="Permalink to this definition">¶</a></dt>
+<dt id="Long.lessThan">
+<tt class="descclassname">Long.</tt><tt class="descname">lessThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.lessThan" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -350,12 +180,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="lessthanorequal">
-<h2>lessThanOrEqual<a class="headerlink" href="#lessthanorequal" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-lessthanorequal">
+<h2>Long.lessThanOrEqual<a class="headerlink" href="#long-lessthanorequal" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Long is less than or equal to the other.</p>
 <dl class="function">
-<dt id="lessThanOrEqual">
-<tt class="descname">lessThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#lessThanOrEqual" title="Permalink to this definition">¶</a></dt>
+<dt id="Long.lessThanOrEqual">
+<tt class="descclassname">Long.</tt><tt class="descname">lessThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.lessThanOrEqual" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -373,12 +203,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="greaterthan">
-<h2>greaterThan<a class="headerlink" href="#greaterthan" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-greaterthan">
+<h2>Long.greaterThan<a class="headerlink" href="#long-greaterthan" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Long is greater than the other.</p>
 <dl class="function">
-<dt id="greaterThan">
-<tt class="descname">greaterThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#greaterThan" title="Permalink to this definition">¶</a></dt>
+<dt id="Long.greaterThan">
+<tt class="descclassname">Long.</tt><tt class="descname">greaterThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.greaterThan" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -396,12 +226,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="greaterthanorequal">
-<h2>greaterThanOrEqual<a class="headerlink" href="#greaterthanorequal" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-greaterthanorequal">
+<h2>Long.greaterThanOrEqual<a class="headerlink" href="#long-greaterthanorequal" title="Permalink to this headline">¶</a></h2>
 <p>Return whether this Long is greater than or equal to the other.</p>
 <dl class="function">
-<dt id="greaterThanOrEqual">
-<tt class="descname">greaterThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#greaterThanOrEqual" title="Permalink to this definition">¶</a></dt>
+<dt id="Long.greaterThanOrEqual">
+<tt class="descclassname">Long.</tt><tt class="descname">greaterThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.greaterThanOrEqual" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -419,12 +249,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="compare">
-<h2>compare<a class="headerlink" href="#compare" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-compare">
+<h2>Long.compare<a class="headerlink" href="#long-compare" title="Permalink to this headline">¶</a></h2>
 <p>Compares this Long with the given one.</p>
 <dl class="function">
-<dt>
-<tt class="descname">compare</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.compare">
+<tt class="descclassname">Long.</tt><tt class="descname">compare</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.compare" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -442,29 +272,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="negate">
-<h2>negate<a class="headerlink" href="#negate" title="Permalink to this headline">¶</a></h2>
-<p>The negation of this value.</p>
-<dl class="function">
-<dt>
-<tt class="descname">negate</tt><big>(</big><big>)</big></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">long the negation of this value.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="add">
-<h2>add<a class="headerlink" href="#add" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-add">
+<h2>Long.add<a class="headerlink" href="#long-add" title="Permalink to this headline">¶</a></h2>
 <p>Returns the sum of this and the given Long.</p>
 <dl class="function">
-<dt>
-<tt class="descname">add</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.add">
+<tt class="descclassname">Long.</tt><tt class="descname">add</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.add" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -482,12 +295,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="subtract">
-<h2>subtract<a class="headerlink" href="#subtract" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-subtract">
+<h2>Long.subtract<a class="headerlink" href="#long-subtract" title="Permalink to this headline">¶</a></h2>
 <p>Returns the difference of this and the given Long.</p>
 <dl class="function">
-<dt>
-<tt class="descname">subtract</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.subtract">
+<tt class="descclassname">Long.</tt><tt class="descname">subtract</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.subtract" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -505,12 +318,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="multiply">
-<h2>multiply<a class="headerlink" href="#multiply" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-multiply">
+<h2>Long.multiply<a class="headerlink" href="#long-multiply" title="Permalink to this headline">¶</a></h2>
 <p>Returns the product of this and the given Long.</p>
 <dl class="function">
-<dt>
-<tt class="descname">multiply</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.multiply">
+<tt class="descclassname">Long.</tt><tt class="descname">multiply</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.multiply" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -528,12 +341,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="div">
-<h2>div<a class="headerlink" href="#div" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-div">
+<h2>Long.div<a class="headerlink" href="#long-div" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Long divided by the given one.</p>
 <dl class="function">
-<dt>
-<tt class="descname">div</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.div">
+<tt class="descclassname">Long.</tt><tt class="descname">div</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.div" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -551,12 +364,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="modulo">
-<h2>modulo<a class="headerlink" href="#modulo" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-modulo">
+<h2>Long.modulo<a class="headerlink" href="#long-modulo" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Long modulo the given one.</p>
 <dl class="function">
-<dt>
-<tt class="descname">modulo</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.modulo">
+<tt class="descclassname">Long.</tt><tt class="descname">modulo</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.modulo" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -574,29 +387,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="not">
-<h2>not<a class="headerlink" href="#not" title="Permalink to this headline">¶</a></h2>
-<p>The bitwise-NOT of this value.</p>
-<dl class="function">
-<dt>
-<tt class="descname">not</tt><big>(</big><big>)</big></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">long the bitwise-NOT of this value.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="and">
-<h2>and<a class="headerlink" href="#and" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-and">
+<h2>Long.and<a class="headerlink" href="#long-and" title="Permalink to this headline">¶</a></h2>
 <p>Returns the bitwise-AND of this Long and the given one.</p>
 <dl class="function">
-<dt>
-<tt class="descname">and</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.and">
+<tt class="descclassname">Long.</tt><tt class="descname">and</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.and" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -614,12 +410,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="or">
-<h2>or<a class="headerlink" href="#or" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-or">
+<h2>Long.or<a class="headerlink" href="#long-or" title="Permalink to this headline">¶</a></h2>
 <p>Returns the bitwise-OR of this Long and the given one.</p>
 <dl class="function">
-<dt>
-<tt class="descname">or</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.or">
+<tt class="descclassname">Long.</tt><tt class="descname">or</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.or" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -637,12 +433,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="xor">
-<h2>xor<a class="headerlink" href="#xor" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-xor">
+<h2>Long.xor<a class="headerlink" href="#long-xor" title="Permalink to this headline">¶</a></h2>
 <p>Returns the bitwise-XOR of this Long and the given one.</p>
 <dl class="function">
-<dt>
-<tt class="descname">xor</tt><big>(</big><em>other</em><big>)</big></dt>
+<dt id="Long.xor">
+<tt class="descclassname">Long.</tt><tt class="descname">xor</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#Long.xor" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -660,12 +456,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="shiftleft">
-<h2>shiftLeft<a class="headerlink" href="#shiftleft" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-shiftleft">
+<h2>Long.shiftLeft<a class="headerlink" href="#long-shiftleft" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Long with bits shifted to the left by the given amount.</p>
 <dl class="function">
-<dt id="shiftLeft">
-<tt class="descname">shiftLeft</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#shiftLeft" title="Permalink to this definition">¶</a></dt>
+<dt id="Long.shiftLeft">
+<tt class="descclassname">Long.</tt><tt class="descname">shiftLeft</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#Long.shiftLeft" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -683,12 +479,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="shiftright">
-<h2>shiftRight<a class="headerlink" href="#shiftright" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-shiftright">
+<h2>Long.shiftRight<a class="headerlink" href="#long-shiftright" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Long with bits shifted to the right by the given amount.</p>
 <dl class="function">
-<dt id="shiftRight">
-<tt class="descname">shiftRight</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#shiftRight" title="Permalink to this definition">¶</a></dt>
+<dt id="Long.shiftRight">
+<tt class="descclassname">Long.</tt><tt class="descname">shiftRight</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#Long.shiftRight" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -706,12 +502,12 @@ case would often result in infinite recursion.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="shiftrightunsigned">
-<h2>shiftRightUnsigned<a class="headerlink" href="#shiftrightunsigned" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="long-shiftrightunsigned">
+<h2>Long.shiftRightUnsigned<a class="headerlink" href="#long-shiftrightunsigned" title="Permalink to this headline">¶</a></h2>
 <p>Returns this Long with bits shifted to the right by the given amount, with the new top bits matching the current sign bit.</p>
 <dl class="function">
-<dt id="shiftRightUnsigned">
-<tt class="descname">shiftRightUnsigned</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#shiftRightUnsigned" title="Permalink to this definition">¶</a></dt>
+<dt id="Long.shiftRightUnsigned">
+<tt class="descclassname">Long.</tt><tt class="descname">shiftRightUnsigned</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#Long.shiftRightUnsigned" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -835,37 +631,25 @@ case would often result in infinite recursion.</p>
 <ul>
 <li><a class="reference internal" href="#">Long()</a><ul>
 <li><a class="reference internal" href="#constructor">Constructor</a></li>
-<li><a class="reference internal" href="#toint">toInt</a></li>
-<li><a class="reference internal" href="#tonumber">toNumber</a></li>
-<li><a class="reference internal" href="#tojson">toJSON</a></li>
-<li><a class="reference internal" href="#tostring">toString</a></li>
-<li><a class="reference internal" href="#gethighbits">getHighBits</a></li>
-<li><a class="reference internal" href="#getlowbits">getLowBits</a></li>
-<li><a class="reference internal" href="#getlowbitsunsigned">getLowBitsUnsigned</a></li>
-<li><a class="reference internal" href="#getnumbitsabs">getNumBitsAbs</a></li>
-<li><a class="reference internal" href="#iszero">isZero</a></li>
-<li><a class="reference internal" href="#isnegative">isNegative</a></li>
-<li><a class="reference internal" href="#isodd">isOdd</a></li>
-<li><a class="reference internal" href="#equals">equals</a></li>
-<li><a class="reference internal" href="#notequals">notEquals</a></li>
-<li><a class="reference internal" href="#lessthan">lessThan</a></li>
-<li><a class="reference internal" href="#lessthanorequal">lessThanOrEqual</a></li>
-<li><a class="reference internal" href="#greaterthan">greaterThan</a></li>
-<li><a class="reference internal" href="#greaterthanorequal">greaterThanOrEqual</a></li>
-<li><a class="reference internal" href="#compare">compare</a></li>
-<li><a class="reference internal" href="#negate">negate</a></li>
-<li><a class="reference internal" href="#add">add</a></li>
-<li><a class="reference internal" href="#subtract">subtract</a></li>
-<li><a class="reference internal" href="#multiply">multiply</a></li>
-<li><a class="reference internal" href="#div">div</a></li>
-<li><a class="reference internal" href="#modulo">modulo</a></li>
-<li><a class="reference internal" href="#not">not</a></li>
-<li><a class="reference internal" href="#and">and</a></li>
-<li><a class="reference internal" href="#or">or</a></li>
-<li><a class="reference internal" href="#xor">xor</a></li>
-<li><a class="reference internal" href="#shiftleft">shiftLeft</a></li>
-<li><a class="reference internal" href="#shiftright">shiftRight</a></li>
-<li><a class="reference internal" href="#shiftrightunsigned">shiftRightUnsigned</a></li>
+<li><a class="reference internal" href="#long-tostring">Long.toString</a></li>
+<li><a class="reference internal" href="#long-equals">Long.equals</a></li>
+<li><a class="reference internal" href="#long-notequals">Long.notEquals</a></li>
+<li><a class="reference internal" href="#long-lessthan">Long.lessThan</a></li>
+<li><a class="reference internal" href="#long-lessthanorequal">Long.lessThanOrEqual</a></li>
+<li><a class="reference internal" href="#long-greaterthan">Long.greaterThan</a></li>
+<li><a class="reference internal" href="#long-greaterthanorequal">Long.greaterThanOrEqual</a></li>
+<li><a class="reference internal" href="#long-compare">Long.compare</a></li>
+<li><a class="reference internal" href="#long-add">Long.add</a></li>
+<li><a class="reference internal" href="#long-subtract">Long.subtract</a></li>
+<li><a class="reference internal" href="#long-multiply">Long.multiply</a></li>
+<li><a class="reference internal" href="#long-div">Long.div</a></li>
+<li><a class="reference internal" href="#long-modulo">Long.modulo</a></li>
+<li><a class="reference internal" href="#long-and">Long.and</a></li>
+<li><a class="reference internal" href="#long-or">Long.or</a></li>
+<li><a class="reference internal" href="#long-xor">Long.xor</a></li>
+<li><a class="reference internal" href="#long-shiftleft">Long.shiftLeft</a></li>
+<li><a class="reference internal" href="#long-shiftright">Long.shiftRight</a></li>
+<li><a class="reference internal" href="#long-shiftrightunsigned">Long.shiftRightUnsigned</a></li>
 <li><a class="reference internal" href="#long-fromint">Long.fromInt</a></li>
 <li><a class="reference internal" href="#long-fromnumber">Long.fromNumber</a></li>
 <li><a class="reference internal" href="#long-frombits">Long.fromBits</a></li>

@@ -1902,23 +1902,3 @@ Writes some data. This method will work properly only if initialized with mode "
        });
      });
 
-
------
-pause
------
-
-
-pause
-
-.. js:function:: pause()
-
-
-------
-resume
-------
-
-
-resume
-
-.. js:function:: resume()
-

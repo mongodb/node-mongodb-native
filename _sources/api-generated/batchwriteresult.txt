@@ -1,0 +1,130 @@
+==================
+BatchWriteResult()
+==================
+
+------------------
+Constructor
+------------------
+
+
+Create a new BatchWriteResult instance (INTERNAL TYPE, do not instantiate directly)
+
+
+  .. js:class:: BatchWriteResult()
+
+   :param object batchResult: internal data structure with results.
+   :returns: batchwriteresult a BatchWriteResult instance
+
+
+
+------------------
+Properties
+------------------
+
+.. csv-table:: 
+   :header: "Property"
+   :widths: 30
+
+   "**n** {number} number of documents affected"
+   "**nInserted** {number} number of inserted documents"
+   "**nUpdated** {number} number of updated documents"
+   "**nUpserted** {number} number of upserted documents"
+   "**nRemoved** {number} number of removed documents"
+
+--------------
+getUpsertedIds
+--------------
+
+
+Return an array of upserted ids
+
+.. js:function:: getUpsertedIds()
+
+   :returns: array 
+
+
+---------------
+getUpsertedIdAt
+---------------
+
+
+Return the upserted id at position x
+
+.. js:function:: getUpsertedIdAt(index)
+
+   :param number index: the number of the upserted id to return, returns undefined if no result for passed in index
+   :returns: array 
+
+
+--------------
+getRawResponse
+--------------
+
+
+Return raw internal result
+
+.. js:function:: getRawResponse()
+
+   :returns: object 
+
+
+--------------
+getSingleError
+--------------
+
+
+Returns top level error object
+
+.. js:function:: getSingleError()
+
+   :returns: object 
+
+
+---------
+hasErrors
+---------
+
+
+Checks if results have errors
+
+.. js:function:: hasErrors()
+
+   :returns: boolean 
+
+
+-------------
+getErrorCount
+-------------
+
+
+Returns the number of errors
+
+.. js:function:: getErrorCount()
+
+   :returns: number 
+
+
+----------
+getErrorAt
+----------
+
+
+Returns the WriteError at the passed in index, returns undefined if no error at the provided index
+
+.. js:function:: getErrorAt(index)
+
+   :param number index: the number of the error to return, returns undefined if no result for passed in index
+   :returns: writeerror 
+
+
+-----------
+getWCErrors
+-----------
+
+
+Returns the number of write concern errors
+
+.. js:function:: getWCErrors()
+
+   :returns: number 
+

@@ -37,3 +37,17 @@ Options
  - **sslKey** {Buffer/String, default:null}, String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
  - **sslPass** {Buffer/String, default:null}, String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher)
 
+
+------------
+createServer
+------------
+
+
+Creates a new server for the <code>replset</code> based on <code>host</code>.
+
+.. js:function:: createServer(host, replset)
+
+   :param string host: - host:port pair (localhost:27017)
+   :param replset replset: - the ReplSet instance
+   :returns: server 
+

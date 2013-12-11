@@ -16,15 +16,3 @@ A class representation of the BSON Double type.
    :returns: double 
 
 
-
--------
-valueOf
--------
-
-
-Access the number value.
-
-.. js:function:: valueOf()
-
-   :returns: number returns the wrapped double number.
-

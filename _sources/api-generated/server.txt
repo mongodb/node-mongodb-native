@@ -32,16 +32,6 @@ Options
  - **disableDriverBSONSizeCheck** {Boolean, default:false}, force the server to error if the BSON message is to big
 
 
------------------
-setReadPreference
------------------
-
-
-Always ourselves
-
-.. js:function:: setReadPreference()
-
-
 ----------------
 assignReplicaSet
 ----------------
@@ -64,13 +54,3 @@ our own options.
 .. js:function:: inheritReplSetOptionsFrom(replset)
 
    :param replset replset: 
-
--------
-connect
--------
-
-
-Opens this server connection.
-
-.. js:function:: connect()
-

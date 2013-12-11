@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ReadStream() &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
+    <title>OrderedBulkOperation() &mdash; MongoDB Node.JS Driver 1.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.20',
+        VERSION:     '1.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" />
-    <link rel="next" title="BSON()" href="../api-bson-generated/bson.html" />
-    <link rel="prev" title="GridStore()" href="gridstore.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.0 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -37,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -46,26 +44,26 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="readstream">
-<h1>ReadStream()<a class="headerlink" href="#readstream" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="orderedbulkoperation">
+<h1>OrderedBulkOperation()<a class="headerlink" href="#orderedbulkoperation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="constructor">
 <h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
-<p>ReadStream</p>
+<p>Create a new OrderedBulkOperation instance (INTERNAL TYPE, do not instantiate directly)</p>
 <blockquote>
 <div><dl class="class">
-<dt id="ReadStream">
-<em class="property">class </em><tt class="descname">ReadStream</tt><big>(</big><big>)</big><a class="headerlink" href="#ReadStream" title="Permalink to this definition">¶</a></dt>
+<dt id="OrderedBulkOperation">
+<em class="property">class </em><tt class="descname">OrderedBulkOperation</tt><big>(</big><big>)</big><a class="headerlink" href="#OrderedBulkOperation" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><strong>autoclose</strong> (<em>boolean</em>) &#8211; automatically close file when the stream reaches the end.</li>
-<li><strong>cursor</strong> (<em>gridstore</em>) &#8211; a cursor object that the stream wraps.</li>
+<li><strong>collection</strong> (<em>object</em>) &#8211; collection instance.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options for the collection.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">readstream</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">object a ordered bulk operation instance.</p>
 </td>
 </tr>
 </tbody>
@@ -73,17 +71,228 @@
 </dd></dl>
 
 </div></blockquote>
-<p>Returns a stream interface for the <strong>file</strong>.</p>
 <dl class="docutils">
-<dt>Events</dt>
+<dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>data</strong> {function(item) {}} the data event triggers when a document is ready.</li>
-<li><strong>end</strong> {function() {}} the end event triggers when there is no more documents available.</li>
-<li><strong>close</strong> {function() {}} the close event triggers when the stream is closed.</li>
-<li><strong>error</strong> {function(err) {}} the error event triggers if an error happens.</li>
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
+<li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
+<li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
 </ul>
 </dd>
 </dl>
+</div>
+<div class="section" id="update">
+<h2>update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h2>
+<p>Add a single update document to the bulk operation</p>
+<dl class="function">
+<dt>
+<tt class="descname">update</tt><big>(</big><em>doc</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; update operations</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="updateone">
+<h2>updateOne<a class="headerlink" href="#updateone" title="Permalink to this headline">¶</a></h2>
+<p>Add a single update one document to the bulk operation</p>
+<dl class="function">
+<dt id="updateOne">
+<tt class="descname">updateOne</tt><big>(</big><em>doc</em><big>)</big><a class="headerlink" href="#updateOne" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; update operations</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="replaceone">
+<h2>replaceOne<a class="headerlink" href="#replaceone" title="Permalink to this headline">¶</a></h2>
+<p>Add a replace one operation to the bulk operation</p>
+<dl class="function">
+<dt id="replaceOne">
+<tt class="descname">replaceOne</tt><big>(</big><em>doc</em><big>)</big><a class="headerlink" href="#replaceOne" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; the new document to replace the existing one with</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="upsert">
+<h2>upsert<a class="headerlink" href="#upsert" title="Permalink to this headline">¶</a></h2>
+<p>Upsert modifier for update bulk operation</p>
+<dl class="function">
+<dt>
+<tt class="descname">upsert</tt><big>(</big><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">orderedbulkoperation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="removeone">
+<h2>removeOne<a class="headerlink" href="#removeone" title="Permalink to this headline">¶</a></h2>
+<p>Add a remove one operation to the bulk operation</p>
+<dl class="function">
+<dt id="removeOne">
+<tt class="descname">removeOne</tt><big>(</big><em>doc</em><big>)</big><a class="headerlink" href="#removeOne" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; selector for the removal of documents</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="remove">
+<h2>remove<a class="headerlink" href="#remove" title="Permalink to this headline">¶</a></h2>
+<p>Add a remove operation to the bulk operation</p>
+<dl class="function">
+<dt>
+<tt class="descname">remove</tt><big>(</big><em>doc</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; selector for the single document to remove</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="insert">
+<h2>insert<a class="headerlink" href="#insert" title="Permalink to this headline">¶</a></h2>
+<p>Add a single insert document to the bulk operation</p>
+<dl class="function">
+<dt>
+<tt class="descname">insert</tt><big>(</big><em>doc</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; the document to insert</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="find">
+<h2>find<a class="headerlink" href="#find" title="Permalink to this headline">¶</a></h2>
+<p>Initiate a find operation for an update/updateOne/remove/removeOne/replaceOne</p>
+<dl class="function">
+<dt>
+<tt class="descname">find</tt><big>(</big><em>doc</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="execute">
+<h2>execute<a class="headerlink" href="#execute" title="Permalink to this headline">¶</a></h2>
+<p>Execute the ordered bulk operation</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
+<li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning</li>
+<li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt>
+<tt class="descname">execute</tt><big>(</big><span class="optional">[</span><em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from from the ordered bulk operation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 </div>
 
@@ -95,18 +304,27 @@
         <div class="sphinxsidebarwrapper">
 <h3>Contents</h3>
 <ul>
-<li><a class="reference internal" href="#">ReadStream()</a><ul>
+<li><a class="reference internal" href="#">OrderedBulkOperation()</a><ul>
 <li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#update">update</a></li>
+<li><a class="reference internal" href="#updateone">updateOne</a></li>
+<li><a class="reference internal" href="#replaceone">replaceOne</a></li>
+<li><a class="reference internal" href="#upsert">upsert</a></li>
+<li><a class="reference internal" href="#removeone">removeOne</a></li>
+<li><a class="reference internal" href="#remove">remove</a></li>
+<li><a class="reference internal" href="#insert">insert</a></li>
+<li><a class="reference internal" href="#find">find</a></li>
+<li><a class="reference internal" href="#execute">execute</a></li>
 </ul>
 </li>
 </ul>
 
 
 
-<ul class="this-page-menu"><li><strong>Previous:</strong> <a href="gridstore.html" title="previous chapter">GridStore()</a></li><li><strong>Next:</strong> <a href="../api-bson-generated/bson.html" title="next chapter">BSON()</a></li>
+<ul class="this-page-menu">
 </ul>
 <h3>Manual</h3>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="mongoclient.html">MongoClient()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a></li>
@@ -115,7 +333,7 @@
 <li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
@@ -254,7 +472,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

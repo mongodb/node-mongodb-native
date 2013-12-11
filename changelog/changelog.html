@@ -51,6 +51,16 @@
 <ul class="simple">
 <li>All node exceptions will no longer be caught if on(&#8216;error&#8217;) is defined</li>
 <li>Added X509 auth support</li>
+<li>Fix for MongoClient connection timeout issue (NODE-97)</li>
+<li>New Bulk API implementation using write commands for 2.6 and down converts for pre 2.6</li>
+<li>Pass through error messages from parseError instead of just text (Issue #1125)</li>
+<li>Close db connection on error (Issue #1128, <a class="reference external" href="https://github.com/benighted">https://github.com/benighted</a>)</li>
+<li>Fixed documentation generation</li>
+<li>Added aggregation cursor for 2.6 and emulated cursor for pre 2.6 (uses stream2)</li>
+<li>Insert/Update/Remove using new write commands when available</li>
+<li>Added support for new roles based API&#8217;s in 2.6 for addUser/removeUser</li>
+<li>Added bufferMaxEntries to start failing if the buffer hits the specified number of entries</li>
+<li>Upgraded BSON parser to work with 0.12.X C++ API changes</li>
 </ul>
 </div>
 <div class="section" id="id2">
