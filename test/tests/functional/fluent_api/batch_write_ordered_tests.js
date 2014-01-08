@@ -7,7 +7,6 @@ exports['Should correctly execute batch with no errors using write commands'] = 
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -28,15 +27,17 @@ exports['Should correctly execute batch with no errors using write commands'] = 
       // Execute the operations
       batch.execute(function(err, result) {
         // Check state of result
-        test.equal(5, result.n);
         test.equal(2, result.nInserted);
         test.equal(1, result.nUpserted);
         test.equal(1, result.nUpdated);
+        test.equal(1, result.nModified);
         test.equal(1, result.nRemoved);
+        
         var upserts = result.getUpsertedIds();
         test.equal(1, upserts.length);
         test.equal(2, upserts[0].index);
         test.ok(upserts[0]._id != null);
+        
         var upsert = result.getUpsertedIdAt(0);
         test.equal(2, upsert.index);
         test.ok(upsert._id != null);
@@ -53,7 +54,6 @@ exports['Should correctly handle single batch api write command error'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -77,17 +77,12 @@ exports['Should correctly handle single batch api write command error'] = {
         // Execute the operations
         batch.execute(function(err, result) {
           // Basic properties check
-          test.equal(1, result.n);
-          test.equal(true, result.hasErrors());
-          test.equal(1, result.getErrorCount());
+          test.equal(1, result.nInserted);
+          test.equal(true, result.hasWriteErrors());
+          test.equal(1, result.getWriteErrorCount());
 
-          // Get the top level error
-          var error = result.getSingleError();
-          test.equal(65, error.code);
-          test.ok(error.errmsg != null);
-
-          // Get the first error
-          var error = result.getErrorAt(0);
+          // Get the write error
+          var error = result.getWriteErrorAt(0);
           test.equal(11000, error.code);
           test.ok(error.errmsg != null);
 
@@ -99,7 +94,7 @@ exports['Should correctly handle single batch api write command error'] = {
           test.equal(true, op.upsert);
 
           // Get the first error
-          var error = result.getErrorAt(1);
+          var error = result.getWriteErrorAt(1);
           test.equal(null, error);
 
           // Finish up test
@@ -115,7 +110,6 @@ exports['Should correctly handle multiple batch api write command error'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -142,13 +136,12 @@ exports['Should correctly handle multiple batch api write command error'] = {
         // Execute the operations
         batch.execute(function(err, result) {
           // Basic properties check
-          test.equal(1, result.n);
-          test.equal(true, result.hasErrors());
-          test.ok(1, result.getErrorCount());
-          test.equal(65, result.getSingleError().code);
+          test.equal(1, result.nInserted);
+          test.equal(true, result.hasWriteErrors());
+          test.ok(1, result.getWriteErrorCount());
 
           // Individual error checking
-          var error = result.getErrorAt(0);
+          var error = result.getWriteErrorAt(0);
           test.equal(1, error.index);
           test.equal(11000, error.code);
           test.ok(error.errmsg != null);
@@ -170,7 +163,6 @@ exports['Should fail due to document being to big'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -205,7 +197,6 @@ exports['Should correctly split up messages into more batches'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -233,8 +224,8 @@ exports['Should correctly split up messages into more batches'] = {
       // Execute the operations
       batch.execute(function(err, result) {
         // Basic properties check
-        test.equal(6, result.n);
-        test.equal(false, result.hasErrors());
+        test.equal(6, result.nInserted);
+        test.equal(false, result.hasWriteErrors());
 
         // Finish up test
         db.close();
@@ -270,13 +261,12 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
         // Execute the operations
         batch.execute(function(err, result) {
           // Test basic settings
-          test.equal(0, result.n);
-          test.equal(true, result.hasErrors());
-          test.ok(1, result.getErrorCount());
-          test.equal(65, result.getSingleError().code);
+          test.equal(0, result.nInserted);
+          test.equal(true, result.hasWriteErrors());
+          test.ok(1, result.getWriteErrorCount());
 
           // Individual error checking
-          var error = result.getErrorAt(0);
+          var error = result.getWriteErrorAt(0);
           test.equal(0, error.index);
           test.ok(typeof error.code == 'number');
           test.ok(error.errmsg != null);
@@ -289,13 +279,12 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
           // Execute the operations
           batch.execute(function(err, result) {
             // Test basic settings
-            test.equal(0, result.n);
-            test.equal(true, result.hasErrors());
-            test.ok(1, result.getErrorCount());
-            test.equal(65, result.getSingleError().code);
+            test.equal(0, result.nRemoved);
+            test.equal(true, result.hasWriteErrors());
+            test.ok(1, result.getWriteErrorCount());
 
             // Individual error checking
-            var error = result.getErrorAt(0);
+            var error = result.getWriteErrorAt(0);
             test.equal(0, error.index);
             test.ok(typeof error.code == 'number');
             test.ok(error.errmsg != null);
@@ -308,13 +297,13 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             // Execute the operations
             batch.execute(function(err, result) {
               // Test basic settings
-              test.equal(0, result.n);
-              test.equal(true, result.hasErrors());
-              test.ok(1, result.getErrorCount());
-              test.equal(65, result.getSingleError().code);
+              test.equal(0, result.nUpdated);
+              test.equal(0, result.nModified);
+              test.equal(true, result.hasWriteErrors());
+              test.ok(1, result.getWriteErrorCount());
 
               // Individual error checking
-              var error = result.getErrorAt(0);
+              var error = result.getWriteErrorAt(0);
               test.equal(0, error.index);
               test.ok(typeof error.code == 'number');
               test.ok(error.errmsg != null);
@@ -334,7 +323,6 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -358,13 +346,14 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
         // Execute the operations
         batch.execute(function(err, result) {
           // Test basic settings
-          test.equal(2, result.n);
-          test.equal(true, result.hasErrors());
-          test.ok(1, result.getErrorCount());
-          test.equal(65, result.getSingleError().code);
+          test.equal(1, result.nInserted);
+          test.equal(1, result.nUpdated);
+          test.equal(1, result.nModified);
+          test.equal(true, result.hasWriteErrors());
+          test.ok(1, result.getWriteErrorCount());
 
           // Individual error checking
-          var error = result.getErrorAt(0);
+          var error = result.getWriteErrorAt(0);
           test.equal(2, error.index);
           test.equal(11000, error.code);
           test.ok(error.errmsg != null);
@@ -382,7 +371,6 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
-  // requires: {mongodb: ">2.5.4"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -407,14 +395,19 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
 
         // Execute the operations
         batch.execute(function(err, result) {
+          console.log("==============================================")
+          console.log(result.getRawResponse())
+
           // Test basic settings
-          test.equal(4, result.n);
-          test.equal(true, result.hasErrors());
-          test.ok(1, result.getErrorCount());
-          test.equal(65, result.getSingleError().code);
+          test.equal(1, result.nInserted);
+          test.equal(2, result.nUpserted);
+          test.equal(1, result.nUpdated);
+          test.equal(1, result.nModified);
+          test.equal(true, result.hasWriteErrors());
+          test.ok(1, result.getWriteErrorCount());
 
           // Individual error checking
-          var error = result.getErrorAt(0);
+          var error = result.getWriteErrorAt(0);
           test.equal(4, error.index);
           test.equal(11000, error.code);
           test.ok(error.errmsg != null);
@@ -435,6 +428,40 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
     });
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /******************************************************************
  *
