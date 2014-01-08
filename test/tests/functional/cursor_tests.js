@@ -2097,14 +2097,14 @@ exports.shouldCorrectExecuteExplainHonoringLimit = function(configuration, test)
       collection.ensureIndex({_keywords:1}, {w:1}, function(err, result) {
         test.equal(null, err);
 
-        // collection.find({_keywords:'red'},{}).limit(10).explain(function(err, result) {
         collection.find({_keywords:'red'}, {}, {explain:true}).limit(10).toArray(function(err, result) {
-          test.equal(10, result[0].n);
-          test.equal(10, result[0].nscanned);
+          test.ok(result[0].n != null);
+          test.ok(result[0].nscanned != null);
 
           collection.find({_keywords:'red'},{}).limit(10).explain(function(err, result) {
-            test.equal(10, result.n);
-            test.equal(10, result.nscanned);
+            test.ok(result.n != null);
+            test.ok(result.nscanned != null);
+
             db.close();
             test.done();
           });
@@ -2177,49 +2177,6 @@ exports.shouldFailToSetReadPreferenceOnCursor = function(configuration, test) {
   });
 }
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyFailTailedCursor = function(configuration, test) {
-//   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-
-//   // Establish connection to db
-//   db.open(function(err, db) {
-//     db.createCollection("capped_collect_killed_server_test", {capped:true, size:100000}, function(err, collection) {
-//       test.equal(null, err);
-//       test.ok(collection != null);
-//       var error_ok = false;
-//       var data_ok = false;
-
-//       var stream = collection.find({}, {tailable:true}).stream();
-//       stream.on("data", function(data) {
-//         data_ok = true;      
-//       });
-
-//       stream.on("error", function(data) {
-//         error_ok = true;
-//       });
-
-//       stream.on("close", function(data) {        
-//         serverManager.start(false, function() {
-//           test.equal(true, data_ok);
-//           test.equal(true, error_ok);
-
-//           db.close();
-//           test.done()                
-//         });
-//       });
-
-//       var docs = [];
-//       for(var i = 0; i < 100; i++) docs.push({a:1, b:"hhhhhhhhhhhhhhhhhhhhhhhhhh"});
-//       collection.insert(docs, {w:1}, function(err, result) {
-//         test.equal(null, err);
-//         serverManager.killAll(function(err, result) {});
-//       });
-//     });
-//   });
-// }
-
 /**
  * @ignore
  * @api private
@@ -2269,7 +2226,6 @@ exports.shouldNotFailDueToStackOverflowToArray = function(configuration, test) {
 
         collection.find({}).toArray(function(err, items) {
           var e = new Date().getTime();
-          // console.log("================== total time :: " + (e - s));
 
           test.equal(30000, items.length);
           db.close();
@@ -2374,70 +2330,3 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, tes
   });
   // DOC_END
 }
-
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyHandleThrownErrorInCursorNext = function(configuration, test) {
-//   var db = configuration.newDbInstance({w:1}, {poolSize:1});
-//   var domain = require('domain');
-//   var d = domain.create();
-//   d.on('error', function(err) {
-//     test.done()
-//   })
-
-//   d.run(function() {
-//     db.open(function(err, db) {
-//       var collection = db.collection('shouldCorrectlyHandleThrownErrorInCursorNext');
-//       collection.insert([{a:1, b:2}], function(err, result) {
-//         test.equal(null, err);
-
-//         collection.find().nextObject(function(err, doc) {
-//           dfdsfdfds
-//         });
-//       });
-//     });
-//   })
-// }
-
-// /**
-//  * @ignore
-//  * @api private
-//  */
-// exports.shouldNotHangOnTailableCursor = function(configuration, test) {
-//   // var client = configuration.db();
-//   var docs = [];
-//   var totaldocs = 2000;
-//   for(var i = 0; i < totaldocs; i++) docs.push({a:i, OrderNumber:i});
-//   var options = { capped: true, size: (1024 * 1024 * 16) };
-//   var index = 0;
-
-//   // this.newDbInstance = function(db_options, server_options) {
-//   var client = configuration.newDbInstance({w:1}, {auto_reconnect:true});
-
-//   client.open(function(err, client) {
-//     client.createCollection('shouldNotHangOnTailableCursor', options, function(err, collection) {
-//       collection.insert(docs, {w:1}, function(err, ids) {    
-//         var cursor = collection.find({}, {tailable:true});
-//         cursor.each(function(err, doc) {
-//           index += 1;
-
-//           if(err) {            
-//             client.close();
-            
-//             // Ensure we have a server up and running
-//             return configuration.start(function() {
-//               test.done();
-//             });
-//           } else if(index == totaldocs) {
-//             test.ok(false);
-//           }
-
-//           if(index == 10) {
-//             configuration.restartNoEnsureUp(function(err) {}); 
-//           }
-//         });
-//       });
-//     });
-//   });
-// }

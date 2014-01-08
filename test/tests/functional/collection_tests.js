@@ -182,36 +182,6 @@ exports.shouldAccessToCollections = function(configuration, test) {
 }
 
 /**
- * @ignore
- */
-exports.shouldCorrectlyDropCollection = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1});
-  db.open(function(err, db) {
-    db.createCollection('test_drop_collection2', function(err, r) {
-      db.dropCollection('test_drop_collection', function(err, r) {
-        test.ok(err instanceof Error);
-        test.equal("ns not found", err.message);
-        var found = false;
-        // Ensure we don't have the collection in the set of names
-        db.collectionNames(function(err, replies) {
-          replies.forEach(function(err, document) {
-            if(document.name == "test_drop_collection") {
-              found = true;
-              return;
-            }
-          });
-          // If we have an instance of the index throw and error
-          if(found) throw new Error("should not fail");
-          // Let's close the db
-          db.close();
-          test.done();
-        });
-      });
-    });
-  });
-}
-
-/**
  * Example of a simple document save and then resave with safe set to true
  *
  * @_class collection
@@ -350,9 +320,11 @@ exports.shouldCorrectlyRetriveCollectionOptions = function(configuration, test) 
 
       // Let's fetch the collection options
       collection.options(function(err, options) {
+        // console.log("=========================================================")
+        // console.dir(options)
+
         test.equal(true, options.capped);
         test.equal(1024, options.size);
-        test.equal("test_collection_options", options.create);
 
         db.close();
         test.done();

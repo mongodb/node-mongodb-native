@@ -39,7 +39,7 @@ module.exports = function(configurations) {
         , '/test/tests/functional/logging_tests.js'
         , '/test/tests/functional/custom_pk_tests.js'
         , '/test/tests/functional/geo_tests.js'
-        , '/test/tests/functional/write_preferences_tests.js'
+        // , '/test/tests/functional/write_preferences_tests.js'
         , '/test/tests/functional/remove_tests.js'
         , '/test/tests/functional/unicode_tests.js'
         , '/test/tests/functional/raw_tests.js'
@@ -64,9 +64,9 @@ module.exports = function(configurations) {
         // , '/test/tests/functional/fluent_api/aggregation_tests.js'
         , '/test/tests/functional/maxtimems_tests.js'
         , '/test/tests/functional/mongo_client_tests.js'
-        , '/test/tests/functional/fluent_api/batch_write_ordered_tests.js'
-        , '/test/tests/functional/fluent_api/batch_write_unordered_tests.js'
-        , '/test/tests/functional/fluent_api/batch_write_concerns_tests.js'
+        // , '/test/tests/functional/fluent_api/batch_write_ordered_tests.js'
+        // , '/test/tests/functional/fluent_api/batch_write_unordered_tests.js'
+        // , '/test/tests/functional/fluent_api/batch_write_concerns_tests.js'
       ]
     );
 

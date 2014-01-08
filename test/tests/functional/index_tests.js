@@ -425,21 +425,17 @@ exports.shouldCorrectlyHandleUniqueIndex = {
         db.createIndex(collection.collectionName, 'hello', {w:1}, function(err, indexName) {
           // Insert some docs
           collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {w:1}, function(err, errors) {
-            // Assert that we have no erros
-            db.error(function(err, errors) {
-              test.equal(1, errors.length);
-              test.equal(null, errors[0].err);
+            test.equal(null, err);
 
-              // Create a unique index and test that insert fails
-              db.createCollection('test_unique_index2', function(err, collection) {
-                db.createIndex(collection.collectionName, 'hello', {unique:true, w:1}, function(err, indexName) {
-                  // Insert some docs
-                  collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {w:1}, function(err, ids) {
-                    test.ok(err != null);
-                    test.equal(11000, err.code);
-                    db.close();
-                    test.done();
-                  });
+            // Create a unique index and test that insert fails
+            db.createCollection('test_unique_index2', function(err, collection) {
+              db.createIndex(collection.collectionName, 'hello', {unique:true, w:1}, function(err, indexName) {
+                // Insert some docs
+                collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {w:1}, function(err, ids) {
+                  test.ok(err != null);
+                  test.equal(11000, err.code);
+                  db.close();
+                  test.done();
                 });
               });
             });
@@ -459,20 +455,16 @@ exports.shouldCorrectlyCreateSubfieldIndex = function(configuration, test) {
     // Create a non-unique index and test inserts
     db.createCollection('test_index_on_subfield', function(err, collection) {
       collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {w:1}, function(err, ids) {
-        // Assert that we have no erros
-        db.error(function(err, errors) {
-          test.equal(1, errors.length);
-          test.ok(errors[0].err == null);
+        test.equal(null, err);
 
-          // Create a unique subfield index and test that insert fails
-          db.createCollection('test_index_on_subfield2', function(err, collection) {
-            db.createIndex(collection.collectionName, 'hello.a', {w:1, unique:true}, function(err, indexName) {
-              collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {w:1}, function(err, ids) {
-                // Assert that we have erros
-                test.ok(err != null);
-                db.close();
-                test.done();
-              });
+        // Create a unique subfield index and test that insert fails
+        db.createCollection('test_index_on_subfield2', function(err, collection) {
+          db.createIndex(collection.collectionName, 'hello.a', {w:1, unique:true}, function(err, indexName) {
+            collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {w:1}, function(err, ids) {
+              // Assert that we have erros
+              test.ok(err != null);
+              db.close();
+              test.done();
             });
           });
         });
