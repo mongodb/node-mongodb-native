@@ -2058,7 +2058,34 @@ exports.shouldAwaitData = function(configuration, test) {
         });
       });
     });
-  })
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldNotAwaitDataWhenFalse = function(configuration, test) {
+  // NODE-98
+  var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+
+  db.open(function(err, db) {
+    var options = { capped: true, size: 8};
+    db.createCollection('should_not_await_data_when_false', options, function(err, collection) {
+      collection.insert({a:1}, {w:1}, function(err, result) {
+        // should not timeout
+        collection.find({}, {tailable:true, awaitdata:false}).each(function(err, result) {
+          if(err != null) {
+	    test.equal("Error: Connection was destroyed by application", err);
+          }
+        });
+
+        setTimeout(function () {
+          db.close();
+          test.done();
+        }, 800);
+      });
+    });
+  });
 }
 
 /**
@@ -2109,6 +2136,26 @@ exports.shouldCorrectExecuteExplainHonoringLimit = function(configuration, test)
             test.done();
           });
         });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldNotExplainWhenFalse = function(configuration, test) {
+  var doc = { "name" : "camera", "_keywords" : [ "compact", "ii2gd", "led", "red", "aet" ]};
+
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var collection = db.collection('shouldNotExplainWhenFalse');
+    collection.insert(doc, {w:1}, function(err, result) {
+      test.equal(null, err);
+      collection.find({"_keywords" : "red"}, {}, {explain:false}).limit(10).toArray(function(err, result) {
+        test.equal("camera", result[0].name);
+	db.close();
+	test.done();
       });
     });
   });
