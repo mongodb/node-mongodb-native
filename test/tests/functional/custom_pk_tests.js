@@ -11,7 +11,7 @@ exports.shouldCreateRecordsWithCustomPKFactory = function(configuration, test) {
     return new ObjectID("aaaaaaaaaaaa");
   }
 
-  var p_client = configuration.newDbInstance({w:0, 'pk':CustomPKFactory}, {poolSize:1});
+  var p_client = configuration.newDbInstance({w:0, 'pkFactory':CustomPKFactory}, {poolSize:1});
   p_client.open(function(err, p_client) {
 
     var collection = p_client.collection('test_custom_key');
