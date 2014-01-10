@@ -9,7 +9,7 @@
 
 ### Bugs / Feature Requests
 
-Think you’ve found a bug? Want to see a new feature in PyMongo? Please open a
+Think you’ve found a bug? Want to see a new feature in node-mongodb-native? Please open a
 case in our issue management tool, JIRA:
 
 - Create an account and login <https://jira.mongodb.org>.
