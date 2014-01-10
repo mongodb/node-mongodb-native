@@ -461,3 +461,42 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
     });
   }
 }
+
+exports['Should correctly perform unordered upsert with custom _id'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      // Get the collection
+      var col = db.collection('batch_write_unordered_ops_legacy_8');
+      // Initialize the Ordered Batch
+      var batch = col.initializeUnorderedBulkOp();
+
+      // Add some operations to be executed in order
+      batch.find({_id:2}).upsert().updateOne({$set: {b:2}});
+
+      // Execute the operations
+      batch.execute(function(err, result) {
+        // Check state of result
+        test.equal(1, result.nUpserted);
+        test.equal(0, result.nInserted);
+        test.equal(0, result.nUpdated);
+        test.equal(0, result.nModified);
+        test.equal(0, result.nRemoved);
+        
+        var upserts = result.getUpsertedIds();
+        test.equal(1, upserts.length);
+        test.equal(0, upserts[0].index);
+        test.equal(2, upserts[0]._id);
+
+        // Finish up test
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
