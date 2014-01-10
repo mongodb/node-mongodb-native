@@ -144,3 +144,87 @@ exports['Should correctly reapply the authentications'] = function(configuration
     });
   });
 }
+
+exports['Ordered bulk operation should fail correctly when not authenticated'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , Server = configuration.getMongoPackage().Server;
+
+  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+  db1.open(function(err, db) {
+    db.admin().addUser('admin', 'admin', function(err, result) {
+      test.equal(null, err);
+
+      // restart server
+      configuration.restart({purgedirectories: false}, function() {
+        db1.open(function(err, db) {
+          // Attempt to save a document
+          var col = db.collection('test');
+
+          // Initialize the Ordered Batch
+          var batch = col.initializeOrderedBulkOp();
+
+          // Add some operations to be executed in order
+          batch.insert({a:1});
+          batch.find({a:1}).updateOne({$set: {b:1}});
+          batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+          batch.insert({a:3});
+          batch.find({a:3}).remove({a:3});
+
+          // Execute the operations
+          batch.execute(function(err, result) {
+            test.ok(err != null);
+            test.ok(err.code != null);
+            test.ok(err.errmsg != null);
+
+            db1.close();
+            test.done();
+            process.exit();
+          });
+        });
+      });
+    });
+  });
+}
+
+exports['Unordered bulk operation should fail correctly when not authenticated'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , Server = configuration.getMongoPackage().Server;
+
+  var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+  db1.open(function(err, db) {
+    db.admin().addUser('admin', 'admin', function(err, result) {
+      test.equal(null, err);
+
+      // restart server
+      configuration.restart({purgedirectories: false}, function() {
+        db1.open(function(err, db) {
+          // Attempt to save a document
+          var col = db.collection('test');
+
+          // Initialize the Ordered Batch
+          var batch = col.initializeUnorderedBulkOp();
+
+          // Add some operations to be executed in order
+          batch.insert({a:1});
+          batch.find({a:1}).updateOne({$set: {b:1}});
+          batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+          batch.insert({a:3});
+          batch.find({a:3}).remove({a:3});
+
+          // Execute the operations
+          batch.execute(function(err, result) {
+            test.ok(err != null);
+            test.ok(err.code != null);
+            test.ok(err.errmsg != null);
+
+            db1.close();
+            test.done();
+            process.exit();
+          });
+        });
+      });
+    });
+  });
+}
