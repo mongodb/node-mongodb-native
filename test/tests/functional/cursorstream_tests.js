@@ -6,8 +6,7 @@
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});  
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
   // DOC_START
   // Establish connection to db
@@ -15,9 +14,12 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(config
 
     // Create a lot of documents to insert
     var docs = []
-    for(var i = 0; i < 1; i++) {
+    for(var i = 0; i < 10; i++) {
       docs.push({'a':i})
     }
+
+    // Received documents
+    var received = [];
 
     // Create a collection
     db.createCollection('test_cursorstream_pause', function(err, collection) {
@@ -27,91 +29,22 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = function(config
       collection.insert(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
-
         // For each data item
         stream.on("data", function(item) {
-          // Check if cursor is paused
-          test.equal(false, stream.paused);
+          // Save the received items
+          received.push(item);
           // Pause stream
           stream.pause();
-          // Check if cursor is paused
-          test.equal(true, stream.paused);
 
           // Restart the stream after 1 miliscecond
           setTimeout(function() {
             stream.resume();
-            // Check if cursor is paused
-            process.nextTick(function() {
-              test.equal(false, stream.paused);
-            })
           }, 1);
         });
 
         // When the stream is done
-        stream.on("close", function() {
-          db.close();
-          test.done();
-        });
-      });
-    });
-  });
-  // DOC_END
-}
-
-/**
- * A simple example showing the use of the cursorstream resume function.
- *
- * @_class cursorstream
- * @_function resume
- * @ignore
- */
-exports.shouldStreamDocumentsUsingTheCursorStreamResumeFunction = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-
-    // Create a lot of documents to insert
-    var docs = []
-    for(var i = 0; i < 1; i++) {
-      docs.push({'a':i})
-    }
-
-    // Create a collection
-    db.createCollection('test_cursorstream_resume', function(err, collection) {
-      test.equal(null, err);
-
-      // Insert documents into collection
-      collection.insert(docs, {w:1}, function(err, ids) {
-        // Peform a find to get a cursor
-        var stream = collection.find().stream();
-
-        // For each data item
-        stream.on("data", function(item) {
-          // Check if cursor is paused
-          test.equal(false, stream.paused);
-          // Pause stream
-          stream.pause();
-          // Check if cursor is paused
-          test.equal(true, stream.paused);
-
-          // Restart the stream after 1 miliscecond
-          setTimeout(function() {
-
-            // Resume the stream
-            stream.resume();
-
-            // Check if cursor is paused
-            process.nextTick(function() {
-              test.equal(false, stream.paused);
-            });
-          }, 1);
-        });
-
-        // When the stream is done
-        stream.on("close", function() {
+        stream.on("end", function() {
+          test.equal(10, received.length);
           db.close();
           test.done();
         });
@@ -186,6 +119,8 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = function(configurat
         var stream = collection.find({}).stream();
         var data = [];
 
+        var i = 0
+
         // For each data item
         stream.on("data", function(item) {
           stream.pause()
@@ -193,15 +128,19 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = function(configurat
           collection.findOne({}, function(err, result) {
             data.push(1);
             stream.resume();
+
+            // Ensure we are properly done as end event will be 
+            // emitted before the findOne returns
+            if(data.length == 3000) {
+              test.equal(3000, data.length);
+              db.close();
+              test.done();              
+            }
           })
         });
 
         // When the stream is done
-        stream.on("close", function() {
-          test.equal(3000, data.length);
-          db.close();
-          test.done();
-        });
+        stream.on("end", function() {});
       });
     });
   });
@@ -233,15 +172,19 @@ exports.shouldStream10KDocuments = function(configuration, test) {
           collection.findOne({}, function(err, result) {
             data.push(1);
             stream.resume();
+
+            // Ensure we are properly done as end event will be 
+            // emitted before the findOne returns
+            if(data.length == 3000) {
+              test.equal(3000, data.length);
+              db.close();
+              test.done();              
+            }
           })
         });
 
         // When the stream is done
-        stream.on("close", function() {
-          test.equal(10000, data.length);
-          db.close();
-          test.done();
-        });
+        stream.on("end", function() {});
       });
     });
   });
