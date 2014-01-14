@@ -16,10 +16,11 @@ var setUp = function(configuration, options, callback) {
   var repl_options = {retries:120, 
     host: "server",
     ssl:true,
-    ssl_ca: '../test/tests/ssl/certificates/ca.pem',
-    ssl_crl: '../test/tests/ssl/certificates/crl.pem',
+    // ssl_ca: '../test/tests/ssl/certificates/ca.pem',
+    // ssl_crl: '../test/tests/ssl/certificates/crl.pem',
     ssl_server_pem: "../test/tests/ssl/certificates/server.pem",
-    ssl_client_pem: cert,
+    // ssl_client_pem: cert,
+    auth:true,
 
     arbiter_count:0,
     secondary_count:2,
@@ -61,9 +62,9 @@ exports.shouldCorrectlyValidateAndPresentCertificateReplSet = function(configura
       {
           rs_name:RS.name
         , ssl:true
-        , sslValidate:true
-        , sslCA:ca
-        , sslKey:key
+        // , sslValidate:true
+        // , sslCA:ca
+        // , sslKey:key
         , sslCert:cert
       }
     );
