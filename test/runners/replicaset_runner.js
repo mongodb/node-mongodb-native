@@ -56,7 +56,7 @@ module.exports = function(configurations) {
     );
 
   // After each test is done
-  repl_set_parallel_tests_runner.on('test_done', function(test_statistics) {
+  repl_set_parallel_tests_runner.on('test_done', function(test_statistics, configuration) {
     // Unpack statistics
     var time_spent = test_statistics.end_time.getTime() - test_statistics.start_time.getTime();
     var test = test_statistics.name;
@@ -64,13 +64,13 @@ module.exports = function(configurations) {
     var config = test_statistics.config_name;
 
     // Add to bucket
-    if(!Array.isArray(buckets[test_statistics.configuration.startPort])) {
-      buckets[test_statistics.configuration.startPort] = [];
+    if(!Array.isArray(buckets[configuration.startPort])) {
+      buckets[configuration.startPort] = [];
     }
 
     // Stat object
     var stat = {
-        port: test_statistics.configuration.startPort
+        port: configuration.startPort
       , time: time_spent
       , test: test
       , file: file
@@ -78,7 +78,7 @@ module.exports = function(configurations) {
     };
 
     // Save statistics about test to it's bucket
-    buckets[test_statistics.configuration.startPort].push(stat);
+    buckets[configuration.startPort].push(stat);
     // Save to list
     test_results.push(stat);
   });
