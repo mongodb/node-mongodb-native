@@ -16,10 +16,10 @@ var setUp = function(configuration, options, callback) {
   var repl_options = {retries:120, 
     host: "server",
     ssl:true,
-    // ssl_ca: '../test/tests/ssl/certificates/ca.pem',
-    // ssl_crl: '../test/tests/ssl/certificates/crl.pem',
+    ssl_ca: '../test/tests/ssl/certificates/ca.pem',
+    ssl_crl: '../test/tests/ssl/certificates/crl.pem',
     ssl_server_pem: "../test/tests/ssl/certificates/server.pem",
-    // ssl_client_pem: cert,
+    ssl_client_pem: cert,
     auth:true,
 
     arbiter_count:0,
@@ -36,6 +36,93 @@ var setUp = function(configuration, options, callback) {
     // Finish setup
     callback();      
   });      
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly receive ping and ha events using ssl'] = function(configuration, test) {
+  var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
+    , Db = configuration.getMongoPackage().Db
+    , Server = configuration.getMongoPackage().Server
+    , ReplSetServers = configuration.getMongoPackage().ReplSetServers
+    , MongoClient = configuration.getMongoPackage().MongoClient;
+
+  setUp(configuration, function() {
+    // Read the ca
+    var ca = [fs.readFileSync(__dirname + "/certificates/ca.pem")];
+    var cert = fs.readFileSync(__dirname + "/certificates/client.pem");
+    var key = fs.readFileSync(__dirname + "/certificates/client.pem");
+
+    // Create new 
+    var replSet = new ReplSetServers( [ 
+        new Server( "server", RS.ports[1], { auto_reconnect: true } ),
+        new Server( "server", RS.ports[0], { auto_reconnect: true } ),
+      ], 
+      {
+          rs_name:RS.name
+        , ssl:true
+        , sslValidate:true
+        , sslCA:ca
+        , sslKey:key
+        , sslCert:cert
+      }
+    );
+
+    // Connect to the replicaset
+    var slaveDb = null;
+    var db = new Db('foo', replSet, {w:0});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var ha_connect = false;
+      var ha_ismaster = false;
+      var ping_connect = false;
+      var ping = false;
+      var ping_ismaster = false;
+      var items = 0;
+
+      // Listen to the ha and ping events
+      db.serverConfig.once("ha_connect", function(err) {
+        test.equal(null, err);
+        ha_connect = true;
+        items = items + 1;
+      });
+
+      db.serverConfig.once("ha_ismaster", function(err, result) {
+        test.equal(null, err);
+        ha_ismaster = true;
+        items = items + 1;
+
+        test.ok(ha_connect);
+        test.ok(ha_ismaster);
+        test.ok(ping_connect);
+        test.ok(ping);
+        test.ok(ping_ismaster);
+
+        db.close();
+        test.done();
+      });
+
+      db.serverConfig.once("ping_connect", function(err) {
+        test.equal(null, err);
+        ping_connect = true;
+        items = items + 1;
+      });
+
+      db.serverConfig.once("ping", function(err) {
+        test.equal(null, err);
+        ping = true;
+        items = items + 1;
+      });
+
+      db.serverConfig.once("ping_ismaster", function(err, result) {
+        test.equal(null, err);
+        ping_ismaster = true;
+        items = items + 1;
+      });
+    });
+  });
 }
 
 /**
@@ -62,9 +149,9 @@ exports.shouldCorrectlyValidateAndPresentCertificateReplSet = function(configura
       {
           rs_name:RS.name
         , ssl:true
-        // , sslValidate:true
-        // , sslCA:ca
-        // , sslKey:key
+        , sslValidate:true
+        , sslCA:ca
+        , sslKey:key
         , sslCert:cert
       }
     );
@@ -79,22 +166,21 @@ exports.shouldCorrectlyValidateAndPresentCertificateReplSet = function(configura
         db.collection('test').count(function() {});
       }, 1000);
 
-      // process.exit(0)
-      // // Create a collection
-      // db.createCollection('shouldCorrectlyValidateAndPresentCertificateReplSet', function(err, collection) {
-      //   collection.remove({});
-      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-      //   collection.insert([{a:1}, {b:2}, {c:'hello world'}], {w:1}, function(err, result) {
-      //     collection.find({}).toArray(function(err, items) {
-      //       test.equal(15, items.length);
-      //       db.close();
-      //       test.done();
-      //     })
-      //   });
-      // });
+      // Create a collection
+      db.createCollection('shouldCorrectlyValidateAndPresentCertificateReplSet', function(err, collection) {
+        collection.remove({});
+        collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+        collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+        collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+        collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
+        collection.insert([{a:1}, {b:2}, {c:'hello world'}], {w:1}, function(err, result) {
+          collection.find({}).toArray(function(err, items) {
+            test.equal(15, items.length);
+            db.close();
+            test.done();
+          })
+        });
+      });
     });
   });
 }

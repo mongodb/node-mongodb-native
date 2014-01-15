@@ -692,3 +692,72 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = f
     });
   });
 }
+
+exports['Should correctly receive ping and ha events'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
+
+  // Replset start port
+  var replicasetManager = configuration.getReplicasetManager();
+  
+  // Replica configuration
+  var replSet = new ReplSetServers([
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ]
+    , {rs_name:replicasetManager.name}
+  );
+
+  // Open the db connection
+  new Db('integration_test_', replSet, {w:1}).open(function(err, db) {
+    var ha_connect = false;
+    var ha_ismaster = false;
+    var ping_connect = false;
+    var ping = false;
+    var ping_ismaster = false;
+    var items = 0;
+
+    // Listen to the ha and ping events
+    db.serverConfig.once("ha_connect", function(err) {
+      test.equal(null, err);
+      ha_connect = true;
+      items = items + 1;
+    });
+
+    db.serverConfig.once("ha_ismaster", function(err, result) {
+      test.equal(null, err);
+      ha_ismaster = true;
+      items = items + 1;
+
+      test.ok(ha_connect);
+      test.ok(ha_ismaster);
+      test.ok(ping_connect);
+      test.ok(ping);
+      test.ok(ping_ismaster);
+
+      db.close();
+      test.done();
+    });
+
+    db.serverConfig.once("ping_connect", function(err) {
+      test.equal(null, err);
+      ping_connect = true;
+      items = items + 1;
+    });
+
+    db.serverConfig.once("ping", function(err) {
+      test.equal(null, err);
+      ping = true;
+      items = items + 1;
+    });
+
+    db.serverConfig.once("ping_ismaster", function(err, result) {
+      test.equal(null, err);
+      ping_ismaster = true;
+      items = items + 1;
+    });
+  });
+}
