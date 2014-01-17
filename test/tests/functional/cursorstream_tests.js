@@ -220,7 +220,7 @@ exports.shouldTriggerMassiveAmountOfGetMores = function(configuration, test) {
         });
 
         // When the stream is done
-        stream.on("close", function() {
+        stream.on("end", function() {
           test.equal(1000, counter);
           test.equal(1000, counter2);
           db.close();

@@ -1335,18 +1335,18 @@ exports['should be able to stream documents'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
     // Create collection
-    db.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
-      test.equal(null, err);
+    db.createCollection('Should_be_able_to_stream_documents', function(er, collection) {
+      test.equal(null, er);
 
       // insert all docs
       collection.insert(docs, {w:1}, function(err, result) {
         test.equal(null, err);
 
         var paused = 0
-          , closed = 0
+          , ended = 0
           , resumed = 0
           , i = 0
-          , err
+          , err = null;
 
         var stream = collection.find().stream();
 
@@ -1360,9 +1360,7 @@ exports['should be able to stream documents'] = function(configuration, test) {
           }
 
           if (++i === 3) {
-            // test.equal(false, stream.paused);
             stream.pause();
-            // test.equal(true, stream.paused);
             paused++;
 
             setTimeout(function () {
@@ -1380,17 +1378,15 @@ exports['should be able to stream documents'] = function(configuration, test) {
         });
 
         stream.on('end', function () {
-          closed++;
+          ended++;
           done();
         });
 
         function done () {
-          test.equal(undefined, err);
+          test.equal(null, err);
           test.equal(i, docs.length);
-          test.equal(1, closed);
-          test.equal(1, paused);
-          test.equal(1, resumed);
-          test.strictEqual(stream._cursor.isClosed(), true);
+          test.equal(1, ended);
+          test.strictEqual(stream.isClosed(), true);
           db.close();
           test.done();
         }
@@ -1431,7 +1427,7 @@ exports['immediately destroying a stream prevents the query from executing'] = f
           test.equal(++doneCalled, 1);
           test.equal(undefined, err);
           test.strictEqual(0, i);
-          test.strictEqual(true, stream._destroyed);
+          test.strictEqual(true, stream.isDestroyed());
           db.close();
           test.done();
         }
@@ -1464,14 +1460,13 @@ exports['destroying a stream stops it'] = function(configuration, test) {
 
         var stream = collection.find().stream();
 
-        test.strictEqual(null, stream._destroyed);
-        test.strictEqual(true, stream.readable);
+        test.strictEqual(null, stream.isDestroyed());
 
-        stream.on('data', function (doc) {
+        stream.on('data', function (data) {
           if (++i === 5) {
             stream.destroy();
-            test.strictEqual(false, stream.readable);
           }
+//          var doc = stream.read()
         });
 
         stream.on('close', done);
@@ -1483,9 +1478,8 @@ exports['destroying a stream stops it'] = function(configuration, test) {
             test.strictEqual(undefined, err);
             test.strictEqual(5, i);
             test.strictEqual(1, finished);
-            test.strictEqual(true, stream._destroyed);
-            test.strictEqual(false, stream.readable);
-            test.strictEqual(true, stream._cursor.isClosed());
+            test.strictEqual(true, stream.isDestroyed());
+            test.strictEqual(true, stream.isClosed());
             db.close();
             test.done();
           }, 150)
@@ -1541,13 +1535,12 @@ exports['cursor stream errors'] = {
           function done (err) {
             ++finished;
             setTimeout(function () {
-              test.equal('Connection was destroyed by application', err.message);
+              test.equal('Connection Closed By Application', err.message);
               test.equal(5, i);
               test.equal(1, closed);
               test.equal(1, finished);
-              test.equal(true, stream._destroyed);
-              test.equal(false, stream.readable);
-              test.equal(true, stream._cursor.isClosed());
+              test.equal(true, stream.isDestroyed());
+              test.equal(true, stream.isClosed());
               client.close();
               test.done();
             }, 150)
@@ -1562,6 +1555,13 @@ exports['cursor stream errors'] = {
  * @ignore
  * @api private
  */
+/*
+
+This test triggers the following error: 
+     TypeError: Invalid non-string/buffer chunk
+
+It seems that there is a related bug in Node: https://github.com/EvanOxfeld/node-unzip/issues/25
+*/
 exports['cursor stream pipe']= function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
@@ -2375,3 +2375,70 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, tes
   });
   // DOC_END
 }
+
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyHandleThrownErrorInCursorNext = function(configuration, test) {
+//   var db = configuration.newDbInstance({w:1}, {poolSize:1});
+//   var domain = require('domain');
+//   var d = domain.create();
+//   d.on('error', function(err) {
+//     test.done()
+//   })
+
+//   d.run(function() {
+//     db.open(function(err, db) {
+//       var collection = db.collection('shouldCorrectlyHandleThrownErrorInCursorNext');
+//       collection.insert([{a:1, b:2}], function(err, result) {
+//         test.equal(null, err);
+
+//         collection.find().nextObject(function(err, doc) {
+//           dfdsfdfds
+//         });
+//       });
+//     });
+//   })
+// }
+
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldNotHangOnTailableCursor = function(configuration, test) {
+//   // var client = configuration.db();
+//   var docs = [];
+//   var totaldocs = 2000;
+//   for(var i = 0; i < totaldocs; i++) docs.push({a:i, OrderNumber:i});
+//   var options = { capped: true, size: (1024 * 1024 * 16) };
+//   var index = 0;
+
+//   // this.newDbInstance = function(db_options, server_options) {
+//   var client = configuration.newDbInstance({w:1}, {auto_reconnect:true});
+
+//   client.open(function(err, client) {
+//     client.createCollection('shouldNotHangOnTailableCursor', options, function(err, collection) {
+//       collection.insert(docs, {w:1}, function(err, ids) {    
+//         var cursor = collection.find({}, {tailable:true});
+//         cursor.each(function(err, doc) {
+//           index += 1;
+
+//           if(err) {            
+//             client.close();
+            
+//             // Ensure we have a server up and running
+//             return configuration.start(function() {
+//               test.done();
+//             });
+//           } else if(index == totaldocs) {
+//             test.ok(false);
+//           }
+
+//           if(index == 10) {
+//             configuration.restartNoEnsureUp(function(err) {}); 
+//           }
+//         });
+//       });
+//     });
+//   });
+// }
