@@ -24,14 +24,20 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.path = path.resolve("data");
   this.killNodeWaitTime = options['kill_node_wait_time'] != null ? options['kill_node_wait_time'] : 1000;
   this.tags = options['tags'] != null ? options['tags'] : [];
+  
+  // SSL Settings
   this.ssl = options['ssl'] != null ? options['ssl'] : false;
   this.ssl_server_pem = options['ssl_server_pem'] != null ? options['ssl_server_pem'] : null;
   this.ssl_server_pem_pass = options['ssl_server_pem_pass'] != null ? options['ssl_server_pem_pass'] : null;
   this.ssl_weak_certificate_validation = options['ssl_weak_certificate_validation'] != null ? options['ssl_weak_certificate_validation'] : null;
   this.ssl_client_pem = options['ssl_client_pem'] != null ? options['ssl_client_pem'] : null;
+  
   // Ca settings for ssl
   this.ssl_ca = options['ssl_ca'] != null ? options['ssl_ca'] : null;
   this.ssl_crl = options['ssl_crl'] != null ? options['ssl_crl'] : null;
+
+  // SSL FIPS Setting
+  this.ssl_fips = options['ssl_fips'] != null ? options['ssl_fips'] : null;
 
   // Set up for creating different topologies
   this.arbiterCount = options["arbiter_count"] != null ? options["arbiter_count"] : 2;
@@ -940,6 +946,10 @@ ReplicaSetManager.prototype.startCmd = function(n) {
 
     if(this.ssl_weak_certificate_validation) {
       this.mongods[n]["start"] = this.mongods[n]["start"] + " --sslWeakCertificateValidation"
+    }
+
+    if(this.ssl_fips) {
+      this.mongods[n]["start"] = this.mongods[n]["start"] + " --sslFIPSMode" 
     }
   }
 
