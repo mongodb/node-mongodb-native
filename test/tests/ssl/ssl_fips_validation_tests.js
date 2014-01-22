@@ -42,7 +42,7 @@ var setUp = function(configuration, options, callback) {
 /**
  * @ignore
  */
-exports['Should correctly receive ping and ha events using ssl'] = function(configuration, test) {
+exports['Should correctly receive ping and ha events using ssl with fips'] = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -129,7 +129,7 @@ exports['Should correctly receive ping and ha events using ssl'] = function(conf
 /**
  * @ignore
  */
-exports.shouldCorrectlyValidateAndPresentCertificateReplSet = function(configuration, test) {
+exports.shouldCorrectlyValidateAndPresentCertificateReplSetWithFips = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -189,7 +189,7 @@ exports.shouldCorrectlyValidateAndPresentCertificateReplSet = function(configura
 /**
  * @ignore
  */
-exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration, test) {
+exports.shouldFailDuePresentingWrongCredentialsToServerWithFips = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -232,7 +232,7 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
 /**
  * @ignore
  */
-exports.shouldCorrectlyConnectToSSLBasedReplicaset = function(configuration, test) {
+exports.shouldCorrectlyConnectToSSLBasedReplicasetWithFips = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -277,7 +277,7 @@ exports.shouldCorrectlyConnectToSSLBasedReplicaset = function(configuration, tes
 /**
  * @ignore
  */
-exports.shouldFailToValidateServerSSLCertificate = function(configuration, test) {
+exports.shouldFailToValidateServerSSLCertificateWithFips = function(configuration, test) {
   var ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -315,7 +315,7 @@ exports.shouldFailToValidateServerSSLCertificate = function(configuration, test)
 /**
  * @ignore
  */
-exports.shouldFailDueToNotPresentingCertificateToServer = function(configuration, test) {
+exports.shouldFailDueToNotPresentingCertificateToServerWithFips = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -372,7 +372,7 @@ exports.shouldFailDueToNotPresentingCertificateToServer = function(configuration
 /**
  * @ignore
  */
-exports.shouldCorrectlyValidateAndPresentCertificate = function(configuration, test) {
+exports.shouldCorrectlyValidateAndPresentCertificateWithFips = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -438,7 +438,7 @@ exports.shouldCorrectlyValidateAndPresentCertificate = function(configuration, t
 /**
  * @ignore
  */
-exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration, test) {
+exports.shouldFailDuePresentingWrongCredentialsToServerWithFips = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -497,7 +497,7 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
 /**
  * @ignore
  */
-exports.shouldCorrectlyPresentPasswordProtectedCertificate = function(configuration, test) {
+exports.shouldCorrectlyPresentPasswordProtectedCertificateWithFips = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -566,7 +566,7 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = function(configurat
 /**
  * @ignore
  */
-exports.shouldCorrectlyValidateServerSSLCertificate = function(configuration, test) {
+exports.shouldCorrectlyValidateServerSSLCertificateWithFips = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
@@ -622,7 +622,7 @@ exports.shouldCorrectlyValidateServerSSLCertificate = function(configuration, te
 /**
  * @ignore
  */
-exports.shouldFailToValidateServerSSLCertificate = function(configuration, test) {
+exports.shouldFailToValidateServerSSLCertificateWithFips = function(configuration, test) {
   var ServerManager = require('../../tools/server_manager').ServerManager
     , Db = configuration.getMongoPackage().Db
     , Server = configuration.getMongoPackage().Server
