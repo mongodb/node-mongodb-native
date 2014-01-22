@@ -24,6 +24,7 @@ module.exports = function(configurations) {
       [
           '/test/tests/ssl/mongoclient_tests.js'
         , '/test/tests/ssl/ssl_validation_tests.js'
+        , '/test/tests/ssl/ssl_fips_validation_tests.js'
         , '/test/tests/ssl/x509_validation_tests.js'
       ]
     );
