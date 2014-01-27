@@ -41,6 +41,7 @@ var ensureUp = function(self, host, port, number_of_retries, callback) {
 
 var ServerManager = exports.ServerManager = function(options) {
   options = options == null ? {} : options;
+  
   // Basic unpack values
   this.path = path.resolve("data");
   this.port = options["start_port"] != null ? options["start_port"] : 27017;
@@ -49,10 +50,14 @@ var ServerManager = exports.ServerManager = function(options) {
   this.log_path = getPath(this, "log-" + this.port);
   this.journal = options["journal"] != null ? options["journal"] : true;
   this.auth = options['auth'] != null ? options['auth'] : false;
+  
+  // SSL Settings
   this.ssl = options['ssl'] != null ? options['ssl'] : false;
   this.ssl_server_pem = options['ssl_server_pem'] != null ? options['ssl_server_pem'] : null;
   this.ssl_server_pem_pass = options['ssl_server_pem_pass'] != null ? options['ssl_server_pem_pass'] : null;
   this.ssl_weak_certificate_validation = options['ssl_weak_certificate_validation'] != null ? options['ssl_weak_certificate_validation'] : null;
+  this.ssl_fips = options['ssl_fips'] != null ? options['ssl_fips'] : null;
+  
   // Ca settings for ssl
   this.ssl_ca = options['ssl_ca'] != null ? options['ssl_ca'] : null;
   this.ssl_crl = options['ssl_crl'] != null ? options['ssl_crl'] : null;
@@ -213,6 +218,10 @@ var generateStartCmd = function(self, options) {
 
     if(self.ssl_weak_certificate_validation) {
       startCmd = startCmd + " --sslWeakCertificateValidation"
+    }
+
+    if(self.ssl_fips) {
+      startCmd = startCmd + " --sslFIPSMode"
     }
   }
   // console.log(startCmd)

@@ -1065,7 +1065,7 @@ exports.shouldCorrectlyRenameACollection = function(configuration, test) {
  * @_class db
  * @_function createIndex
  */
-exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
+exports.shouldCreateComplexIndexOnTwoFieldsDb = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
