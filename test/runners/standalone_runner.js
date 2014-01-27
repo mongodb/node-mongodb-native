@@ -42,7 +42,7 @@ module.exports = function(configurations) {
         // , '/test/tests/functional/write_preferences_tests.js'
         , '/test/tests/functional/remove_tests.js'
         , '/test/tests/functional/unicode_tests.js'
-        , '/test/tests/functional/raw_tests.js'
+        // , '/test/tests/functional/raw_tests.js'
         , '/test/tests/functional/mapreduce_tests.js'
         , '/test/tests/functional/cursorstream_tests.js'
         , '/test/tests/functional/index_tests.js'
