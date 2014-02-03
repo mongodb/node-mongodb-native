@@ -57,7 +57,6 @@ if(argv.t == 'functional') {
   });
 
   replicaset_runners.runner_auth.on('end', function() {
-    process.exit(0);
     sharded_runners.runner_auth.run('sharded_auth', run_options);
   });
 

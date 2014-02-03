@@ -283,7 +283,6 @@ exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = function(configuration
       col2.insert(testData, function (err) {                                      
         if (err) throw err;                                                       
         db2.close();                                                              
-        console.log("done"); 
         test.done();                                                     
       });                                                                         
     });                                                                           

@@ -93,11 +93,13 @@ exports.shouldCorrectlyUpdateDocumentAndReturnRaw = function(configuration, test
               test.ok(Buffer.isBuffer(items[i]));
               objects.push(db.bson.deserialize(items[i]));
             }
+
+            for(var i = 0; i < objects.length; i++) {
+              if(objects[i].b == 2000) {
+                test.equal(2, objects[i].c);
+              }
+            }
             
-            test.equal(1, objects[0].a);
-            test.equal(2.3, objects[1].c);
-            test.equal(2000, objects[2].b);
-            test.equal(2, objects[2].c);
             db.close();
             test.done();
           })
@@ -358,30 +360,36 @@ exports.shouldCorrectlyUpdateDocumentAndReturnRawSettingRawAtCollectionLevel = f
       collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
         // Let's create a raw delete command
         var selectorObject = {b:2000};
+
         // Create raw bson buffer
         var rawSelectorObject = new Buffer(db.bson.calculateObjectSize(selectorObject));
         db.bson.serializeWithBufferAndIndex(selectorObject, false, rawSelectorObject, 0);    
+
         // Let's create a raw delete command
         var updateObject = {"$set":{c:2}};
+
         // Create raw bson buffer
         var rawUpdateObject = new Buffer(db.bson.calculateObjectSize(updateObject));
-        db.bson.serializeWithBufferAndIndex(updateObject, false, rawUpdateObject, 0);    
+        var rawUpdateObject = db.bson.serialize(updateObject, false, true, false);
+
         // Update the document and return the raw new document
         collection.update(rawSelectorObject, rawUpdateObject, {w:1}, function(err, numberOfUpdated) {
           test.equal(1, numberOfUpdated);
           
           // Query the document
-          collection.find({}, {}).toArray(function(err, items) {
+          collection.find({b:2000}, {}).toArray(function(err, items) {
             var objects = [];
             for(var i = 0; i < items.length; i++) {
               test.ok(Buffer.isBuffer(items[i]));
               objects.push(db.bson.deserialize(items[i]));
             }
-            
-            test.equal(1, objects[0].a);
-            test.equal(2.3, objects[1].c);
-            test.equal(2000, objects[2].b);
-            test.equal(2, objects[2].c);
+
+            for(var i = 0; i < objects.length; i++) {
+              if(objects[i].b == 2000) {
+                test.equal(2, objects[i].c);
+              }
+            }
+
             db.close();
             test.done();
           })

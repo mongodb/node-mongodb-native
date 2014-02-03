@@ -24,7 +24,7 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = functi
     , "primary");
 
   // legacy tests
-  var executeTests = function(_useLegacyOps, _db, _callback) {
+  var executeTests = function(_db, _callback) {
     // Get the collection
     var col = _db.collection('batch_write_ordered_ops_0');
 
@@ -37,41 +37,37 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = functi
         test.equal(null, err);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp({useLegacyOps:_useLegacyOps});
+        var batch = col.initializeOrderedBulkOp();
         batch.insert({a:1});
         batch.insert({a:2});
 
         // Execute the operations
         batch.execute({w:5, wtimeout:1}, function(err, result) {
-          // Check state of result
-          test.equal(2, result.n);
-          test.equal(65, result.getSingleError().code);
-          test.ok(typeof result.getSingleError().errmsg == 'string');
-          test.equal(true, result.hasErrors());
-          test.equal(2, result.getErrorCount());
-          test.equal(2, result.getWCErrors().length);
+          test.equal(2, result.nInserted);
+          test.equal(0, result.nUpdated);
+          test.equal(0, result.nUpserted);
+          test.equal(0, result.nRemoved);
+          test.equal(0, result.nModified);
+          
+          var writeConcernError = result.getWriteConcernError();
+          test.ok(writeConcernError != null);
+          test.ok(writeConcernError.code != null);
+          test.ok(writeConcernError.errmsg != null);
 
-          // Test errors for expected behavior
-          test.equal(0, result.getErrorAt(0).index);
-          test.equal(64, result.getErrorAt(0).code);
-          test.ok(typeof result.getErrorAt(0).errmsg == 'string');
-          test.equal(1, result.getErrorAt(0).getOperation().a);
+          test.equal(0, result.getWriteErrorCount());
 
           // Callback
-          _callback();
+          _callback();          
         });
       });
     });    
   }
 
-
   MongoClient.connect(url, function(err, db) {
-    executeTests(false, db, function() {
-      executeTests(true, db, function() {
-        // Finish up test
-        db.close();
-        test.done();
-      });
+    executeTests(db, function() {
+      // Finish up test
+      db.close();
+      test.done();
     });
   });
 }
@@ -94,7 +90,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
     , "primary");
 
   // legacy tests
-  var executeTests = function(_useLegacyOps, _db, _callback) {
+  var executeTests = function(_db, _callback) {
     // Get the collection
     var col = _db.collection('batch_write_ordered_ops_1');
 
@@ -107,7 +103,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
         test.equal(null, err);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp({useLegacyOps:_useLegacyOps});
+        var batch = col.initializeOrderedBulkOp();
         batch.insert({a:1});
         batch.find({a:3}).upsert().updateOne({a:3, b:1})
         batch.insert({a:1})
@@ -115,50 +111,38 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
 
         // Execute the operations
         batch.execute({w:5, wtimeout:1}, function(err, result) {
-          // Check state of result
-          test.equal(2, result.n);
-          test.equal(65, result.getSingleError().code);
-          test.ok(typeof result.getSingleError().errmsg == 'string');
-          test.equal(true, result.hasErrors());
-          test.equal(3, result.getErrorCount());
-          test.equal(2, result.getWCErrors().length);
+          test.equal(1, result.nInserted);
+          test.equal(0, result.nUpdated);
+          test.equal(1, result.nUpserted);
+          test.equal(0, result.nRemoved);
+          test.equal(0, result.nModified);
+          
+          var writeConcernError = result.getWriteConcernError();
+          test.ok(writeConcernError != null);
+          test.ok(writeConcernError.code != null);
+          test.ok(writeConcernError.errmsg != null);
 
-          // Test errors for expected behavior
-          test.equal(0, result.getErrorAt(0).index);
-          test.equal(64, result.getErrorAt(0).code);
-          test.ok(typeof result.getErrorAt(0).errmsg == 'string');
-          test.equal(1, result.getErrorAt(0).getOperation().a);
+          test.equal(1, result.getWriteErrorCount());
 
-          test.equal(1, result.getErrorAt(1).index);
-          test.equal(64, result.getErrorAt(1).code);
-          test.ok(typeof result.getErrorAt(1).errmsg == 'string');
-          test.equal(3, result.getErrorAt(1).getOperation().q.a);
-
-          test.equal(2, result.getErrorAt(2).index);
-          test.equal(11000, result.getErrorAt(2).code);
-          test.ok(typeof result.getErrorAt(2).errmsg == 'string');
-          test.equal(1, result.getErrorAt(2).getOperation().a);
-
-          var upserts = result.getUpsertedIds();
-          test.equal(1, upserts.length);
-          test.equal(1, upserts[0].index);
-          test.ok(upserts[0]._id != null);
+          // Individual error checking
+          var error = result.getWriteErrorAt(0);
+          test.equal(2, error.index);
+          test.equal(11000, error.code);
+          test.ok(error.errmsg != null);
+          test.equal(1, error.getOperation().a);
 
           // Callback
-          _callback();
+          _callback();          
         });
       });
     });    
   }
 
-
   MongoClient.connect(url, function(err, db) {
-    executeTests(false, db, function() {
-      executeTests(true, db, function() {
-        // Finish up test
-        db.close();
-        test.done();
-      });
+    executeTests(db, function() {
+      // Finish up test
+      db.close();
+      test.done();
     });
   });
 }
@@ -187,7 +171,7 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = func
     , "primary");
 
   // legacy tests
-  var executeTests = function(_useLegacyOps, _db, _callback) {
+  var executeTests = function(_db, _callback) {
     // Get the collection
     var col = _db.collection('batch_write_unordered_ops_0');
 
@@ -200,56 +184,38 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = func
         test.equal(null, err);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeUnorderedBulkOp({useLegacyOps:_useLegacyOps});
+        var batch = col.initializeUnorderedBulkOp();
         batch.insert({a:1});
         batch.find({a:3}).upsert().updateOne({a:3, b:1})
         batch.insert({a:2});
 
         // Execute the operations
         batch.execute({w:5, wtimeout:1}, function(err, result) {
-          // Go over all the errors
-          for(var i = 0; i < result.getErrorCount(); i++) {
-            var error = result.getErrorAt(i);
+          test.equal(2, result.nInserted);
+          test.equal(0, result.nUpdated);
+          test.equal(1, result.nUpserted);
+          test.equal(0, result.nRemoved);
+          test.equal(0, result.nModified);
+          
+          var writeConcernError = result.getWriteConcernError();
+          test.ok(writeConcernError != null);
+          test.ok(writeConcernError.code != null);
+          test.ok(writeConcernError.errmsg != null);
 
-            switch(error.index) {
-              case 0:
-                test.equal(0, error.index);
-                test.equal(64, error.code);
-                test.ok(typeof error.errmsg == 'string');
-                test.equal(1, error.getOperation().a);
-                break;
-              case 1:
-                test.equal(1, error.index);
-                test.equal(64, error.code);
-                test.ok(typeof error.errmsg == 'string');
-                test.equal(3, error.getOperation().q.a);
-                break;
-              case 2:
-                test.equal(2, error.index);
-                test.equal(64, error.code);
-                test.ok(typeof error.errmsg == 'string');
-                test.equal(2, error.getOperation().a);
-                break;
-              default:
-                test.ok(false);
-            }
-          }
+          test.equal(0, result.getWriteErrorCount());
 
           // Callback
-          _callback();
+          _callback();          
         });
       });
     });    
   }
 
-
   MongoClient.connect(url, function(err, db) {
-    executeTests(false, db, function() {
-      executeTests(true, db, function() {
-        // Finish up test
-        db.close();
-        test.done();
-      });
+    executeTests(db, function() {
+      // Finish up test
+      db.close();
+      test.done();
     });
   });
 }
@@ -272,7 +238,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
     , "primary");
 
   // legacy tests
-  var executeTests = function(_useLegacyOps, _db, _callback) {
+  var executeTests = function(_db, _callback) {
     // Get the collection
     var col = _db.collection('batch_write_unordered_ops_1');
 
@@ -285,7 +251,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
         test.equal(null, err);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp({useLegacyOps:_useLegacyOps});
+        var batch = col.initializeOrderedBulkOp();
         batch.insert({a:1});
         batch.find({a:3}).upsert().updateOne({a:3, b:1})
         batch.insert({a:1})
@@ -293,62 +259,42 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
 
         // Execute the operations
         batch.execute({w:5, wtimeout:1}, function(err, result) {
-          // Check state of result
-          test.equal(2, result.n);
-          test.equal(65, result.getSingleError().code);
-          test.ok(typeof result.getSingleError().errmsg == 'string');
-          test.equal(true, result.hasErrors());
-          test.equal(3, result.getErrorCount());
-          test.equal(2, result.getWCErrors().length);
+          test.equal(1, result.nInserted);
+          test.equal(0, result.nUpdated);
+          test.equal(1, result.nUpserted);
+          test.equal(0, result.nRemoved);
+          test.equal(0, result.nModified);
+          
+          var writeConcernError = result.getWriteConcernError();
+          test.ok(writeConcernError != null);
+          test.ok(writeConcernError.code != null);
+          test.ok(writeConcernError.errmsg != null);
 
-          // Go over all the errors
-          for(var i = 0; i < result.getErrorCount(); i++) {
-            var error = result.getErrorAt(i);
-
-            switch(error.index) {
-              case 0:
-                test.equal(0, error.index);
-                test.equal(64, error.code);
-                test.ok(typeof error.errmsg == 'string');
-                test.equal(1, error.getOperation().a);
-                break;
-              case 1:
-                test.equal(1, error.index);
-                test.equal(64, error.code);
-                test.ok(typeof error.errmsg == 'string');
-                test.equal(3, error.getOperation().q.a);
-                break;
-              case 2:
-                test.equal(2, error.index);
-                test.equal(11000, error.code);
-                test.ok(typeof error.errmsg == 'string');
-                test.equal(1, error.getOperation().a);
-                break;
-              default:
-                test.ok(false);
-            }
+          // Might or might not have a write error depending on
+          // Unordered execution order
+          test.ok(result.getWriteErrorCount() == 0 || result.getWriteErrorCount() == 1);
+          
+          // If we have an error it should be a duplicate key error
+          if(result.getWriteErrorCount() == 1) {
+            var error = result.getWriteErrorAt(0);
+            test.ok(error.index == 0 || error.index == 2);
+            test.equal(11000, error.code);
+            test.ok(error.errmsg != null);
+            test.equal(1, error.getOperation().a);            
           }
 
-          var upserts = result.getUpsertedIds();
-          test.equal(1, upserts.length);
-          test.equal(1, upserts[0].index);
-          test.ok(upserts[0]._id != null);
-
           // Callback
-          _callback();
+          _callback();          
         });
       });
     });    
   }
 
-
   MongoClient.connect(url, function(err, db) {
-    executeTests(false, db, function() {
-      executeTests(true, db, function() {
-        // Finish up test
-        db.close();
-        test.done();
-      });
+    executeTests(db, function() {
+      // Finish up test
+      db.close();
+      test.done();
     });
   });
 }
