@@ -479,6 +479,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
               // console.log("=====================================================")
               // console.dir(err)
               // console.dir(object)
+              if(err) return callback(err, null);
               // Close connection
               if(connection != null) connection.close();
               // Get documents
