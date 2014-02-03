@@ -1,3 +1,48 @@
 TODO
-- Certificate verification for SSL
-- Allow setting forceServerObjectId at the collection level.
+----
+- Log stream for driver allowing people to customize the logging themselves and allow to set the level off logging
+	- MongoClient.log(level) -> (Stream)
+		- error
+		- warning
+		- info
+			- connect event
+			- ha
+			- ping
+			- operation server selection
+			- ....			
+		- debug
+	- Goal is to make it easy to plug your own processor, should also be possible 	to change the level of debugging on the fly if needed
+
+- Integra test suite code coverage
+	- Normal code coverage
+	- Reversed code coverage
+
+- Extending benchmark suite
+	- Better coverage of critical path
+	- Profiling of critical path
+
+- Functional tests running against
+	- Single server
+	- Replicaset
+	- Sharded
+
+- Rework docs to be better and nicer
+	- Refactor tools code into cleaner code
+	- Better design of code location
+	- Ensure analytics is used for this
+
+- Redesign BSON interface to be more pluggable
+	- Single method entry instead of like now
+	- Support pre-allocated buffers for both C++ and js BSON by option
+
+- Fix Kerberos module to compile correctly against Node 0.12.0 on unix/win32
+
+- Fix BSON module to compile correctly against Node 0.12.0 on unix/win32
+
+- Figure out Windows binaries packaging and loading logic in bson library
+	- 64bit/32bit
+	- Node 0.10.X vs 0.12.X
+	- win7 vs win8 ? (not sure if this is a problem)
+
+- BsonRegExp Class introduction to BSON
+
