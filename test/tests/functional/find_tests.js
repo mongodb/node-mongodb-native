@@ -2032,240 +2032,275 @@ exports.shouldCorrectlyDoFindMinMax = function(configuration, test) {
  * @_class collection
  * @_function parallelCollectionScan
  */
-exports['Should correctly execute parallelCollectionScan with multiple cursors'] = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+exports['Should correctly execute parallelCollectionScan with multiple cursors'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.5.5"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    var docs = [];
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      var docs = [];
 
-    // Insert some documents
-    for(var i = 0; i < 2000; i++) {
-      docs.push({a:i});
-    }
+      // Insert some documents
+      for(var i = 0; i < 2000; i++) {
+        docs.push({a:i});
+      }
 
-    // Get the collection
-    var collection = db.collection('parallelCollectionScan');
-    // Insert 1000 documents in a batch
-    collection.insert(docs, function(err, result) {
-      var results = [];
-      var numCursors = 3;
+      // Get the collection
+      var collection = db.collection('parallelCollectionScan');
+      // Insert 1000 documents in a batch
+      collection.insert(docs, function(err, result) {
+        var results = [];
+        var numCursors = 3;
 
-      // Execute parallelCollectionScan command
-      collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
-        test.equal(null, err);
-        test.ok(cursors != null);
-        test.ok(cursors.length > 0);
+        // Execute parallelCollectionScan command
+        collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
+          test.equal(null, err);
+          test.ok(cursors != null);
+          test.ok(cursors.length > 0);
 
-        for(var i = 0; i < cursors.length; i++) {
-          cursors[i].get(function(err, items) {
-            test.equal(err, null);
+          for(var i = 0; i < cursors.length; i++) {
+            cursors[i].get(function(err, items) {
+              test.equal(err, null);
 
-            // Add docs to results array
-            results = results.concat(items);
-            numCursors = numCursors - 1;
-
-            // No more cursors let's ensure we got all results
-            if(numCursors == 0) {
-              test.equal(docs.length, results.length);
-
-              db.close();
-              test.done();
-            }
-          });
-        }
-      });
-    });
-  });
-  // DOC_END
-}
-
-exports['Should correctly execute parallelCollectionScan with multiple cursors using each'] = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
-  // Establish connection to db
-  db.open(function(err, db) {
-    var docs = [];
-
-    // Insert some documents
-    for(var i = 0; i < 2000; i++) {
-      docs.push({a:i});
-    }
-
-    // Get the collection
-    var collection = db.collection('parallelCollectionScan_2');
-    // Insert 2000 documents in a batch
-    collection.insert(docs, function(err, result) {
-      var results = [];
-      var numCursors = 3;
-
-      // Execute parallelCollectionScan command
-      collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
-        test.equal(null, err);
-        test.ok(cursors != null);
-        test.ok(cursors.length > 0);
-
-        for(var i = 0; i < cursors.length; i++) {
-          cursors[i].each(function(err, item) {
-            test.equal(err, null);
-
-            // Add item to list
-            if(item) results.push(item);
-            // Finished each
-            if(item == null) {
+              // Add docs to results array
+              results = results.concat(items);
               numCursors = numCursors - 1;
 
               // No more cursors let's ensure we got all results
               if(numCursors == 0) {
                 test.equal(docs.length, results.length);
 
-                // Ensure all cursors are closed
-                for(var j = 0; j < cursors.length; j++) {
-                  test.equal(true, cursors[j].isClosed());
+                db.close();
+                test.done();
+              }
+            });
+          }
+        });
+      });
+    });
+    // DOC_END
+  }
+}
+
+exports['Should correctly execute parallelCollectionScan with multiple cursors using each'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.5.5"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      var docs = [];
+
+      // Insert some documents
+      for(var i = 0; i < 2000; i++) {
+        docs.push({a:i});
+      }
+
+      // Get the collection
+      var collection = db.collection('parallelCollectionScan_2');
+      // Insert 2000 documents in a batch
+      collection.insert(docs, function(err, result) {
+        var results = [];
+        var numCursors = 3;
+
+        // Execute parallelCollectionScan command
+        collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
+          test.equal(null, err);
+          test.ok(cursors != null);
+          test.ok(cursors.length > 0);
+
+          for(var i = 0; i < cursors.length; i++) {
+            cursors[i].each(function(err, item) {
+              test.equal(err, null);
+
+              // Add item to list
+              if(item) results.push(item);
+              // Finished each
+              if(item == null) {
+                numCursors = numCursors - 1;
+
+                // No more cursors let's ensure we got all results
+                if(numCursors == 0) {
+                  test.equal(docs.length, results.length);
+
+                  // Ensure all cursors are closed
+                  for(var j = 0; j < cursors.length; j++) {
+                    test.equal(true, cursors[j].isClosed());
+                  }
+
+                  db.close();
+                  return test.done();
+                }
+              }
+            });
+          }
+        });
+      });
+    });
+  }
+}
+
+exports['Should correctly execute parallelCollectionScan with multiple cursors using next'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.5.5"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      var docs = [];
+
+      // Insert some documents
+      for(var i = 0; i < 2000; i++) {
+        docs.push({a:i});
+      }
+
+      // Get the collection
+      var collection = db.collection('parallelCollectionScan_3');
+      // Insert 1000 documents in a batch
+      collection.insert(docs, function(err, result) {
+        var results = [];
+        var numCursors = 3;
+
+        // Execute parallelCollectionScan command
+        collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
+          test.equal(null, err);
+          test.ok(cursors != null);
+          test.ok(cursors.length > 0);
+
+          for(var i = 0; i < cursors.length; i++) {
+
+            // Iterate using next method
+            var nextIterator = function(_cursor) {            
+              var _callback = function(err, item) {
+                if(item) {
+                  results.push(item);
+                  return _cursor.next(_callback)
                 }
 
-                db.close();
-                return test.done();
-              }
-            }
-          });
-        }
-      });
-    });
-  });
-}
+                numCursors = numCursors - 1;              
+                // Ensure cursor is closed
+                test.equal(true, _cursor.isClosed());
+                // No more cursors let's ensure we got all results
+                if(numCursors == 0) {
+                  test.equal(docs.length, results.length);
 
-exports['Should correctly execute parallelCollectionScan with multiple cursors using next'] = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
-  // Establish connection to db
-  db.open(function(err, db) {
-    var docs = [];
-
-    // Insert some documents
-    for(var i = 0; i < 2000; i++) {
-      docs.push({a:i});
-    }
-
-    // Get the collection
-    var collection = db.collection('parallelCollectionScan_3');
-    // Insert 1000 documents in a batch
-    collection.insert(docs, function(err, result) {
-      var results = [];
-      var numCursors = 3;
-
-      // Execute parallelCollectionScan command
-      collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
-        test.equal(null, err);
-        test.ok(cursors != null);
-        test.ok(cursors.length > 0);
-
-        for(var i = 0; i < cursors.length; i++) {
-
-          // Iterate using next method
-          var nextIterator = function(_cursor) {            
-            var _callback = function(err, item) {
-              if(item) {
-                results.push(item);
-                return _cursor.next(_callback)
+                  db.close();
+                  return test.done();
+                }
               }
 
-              numCursors = numCursors - 1;              
-              // Ensure cursor is closed
-              test.equal(true, _cursor.isClosed());
-              // No more cursors let's ensure we got all results
-              if(numCursors == 0) {
-                test.equal(docs.length, results.length);
-
-                db.close();
-                return test.done();
-              }
+              _cursor.next(_callback);
             }
 
-            _cursor.next(_callback);
+            // Start iteration using next
+            nextIterator(cursors[i]);
           }
-
-          // Start iteration using next
-          nextIterator(cursors[i]);
-        }
+        });
       });
     });
-  });
+  }
 }
 
-exports['Should correctly execute parallelCollectionScan with single cursor and close'] = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
-  // Establish connection to db
-  db.open(function(err, db) {
-    var docs = [];
+exports['Should correctly execute parallelCollectionScan with single cursor and close'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.5.5"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      var docs = [];
 
-    // Insert some documents
-    for(var i = 0; i < 2000; i++) {
-      docs.push({a:i});
-    }
+      // Insert some documents
+      for(var i = 0; i < 2000; i++) {
+        docs.push({a:i});
+      }
 
-    // Get the collection
-    var collection = db.collection('parallelCollectionScan_4');
-    // Insert 1000 documents in a batch
-    collection.insert(docs, function(err, result) {
-      var results = [];
-      var numCursors = 1;
+      // Get the collection
+      var collection = db.collection('parallelCollectionScan_4');
+      // Insert 1000 documents in a batch
+      collection.insert(docs, function(err, result) {
+        var results = [];
+        var numCursors = 1;
 
-      // Execute parallelCollectionScan command
-      collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
-        test.equal(null, err);
-        test.ok(cursors != null);
-        test.ok(cursors.length > 0);
-
-        cursors[0].close(function(err, result) {
+        // Execute parallelCollectionScan command
+        collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
           test.equal(null, err);
-          test.equal(null, result);
-          test.equal(true, cursors[0].isClosed());
-          db.close();
-          test.done();
+          test.ok(cursors != null);
+          test.ok(cursors.length > 0);
+
+          cursors[0].close(function(err, result) {
+            test.equal(null, err);
+            test.equal(null, result);
+            test.equal(true, cursors[0].isClosed());
+            db.close();
+            test.done();
+          });
         });
       });
     });
-  });
+  }
 }
 
-exports['Should correctly execute parallelCollectionScan with single cursor streaming'] = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
-  // Establish connection to db
-  db.open(function(err, db) {
-    var docs = [];
+exports['Should correctly execute parallelCollectionScan with single cursor streaming'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.5.5"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      var docs = [];
 
-    // Insert some documents
-    for(var i = 0; i < 2000; i++) {
-      docs.push({a:i});
-    }
+      // Insert some documents
+      for(var i = 0; i < 2000; i++) {
+        docs.push({a:i});
+      }
 
-    // Get the collection
-    var collection = db.collection('parallelCollectionScan_4');
-    // Insert 1000 documents in a batch
-    collection.insert(docs, function(err, result) {
-      var results = [];
-      var numCursors = 1;
+      // Get the collection
+      var collection = db.collection('parallelCollectionScan_4');
+      // Insert 1000 documents in a batch
+      collection.insert(docs, function(err, result) {
+        var results = [];
+        var numCursors = 1;
 
-      // Execute parallelCollectionScan command
-      collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
-        test.equal(null, err);
-        test.ok(cursors != null);
-        test.ok(cursors.length > 0);
+        // Execute parallelCollectionScan command
+        collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
+          test.equal(null, err);
+          test.ok(cursors != null);
+          test.ok(cursors.length > 0);
 
-        cursors[0].on("data", function(data) {
-          results.push(data);
-        });
+          cursors[0].on("data", function(data) {
+            results.push(data);
+          });
 
-        cursors[0].on("end", function() {
-          test.equal(docs.length, results.length);
-          test.equal(true, cursors[0].isClosed());
-          db.close();
-          test.done();
+          cursors[0].on("end", function() {
+            test.equal(docs.length, results.length);
+            test.equal(true, cursors[0].isClosed());
+            db.close();
+            test.done();
+          });
         });
       });
     });
-  });
+  }
 }
 
 exports['Should correctly sort using text search on 2.6 or higher in find'] = {
