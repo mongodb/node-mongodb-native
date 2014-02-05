@@ -2229,6 +2229,45 @@ exports['Should correctly execute parallelCollectionScan with single cursor and 
   });
 }
 
+exports['Should correctly execute parallelCollectionScan with single cursor streaming'] = function(configuration, test) {
+  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+  // Establish connection to db
+  db.open(function(err, db) {
+    var docs = [];
+
+    // Insert some documents
+    for(var i = 0; i < 2000; i++) {
+      docs.push({a:i});
+    }
+
+    // Get the collection
+    var collection = db.collection('parallelCollectionScan_4');
+    // Insert 1000 documents in a batch
+    collection.insert(docs, function(err, result) {
+      var results = [];
+      var numCursors = 1;
+
+      // Execute parallelCollectionScan command
+      collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
+        test.equal(null, err);
+        test.ok(cursors != null);
+        test.ok(cursors.length > 0);
+
+        cursors[0].on("data", function(data) {
+          results.push(data);
+        });
+
+        cursors[0].on("end", function() {
+          test.equal(docs.length, results.length);
+          test.equal(true, cursors[0].isClosed());
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}
+
 exports['Should correctly sort using text search on 2.6 or higher in find'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
