@@ -24,16 +24,13 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = function(configurat
     }, function(err,db){
       test.equal(null, err);
       test.ok(db != null);
-      // console.log("========================================================== 0")
 
       db.collection("replicaset_readpref_test").insert({testfield:123}, function(err, result) {
         test.equal(null, err);
         
-        // console.log("========================================================== 1")
         db.collection("replicaset_readpref_test").findOne({}, function(err, result){
           test.equal(null, err);
           test.equal(result.testfield, 123);
-          // console.log("========================================================== 2")
 
           // wait five seconds, then kill 2 of the 3 nodes that are up.
           setTimeout(function(){
@@ -62,12 +59,8 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = function(configurat
             db.collection("replicaset_readpref_test").findOne({},
               {readPreference: ReadPreference.SECONDARY_PREFERRED},
               function(err, result){
-                // console.log("===================================== EXECUTE")
-                // console.dir(err)
-                // console.dir(result)
                 callbacksWaiting--;
             });
-            // console.log("counter:", counter, callbacksWaiting);
           }, 1000);
         });
       });
@@ -150,9 +143,6 @@ var identifyServers = function(mongo, rs, dbname, callback) {
     var db = new Db(dbname, server, {w:0});
     // Connect to the db
     db.open(function(err, db) {
-      // if(err)
-      //   console.log(callback.toString())
-
       numberOfServersToCheck = numberOfServersToCheck - 1;
       if(db.serverConfig.isMasterDoc.ismaster) {
         primary = {host:db.serverConfig.host, port:db.serverConfig.port};
@@ -183,7 +173,6 @@ exports['Connection to replicaset with secondary read preference with no seconda
     , Server = mongo.Server
     , Db = mongo.Db;
 
-  // console.log("**** 'Connection to replicaset with secondary read preference with no secondaries should return primary'");
   var replicasetManager = configuration.getReplicasetManager();
 
   // Fetch all the identity servers
@@ -201,7 +190,6 @@ exports['Connection to replicaset with secondary read preference with no seconda
     var db = new Db('integration_test_', replSet, {w:0});
     // Trigger test once whole set is up
     db.on("fullsetup", function() {
-      // console.log("====================================================== 0")
       // Rip out secondaries forcing an attempt to read from the primary
       db.serverConfig._state.secondaries = {};
 
@@ -209,7 +197,6 @@ exports['Connection to replicaset with secondary read preference with no seconda
       var checkoutWriterMethod = db.serverConfig._state.master.checkoutWriter;
       // Set up checkoutWriter to catch correct write request
       db.serverConfig._state.master.checkoutWriter = function() {
-        // console.log("====================================================== 2")
         var r = checkoutWriterMethod.apply(db.serverConfig._state.master);
         test.equal(servers.primary.host, r.socketOptions.host);
         test.equal(servers.primary.port, r.socketOptions.port);
@@ -218,10 +205,8 @@ exports['Connection to replicaset with secondary read preference with no seconda
 
       // Grab the collection
       var collection = db.collection("read_preference_replicaset_test_0");
-      // console.log("====================================================== 1")
       // Attempt to read (should fail due to the server not being a primary);
       collection.find().toArray(function(err, items) {
-        // console.log("====================================================== 3")
         // Does not get called or we don't care
         db.close();
         test.done();
@@ -306,7 +291,6 @@ exports['Connection to replicaset with secondary read preference should return s
     , Db = mongo.Db;
 
   var replicasetManager = configuration.getReplicasetManager();
-  // console.log("+++ 'Connection to replicaset with secondary read preference should return secondary server'");
 
   // Fetch all the identity servers
   identifyServers(mongo, replicasetManager, 'integration_test_', function(err, servers) {
@@ -918,9 +902,9 @@ exports['Connection to a single primary host with different read preferences'] =
     var port = servers.primary.port;
 
     // Connect to the db
-    var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_PRIMARY});
+    var server = new Server(host, port,{auto_reconnect: true});
     // Create db instance
-    var db = new Db('integration_test_', server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db('integration_test_', server, {w:1});
     db.open(function(err, p_db) {
       // Grab the collection
       var collection = p_db.collection("read_preference_single_test_0");
@@ -930,9 +914,9 @@ exports['Connection to a single primary host with different read preferences'] =
         p_db.close();
 
         // Connect to the db
-        var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_SECONDARY});
+        var server = new Server(host, port,{auto_reconnect: true, readPreference:ReadPreference.SECONDARY_PREFERRED});
         // Create db instance
-        var db = new Db('integration_test_', server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+        var db = new Db('integration_test_', server, {w:1});
         db.open(function(err, p_db) {
           // Grab the collection
           var collection = db.collection("read_preference_single_test_0");
@@ -943,12 +927,13 @@ exports['Connection to a single primary host with different read preferences'] =
             p_db.close();
 
             // Connect to the db
-            var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_SECONDARY_ONLY});
+            var server = new Server(host, port,{auto_reconnect: true, readPreference:ReadPreference.SECONDARY});
             // Create db instance
-            var db = new Db('integration_test_', server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+            var db = new Db('integration_test_', server, {w:1});
             db.open(function(err, p_db) {
               // Grab the collection
               var collection = db.collection("read_preference_single_test_0");
+
               // Attempt to read (should fail due to the server not being a primary);
               collection.find().toArray(function(err, items) {
                 test.ok(err instanceof Error);
@@ -985,9 +970,9 @@ exports['Connection to a single secondary host with different read preferences']
     var port = servers.secondaries[0].port;
 
     // Connect to the db
-    var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_PRIMARY});
+    var server = new Server(host, port,{auto_reconnect: true});
     // Create db instance
-    var db = new Db('integration_test_', server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+    var db = new Db('integration_test_', server, {w:0, readPreference:ReadPreference.PRIMARY});
     db.open(function(err, p_db) {
       // Grab the collection
       var collection = p_db.collection("read_preference_single_test_1");
@@ -998,22 +983,21 @@ exports['Connection to a single secondary host with different read preferences']
         p_db.close();
 
         // Connect to the db
-        var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_SECONDARY});
+        var server = new Server(host, port,{auto_reconnect: true});
         // Create db instance
-        var db = new Db('integration_test_', server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+        var db = new Db('integration_test_', server, {w:0});
         db.open(function(err, p_db) {
           // Grab the collection
           var collection = db.collection("read_preference_single_test_1");
           // Attempt to read (should fail due to the server not being a primary);
           collection.find().toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal(0, items.length);
+            test.ok(err != null);
             p_db.close();
 
             // Connect to the db
-            var server = new Server(host, port,{auto_reconnect: true, readPreference:Server.READ_SECONDARY_ONLY});
+            var server = new Server(host, port,{auto_reconnect: true});
             // Create db instance
-            var db = new Db('integration_test_', server, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
+            var db = new Db('integration_test_', server, {w:0, readPreference:ReadPreference.SECONDARY});
             db.open(function(err, p_db) {
               // Grab the collection
               var collection = db.collection("read_preference_single_test_1");
