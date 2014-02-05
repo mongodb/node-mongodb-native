@@ -20,7 +20,7 @@ Where
   * `fields` - indicates which fields should be included in the response (default is all)
   * `options` - defines extra logic (sorting options, paging etc.)
   * `raw` - driver returns documents as bson binary Buffer objects, `default:false`
-  * `callback` has two parameters - an error object (if an error occured) and a cursor object.
+  * `callback` has two parameters - an error object (if an error occurred) and a cursor object.
   
 The result for the query is actually a cursor object. This can be used directly or converted to an array.
 
@@ -40,9 +40,9 @@ To indicate which fields must or must no be returned `fields` value can be used.
 
 retrieves fields `name` and `title` (and as a default also `_id`) but not any others.
 
-## Find first occurence with findOne()
+## Find first occurrence with findOne()
 
-`findOne` is a convinence method finding and returning the first match of a query while regular `find` returns a cursor object instead. Use it when you expect only one record, for example when querying with `_id` or another unique property.
+`findOne` is a convenience method finding and returning the first match of a query while regular `find` returns a cursor object instead. Use it when you expect only one record, for example when querying with `_id` or another unique property.
 
 ```javascript
   collection.findOne(query, [fields, [options]], callback);
@@ -53,7 +53,7 @@ Where
   * `query` is a query object or an `_id` value
   * `fields` - indicates which fields should be included in the response (default is all)
   * `options` - defines extra logic (sorting options, paging etc.)
-  * `callback` has two parameters - an error object (if an error occured) and the document object. 
+  * `callback` has two parameters - an error object (if an error occurred) and the document object. 
 
 Example:
 
@@ -65,7 +65,7 @@ Example:
 
 ## _id values
 
-Default `_id` values are 12 byte binary hashes. You can alter the format with custom Primary Key factories (see *Custom Primarky Keys* in [Database](database.md)).
+Default `_id` values are 12 byte binary hashes. You can alter the format with custom Primary Key factories (see *Custom Primary Keys* in [Database](database.md)).
 
 In order to treat these binary _id values as strings it would be wise to convert binary values to hex strings. This can be done with `toHexString` property.
 
@@ -132,7 +132,7 @@ If more than one fieldname is specified, then it's an AND query
   }
 ```
 
-Whis query matches all records where *key1* is *"value1"* and  *key2* is *"value2"*
+Which query matches all records where *key1* is *"value1"* and  *key2* is *"value2"*
 
 ### OR
 
@@ -219,7 +219,7 @@ For example with the following document
   }
 ```
 
-not only the `_id` field can be used as a query field - also the `firstname` and even `title` can be used. This can be done when using nested field names as strings, concated with periods.
+not only the `_id` field can be used as a query field - also the `firstname` and even `title` can be used. This can be done when using nested field names as strings, concatenated with periods.
 
 ```javascript
   collection.find({"author.firstname":"Daniel})
@@ -260,7 +260,7 @@ retrieves 10 elements starting from 20
 
 ### Sorting
 
-Sorting can be acieved with option parameter `sort` which takes an array of sort preferences
+Sorting can be achieved with option parameter `sort` which takes an array of sort preferences
 
 ```javascript
   {
@@ -316,7 +316,7 @@ Counting total number of found matches can be done against cursors with method `
 
 Where
 
-  * `callback` is the callback function with two parameters - an error object (if an error occured) and the number on matches as an integer.
+  * `callback` is the callback function with two parameters - an error object (if an error occurred) and the number on matches as an integer.
   
 Example
 
