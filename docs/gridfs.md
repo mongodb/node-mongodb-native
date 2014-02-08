@@ -152,7 +152,7 @@ Where
 Seeking can be done with `seek`
 
 ```javascript
-  gs.seek(position);
+  gs.seek(position, callback);
 ```
 
 This function moves the internal pointer to the specified position.
