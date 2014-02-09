@@ -72,6 +72,7 @@ var sharded_config = function(options) {
     this.killMongoS = mapFunction(this.shardManager, 'killMongoS');
     this.killShard = mapFunction(this.shardManager, 'killShard');
     this.restartMongoS = mapFunction(this.shardManager, 'restartMongoS');
+    this.restartAllMongos = mapFunction(this.shardManager, 'restartAllMongos');
 
     // Pr test functions
     this.setup = function(callback) { 

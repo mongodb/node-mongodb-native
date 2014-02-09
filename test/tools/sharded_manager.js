@@ -165,12 +165,27 @@ ShardedManager.prototype.killShardPrimary = function(callback) {
 
 // Kills the first server
 ShardedManager.prototype.killMongoS = function(port, callback) {
+  if(typeof port == 'function') {
+    callback = port;
+    port = null;
+  }
+  // Number of proxies left
+  var left = this.mongosProxies.length;
+
   // Locate the server instance and kill it
   for(var i = 0; i < this.mongosProxies.length; i++) {
     var proxy = this.mongosProxies[i];
     // If it's the right one kill it
     if(proxy.port == port) {
       proxy.stop(9, callback);
+    } else if(port == null) {
+      proxy.stop(9, function() {
+        left = left - 1;
+
+        if(left == 0) {
+          callback();
+        }
+      });
     }
   }
 }

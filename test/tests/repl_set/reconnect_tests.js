@@ -285,6 +285,67 @@ exports['Should not timeout'] = function(configuration, test) {
   });
 }
 
+/**
+ * @ignore
+ */
+exports['Should correctly receive reconnect event after primary selection and buffering'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , MongoClient = mongo.MongoClient
+    , ReadPreference = mongo.ReadPreference
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
+
+  // var db = configuration.db();
+  var replicasetManager = configuration.getReplicasetManager();
+
+  // Replica configuration
+  var replSet = new ReplSetServers( [
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ],
+    {rs_name:replicasetManager.name, readPreference:ReadPreference.SECONDARY_PREFERRED}
+  );
+
+  var db = new Db('integration_test_', replSet, {w:0});  
+  db.open(function(err, db) {    
+    var reconnectCalled = false;
+    // Add listener to the serverConfig
+    db.serverConfig.on('reconnect', function(err) {
+      reconnectCalled = true;
+    });
+
+    // Drop collection on replicaset
+    db.dropCollection('testsets', function(err, r) {
+      var collection = db.collection('testsets');
+      // Insert a dummy document
+      collection.insert({a:20}, {safe: {w:2, wtimeout: 10000}}, function(err, r) {
+        test.equal(null, err);
+
+        // Execute a count
+        collection.count(function(err, c) {
+          test.equal(null, err);
+          test.equal(1, c);
+           
+          // Kill the primary
+          configuration.killPrimary(function(node) {
+            test.equal(null, err);
+
+            collection.insert({a:30}, {w:1}, function(err, r) {
+              test.equal(null, err);
+              test.ok(reconnectCalled);
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+
 // /**
 //  * @ignore
 //  */
