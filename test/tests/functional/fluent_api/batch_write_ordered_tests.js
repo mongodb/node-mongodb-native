@@ -29,7 +29,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
         // Check state of result
         test.equal(2, result.nInserted);
         test.equal(1, result.nUpserted);
-        test.equal(1, result.nUpdated);
+        test.equal(1, result.nMatched);
         test.equal(1, result.nModified);
         test.equal(1, result.nRemoved);
         
@@ -297,7 +297,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             // Execute the operations
             batch.execute(function(err, result) {
               // Test basic settings
-              test.equal(0, result.nUpdated);
+              test.equal(0, result.nMatched);
               test.equal(0, result.nModified);
               test.equal(true, result.hasWriteErrors());
               test.ok(1, result.getWriteErrorCount());
@@ -347,7 +347,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
         batch.execute(function(err, result) {
           // Test basic settings
           test.equal(1, result.nInserted);
-          test.equal(1, result.nUpdated);
+          test.equal(1, result.nMatched);
           test.equal(1, result.nModified);
           test.equal(true, result.hasWriteErrors());
           test.ok(1, result.getWriteErrorCount());
@@ -398,7 +398,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
           // Test basic settings
           test.equal(1, result.nInserted);
           test.equal(2, result.nUpserted);
-          test.equal(1, result.nUpdated);
+          test.equal(1, result.nMatched);
           test.equal(1, result.nModified);
           test.equal(true, result.hasWriteErrors());
           test.ok(1, result.getWriteErrorCount());
@@ -448,7 +448,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
         // Check state of result
         test.equal(1, result.nUpserted);
         test.equal(0, result.nInserted);
-        test.equal(0, result.nUpdated);
+        test.equal(0, result.nMatched);
         test.equal(0, result.nModified);
         test.equal(0, result.nRemoved);
         
