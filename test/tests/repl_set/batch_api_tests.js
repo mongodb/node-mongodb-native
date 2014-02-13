@@ -44,7 +44,7 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = functi
         // Execute the operations
         batch.execute({w:5, wtimeout:1}, function(err, result) {
           test.equal(2, result.nInserted);
-          test.equal(0, result.nUpdated);
+          test.equal(0, result.nMatched);
           test.equal(0, result.nUpserted);
           test.equal(0, result.nRemoved);
           test.equal(0, result.nModified);
@@ -112,7 +112,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
         // Execute the operations
         batch.execute({w:5, wtimeout:1}, function(err, result) {
           test.equal(1, result.nInserted);
-          test.equal(0, result.nUpdated);
+          test.equal(0, result.nMatched);
           test.equal(1, result.nUpserted);
           test.equal(0, result.nRemoved);
           test.equal(0, result.nModified);
@@ -192,7 +192,7 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = func
         // Execute the operations
         batch.execute({w:5, wtimeout:1}, function(err, result) {
           test.equal(2, result.nInserted);
-          test.equal(0, result.nUpdated);
+          test.equal(0, result.nMatched);
           test.equal(1, result.nUpserted);
           test.equal(0, result.nRemoved);
           test.equal(0, result.nModified);
@@ -259,8 +259,11 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
 
         // Execute the operations
         batch.execute({w:5, wtimeout:1}, function(err, result) {
+          console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+          console.dir(result.getRawResponse())
+
           test.equal(1, result.nInserted);
-          test.equal(0, result.nUpdated);
+          test.equal(0, result.nMatched);
           test.equal(1, result.nUpserted);
           test.equal(0, result.nRemoved);
           test.equal(0, result.nModified);
