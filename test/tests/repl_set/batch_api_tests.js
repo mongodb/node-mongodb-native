@@ -259,9 +259,6 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
 
         // Execute the operations
         batch.execute({w:5, wtimeout:1}, function(err, result) {
-          console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-          console.dir(result.getRawResponse())
-
           test.equal(1, result.nInserted);
           test.equal(0, result.nMatched);
           test.equal(1, result.nUpserted);
