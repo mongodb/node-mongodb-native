@@ -1,8 +1,10 @@
-/******************************************************************
+/**
+ * Example of a simple ordered insert/update/upsert/remove ordered collection
  *
- * Write operations
- *
- ******************************************************************/
+ * @_class unordered
+ * @_function update
+ * @ignore
+ */
 exports['Should correctly execute unordered batch with no errors'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -11,6 +13,9 @@ exports['Should correctly execute unordered batch with no errors'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_0');
@@ -47,6 +52,7 @@ exports['Should correctly execute unordered batch with no errors'] = {
         test.done();
       });
     });
+    // DOC_END
   }
 }
 

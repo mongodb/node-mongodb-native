@@ -44,6 +44,12 @@ files.forEach(function(file) {
   if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/gridstore/" + file});
 })
 
+// Read all gridstore files
+files = fs.readdirSync("./test/tests/functional/fluent_api");
+files.forEach(function(file) {
+  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/fluent_api/" + file});
+})
+
 // Read all replicaset files
 files = fs.readdirSync("./test/tests/repl_set");
 files.forEach(function(file) {
