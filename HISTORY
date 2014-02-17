@@ -16,7 +16,7 @@
 - Fixes for SSL HA ping and discovery.
 - Uses createIndexes if available for ensureIndex/createIndex
 - Added parallelCollectionScan method to collection returning CommandCursor instances for cursors
-- Made CommandCursor behave as Readable stream
+- Made CommandCursor behave as Readable stream.
 - Only Db honors readPreference settings, removed Server.js legacy readPreference settings due to user confusion.
 - Reconnect event emitted by ReplSet/Mongos/Server after reconnect and before replaying of buffered operations.
 
