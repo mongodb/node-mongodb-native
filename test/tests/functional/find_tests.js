@@ -2340,3 +2340,19 @@ exports['Should correctly sort using text search on 2.6 or higher in find'] = {
     });
   }
 }
+
+exports.shouldNotMutateUserOptions = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    
+    var collection = db.collection('shouldNotMutateUserOptions');
+    var options = { raw : "TEST" };
+    collection.find({}, {}, options, function(error, docs) {
+      test.equal(undefined, options.skip);
+      test.equal(undefined, options.limit);
+      test.equal("TEST", options.raw);
+      db.close();
+      test.done();
+    });
+  });
+}
