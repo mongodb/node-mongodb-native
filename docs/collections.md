@@ -3,13 +3,13 @@ Collections
 
 See also:
 
-  * [Database](database.md)
-  * [Queries](queries.md)
+  * [Database](database.html)
+  * [Queries](queries.html)
   
 ## Collection objects
 
-Collection object is a pointer to a specific collection in the [database](database.md). If you want to [insert](insert.md) new records or
-[query](queries.md) existing ones then you need to have a valid collection object. 
+Collection object is a pointer to a specific collection in the [database](database.html). If you want to [insert](insert.html) new records or
+[query](queries.html) existing ones then you need to have a valid collection object. 
 
 **NB** Collection names can't start or end with a period nor contain a dollar sign! (`.tes$t` is not allowed)
 
