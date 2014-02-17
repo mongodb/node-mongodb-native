@@ -125,6 +125,7 @@ docs.renderAPIDocs(outputDirectory2, apiClasses2, testClasses, templates, {index
 // ----------------------------------------------------------------------------
 // Transform the versionb based content
 var articles = [
+    {name:"AnIntroductionTo1_4_and_2_6", output:"AnIntroductionTo1_4_and_2_6.rst", path:"./docs/articles/AnIntroductionTo1_4_and_2_6.md"},
     {name:"MongoClient", output:"MongoClient.rst", path:"./docs/articles/MongoClient.md"},
     {name:"AnIntroductionTo1_1And2_2", output:"AnIntroductionTo1_1And2_2.rst", path:"./docs/articles/AnIntroductionTo1_1And2_2.md"}
   ];
