@@ -44,6 +44,12 @@ files.forEach(function(file) {
   if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/gridstore/" + file});
 })
 
+// Read all gridstore files
+files = fs.readdirSync("./test/tests/functional/fluent_api");
+files.forEach(function(file) {
+  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/fluent_api/" + file});
+})
+
 // Read all replicaset files
 files = fs.readdirSync("./test/tests/repl_set");
 files.forEach(function(file) {
@@ -119,6 +125,7 @@ docs.renderAPIDocs(outputDirectory2, apiClasses2, testClasses, templates, {index
 // ----------------------------------------------------------------------------
 // Transform the versionb based content
 var articles = [
+    {name:"AnIntroductionTo1_4_and_2_6", output:"AnIntroductionTo1_4_and_2_6.rst", path:"./docs/articles/AnIntroductionTo1_4_and_2_6.md"},
     {name:"MongoClient", output:"MongoClient.rst", path:"./docs/articles/MongoClient.md"},
     {name:"AnIntroductionTo1_1And2_2", output:"AnIntroductionTo1_1And2_2.rst", path:"./docs/articles/AnIntroductionTo1_1And2_2.md"}
   ];

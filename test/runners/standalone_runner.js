@@ -39,7 +39,7 @@ module.exports = function(configurations) {
         , '/test/tests/functional/logging_tests.js'
         , '/test/tests/functional/custom_pk_tests.js'
         , '/test/tests/functional/geo_tests.js'
-        // , '/test/tests/functional/write_preferences_tests.js'
+        , '/test/tests/functional/write_preferences_tests.js'
         , '/test/tests/functional/remove_tests.js'
         , '/test/tests/functional/unicode_tests.js'
         , '/test/tests/functional/raw_tests.js'

@@ -1,8 +1,10 @@
-/******************************************************************
+/**
+ * Example of a simple ordered insert/update/upsert/remove ordered collection
  *
- * Write operations
- *
- ******************************************************************/
+ * @_class unordered
+ * @_function update
+ * @ignore
+ */
 exports['Should correctly execute unordered batch with no errors'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -11,6 +13,9 @@ exports['Should correctly execute unordered batch with no errors'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_0');
@@ -29,7 +34,7 @@ exports['Should correctly execute unordered batch with no errors'] = {
         // Check state of result
         test.equal(2, result.nInserted);
         test.equal(1, result.nUpserted);
-        test.equal(1, result.nUpdated);
+        test.equal(1, result.nMatched);
         test.equal(1, result.nModified);
         test.equal(1, result.nRemoved);
 
@@ -47,6 +52,7 @@ exports['Should correctly execute unordered batch with no errors'] = {
         test.done();
       });
     });
+    // DOC_END
   }
 }
 
@@ -79,7 +85,7 @@ exports['Should correctly handle single unordered batch API'] = {
           // Basic properties check
           test.equal(2, result.nInserted);
           test.equal(0, result.nUpserted);
-          test.equal(0, result.nUpdated);
+          test.equal(0, result.nMatched);
           test.equal(0, result.nModified);
           test.equal(true, result.hasWriteErrors());
           test.equal(1, result.getWriteErrorCount());
@@ -293,7 +299,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
         batch.execute(function(err, result) {
           // Test basic settings
           test.equal(0, result.nInserted);
-          test.equal(0, result.nUpdated);
+          test.equal(0, result.nMatched);
           test.equal(0, result.nUpserted);
           test.equal(0, result.nModified);
           test.equal(true, result.hasWriteErrors());
@@ -314,7 +320,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
           batch.execute(function(err, result) {            
             // Test basic settings
             test.equal(0, result.nInserted);
-            test.equal(0, result.nUpdated);
+            test.equal(0, result.nMatched);
             test.equal(0, result.nUpserted);
             test.equal(0, result.nModified);
             test.equal(true, result.hasWriteErrors());
@@ -334,7 +340,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
             // Execute the operations
             batch.execute(function(err, result) {
               test.equal(0, result.nInserted);
-              test.equal(0, result.nUpdated);
+              test.equal(0, result.nMatched);
               test.equal(0, result.nUpserted);
               test.equal(0, result.nModified);
               test.equal(true, result.hasWriteErrors());
@@ -484,7 +490,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
         // Check state of result
         test.equal(1, result.nUpserted);
         test.equal(0, result.nInserted);
-        test.equal(0, result.nUpdated);
+        test.equal(0, result.nMatched);
         test.equal(0, result.nModified);
         test.equal(0, result.nRemoved);
         

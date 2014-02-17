@@ -143,3 +143,41 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = functi
     });
   });
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly connect and emit a reconnect event after mongos failover'] = function(configuration, test) {
+  var Mongos = configuration.getMongoPackage().Mongos
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , Server = configuration.getMongoPackage().Server
+    , Db = configuration.getMongoPackage().Db
+    , ReadPreference = configuration.getMongoPackage().ReadPreference;
+
+  MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1', {}, function(err, db) {
+    test.equal(null, err);
+    test.ok(db != null);
+
+    var reconnectCalled = false;
+    // Add listener to the serverConfig
+    db.serverConfig.on('reconnect', function(err) {
+      reconnectCalled = true;
+    });
+
+    // Kill the mongos proxy
+    configuration.killMongoS(function(err, result) {
+      // Cause an insert to be buffered
+      db.collection("replicaset_mongo_client_collection").insert({c:1}, function(err, db) {
+      });
+
+      configuration.restartAllMongos(function(err, result) {
+        db.collection("replicaset_mongo_client_collection").insert({c:1}, function(err) {
+          test.equal(null, err);
+          test.ok(reconnectCalled);
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+}
