@@ -54,7 +54,7 @@ One feature that has requested often is the ability to timeout individual querie
 		MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
 			// Get an aggregation cursor
 			var cursor = db.collection('data')
-				.find("$where": "sleep(100) || true")
+				.find("$where": "sleep(1000) || true")
 				.maxTimeMS(50);
 
 			// Get alll the items
