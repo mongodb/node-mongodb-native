@@ -506,3 +506,36 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
     });
   }
 }
+
+exports['Should prohibit batch finds with no selector'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      // Get the collection
+      var col = db.collection('batch_write_unordered_ops_legacy_9');
+
+      var unorderedBatch = col.initializeUnorderedBulkOp();
+      var orderedBatch = col.initializeOrderedBulkOp();
+
+      try {
+        unorderedBatch.find();
+        test.ok(false);
+      } catch(e) {
+        test.equal("MongoError: Bulk find operation must specify a selector", e.toString());
+      }
+
+      try {
+        orderedBatch.find();
+        test.ok(false);
+      } catch(e) {
+        test.equal("MongoError: Bulk find operation must specify a selector", e.toString());
+      }
+
+      db.close();
+      test.done();
+    });
+  }
+}
