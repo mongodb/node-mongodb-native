@@ -384,7 +384,7 @@ exports['Should Set read preference at collection level using collection method'
     cursor.toArray(function(err, items) {
       // Does not get called or we don't care
       test.ok(executedCorrectlyRead);
-      test.equal(Server.READ_SECONDARY_ONLY, cursor.read)
+      test.equal(Server.READ_SECONDARY_ONLY, cursor.readPreference)
       p_db.close();
       test.done();
     });
@@ -438,7 +438,7 @@ exports['Should Set read preference at collection level using createCollection m
       cursor.toArray(function(err, items) {
         // Does not get called or we don't care
         test.ok(executedCorrectlyRead);
-        test.equal(Server.READ_SECONDARY_ONLY, cursor.read)
+        test.equal(Server.READ_SECONDARY_ONLY, cursor.readPreference)
         p_db.close();
         test.done();
       });
@@ -561,7 +561,7 @@ exports['Attempt to change read preference at cursor level after object read leg
           })
 
           // Assert it's the same
-          test.equal(Server.READ_SECONDARY_ONLY, cursor.read);
+          test.equal(Server.READ_SECONDARY_ONLY, cursor.readPreference);
         }
       });
     });
@@ -613,7 +613,7 @@ exports['Set read preference at db level'] = function(configuration, test) {
     cursor.toArray(function(err, items) {
       // Does not get called or we don't care
       test.ok(executedCorrectlyRead);
-      test.equal(ReadPreference.SECONDARY, cursor.read.mode)
+      test.equal(ReadPreference.SECONDARY, cursor.readPreference.mode)
       p_db.close();
       test.done();
     });
@@ -665,7 +665,7 @@ exports['Set read preference at collection level using collection method'] = fun
     cursor.toArray(function(err, items) {
       // Does not get called or we don't care
       test.ok(executedCorrectlyRead);
-      test.equal(ReadPreference.SECONDARY, cursor.read.mode)
+      test.equal(ReadPreference.SECONDARY, cursor.readPreference.mode)
       p_db.close();
       test.done();
     });
@@ -717,7 +717,7 @@ exports['Set read preference at collection level using createCollection method']
       cursor.toArray(function(err, items) {
         // Does not get called or we don't care
         test.ok(executedCorrectlyRead);
-        test.equal(ReadPreference.SECONDARY, cursor.read.mode)
+        // test.equal(ReadPreference.SECONDARY, cursor.readPreference.mode)
         p_db.close();
         test.done();
       });
@@ -841,7 +841,7 @@ exports['Attempt to change read preference at cursor level after object read'] =
           })
 
           // Assert it's the same
-          test.equal(ReadPreference.SECONDARY, cursor.read.mode);
+          test.equal(ReadPreference.SECONDARY, cursor.readPreference.mode);
         }
       });
     });
