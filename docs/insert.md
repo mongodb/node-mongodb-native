@@ -17,7 +17,7 @@ Records can be inserted to a collection with `insert`
 Where
 
   * `docs` is a single document object or an array of documents
-  * `options` is an options object
+  * `options` is an options object. 
   * `callback` - callback function to run after the record is inserted.
 
 For example

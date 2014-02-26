@@ -445,7 +445,7 @@ exports.shouldPerformStrictCreateCollection = function(configuration, test) {
       // Creating an existing collection should fail
       db.createCollection('test_strict_create_collection', {strict: true}, function(err, collection) {
         test.ok(err instanceof Error);
-        test.equal("Collection test_strict_create_collection already exists. Currently in safe mode.", err.message);
+        test.equal("Collection test_strict_create_collection already exists. Currently in strict mode.", err.message);
 
         // Switch out of strict mode and try to re-create collection
         db.createCollection('test_strict_create_collection', {strict: false}, function(err, collection) {
