@@ -320,11 +320,8 @@ exports.shouldCorrectlyRetriveCollectionOptions = function(configuration, test) 
 
       // Let's fetch the collection options
       collection.options(function(err, options) {
-        // console.log("=========================================================")
-        // console.dir(options)
-
         test.equal(true, options.capped);
-        test.equal(1024, options.size);
+        test.ok(options.size >= 1024);
 
         db.close();
         test.done();

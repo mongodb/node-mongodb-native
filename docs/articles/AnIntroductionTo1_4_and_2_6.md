@@ -54,7 +54,7 @@ One feature that has requested often is the ability to timeout individual querie
 		MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
 			// Get an aggregation cursor
 			var cursor = db.collection('data')
-				.find("$where": "sleep(100) || true")
+				.find("$where": "sleep(1000) || true")
 				.maxTimeMS(50);
 
 			// Get alll the items
@@ -221,3 +221,10 @@ Buffered Max Entries allow for more fine grained control on how many operations 
 		});
 
 This example disables the command buffering completely and errors out the moment there is no connection available. The default value (for backward compatibility) is to buffer until memory runs out. Be aware that by setting a very low value you can cause some problems in failover scenarios in Replicasets as it might take a little but of time before f.ex a new Primary is elected and steps up to accept writes. Setting **bufferMaxEntries** to 0 in this case will cause the driver to error out instead of falling over correctly.
+
+## Fsync and journal Write Concerns note
+
+MongoDB from version 2.6 and higher disallows the combination of **journal** and **fsync**. Combining them will cause an error while on 2.4 **fsync** was ignored when provided with **journal**. The following semantics apply.
+
+* j: If true block until write operations have been committed to the journal. Cannot be used in combination with `fsync`. Prior to MongoDB 2.6 this option was ignored if the server was running without journaling. Starting with MongoDB 2.6 write operations will fail with an exception if this option is used when the server is running without journaling.
+* fsync: If true and the server is running without journaling, blocks until the server has synced all data files to disk. If the server is running with journaling, this acts the same as the `j` option, blocking until write operations have been committed to the journal. Cannot be used in combination with `j`.

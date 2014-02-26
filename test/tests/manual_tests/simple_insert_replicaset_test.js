@@ -1,8 +1,8 @@
 "use strict";
-var mongodb         = require('../../lib/mongodb'),
+var mongodb         = require('../../../lib/mongodb'),
     Server          = mongodb.Server,
     ReadPreference = mongodb.ReadPreference,
-    ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager,
+    ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager,
     ReplSetServers  = mongodb.ReplSetServers,
     Db              = mongodb.Db;
 
@@ -12,9 +12,21 @@ var repset = new ReplSetServers( [
   new Server('localhost', 30002, {auto_reconnect: true}),
 ], {rs_name : 'rs0'});
 
-var RS = new ReplicaSetManager({name:"rs0", retries:120, secondary_count:2, passive_count:0, arbiter_count:0});
-RS.startSet(true, function(err, result) {
+// var RS = new ReplicaSetManager({name:"rs0", retries:120, secondary_count:2, passive_count:0, arbiter_count:0});
+// RS.startSet(true, function(err, result) {
   var db = new Db("somedb", repset, {w:1});
+  db.serverConfig.on("joined", function(type, doc, server) {
+    console.log("== " + type + " server " + server.host + ":" + server.port + " joined");
+  });
+
+  db.serverConfig.on("left", function(type, server) {
+    console.log("== " + type + " server " + server.host + ":" + server.port + " left");
+  });
+
+  db.serverConfig.on("reconnect", function(type, server) {
+    console.log("== driver reconnected");
+  });
+
   db.open(function(err, db) {
     if(err) {
     if(db)
@@ -30,6 +42,9 @@ RS.startSet(true, function(err, result) {
       var doc = {'message_id': message_id, 'content': message_content};
 
       collection.insert(doc, {safe:true}, function(err, result) {
+        console.log("====================== insert")
+        console.dir(err)
+        console.dir(result)
         if(err) {
           console.warn(err);
         }
@@ -46,4 +61,4 @@ RS.startSet(true, function(err, result) {
   }
 
   run();
-});
+// });
