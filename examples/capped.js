@@ -11,7 +11,7 @@ MongoClient.connect(format("mongodb://%s:%s/node-mongo-examples?w=1", host, port
     // Old records get pushed out by new ones once the size or max num records is
     // reached.
     db.createCollection('test', {'capped':true, 'size':1024, 'max':12}, function(err, collection) {      
-      for(var i = 0; i < 100; i++) { collection.insert({'a':i}, {safe:{w:0}}); }
+      for(var i = 0; i < 100; i++) { collection.insert({'a':i}, {w:0}); }
       
       // We will only see the last 12 records
       collection.find().toArray(function(err, items) {
