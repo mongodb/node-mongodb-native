@@ -539,3 +539,30 @@ exports['Should prohibit batch finds with no selector'] = {
     });
   }
 }
+
+exports['Should throw an error when no operations in unordered batch'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      // Get the collection
+      var col = db.collection('batch_write_ordered_ops_8');
+      var threw = false;
+
+      try {
+        // Initialize the Ordered Batch
+        col.initializeUnorderedBulkOp().execute(function(err, result) {});
+      } catch(err) {
+        threw = true;
+      }
+
+      test.equal(true, threw);
+      db.close();
+      test.done();        
+    });
+  }
+}
