@@ -17,5 +17,6 @@ build
 upload.py
 rcover_html/
 results/
+out/
 .coverage_data/
 docs/sphinx-docs/source/driver-articles/

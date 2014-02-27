@@ -1449,7 +1449,7 @@ exports.handleBSONTypeInsertsCorrectly = function(configuration, test) {
     , MaxKey = configuration.getMongoPackage().MaxKey
     , Code = configuration.getMongoPackage().Code;
 
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  var db = configuration.newDbInstance({w:1}, {poolSize:1, native_parser: false});
   db.open(function(err, db) {
     var collection = db.collection('bson_types_insert');
 
@@ -1484,11 +1484,11 @@ exports.handleBSONTypeInsertsCorrectly = function(configuration, test) {
 
               collection.findOne({"minkey": new MinKey()}, function(err, doc) {            
                 test.equal(null, err);
-                test.ok(doc.minkey instanceof MinKey);
+                test.ok(doc.minkey._bsontype == 'MinKey');
 
                 collection.findOne({"maxkey": new MaxKey()}, function(err, doc) {            
                   test.equal(null, err);
-                  test.ok(doc.maxkey instanceof MaxKey);
+                  test.ok(doc.maxkey._bsontype == 'MaxKey');
 
                   collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {            
                     test.equal(null, err);
@@ -1677,8 +1677,8 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = function(configuration,
 
         db.collection('shouldCorrectlyHonorPromoteLong').findOne(function(err, doc) {      test.equal(null, err);
           test.equal(null, err);
-          test.ok(doc.doc instanceof Long);
-          test.ok(doc.array[0][0] instanceof Long);
+          test.ok(doc.doc.subtract != null);
+          test.ok(doc.array[0][0].subtract != null);
           db.close();
           test.done();
         });
@@ -1721,8 +1721,8 @@ exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = function(configuration, tes
 
         db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {      test.equal(null, err);
           test.equal(null, err);
-          test.ok(doc.doc instanceof Long);
-          test.ok(doc.array[0][0] instanceof Long);
+          test.ok(doc.doc.subtract != null);
+          test.ok(doc.array[0][0].subtract != null);
           db.close();
           test.done();
         });

@@ -577,7 +577,7 @@ exports.shouldCorrectlyExecuteSave = function(configuration, test) {
     db.createCollection('test_save', function(err, collection) {
       var doc = {'hello':'world'};
       collection.save(doc, {w: 1}, function(err, docs) {
-        test.ok(docs._id instanceof ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
+        test.ok(docs._id != null);
 
         collection.count(function(err, count) {
           test.equal(1, count);

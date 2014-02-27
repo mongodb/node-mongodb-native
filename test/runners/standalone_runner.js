@@ -1,4 +1,5 @@
 var Runner = require('integra').Runner
+  , Cover = require('integra').Cover
   , createVersionFilters = require('./shared/filters').createVersionFilters;
 
 var defaultFilters = createVersionFilters();
@@ -22,6 +23,9 @@ module.exports = function(configurations) {
 
     // Add default filters
     .addFilter(defaultFilters)
+
+    // Add Coverage
+    .plugin(new Cover())
 
     // The list of files to execute
     .add("functional_tests",
