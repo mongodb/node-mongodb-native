@@ -8,7 +8,11 @@
 exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.1.0"},
+  metadata: {
+    requires: {
+      mongodb: ">2.1.0"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -68,7 +72,11 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.1.0"},
+  metadata: {
+    requires: {
+      mongodb: ">2.1.0"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -128,7 +136,11 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingleObject = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.1.0"},
+  metadata: {
+    requires: {
+      mongodb: ">2.1.0"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -184,7 +196,11 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
 exports.shouldCorrectlyFailAndReturnError = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.1.0"},
+  metadata: {
+    requires: {
+      mongodb: ">2.1.0"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -229,7 +245,11 @@ exports.shouldCorrectlyFailAndReturnError = {
 exports.shouldCorrectlyPassReadPreference = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.1.0"},
+  metadata: {
+    requires: {
+      mongodb: ">2.1.0"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -306,9 +326,12 @@ exports.shouldCorrectlyPassReadPreference = {
 exports['Should correctly return and iterate over all the cursor results'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.1.0"},
-  requires: {serverType: 'Server'},
-  requires: {node: ">0.10.0"},
+  metadata: {
+    requires: {
+      mongodb: ">2.5.3",
+      node: ">0.10.0"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -373,9 +396,12 @@ exports['Should correctly return and iterate over all the cursor results'] = {
 exports['Should correctly return a cursor and call explain'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.5.3"},
-  requires: {serverType: 'Server'},
-  requires: {node: ">0.10.0"},
+  metadata: {
+    requires: {
+      mongodb: ">2.5.3",
+      node: ">0.10.0"
+    }
+  },
 
   // The actual test we wish to run
   test: function(configure, test) {
@@ -437,9 +463,12 @@ exports['Should correctly return a cursor and call explain'] = {
 exports['Should correctly return a cursor with batchSize 1 and call next'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.5.3"},
-  requires: {serverType: 'Server'},
-  requires: {node: ">0.10.0"},
+  metadata: {
+    requires: {
+      mongodb: ">2.5.3",
+      node: ">0.10.0"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -502,7 +531,11 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
 exports['Should correctly write the results out to a new collection'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.5.3"},
+  metadata: {
+    requires: {
+      mongodb: ">2.5.3"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -561,7 +594,11 @@ exports['Should correctly write the results out to a new collection'] = {
 exports['Should correctly use allowDiskUsage when performing an aggregation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.5.3"},
+  metadata: {
+    requires: {
+      mongodb: ">2.5.3"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -619,9 +656,12 @@ exports['Should correctly use allowDiskUsage when performing an aggregation'] = 
 exports['Should correctly use allowDiskUsage when performing an aggregation with a cursor'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.5.3"},
-  requires: {serverType: 'Server'},
-  requires: {node: ">0.10.0"},
+  metadata: {
+    requires: {
+        mongodb: ">2.5.3"
+      , node: ">0.10.0"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -681,9 +721,12 @@ exports['Should correctly use allowDiskUsage when performing an aggregation with
 exports['Should correctly use aggregation as a cursor'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.5.3"},
-  requires: {serverType: 'Server'},
-  requires: {node: ">0.10.0"},
+  metadata: {
+    requires: {
+        mongodb: ">2.5.3"
+      , node: ">0.10.0"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -705,7 +748,6 @@ exports['Should correctly use aggregation as a cursor'] = {
       var collection = db.collection('shouldCorrectlyDoAggWithCursorStream');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
-
         var items = [];
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([

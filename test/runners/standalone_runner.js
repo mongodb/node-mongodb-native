@@ -1,5 +1,6 @@
 var Runner = require('integra').Runner
   , Cover = require('integra').Cover
+  , RCover = require('integra').RCover
   , createVersionFilters = require('./shared/filters').createVersionFilters;
 
 var defaultFilters = createVersionFilters();
@@ -25,7 +26,8 @@ module.exports = function(configurations) {
     .addFilter(defaultFilters)
 
     // Add Coverage
-    .plugin(new Cover())
+    // .plugin(new RCover())
+    // .plugin(new Cover())
 
     // The list of files to execute
     .add("functional_tests",
@@ -54,7 +56,7 @@ module.exports = function(configurations) {
         , '/test/tests/functional/find_tests.js'
         , '/test/tests/functional/insert_tests.js'
         , '/test/tests/functional/admin_mode_tests.js'
-        , '/test/tests/functional/aggregation_tests.js'
+        // , '/test/tests/functional/aggregation_tests.js'
         , '/test/tests/functional/exception_tests.js'
         , '/test/tests/functional/error_tests.js'
         , '/test/tests/functional/command_generation_tests.js'
