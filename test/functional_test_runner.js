@@ -52,6 +52,10 @@ var StandaloneConfiguration = function(context) {
 		newDbInstance: function(dbOptions, serverOptions) {
 			var port = serverOptions && serverOptions.port || 27017;
 			var host = serverOptions && serverOptions.host || "localhost";
+			if(dbOptions.w == null
+					&& dbOptions.fsync == null
+					&& dbOptions.wtimeout == null
+					&& dbOptions.j == null) dbOptions.w = 1;
 			// Return a new db instance
 			return new Db(database, new Server(host, port, serverOptions), dbOptions);
 		},
@@ -255,5 +259,5 @@ runner.on('exit', function(errors, results) {
 });
 
 // Run the tests
-// runner.run(StandaloneConfiguration);
-runner.run(ReplicasetConfiguration);
+runner.run(StandaloneConfiguration);
+// runner.run(ReplicasetConfiguration);
