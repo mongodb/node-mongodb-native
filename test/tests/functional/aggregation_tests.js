@@ -567,13 +567,13 @@ exports['Should correctly write the results out to a new collection'] = {
 }
 
 /**
- * Correctly use allowDiskUsage when performing an aggregation
+ * Correctly use allowDiskUse when performing an aggregation
  *
  * @_class collection
  * @_function aggregate
  * @ignore
  */
-exports['Should correctly use allowDiskUsage when performing an aggregation'] = {
+exports['Should correctly use allowDiskUse when performing an aggregation'] = {
   metadata: {
     requires: {
       mongodb: ">2.5.3"
@@ -613,7 +613,7 @@ exports['Should correctly use allowDiskUsage when performing an aggregation'] = 
               authors : { $addToSet : "$author" }
             }}
           ], {
-            allowDiskUsage: true
+            allowDiskUse: true
           }, function(err, results) {
             test.equal(null, err);
             test.equal('good', results[0]._id.tags);
@@ -633,7 +633,7 @@ exports['Should correctly use allowDiskUsage when performing an aggregation'] = 
 /**
  * @ignore
  */
-exports['Should correctly use allowDiskUsage when performing an aggregation with a cursor'] = {
+exports['Should correctly use allowDiskUse when performing an aggregation with a cursor'] = {
   metadata: {
     requires: {
         mongodb: ">2.5.3"
@@ -674,7 +674,7 @@ exports['Should correctly use allowDiskUsage when performing an aggregation with
               authors : { $addToSet : "$author" }
             }}
           ], {
-              allowDiskUsage: true
+              allowDiskUse: true
             , cursor: {batchSize: 1}
           })
 
@@ -737,7 +737,7 @@ exports['Should correctly use aggregation as a cursor'] = {
               authors : { $addToSet : "$author" }
             }}
           ], {
-              allowDiskUsage: true
+              allowDiskUse: true
             , cursor: {batchSize: 1}
           })
 
