@@ -5,31 +5,36 @@
  * @_function put
  * @ignore
  */
-exports.shouldPutFileCorrectlyToGridUsingObjectId = function(configuration, test) {
-  var Grid = configuration.getMongoPackage().Grid
-    , ObjectID = configuration.getMongoPackage().ObjectID;
-  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+exports.shouldPutFileCorrectlyToGridUsingObjectId = {
+  metadata: {},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Grid = configuration.require.Grid
+      , ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    // Create a new grid instance
-    var grid = new Grid(db, 'fs');
-    // Some data to write
-    var originalData = new Buffer('Hello world');
-    // Write data to grid
-    grid.put(originalData, {}, function(err, result) {
-      // Fetch the content
-      grid.get(result._id, function(err, data) {
-        test.deepEqual(originalData.toString('base64'), data.toString('base64'));
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Create a new grid instance
+      var grid = new Grid(db, 'fs');
+      // Some data to write
+      var originalData = new Buffer('Hello world');
+      // Write data to grid
+      grid.put(originalData, {}, function(err, result) {
+        // Fetch the content
+        grid.get(result._id, function(err, data) {
+          test.deepEqual(originalData.toString('base64'), data.toString('base64'));
 
-        db.close();
-        test.done();
+          db.close();
+          test.done();
+        });
       });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }
 
 /**
@@ -39,32 +44,37 @@ exports.shouldPutFileCorrectlyToGridUsingObjectId = function(configuration, test
  * @_function put
  * @ignore
  */
-exports.shouldPutFileCorrectlyToGridUsingIntId = function(configuration, test) {
-  var Grid = configuration.getMongoPackage().Grid
-    , ObjectID = configuration.getMongoPackage().ObjectID;
-  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+exports.shouldPutFileCorrectlyToGridUsingIntId = {
+  metadata: {},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Grid = configuration.require.Grid
+      , ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    // Create a new grid instance
-    var grid = new Grid(db, 'fs');
-    // Some data to write
-    var originalData = new Buffer('Hello world');
-    // Write data to grid
-    var id = 123;
-    grid.put(originalData, {_id: id}, function(err, result) {
-      // Fetch the content
-      grid.get(id, function(err, data) {
-        test.deepEqual(originalData.toString('base64'), data.toString('base64'));
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Create a new grid instance
+      var grid = new Grid(db, 'fs');
+      // Some data to write
+      var originalData = new Buffer('Hello world');
+      // Write data to grid
+      var id = 123;
+      grid.put(originalData, {_id: id}, function(err, result) {
+        // Fetch the content
+        grid.get(id, function(err, data) {
+          test.deepEqual(originalData.toString('base64'), data.toString('base64'));
 
-        db.close();
-        test.done();
+          db.close();
+          test.done();
+        });
       });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }
 
 /**
@@ -74,34 +84,39 @@ exports.shouldPutFileCorrectlyToGridUsingIntId = function(configuration, test) {
  * @_function put
  * @ignore
  */
-exports.shouldPutFileCorrectlyToGridUsingStringId = function(configuration, test) {
-  var Grid = configuration.getMongoPackage().Grid
-    , ObjectID = configuration.getMongoPackage().ObjectID;
-  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+exports.shouldPutFileCorrectlyToGridUsingStringId = {
+  metadata: {},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Grid = configuration.require.Grid
+      , ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    // Create a new grid instance
-    var grid = new Grid(db, 'fs');
-    // Some data to write
-    var originalData = new Buffer('Hello world');
-    // Write data to grid
-    var id = 'test';
-    grid.put(originalData, {_id: id}, function(err, result) {
-      test.equal(result._id, id);
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Create a new grid instance
+      var grid = new Grid(db, 'fs');
+      // Some data to write
+      var originalData = new Buffer('Hello world');
+      // Write data to grid
+      var id = 'test';
+      grid.put(originalData, {_id: id}, function(err, result) {
+        test.equal(result._id, id);
 
-      // Fetch the content
-      grid.get(id, function(err, data) {
-        test.deepEqual(originalData.toString('base64'), data.toString('base64'));
+        // Fetch the content
+        grid.get(id, function(err, data) {
+          test.deepEqual(originalData.toString('base64'), data.toString('base64'));
 
-        db.close();
-        test.done();
+          db.close();
+          test.done();
+        });
       });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }
 
 /**
@@ -111,55 +126,65 @@ exports.shouldPutFileCorrectlyToGridUsingStringId = function(configuration, test
  * @_function get
  * @ignore
  */
-exports.shouldPutAndGetFileCorrectlyToGridUsingObjectId = function(configuration, test) {
-  var Grid = configuration.getMongoPackage().Grid
-    , ObjectID = configuration.getMongoPackage().ObjectID;
-  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+exports.shouldPutAndGetFileCorrectlyToGridUsingObjectId = {
+  metadata: {},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Grid = configuration.require.Grid
+      , ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    // Create a new grid instance
-    var grid = new Grid(db, 'fs');
-    // Some data to write
-    var originalData = new Buffer('Hello world');
-    // Write data to grid
-    grid.put(originalData, {}, function(err, result) {
-      // Fetch the content
-      grid.get(result._id, function(err, data) {
-        test.deepEqual(originalData.toString('base64'), data.toString('base64'));
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Create a new grid instance
+      var grid = new Grid(db, 'fs');
+      // Some data to write
+      var originalData = new Buffer('Hello world');
+      // Write data to grid
+      grid.put(originalData, {}, function(err, result) {
+        // Fetch the content
+        grid.get(result._id, function(err, data) {
+          test.deepEqual(originalData.toString('base64'), data.toString('base64'));
 
-        // Should fail due to illegal objectID
-        grid.get('not an id', function(err, result) {
-          test.ok(err != null);
+          // Should fail due to illegal objectID
+          grid.get('not an id', function(err, result) {
+            test.ok(err != null);
 
-          db.close();
-          test.done();
+            db.close();
+            test.done();
+          });
         });
       });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }
 
 /**
  * @ignore
  */
-exports.shouldFailToPutFileDueToDataObjectNotBeingBuffer = function(configuration, test) {
-  var Grid = configuration.getMongoPackage().Grid
-    , ObjectID = configuration.getMongoPackage().ObjectID;
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-  db.open(function(err, db) {
-    var grid = new Grid(db, 'fs');
-    var originalData = 'Hello world';
-    // Write data to grid
-    grid.put(originalData, {}, function(err, result) {
-      test.ok(err != null);
-      db.close();
-      test.done();
+exports.shouldFailToPutFileDueToDataObjectNotBeingBuffer = {
+  metadata: {},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Grid = configuration.require.Grid
+      , ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      var grid = new Grid(db, 'fs');
+      var originalData = 'Hello world';
+      // Write data to grid
+      grid.put(originalData, {}, function(err, result) {
+        test.ok(err != null);
+        db.close();
+        test.done();
+      });
     });
-  });
+  }
 }
 
 /**
@@ -169,37 +194,42 @@ exports.shouldFailToPutFileDueToDataObjectNotBeingBuffer = function(configuratio
  * @_function delete
  * @ignore
  */
-exports.shouldCorrectlyWriteFileAndThenDeleteIt = function(configuration, test) {
-  var Grid = configuration.getMongoPackage().Grid
-    , ObjectID = configuration.getMongoPackage().ObjectID;
-  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+exports.shouldCorrectlyWriteFileAndThenDeleteIt = {
+  metadata: {},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Grid = configuration.require.Grid
+      , ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    // Create a new grid instance
-    var grid = new Grid(db, 'fs');
-    // Some data to write
-    var originalData = new Buffer('Hello world');
-    // Write data to grid
-    grid.put(originalData, {}, function(err, result) {
+    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Create a new grid instance
+      var grid = new Grid(db, 'fs');
+      // Some data to write
+      var originalData = new Buffer('Hello world');
+      // Write data to grid
+      grid.put(originalData, {}, function(err, result) {
 
-      // Delete file
-      grid.delete(result._id, function(err, result2) {
-        test.equal(null, err);
-        test.equal(true, result2);
+        // Delete file
+        grid.delete(result._id, function(err, result2) {
+          test.equal(null, err);
+          test.equal(true, result2);
 
-        // Fetch the content, showing that the file is gone
-        grid.get(result._id, function(err, data) {
-          test.ok(err != null);
-          test.equal(null, data);
+          // Fetch the content, showing that the file is gone
+          grid.get(result._id, function(err, data) {
+            test.ok(err != null);
+            test.equal(null, data);
 
-          db.close();
-          test.done();
+            db.close();
+            test.done();
+          });
         });
       });
     });
-  });
-  // DOC_END
+    // DOC_END
+  }
 }

@@ -5,14 +5,16 @@
  * @_function open
  */
 exports['Should correctly connect using MongoClient to a single server'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.getMongoPackage().MongoClient
-      , Server = configuration.getMongoPackage().Server;
+    var MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
     // DOC_START
     // Set up the connection to the local db
     var mongoclient = new MongoClient(new Server("localhost", 27017), {native_parser: true});
@@ -49,14 +51,16 @@ exports['Should correctly connect using MongoClient to a single server'] = {
  * @_function MongoClient.connect
  */
 exports['Should correctly connect using MongoClient to a single server using connect'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.getMongoPackage().MongoClient
-      , Server = configuration.getMongoPackage().Server;
+    var MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
     // DOC_START
     // Connect using the connection string  
     MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
@@ -78,14 +82,16 @@ exports['Should correctly connect using MongoClient to a single server using con
  * @ignore
  */
 exports['Should correctly connect using MongoClient to a single server using connect with optional server setting'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.getMongoPackage().MongoClient
-      , Server = configuration.getMongoPackage().Server;
+    var MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
     // Connect using the connection string  
     MongoClient.connect("mongodb://localhost:27017/integration_tests", {
       db: {
@@ -117,14 +123,16 @@ exports['Should correctly connect using MongoClient to a single server using con
  * @ignore
  */
 exports['Should correctly allow for w:0 overriding on the connect url'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.getMongoPackage().MongoClient
-      , Server = configuration.getMongoPackage().Server;
+    var MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
     // Connect using the connection string  
     MongoClient.connect("mongodb://localhost:27017/integration_tests?w=0", function(err, db) {
       test.equal(null, err);
@@ -141,13 +149,15 @@ exports['Should correctly allow for w:0 overriding on the connect url'] = {
 }
 
 exports['Should correctly connect via domain socket'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Db = configuration.getMongoPackage().Db;
+    var Db = configuration.require.Db;
 
     if(process.platform != "win32") {
       Db.connect("mongodb:///tmp/mongodb-27017.sock?safe=false", function(err, db) {
@@ -162,13 +172,15 @@ exports['Should correctly connect via domain socket'] = {
 }
 
 exports['Should correctly connect via normal url using connect'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongodb = configuration.getMongoPackage();
+    var mongodb = configuration.require;
 
     mongodb.connect("mongodb://localhost?safe=false", function(err, db) {
       test.equal(false, db.safe);
@@ -179,9 +191,11 @@ exports['Should correctly connect via normal url using connect'] = {
 }
 
 exports['Should correctly connect via normal url using require'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -194,13 +208,15 @@ exports['Should correctly connect via normal url using require'] = {
 }
 
 exports['Should correctly connect via normal url safe set to false'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Db = configuration.getMongoPackage().Db;
+    var Db = configuration.require.Db;
 
     Db.connect("mongodb://localhost?safe=false", function(err, db) {
       test.equal(false, db.safe);
@@ -211,13 +227,15 @@ exports['Should correctly connect via normal url safe set to false'] = {
 }
 
 exports['Should correctly connect via normal url journal option'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Db = configuration.getMongoPackage().Db;
+    var Db = configuration.require.Db;
 
     Db.connect("mongodb://localhost?journal=true", function(err, db) {
       test.deepEqual({j:true}, db.safe);
@@ -228,13 +246,15 @@ exports['Should correctly connect via normal url journal option'] = {
 }
 
 exports['Should correctly connect via normal url using ip'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Db = configuration.getMongoPackage().Db;
+    var Db = configuration.require.Db;
 
     Db.connect("mongodb://127.0.0.1:27017?fsync=true", function(err, db) {
       test.deepEqual({fsync:true}, db.safe);
@@ -245,13 +265,15 @@ exports['Should correctly connect via normal url using ip'] = {
 }
 
 exports['Should correctly connect via normal url setting up poolsize of 1'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Db = configuration.getMongoPackage().Db;
+    var Db = configuration.require.Db;
 
     Db.connect("mongodb://127.0.0.1:27017?maxPoolSize=1", function(err, db) {
       test.deepEqual(1, db.serverConfig.poolSize);
@@ -263,13 +285,15 @@ exports['Should correctly connect via normal url setting up poolsize of 1'] = {
 }
 
 exports['Should correctly connect using uri encoded username and password'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.getMongoPackage().MongoClient;
+    var MongoClient = configuration.require.MongoClient;
     MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
       test.equal(null, err);
       var user = 'u$ser'

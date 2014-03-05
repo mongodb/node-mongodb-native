@@ -8,7 +8,7 @@
 exports['Should correctly execute ordered batch with no errors using write commands'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -59,7 +59,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
 exports['Should correctly handle ordered single batch api write command error'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -115,7 +115,7 @@ exports['Should correctly handle ordered single batch api write command error'] 
 exports['Should correctly handle ordered multiple batch api write command error'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -168,7 +168,7 @@ exports['Should correctly handle ordered multiple batch api write command error'
 exports['Should fail due to ordered document being to big'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -202,7 +202,7 @@ exports['Should fail due to ordered document being to big'] = {
 exports['Should correctly split up ordered messages into more batches'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -244,8 +244,11 @@ exports['Should correctly split up ordered messages into more batches'] = {
 exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations using write commands'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
-  requires: {mongodb: ">2.5.4"},
+  metadata: {
+    requires: {
+      mongodb: ">2.5.4"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -328,7 +331,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
 exports['Should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -376,7 +379,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
 exports['Should Correctly Execute Ordered Batch of Write Operations with upserts causing duplicate key errors on updates'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -435,7 +438,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
 exports['Should correctly perform ordered upsert with custom _id'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -474,7 +477,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
 exports['Should throw an error when no operations in ordered batch'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {

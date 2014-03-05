@@ -3,13 +3,18 @@ var ConnectionPool = require('../../../lib/mongodb/connection/connection_pool').
 /**
  * @ignore
  */
-exports['Should Correctly create a pool instance with the expected values'] = function(configuration, test) {
-  var connectionPool = new ConnectionPool('localhost', 2000, 1, null, {timeout:100, noDelay:true});
-  test.equal(100, connectionPool.socketOptions.timeout);
-  test.equal(true, connectionPool.socketOptions.noDelay);
-  test.equal(null, connectionPool.socketOptions.encoding);
-  test.equal(0, connectionPool.socketOptions.bufferSize);    
-  test.done();
+exports['Should Correctly create a pool instance with the expected values'] = {
+  metadata: {},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var connectionPool = new ConnectionPool('localhost', 2000, 1, null, {timeout:100, noDelay:true});
+    test.equal(100, connectionPool.socketOptions.timeout);
+    test.equal(true, connectionPool.socketOptions.noDelay);
+    test.equal(null, connectionPool.socketOptions.encoding);
+    test.equal(0, connectionPool.socketOptions.bufferSize);    
+    test.done();
+  }
 }
 
 /**
@@ -18,7 +23,9 @@ exports['Should Correctly create a pool instance with the expected values'] = fu
 exports['Should correctly fail due to no server'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {topology: 'single'}
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -44,7 +51,9 @@ exports['Should correctly fail due to no server'] = {
 exports['Should Correctly create a pool of connections and receive an ok when all connections are active'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {topology: 'single'}
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -67,7 +76,9 @@ exports['Should Correctly create a pool of connections and receive an ok when al
 exports['Should Correctly connect and then force a restart creating new connections'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {topology: 'single'}
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {

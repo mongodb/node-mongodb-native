@@ -4,7 +4,9 @@
 exports.shouldCorrectlyLogContent = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {topology: 'single'}
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
