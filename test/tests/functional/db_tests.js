@@ -61,7 +61,11 @@ exports.shouldCorrectlyHandleIllegalDbNames = {
  * @ignore
  */
 exports.shouldCorrectlyPerformAutomaticConnect = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: 'single'
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -97,7 +101,11 @@ exports.shouldCorrectlyPerformAutomaticConnect = {
  * @ignore
  */
 exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: 'single'
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {

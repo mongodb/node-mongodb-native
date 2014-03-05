@@ -214,8 +214,6 @@ exports.shouldPerformSimpleMapReduceFunctions = {
  * @_function mapReduce
  */
 exports.shouldPerformMapReduceFunctionInline = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">1.7.6"}
   },
@@ -457,8 +455,6 @@ exports.shouldPerformMapReduceWithStringFunctions = {
 * @ignore
 */
 exports.shouldForceMapReduceError = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">1.7.6"}
   },

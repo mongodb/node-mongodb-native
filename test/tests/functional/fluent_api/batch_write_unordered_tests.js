@@ -6,8 +6,6 @@
  * @ignore
  */
 exports['Should correctly execute unordered batch with no errors'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -57,8 +55,6 @@ exports['Should correctly execute unordered batch with no errors'] = {
 }
 
 exports['Should correctly handle single unordered batch API'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -116,8 +112,6 @@ exports['Should correctly handle single unordered batch API'] = {
 }
 
 exports['Should correctly handle multiple unordered batch API'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -197,8 +191,6 @@ exports['Should correctly handle multiple unordered batch API'] = {
 }
 
 exports['Should fail due to document being to big for unordered batch'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -231,9 +223,11 @@ exports['Should fail due to document being to big for unordered batch'] = {
 }
 
 exports['Should correctly split up messages into more batches for unordered batches'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: 'single'
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -273,8 +267,6 @@ exports['Should correctly split up messages into more batches for unordered batc
 }
 
 exports['Should Correctly Fail Unordered Batch Operation due to illegal Operations'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.5.4"
@@ -367,8 +359,6 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
 }
 
 exports['Should Correctly Execute Unordered Batch with duplicate key errors on updates'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -413,8 +403,6 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
 }
 
 exports['Should Correctly Execute Unordered Batch of with upserts causing duplicate key errors on updates'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -472,8 +460,6 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
 }
 
 exports['Should correctly perform unordered upsert with custom _id'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -511,8 +497,6 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
 }
 
 exports['Should prohibit batch finds with no selector'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   test: function(configuration, test) {
@@ -545,8 +529,6 @@ exports['Should prohibit batch finds with no selector'] = {
 }
 
 exports['Should throw an error when no operations in unordered batch'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run

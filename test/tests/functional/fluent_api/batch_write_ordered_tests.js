@@ -6,8 +6,6 @@
  * @ignore
  */
 exports['Should correctly execute ordered batch with no errors using write commands'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -20,7 +18,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_0');
       // Initialize the Ordered Batch
-      var batch = col.initializeOrderedBulkOp();
+      var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
 
       // Add some operations to be executed in order
       batch.insert({a:1});
@@ -57,8 +55,6 @@ exports['Should correctly execute ordered batch with no errors using write comma
 }
 
 exports['Should correctly handle ordered single batch api write command error'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -73,7 +69,7 @@ exports['Should correctly handle ordered single batch api write command error'] 
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp();
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
 
         // Add some operations to be executed in order
         batch.insert({b:1, a:1});
@@ -113,8 +109,6 @@ exports['Should correctly handle ordered single batch api write command error'] 
 }
 
 exports['Should correctly handle ordered multiple batch api write command error'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -129,7 +123,7 @@ exports['Should correctly handle ordered multiple batch api write command error'
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp();
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
 
         // Add some operations to be executed in order
         batch.insert({b:1, a:1});
@@ -166,8 +160,6 @@ exports['Should correctly handle ordered multiple batch api write command error'
 }
 
 exports['Should fail due to ordered document being to big'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -184,7 +176,7 @@ exports['Should fail due to ordered document being to big'] = {
       }
 
       // Set up the batch
-      var batch = coll.initializeOrderedBulkOp();
+      var batch = coll.initializeOrderedBulkOp(configuration.writeConcern);
       batch.insert({b:1, a:1});
       // Should fail on insert due to string being to big
       try {
@@ -200,9 +192,11 @@ exports['Should fail due to ordered document being to big'] = {
 }
 
 exports['Should correctly split up ordered messages into more batches'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: 'single'
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -219,7 +213,7 @@ exports['Should correctly split up ordered messages into more batches'] = {
       }
 
       // Insert the string a couple of times, should force split into multiple batches
-      var batch = coll.initializeOrderedBulkOp();
+      var batch = coll.initializeOrderedBulkOp(configuration.writeConcern);
       batch.insert({a:1, b: hugeString});
       batch.insert({a:2, b: hugeString});
       batch.insert({a:3, b: hugeString});
@@ -242,8 +236,6 @@ exports['Should correctly split up ordered messages into more batches'] = {
 }
 
 exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations using write commands'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.5.4"
@@ -262,7 +254,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp();
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
 
         // Add illegal insert operation
         batch.insert({$set:{a:1}});
@@ -329,8 +321,6 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
 }
 
 exports['Should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -345,7 +335,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp();
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
 
         // Add some operations to be executed in order
         batch.insert({a:1});
@@ -377,8 +367,6 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
 }
 
 exports['Should Correctly Execute Ordered Batch of Write Operations with upserts causing duplicate key errors on updates'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -393,7 +381,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp();
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
 
         // Add some operations to be executed in order
         batch.insert({a:1});
@@ -436,8 +424,6 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
 }
 
 exports['Should correctly perform ordered upsert with custom _id'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run
@@ -447,7 +433,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_8');
       // Initialize the Ordered Batch
-      var batch = col.initializeOrderedBulkOp();
+      var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
 
       // Add some operations to be executed in order
       batch.find({_id:2}).upsert().updateOne({$set: {b:2}});
@@ -475,8 +461,6 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
 }
 
 exports['Should throw an error when no operations in ordered batch'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {},
   
   // The actual test we wish to run

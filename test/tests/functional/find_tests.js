@@ -2328,8 +2328,6 @@ exports.shouldCorrectlyDoFindMinMax = {
  * @_function parallelCollectionScan
  */
 exports['Should correctly execute parallelCollectionScan with multiple cursors'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">2.5.5"}
   },
@@ -2387,8 +2385,6 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
 }
 
 exports['Should correctly execute parallelCollectionScan with multiple cursors using each'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">2.5.5"}
   },
@@ -2450,8 +2446,6 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
 }
 
 exports['Should correctly execute parallelCollectionScan with multiple cursors using next'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">2.5.5"}
   },
@@ -2516,8 +2510,6 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
 }
 
 exports['Should correctly execute parallelCollectionScan with single cursor and close'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">2.5.5"}
   },
@@ -2561,8 +2553,6 @@ exports['Should correctly execute parallelCollectionScan with single cursor and 
 }
 
 exports['Should correctly execute parallelCollectionScan with single cursor streaming'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">2.5.5"}
   },
@@ -2609,8 +2599,6 @@ exports['Should correctly execute parallelCollectionScan with single cursor stre
 }
 
 exports['Should correctly sort using text search on 2.6 or higher in find'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">2.5.5"}
   },

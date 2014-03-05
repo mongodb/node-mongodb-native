@@ -210,7 +210,7 @@ exports.testConnectGoodAuth = {
     // First add a user.
     connect(configuration.url(), function(err, db) {
       test.equal(err, null);
-      db.addUser(user, password, function(err, result) {
+      db.addUser(user, password, configuration.writeConcern, function(err, result) {
         test.equal(err, null);
         db.close();
         restOfTest();

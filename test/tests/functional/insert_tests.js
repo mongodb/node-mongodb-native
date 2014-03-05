@@ -156,8 +156,6 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
  * @ignore
  */
 exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">1.9.1"}
   },
@@ -1386,7 +1384,8 @@ exports.shouldFailDueToMessageBeingBiggerThanMaxMessageSize = {
 
       collection.insert([{doc:binary}, {doc:binary}, {doc:binary}, {doc:binary}], {w:1}, function(err, result) {
         test.ok(err != null);
-        test.ok(err.message.match('Command exceeds maximum'))
+        test.ok(err.message.match('Command exceeds maximum')
+          || err.message.indexOf('exceeds maximum') != -1)
 
         db.close();
         test.done();
@@ -1917,8 +1916,8 @@ exports.shouldCorrectlyThrowOnToLargeAnInsert = {
           // Attempt to insert
           db.collection('shouldCorrectlyThrowOnToLargeAnInsert', {w:1}).insert(docs, function(err, result) {
             test.ok(err != null);
-            test.ok(err.message.indexOf("Command exceeds maximum message size of") != -1);
-
+            test.ok(err.message.indexOf("Command exceeds maximum message size of") != -1
+                || err.message.indexOf("exceeds maximum") != -1);
             db.close();
             test.done();
           });

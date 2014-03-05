@@ -52,7 +52,7 @@ exports.shouldCorrectlyAuthenticate = {
   
   // The actual test we wish to run
   test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+    var db = configure.newDbInstance({}, {poolSize:1});
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
     db.open(function(err, db) {
@@ -68,7 +68,6 @@ exports.shouldCorrectlyAuthenticate = {
 
         // Add the new user to the admin database
         adminDb.addUser('admin2', 'admin2', function(err, result) {
-
           // Authenticate using the newly added user
           adminDb.authenticate('admin2', 'admin2', function(err, result) {
             test.ok(result);

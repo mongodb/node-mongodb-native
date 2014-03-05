@@ -6,8 +6,6 @@
  * @ignore
  */
 exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.1.0"
@@ -70,8 +68,6 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
  * @ignore
  */
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.1.0"
@@ -134,8 +130,6 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
  * @ignore
  */
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingleObject = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.1.0"
@@ -194,8 +188,6 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
  * @ignore
  */
 exports.shouldCorrectlyFailAndReturnError = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.1.0"
@@ -243,8 +235,6 @@ exports.shouldCorrectlyFailAndReturnError = {
  * @ignore
  */
 exports.shouldCorrectlyPassReadPreference = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.1.0"
@@ -324,8 +314,6 @@ exports.shouldCorrectlyPassReadPreference = {
  * @ignore
  */
 exports['Should correctly return and iterate over all the cursor results'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.5.3",
@@ -394,8 +382,6 @@ exports['Should correctly return and iterate over all the cursor results'] = {
  * @ignore
  */
 exports['Should correctly return a cursor and call explain'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.5.3",
@@ -461,8 +447,6 @@ exports['Should correctly return a cursor and call explain'] = {
  * @ignore
  */
 exports['Should correctly return a cursor with batchSize 1 and call next'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.5.3",
@@ -529,8 +513,6 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
  * @ignore
  */
 exports['Should correctly write the results out to a new collection'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.5.3"
@@ -592,8 +574,6 @@ exports['Should correctly write the results out to a new collection'] = {
  * @ignore
  */
 exports['Should correctly use allowDiskUsage when performing an aggregation'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       mongodb: ">2.5.3"
@@ -654,8 +634,6 @@ exports['Should correctly use allowDiskUsage when performing an aggregation'] = 
  * @ignore
  */
 exports['Should correctly use allowDiskUsage when performing an aggregation with a cursor'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
         mongodb: ">2.5.3"
@@ -719,8 +697,6 @@ exports['Should correctly use allowDiskUsage when performing an aggregation with
  * @ignore
  */
 exports['Should correctly use aggregation as a cursor'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
         mongodb: ">2.5.3"

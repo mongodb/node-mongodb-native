@@ -21,8 +21,6 @@ exports['Should Correctly create a pool instance with the expected values'] = {
  * @ignore
  */
 exports['Should correctly fail due to no server'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {topology: 'single'}
   },
@@ -49,8 +47,6 @@ exports['Should correctly fail due to no server'] = {
  * @ignore
  */
 exports['Should Correctly create a pool of connections and receive an ok when all connections are active'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {topology: 'single'}
   },
@@ -74,8 +70,6 @@ exports['Should Correctly create a pool of connections and receive an ok when al
  * @ignore
  */
 exports['Should Correctly connect and then force a restart creating new connections'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {topology: 'single'}
   },

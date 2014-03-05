@@ -81,7 +81,103 @@ var StandaloneConfiguration = function(context) {
 		// Additional parameters needed
 		require: mongo,
 		database: database,
-		nativeParser: true
+		nativeParser: true,
+		port: 27017,
+		host: 'localhost',
+		writeConcern: {w: 1}
+	}
+}
+
+var ReplicasetConfiguration = function(context) {
+	var mongo = require('../lib/mongodb');
+	var Db = mongo.Db;
+	var Server = mongo.Server;
+	var ReplSet = mongo.ReplSet;
+	var ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
+  var database = "integration_tests";
+  var url = "mongodb://%slocalhost:30000/" + database;
+  var startPort = 30000;
+
+  // Replicaset settings
+  var replicasetOptions = { 
+      retries:120, secondary_count:2
+    , passive_count:0, arbiter_count:1
+    , start_port: startPort
+    , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
+  }
+
+  // Set up replicaset manager
+  var replicasetManager = new ReplicaSetManager(replicasetOptions);
+  var replSet = null;
+
+	return {		
+		start: function(callback) {
+      replicasetManager.startSet(true, function(err) {
+        if(err) throw err;
+        callback();
+      });
+		},
+
+		shutdown: function(callback) {
+      replicasetManager.killSetServers(function(err) {
+        callback();
+      });
+		},
+
+		restart: function(callback) {
+			var self = this;
+
+      replicasetManager.killSetServers(function(err) {
+        self.start(callback);
+      });
+		},
+
+		setup: function(callback) {
+			callback();
+		},
+
+		teardown: function(callback) {
+			callback();
+		},
+
+		newDbInstance: function(dbOptions, serverOptions) {
+			if(dbOptions.w == null
+					&& dbOptions.fsync == null
+					&& dbOptions.wtimeout == null
+					&& dbOptions.j == null) dbOptions.w = 'majority';
+			serverOptions = serverOptions || {};
+			var port = serverOptions.port || startPort;
+			var host = serverOptions.host || "localhost";
+
+			// Return the db
+      return new Db('integration_tests'
+      	, new ReplSet([new Server(host, port, serverOptions)]
+      	, {poolSize:1}), dbOptions);      
+		},
+
+		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
+			return new Db('integration_tests'
+				, new ReplSet([new Server(host, serverOptions)]
+				, {poolSize:1}), dbOptions);      
+		},
+
+		url: function(username, password) {
+			var auth = "";
+
+			if(username && password) {
+				auth = f("%s:%s@", username, password);
+			}
+
+			return f(url, auth);
+		},
+
+		// Additional parameters needed
+		require: mongo,
+		database: database,
+		nativeParser: true,
+		port: 30000,
+		host: 'localhost',
+		writeConcern: {w: 'majority'}
 	}
 }
 
@@ -140,8 +236,6 @@ var testFiles =[
 testFiles.forEach(function(t) {
 	if(t != "") runner.add(t);
 });
-// runner.add('/test/tests/functional/aggregation_tests.js');
-
 
 // // Add the Coverage plugin
 // runner.plugin(new Cover({
@@ -161,4 +255,5 @@ runner.on('exit', function(errors, results) {
 });
 
 // Run the tests
-runner.run(StandaloneConfiguration);
+// runner.run(StandaloneConfiguration);
+runner.run(ReplicasetConfiguration);

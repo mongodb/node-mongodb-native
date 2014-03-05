@@ -2276,7 +2276,7 @@ exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = {
   	  var id = new ObjectID();
 
   	  // Execute function
-  	  var exec_function = format("mongofiles --host localhost --port 27017 --db %s put %s", configuration.database, __dirname + "/iya_logo_final_bw.jpg");
+  	  var exec_function = format("mongofiles --host %s --port %s --db %s put %s", configuration.host, configuration.port, configuration.database, __dirname + "/iya_logo_final_bw.jpg");
   	  var exec = child_process.exec;
   	  // Read the data to compare
   	  var originalData = fs.readFileSync(__dirname + "/iya_logo_final_bw.jpg");

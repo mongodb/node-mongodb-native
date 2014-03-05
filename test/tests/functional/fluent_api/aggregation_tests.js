@@ -2,8 +2,6 @@ var fs = require('fs')
 	, stream = require('stream');
 
 exports['Should correctly perform a simple pipe aggregation command and get'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
   requires: {mongodb: ">2.5.1"},
   
@@ -34,8 +32,6 @@ exports['Should correctly perform a simple pipe aggregation command and get'] = 
 }
 
 exports['Should correctly perform a simple pipe aggregation command and getOne'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
   requires: {mongodb: ">2.5.1"},
   
@@ -66,8 +62,6 @@ exports['Should correctly perform a simple pipe aggregation command and getOne']
 }
 
 exports['Should correctly perform a complete pipe aggregation command and get'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
   requires: {mongodb: ">2.5.1"},
   
@@ -112,8 +106,6 @@ exports['Should correctly perform a complete pipe aggregation command and get'] 
 }
 
 exports['Should correctly perform a simple pipe aggregation command and explain'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
   requires: {mongodb: ">2.5.3"},
   
@@ -144,8 +136,6 @@ exports['Should correctly perform a simple pipe aggregation command and explain'
 }
 
 exports['Should correctly perform a simple pipe aggregation command and each'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
   requires: {mongodb: ">2.5.1"},
   
@@ -182,8 +172,6 @@ exports['Should correctly perform a simple pipe aggregation command and each'] =
 }
 
 exports['Should correctly perform a simple pipe aggregation command and next'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
   requires: {mongodb: ">2.5.1"},
   
@@ -220,8 +208,6 @@ exports['Should correctly perform a simple pipe aggregation command and next'] =
 }
 
 exports['Should correctly perform a simple pipe aggregation command and print as stream'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
   requires: {mongodb: ">2.5.1"},
   requires: {node: ">0.10.0"},
@@ -277,8 +263,6 @@ exports['Should correctly perform a simple pipe aggregation command and print as
 }
 
 exports['Should correctly perform a simple pipe aggregation command, next, close and correctly fail'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   requires: {serverType: 'Server'},
   requires: {mongodb: ">2.5.1"},
   

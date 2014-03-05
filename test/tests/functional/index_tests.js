@@ -456,8 +456,6 @@ exports.shouldCorrectlyHandleMultipleColumnIndexes = {
  * @ignore
  */
 exports.shouldCorrectlyHandleUniqueIndex = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {topology: 'single'}
   },
@@ -714,8 +712,6 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = {
  * @ignore
  */
 exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">1.9.1"}
   },
@@ -746,8 +742,6 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
  * @ignore
  */
 exports.shouldCorrectlyHandleGeospatialIndexes = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">1.9.1"}
   },
@@ -781,8 +775,6 @@ exports.shouldCorrectlyHandleGeospatialIndexes = {
  * @ignore
  */
 exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {mongodb: ">1.9.1"}
   },

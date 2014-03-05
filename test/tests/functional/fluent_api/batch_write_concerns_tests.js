@@ -4,8 +4,6 @@
  *
  *******************************************************************/
 exports['Should fail with journal write concern due to --nojournal ordered'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       topology: "single"
@@ -39,8 +37,6 @@ exports['Should fail with journal write concern due to --nojournal ordered'] = {
 }
 
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance ordered'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       topology: "single"
@@ -79,8 +75,6 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
  *
  *******************************************************************/
 exports['Should fail with journal write concern due to --nojournal unordered'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       topology: "single"
@@ -114,8 +108,6 @@ exports['Should fail with journal write concern due to --nojournal unordered'] =
 }
 
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance unordered'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
       topology: "single"
