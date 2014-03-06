@@ -34,14 +34,24 @@ var MongoDBTopologyFilter = function() {
   	if(test.metadata.requires == null) return false;
   	if(test.metadata.requires.topology == null) return false;
 
-  	// If the topology does not match the required one for 
-  	// this test, filter it out
-  	if(test.metadata.requires.topology != serverConfig) {
-  		return true;
-  	}
+    // If we have a single topology convert to single item array
+    var topologies = null;
 
-  	// Execute the test
-  	return false;
+    if(typeof test.metadata.requires.topology == 'string') {
+      topologies = [test.metadata.requires.topology];
+    } else if(Array.isArray(test.metadata.requires.topology)) {
+      topologies = test.metadata.requires.topology;
+    } else {
+      throw new Error("MongoDBTopologyFilter only supports single string topology or an array of string topologies");
+    }
+
+    // Check if we have an allowed topology for this test
+    for(var i = 0; i < topologies.length; i++) {
+      if(topologies[i] == serverConfig) return false;
+    }
+
+  	// Do not execute the test
+  	return true;
 	}	
 }
 

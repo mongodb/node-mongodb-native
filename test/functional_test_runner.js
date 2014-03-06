@@ -17,26 +17,26 @@ var StandaloneConfiguration = function(context) {
 	var ServerManager = require('../test/tools/server_manager').ServerManager;
   var database = "integration_tests";
   var url = "mongodb://%slocalhost:27017/" + database;
-  var serverManager = new ServerManager({
+  var manager = new ServerManager({
   	journal:false
   });  
 
 	return {		
 		start: function(callback) {
-      serverManager.start(true, function(err) {
+      manager.start(true, function(err) {
         if(err) throw err;
         callback();
       });
 		},
 
 		shutdown: function(callback) {
-      serverManager.killAll(function(err) {
+      manager.killAll(function(err) {
         callback();
       });        
 		},
 
 		restart: function(callback) {
-			serverManager.stop(3, function() {
+			manager.stop(3, function() {
 				serverManager.start(false, callback);
 			})
 		},
@@ -111,19 +111,19 @@ var ReplicasetConfiguration = function(context) {
   }
 
   // Set up replicaset manager
-  var replicasetManager = new ReplicaSetManager(replicasetOptions);
+  var manager = new ReplicaSetManager(replicasetOptions);
   var replSet = null;
 
 	return {		
 		start: function(callback) {
-      replicasetManager.startSet(true, function(err) {
+      manager.startSet(true, function(err) {
         if(err) throw err;
         callback();
       });
 		},
 
 		shutdown: function(callback) {
-      replicasetManager.killSetServers(function(err) {
+      manager.killSetServers(function(err) {
         callback();
       });
 		},
@@ -131,7 +131,7 @@ var ReplicasetConfiguration = function(context) {
 		restart: function(callback) {
 			var self = this;
 
-      replicasetManager.killSetServers(function(err) {
+      manager.killSetServers(function(err) {
         self.start(callback);
       });
 		},
@@ -185,6 +185,105 @@ var ReplicasetConfiguration = function(context) {
 	}
 }
 
+var ShardingConfiguration = function(context) {
+	var mongo = require('../lib/mongodb');
+	var Db = mongo.Db;
+	var Server = mongo.Server;
+	var Mongos = mongo.Mongos;
+	var ShardedManager = require('../test/tools/sharded_manager').ShardedManager;
+  var database = "integration_tests";
+  var replStartPort = 30000;
+  var mongosStartPort = 27017;
+  var url = "mongodb://%slocalhost:" + mongosStartPort + "/" + database;
+
+  // Replicaset settings
+  var options = { 
+  		numberOfReplicaSets: 1
+  	,	numberOfMongosServers: 1
+  	, replPortRangeSet: replStartPort
+  	, mongosRangeSet: mongosStartPort
+  	, db: database
+  	, collection: 'test_distinct_queries'
+  }
+
+  // Set up replicaset manager
+  var manager = new ShardedManager(options);
+  var replSet = null;
+
+	return {		
+		start: function(callback) {
+      manager.start(function(err) {
+        if(err) throw err;
+        // manager.shardCollection('test_distinct_queries', {a:1}, function(err) {
+        // 	if(err) throw err;
+	        callback();
+        // });
+      });
+		},
+
+		shutdown: function(callback) {
+      manager.killSetServers(function(err) {
+        callback();
+      });
+		},
+
+		restart: function(callback) {
+			var self = this;
+
+      manager.killSetServers(function(err) {
+        self.start(callback);
+      });
+		},
+
+		setup: function(callback) {
+			callback();
+		},
+
+		teardown: function(callback) {
+			callback();
+		},
+
+		newDbInstance: function(dbOptions, serverOptions) {
+			if(dbOptions.w == null
+					&& dbOptions.fsync == null
+					&& dbOptions.wtimeout == null
+					&& dbOptions.j == null) dbOptions.w = 'majority';
+			serverOptions = serverOptions || {};
+			var port = serverOptions.port || mongosStartPort;
+			var host = serverOptions.host || "localhost";
+
+			// Return the db
+      return new Db('integration_tests'
+      	, new Mongos([new Server(host, port, serverOptions)]
+      	, {poolSize:1}), dbOptions);      
+		},
+
+		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
+			return new Db('integration_tests'
+				, new Mongos([new Server(host, serverOptions)]
+				, {poolSize:1}), dbOptions);      
+		},
+
+		url: function(username, password) {
+			var auth = "";
+
+			if(username && password) {
+				auth = f("%s:%s@", username, password);
+			}
+
+			return f(url, auth);
+		},
+
+		// Additional parameters needed
+		require: mongo,
+		database: database,
+		nativeParser: true,
+		port: 30000,
+		host: 'localhost',
+		writeConcern: {w: 'majority'}
+	}
+}
+
 // Set up the runner
 var runner = new Runner({
 		logLevel:'error'
@@ -193,47 +292,47 @@ var runner = new Runner({
 });
 
 var testFiles =[
-		'/test/tests/functional/mongo_reply_parser_tests.js'
-  , '/test/tests/functional/connection_pool_tests.js'
-  , '/test/tests/functional/gridstore/readstream_tests.js'
-  , '/test/tests/functional/gridstore/grid_tests.js'
-  , '/test/tests/functional/gridstore/gridstore_direct_streaming_tests.js'
-  , '/test/tests/functional/gridstore/gridstore_tests.js'
-  , '/test/tests/functional/gridstore/gridstore_stream_tests.js'
-  , '/test/tests/functional/gridstore/gridstore_file_tests.js'
-  , '/test/tests/functional/util_tests.js'
-  , '/test/tests/functional/multiple_db_tests.js'
-  , '/test/tests/functional/logging_tests.js'
-  , '/test/tests/functional/custom_pk_tests.js'
-  , '/test/tests/functional/geo_tests.js'
-  , '/test/tests/functional/write_preferences_tests.js'
-  , '/test/tests/functional/remove_tests.js'
-  , '/test/tests/functional/unicode_tests.js'
-  , '/test/tests/functional/raw_tests.js'
-  , '/test/tests/functional/mapreduce_tests.js'
-  , '/test/tests/functional/cursorstream_tests.js'
+		// '/test/tests/functional/mongo_reply_parser_tests.js'
+  // , '/test/tests/functional/connection_pool_tests.js'
+  // , '/test/tests/functional/gridstore/readstream_tests.js'
+  // , '/test/tests/functional/gridstore/grid_tests.js'
+  // , '/test/tests/functional/gridstore/gridstore_direct_streaming_tests.js'
+  // , '/test/tests/functional/gridstore/gridstore_tests.js'
+  // , '/test/tests/functional/gridstore/gridstore_stream_tests.js'
+  // , '/test/tests/functional/gridstore/gridstore_file_tests.js'
+  // , '/test/tests/functional/util_tests.js'
+  // , '/test/tests/functional/multiple_db_tests.js'
+  // , '/test/tests/functional/logging_tests.js'
+  // , '/test/tests/functional/custom_pk_tests.js'
+  // , '/test/tests/functional/geo_tests.js'
+  // , '/test/tests/functional/write_preferences_tests.js'
+  // , '/test/tests/functional/remove_tests.js'
+  // , '/test/tests/functional/unicode_tests.js'
+  // , '/test/tests/functional/raw_tests.js'
+  // , '/test/tests/functional/mapreduce_tests.js'
+  // , '/test/tests/functional/cursorstream_tests.js'
   , '/test/tests/functional/index_tests.js'
-  , '/test/tests/functional/cursor_tests.js'
-  , '/test/tests/functional/find_tests.js'
-  , '/test/tests/functional/insert_tests.js'
-  , '/test/tests/functional/admin_mode_tests.js'
-  , '/test/tests/functional/aggregation_tests.js'
-  , '/test/tests/functional/exception_tests.js'
-  , '/test/tests/functional/error_tests.js'
-  , '/test/tests/functional/command_generation_tests.js'
-  , '/test/tests/functional/uri_tests.js'
-  , '/test/tests/functional/url_parser_tests.js'
-  , '/test/tests/functional/objectid_tests.js'
-  , '/test/tests/functional/connection_tests.js'
-  , '/test/tests/functional/collection_tests.js'
-  , '/test/tests/functional/db_tests.js'
-  , '/test/tests/functional/read_preferences_tests.js'
-  // , '/test/tests/functional/fluent_api/aggregation_tests.js'
-  , '/test/tests/functional/maxtimems_tests.js'
-  , '/test/tests/functional/mongo_client_tests.js'
-  , '/test/tests/functional/fluent_api/batch_write_ordered_tests.js'
-  , '/test/tests/functional/fluent_api/batch_write_unordered_tests.js'
-  , '/test/tests/functional/fluent_api/batch_write_concerns_tests.js'
+  // , '/test/tests/functional/cursor_tests.js'
+  // , '/test/tests/functional/find_tests.js'
+  // , '/test/tests/functional/insert_tests.js'
+  // , '/test/tests/functional/admin_mode_tests.js'
+  // , '/test/tests/functional/aggregation_tests.js'
+  // , '/test/tests/functional/exception_tests.js'
+  // , '/test/tests/functional/error_tests.js'
+  // , '/test/tests/functional/command_generation_tests.js'
+  // , '/test/tests/functional/uri_tests.js'
+  // , '/test/tests/functional/url_parser_tests.js'
+  // , '/test/tests/functional/objectid_tests.js'
+  // , '/test/tests/functional/connection_tests.js'
+  // , '/test/tests/functional/collection_tests.js'
+  // , '/test/tests/functional/db_tests.js'
+  // , '/test/tests/functional/read_preferences_tests.js'
+  // // , '/test/tests/functional/fluent_api/aggregation_tests.js'
+  // , '/test/tests/functional/maxtimems_tests.js'
+  // , '/test/tests/functional/mongo_client_tests.js'
+  // , '/test/tests/functional/fluent_api/batch_write_ordered_tests.js'
+  // , '/test/tests/functional/fluent_api/batch_write_unordered_tests.js'
+  // , '/test/tests/functional/fluent_api/batch_write_concerns_tests.js'
 ]
 
 // Add all the tests to run
@@ -259,5 +358,12 @@ runner.on('exit', function(errors, results) {
 });
 
 // Run the tests
-runner.run(StandaloneConfiguration);
+// runner.run(StandaloneConfiguration);
 // runner.run(ReplicasetConfiguration);
+runner.run(ShardingConfiguration);
+
+
+
+
+
+
