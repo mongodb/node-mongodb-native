@@ -5,7 +5,7 @@ exports['Should correctly authenticate against admin db'] = function(configurati
 
   // restart server
   configuration.restart({purgedirectories: true}, function() {
-    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), configuration.writeConcern());
     db1.open(function(err, db) {
       db.admin().addUser('admin', 'admin', function(err, result) {
         test.equal(null, err);
@@ -52,7 +52,7 @@ exports['Should correctly authenticate against normal db'] = function(configurat
 
   // restart server
   configuration.restart({purgedirectories: true}, function() {
-    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), configuration.writeConcern());
     db1.open(function(err, db) {
       db.addUser('user', 'user', function(err, result) {
         test.equal(null, err);
@@ -103,7 +103,7 @@ exports['Should correctly reapply the authentications'] = function(configuration
 
   // restart server
   configuration.restart({purgedirectories: true}, function() {
-    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), configuration.writeConcern());
     db1.open(function(err, db) {
       db.admin().addUser('admin', 'admin', function(err, result) {
         test.equal(null, err);
@@ -149,7 +149,7 @@ exports['Ordered bulk operation should fail correctly when not authenticated'] =
 
   // restart server
   configuration.restart({purgedirectories: true}, function() {
-    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), configuration.writeConcern());
     db1.open(function(err, db) {
       db.admin().addUser('admin', 'admin', function(err, result) {
         test.equal(null, err);
@@ -188,7 +188,7 @@ exports['Unordered bulk operation should fail correctly when not authenticated']
 
   // restart server
   configuration.restart({purgedirectories: true}, function() {
-    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+    var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), configuration.writeConcern());
     db1.open(function(err, db) {
       db.admin().addUser('admin', 'admin', function(err, result) {
         test.equal(null, err);

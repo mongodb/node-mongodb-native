@@ -9,7 +9,7 @@ exports.shouldCorrectlyPerformSimpleFind = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_simple', function(err, r) {
         var collection = db.collection('test_find_simple', function(err, collection) {
@@ -17,7 +17,7 @@ exports.shouldCorrectlyPerformSimpleFind = {
           var doc2 = null;
 
           // Insert some test documents
-          collection.insert([{a:2}, {b:3}], {w:1}, function(err, docs) {
+          collection.insert([{a:2}, {b:3}], configuration.writeConcern(), function(err, docs) {
             doc1 = docs[0];
             doc2 = docs[1]
 
@@ -54,7 +54,7 @@ exports.shouldCorrectlyPeformSimpleChainedFind = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_simple_chained', function(err, r) {
         var collection = db.collection('test_find_simple_chained', function(err, collection) {
@@ -62,7 +62,7 @@ exports.shouldCorrectlyPeformSimpleChainedFind = {
           var doc2 = null;
 
           // Insert some test documents
-          collection.insert([{a:2}, {b:3}], {w:1}, function(err, docs) {
+          collection.insert([{a:2}, {b:3}], configuration.writeConcern(), function(err, docs) {
             doc1 = docs[0];
             doc2 = docs[1]
 
@@ -99,14 +99,14 @@ exports.shouldCorrectlyPeformAdvancedFinds = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_advanced', function(err, r) {
         var collection = db.collection('test_find_advanced', function(err, collection) {
           var doc1 = null, doc2 = null, doc3 = null;
 
           // Insert some test documents
-          collection.insert([{a:1}, {a:2}, {b:3}], {w:1}, function(err, docs) {
+          collection.insert([{a:1}, {a:2}, {b:3}], configuration.writeConcern(), function(err, docs) {
             var doc1 = docs[0], doc2 = docs[1], doc3 = docs[2];
 
             // Locate by less than
@@ -193,7 +193,7 @@ exports.shouldCorrectlyPerformFindWithSort = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_sorting', function(err, r) {
         db.collection('test_find_sorting', function(err, collection) {
@@ -203,7 +203,7 @@ exports.shouldCorrectlyPerformFindWithSort = {
               {a:2, b:1},
               {a:3, b:2},
               {a:4, b:1}
-            ], {w:1}, function(err, docs) {
+            ], configuration.writeConcern(), function(err, docs) {
               doc1 = docs[0];
               doc2 = docs[1];
               doc3 = docs[2];
@@ -301,7 +301,7 @@ exports.shouldCorrectlyPerformFindWithLimit = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_limits', function(err, r) {
         db.collection('test_find_limits', function(err, collection) {
@@ -312,7 +312,7 @@ exports.shouldCorrectlyPerformFindWithLimit = {
               {b:2},
               {c:3},
               {d:4}
-            ], {w:1}, function(err, docs) {
+            ], configuration.writeConcern(), function(err, docs) {
               doc1 = docs[0];
               doc2 = docs[1];
               doc3 = docs[2];
@@ -361,13 +361,13 @@ exports.shouldCorrectlyFindWithNonQuotedValues = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_non_quoted_values', function(err, r) {
         db.collection('test_find_non_quoted_values', function(err, collection) {
           // insert test document
           collection.insert([{ a: 19, b: 'teststring', c: 59920303 },
-                             { a: "19", b: 'teststring', c: 3984929 }], {w:1} , function(err, r) {
+                             { a: "19", b: 'teststring', c: 3984929 }], configuration.writeConcern() , function(err, r) {
 
              collection.find({ a: 19 }).toArray(function(err, documents) {
                test.equal(1, documents.length);
@@ -390,13 +390,13 @@ exports.shouldCorrectlyFindEmbeddedDocument = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_embedded_document', function(err, r) {
         db.collection('test_find_embedded_document', function(err, collection) {
           // insert test document
           collection.insert([{ a: { id: 10, value: 'foo' }, b: 'bar', c: { id: 20, value: 'foobar' }},
-                             { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}], {w:1}, function(err, r) {
+                             { a: { id: 11, value: 'foo' }, b: 'bar2', c: { id: 20, value: 'foobar' }}], configuration.writeConcern(), function(err, r) {
 
              // test using integer value
              collection.find({ 'a.id': 10 }).toArray(function(err, documents) {
@@ -429,7 +429,7 @@ exports.shouldCorrectlyFindNoRecords = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_one_no_records', function(err, r) {
         db.collection('test_find_one_no_records', function(err, collection) {
@@ -455,10 +455,10 @@ exports.shouldCorrectlyPerformFindByWhere = {
   test: function(configuration, test) {
     var Code = configuration.require.Code;
     
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_where', function(err, collection) {
-        collection.insert([{'a':1}, {'a':2}, {'a':3}], {w:1}, function(err, ids) {
+        collection.insert([{'a':1}, {'a':2}, {'a':3}], configuration.writeConcern(), function(err, ids) {
           collection.count(function(err, count) {
             test.equal(3, count);
 
@@ -489,11 +489,11 @@ exports.shouldCorrectlyPerformFindsWithHintTurnedOn = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_hint', function(err, collection) {
-        collection.insert({'a':1}, {w:1}, function(err, ids) {
-          db.createIndex(collection.collectionName, "a", {w:1}, function(err, indexName) {
+        collection.insert({'a':1}, configuration.writeConcern(), function(err, ids) {
+          db.createIndex(collection.collectionName, "a", configuration.writeConcern(), function(err, indexName) {
             collection.find({'a':1}, {'hint':'a'}).toArray(function(err, items) {
               test.equal(1, items.length);
             });
@@ -550,10 +550,10 @@ exports.shouldCorrectlyPerformFindByObjectID = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
     
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_by_oid', function(err, collection) {
-        collection.save({'hello':'mike'}, {w:1}, function(err, docs) {
+        collection.save({'hello':'mike'}, configuration.writeConcern(), function(err, docs) {
           test.ok(docs._id instanceof ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
 
           collection.findOne({'_id':docs._id}, function(err, doc) {
@@ -582,7 +582,7 @@ exports.shouldCorrectlyReturnDocumentWithOriginalStructure = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_by_oid_with_subdocs', function(err, collection) {
         var c1 = { _id: new ObjectID, comments: [], title: 'number 1' };
@@ -594,7 +594,7 @@ exports.shouldCorrectlyReturnDocumentWithOriginalStructure = {
           , _id: new ObjectID
         };
 
-        collection.insert(doc, {w:1}, function(err, docs) {
+        collection.insert(doc, configuration.writeConcern(), function(err, docs) {
           collection.findOne({'_id':doc._id}, {w:1,fields: undefined}, function(err, doc) {
             if (err) console.error('error', err);
             test.equal(2, doc.comments.length);
@@ -618,11 +618,11 @@ exports.shouldCorrectlyRetrieveSingleRecord = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var p_client = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var p_client = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     p_client.open(function(err, p_client) {
       p_client.createCollection('test_should_correctly_retrieve_one_record', function(err, collection) {
-        collection.insert({'a':0}, {w:1}, function(err, r) {
+        collection.insert({'a':0}, configuration.writeConcern(), function(err, r) {
           p_client.collection('test_should_correctly_retrieve_one_record', function(err, usercollection) {
             usercollection.findOne({'a': 0}, function(err, result) {
               p_client.close();
@@ -646,7 +646,7 @@ exports.shouldCorrectlyHandleError = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_one_error_handling', function(err, collection) {
         // Try to fetch an object using a totally invalid and wrong hex string... what we're interested in here
@@ -671,7 +671,7 @@ exports.shouldCorrectlyPerformFindWithOptions = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_field_select_with_options', function(err, r) {
         var collection = db.collection('test_field_select_with_options', function(err, collection) {
@@ -679,7 +679,7 @@ exports.shouldCorrectlyPerformFindWithOptions = {
 
           // Insert some test documents
           while(docCount--) docs.push({a:docCount, b:docCount});
-          collection.insert(docs, {w:1}, function(err,retDocs) {
+          collection.insert(docs, configuration.writeConcern(), function(err,retDocs) {
             docs = retDocs;
 
             collection.find({},{ 'a' : 1},{ limit : 3, sort : [['a',-1]] }).toArray(function(err,documents){
@@ -716,25 +716,25 @@ exports.shouldCorrectlyFindAndModifyDocument = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_and_modify_a_document', function(err, collection) {
         // Test return new document on change
-        collection.insert({'a':1, 'b':2}, {w:1}, function(err, doc) {
+        collection.insert({'a':1, 'b':2}, configuration.writeConcern(), function(err, doc) {
           // Let's modify the document in place
           collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true}, function(err, updated_doc) {
             test.equal(1, updated_doc.a);
             test.equal(3, updated_doc.b);
 
             // Test return old document on change
-            collection.insert({'a':2, 'b':2}, {w:1}, function(err, doc) {
+            collection.insert({'a':2, 'b':2}, configuration.writeConcern(), function(err, doc) {
               // Let's modify the document in place
-              collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {w:1}, function(err, result, object) {
+              collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, configuration.writeConcern(), function(err, result, object) {
                 test.equal(2, result.a);
                 test.equal(2, result.b);
 
                 // Test remove object on change
-                collection.insert({'a':3, 'b':2}, {w:1}, function(err, doc) {
+                collection.insert({'a':3, 'b':2}, configuration.writeConcern(), function(err, doc) {
                   // Let's modify the document in place
                   collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {'new': true, remove: true}, function(err, updated_doc) {
                     test.equal(3, updated_doc.a);
@@ -746,7 +746,7 @@ exports.shouldCorrectlyFindAndModifyDocument = {
                       test.equal(3, updated_doc.b);
 
                       // Test selecting a subset of fields
-                      collection.insert({a: 100, b: 101}, {w:1}, function (err, ids) {
+                      collection.insert({a: 100, b: 101}, configuration.writeConcern(), function (err, ids) {
                         collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
                           test.equal(2, Object.keys(updated_doc).length);
                           test.equal(ids[0]['_id'].toHexString(), updated_doc._id.toHexString());
@@ -777,11 +777,11 @@ exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_and_modify_a_document', function(err, collection) {
         // Test return new document on change
-        collection.insert({'a':1, 'b':2}, {w:1}, function(err, doc) {
+        collection.insert({'a':1, 'b':2}, configuration.writeConcern(), function(err, doc) {
           // Let's modify the document in place
           collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true, 'fields': {a:1}}, function(err, updated_doc) {
             test.equal(2, Object.keys(updated_doc).length);
@@ -804,7 +804,7 @@ exports.shouldCorrectlyFindAndModifyWithNoGetLastErrorChainedW0 = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyFindAndModifyWithNoGetLastErrorChained', function(err, collection) {
         // Let's modify the document in place
@@ -827,7 +827,7 @@ exports.shouldCorrectlyFindAndModifyWithNoGetLastErrorChainedSafe = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyFindAndModifyWithNoGetLastErrorChainedSafe', function(err, collection) {
         // Let's modify the document in place
@@ -852,11 +852,11 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyExecuteFindOneWithAnInSearchTag', function(err, collection) {
         // Test return new document on change
-        collection.insert({'tags':[]}, {w:1}, function(err, docs) {
+        collection.insert({'tags':[]}, configuration.writeConcern(), function(err, docs) {
           // Fetch the id
           var id = docs[0]._id
 
@@ -869,7 +869,7 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = {
                 test.ok(doc != null);
 
                 // Perform atomic push operation
-                collection.update({_id:id}, {'$push':{comments:{title:'1'}}}, {w:1}, self);
+                collection.update({_id:id}, {'$push':{comments:{title:'1'}}}, configuration.writeConcern(), self);
               })
             },
 
@@ -884,7 +884,7 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = {
                 test.deepEqual(1, doc.comments.length);
 
                 // Perform atomic push operation
-                collection.update({_id:id}, {'$push':{comments:{title:'2'}}}, {w:1}, self);
+                collection.update({_id:id}, {'$push':{comments:{title:'2'}}}, configuration.writeConcern(), self);
               })
             },
 
@@ -899,7 +899,7 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = {
                 test.deepEqual(2, doc.comments.length);
 
                 // Perform atomic push operation
-                collection.update({_id:id}, {'$push':{comments:{title:'3'}}}, {w:1}, self);
+                collection.update({_id:id}, {'$push':{comments:{title:'3'}}}, configuration.writeConcern(), self);
               })
             },
 
@@ -913,7 +913,7 @@ exports.shouldCorrectlyExecuteFindOneWithAnInSearchTag = {
                 test.ok(doc != null);
                 test.deepEqual(3, doc.comments.length);
                 // Perform atomic push operation
-                collection.update({_id:id}, {'$pushAll':{comments:[{title:'4'}, {title:'5'}]}}, {w:1}, self);
+                collection.update({_id:id}, {'$pushAll':{comments:[{title:'4'}, {title:'5'}]}}, configuration.writeConcern(), self);
               })
             },
 
@@ -945,17 +945,17 @@ exports['ShouldCorrectlyLocatePostAndIncValues'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyExecuteFindOneWithAnInSearchTag', function(err, collection) {
         // Test return new document on change
         collection.insert({title:'Tobi',
             author:'Brian',
-            newTitle:'Woot', meta:{visitors:0}}, {w:1}, function(err, docs) {
+            newTitle:'Woot', meta:{visitors:0}}, configuration.writeConcern(), function(err, docs) {
           // Fetch the id
           var id = docs[0]._id
 
-          collection.update({_id:id}, {$inc:{ 'meta.visitors': 1 }}, {w:1}, function(err, result) {
+          collection.update({_id:id}, {$inc:{ 'meta.visitors': 1 }}, configuration.writeConcern(), function(err, result) {
             test.equal(1, result);
             test.equal(null, err);
 
@@ -980,12 +980,12 @@ exports['Should Correctly Handle FindAndModify Duplicate Key Error'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('FindAndModifyDuplicateKeyError', function(err, collection) {
         collection.ensureIndex(['name', 1], {unique:true, w:1}, function(err, index) {
           // Test return new document on change
-          collection.insert([{name:'test1'}, {name:'test2'}], {w:1}, function(err, doc) {
+          collection.insert([{name:'test1'}, {name:'test2'}], configuration.writeConcern(), function(err, doc) {
             // Let's modify the document in place
             collection.findAndModify({name: 'test1'}, [], {$set: {name: 'test2'}}, {}, function(err, updated_doc) {
               test.equal(null, updated_doc);
@@ -1008,7 +1008,7 @@ exports['Should correctly return null when attempting to modify a non-existing d
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('AttemptToFindAndModifyNonExistingDocument', function(err, collection) {
         // Let's modify the document in place
@@ -1031,10 +1031,10 @@ exports['Should correctly handle chained skip and limit on find with toArray'] =
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('skipAndLimitOnFindWithToArray', function(err, collection) {
-        collection.insert([{a:1}, {b:2}, {c:3}], {w:1}, function(err, result) {
+        collection.insert([{a:1}, {b:2}, {c:3}], configuration.writeConcern(), function(err, result) {
 
           collection.find().skip(1).limit(-1).toArray(function(err, items) {
             test.equal(null, err);
@@ -1057,10 +1057,10 @@ exports['Should correctly handle chained skip and negative limit on find with to
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('skipAndNegativeLimitOnFindWithToArray', function(err, collection) {
-        collection.insert([{a:1}, {b:2}, {c:3}, {d:4}, {e:5}], {w:1}, function(err, result) {
+        collection.insert([{a:1}, {b:2}, {c:3}, {d:4}, {e:5}], configuration.writeConcern(), function(err, result) {
 
           collection.find().skip(1).limit(-3).toArray(function(err, items) {
             test.equal(null, err);
@@ -1085,7 +1085,7 @@ exports['Should correctly pass timeout options to cursor'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('timeoutFalse', function(err, collection) {
         collection.find({},{timeout:false},function(err, cursor) {
@@ -1114,11 +1114,11 @@ exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var p_client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var p_client = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     p_client.open(function(err, p_client) {
       p_client.createCollection('shouldCorrectlyFindAndModifyDocumentWithDBStrict', function(err, collection) {
         // Test return old document on change
-        collection.insert({'a':2, 'b':2}, {w:1}, function(err, doc) {
+        collection.insert({'a':2, 'b':2}, configuration.writeConcern(), function(err, doc) {
           // Let's modify the document in place
           collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {new:true}, function(err, result) {
             test.equal(2, result.a)
@@ -1141,13 +1141,13 @@ exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep', function(err, collection) {
         // Set up an index to force duplicate index erro
         collection.ensureIndex([['failIndex', 1]], {unique:true, w:1}, function(err, index) {
           // Setup a new document
-          collection.insert({'a':2, 'b':2, 'failIndex':2}, {w:1}, function(err, doc) {
+          collection.insert({'a':2, 'b':2, 'failIndex':2}, configuration.writeConcern(), function(err, doc) {
 
             // Let's attempt to upsert with a duplicate key error
             collection.findAndModify({'c':2}, [['a', 1]], {'a':10, 'b':10, 'failIndex':2}, {w:1, upsert:true}, function(err, result) {
@@ -1173,13 +1173,13 @@ exports['Should correctly return new modified document'] = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('Should_correctly_return_new_modified_document', function(err, collection) {
         var id = new ObjectID();
         var doc = {_id:id, a:1, b:1, c:{a:1, b:1}};
 
-        collection.insert(doc, {w:1}, function(err, result) {
+        collection.insert(doc, configuration.writeConcern(), function(err, result) {
           test.ok(err == null);
 
           // Find and modify returning the new object
@@ -1210,7 +1210,7 @@ exports.shouldCorrectlyExecuteFindAndModify = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
         var self = {_id : new ObjectID()}
@@ -1241,7 +1241,7 @@ exports['Should correctly return record with 64-bit id'] = {
     var ObjectID = configuration.require.ObjectID
       , Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('should_correctly_return_record_with_64bit_id', function(err, collection) {
         var _lowerId = new ObjectID();
@@ -1252,7 +1252,7 @@ exports['Should correctly return record with 64-bit id'] = {
         var lowerDoc = {_id:_lowerId, id: lowerId};
         var higherDoc = {_id:_higherId, id: higherId};
 
-        collection.insert([lowerDoc, higherDoc], {w:1}, function(err, result) {
+        collection.insert([lowerDoc, higherDoc], configuration.writeConcern(), function(err, result) {
           test.ok(err == null);
 
           // Select record with id of 133118461172916225 using $gt directive
@@ -1278,12 +1278,12 @@ exports['Should Correctly find a Document using findOne excluding _id field'] = 
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    var p_client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var p_client = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     p_client.open(function(err, p_client) {
       p_client.createCollection('Should_Correctly_find_a_Document_using_findOne_excluding__id_field', function(err, collection) {
         var doc = {_id : new ObjectID(), a:1, c:2}
         // insert doc
-        collection.insert(doc, {w:1}, function(err, result) {
+        collection.insert(doc, configuration.writeConcern(), function(err, result) {
           // Get one document, excluding the _id field
           collection.findOne({a:1}, {fields:{'_id': 0}}, function(err, item) {
             test.equal(null, item._id);
@@ -1315,12 +1315,12 @@ exports['Should correctly execute find and findOne queries in the same way'] = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {
         var doc = {_id : new ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
         // insert doc
-        collection.insert(doc, {w:1}, function(err, result) {
+        collection.insert(doc, configuration.writeConcern(), function(err, result) {
 
           collection.find({_id: doc._id}, {comments: {$slice: -5}}).toArray(function(err, docs) {
             test.equal(5, docs[0].comments.length)
@@ -1347,12 +1347,12 @@ exports['Should correctly execute find and findOne queries with selector set to 
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('Should_correctly_execute_find_and_findOne_queries_in_the_same_way', function(err, collection) {
         var doc = {_id : new ObjectID(), a:1, c:2, comments:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]};
         // insert doc
-        collection.insert(doc, {w:1}, function(err, result) {
+        collection.insert(doc, configuration.writeConcern(), function(err, result) {
 
           collection.find(null, {comments: {$slice: -5}}).toArray(function(err, docs) {
             test.equal(5, docs[0].comments.length)
@@ -1377,7 +1377,7 @@ exports.shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists', function(err, collection) {
         collection.findAndModify({'a':1}, [], {'$set':{'b':3}}, {'new': true}, function(err, updated_doc) {
@@ -1401,7 +1401,7 @@ exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;  
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var transaction = {};
       transaction.document = {};
@@ -1422,7 +1422,7 @@ exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = {
       }
 
       db.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
-        collection.insert(wrapingObject, {w:1}, function(err, doc) {
+        collection.insert(wrapingObject, configuration.writeConcern(), function(err, doc) {
           test.equal(null, err);
 
           collection.findOne({_id:doc[0]._id, 'funds.remaining': {$gte: 3.0}, 'transactions.id': {$ne: transaction.transactionId}}, function(err, item) {
@@ -1447,13 +1447,13 @@ exports.shouldCorrectlyExecuteMultipleFindsInParallel = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var p_client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var p_client = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     p_client.open(function(err, p_client) {
       p_client.createCollection('tasks', function(err, collection) {
         var numberOfOperations = 0;
 
         // Test return old document on change
-        collection.insert({'a':2, 'b':2}, {w:1}, function(err, doc) {
+        collection.insert({'a':2, 'b':2}, configuration.writeConcern(), function(err, doc) {
           collection.find({"user_id":"4e9fc8d55883d90100000003","lc_status":{"$ne":"deleted"},"owner_rating":{"$exists":false}},
             {"skip":0,"limit":10,"sort":{"updated":-1}}).count(function(err, count) {
             numberOfOperations = numberOfOperations + 1;
@@ -1487,7 +1487,7 @@ exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError', function(err, collection) {
         var q = { x: 1 };
@@ -1497,7 +1497,7 @@ exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = {
         var doc = {_id: new ObjectID(), x:1};
 
         // Insert original doc
-        collection.insert(doc, {w:1}, function(err, result) {
+        collection.insert(doc, configuration.writeConcern(), function(err, result) {
           collection.findAndModify(q, [], set, opts, function (err, res) {
             test.ok(err != null);
             db.close();
@@ -1518,7 +1518,7 @@ exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    var p_client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var p_client = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     var running = true;
 
     p_client.open(function(err, p_client) {
@@ -1528,10 +1528,10 @@ exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = {
         setTimeout(function() {
           var id = new ObjectID();
 
-          collection.insert({_id:id, a:1}, {w:1}, function(err, result) {
+          collection.insert({_id:id, a:1}, configuration.writeConcern(), function(err, result) {
             test.equal(null, err);
 
-            collection.insert({_id:id, a:1}, {w:1}, function(err, result) {
+            collection.insert({_id:id, a:1}, configuration.writeConcern(), function(err, result) {
               running = false;
               test.done();
               p_client.close();
@@ -1597,11 +1597,11 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var p_client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var p_client = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     p_client.open(function(err, p_client) {
       p_client.createCollection('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', function(err, collection) {
         // Test return old document on change
-        collection.insert([{'login':'user1'}, {'login':'user2'}], {w:1}, function(err, docs) {
+        collection.insert([{'login':'user1'}, {'login':'user2'}], configuration.writeConcern(), function(err, docs) {
           var id = docs[1]._id;
           // Set an index
           collection.ensureIndex('login', {unique:true, w:1}, function(err, result) {
@@ -1628,7 +1628,7 @@ exports.shouldPerformSimpleFindInArray = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -1641,7 +1641,7 @@ exports.shouldPerformSimpleFindInArray = {
         for(var i = 0; i < 100; i++) docs.push({a:i});
 
         // Insert some test documentations
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Find all the variables in a specific array
@@ -1676,7 +1676,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1688,7 +1688,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
         test.equal(null, err);
 
         // Insert some test documentations
-        collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err, result) {
+        collection.insert([{a:1}, {b:1}, {c:1}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Simple findAndModify command returning the new document
@@ -1739,7 +1739,7 @@ exports.shouldPerformSimpleFindAndRemove = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1751,7 +1751,7 @@ exports.shouldPerformSimpleFindAndRemove = {
         test.equal(null, err);
 
         // Insert some test documentations
-        collection.insert([{a:1}, {b:1, d:1}, {c:1}], {w:1}, function(err, result) {
+        collection.insert([{a:1}, {b:1, d:1}, {c:1}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Simple findAndModify command returning the old document and
@@ -1788,7 +1788,7 @@ exports.shouldPeformASimpleQuery = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1800,7 +1800,7 @@ exports.shouldPeformASimpleQuery = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the testing
-        collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
+        collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Peform a simple find and return all the documents
@@ -1829,7 +1829,7 @@ exports.shouldPeformASimpleExplainQuery = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1841,7 +1841,7 @@ exports.shouldPeformASimpleExplainQuery = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the testing
-        collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
+        collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Peform a simple find and return all the documents
@@ -1870,7 +1870,7 @@ exports.shouldPeformASimpleLimitSkipQuery = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1882,7 +1882,7 @@ exports.shouldPeformASimpleLimitSkipQuery = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the testing
-        collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+        collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Peform a simple find and return all the documents
@@ -1907,13 +1907,13 @@ exports.shouldReturnInstanceofErrorWithBadFieldSelection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     db.open(function(err, db) {
       test.equal(null, err);
 
       var col = db.collection('bad_field_selection');
-      col.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+      col.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
         col.find({}, {skip:1, limit:1, fields:{_id:1,b:0}}).toArray(function(err, docs) {
@@ -1937,7 +1937,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1949,7 +1949,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the testing
-        collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+        collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Peform a simple find and return all the documents
@@ -1976,7 +1976,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -1986,7 +1986,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the testing
-        collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+        collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Peform a simple find and return all the documents
@@ -2021,7 +2021,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -2031,7 +2031,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the testing
-        collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+        collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Peform a simple find and return all the documents
@@ -2058,7 +2058,7 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -2073,7 +2073,7 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = {
         }
 
         // Insert a bunch of documents for the testing
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Peform a simple find and return all the documents
@@ -2094,11 +2094,15 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = {
  * A simple query with a different batchSize
  */
 exports.shouldQueryCurrentOperation = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -2124,7 +2128,7 @@ exports.shouldCorrectlyPerformNegativeLimit = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -2137,7 +2141,7 @@ exports.shouldCorrectlyPerformNegativeLimit = {
         }
 
         // Insert a bunch of documents
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           // Peform a simple find and return all the documents
           collection.find({}).limit(-10).toArray(function(err, docs) {
             test.equal(null, err);
@@ -2156,12 +2160,16 @@ exports.shouldCorrectlyPerformNegativeLimit = {
  * Should perform an exhaust find query
  */
 exports.shouldCorrectlyExecuteExhaustQuery = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -2178,7 +2186,7 @@ exports.shouldCorrectlyExecuteExhaustQuery = {
         }
 
         // Insert a bunch of documents
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           // Peform a simple find and return all the documents
           collection.find({}, {exhaust:true}).toArray(function(err, docs2) {
             test.equal(null, err);
@@ -2216,7 +2224,7 @@ exports['Readpreferences should work fine when using a single server instance'] 
       // Create a collection we want to drop later
       db.collection('Readpreferencesshouldworkfine', function(err, collection) {
         // Insert a bunch of documents
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           // Peform a simple find and return all the documents
           collection.find({}, {exhaust:true}).toArray(function(err, docs2) {
             test.equal(null, err);
@@ -2261,12 +2269,12 @@ exports.shouldCorrectlyFindDocumentsByRegExp = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Serialized regexes contain extra trailing chars. Sometimes these trailing chars contain / which makes
       // the original regex invalid, and leads to segmentation fault.
       db.createCollection('test_regex_serialization', function(err, collection) {
-        collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, {w:1}, function(err, r) {
+        collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, configuration.writeConcern(), function(err, r) {
           
           var count = 20,
               run = function(i) {
@@ -2295,12 +2303,12 @@ exports.shouldCorrectlyDoFindMinMax = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Serialized regexes contain extra trailing chars. Sometimes these trailing chars contain / which makes
       // the original regex invalid, and leads to segmentation fault.
       db.createCollection('shouldCorrectlyDoFindMinMax', function(err, collection) {
-        collection.insert({"_id": 123, "name": "some name", "min": 1, "max": 10}, {w:1}, function(err, doc) {
+        collection.insert({"_id": 123, "name": "some name", "min": 1, "max": 10}, configuration.writeConcern(), function(err, doc) {
           test.equal(null, err);
 
           collection.find({"_id": {$in:['some', 'value', 123]}}, {"_id":1, "max":1}, {}).toArray(function(err, docs) {        
@@ -2329,12 +2337,15 @@ exports.shouldCorrectlyDoFindMinMax = {
  */
 exports['Should correctly execute parallelCollectionScan with multiple cursors'] = {
   metadata: {
-    requires: {mongodb: ">2.5.5"}
+    requires: {
+      mongodb: ">2.5.5",
+      topology: ['single', 'replicaset']
+    }
   },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -2386,12 +2397,15 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
 
 exports['Should correctly execute parallelCollectionScan with multiple cursors using each'] = {
   metadata: {
-    requires: {mongodb: ">2.5.5"}
+    requires: {
+      mongodb: ">2.5.5",
+      topology: ['single', 'replicaset']
+    }
   },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
       var docs = [];
@@ -2447,12 +2461,15 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
 
 exports['Should correctly execute parallelCollectionScan with multiple cursors using next'] = {
   metadata: {
-    requires: {mongodb: ">2.5.5"}
+    requires: {
+      mongodb: ">2.5.5",
+      topology: ['single', 'replicaset']
+    }
   },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
       var docs = [];
@@ -2511,12 +2528,15 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
 
 exports['Should correctly execute parallelCollectionScan with single cursor and close'] = {
   metadata: {
-    requires: {mongodb: ">2.5.5"}
+    requires: {
+      mongodb: ">2.5.5",
+      topology: ['single', 'replicaset']
+    }
   },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
       var docs = [];
@@ -2554,12 +2574,15 @@ exports['Should correctly execute parallelCollectionScan with single cursor and 
 
 exports['Should correctly execute parallelCollectionScan with single cursor streaming'] = {
   metadata: {
-    requires: {mongodb: ">2.5.5"}
+    requires: {
+      mongodb: ">2.5.5",
+      topology: ['single', 'replicaset']
+    }
   },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
       var docs = [];
@@ -2605,7 +2628,7 @@ exports['Should correctly sort using text search on 2.6 or higher in find'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
       var docs = [];
@@ -2641,7 +2664,7 @@ exports.shouldNotMutateUserOptions = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       
       var collection = db.collection('shouldNotMutateUserOptions');

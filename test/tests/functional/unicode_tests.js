@@ -6,7 +6,7 @@ exports.shouldCorrectlySaveUnicodeContainingDocument = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var doc = {statuses_count: 1687
       , created_at: 'Mon Oct 22 14:55:08 +0000 2007'
@@ -52,7 +52,7 @@ exports.shouldCorrectlySaveUnicodeContainingDocument = {
       db.createCollection('test_should_correctly_save_unicode_containing_document', function(err, collection) {
         doc['_id'] = 'felixge';
 
-        collection.save(doc, {w:1}, function(err, doc) {
+        collection.save(doc, configuration.writeConcern(), function(err, doc) {
           collection.findOne(function(err, doc) {
             test.equal('felixge', doc._id);
             db.close();
@@ -72,13 +72,13 @@ exports.shouldCorrectlyInsertUnicodeCharacters = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('unicode_test_collection', function(err, collection) {
         var test_strings = ["ouooueauiOUOOUEAUI", "öüóőúéáűíÖÜÓŐÚÉÁŰÍ", "本荘由利地域に洪水警報"];
-        collection.insert({id: 0, text: test_strings[0]}, {w:1}, function(err, ids) {
-          collection.insert({id: 1, text: test_strings[1]}, {w:1}, function(err, ids) {
-            collection.insert({id: 2, text: test_strings[2]}, {w:1}, function(err, ids) {
+        collection.insert({id: 0, text: test_strings[0]}, configuration.writeConcern(), function(err, ids) {
+          collection.insert({id: 1, text: test_strings[1]}, configuration.writeConcern(), function(err, ids) {
+            collection.insert({id: 2, text: test_strings[2]}, configuration.writeConcern(), function(err, ids) {
               collection.find().each(function(err, item) {
                 if(item != null) {
                   test.equal(test_strings[item.id], item.text);
@@ -105,12 +105,12 @@ exports.shouldCreateObjectWithChineseObjectName = {
   test: function(configuration, test) {
     var object = {'客家话' : 'Hello'};
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('create_object_with_chinese_object_name', function(err, r) {
         db.collection('create_object_with_chinese_object_name', function(err, collection) {        
           
-          collection.insert(object, {w:1}, function(err, result) {
+          collection.insert(object, configuration.writeConcern(), function(err, result) {
             collection.findOne(function(err, item) {
               test.equal(object['客家话'], item['客家话'])
 
@@ -135,10 +135,10 @@ exports.shouldCorrectlyHandleUT8KeyNames = {
   
   // The actual test we wish to run
   test: function(configuration, test) { 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_utf8_key_name', function(err, collection) { 
-        collection.insert({'šđžčćŠĐŽČĆ':1}, {w:1}, function(err, ids) { 
+        collection.insert({'šđžčćŠĐŽČĆ':1}, configuration.writeConcern(), function(err, ids) { 
               // finished_test({test_utf8_key_name:'ok'}); 
           collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}).toArray(function(err, items) { 
             test.equal(1, items[0]['šđžčćŠĐŽČĆ']); 

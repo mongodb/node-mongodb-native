@@ -7,13 +7,13 @@ exports.shouldCorrectlyGenerateObjectID = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var number_of_tests_done = 0;
 
       var collection = db.collection('test_object_id_generation.data');
       // Insert test documents (creates collections and test fetch by query)
-      collection.insert({name:"Fred", age:42}, {w:1}, function(err, ids) {
+      collection.insert({name:"Fred", age:42}, configuration.writeConcern(), function(err, ids) {
         test.equal(1, ids.length);
         test.ok(ids[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
@@ -24,7 +24,7 @@ exports.shouldCorrectlyGenerateObjectID = {
       });
 
       // Insert another test document and collect using ObjectId
-      collection.insert({name:"Pat", age:21}, {w:1}, function(err, ids) {
+      collection.insert({name:"Pat", age:21}, configuration.writeConcern(), function(err, ids) {
         test.equal(1, ids.length);
         test.ok(ids[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
@@ -37,7 +37,7 @@ exports.shouldCorrectlyGenerateObjectID = {
       // Manually created id
       var objectId = new ObjectID(null);
       // Insert a manually created document with generated oid
-      collection.insert({"_id":objectId, name:"Donald", age:95}, {w:1}, function(err, ids) {
+      collection.insert({"_id":objectId, name:"Donald", age:95}, configuration.writeConcern(), function(err, ids) {
         test.equal(1, ids.length);
         test.ok(ids[0]['_id'].toHexString().length == 24);
         test.equal(objectId.toHexString(), ids[0]['_id'].toHexString());
@@ -247,7 +247,7 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {  
       var collection = db.collection('test_non_oid_id');
       var date = new Date();
@@ -258,7 +258,7 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
       date.setUTCMinutes(0);
       date.setUTCSeconds(30);
 
-      collection.insert({'_id':date}, {w:1}, function(err, ids) {
+      collection.insert({'_id':date}, configuration.writeConcern(), function(err, ids) {
         collection.find({'_id':date}).toArray(function(err, items) {
           test.equal(("" + date), ("" + items[0]._id));
 
@@ -319,12 +319,12 @@ exports.shouldCorrectlyInsertWithObjectId = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyInsertWithObjectId');
-      collection.insert({}, {w:1}, function(err, ids) {
+      collection.insert({}, configuration.writeConcern(), function(err, ids) {
         setTimeout(function() {
-          collection.insert({}, {w:1}, function(err, ids) {
+          collection.insert({}, configuration.writeConcern(), function(err, ids) {
             collection.find().toArray(function(err, items) {
               var compareDate = new Date();
               

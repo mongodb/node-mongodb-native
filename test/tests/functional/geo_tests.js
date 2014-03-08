@@ -10,7 +10,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // Establish connection to db  
     db.open(function(err, db) {
@@ -45,7 +45,11 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {

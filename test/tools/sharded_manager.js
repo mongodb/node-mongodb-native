@@ -118,12 +118,14 @@ ShardedManager.prototype.start = function(callback) {
       console.log("============================ replicaset servers start failed");
       console.dir(err);
     }
+    
     // Start the config servers
     startConfigServers(self, function(err, result) {
       if(err) {
         console.log("============================ config servers start failed");
         console.dir(err);
       }
+      
       // Start the mongos proxies
       startMongosProxies(self, function(err, result) {
         if(err) {

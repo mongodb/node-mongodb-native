@@ -10,7 +10,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
     // Establish connection to db
@@ -18,7 +18,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_0');
       // Initialize the Ordered Batch
-      var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
+      var batch = col.initializeOrderedBulkOp(configuration.writeConcern());
 
       // Add some operations to be executed in order
       batch.insert({a:1});
@@ -69,7 +69,7 @@ exports['Should correctly handle ordered single batch api write command error'] 
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern());
 
         // Add some operations to be executed in order
         batch.insert({b:1, a:1});
@@ -123,7 +123,7 @@ exports['Should correctly handle ordered multiple batch api write command error'
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern());
 
         // Add some operations to be executed in order
         batch.insert({b:1, a:1});
@@ -176,7 +176,7 @@ exports['Should fail due to ordered document being to big'] = {
       }
 
       // Set up the batch
-      var batch = coll.initializeOrderedBulkOp(configuration.writeConcern);
+      var batch = coll.initializeOrderedBulkOp(configuration.writeConcern());
       batch.insert({b:1, a:1});
       // Should fail on insert due to string being to big
       try {
@@ -213,7 +213,7 @@ exports['Should correctly split up ordered messages into more batches'] = {
       }
 
       // Insert the string a couple of times, should force split into multiple batches
-      var batch = coll.initializeOrderedBulkOp(configuration.writeConcern);
+      var batch = coll.initializeOrderedBulkOp(configuration.writeConcern());
       batch.insert({a:1, b: hugeString});
       batch.insert({a:2, b: hugeString});
       batch.insert({a:3, b: hugeString});
@@ -254,7 +254,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern());
 
         // Add illegal insert operation
         batch.insert({$set:{a:1}});
@@ -335,7 +335,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern());
 
         // Add some operations to be executed in order
         batch.insert({a:1});
@@ -381,7 +381,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
         test.equal(err, null);
 
         // Initialize the Ordered Batch
-        var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
+        var batch = col.initializeOrderedBulkOp(configuration.writeConcern());
 
         // Add some operations to be executed in order
         batch.insert({a:1});
@@ -433,7 +433,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_8');
       // Initialize the Ordered Batch
-      var batch = col.initializeOrderedBulkOp(configuration.writeConcern);
+      var batch = col.initializeOrderedBulkOp(configuration.writeConcern());
 
       // Add some operations to be executed in order
       batch.find({_id:2}).upsert().updateOne({$set: {b:2}});

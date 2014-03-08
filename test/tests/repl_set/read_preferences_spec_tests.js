@@ -21,7 +21,7 @@ exports['Should Correctly Use Secondary Server with Query when using NEAREST'] =
   );
 
   // Open the database
-  var db = new Db('integration_test_', replSet, {w:1});
+  var db = new Db('integration_test_', replSet, configuration.writeConcern());
   db.open(function(err, db) {
     // Force selection of a secondary
     db.serverConfig._state.master.runtimeStats['pingMs'] = 5000;
@@ -181,7 +181,7 @@ exports['Should Correctly Vary read server when using readpreference NEAREST'] =
   );
 
   // Open the database
-  var db = new Db('integration_test_', replSet, {w:1});
+  var db = new Db('integration_test_', replSet, configuration.writeConcern());
   db.open(function(err, db) {
     // Check that we are getting different servers
     var connection = db.serverConfig.checkoutReader();

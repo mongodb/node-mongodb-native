@@ -48,7 +48,7 @@ RS.startSet(true, function(err, result) {
     
     client.collection("users", function(err, coll){      
       console.log("Connected");
-      coll.insert(userObjects, {w:1}, function(err, result) {
+      coll.insert(userObjects, configuration.writeConcern(), function(err, result) {
         users = coll;
         query();        
       })

@@ -4,7 +4,7 @@ var mongodb = require("../../../lib/mongodb"),
 
 var db = new mongodb.Db('test_db', new mongodb.Server("127.0.0.1", 27017, {
   auto_reconnect: true
-}), {w:1});
+}), configuration.writeConcern());
 
 // open connection
 db.open(function(err, db) {
@@ -23,7 +23,7 @@ db.open(function(err, db) {
       docs.push({a:i});
     }
 
-    db.collection('test').insert(docs, {w:1}, function(err, result) {
+    db.collection('test').insert(docs, configuration.writeConcern(), function(err, result) {
       total = total - 1;
 
       if(total == 0) {

@@ -3,7 +3,7 @@ exports.shouldFailInsertDueToUniqueIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_failing_insert_due_to_unique_index');
       collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
@@ -26,15 +26,15 @@ exports.shouldFailInsertDueToUniqueIndexStrict = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.dropCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
         db.createCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
           db.collection('test_failing_insert_due_to_unique_index_strict', function(err, collection) {
             collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
-              collection.insert({a:2}, {w:1}, function(err, r) {
+              collection.insert({a:2}, configuration.writeConcern(), function(err, r) {
                 test.ok(err == null);
-                collection.insert({a:2}, {w:1}, function(err, r) {
+                collection.insert({a:2}, configuration.writeConcern(), function(err, r) {
                   test.ok(err != null);
                   db.close();
                   test.done();
@@ -53,10 +53,10 @@ exports['mixing included and excluded fields should return an error object with 
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var c = db.collection('test_error_object_should_include_message');
-      c.insert({a:2, b: 5}, {w:1}, function(err, r) {
+      c.insert({a:2, b: 5}, configuration.writeConcern(), function(err, r) {
         test.equal(err, null);
         
         c.findOne({a:2}, {fields: {a:1, b:0}}, function(err) {
@@ -74,7 +74,7 @@ exports['should handle error throw in user callback'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     process.once("uncaughtException", function(err) {
       db.close();
       test.done();
@@ -94,7 +94,7 @@ exports['Should handle uncaught error correctly'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     process.once("uncaughtException", function(err) {
       db.close();
       test.done();
@@ -112,7 +112,7 @@ exports['Should handle throw error in db operation correctly'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       process.once("uncaughtException", function(err) {
         db.close();
@@ -140,6 +140,7 @@ exports['Should handle MongoClient uncaught error correctly'] = {
     var d = domain.create();
     d.once('error', function(err) {
       d.exit();
+      d.dispose();
       test.done()
     })
 

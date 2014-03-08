@@ -20,7 +20,7 @@ exports.shouldCreateRecordsWithCustomPKFactory = {
 
       var collection = p_client.collection('test_custom_key');
 
-      collection.insert({'a':1}, {w:1}, function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
         
         collection.find({'_id':new ObjectID("aaaaaaaaaaaa")}).toArray(function(err, items) {
           test.equal(1, items.length);

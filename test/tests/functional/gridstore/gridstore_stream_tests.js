@@ -148,7 +148,7 @@ exports.shouldCorrectlyReadFileUsingStream = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -220,7 +220,7 @@ exports.shouldCorrectlyPipeAGridFsToAfile = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;    
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START

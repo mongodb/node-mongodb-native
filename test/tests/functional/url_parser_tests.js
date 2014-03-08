@@ -10,7 +10,7 @@ exports['Should correctly parse mongodb://localhost'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost");
     test.equal(1, object.servers.length);
@@ -28,7 +28,7 @@ exports['Should correctly parse mongodb://localhost:27017'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost:27017");
     test.equal(1, object.servers.length);
@@ -46,7 +46,7 @@ exports['Should correctly parse mongodb://localhost?safe=true&readPreference=sec
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost?safe=true&readPreference=secondary");
     // var object = parse("mongodb://localhost?safe");
@@ -65,7 +65,7 @@ exports['Should correctly parse mongodb://localhost:28101'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost:28101");
     test.equal(1, object.servers.length);
@@ -83,7 +83,7 @@ exports['Should correctly parse mongodb://fred:foobar@localhost/baz'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://fred:foobar@localhost/baz");
     test.equal(1, object.servers.length);
@@ -103,7 +103,7 @@ exports['Should correctly parse mongodb://fred:foo%20bar@localhost/baz'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://fred:foo%20bar@localhost/baz", {uri_decode_auth:true});
     test.equal(1, object.servers.length);
@@ -123,7 +123,7 @@ exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb:///tmp/mongodb-27017.sock", {uri_decode_auth:true});
     test.equal(1, object.servers.length);
@@ -140,7 +140,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock", {uri_decode_auth:true});
     test.equal(1, object.servers.length);
@@ -159,7 +159,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb");
     test.equal(1, object.servers.length);
@@ -178,7 +178,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
     test.equal(1, object.servers.length);
@@ -198,7 +198,7 @@ exports['Should correctly parse mongodb://example1.com:27017,example2.com:27018'
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://example1.com:27017,example2.com:27018");
     test.equal(2, object.servers.length);
@@ -218,7 +218,7 @@ exports['Should correctly parse mongodb://localhost,localhost:27018,localhost:27
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost,localhost:27018,localhost:27019");
     test.equal(3, object.servers.length);
@@ -240,7 +240,7 @@ exports['Should correctly parse mongodb://host1,host2,host3/?slaveOk=true'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://host1,host2,host3/?slaveOk=true");
     test.equal(3, object.servers.length);
@@ -263,7 +263,7 @@ exports['Should correctly parse mongodb://localhost/?safe=true'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost/?safe=true");
     test.equal(1, object.servers.length);
@@ -282,7 +282,7 @@ exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtime
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000");
     test.equal(3, object.servers.length);
@@ -307,7 +307,7 @@ exports['Parse mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeout
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeoutMS=1000&socketTimeoutMS=2000");
     test.equal(1, object.servers.length);
@@ -332,7 +332,7 @@ exports['Parse mongodb://localhost/db?ssl=true'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost/db?ssl=true");
     test.equal(1, object.servers.length);
@@ -352,7 +352,7 @@ exports['Parse mongodb://localhost/db?maxPoolSize=100'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost/db?maxPoolSize=100");
     test.equal(1, object.servers.length);
@@ -372,7 +372,7 @@ exports['Parse mongodb://localhost/db?w=-1'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     var object = parse("mongodb://localhost/db?w=-1");
     test.equal(1, object.servers.length);
@@ -391,7 +391,7 @@ exports['Throw on unsuported options'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     // console.dir(parse)
     test.throws(function() { parse("mongodb://localhost/db?minPoolSize=100") }, "minPoolSize not supported");
     test.throws(function() { parse("mongodb://localhost/db?maxIdleTimeMS=100") }, "maxIdleTimeMS not supported");
@@ -409,7 +409,7 @@ exports['Write concerns parsing'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     var object = parse("mongodb://localhost/db?safe=true&w=1");
     test.equal(true, object.db_options.safe);
 
@@ -430,7 +430,7 @@ exports['GSSAPI parsing'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     var object = parse("mongodb://dev1%4010GEN.ME@kdc.10gen.com/test?authMechanism=GSSAPI");
     test.deepEqual({user:'dev1@10GEN.ME', password:null}, object.auth);
     test.deepEqual("GSSAPI", object.db_options.authMechanism);
@@ -463,7 +463,7 @@ exports['Read preferences parsing'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     var object = parse("mongodb://localhost/db?slaveOk=true");
     test.equal(true, object.server_options.slave_ok);
 
@@ -497,7 +497,7 @@ exports['Read preferences tag parsing'] = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
+  test: function(configuration, test) {
     var object = parse("mongodb://localhost/db");
     test.equal(null, object.db_options.read_preference_tags);
 

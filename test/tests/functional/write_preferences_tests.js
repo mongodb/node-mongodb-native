@@ -6,7 +6,7 @@ exports['insert with w=1 db level'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     db.open(function(err, db) {
       db.collection('insert_with_w_1').update({a:1}, {a:1}, {upsert:true}, function(err, result) {
@@ -27,10 +27,10 @@ exports['insert with w=1 collection level'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     db.open(function(err, db) {
-      db.collection('insert_with_w_1', {w:1}).update({a:1}, {a:1}, {upsert:true}, function(err, result) {
+      db.collection('insert_with_w_1', configuration.writeConcern()).update({a:1}, {a:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result);
         test.done();
@@ -48,7 +48,7 @@ exports['insert with w=1 operation level'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     db.open(function(err, db) {
       db.collection('insert_with_w_1').update({a:1}, {a:1}, {upsert:true, w:1}, function(err, result) {
@@ -89,7 +89,7 @@ exports['insert with journal collection level'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     db.open(function(err, db) {
       db.collection('insert_with_w_1', {journal:true}).update({a:1}, {a:1}, {upsert:true}, function(err, result) {
@@ -138,7 +138,7 @@ exports['throw error when combining w:0 and journal'] = {
           test.equal(null, err);
           test.equal(1, result);
         });
-      }, "No acknowlegement using w < 1 cannot be combined with journal:ture or fsync:true");
+      }, "No acknowlegement using w < 1 cannot be combined with journal:true or fsync:true");
 
       test.done();
       db.close();

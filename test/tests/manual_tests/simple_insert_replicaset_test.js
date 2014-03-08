@@ -14,7 +14,7 @@ var repset = new ReplSetServers( [
 
 // var RS = new ReplicaSetManager({name:"rs0", retries:120, secondary_count:2, passive_count:0, arbiter_count:0});
 // RS.startSet(true, function(err, result) {
-  var db = new Db("somedb", repset, {w:1});
+  var db = new Db("somedb", repset, configuration.writeConcern());
   db.serverConfig.on("joined", function(type, doc, server) {
     console.log("== " + type + " server " + server.host + ":" + server.port + " joined");
   });

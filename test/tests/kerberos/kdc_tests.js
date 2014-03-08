@@ -91,7 +91,7 @@ exports['Should Correctly Authenticate authenticate method manually'] = function
   var principal = "dev1@10GEN.ME";
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
-  var db = new Db('test', new Server('kdc.10gen.me', 27017), {w:1});
+  var db = new Db('test', new Server('kdc.10gen.me', 27017), configuration.writeConcern());
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);

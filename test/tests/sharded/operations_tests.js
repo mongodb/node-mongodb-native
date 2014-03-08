@@ -29,7 +29,7 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(confi
       test.equal(null, err);
 
       // Perform an update
-      collection.update({a:0}, {$set: {c:1}}, {w:1}, function(err, result) {
+      collection.update({a:0}, {$set: {c:1}}, configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
         var numberOfRecords = 0;
 

@@ -13,7 +13,7 @@ console.log('launching simple mongo application...');
 // var url = "mongodb://192.168.2.173:30000,192.168.2.173:30001,192.168.2.173:30002/foo&readPreference=secondaryPreferred";
 var url = "mongodb://localhost:27017/test"
 // var writeOptions = {w:3};
-var writeOptions = {w:1};
+var writeOptions = configuration.writeConcern();
 
 // Connect
 MongoClient.connect(url, function(err, db) {

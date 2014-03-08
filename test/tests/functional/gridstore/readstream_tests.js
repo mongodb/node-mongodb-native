@@ -12,7 +12,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -22,7 +22,8 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
       var fileId = new ObjectID();
       // Create a file
       var file = new GridStore(db, fileId, "w", {chunk_size:5});
-      file.open(function(err, file) {      
+      file.open(function(err, file) {    
+        test.equal(null, err);  
         // Write some content and flush to disk
         file.write('Hello world', function(err, file) {        
           file.close(function(err, result) {
@@ -78,7 +79,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -159,7 +160,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START

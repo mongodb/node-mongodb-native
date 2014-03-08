@@ -12,7 +12,7 @@ exports['Should fail with journal write concern due to --nojournal ordered'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_concerns_ops_0');
@@ -45,7 +45,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_concerns_ops_1');
@@ -83,7 +83,7 @@ exports['Should fail with journal write concern due to --nojournal unordered'] =
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_concerns_ops_0');
@@ -116,7 +116,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_concerns_ops_1');

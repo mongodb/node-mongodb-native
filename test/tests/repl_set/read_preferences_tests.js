@@ -538,7 +538,7 @@ exports['Attempt to change read preference at cursor level after object read leg
     // Grab the collection
     var collection = db.collection("read_preferences_all_levels_2");
     // Insert a bunch of documents
-    collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err) {
+    collection.insert([{a:1}, {b:1}, {c:1}], configuration.writeConcern(), function(err) {
       test.equal(null, err);
 
       // Set up cursor
@@ -817,7 +817,7 @@ exports['Attempt to change read preference at cursor level after object read'] =
     // Grab the collection
     var collection = db.collection("read_preferences_all_levels_2");
     // Insert a bunch of documents
-    collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err) {
+    collection.insert([{a:1}, {b:1}, {c:1}], configuration.writeConcern(), function(err) {
       test.equal(null, err);
 
       // Set up cursor
@@ -904,7 +904,7 @@ exports['Connection to a single primary host with different read preferences'] =
     // Connect to the db
     var server = new Server(host, port,{auto_reconnect: true});
     // Create db instance
-    var db = new Db('integration_test_', server, {w:1});
+    var db = new Db('integration_test_', server, configuration.writeConcern());
     db.open(function(err, p_db) {
       // Grab the collection
       var collection = p_db.collection("read_preference_single_test_0");
@@ -916,7 +916,7 @@ exports['Connection to a single primary host with different read preferences'] =
         // Connect to the db
         var server = new Server(host, port,{auto_reconnect: true, readPreference:ReadPreference.SECONDARY_PREFERRED});
         // Create db instance
-        var db = new Db('integration_test_', server, {w:1});
+        var db = new Db('integration_test_', server, configuration.writeConcern());
         db.open(function(err, p_db) {
           // Grab the collection
           var collection = db.collection("read_preference_single_test_0");
@@ -929,7 +929,7 @@ exports['Connection to a single primary host with different read preferences'] =
             // Connect to the db
             var server = new Server(host, port,{auto_reconnect: true, readPreference:ReadPreference.SECONDARY});
             // Create db instance
-            var db = new Db('integration_test_', server, {w:1});
+            var db = new Db('integration_test_', server, configuration.writeConcern());
             db.open(function(err, p_db) {
               // Grab the collection
               var collection = db.collection("read_preference_single_test_0");

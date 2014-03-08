@@ -9,7 +9,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
   // The actual test we wish to run
   test: function(configuration, test) {
     if(process.platform !== 'linux') {
-      var db = configuration.newDbInstance({w:1}, {poolSize:1});
+      var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
       // All inserted docs
       var docs = [];
       var errs = [];
@@ -18,7 +18,6 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
 
       // Start server
       db.on("close", function(err) {
-        // console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 1 :: " + this.databaseName)
         numberOfCloses = numberOfCloses + 1;
       })
       
@@ -26,14 +25,13 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
         db.createCollection('shouldCorrectlyErrorOnAllDbs', function(err, collection) {
           test.equal(null, err);
 
-          collection.insert({a:1}, {w:1}, function(err, result) {
+          collection.insert({a:1}, configuration.writeConcern(), function(err, result) {
             test.equal(null, err);
 
             // Open a second db
             var db2 = db.db('tests_2');
             // Add a close handler
             db2.on("close", function(err) {
-              // console.log("+++++++++++++++++++++++++++++++++++++++++++++++ 0 :: " + this.databaseName)
               numberOfCloses = numberOfCloses + 1;              
               test.equal(2, numberOfCloses)
               test.done();          
@@ -62,8 +60,8 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance({w:1}, {poolSize:1});
-    var second_test_database = configuration.newDbInstance({w:1}, {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var second_test_database = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     // Just create second database
     client.open(function(err, client) {
       second_test_database.open(function(err, second_test_database) {
@@ -116,7 +114,7 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -133,8 +131,8 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = {
       var multipleColl2 = secondDb.collection("multiple_db_instances");
       
       // Write a record into each and then count the records stored
-      multipleColl1.insert({a:1}, {w:1}, function(err, result) {      
-        multipleColl2.insert({a:1}, {w:1}, function(err, result) {
+      multipleColl1.insert({a:1}, configuration.writeConcern(), function(err, result) {      
+        multipleColl2.insert({a:1}, configuration.writeConcern(), function(err, result) {
           
           // Count over the results ensuring only on record in each collection
           multipleColl1.count(function(err, count) {
@@ -162,7 +160,7 @@ exports.shouldCorrectlyHandleMultipleDbsFindAndModifies = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var db_instance = db.db('site1');
       db_instance = db.db('site2');

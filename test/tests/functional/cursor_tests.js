@@ -12,7 +12,7 @@ exports.shouldCorrectlyExecuteToArray = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -23,7 +23,7 @@ exports.shouldCorrectlyExecuteToArray = {
       db.createCollection('test_array', function(err, collection) {
 
         // Insert a test document
-        collection.insert({'b':[1, 2, 3]}, {w:1}, function(err, ids) {
+        collection.insert({'b':[1, 2, 3]}, configuration.writeConcern(), function(err, ids) {
 
           // Retrieve all the documents in the collection
           collection.find().toArray(function(err, documents) {
@@ -49,11 +49,11 @@ exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_to_a', function(err, collection) {
 
-        collection.insert({'a':1}, {w:1}, function(err, ids) {
+        collection.insert({'a':1}, configuration.writeConcern(), function(err, ids) {
           var cursor = collection.find({});
           cursor.toArray(function(err, items) {
             // Should fail if called again (cursor should be closed)
@@ -87,7 +87,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -99,7 +99,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
         test.equal(null, err);
 
         // Insert a document in the collection
-        collection.insert({'a':1}, {w:1}, function(err, ids) {
+        collection.insert({'a':1}, configuration.writeConcern(), function(err, ids) {
 
           // Grab a cursor
           var cursor = collection.find();
@@ -136,10 +136,10 @@ exports.shouldCorrectlyExecuteCursorExplain = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_explain', function(err, collection) {
-        collection.insert({'a':1}, {w:1}, function(err, r) {
+        collection.insert({'a':1}, configuration.writeConcern(), function(err, r) {
           collection.find({'a':1}).explain(function(err, explaination) {
             test.ok(explaination.cursor != null);
             test.ok(explaination.n.constructor == Number);
@@ -165,7 +165,7 @@ exports.shouldCorrectlyExecuteCursorCount = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_count', function(err, collection) {
         collection.find().count(function(err, count) {
@@ -176,7 +176,7 @@ exports.shouldCorrectlyExecuteCursorCount = {
               var group = this.group();
 
               for(var i = 0; i < 10; i++) {
-                collection.insert({'x':i}, {w:1}, group());
+                collection.insert({'x':i}, configuration.writeConcern(), group());
               }
             },
 
@@ -231,7 +231,7 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_sort', function(err, collection) {
         Step(
@@ -239,7 +239,7 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
             var group = this.group();
 
             for(var i = 0; i < 5; i++) {
-              collection.insert({'a':i}, {w:1}, group());
+              collection.insert({'a':i}, configuration.writeConcern(), group());
             }
           },
 
@@ -311,7 +311,7 @@ exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_to_array', function(err, collection) {
         Step(
@@ -319,7 +319,7 @@ exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
             var group = this.group();
 
             for(var i = 0; i < 2; i++) {
-              collection.save({'x':1}, {w:1}, group());
+              collection.save({'x':1}, configuration.writeConcern(), group());
             }
           },
 
@@ -348,7 +348,7 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_each', function(err, collection) {
         Step(
@@ -356,7 +356,7 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
             var group = this.group();
 
             for(var i = 0; i < 2; i++) {
-              collection.save({'x':1}, {w:1}, group());
+              collection.save({'x':1}, configuration.writeConcern(), group());
             }
           },
 
@@ -385,7 +385,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_cursor_limit', function(err, collection) {
         Step(
@@ -393,7 +393,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
             var group = this.group();
 
             for(var i = 0; i < 10; i++) {
-              collection.save({'x':1}, {w:1}, group());
+              collection.save({'x':1}, configuration.writeConcern(), group());
             }
           },
 
@@ -425,7 +425,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_cursor_negative_one_limit', function(err, collection) {
         Step(
@@ -433,7 +433,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
             var group = this.group();
 
             for(var i = 0; i < 10; i++) {
-              collection.save({'x':1}, {w:1}, group());
+              collection.save({'x':1}, configuration.writeConcern(), group());
             }
           },
 
@@ -461,7 +461,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_cursor_any_negative_limit', function(err, collection) {
         Step(
@@ -469,7 +469,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
             var group = this.group();
 
             for(var i = 0; i < 10; i++) {
-              collection.save({'x':1}, {w:1}, group());
+              collection.save({'x':1}, configuration.writeConcern(), group());
             }
           },
 
@@ -497,10 +497,10 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_limit_exceptions', function(err, collection) {
-        collection.insert({'a':1}, {w:1}, function(err, docs) {});
+        collection.insert({'a':1}, configuration.writeConcern(), function(err, docs) {});
         collection.find(function(err, cursor) {
           cursor.limit('not-an-integer', function(err, cursor) {
             test.equal("limit requires an integer", err.message);
@@ -560,7 +560,7 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_skip', function(err, collection) {
         Step(
@@ -568,7 +568,7 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
             var group = this.group();
 
             for(var i = 0; i < 10; i++) {
-              collection.insert({'x':i}, {w:1}, group());
+              collection.insert({'x':i}, configuration.writeConcern(), group());
             }
           },
 
@@ -617,10 +617,10 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_skip_exceptions', function(err, collection) {
-        collection.insert({'a':1}, {w:1}, function(err, docs) {});
+        collection.insert({'a':1}, configuration.writeConcern(), function(err, docs) {});
         collection.find().skip('not-an-integer', function(err, cursor) {
           test.equal("skip requires an integer", err.message);
         });
@@ -655,10 +655,10 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_batchSize_exceptions', function(err, collection) {
-        collection.insert({'a':1}, {w:1}, function(err, docs) {});
+        collection.insert({'a':1}, configuration.writeConcern(), function(err, docs) {});
         var cursor = collection.find();
         cursor.batchSize('not-an-integer', function(err, cursor) {
           test.equal("batchSize requires an integer", err.message);
@@ -717,7 +717,7 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_not_multiple_batch_size', function(err, collection) {
         var records = 6;
@@ -727,7 +727,7 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
           docs.push({'a':i});
         }
 
-        collection.insert(docs, {w:1}, function() {
+        collection.insert(docs, configuration.writeConcern(), function() {
           collection.find({}, {batchSize : batchSize}, function(err, cursor) {
             //1st
             cursor.nextObject(function(err, items) {
@@ -794,7 +794,7 @@ exports.shouldCorrectlyHandleBatchSize = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_multiple_batch_size', function(err, collection) {
         //test with the last batch that is a multiple of batchSize
@@ -805,7 +805,7 @@ exports.shouldCorrectlyHandleBatchSize = {
           docs.push({'a':i});
         }
 
-        collection.insert(docs, {w:1}, function() {
+        collection.insert(docs, configuration.writeConcern(), function() {
           collection.find({}, {batchSize : batchSize}, function(err, cursor) {
             //1st
             cursor.nextObject(function(err, items) {
@@ -855,7 +855,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_limit_greater_than_batch_size', function(err, collection) {
         var limit = 4;
@@ -866,7 +866,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
           docs.push({'a':i});
         }
 
-        collection.insert(docs, {w:1}, function() {
+        collection.insert(docs, configuration.writeConcern(), function() {
           var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
           //1st
           cursor.nextObject(function(err, items) {
@@ -911,7 +911,7 @@ exports.shouldHandleLimitLessThanBatchSize = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_limit_less_than_batch_size', function(err, collection) {
         var limit = 2;
@@ -922,7 +922,7 @@ exports.shouldHandleLimitLessThanBatchSize = {
           docs.push({'a':i});
         }
 
-        collection.insert(docs, {w:1}, function() {
+        collection.insert(docs, configuration.writeConcern(), function() {
           var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
           //1st
           cursor.nextObject(function(err, items) {
@@ -957,7 +957,7 @@ exports.shouldHandleSkipLimitChaining = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_limit_skip_chaining', function(err, collection) {
         Step(
@@ -965,7 +965,7 @@ exports.shouldHandleSkipLimitChaining = {
             var group = this.group();
 
             for(var i = 0; i < 10; i++) {
-              collection.insert({'x':1}, {w:1}, group());
+              collection.insert({'x':1}, configuration.writeConcern(), group());
             }
           },
 
@@ -1006,7 +1006,7 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_limit_skip_chaining_inline', function(err, collection) {
         Step(
@@ -1014,7 +1014,7 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = {
             var group = this.group();
 
             for(var i = 0; i < 10; i++) {
-              collection.insert({'x':1}, {w:1}, group());
+              collection.insert({'x':1}, configuration.writeConcern(), group());
             }
           },
 
@@ -1055,7 +1055,7 @@ exports.shouldCloseCursorNoQuerySent = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_close_no_query_sent', function(err, collection) {
         collection.find().close(function(err, cursor) {
@@ -1080,7 +1080,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
   test: function(configuration, test) {
     var COUNT = 1000;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_refill_via_get_more', function(err, collection) {
         Step(
@@ -1088,7 +1088,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
             var group = this.group();
 
             for(var i = 0; i < COUNT; i++) {
-              collection.save({'a': i}, {w:1}, group());
+              collection.save({'a': i}, configuration.writeConcern(), group());
             }
           },
 
@@ -1146,7 +1146,7 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_refill_via_get_more_alt_coll', function(err, collection) {
 
@@ -1155,7 +1155,7 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
             var group = this.group();
 
             for(var i = 0; i < 1000; i++) {
-              collection.save({'a': i}, {w:1}, group());
+              collection.save({'a': i}, configuration.writeConcern(), group());
             }
           },
 
@@ -1213,10 +1213,10 @@ exports.shouldCloseCursorAfterQueryHasBeenSent = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_close_after_query_sent', function(err, collection) {
-        collection.insert({'a':1}, {w:1}, function(err, r) {
+        collection.insert({'a':1}, configuration.writeConcern(), function(err, r) {
           var cursor = collection.find({'a':1});
           cursor.nextObject(function(err, item) {
             cursor.close(function(err, cursor) {
@@ -1241,10 +1241,10 @@ exports.shouldCorrectlyExecuteCursorCountWithFields = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_count_with_fields', function(err, collection) {
-        collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
+        collection.save({'x':1, 'a':2}, configuration.writeConcern(), function(err, doc) {
           collection.find({}, {'fields':['a']}).toArray(function(err, items) {
             test.equal(1, items.length);
             test.equal(2, items[0].a);
@@ -1272,10 +1272,10 @@ exports.shouldCorrectlyCountWithFieldsUsingExclude = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
-        collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
+        collection.save({'x':1, 'a':2}, configuration.writeConcern(), function(err, doc) {
           collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
             test.equal(1, items.length);
             test.equal(2, items[0].a);
@@ -1305,14 +1305,14 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
       docs[i] = {createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Create collection
       db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
         // ensure index of createdAt index
         collection.ensureIndex({createdAt:1}, function(err, result) {
           // insert all docs
-          collection.insert(docs, {w:1}, function(err, result) {
+          collection.insert(docs, configuration.writeConcern(), function(err, result) {
             test.equal(null, err);
 
             // Find with sort
@@ -1334,7 +1334,11 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
  * @api private
  */
 exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single']
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1345,7 +1349,7 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = {
       docs[i] = {createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Create collection
       db.createCollection('shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex', function(err, collection) {
@@ -1354,7 +1358,7 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = {
           test.equal(null, err);
 
           // insert all docs
-          collection.insert(docs, {w:1}, function(err, result) {
+          collection.insert(docs, configuration.writeConcern(), function(err, result) {
             test.equal(null, err);
 
             // Find with sort
@@ -1382,7 +1386,7 @@ exports['Should correctly rewind and restart cursor'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1401,7 +1405,7 @@ exports['Should correctly rewind and restart cursor'] = {
         test.equal(null, err);
 
         // insert all docs
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Grab a cursor using the find
@@ -1443,14 +1447,14 @@ exports['Should correctly execute count on cursor'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor', function(err, collection) {
         test.equal(null, err);
 
         // insert all docs
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
           var total = 0;
           // Create a cursor for the content
@@ -1491,14 +1495,14 @@ exports['should be able to stream documents'] = {
       docs[i] = { a: i+1 };
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Create collection
       db.createCollection('Should_be_able_to_stream_documents', function(er, collection) {
         test.equal(null, er);
 
         // insert all docs
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           var paused = 0
@@ -1568,13 +1572,13 @@ exports['immediately destroying a stream prevents the query from executing'] = {
       , docs = [{ b: 2 }, { b: 3 }]
       , doneCalled = 0
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('immediately_destroying_a_stream_prevents_the_query_from_executing', function(err, collection) {
         test.equal(null, err);
 
         // insert all docs
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           var stream = collection.find().stream();
@@ -1610,7 +1614,7 @@ exports['destroying a stream stops it'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       test.equal(null, err);
 
@@ -1621,7 +1625,7 @@ exports['destroying a stream stops it'] = {
         for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
 
         // insert all docs
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           var finished = 0
@@ -1669,7 +1673,7 @@ exports['cursor stream errors'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var client = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     client.open(function(err, db_p) {
       test.equal(null, err);
 
@@ -1680,7 +1684,7 @@ exports['cursor stream errors'] = {
         for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
 
         // insert all docs
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           var finished = 0
@@ -1736,7 +1740,7 @@ exports['cursor stream pipe'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('cursor_stream_pipe', function(err, collection) {
         test.equal(null, err);
@@ -1747,7 +1751,7 @@ exports['cursor stream pipe'] = {
         });
 
         // insert all docs
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           var filename = '/tmp/_nodemongodbnative_stream_out.txt'
@@ -1798,7 +1802,7 @@ exports.shouldCorrectlyUseCursorCountFunction = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1810,7 +1814,7 @@ exports.shouldCorrectlyUseCursorCountFunction = {
         test.equal(null, err);
 
         // Insert some docs
-        collection.insert([{a:1}, {a:2}], {w:1}, function(err, docs) {
+        collection.insert([{a:1}, {a:2}], configuration.writeConcern(), function(err, docs) {
           test.equal(null, err);
 
           // Do a find and get the cursor count
@@ -1840,7 +1844,7 @@ exports.shouldCorrectlyPeformSimpleSorts = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1852,7 +1856,7 @@ exports.shouldCorrectlyPeformSimpleSorts = {
         test.equal(null, err);
 
         // Insert some documents we can sort on
-        collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+        collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcern(), function(err, docs) {
           test.equal(null, err);
 
           // Do normal ascending sort
@@ -1888,7 +1892,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1900,7 +1904,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = {
         test.equal(null, err);
 
         // Insert some documents we can sort on
-        collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+        collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcern(), function(err, docs) {
           test.equal(null, err);
 
           // Limit to only one document returned
@@ -1930,7 +1934,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1942,7 +1946,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = {
         test.equal(null, err);
 
         // Insert some documents we can sort on
-        collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+        collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcern(), function(err, docs) {
           test.equal(null, err);
 
           // Skip one document
@@ -1973,7 +1977,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1985,7 +1989,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = {
         test.equal(null, err);
 
         // Insert some documents we can sort on
-        collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+        collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcern(), function(err, docs) {
           test.equal(null, err);
 
           // Do normal ascending sort
@@ -2015,7 +2019,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -2027,7 +2031,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
         test.equal(null, err);
 
         // Insert some documents we can sort on
-        collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+        collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcern(), function(err, docs) {
           test.equal(null, err);
 
           // Do normal ascending sort
@@ -2057,7 +2061,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -2069,7 +2073,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = {
         test.equal(null, err);
 
         // Insert some documents we can sort on
-        collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+        collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcern(), function(err, docs) {
           test.equal(null, err);
 
           // Do normal ascending sort
@@ -2098,7 +2102,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -2116,7 +2120,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
         test.equal(null, err);
 
         // Insert documents into collection
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           // Peform a find to get a cursor
           var stream = collection.find().stream();
 
@@ -2148,7 +2152,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -2166,7 +2170,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
         test.equal(null, err);
 
         // Insert documents into collection
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           // Peform a find to get a cursor
           var cursor = collection.find();
 
@@ -2199,7 +2203,7 @@ exports.shouldCloseDeadTailableCursors = {
   // The actual test we wish to run
   test: function(configuration, test) {
     // http://www.mongodb.org/display/DOCS/Tailable+Cursors
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     db.open(function(err, db) {
 
@@ -2216,7 +2220,7 @@ exports.shouldCloseDeadTailableCursors = {
           for(var end = insertId+1; insertId < end+80; insertId++) {
             docs.push({id:insertId})
           }
-          collection.insert(docs, {w:1}, function(err, ids) {
+          collection.insert(docs, configuration.writeConcern(), function(err, ids) {
             test.equal(null, err);
             cb && cb();
           })
@@ -2269,12 +2273,12 @@ exports.shouldAwaitData = {
   // The actual test we wish to run
   test: function(configuration, test) {
     // http://www.mongodb.org/display/DOCS/Tailable+Cursors
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     db.open(function(err, db) {
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data', options, function(err, collection) {
-        collection.insert({a:1}, {w:1}, function(err, result) {
+        collection.insert({a:1}, configuration.writeConcern(), function(err, result) {
           // Create cursor with awaitdata, and timeout after the period specified
           collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
             if(err != null) {
@@ -2297,12 +2301,12 @@ exports.shouldNotAwaitDataWhenFalse = {
   // The actual test we wish to run
   test: function(configuration, test) {
     // NODE-98
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     db.open(function(err, db) {
       var options = { capped: true, size: 8};
       db.createCollection('should_not_await_data_when_false', options, function(err, collection) {
-        collection.insert({a:1}, {w:1}, function(err, result) {
+        collection.insert({a:1}, configuration.writeConcern(), function(err, result) {
           // should not timeout
           collection.find({}, {tailable:true, awaitdata:false}).each(function(err, result) {
             if(err != null) {
@@ -2350,14 +2354,14 @@ exports.shouldCorrectExecuteExplainHonoringLimit = {
     docs[18] = { "_keywords" : [ "catena", "diameter", "621455", "8mm", "rings", "brd", "legend", "red" ]};
     docs[19] = { "_keywords" : [ "catena", "diameter", "621464", "rings", "5mm", "brd", "legend", "red" ]};
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Insert all the docs
       var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
-      collection.insert(docs, {w:1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
-        collection.ensureIndex({_keywords:1}, {w:1}, function(err, result) {
+        collection.ensureIndex({_keywords:1}, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           collection.find({_keywords:'red'}, {}, {explain:true}).limit(10).toArray(function(err, result) {
@@ -2388,10 +2392,10 @@ exports.shouldNotExplainWhenFalse = {
   test: function(configuration, test) {
     var doc = { "name" : "camera", "_keywords" : [ "compact", "ii2gd", "led", "red", "aet" ]};
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldNotExplainWhenFalse');
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
         collection.find({"_keywords" : "red"}, {}, {explain:false}).limit(10).toArray(function(err, result) {
           test.equal("camera", result[0].name);
@@ -2411,7 +2415,7 @@ exports.shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -2428,7 +2432,7 @@ exports.shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates = {
         test.equal(null, err);
 
         // Insert documents into collection
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           // Peform a find to get a cursor
           var stream = collection.find().stream();
           stream.pause();
@@ -2458,7 +2462,7 @@ exports.shouldFailToSetReadPreferenceOnCursor = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -2481,18 +2485,22 @@ exports.shouldFailToSetReadPreferenceOnCursor = {
  * @api private
  */
 exports.shouldNotFailDueToStackOverflowEach = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single']
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldNotFailDueToStackOverflowEach', function(err, collection) {
         var docs = [];
         var total = 0;
         for(var i = 0; i < 30000; i++) docs.push({a:i});
 
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           var s = new Date().getTime();
 
           collection.find({}).each(function(err, item) {
@@ -2517,11 +2525,15 @@ exports.shouldNotFailDueToStackOverflowEach = {
  * @api private
  */
 exports.shouldNotFailDueToStackOverflowToArray = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single']
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldNotFailDueToStackOverflowToArray', function(err, collection) {
         var docs = [];
@@ -2529,7 +2541,7 @@ exports.shouldNotFailDueToStackOverflowToArray = {
         var s = new Date().getTime();
         for(var i = 0; i < 30000; i++) docs.push({a:i});
 
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           var s = new Date().getTime();
 
           collection.find({}).toArray(function(err, items) {
@@ -2554,13 +2566,13 @@ exports.shouldCorrectlySkipAndLimit = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlySkipAndLimit')
       var docs = [];
       for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
 
-      collection.insert(docs, {w:1}, function(err, ids) {
+      collection.insert(docs, configuration.writeConcern(), function(err, ids) {
 
         collection.find({}, {OrderNumber:1}).skip(10).limit(10).toArray(function(err, items) {
           test.equal(10, items[0].OrderNumber);
@@ -2585,13 +2597,13 @@ exports.shouldFailToTailANormalCollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldFailToTailANormalCollection')
       var docs = [];
       for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
 
-      collection.insert(docs, {w:1}, function(err, ids) {
+      collection.insert(docs, configuration.writeConcern(), function(err, ids) {
         collection.find({}, {tailable:true}).each(function(err, doc) {
           test.ok(err instanceof Error);
           db.close();
@@ -2614,7 +2626,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -2632,7 +2644,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
         test.equal(null, err);
 
         // Insert documents into collection
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           // Peform a find to get a cursor
           var cursor = collection.find();
 
@@ -2658,25 +2670,31 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
 /**
  * @ignore
  */
-exports.shouldCorrectlyHandleThrownErrorInCursorNext = function(configuration, test) {
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-  var domain = require('domain');
-  var d = domain.create();
-  d.on('error', function(err) {
-    test.done()
-    d.exit();
-  })
+exports.shouldCorrectlyHandleThrownErrorInCursorNext = {
+  metadata: {},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var domain = require('domain');
+    var d = domain.create();
+    d.on('error', function(err) {
+      d.exit();
+      d.dispose();
+      test.done()
+    })
 
-  d.run(function() {
-    db.open(function(err, db) {
-      var collection = db.collection('shouldCorrectlyHandleThrownErrorInCursorNext');
-      collection.insert([{a:1, b:2}], function(err, result) {
-        test.equal(null, err);
+    d.run(function() {
+      db.open(function(err, db) {
+        var collection = db.collection('shouldCorrectlyHandleThrownErrorInCursorNext');
+        collection.insert([{a:1, b:2}], function(err, result) {
+          test.equal(null, err);
 
-        collection.find().nextObject(function(err, doc) {
-          dfdsfdfds
+          collection.find().nextObject(function(err, doc) {
+            dfdsfdfds
+          });
         });
       });
-    });
-  })
+    })
+  }
 }

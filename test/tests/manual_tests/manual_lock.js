@@ -36,12 +36,12 @@ RS.startSet(true, function(err, result) {
     client.collection("collA", function(err, coll){      
       collA = coll;
 
-      coll.insert(userObjects, {w:1}, function(err, result) {
+      coll.insert(userObjects, configuration.writeConcern(), function(err, result) {
 
         client.collection("collB", function(err, coll){                
           collB = coll;
 
-          coll.insert(userObjects, {w:1}, function(err, result) {
+          coll.insert(userObjects, configuration.writeConcern(), function(err, result) {
                   
             var timeoutFunc = function() {
               lookup(function(err, result) {

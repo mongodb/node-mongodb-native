@@ -9,7 +9,7 @@ exports.shouldCreateASimpleIndexOnASingleField = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:true});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -21,11 +21,11 @@ exports.shouldCreateASimpleIndexOnASingleField = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the index
-        collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {w:1}, function(err, result) {
+        collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
-          collection.createIndex('a', {w:1}, function(err, indexName) {
+          collection.createIndex('a', configuration.writeConcern(), function(err, indexName) {
             test.equal("a_1", indexName);
 
             // Peform a query, with explain to show we hit the query
@@ -54,7 +54,7 @@ exports.shouldCreateComplexIndexOnTwoFields = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:true});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -62,17 +62,17 @@ exports.shouldCreateComplexIndexOnTwoFields = {
     db.open(function(err, db) {
 
       // Create a collection we want to drop later
-      db.createCollection('more_complex_index_test', function(err, collection) {
+      db.createCollection('more_complex_index_test_2', function(err, collection) {
         test.equal(null, err);
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           collection.createIndex({a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, dropDups:true}, function(err, indexName) {
 
             // Show that duplicate records got dropped
             collection.find({}).toArray(function(err, items) {
@@ -108,7 +108,7 @@ exports.shouldCreateComplexEnsureIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:true});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -116,17 +116,17 @@ exports.shouldCreateComplexEnsureIndex = {
     db.open(function(err, db) {
 
       // Create a collection we want to drop later
-      db.createCollection('more_complex_ensure_index_test', function(err, collection) {
+      db.createCollection('more_complex_ensure_index_test_2', function(err, collection) {
         test.equal(null, err);
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           collection.ensureIndex({a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, dropDups:true}, function(err, indexName) {
             // Show that duplicate records got dropped
             collection.find({}).toArray(function(err, items) {
               test.equal(null, err);
@@ -161,7 +161,7 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:true});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -169,17 +169,17 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = {
     db.open(function(err, db) {
 
       // Create a collection we want to drop later
-      db.createCollection('more_index_information_test', function(err, collection) {
+      db.createCollection('more_index_information_test_2', function(err, collection) {
         test.equal(null, err);
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           collection.ensureIndex({a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, dropDups:true}, function(err, indexName) {
 
             // Fetch basic indexInformation for collection
             collection.indexInformation(function(err, indexInformation) {
@@ -214,7 +214,7 @@ exports.shouldCorrectlyCreateAndDropIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:true});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -227,12 +227,12 @@ exports.shouldCorrectlyCreateAndDropIndex = {
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           collection.ensureIndex({a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, dropDups:true}, function(err, indexName) {
 
             // Drop the index
             collection.dropIndex("a_1_b_1", function(err, result) {
@@ -266,7 +266,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:true});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -279,16 +279,16 @@ exports.shouldCorrectlyCreateAndDropAllIndex = {
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           collection.ensureIndex({a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, dropDups:true}, function(err, indexName) {
 
             // Create an additional index
             collection.ensureIndex({c:1}
-              , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+              , {unique:true, background:true, dropDups:true}, function(err, indexName) {
 
               // Drop the index
               collection.dropAllIndexes(function(err, result) {
@@ -324,7 +324,7 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:true});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -337,12 +337,12 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = {
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           collection.ensureIndex({a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, dropDups:true}, function(err, indexName) {
 
             // Force a reindex of the collection
             collection.reIndex(function(err, result) {
@@ -374,12 +374,12 @@ exports.shouldCorrectlyExtractIndexInformation = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_index_information', function(err, collection) {
-        collection.insert({a:1}, {w:1}, function(err, ids) {
+        collection.insert({a:1}, configuration.writeConcern(), function(err, ids) {
           // Create an index on the collection
-          db.createIndex(collection.collectionName, 'a', {w:1}, function(err, indexName) {
+          db.createIndex(collection.collectionName, 'a', configuration.writeConcern(), function(err, indexName) {
             test.equal("a_1", indexName);
             // Let's fetch the index information
             db.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -423,12 +423,12 @@ exports.shouldCorrectlyHandleMultipleColumnIndexes = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_multiple_index_cols', function(err, collection) {
         collection.insert({a:1}, function(err, ids) {
           // Create an index on the collection
-          db.createIndex(collection.collectionName, [['a', -1], ['b', 1], ['c', -1]], {w:1}, function(err, indexName) {
+          db.createIndex(collection.collectionName, [['a', -1], ['b', 1], ['c', -1]], configuration.writeConcern(), function(err, indexName) {
             test.equal("a_-1_b_1_c_-1", indexName);
             // Let's fetch the index information
             db.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -462,20 +462,20 @@ exports.shouldCorrectlyHandleUniqueIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Create a non-unique index and test inserts
       db.createCollection('test_unique_index', function(err, collection) {
-        db.createIndex(collection.collectionName, 'hello', {w:1}, function(err, indexName) {
+        db.createIndex(collection.collectionName, 'hello', configuration.writeConcern(), function(err, indexName) {
           // Insert some docs
-          collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {w:1}, function(err, errors) {
+          collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], configuration.writeConcern(), function(err, errors) {
             test.equal(null, err);
 
             // Create a unique index and test that insert fails
             db.createCollection('test_unique_index2', function(err, collection) {
-              db.createIndex(collection.collectionName, 'hello', {unique:true, w:1}, function(err, indexName) {
+              db.createIndex(collection.collectionName, 'hello', {unique:true}, function(err, indexName) {
                 // Insert some docs
-                collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], {w:1}, function(err, ids) {
+                collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], configuration.writeConcern(), function(err, ids) {
                   test.ok(err != null);
                   test.equal(11000, err.code);
                   db.close();
@@ -498,17 +498,17 @@ exports.shouldCorrectlyCreateSubfieldIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Create a non-unique index and test inserts
       db.createCollection('test_index_on_subfield', function(err, collection) {
-        collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {w:1}, function(err, ids) {
+        collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], configuration.writeConcern(), function(err, ids) {
           test.equal(null, err);
 
           // Create a unique subfield index and test that insert fails
           db.createCollection('test_index_on_subfield2', function(err, collection) {
-            db.createIndex(collection.collectionName, 'hello.a', {w:1, unique:true}, function(err, indexName) {
-              collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], {w:1}, function(err, ids) {
+            db.createIndex(collection.collectionName, 'hello.a', {unique:true}, function(err, indexName) {
+              collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], configuration.writeConcern(), function(err, ids) {
                 // Assert that we have erros
                 test.ok(err != null);
                 db.close();
@@ -530,12 +530,12 @@ exports.shouldCorrectlyDropIndexes = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_drop_indexes', function(err, collection) {
-        collection.insert({a:1}, {w:1}, function(err, ids) {
+        collection.insert({a:1}, configuration.writeConcern(), function(err, ids) {
           // Create an index on the collection
-          db.createIndex(collection.collectionName, 'a', {w:1}, function(err, indexName) {
+          db.createIndex(collection.collectionName, 'a', configuration.writeConcern(), function(err, indexName) {
             test.equal("a_1", indexName);
             // Drop all the indexes
             collection.dropAllIndexes(function(err, result) {
@@ -562,12 +562,12 @@ exports.shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
         try {
           // insert a doc
-          collection.createIndex({a:1}, {w:1});
+          collection.createIndex({a:1}, configuration.writeConcern());
           test.ok(false);
         } catch(err) {}
 
@@ -586,12 +586,12 @@ exports.shouldThrowErrorOnAttemptingSafeEnsureIndexWithNoCallback = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
         try {
           // insert a doc
-          collection.ensureIndex({a:1}, {w:1});
+          collection.ensureIndex({a:1}, configuration.writeConcern());
           test.ok(false);
         } catch(err) {}
 
@@ -610,13 +610,13 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_distinct_queries', function(err, collection) {
         collection.insert([{'a':0, 'b':{'c':'a'}},
           {'a':1, 'b':{'c':'b'}},
           {'a':1, 'b':{'c':'c'}},
-          {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], {w:1}, function(err, ids) {
+          {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], configuration.writeConcern(), function(err, ids) {
             collection.distinct('a', function(err, docs) {
               test.deepEqual([0, 1, 2, 3], docs.sort());
             });
@@ -640,11 +640,11 @@ exports.shouldCorrectlyExecuteEnsureIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_ensure_index', function(err, collection) {
         // Create an index on the collection
-        db.ensureIndex(collection.collectionName, 'a', {w:1}, function(err, indexName) {
+        db.ensureIndex(collection.collectionName, 'a', configuration.writeConcern(), function(err, indexName) {
           test.equal("a_1", indexName);
           // Let's fetch the index information
           db.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -653,7 +653,7 @@ exports.shouldCorrectlyExecuteEnsureIndex = {
             test.ok(collectionInfo['a_1'] != null);
             test.deepEqual([["a", 1]], collectionInfo['a_1']);
 
-            db.ensureIndex(collection.collectionName, 'a', {w:1}, function(err, indexName) {
+            db.ensureIndex(collection.collectionName, 'a', configuration.writeConcern(), function(err, indexName) {
               test.equal("a_1", indexName);
               // Let's fetch the index information
               db.indexInformation(collection.collectionName, function(err, collectionInfo) {
@@ -681,13 +681,13 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('create_and_use_sparse_index_test', function(err, r) {
         db.collection('create_and_use_sparse_index_test', function(err, collection) {
 
-          collection.ensureIndex({title:1}, {sparse:true, w:1}, function(err, indexName) {
-            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
+          collection.ensureIndex({title:1}, {sparse:true}, function(err, indexName) {
+            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], configuration.writeConcern(), function(err, result) {
               collection.find({title:{$ne:null}}).sort({title:1}).toArray(function(err, items) {
                 test.equal(1, items.length);
                 test.equal("Sarah", items[0].name);
@@ -711,20 +711,21 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = {
 /**
  * @ignore
  */
-exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = {
+exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1 with indexes"] = {
   metadata: {
     requires: {mongodb: ">1.9.1"}
   },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyExecuteKeepGoingWithMongodb191OrHigher', function(err, collection) {
-        collection.ensureIndex({title:1}, {unique:true, w:1}, function(err, indexName) {
-          collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
+        collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
+          collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], configuration.writeConcern(), function(err, result) {
+            
             // Force keep going flag, ignoring unique index issue
-            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
+            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {keepGoing:true}, function(err, result) {
               collection.count(function(err, count) {
                 test.equal(3, count);
                 db.close();
@@ -748,14 +749,14 @@ exports.shouldCorrectlyHandleGeospatialIndexes = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('geospatial_index_test', function(err, r) {
         db.collection('geospatial_index_test', function(err, collection) {
-          collection.ensureIndex({loc:'2d'}, {w:1}, function(err, indexName) {
-            collection.insert({'loc': [-100,100]}, {w:1}, function(err, result) {
+          collection.ensureIndex({loc:'2d'}, configuration.writeConcern(), function(err, indexName) {
+            collection.insert({'loc': [-100,100]}, configuration.writeConcern(), function(err, result) {
               test.equal(err,null);
-              collection.insert({'loc': [200,200]}, {w:1}, function(err, result) {
+              collection.insert({'loc': [200,200]}, configuration.writeConcern(), function(err, result) {
                 err = err ? err : {};
                 test.ok(err.err.indexOf("point not in interval of") != -1);
                 test.ok(err.err.indexOf("-180") != -1);
@@ -781,16 +782,16 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('geospatial_index_altered_test', function(err, r) {
         db.collection('geospatial_index_altered_test', function(err, collection) {
-          collection.ensureIndex({loc:'2d'},{min:0,max:1024, w:1}, function(err, indexName) {
-            collection.insert({'loc': [100,100]}, {w:1}, function(err, result) {
+          collection.ensureIndex({loc:'2d'},{min:0,max:1024}, function(err, indexName) {
+            collection.insert({'loc': [100,100]}, configuration.writeConcern(), function(err, result) {
               test.equal(err,null);
-              collection.insert({'loc': [200,200]}, {w:1}, function(err, result) {
+              collection.insert({'loc': [200,200]}, configuration.writeConcern(), function(err, result) {
                 test.equal(err,null);
-                collection.insert({'loc': [-200,-200]}, {w:1}, function(err, result) {
+                collection.insert({'loc': [-200,-200]}, configuration.writeConcern(), function(err, result) {
                   err = err ? err : {};
                   test.ok(err.err.indexOf("point not in interval of") != -1);
                   test.ok(err.err.indexOf("0") != -1);
@@ -815,13 +816,13 @@ exports.shouldThrowDuplicateKeyErrorWhenCreatingIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldThrowDuplicateKeyErrorWhenCreatingIndex', function(err, collection) {
-        collection.insert([{a:1}, {a:1}], {w:1}, function(err, result) {
+        collection.insert([{a:1}, {a:1}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
-          collection.ensureIndex({a:1}, {unique:true, w:1}, function(err, indexName) {
+          collection.ensureIndex({a:1}, {unique:true}, function(err, indexName) {
             test.ok(err != null);
             db.close();
             test.done();
@@ -840,14 +841,14 @@ exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:true});
     // Establish connection to db
     db.open(function(err, db) {
       db.createCollection('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', function(err, collection) {
-        collection.insert([{a:1}, {a:1}], {w:1}, function(err, result) {
+        collection.insert([{a:1}, {a:1}], configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
-          collection.ensureIndex({a:1}, {unique:true, w:1}, function(err, indexName) {
+          collection.ensureIndex({a:1}, {unique:true}, function(err, indexName) {
             test.ok(err != null);
             db.close();
             test.done();
@@ -866,16 +867,16 @@ exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Establish connection to db
       db.createCollection('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', function(err, collection) {
         test.equal(null, err);
 
-        collection.ensureIndex({loc:'2d'}, {min:200, max:1400, w:1}, function(err, indexName) {
+        collection.ensureIndex({loc:'2d'}, {min:200, max:1400}, function(err, indexName) {
           test.equal(null, err);
 
-          collection.insert({loc:[600, 600]}, {w:1}, function(err, result) {
+          collection.insert({loc:[600, 600]}, configuration.writeConcern(), function(err, result) {
             test.equal(null, err);
             db.close();
             test.done();
@@ -894,7 +895,7 @@ exports['Should correctly create an index with overriden name'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       // Establish connection to db
       db.createCollection('shouldCorrectlyCreateAnIndexWithOverridenName', function(err, collection) {
@@ -920,7 +921,7 @@ exports['should handle index declarations using objects from other contexts'] = 
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var shared = require('./contexts');
 
@@ -941,13 +942,13 @@ exports['should correctly return error message when applying unique index to dup
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection("should_throw_error_due_to_duplicates");
-      collection.insert([{a:1}, {a:1}, {a:1}], {w:1}, function(err, result) {
+      collection.insert([{a:1}, {a:1}, {a:1}], configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
-        collection.ensureIndex({a:1}, {w:1, unique:true}, function(err, result) {
+        collection.ensureIndex({a:1}, {unique:true}, function(err, result) {
           test.ok(err != null);
           db.close();
           test.done();
@@ -962,13 +963,13 @@ exports['should correctly drop index with no callback'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection("should_correctly_drop_index");
-      collection.insert([{a:1}], {w:1}, function(err, result) {
+      collection.insert([{a:1}], configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
-        collection.ensureIndex({a:1}, {w:1}, function(err, result) {
+        collection.ensureIndex({a:1}, configuration.writeConcern(), function(err, result) {
           collection.dropIndex("a_1")
 
           db.close();
@@ -984,13 +985,13 @@ exports['should correctly apply hint to find'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection("should_correctly_apply_hint");
-      collection.insert([{a:1}], {w:1}, function(err, result) {
+      collection.insert([{a:1}], configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
-        collection.ensureIndex({a:1}, {w:1}, function(err, result) {
+        collection.ensureIndex({a:1}, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           collection.indexInformation({full:false}, function(err, indexInformation) {

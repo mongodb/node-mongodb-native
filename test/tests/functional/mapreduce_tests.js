@@ -10,7 +10,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -25,7 +25,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
           test.deepEqual([], results);
 
           // Trigger some inserts on the collection
-          collection.insert([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
+          collection.insert([{'a':2}, {'b':5}, {'a':1}], configuration.writeConcern(), function(err, ids) {
 
             // Perform a group count
             collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -46,7 +46,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
                     test.equal(1, results[0].count);
 
                     // Insert some more test data
-                    collection.insert([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
+                    collection.insert([{'a':2}, {'b':3}], configuration.writeConcern(), function(err, ids) {
 
                       // Do a Group by field a
                       collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -129,14 +129,14 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_group2', function(err, collection) {
         collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
           test.deepEqual([], results);
 
           // Trigger some inserts
-          collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], {w:1}, function(err, ids) {
+          collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], configuration.writeConcern(), function(err, ids) {
             collection.group([], {}, {count: 0, running_average: 0}
               , function (doc, out) {
                   out.count++;
@@ -168,7 +168,7 @@ exports.shouldPerformSimpleMapReduceFunctions = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -179,7 +179,7 @@ exports.shouldPerformSimpleMapReduceFunctions = {
       db.createCollection('test_map_reduce_functions', function(err, collection) {
 
         // Insert some documents to perform map reduce over
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcern(), function(err, r) {
 
           // Map function
           var map = function() { emit(this.user_id, 1); };
@@ -220,7 +220,7 @@ exports.shouldPerformMapReduceFunctionInline = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -231,7 +231,7 @@ exports.shouldPerformMapReduceFunctionInline = {
       db.createCollection('test_map_reduce_functions_inline', function(err, collection) {
 
         // Insert some test documents
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcern(), function(err, r) {
 
           // Map function
           var map = function() { emit(this.user_id, 1); };
@@ -268,7 +268,7 @@ exports.shouldPerformMapReduceInContext = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -280,7 +280,7 @@ exports.shouldPerformMapReduceInContext = {
 
         // Insert some test documents
         collection.insert([{'user_id':1, 'timestamp':new Date()}
-          , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
+          , {'user_id':2, 'timestamp':new Date()}], configuration.writeConcern(), function(err, r) {
 
           // Map function
           var map = function(){
@@ -348,7 +348,7 @@ exports.shouldPerformMapReduceInContextObjects = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -360,7 +360,7 @@ exports.shouldPerformMapReduceInContextObjects = {
 
         // Insert some test documents
         collection.insert([{'user_id':1, 'timestamp':new Date()}
-          , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
+          , {'user_id':2, 'timestamp':new Date()}], configuration.writeConcern(), function(err, r) {
 
           // Map function
           var map = function(){
@@ -425,10 +425,10 @@ exports.shouldPerformMapReduceWithStringFunctions = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcern(), function(err, r) {
           // String functions
           var map = "function() { emit(this.user_id, 1); }";
           var reduce = "function(k,vals) { return 1; }";
@@ -461,10 +461,10 @@ exports.shouldForceMapReduceError = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcern(), function(err, r) {
           // String functions
           var map = "function() { emiddft(this.user_id, 1); }";
           var reduce = "function(k,vals) { return 1; }";
@@ -488,10 +488,10 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce_with_functions_as_arguments', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcern(), function(err, r) {
           // String functions
           var map = function() { emit(this.user_id, 1); };
           var reduce = function(k,vals) { return 1; };
@@ -523,10 +523,10 @@ exports.shouldPerformMapReduceWithCodeObjects = {
   test: function(configuration, test) {
     var Code = configuration.require.Code;
     
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcern(), function(err, r) {
           // String functions
           var map = new Code("function() { emit(this.user_id, 1); }");
           var reduce = new Code("function(k,vals) { return 1; }");
@@ -558,10 +558,10 @@ exports.shouldPerformMapReduceWithOptions = {
   test: function(configuration, test) {
     var Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce_with_options', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], configuration.writeConcern(), function(err, r) {
           // String functions
           var map = new Code("function() { emit(this.user_id, 1); }");
           var reduce = new Code("function(k,vals) { return 1; }");
@@ -597,10 +597,10 @@ exports.shouldHandleMapReduceErrors = {
   test: function(configuration, test) {
     var Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce_error', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], configuration.writeConcern(), function(err, r) {
           // String functions
           var map = new Code("function() { throw 'error'; }");
           var reduce = new Code("function(k,vals) { throw 'error'; }");
@@ -624,7 +624,7 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -633,7 +633,7 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = {
       db.createCollection('test_map_reduce_functions', function(err, collection) {
 
         // Insert some documents to perform map reduce over
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcern(), function(err, r) {
 
           // Map function
           var map = function() { emit(this.user_id, 1); };
@@ -669,7 +669,7 @@ exports.shouldCorrectlyReturnNestedKeys = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var start = new Date().setTime(new Date().getTime() - 10000);
       var end = new Date().setTime(new Date().getTime() + 10000);
@@ -702,7 +702,7 @@ exports.shouldCorrectlyReturnNestedKeys = {
               lastname:'smith',
               date:new Date()
             }
-          }, {w:1}, function(err, result) {
+          }, configuration.writeConcern(), function(err, result) {
 
           // Execute the group
           collection.group(keys, condition, initial, reduce, true, function(err, r) {

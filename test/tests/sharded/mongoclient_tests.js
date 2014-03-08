@@ -72,7 +72,7 @@ exports['Should correctly emit open and fullsetup to all db instances'] = functi
     , Server = configuration.getMongoPackage().Server
     , Db = configuration.getMongoPackage().Db;
 
-  var db_conn = new Db('integration_test_', new Mongos([new Server("localhost", 50000), new Server("localhost", 50001)]), {w:1});
+  var db_conn = new Db('integration_test_', new Mongos([new Server("localhost", 50000), new Server("localhost", 50001)]), configuration.writeConcern());
   var db2 = db_conn.db('integration_test_2');
 
   var close_count = 0;

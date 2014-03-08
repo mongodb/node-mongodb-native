@@ -111,7 +111,7 @@ exports['Should Correctly Authenticate on Win32 authenticate method manually'] =
   var urlEncodedPrincipal = encodeURIComponent(principal);
   var pass = "a";
 
-  var db = new Db('test', new Server('kdc.10gen.me', 27017), {w:1});
+  var db = new Db('test', new Server('kdc.10gen.me', 27017), configuration.writeConcern());
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);

@@ -12,7 +12,7 @@ exports.shouldPutFileCorrectlyToGridUsingObjectId = {
   test: function(configuration, test) {
     var Grid = configuration.require.Grid
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -51,7 +51,7 @@ exports.shouldPutFileCorrectlyToGridUsingIntId = {
   test: function(configuration, test) {
     var Grid = configuration.require.Grid
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -91,7 +91,7 @@ exports.shouldPutFileCorrectlyToGridUsingStringId = {
   test: function(configuration, test) {
     var Grid = configuration.require.Grid
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -133,7 +133,7 @@ exports.shouldPutAndGetFileCorrectlyToGridUsingObjectId = {
   test: function(configuration, test) {
     var Grid = configuration.require.Grid
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -201,7 +201,7 @@ exports.shouldCorrectlyWriteFileAndThenDeleteIt = {
   test: function(configuration, test) {
     var Grid = configuration.require.Grid
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START

@@ -87,10 +87,10 @@ RS.startSet(true, function(err, result) {
     }
     
     // Insert all the docs
-    userCollection.insert(userDocs, {w:1}, function(err, result) {
+    userCollection.insert(userDocs, configuration.writeConcern(), function(err, result) {
       console.dir(err);
       
-      accountCollection.insert(accountDocs, {w:1}, function(err, result) {
+      accountCollection.insert(accountDocs, configuration.writeConcern(), function(err, result) {
         console.dir(err);
         
         var timeoutFunc = function() {

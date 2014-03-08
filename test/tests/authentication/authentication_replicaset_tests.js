@@ -29,7 +29,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
         test.ok(result);
 
         configuration.killPrimary(9, function(err, result) {
-          db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
+          db.collection('replicaset_test_auth').insert({a:1}, configuration.writeConcern(), function(err, result) {
             test.equal(null, err);
 
             db.close();
@@ -501,7 +501,7 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = function(configuration
           db_p.authenticate('test', 'test', function(err, replies) {
             test.equal(null, err);
 
-            db_p.collection('userconfirm2').insert({a:1}, {w:1}, function(err, result) {
+            db_p.collection('userconfirm2').insert({a:1}, configuration.writeConcern(), function(err, result) {
               test.equal(null, err);
 
               db_p.collection('userconfirm2').findOne(function(err, item) {            
@@ -545,7 +545,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
 
       db_p.admin().authenticate("me", "secret", function(err, result) {
 
-        db_p.collection('test').insert({a:1}, {w:1}, function(err, result) {
+        db_p.collection('test').insert({a:1}, configuration.writeConcern(), function(err, result) {
           test.equal(null, err);
 
           db_p.addUser('test', 'test', {w:3}, function(err, result) {
@@ -865,8 +865,8 @@ exports['Should Correctly Authenticate using different user source database and 
     var connectTimeoutMS = 100;
 
     // Kill server and restart
-    var auth_db = new Db(dbName, replSet1, {w:1});
-    var db = new Db('users', replSet2, {w:1});
+    var auth_db = new Db(dbName, replSet1, configuration.writeConcern());
+    var db = new Db('users', replSet2, configuration.writeConcern());
     db.open(function(err, db) {
 
       // Add admin user
@@ -987,8 +987,8 @@ exports['Should Correctly Authenticate using different user source database and 
 //   var connectTimeoutMS = 100;
 
 //   // Kill server and restart
-//   var auth_db = new Db(dbName, replSet1, {w:1});
-//   var db = new Db('users', replSet2, {w:1});
+//   var auth_db = new Db(dbName, replSet1, configuration.writeConcern());
+//   var db = new Db('users', replSet2, configuration.writeConcern());
 //   db.open(function(err, db) {
 
 //     // Add admin user

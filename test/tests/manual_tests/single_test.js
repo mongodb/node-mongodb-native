@@ -37,8 +37,8 @@ db.open(function(err, client){
   }
   
   client.collection("users", function(err, coll){      
-    coll.remove({}, {w:1}, function(err) {
-      coll.insert(userObjects, {w:1}, function(err, result) {
+    coll.remove({}, configuration.writeConcern(), function(err) {
+      coll.insert(userObjects, configuration.writeConcern(), function(err, result) {
         users = coll;
         query();        
       })      

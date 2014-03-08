@@ -56,11 +56,11 @@ var replSet = new ReplSetServers([
 
       db.collection('stats', function(statsErr, stats) {
           if (statsErr) return console.log('error opening stats %o', err);
-          stats.remove({}, {w:1}, function(err, result) {
+          stats.remove({}, configuration.writeConcern(), function(err, result) {
             // console.log("================================================================")
             // console.dir(err)
 
-            stats.insert({name:'reqcount', value:0}, {w:1}, function(err, result) {
+            stats.insert({name:'reqcount', value:0}, configuration.writeConcern(), function(err, result) {
               // console.log("================================================================")
               // console.dir(err)
               //create server

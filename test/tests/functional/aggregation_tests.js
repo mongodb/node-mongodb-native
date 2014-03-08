@@ -13,8 +13,8 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -31,7 +31,7 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
       // Create a collection
       var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         collection.aggregate([
@@ -75,8 +75,8 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -93,7 +93,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
       // Create a collection
       var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
         // Execute aggregate, notice the pipeline is expressed as function call parameters
         // instead of an Array.
         collection.aggregate(
@@ -137,8 +137,8 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -155,7 +155,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
       // Create a collection
       var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
         // Execute aggregate, notice the pipeline is expressed as function call parameters
         // instead of an Array.
         collection.aggregate(
@@ -195,8 +195,8 @@ exports.shouldCorrectlyFailAndReturnError = {
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     // Some docs for insertion
     var docs = [{
         title : "this is my title", author : "bob", posted : new Date() ,
@@ -209,7 +209,7 @@ exports.shouldCorrectlyFailAndReturnError = {
       // Create a collection
       var collection = db.collection('shouldCorrectlyFailAndReturnError');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
         // Execute aggregate
         collection.aggregate(
             { $project : {
@@ -242,8 +242,8 @@ exports.shouldCorrectlyPassReadPreference = {
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // Some docs for insertion
     var docs = [{
@@ -257,16 +257,15 @@ exports.shouldCorrectlyPassReadPreference = {
     db.open(function(err, db) {
       // Create a collection
       var collection = db.collection('shouldCorrectlyFailAndReturnError');
-      // Override the command object for the db
-      var _command = db.command;        
-      db.command = function(selector, options, callback) {
-          var args = Array.prototype.slice.call(arguments, 0);
-          test.equal("secondary", options.readPreference);
-        _command.apply(db, args);
-      }
-
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
+        // Override the command object for the db
+        var _command = db.command;        
+        db.command = function(selector, options, callback) {
+            var args = Array.prototype.slice.call(arguments, 0);
+            test.equal("secondary", options.readPreference);
+          _command.apply(db, args);
+        }
         
         // Execute aggregate
         collection.aggregate(
@@ -322,8 +321,8 @@ exports['Should correctly return and iterate over all the cursor results'] = {
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -340,7 +339,7 @@ exports['Should correctly return and iterate over all the cursor results'] = {
       // Create a collection
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -390,8 +389,8 @@ exports['Should correctly return a cursor and call explain'] = {
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -408,7 +407,7 @@ exports['Should correctly return a cursor and call explain'] = {
       // Create a collection
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -455,8 +454,8 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -473,7 +472,7 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
       // Create a collection
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -515,13 +514,14 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
 exports['Should correctly write the results out to a new collection'] = {
   metadata: {
     requires: {
-      mongodb: ">2.5.3"
+      mongodb: ">2.5.3",
+      topology: ['single']
     }
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -538,7 +538,7 @@ exports['Should correctly write the results out to a new collection'] = {
       // Create a collection
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         collection.aggregate([
@@ -581,8 +581,8 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -599,7 +599,7 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
       // Create a collection
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         collection.aggregate([
@@ -642,8 +642,8 @@ exports['Should correctly use allowDiskUse when performing an aggregation with a
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -660,7 +660,7 @@ exports['Should correctly use allowDiskUse when performing an aggregation with a
       // Create a collection
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -705,8 +705,8 @@ exports['Should correctly use aggregation as a cursor'] = {
   },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -723,7 +723,7 @@ exports['Should correctly use aggregation as a cursor'] = {
       // Create a collection
       var collection = db.collection('shouldCorrectlyDoAggWithCursorStream');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insert(docs, configuration.writeConcern(), function(err, result) {
         var items = [];
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([

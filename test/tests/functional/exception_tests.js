@@ -6,7 +6,7 @@ exports.shouldCorrectlyHandleThrownError = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyHandleThrownError', function(err, r) {
         try {
@@ -35,7 +35,7 @@ exports.shouldCorrectlyHandleThrownErrorInRename = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     var domain = require('domain');
     var d = domain.create();
     d.on('error', function(err) {
@@ -67,7 +67,7 @@ exports.shouldCorrectlyHandleExceptionsInCursorNext = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     process.once('uncaughtException', function(err) {
       test.ok(err != null);
@@ -94,7 +94,7 @@ exports.shouldCorrectlyHandleExceptionsInCursorEach = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     process.once('uncaughtException', function(err) {
       test.ok(err != null);

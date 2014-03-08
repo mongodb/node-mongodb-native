@@ -48,7 +48,7 @@ exports['Should retrieve correct count after primary killed'] = function(configu
             configuration.killPrimary(function(node) {
               test.equal(null, err);
 
-              collection.insert({a:30}, {w:1}, function(err, r) {
+              collection.insert({a:30}, configuration.writeConcern(), function(err, r) {
                 test.ok(err != null);
                 test.done();
               });
@@ -230,7 +230,7 @@ exports['Should work correctly with inserts after bringing master back'] = funct
                     });
 
                     // Run second check
-                    collection.save({a:80}, {w:1}, function(err, r) {
+                    collection.save({a:80}, configuration.writeConcern(), function(err, r) {
                       if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
                       collection.find().toArray(function(err, items) {
@@ -332,7 +332,7 @@ exports['Should correctly receive reconnect event after primary selection and bu
           configuration.killPrimary(function(node) {
             test.equal(null, err);
 
-            collection.insert({a:30}, {w:1}, function(err, r) {
+            collection.insert({a:30}, configuration.writeConcern(), function(err, r) {
               test.equal(null, err);
               test.ok(reconnectCalled);
               db.close();

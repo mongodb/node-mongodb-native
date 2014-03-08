@@ -206,7 +206,7 @@ exports.shouldCorrectlySeekWithBuffer = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -413,7 +413,7 @@ exports.shouldCorrectlySeekAcrossChunks = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -465,7 +465,7 @@ exports.shouldCorrectlyAppendToFile = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var fs_db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var fs_db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     fs_db.open(function(err, fs_db) {
       fs_db.dropDatabase(function(err, done) {
@@ -518,7 +518,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -580,7 +580,7 @@ exports.shouldCorrectlySaveEmptyFile = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var fs_db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var fs_db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     fs_db.open(function(err, fs_db) {
       fs_db.dropDatabase(function(err, done) {
@@ -623,7 +623,7 @@ exports.shouldCorrectlyDetectEOF = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1089,7 +1089,7 @@ exports.shouldCorrectlyExecuteGridstoreTell = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1142,7 +1142,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1227,7 +1227,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START

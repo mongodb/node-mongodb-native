@@ -535,7 +535,7 @@ exports['Should correctly emit all signals even if not yet connected'] = functio
     {rs_name:replicasetManager.name}
   );
 
-  var db_conn = new Db('integration_test_', replSet, {w:1});
+  var db_conn = new Db('integration_test_', replSet, configuration.writeConcern());
   var db2 = db_conn.db('integration_test_2');
   var close_count = 0;
   var open_count = 0;
@@ -712,7 +712,7 @@ exports['Should correctly receive ping and ha events'] = function(configuration,
   );
 
   // Open the db connection
-  new Db('integration_test_', replSet, {w:1}).open(function(err, db) {
+  new Db('integration_test_', replSet, configuration.writeConcern()).open(function(err, db) {
     var ha_connect = false;
     var ha_ismaster = false;
     var ping_connect = false;

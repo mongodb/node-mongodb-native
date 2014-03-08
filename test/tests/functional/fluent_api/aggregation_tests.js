@@ -7,7 +7,7 @@ exports['Should correctly perform a simple pipe aggregation command and get'] = 
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('fluent_api');
 
@@ -16,7 +16,7 @@ exports['Should correctly perform a simple pipe aggregation command and get'] = 
       for(var i = 0; i < 100; i++) docs_1.push({agg_pipe: i});
 
       // Simple insert
-      col.insert(docs_1, {w:1}, function(err, result) {
+      col.insert(docs_1, configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
         // Execute the aggregation
@@ -37,7 +37,7 @@ exports['Should correctly perform a simple pipe aggregation command and getOne']
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('fluent_api');
 
@@ -67,7 +67,7 @@ exports['Should correctly perform a complete pipe aggregation command and get'] 
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('fluent_api');
 
@@ -111,7 +111,7 @@ exports['Should correctly perform a simple pipe aggregation command and explain'
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('fluent_api');
 
@@ -141,7 +141,7 @@ exports['Should correctly perform a simple pipe aggregation command and each'] =
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('fluent_api');
 
@@ -177,7 +177,7 @@ exports['Should correctly perform a simple pipe aggregation command and next'] =
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('fluent_api');
 
@@ -214,7 +214,7 @@ exports['Should correctly perform a simple pipe aggregation command and print as
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('fluent_api');
     	var liner = new stream.Transform( { objectMode: true } )
@@ -268,7 +268,7 @@ exports['Should correctly perform a simple pipe aggregation command, next, close
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('fluent_api');
 

@@ -5,14 +5,18 @@
  * @ignore
  */
 exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode');
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
         var adminDb = db.admin();
         
         adminDb.addUser('admin', 'admin', function(err, result) {
@@ -51,17 +55,17 @@ exports.shouldCorrectlyAuthenticate = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({}, {poolSize:1});
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
     db.open(function(err, db) {
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test1');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w:1}, function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -97,8 +101,8 @@ exports.accessAdminLevelOperations = {
   metadata: {},
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
     db.open(function(err, db) {
@@ -122,11 +126,15 @@ exports.accessAdminLevelOperations = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveBuildInfo = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -169,11 +177,15 @@ exports.shouldCorrectlyRetrieveBuildInfo = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -216,11 +228,15 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
  * @ignore
  */
 exports.shouldCorrectlySetDefaultProfilingLevel = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -228,11 +244,11 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
     db.open(function(err, db) {
       
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test2');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -269,11 +285,15 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
  * @_function setProfilingLevel
  */ 
 exports.shouldCorrectlyChangeProfilingLevel = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -281,11 +301,11 @@ exports.shouldCorrectlyChangeProfilingLevel = {
     db.open(function(err, db) {
       
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test3');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -351,11 +371,15 @@ exports.shouldCorrectlyChangeProfilingLevel = {
  * @_function profilingInfo
  */ 
 exports.shouldCorrectlySetAndExtractProfilingInfo = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -363,11 +387,11 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
     db.open(function(err, db) {
 
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test4');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(doc) {
+      collection.insert({'a':1}, configuration.writeConcern(), function(doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -420,11 +444,15 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
  * @_function validateCollection
  */
 exports.shouldCorrectlyCallValidateCollection = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -432,11 +460,11 @@ exports.shouldCorrectlyCallValidateCollection = {
     db.open(function(err, db) {
 
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test5');
         
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
         
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -448,8 +476,10 @@ exports.shouldCorrectlyCallValidateCollection = {
           adminDb.authenticate('admin8', 'admin8', function(err, replies) {
             
             // Validate the 'test' collection
-            adminDb.validateCollection('test', function(err, doc) {
-
+            adminDb.validateCollection('test5', function(err, doc) {
+              console.log("============================================= 0")
+              console.dir(err)
+              console.dir(doc)
               // Pre 1.9.1 servers
               if(doc.result != null) {
                 test.ok(doc.result != null);
@@ -479,11 +509,15 @@ exports.shouldCorrectlyCallValidateCollection = {
  * @_function ping
  */
 exports.shouldCorrectlyPingTheMongoDbInstance = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -525,11 +559,15 @@ exports.shouldCorrectlyPingTheMongoDbInstance = {
  * @_function logout
  */
 exports.shouldCorrectlyUseLogoutFunction = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {  
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {  
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:5});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -571,11 +609,15 @@ exports.shouldCorrectlyUseLogoutFunction = {
  * @_function addUser
  */
 exports.shouldCorrectlyAddAUserToAdminDb = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {  
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {  
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -611,11 +653,15 @@ exports.shouldCorrectlyAddAUserToAdminDb = {
  * @_function removeUser
  */
 exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {  
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {  
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -660,11 +706,15 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
  * @_function listDatabases
  */
 exports.shouldCorrectlyListAllAvailableDatabases = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {  
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {  
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -695,11 +745,15 @@ exports.shouldCorrectlyListAllAvailableDatabases = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveServerInfo = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -707,11 +761,11 @@ exports.shouldCorrectlyRetrieveServerInfo = {
     db.open(function(err, db) {
 
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test6');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -750,11 +804,15 @@ exports.shouldCorrectlyRetrieveServerInfo = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveReplSetGetStatus = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -762,11 +820,11 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = {
     db.open(function(err, db) {
 
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test7');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();

@@ -10,7 +10,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});  
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});  
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
     // Establish connection to db
@@ -30,7 +30,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
         test.equal(null, err);
 
         // Insert documents into collection
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           // Peform a find to get a cursor
           var stream = collection.find().stream();
           // For each data item
@@ -71,7 +71,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -89,7 +89,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
         test.equal(null, err);
 
         // Insert documents into collection
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           // Peform a find to get a cursor
           var stream = collection.find().stream();
 
@@ -122,13 +122,13 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
       docs.push({'a':i})
     }
 
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // Establish connection to db
     db.open(function(err, db) {
       db.createCollection('test_streaming_function_with_limit_for_fetching2', function(err, collection) {
 
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           // Peform a find to get a cursor
           var stream = collection.find({}).stream();
           var data = [];
@@ -162,7 +162,11 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
 }
 
 exports.shouldStream10KDocuments = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single']
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -173,13 +177,13 @@ exports.shouldStream10KDocuments = {
       docs.push({'a':i, bin: new Binary(new Buffer(256))})
     }
 
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // Establish connection to db
     db.open(function(err, db) {
       db.createCollection('test_streaming_function_with_limit_for_fetching_2', function(err, collection) {
 
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           // Peform a find to get a cursor
           var stream = collection.find({}).stream();
           var data = [];
@@ -224,13 +228,13 @@ exports.shouldTriggerMassiveAmountOfGetMores = {
       docs.push({'a':i, bin: new Binary(new Buffer(256))})
     }
 
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
     // Establish connection to db
     db.open(function(err, db) {
       db.createCollection('test_streaming_function_with_limit_for_fetching_3', function(err, collection) {
 
-        collection.insert(docs, {w:1}, function(err, ids) {
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
           // Peform a find to get a cursor
           var stream = collection.find({}).stream();
           var data = [];
@@ -264,7 +268,7 @@ exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
     var ObjectID = configuration.require.ObjectID
       , Binary = configuration.require.Binary;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
       var docs = []
 
@@ -276,7 +280,7 @@ exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
       var updateCollection = db.collection('test_streaming_function_with_limit_for_fetching_update');
       
       // Insert the docs
-      collection.insert(docs, {w:1}, function(err, ids) {        
+      collection.insert(docs, configuration.writeConcern(), function(err, ids) {        
         var cursor = collection.find({});
         // Execute find on all the documents
         var stream = cursor.stream(); 

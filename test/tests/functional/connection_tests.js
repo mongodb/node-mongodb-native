@@ -10,11 +10,11 @@ exports['Should correctly connect to server using domain socket'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1});
+    var db = configuration.newDbInstanceWithDomainSocket(configuration.writeConcern(), {poolSize: 1});
     db.open(function(err, db) {
       test.equal(null, err);
 
-      db.collection("domainSocketCollection").insert({a:1}, {w:1}, function(err, item) {
+      db.collection("domainSocketCollection").insert({a:1}, configuration.writeConcern(), function(err, item) {
         test.equal(null, err);
 
         db.collection("domainSocketCollection").find({a:1}).toArray(function(err, items) {
@@ -41,11 +41,11 @@ exports['Should connect to server using domain socket with undefined port'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, port:'undefined'});
+    var db = configuration.newDbInstanceWithDomainSocket(configuration.writeConcern(), {poolSize: 1, port:'undefined'});
     db.open(function(err, db) {
       test.equal(null, err);
 
-      db.collection("domainSocketCollection").insert({x:1}, {w:1}, function(err, item) {
+      db.collection("domainSocketCollection").insert({x:1}, configuration.writeConcern(), function(err, item) {
         test.equal(null, err);
 
         db.collection("domainSocketCollection").find({x:1}).toArray(function(err, items) {
@@ -77,7 +77,7 @@ exports['Should fail to connect using non-domain socket with undefined port'] = 
     
     var error;
     try {    
-      var db = new Db('test', new Server("localhost", undefined), {w:0});
+      var db = new Db('test', new Server("localhost", undefined), configuration.writeConcern());
       db.open(function(){ });
     } catch (err){
       error = err;
@@ -92,13 +92,13 @@ exports['Should fail to connect using non-domain socket with undefined port'] = 
 /**
  * @ignore
  */
-function connectionTester(test, testName, callback) {
+function connectionTester(test, testName, configuration, callback) {
   return function(err, db) {
     test.equal(err, null);
     db.collection(testName, function(err, collection) {
       test.equal(err, null);
       var doc = {foo:123};
-      collection.insert({foo:123}, {w:1}, function(err, docs) {
+      collection.insert({foo:123}, configuration.writeConcern(), function(err, docs) {
         test.equal(err, null);
         db.dropDatabase(function(err, done) {
           db.close();
@@ -122,7 +122,7 @@ exports.testConnectNoOptions = {
   test: function(configuration, test) {
     var connect = configuration.require.connect;
 
-    connect(configuration.url(), connectionTester(test, 'testConnectNoOptions', function(db) {
+    connect(configuration.url(), connectionTester(test, 'testConnectNoOptions', configuration, function(db) {
       test.done();
     }));
   }
@@ -140,7 +140,7 @@ exports.testConnectDbOptions = {
 
     connect(configuration.url(),
             { db: { native_parser: configuration.nativeParser } },
-            connectionTester(test, 'testConnectDbOptions', function(db) {            
+            connectionTester(test, 'testConnectDbOptions', configuration, function(db) {            
       test.equal(configuration.nativeParser, db.native_parser);
       test.done();
     }));
@@ -163,7 +163,7 @@ exports.testConnectServerOptions = {
 
     connect(configuration.url(),
             { server: {auto_reconnect: true, poolSize: 4} },
-            connectionTester(test, 'testConnectServerOptions', function(db) {            
+            connectionTester(test, 'testConnectServerOptions', configuration, function(db) {            
       test.equal(4, db.serverConfig.poolSize);
       test.equal(true, db.serverConfig.autoReconnect);
       test.done();
@@ -188,7 +188,7 @@ exports.testConnectAllOptions  = {
     connect(configuration.url(),
             { server: {auto_reconnect: true, poolSize: 4},
               db: {native_parser: configuration.nativeParser} },
-            connectionTester(test, 'testConnectAllOptions', function(db) {
+            connectionTester(test, 'testConnectAllOptions', configuration, function(db) {
       test.equal(configuration.nativeParser, db.native_parser);
       test.equal(4, db.serverConfig.poolSize);
       test.equal(true, db.serverConfig.autoReconnect);
@@ -201,7 +201,11 @@ exports.testConnectAllOptions  = {
  * @ignore
  */
 exports.testConnectGoodAuth = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ['single', 'replicaset']
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -210,7 +214,7 @@ exports.testConnectGoodAuth = {
     // First add a user.
     connect(configuration.url(), function(err, db) {
       test.equal(err, null);
-      db.addUser(user, password, configuration.writeConcern, function(err, result) {
+      db.addUser(user, password, configuration.writeConcern(), function(err, result) {
         test.equal(err, null);
         db.close();
         restOfTest();
@@ -218,7 +222,7 @@ exports.testConnectGoodAuth = {
     });
 
     function restOfTest() {
-      connect(configuration.url(user, password), connectionTester(test, 'testConnectGoodAuth', function(db) {            
+      connect(configuration.url(user, password), connectionTester(test, 'testConnectGoodAuth', configuration, function(db) {            
         test.equal(false, db.safe);
         test.done();
       }));
@@ -310,7 +314,7 @@ exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db_conn = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db_conn = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     var db2 = db_conn.db("test2");
 
     db2.on('open', function (err, db) {
@@ -347,7 +351,7 @@ exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db_conn = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db_conn = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     test.equal(false, db_conn.serverConfig.isConnected());
     test.done();
   }
@@ -365,7 +369,7 @@ exports['Should Force reconnect event by force closing connection'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:true});
     db.open(function(err, db) {
       test.equal(null, err);
 

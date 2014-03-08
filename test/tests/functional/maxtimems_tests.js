@@ -7,7 +7,7 @@ exports['Should Correctly respect the maxtimeMs property on count'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('max_time_ms');
 
@@ -15,7 +15,7 @@ exports['Should Correctly respect the maxtimeMs property on count'] = {
       var docs_1 = [{agg_pipe:1}];
 
       // Simple insert
-      col.insert(docs_1, {w:1}, function(err, result) {
+      col.insert(docs_1, configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
         // Execute a find command
@@ -40,7 +40,7 @@ exports['Should Correctly respect the maxtimeMs property on toArray'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('max_time_ms_2');
 
@@ -48,7 +48,7 @@ exports['Should Correctly respect the maxtimeMs property on toArray'] = {
       var docs_1 = [{agg_pipe:1}];
 
       // Simple insert
-      col.insert(docs_1, {w:1}, function(err, result) {
+      col.insert(docs_1, configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
         // Execute a find command
@@ -72,7 +72,7 @@ exports['Should Correctly respect the maxtimeMs property on toArray'] = {
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
-//     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
 //     db.open(function(err, db) {
 //       var col = db.collection('max_time_ms_3');
 
@@ -80,7 +80,7 @@ exports['Should Correctly respect the maxtimeMs property on toArray'] = {
 //       var docs_1 = [{agg_pipe:10}];
 
 //       // Simple insert
-//       col.insert(docs_1, {w:1}, function(err, result) {
+//       col.insert(docs_1, configuration.writeConcern(), function(err, result) {
 //         test.equal(null, err);
 
 //         db.admin().command({configureFailPoint: "maxTimeAlwaysTimeOut", mode: "alwaysOn"}, function(err, result) {
@@ -114,7 +114,7 @@ exports['Should Correctly respect the maxtimeMs property on sleep command'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('max_time_ms_3');
 
@@ -122,7 +122,7 @@ exports['Should Correctly respect the maxtimeMs property on sleep command'] = {
       var docs_1 = [{agg_pipe:10}];
 
       // Simple insert
-      col.insert(docs_1, {w:1}, function(err, result) {
+      col.insert(docs_1, configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
         db.db('admin')        	
@@ -146,7 +146,7 @@ exports['Should Correctly fail with maxTimeMS error'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
       var col = db.collection('max_time_ms_5');
 
@@ -154,7 +154,7 @@ exports['Should Correctly fail with maxTimeMS error'] = {
       var docs_1 = [{agg_pipe:10}];
 
       // Simple insert
-      col.insert(docs_1, {w:1}, function(err, result) {
+      col.insert(docs_1, configuration.writeConcern(), function(err, result) {
         test.equal(null, err);
 
         db.admin().command({configureFailPoint: "maxTimeAlwaysTimeOut", mode: "alwaysOn"}, function(err, result) {

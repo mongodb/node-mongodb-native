@@ -4,7 +4,7 @@ var mongodb = require("../../lib/mongodb"),
 
 var db = new mongodb.Db('test_db', new mongodb.Server("127.0.0.1", 27017, {
   auto_reconnect: true
-}), {w:1});
+}), configuration.writeConcern());
 
 // open connection
 db.open(function(err, client) {
