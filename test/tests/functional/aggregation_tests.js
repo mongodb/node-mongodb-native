@@ -257,16 +257,16 @@ exports.shouldCorrectlyPassReadPreference = {
     db.open(function(err, db) {
       // Create a collection
       var collection = db.collection('shouldCorrectlyFailAndReturnError');
-      // Override the command object for the db
-      var _command = db.command;        
-      db.command = function(selector, options, callback) {
-          var args = Array.prototype.slice.call(arguments, 0);
-          test.equal("secondary", options.readPreference);
-        _command.apply(db, args);
-      }
 
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        // Override the command object for the db
+        var _command = db.command;        
+        db.command = function(selector, options, callback) {
+            var args = Array.prototype.slice.call(arguments, 0);
+            test.equal("secondary", options.readPreference);
+          _command.apply(db, args);
+        }
         
         // Execute aggregate
         collection.aggregate(
@@ -574,11 +574,17 @@ exports['Should correctly write the results out to a new collection'] = {
  * @ignore
  */
 exports['Should correctly use allowDiskUse when performing an aggregation'] = {
+<<<<<<< HEAD
   metadata: {
     requires: {
       mongodb: ">2.5.3"
     }
   },
+=======
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.6.0"},
+>>>>>>> 1.4
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -697,12 +703,20 @@ exports['Should correctly use allowDiskUse when performing an aggregation with a
  * @ignore
  */
 exports['Should correctly use aggregation as a cursor'] = {
+<<<<<<< HEAD
   metadata: {
     requires: {
         mongodb: ">2.5.3"
       , node: ">0.10.0"
     }
   },
+=======
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {mongodb: ">2.6.0"},
+  requires: {serverType: 'Server'},
+  requires: {node: ">0.10.0"},
+>>>>>>> 1.4
   
   // The actual test we wish to run
   test: function(configure, test) {
