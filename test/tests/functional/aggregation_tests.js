@@ -247,16 +247,16 @@ exports.shouldCorrectlyPassReadPreference = {
     db.open(function(err, db) {
       // Create a collection
       var collection = db.collection('shouldCorrectlyFailAndReturnError');
-      // Override the command object for the db
-      var _command = db.command;        
-      db.command = function(selector, options, callback) {
-          var args = Array.prototype.slice.call(arguments, 0);
-          test.equal("secondary", options.readPreference);
-        _command.apply(db, args);
-      }
 
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        // Override the command object for the db
+        var _command = db.command;        
+        db.command = function(selector, options, callback) {
+            var args = Array.prototype.slice.call(arguments, 0);
+            test.equal("secondary", options.readPreference);
+          _command.apply(db, args);
+        }
         
         // Execute aggregate
         collection.aggregate(

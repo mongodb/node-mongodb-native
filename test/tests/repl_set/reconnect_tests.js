@@ -60,28 +60,28 @@ exports['Should retrieve correct count after primary killed'] = function(configu
   });
 }
 
-/**
- * @ignore
- */
-exports['Should correctly throw timeout for replication to servers on inserts'] = function(configuration, test) {
-  var db = configuration.db();
+// /**
+//  * @ignore
+//  */
+// exports['Should correctly throw timeout for replication to servers on inserts'] = function(configuration, test) {
+//   var db = configuration.db();
 
-  // Drop collection on replicaset
-  db.dropCollection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts', function(err, r) {
+//   // Drop collection on replicaset
+//   db.dropCollection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts', function(err, r) {
 
-    var collection = db.collection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts');
-    // Insert a dummy document
-    collection.insert({a:20}, {w:7, wtimeout: 2000}, function(err, r) {
-      // console.log("=========================================")
-      // console.dir(err)
-      // console.dir(r)
-      test.ok(err != null);
-      // test.ok(err.err.indexOf("time") != -1);
-      // test.equal(true, err.wtimeout);
-      test.done();
-    });
-  });
-}
+//     var collection = db.collection('shouldCorrectlyThrowTimeoutForReplicationToServersOnInserts');
+//     // Insert a dummy document
+//     collection.insert({a:20}, {w:7, wtimeout: 2000}, function(err, r) {
+//       console.log("=========================================")
+//       console.dir(err)
+//       console.dir(r)
+//       test.ok(err != null);
+//       // test.ok(err.err.indexOf("time") != -1);
+//       // test.equal(true, err.wtimeout);
+//       test.done();
+//     });
+//   });
+// }
 
 /**
  * @ignore
