@@ -35,7 +35,7 @@ exports['Should correctly execute unordered batch with no errors'] = {
         test.equal(2, result.nInserted);
         test.equal(1, result.nUpserted);
         test.equal(1, result.nMatched);
-        test.equal(1, result.nModified);
+        test.ok(1 == result.nModified || result.nModified == null);
         test.equal(1, result.nRemoved);
 
         var upserts = result.getUpsertedIds();
@@ -86,7 +86,7 @@ exports['Should correctly handle single unordered batch API'] = {
           test.equal(2, result.nInserted);
           test.equal(0, result.nUpserted);
           test.equal(0, result.nMatched);
-          test.equal(0, result.nModified);
+          test.ok(0 == result.nModified || result.nModified == null);
           test.equal(true, result.hasWriteErrors());
           test.equal(1, result.getWriteErrorCount());
 
@@ -301,7 +301,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
           test.equal(0, result.nInserted);
           test.equal(0, result.nMatched);
           test.equal(0, result.nUpserted);
-          test.equal(0, result.nModified);
+          test.ok(0 == result.nModified || result.nModified == null);
           test.equal(true, result.hasWriteErrors());
           test.ok(1, result.getWriteErrorCount());
 
@@ -322,7 +322,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
             test.equal(0, result.nInserted);
             test.equal(0, result.nMatched);
             test.equal(0, result.nUpserted);
-            test.equal(0, result.nModified);
+            test.ok(0 == result.nModified || result.nModified == null);
             test.equal(true, result.hasWriteErrors());
             test.ok(1, result.getWriteErrorCount());
 
@@ -342,7 +342,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
               test.equal(0, result.nInserted);
               test.equal(0, result.nMatched);
               test.equal(0, result.nUpserted);
-              test.equal(0, result.nModified);
+              test.ok(0 == result.nModified || result.nModified == null);
               test.equal(true, result.hasWriteErrors());
               test.ok(1, result.getWriteErrorCount());
 
@@ -440,7 +440,7 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
           // Test basic settings
           test.equal(2, result.nInserted);
           test.equal(2, result.nUpserted);
-          test.equal(0, result.nModified);
+          test.ok(0 == result.nModified || result.nModified == null);
           test.equal(0, result.nRemoved);
           test.equal(true, result.hasWriteErrors());
           test.ok(1, result.getWriteErrorCount());
@@ -491,7 +491,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
         test.equal(1, result.nUpserted);
         test.equal(0, result.nInserted);
         test.equal(0, result.nMatched);
-        test.equal(0, result.nModified);
+        test.ok(0 == result.nModified || result.nModified == null);
         test.equal(0, result.nRemoved);
         
         var upserts = result.getUpsertedIds();
