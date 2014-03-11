@@ -1,12 +1,11 @@
 var MongoDBTopologyFilter = function() {
-	var Server = require('../../lib/mongodb').Server
-		, ReplSet = require('../../lib/mongodb').ReplSet
-		, Mongos = require('../../lib/mongodb').Mongos;
-
   // Keep the server config
   var serverConfig = null;
 
   this.beforeStart = function(object, callback) {
+    var Server = require('../../lib/mongodb').Server
+      , ReplSet = require('../../lib/mongodb').ReplSet
+      , Mongos = require('../../lib/mongodb').Mongos;
     // Get the first configuration
     var configuration = object.configurations[0];
     

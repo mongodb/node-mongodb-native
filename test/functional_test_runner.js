@@ -1,5 +1,6 @@
 var Runner = require('integra').Runner
 	, Cover = require('integra').Cover
+	, RCover = require('integra').RCover
 	, NodeVersionFilter = require('./filters/node_version_filter')
 	, MongoDBVersionFilter = require('./filters/mongodb_version_filter')
 	, MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
@@ -302,46 +303,46 @@ var runner = new Runner({
 });
 
 var testFiles =[
-		'/test/tests/functional/mongo_reply_parser_tests.js'
-  , '/test/tests/functional/connection_pool_tests.js'
-  , '/test/tests/functional/gridstore/readstream_tests.js'
-  , '/test/tests/functional/gridstore/grid_tests.js'
-  , '/test/tests/functional/gridstore/gridstore_direct_streaming_tests.js'
-  , '/test/tests/functional/gridstore/gridstore_tests.js'
-  , '/test/tests/functional/gridstore/gridstore_stream_tests.js'
-  , '/test/tests/functional/gridstore/gridstore_file_tests.js'
-  , '/test/tests/functional/util_tests.js'
-  , '/test/tests/functional/multiple_db_tests.js'
-  , '/test/tests/functional/logging_tests.js'
-  , '/test/tests/functional/custom_pk_tests.js'
-  , '/test/tests/functional/geo_tests.js'
-  , '/test/tests/functional/write_preferences_tests.js'
-  , '/test/tests/functional/remove_tests.js'
-  , '/test/tests/functional/unicode_tests.js'
-  , '/test/tests/functional/raw_tests.js'
-  , '/test/tests/functional/mapreduce_tests.js'
-  , '/test/tests/functional/cursorstream_tests.js'
-  , '/test/tests/functional/index_tests.js'
-  , '/test/tests/functional/cursor_tests.js'
-  , '/test/tests/functional/find_tests.js'
-  , '/test/tests/functional/insert_tests.js'
-  , '/test/tests/functional/admin_mode_tests.js'
-  , '/test/tests/functional/aggregation_tests.js'
-  , '/test/tests/functional/exception_tests.js'
-  , '/test/tests/functional/error_tests.js'
-  , '/test/tests/functional/command_generation_tests.js'
-  , '/test/tests/functional/uri_tests.js'
-  , '/test/tests/functional/url_parser_tests.js'
-  , '/test/tests/functional/objectid_tests.js'
-  , '/test/tests/functional/connection_tests.js'
-  , '/test/tests/functional/collection_tests.js'
-  , '/test/tests/functional/db_tests.js'
-  , '/test/tests/functional/read_preferences_tests.js'
-  // , '/test/tests/functional/fluent_api/aggregation_tests.js'
-  , '/test/tests/functional/maxtimems_tests.js'
-  , '/test/tests/functional/mongo_client_tests.js'
-  , '/test/tests/functional/fluent_api/batch_write_ordered_tests.js'
-  , '/test/tests/functional/fluent_api/batch_write_unordered_tests.js'
+		// '/test/tests/functional/mongo_reply_parser_tests.js'
+  // , '/test/tests/functional/connection_pool_tests.js'
+  // , '/test/tests/functional/gridstore/readstream_tests.js'
+  // , '/test/tests/functional/gridstore/grid_tests.js'
+  // , '/test/tests/functional/gridstore/gridstore_direct_streaming_tests.js'
+  // , '/test/tests/functional/gridstore/gridstore_tests.js'
+  // , '/test/tests/functional/gridstore/gridstore_stream_tests.js'
+  // , '/test/tests/functional/gridstore/gridstore_file_tests.js'
+  // , '/test/tests/functional/util_tests.js'
+  // , '/test/tests/functional/multiple_db_tests.js'
+  // , '/test/tests/functional/logging_tests.js'
+  // , '/test/tests/functional/custom_pk_tests.js'
+  // , '/test/tests/functional/geo_tests.js'
+  // , '/test/tests/functional/write_preferences_tests.js'
+  // , '/test/tests/functional/remove_tests.js'
+  // , '/test/tests/functional/unicode_tests.js'
+  // , '/test/tests/functional/raw_tests.js'
+  // , '/test/tests/functional/mapreduce_tests.js'
+  // , '/test/tests/functional/cursorstream_tests.js'
+  // , '/test/tests/functional/index_tests.js'
+  // , '/test/tests/functional/cursor_tests.js'
+  // , '/test/tests/functional/find_tests.js'
+  // , '/test/tests/functional/insert_tests.js'
+  // , '/test/tests/functional/admin_mode_tests.js'
+  // , '/test/tests/functional/aggregation_tests.js'
+  // , '/test/tests/functional/exception_tests.js'
+  // , '/test/tests/functional/error_tests.js'
+  // , '/test/tests/functional/command_generation_tests.js'
+  // , '/test/tests/functional/uri_tests.js'
+  // , '/test/tests/functional/url_parser_tests.js'
+  // , '/test/tests/functional/objectid_tests.js'
+  // , '/test/tests/functional/connection_tests.js'
+  // , '/test/tests/functional/collection_tests.js'
+  // , '/test/tests/functional/db_tests.js'
+  // , '/test/tests/functional/read_preferences_tests.js'
+  // // , '/test/tests/functional/fluent_api/aggregation_tests.js'
+  // , '/test/tests/functional/maxtimems_tests.js'
+  // , '/test/tests/functional/mongo_client_tests.js'
+  // , '/test/tests/functional/fluent_api/batch_write_ordered_tests.js'
+  // , '/test/tests/functional/fluent_api/batch_write_unordered_tests.js'
   , '/test/tests/functional/fluent_api/batch_write_concerns_tests.js'
 ]
 
@@ -352,8 +353,13 @@ testFiles.forEach(function(t) {
 
 // // Add the Coverage plugin
 // runner.plugin(new Cover({
-// 	logLevel: "error"
+// 	logLevel: "info"
 // }));
+
+// Add the RCoverage plugin
+runner.plugin(new RCover({
+	logLevel: "info"
+}));
 
 // Add a Node version plugin
 runner.plugin(new NodeVersionFilter());
