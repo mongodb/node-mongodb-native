@@ -223,6 +223,7 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
     var db = new Db('foo', replSet, {w:0});
     db.open(function(err, p_db) {
       test.ok(err != null);
+      test.equal(p_db, null);
       test.done();
     });
   });
@@ -267,8 +268,12 @@ exports.shouldCorrectlyConnectToSSLBasedReplicaset = function(configuration, tes
     var db = new Db('foo', replSet, {w:0});
     db.open(function(err, p_db) {
       test.equal(null, err);
-      test.done();
-      p_db.close();
+      test.ok(!!p_db);
+      p_db.collection('test').find({}, function(error) {
+        test.equal(null, error);
+        test.done();
+        p_db.close();
+      });
     });
   });
 }
@@ -306,6 +311,7 @@ exports.shouldFailToValidateServerSSLCertificate = function(configuration, test)
     db.open(function(err, p_db) {
       test.ok(err != null);
       test.ok(err instanceof Error);
+      test.ok(!p_db);
       test.done();
     });
   });
@@ -363,6 +369,7 @@ exports.shouldFailDueToNotPresentingCertificateToServer = function(configuration
     db1.open(function(err, db) {  
       // console.log(err)
       test.ok(err != null);
+      test.ok(!db);
       test.done();      
     })      
   });
@@ -488,6 +495,7 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = function(configuration
   serverManager.start(true, function() {
     db1.open(function(err, db) {  
       test.ok(err != null);
+      test.ok(!db);
       test.done();      
     })      
   });
