@@ -5,7 +5,7 @@ Now to shamelessly plug my driver. It can be downloaded via npm, or fetched from
 
 `npm install mongodb`
 
-or go fetch it from github at [https://github.com/christkv/node-mongodb-native](https://github.com/christkv/node-mongodb-native)
+or go fetch it from github at [https://github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)
 
 Once this business is taken care of, let's move through the types available for the driver and then how to connect to your Mongo DB instance before facing the usage of some CRUD operations.
 
