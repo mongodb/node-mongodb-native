@@ -2059,3 +2059,70 @@ exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = function(configuration,
 	  });
 	});
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly append content to file and have correct chunk numbers'] = function(configuration, test) {
+  var GridStore = configuration.getMongoPackage().GridStore
+    , ObjectID = configuration.getMongoPackage().ObjectID;
+
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    test.equal(null, err);
+    var chunkSize = 256*1024;  // Standard 256KB chunks
+    // Our file ID
+    var fileId = new ObjectID();
+
+    // Open a new file
+    var gridStore = new GridStore(db, fileId, 'w', { chunkSize: chunkSize, root: "chunkCheck" });
+
+    // Open the new file
+    gridStore.open(function(err, gridStore) {
+      test.equal(null, err);
+
+      // Create a chunkSize Buffer
+      var buffer = new Buffer(chunkSize); 
+
+      // Write the buffer
+      gridStore.write(buffer, function(err, gridStore) {
+        test.equal(null, err);
+
+        // Close the file
+        gridStore.close(function(err, result) {
+          test.equal(null, err);
+
+          // Open the same file, this time for appending data
+          // No need to specify chunkSize...
+          gridStore = new GridStore(db, fileId, 'w+', {root: "chunkCheck"});
+
+          // Open the file again
+          gridStore.open(function(err, gridStore) {
+            test.equal(null, err);
+
+            // Write the buffer again
+            gridStore.write(buffer, function(err, gridStore) {
+              test.equal(null, err);
+
+              // Close the file again
+              gridStore.close(function(err, result) {
+                test.equal(null, err);
+
+                var chunkCollection = gridStore.chunkCollection();
+                chunkCollection.find({files_id: fileId}, {data:0}).sort({n: 1}).toArray(function(err, chunks) {
+                  test.equal(null, err);
+                  test.equal(2, chunks.length);
+                  test.equal(0, chunks[0].n);
+                  test.equal(1, chunks[1].n);
+
+                  db.close();
+                  test.done();
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
