@@ -1894,9 +1894,11 @@ exports.shouldCorrectlyExecuteExhaustQuery = function(configuration, test) {
 
     // Create a collection we want to drop later
     db.collection('shouldCorrectlyExecuteExhaustQuery', function(err, collection) {
-      var docs = [];
-      for(var i = 0; i < 4000; i++) {
-        docs.push({
+      test.equal(null, err);
+
+      var docs1 = [];
+      for(var i = 0; i < 1000; i++) {
+        docs1.push({
           a: 1,
           b: "helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld",
           c: new Binary(new Buffer(1024))
@@ -1904,14 +1906,29 @@ exports.shouldCorrectlyExecuteExhaustQuery = function(configuration, test) {
       }
 
       // Insert a bunch of documents
-      collection.insert(docs, {w:1}, function(err, result) {
-        // Peform a simple find and return all the documents
-        collection.find({}, {exhaust:true}).toArray(function(err, docs2) {
-          test.equal(null, err);
-          test.equal(docs.length, docs2.length)
+      collection.insert(docs1, {w:1}, function(err, result) {
+        test.equal(null, err);
 
-          db.close();
-          test.done();
+        for(var i = 0; i < 1000; i++) {
+          var docs2 = [];
+          docs2.push({
+            a: 1,
+            b: "helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld helloworld",
+            c: new Binary(new Buffer(1024))
+          })
+        }
+
+        collection.insert(docs2, {w:1}, function(err, result) {
+          test.equal(null, err);
+  
+          // Peform a simple find and return all the documents
+          collection.find({}, {exhaust:true}).toArray(function(err, docs3) {
+            test.equal(null, err);
+            test.equal(docs1.length + docs2.length, docs3.length)
+
+            db.close();
+            test.done();
+          });
         });
       });
     });
