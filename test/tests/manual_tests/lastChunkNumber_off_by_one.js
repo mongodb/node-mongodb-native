@@ -1,7 +1,9 @@
-var Db = require('mongodb').Db;
-var GridStore = require('mongodb').GridStore;
-var Server = require('mongodb').Server;
-var ObjectID = require('mongodb').ObjectID;
+// var m = require('mongodb');
+var m = require('../../../lib/mongodb');
+var Db = m.Db;
+var GridStore = m.GridStore;
+var Server = m.Server;
+var ObjectID = m.ObjectID;
 var assert = require('assert');
 
 var chunkSize = 256*1024;  // Standard 256KB chunks
@@ -9,6 +11,7 @@ var chunkSize = 256*1024;  // Standard 256KB chunks
 var db = new Db('test', new Server('127.0.0.1', 27017));
 // Establish connection to db
 db.open(function(err, db) {
+  assert.equal(err, null);
   // Our file ID
   var fileId = new ObjectID();
 
