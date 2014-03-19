@@ -1088,4 +1088,76 @@ exports['Ensure tag read goes only to the correct server'] = function(configurat
   })
 }
 
+/**
+ * @ignore
+ */
+exports['should select correct connection using statistics strategy'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , MongoClient = mongo.MongoClient
+    , ReadPreference = mongo.ReadPreference
+    , ReplSetServers = mongo.ReplSetServers
+    , Server = mongo.Server
+    , Db = mongo.Db;
 
+  var replicasetManager = configuration.getReplicasetManager();
+
+  // Replica configuration
+  var replSet = new ReplSetServers([
+      new Server(replicasetManager.host, replicasetManager.ports[0]),
+      new Server(replicasetManager.host, replicasetManager.ports[1]),
+      new Server(replicasetManager.host, replicasetManager.ports[2])
+    ],
+    { strategy:'statistical' }
+  );
+
+  var db = new Db('statistics_strategy', replSet, { w:0 });
+  db.open(function(error, db) {
+    var checkoutReaderMethod = db.serverConfig.checkoutReader;
+    var readerReturnValues = [];
+
+    db.serverConfig.checkoutReader = function(readPreference) {
+      var ret = checkoutReaderMethod.apply(this, [readPreference]);
+      readerReturnValues.push({ connection : ret });
+      return ret;
+    };
+
+    var collection = db.collection("statistics_strategy");
+    var keys = Object.keys(replSet._state.secondaries);
+    test.equal(2, keys.length);
+    test.equal(replSet._state.secondaries[keys[0]].runtimeStats.queryStats.sScore, 0);
+    test.equal(replSet._state.secondaries[keys[1]].runtimeStats.queryStats.sScore, 0);
+
+    collection.insert({ a : 1 }, function(error) {
+      collection.find({ $where : "sleep(1000)" }).setReadPreference(ReadPreference.SECONDARY).toArray(function(error, items) {
+        test.equal(1, readerReturnValues.length);
+        test.ok(replSet._state.secondaries[keys[0]].allRawConnections().indexOf(readerReturnValues[0].connection) != -1 ||
+            replSet._state.secondaries[keys[1]].allRawConnections().indexOf(readerReturnValues[0].connection) != -1);
+
+        var expectedServer;
+
+        if (replSet._state.secondaries[keys[0]].allRawConnections().indexOf(readerReturnValues[0].connection) != -1) {
+          expectedServer = replSet._state.secondaries[keys[1]];
+          test.ok(replSet._state.secondaries[keys[0]].runtimeStats.queryStats.sScore > 0);
+        } else if (replSet._state.secondaries[keys[1]].allRawConnections().indexOf(readerReturnValues[0].connection) != -1) {
+          expectedServer = replSet._state.secondaries[keys[0]];
+          test.ok(replSet._state.secondaries[keys[1]].runtimeStats.queryStats.sScore > 0);
+        }
+
+        collection.find({ $where : "sleep(10)" }).setReadPreference(ReadPreference.SECONDARY).toArray(function(error, items) {
+          test.equal(2, readerReturnValues.length);
+          test.ok(readerReturnValues[0].connection !== readerReturnValues[1].connection);
+          test.ok(expectedServer.allRawConnections().indexOf(readerReturnValues[1].connection) != -1);
+
+          keys = Object.keys(replSet._state.secondaries);
+          test.equal(2, keys.length);
+
+          test.ok(replSet._state.secondaries[keys[0]].runtimeStats.queryStats.sScore > 0);
+          test.ok(replSet._state.secondaries[keys[1]].runtimeStats.queryStats.sScore > 0);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+};

@@ -180,6 +180,41 @@ The url format can be used with MongoClient.connect. Where possible MongoClient 
 
 Notice that when connecting to the sharded system it's pretty much the same url as for connecting to the replicaset. This is because the driver itself figures out if it's a replicaset or a set of Mongos proxies it's connecting to. No special care is needed to specify if it's one or the other. This is in contrast to having to use the **ReplSet** or **Mongos** instances when using the **open** command.
 
+## MongoClient connection pooling
+A Connection Pool is a cache of database connections maintained by the driver so that connections can be re-used when new connections to the database are required. To reduce the number of connection pools created by your application, we recommend calling **MongoClient.connect once** and reusing the database variable returned by the callback:
+
+    var express = require('express');
+    var mongodb = require('mongodb');
+    var app = express();
+ 
+    var MongoClient = require('mongodb').MongoClient;
+    var db;
+ 
+    // Initialize connection once
+    MongoClient.connect("mongodb://localhost:27017/integration_test", function(err, database) {
+      if(err) throw err;
+ 
+      db = database;
+
+      // Start the application after the database connection is ready
+      app.listen(3000);
+      console.log("Listening on port 3000");
+    });
+ 
+    // Reuse database object in request handlers
+    app.get("/", function(req, res) { 
+      db.collection("replicaset_mongo_client_collection").find({}, function(err, docs) {
+        docs.each(function(err, doc) {
+          if(doc) {
+            console.log(doc);
+          }
+          else {
+            res.end();
+          }
+        });
+      });
+    });
+
 ## MongoClient.connect options
 The connect function also takes a hash of options divided into db/server/replset/mongos allowing you to tweak options not directly supported by the unified url string format. To use these options you do pass in a hash like this:
 
