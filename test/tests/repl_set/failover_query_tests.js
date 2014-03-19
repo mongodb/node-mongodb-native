@@ -70,8 +70,6 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
     {strategy:'statistical', rs_name:replicasetManager.name}
   );
 
-  // console.log("=============================================== 0")
-
   // Ensure we have the right strategy
   test.ok(replSet.strategyInstance instanceof StatisticsStrategy);
 
@@ -81,28 +79,21 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
   var db = new Db('integration_test_', replSet, {w:0});
   // Trigger test once whole set is up
   db.on("fullsetup", function() {
-    // console.log("=============================================== 1")
     db.createCollection('testsets2', function(err, collection) {
-      // if(err){
-      //   console.dir(err)
-      // }
-      // console.log("=============================================== 2")
+      test.equal(null, err);
 
       // Insert a bunch of documents
       collection.insert([{a:20}, {b:30}, {c:40}, {d:50}], {safe: {w:'majority'}}, function(err, r) {
-        // console.log("=============================================== 3")
+        test.equal(null, err);
+
         // Select all documents
         collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
-        //collection.find().toArray(function(err, items) {
-          // console.log("=============================================== 4")
+          test.equal(null, err);
+
           collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
-          //collection.find().toArray(function(err, items) {
-            // console.log("=============================================== 5")
+            test.equal(null, err);
+  
             collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
-            //collection.find().toArray(function(err, items) {
-              console.log("=============================================== 6")
-              // console.dir(err)
-              // console.dir(items)
               test.equal(null, err);
               test.equal(4, items.length);
 
@@ -111,17 +102,10 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
               
               // Check that we have correct strategy objects
               var keys = Object.keys(replSet._state.secondaries);
-              // console.dir("===== keys")
-              // console.dir(keys)
               for(var i = 0; i < keys.length; i++) {
                 var server = replSet._state.secondaries[keys[i]];
-                // console.dir(server.queryStats)
-                // console.dir("server.queryStats.numDataValues = " + server.queryStats.numDataValues)
                 totalNumberOfStrategyEntries += server.queryStats.numDataValues;
               }
-
-                // console.dir(replSet._state.master.queryStats)
-              // console.dir("replSet._state.master.queryStats.numDataValues = " + replSet._state.master.queryStats.numDataValues)
 
               db.close();
               test.ok(totalNumberOfStrategyEntries > 0);
@@ -134,7 +118,6 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
   });
 
   db.open(function(err, p_db) {
-    // console.log("=============================================== 0 : 1")
     db = p_db;
   })
 }

@@ -59,7 +59,6 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = function(configur
         // Use geoNear command to find document
         collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
           test.equal(1, docs.results.length);
-          
           db.close();
           test.done();
         });          
