@@ -92,15 +92,15 @@ exports['Should correctly pick a statistics strategy for secondary'] = function(
       collection.insert([{a:20}, {b:30}, {c:40}, {d:50}], {safe: {w:'majority'}}, function(err, r) {
         // console.log("=============================================== 3")
         // Select all documents
-        // collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
-        collection.find().toArray(function(err, items) {
+        collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
+        //collection.find().toArray(function(err, items) {
           // console.log("=============================================== 4")
-          // collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
-          collection.find().toArray(function(err, items) {
+          collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
+          //collection.find().toArray(function(err, items) {
             // console.log("=============================================== 5")
-            // collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
-            collection.find().toArray(function(err, items) {
-              // console.log("=============================================== 6")
+            collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
+            //collection.find().toArray(function(err, items) {
+              console.log("=============================================== 6")
               // console.dir(err)
               // console.dir(items)
               test.equal(null, err);
