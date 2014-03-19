@@ -97,8 +97,6 @@ exports['Should Correctly Pick lowest ping time'] = function(configuration, test
     var connection = db.serverConfig.checkoutReader(new ReadPreference(ReadPreference.NEAREST));
     // Should match the first secondary server
     var matching_server = db.serverConfig._state.secondaries[keys[0]];
-    // console.log(matching_server.host + "=" + connection.socketOptions.host)
-    // console.log(matching_server.port + "=" + connection.socketOptions.port)
 
     // Host and port should match
     test.equal(matching_server.host, connection.socketOptions.host);
@@ -220,14 +218,19 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = function(c
   var data = fs.readFileSync('./test/tests/functional/gridstore/test_gs_weird_bug.png');
 
   gridStore.open(function(err, gridStore) {
+    test.equal(null, err);
 
     // Write the file using write
     gridStore.write(data, function(err, doc) {
+      test.equal(null, err);
+  
       gridStore.close(function(err, doc) {
+        test.equal(null, err);
 
         // Save checkout function
         var checkout = client.serverConfig.checkoutReader;
-        // // Set up our checker method
+        
+        // Set up our checker method
         client.serverConfig.checkoutReader = function() {
           var args = Array.prototype.slice.call(arguments, 0);
           test.equal(ReadPreference.SECONDARY, args[0]);
@@ -237,6 +240,7 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = function(c
         // Read the file using readBuffer
         new GridStore(client, doc._id, 'r', {readPreference:ReadPreference.SECONDARY}).open(function(err, gridStore) {
           gridStore.read(function(err, data2) {
+            test.equal(null, err);
             test.equal(data.toString('base64'), data2.toString('base64'));
             client.serverConfig.checkoutReader = checkout;
 

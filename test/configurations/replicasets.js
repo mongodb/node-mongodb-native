@@ -52,7 +52,7 @@ var replica_set_config = function(options) {
               {rs_name:replicasetManager.name, haInterval: 2000, strategy: "none"}
             );
 
-        __db = self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
+        __db = self._db = new Db('integration_tests', replSet, {w:1, native_parser: false});
         self._db.open(function(err, _db) {
           var db2 = _db.db('node-native-test');
           db2.addUser("me", "secret", {w:3}, function(err, result) {
@@ -240,7 +240,7 @@ var replica_set_config_auth = function(options) {
           {rs_name:replicasetManager.name}
         );
 
-        self._db = new Db('integration_tests', replSet, {w:0, native_parser: false});
+        self._db = new Db('integration_tests', replSet, {w:1, native_parser: false});
         self._db.open(function(err, _db) {
           if(err) throw err;
           callback();
