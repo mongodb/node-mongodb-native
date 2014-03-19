@@ -566,3 +566,42 @@ exports['Should throw an error when no operations in unordered batch'] = {
     });
   }
 }
+
+exports['Should correctly execute unordered batch using w:0'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {serverType: 'Server'},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      // Get the collection
+      var col = db.collection('batch_write_ordered_ops_9');
+      var threw = false;
+
+      var bulk = col.initializeUnorderedBulkOp();
+      for(var i = 0; i < 100; i++) {
+        bulk.insert({a:1});
+      }
+
+      bulk.find({b:1}).upsert().update({b:1});
+      bulk.find({c:1}).remove();
+
+      bulk.execute({w:0}, function(err, result) {
+        test.equal(null, err);
+        // Check state of result
+        test.equal(0, result.nUpserted);
+        test.equal(0, result.nInserted);
+        test.equal(0, result.nMatched);
+        test.equal(0, result.nModified);
+        test.equal(0, result.nRemoved);
+        test.equal(false, result.hasWriteErrors());
+
+        db.close();
+        test.done();        
+      });
+    });
+  }
+}
+
