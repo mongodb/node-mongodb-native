@@ -127,100 +127,100 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
   }
 }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlyExecuteCursorExplain = {
-  metadata: {},
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldCorrectlyExecuteCursorExplain = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_explain', function(err, collection) {
-        collection.insert({'a':1}, configuration.writeConcern(), function(err, r) {
-          collection.find({'a':1}).explain(function(err, explaination) {
-            test.ok(explaination.cursor != null);
-            test.ok(explaination.n.constructor == Number);
-            test.ok(explaination.millis.constructor == Number);
-            test.ok(explaination.nscanned.constructor == Number);
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_explain', function(err, collection) {
+//         collection.insert({'a':1}, configuration.writeConcern(), function(err, r) {
+//           collection.find({'a':1}).explain(function(err, explaination) {
+//             test.ok(explaination.cursor != null);
+//             test.ok(explaination.n.constructor == Number);
+//             test.ok(explaination.millis.constructor == Number);
+//             test.ok(explaination.nscanned.constructor == Number);
 
-            // Let's close the db
-            db.close();
-            test.done();
-          });
-        });
-      });
-    });
-  }
-}
+//             // Let's close the db
+//             db.close();
+//             test.done();
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlyExecuteCursorCount = {
-  metadata: {},
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldCorrectlyExecuteCursorCount = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_count', function(err, collection) {
-        collection.find().count(function(err, count) {
-          test.equal(0, count);
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_count', function(err, collection) {
+//         collection.find().count(function(err, count) {
+//           test.equal(0, count);
 
-          Step(
-            function insert() {
-              var group = this.group();
+//           Step(
+//             function insert() {
+//               var group = this.group();
 
-              for(var i = 0; i < 10; i++) {
-                collection.insert({'x':i}, configuration.writeConcern(), group());
-              }
-            },
+//               for(var i = 0; i < 10; i++) {
+//                 collection.insert({'x':i}, configuration.writeConcern(), group());
+//               }
+//             },
 
-            function finished() {
-              collection.find().count(function(err, count) {
-                test.equal(10, count);
-                test.ok(count.constructor == Number);
-              });
+//             function finished() {
+//               collection.find().count(function(err, count) {
+//                 test.equal(10, count);
+//                 test.ok(count.constructor == Number);
+//               });
 
-              collection.find({}, {'limit':5}).count(function(err, count) {
-                test.equal(10, count);
-              });
+//               collection.find({}, {'limit':5}).count(function(err, count) {
+//                 test.equal(10, count);
+//               });
 
-              collection.find({}, {'skip':5}).count(function(err, count) {
-                test.equal(10, count);
-              });
+//               collection.find({}, {'skip':5}).count(function(err, count) {
+//                 test.equal(10, count);
+//               });
 
-              var cursor = collection.find();
-              cursor.count(function(err, count) {
-                test.equal(10, count);
+//               var cursor = collection.find();
+//               cursor.count(function(err, count) {
+//                 test.equal(10, count);
 
-                cursor.each(function(err, item) {
-                  if(item == null) {
-                    cursor.count(function(err, count2) {
-                      test.equal(10, count2);
-                      test.equal(count, count2);
-                      // Let's close the db
-                      db.close();
-                      test.done();
-                    });
-                  }
-                });
-              });
+//                 cursor.each(function(err, item) {
+//                   if(item == null) {
+//                     cursor.count(function(err, count2) {
+//                       test.equal(10, count2);
+//                       test.equal(count, count2);
+//                       // Let's close the db
+//                       db.close();
+//                       test.done();
+//                     });
+//                   }
+//                 });
+//               });
 
-              db.collection('acollectionthatdoesn').count(function(err, count) {
-                test.equal(0, count);
-              });
-            }
-          )
-        });
-      });
-    });
-  }
-}
+//               db.collection('acollectionthatdoesn').count(function(err, count) {
+//                 test.equal(0, count);
+//               });
+//             }
+//           )
+//         });
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore
@@ -376,45 +376,45 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
   }
 }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlyHandleLimitOnCursor = {
-  metadata: {},
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldCorrectlyHandleLimitOnCursor = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_cursor_limit', function(err, collection) {
-        Step(
-          function insert() {
-            var group = this.group();
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_cursor_limit', function(err, collection) {
+//         Step(
+//           function insert() {
+//             var group = this.group();
 
-            for(var i = 0; i < 10; i++) {
-              collection.save({'x':1}, configuration.writeConcern(), group());
-            }
-          },
+//             for(var i = 0; i < 10; i++) {
+//               collection.save({'x':1}, configuration.writeConcern(), group());
+//             }
+//           },
 
-          function finished() {
-            collection.find().count(function(err, count) {
-              test.equal(10, count);
-            });
+//           function finished() {
+//             collection.find().count(function(err, count) {
+//               test.equal(10, count);
+//             });
 
-            collection.find().limit(5).toArray(function(err, items) {
-              test.equal(5, items.length);
+//             collection.find().limit(5).toArray(function(err, items) {
+//               test.equal(5, items.length);
               
-              // Let's close the db
-              db.close();
-              test.done();
-            });
-          }
-        );
-      });
-    });
-  }
-}
+//               // Let's close the db
+//               db.close();
+//               test.done();
+//             });
+//           }
+//         );
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore
@@ -452,41 +452,41 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
   }
 }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
-  metadata: {},
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_cursor_any_negative_limit', function(err, collection) {
-        Step(
-          function insert() {
-            var group = this.group();
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_cursor_any_negative_limit', function(err, collection) {
+//         Step(
+//           function insert() {
+//             var group = this.group();
 
-            for(var i = 0; i < 10; i++) {
-              collection.save({'x':1}, configuration.writeConcern(), group());
-            }
-          },
+//             for(var i = 0; i < 10; i++) {
+//               collection.save({'x':1}, configuration.writeConcern(), group());
+//             }
+//           },
 
-          function finished() {
-            collection.find().limit(-5).toArray(function(err, items) {
-              test.equal(5, items.length);
+//           function finished() {
+//             collection.find().limit(-5).toArray(function(err, items) {
+//               test.equal(5, items.length);
               
-              // Let's close the db
-              db.close();
-              test.done();
-            });
-          }
-        );
-      });
-    });
-  }
-}
+//               // Let's close the db
+//               db.close();
+//               test.done();
+//             });
+//           }
+//         );
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore
@@ -551,62 +551,62 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
   }
 }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlySkipRecordsOnCursor = {
-  metadata: {},
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldCorrectlySkipRecordsOnCursor = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_skip', function(err, collection) {
-        Step(
-          function insert() {
-            var group = this.group();
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_skip', function(err, collection) {
+//         Step(
+//           function insert() {
+//             var group = this.group();
 
-            for(var i = 0; i < 10; i++) {
-              collection.insert({'x':i}, configuration.writeConcern(), group());
-            }
-          },
+//             for(var i = 0; i < 10; i++) {
+//               collection.insert({'x':i}, configuration.writeConcern(), group());
+//             }
+//           },
 
-          function finished() {
-            collection.find(function(err, cursor) {
-              cursor.count(function(err, count) {
-                test.equal(10, count);
-              });
-            });
+//           function finished() {
+//             collection.find(function(err, cursor) {
+//               cursor.count(function(err, count) {
+//                 test.equal(10, count);
+//               });
+//             });
 
-            collection.find(function(err, cursor) {
-              cursor.toArray(function(err, items) {
-                test.equal(10, items.length);
+//             collection.find(function(err, cursor) {
+//               cursor.toArray(function(err, items) {
+//                 test.equal(10, items.length);
 
-                collection.find().skip(2).toArray(function(err, items2) {
-                  test.equal(8, items2.length);
+//                 collection.find().skip(2).toArray(function(err, items2) {
+//                   test.equal(8, items2.length);
 
-                  // Check that we have the same elements
-                  var numberEqual = 0;
-                  var sliced = items.slice(2, 10);
+//                   // Check that we have the same elements
+//                   var numberEqual = 0;
+//                   var sliced = items.slice(2, 10);
 
-                  for(var i = 0; i < sliced.length; i++) {
-                    if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                  }
-                  test.equal(8, numberEqual);
+//                   for(var i = 0; i < sliced.length; i++) {
+//                     if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+//                   }
+//                   test.equal(8, numberEqual);
 
-                  // Let's close the db
-                  db.close();
-                  test.done();
-                });
-              });
-            });
-          }
-        )
-      });
-    });
-  }
-}
+//                   // Let's close the db
+//                   db.close();
+//                   test.done();
+//                 });
+//               });
+//             });
+//           }
+//         )
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore
@@ -708,143 +708,143 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
   }
 }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlyHandleChangesInBatchSizes = {
-  metadata: {},
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldCorrectlyHandleChangesInBatchSizes = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_not_multiple_batch_size', function(err, collection) {
-        var records = 6;
-        var batchSize = 2;
-        var docs = [];
-        for(var i = 0; i < records; i++) {
-          docs.push({'a':i});
-        }
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_not_multiple_batch_size', function(err, collection) {
+//         var records = 6;
+//         var batchSize = 2;
+//         var docs = [];
+//         for(var i = 0; i < records; i++) {
+//           docs.push({'a':i});
+//         }
 
-        collection.insert(docs, configuration.writeConcern(), function() {
-          collection.find({}, {batchSize : batchSize}, function(err, cursor) {
-            //1st
-            cursor.nextObject(function(err, items) {
-              //cursor.items should contain 1 since nextObject already popped one
-              test.equal(1, cursor.items.length);
-              test.ok(items != null);
+//         collection.insert(docs, configuration.writeConcern(), function() {
+//           collection.find({}, {batchSize : batchSize}, function(err, cursor) {
+//             //1st
+//             cursor.nextObject(function(err, items) {
+//               //cursor.items should contain 1 since nextObject already popped one
+//               test.equal(1, cursor.items.length);
+//               test.ok(items != null);
 
-              //2nd
-              cursor.nextObject(function(err, items) {
-                test.equal(0, cursor.items.length);
-                test.ok(items != null);
+//               //2nd
+//               cursor.nextObject(function(err, items) {
+//                 test.equal(0, cursor.items.length);
+//                 test.ok(items != null);
 
-                //test batch size modification on the fly
-                batchSize = 3;
-                cursor.batchSize(batchSize);
+//                 //test batch size modification on the fly
+//                 batchSize = 3;
+//                 cursor.batchSize(batchSize);
 
-                //3rd
-                cursor.nextObject(function(err, items) {
-                  test.equal(2, cursor.items.length);
-                  test.ok(items != null);
+//                 //3rd
+//                 cursor.nextObject(function(err, items) {
+//                   test.equal(2, cursor.items.length);
+//                   test.ok(items != null);
 
-                  //4th
-                  cursor.nextObject(function(err, items) {
-                    test.equal(1, cursor.items.length);
-                    test.ok(items != null);
+//                   //4th
+//                   cursor.nextObject(function(err, items) {
+//                     test.equal(1, cursor.items.length);
+//                     test.ok(items != null);
 
-                    //5th
-                    cursor.nextObject(function(err, items) {
-                      test.equal(0, cursor.items.length);
-                      test.ok(items != null);
+//                     //5th
+//                     cursor.nextObject(function(err, items) {
+//                       test.equal(0, cursor.items.length);
+//                       test.ok(items != null);
 
-                      //6th
-                      cursor.nextObject(function(err, items) {
-                        test.equal(0, cursor.items.length);
-                        test.ok(items != null);
+//                       //6th
+//                       cursor.nextObject(function(err, items) {
+//                         test.equal(0, cursor.items.length);
+//                         test.ok(items != null);
 
-                        //No more
-                        cursor.nextObject(function(err, items) {
-                          test.ok(items == null);
-                          test.ok(cursor.isClosed());
+//                         //No more
+//                         cursor.nextObject(function(err, items) {
+//                           test.ok(items == null);
+//                           test.ok(cursor.isClosed());
 
-                          db.close();
-                          test.done();
-                        });
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  }
-}
+//                           db.close();
+//                           test.done();
+//                         });
+//                       });
+//                     });
+//                   });
+//                 });
+//               });
+//             });
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlyHandleBatchSize = {
-  metadata: {},
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldCorrectlyHandleBatchSize = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_multiple_batch_size', function(err, collection) {
-        //test with the last batch that is a multiple of batchSize
-        var records = 4;
-        var batchSize = 2;
-        var docs = [];
-        for(var i = 0; i < records; i++) {
-          docs.push({'a':i});
-        }
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_multiple_batch_size', function(err, collection) {
+//         //test with the last batch that is a multiple of batchSize
+//         var records = 4;
+//         var batchSize = 2;
+//         var docs = [];
+//         for(var i = 0; i < records; i++) {
+//           docs.push({'a':i});
+//         }
 
-        collection.insert(docs, configuration.writeConcern(), function() {
-          collection.find({}, {batchSize : batchSize}, function(err, cursor) {
-            //1st
-            cursor.nextObject(function(err, items) {
-              test.equal(1, cursor.items.length);
-              test.ok(items != null);
+//         collection.insert(docs, configuration.writeConcern(), function() {
+//           collection.find({}, {batchSize : batchSize}, function(err, cursor) {
+//             //1st
+//             cursor.nextObject(function(err, items) {
+//               test.equal(1, cursor.items.length);
+//               test.ok(items != null);
 
-              //2nd
-              cursor.nextObject(function(err, items) {
-                test.equal(0, cursor.items.length);
-                test.ok(items != null);
+//               //2nd
+//               cursor.nextObject(function(err, items) {
+//                 test.equal(0, cursor.items.length);
+//                 test.ok(items != null);
 
-                //3rd
-                cursor.nextObject(function(err, items) {
-                  test.equal(1, cursor.items.length);
-                  test.ok(items != null);
+//                 //3rd
+//                 cursor.nextObject(function(err, items) {
+//                   test.equal(1, cursor.items.length);
+//                   test.ok(items != null);
 
-                  //4th
-                  cursor.nextObject(function(err, items) {
-                    test.equal(0, cursor.items.length);
-                    test.ok(items != null);
+//                   //4th
+//                   cursor.nextObject(function(err, items) {
+//                     test.equal(0, cursor.items.length);
+//                     test.ok(items != null);
 
-                    //No more
-                    cursor.nextObject(function(err, items) {
-                      test.ok(items == null);
-                      test.ok(cursor.isClosed());
+//                     //No more
+//                     cursor.nextObject(function(err, items) {
+//                       test.ok(items == null);
+//                       test.ok(cursor.isClosed());
 
-                      db.close();
-                      test.done();
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  }
-}
+//                       db.close();
+//                       test.done();
+//                     });
+//                   });
+//                 });
+//               });
+//             });
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore
@@ -902,100 +902,100 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
   }
 }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldHandleLimitLessThanBatchSize = {
-  metadata: {},
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldHandleLimitLessThanBatchSize = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_limit_less_than_batch_size', function(err, collection) {
-        var limit = 2;
-        var records = 10;
-        var batchSize = 4;
-        var docs = [];
-        for(var i = 0; i < records; i++) {
-          docs.push({'a':i});
-        }
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_limit_less_than_batch_size', function(err, collection) {
+//         var limit = 2;
+//         var records = 10;
+//         var batchSize = 4;
+//         var docs = [];
+//         for(var i = 0; i < records; i++) {
+//           docs.push({'a':i});
+//         }
 
-        collection.insert(docs, configuration.writeConcern(), function() {
-          var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
-          //1st
-          cursor.nextObject(function(err, items) {
-            test.equal(1, cursor.items.length);
+//         collection.insert(docs, configuration.writeConcern(), function() {
+//           var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
+//           //1st
+//           cursor.nextObject(function(err, items) {
+//             test.equal(1, cursor.items.length);
 
-            //2nd
-            cursor.nextObject(function(err, items) {
-              test.equal(0, cursor.items.length);
+//             //2nd
+//             cursor.nextObject(function(err, items) {
+//               test.equal(0, cursor.items.length);
 
-              //No more
-              cursor.nextObject(function(err, items) {
-                test.ok(items == null);
-                test.ok(cursor.isClosed());
+//               //No more
+//               cursor.nextObject(function(err, items) {
+//                 test.ok(items == null);
+//                 test.ok(cursor.isClosed());
 
-                db.close();
-                test.done();
-              });
-            });
-          });
-        });
-      });
-    });
-  }
-}
+//                 db.close();
+//                 test.done();
+//               });
+//             });
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldHandleSkipLimitChaining = {
-  metadata: {},
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldHandleSkipLimitChaining = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_limit_skip_chaining', function(err, collection) {
-        Step(
-          function insert() {
-            var group = this.group();
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_limit_skip_chaining', function(err, collection) {
+//         Step(
+//           function insert() {
+//             var group = this.group();
 
-            for(var i = 0; i < 10; i++) {
-              collection.insert({'x':1}, configuration.writeConcern(), group());
-            }
-          },
+//             for(var i = 0; i < 10; i++) {
+//               collection.insert({'x':1}, configuration.writeConcern(), group());
+//             }
+//           },
 
-          function finished() {
-            collection.find().toArray(function(err, items) {
-              test.equal(10, items.length);
+//           function finished() {
+//             collection.find().toArray(function(err, items) {
+//               test.equal(10, items.length);
 
-              collection.find().limit(5).skip(3).toArray(function(err, items2) {
-                test.equal(5, items2.length);
+//               collection.find().limit(5).skip(3).toArray(function(err, items2) {
+//                 test.equal(5, items2.length);
 
-                // Check that we have the same elements
-                var numberEqual = 0;
-                var sliced = items.slice(3, 8);
+//                 // Check that we have the same elements
+//                 var numberEqual = 0;
+//                 var sliced = items.slice(3, 8);
 
-                for(var i = 0; i < sliced.length; i++) {
-                  if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                }
-                test.equal(5, numberEqual);
+//                 for(var i = 0; i < sliced.length; i++) {
+//                   if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+//                 }
+//                 test.equal(5, numberEqual);
 
-                // Let's close the db
-                db.close();
-                test.done();
-              });
-            });
-          }
-        )
-      });
-    });
-  }
-}
+//                 // Let's close the db
+//                 db.close();
+//                 test.done();
+//               });
+//             });
+//           }
+//         )
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore

@@ -2295,8 +2295,8 @@ exports['Should correctly append content to file and have correct chunk numbers'
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.getMongoPackage().GridStore
-      , ObjectID = configuration.getMongoPackage().ObjectID;
+    var GridStore = configuration.require.GridStore
+      , ObjectID = configuration.require.ObjectID;
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
     db.open(function(err, db) {
