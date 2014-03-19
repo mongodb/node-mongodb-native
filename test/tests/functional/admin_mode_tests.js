@@ -477,9 +477,7 @@ exports.shouldCorrectlyCallValidateCollection = {
             
             // Validate the 'test' collection
             adminDb.validateCollection('test5', function(err, doc) {
-              console.log("============================================= 0")
-              console.dir(err)
-              console.dir(doc)
+
               // Pre 1.9.1 servers
               if(doc.result != null) {
                 test.ok(doc.result != null);
