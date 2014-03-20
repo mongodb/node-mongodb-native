@@ -304,7 +304,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             batch.execute(function(err, result) {
               // Test basic settings
               test.equal(0, result.nMatched);
-              test.ok(1 == result.nModified || result.nModified == null);
+              test.ok(0 == result.nModified || result.nModified == null);
               test.equal(true, result.hasWriteErrors());
               test.ok(1, result.getWriteErrorCount());
 
@@ -525,7 +525,7 @@ exports['Should correctly execute ordered batch using w:0'] = {
         test.equal(0, result.nUpserted);
         test.equal(0, result.nInserted);
         test.equal(0, result.nMatched);
-        test.equal(0, result.nModified);
+        test.ok(0 == result.nModified || result.nModified == null);
         test.equal(0, result.nRemoved);
         test.equal(false, result.hasWriteErrors());
 
