@@ -24,7 +24,7 @@ var MongoDBVersionFilter = function() {
   	if(test.metadata.requires == null) return false;
   	if(test.metadata.requires.mongodb == null) return false;
   	// Return if this is a valid method
-    return validVersion(mongodb_version_array, test.metadata.requires.mongodb);
+    return !validVersion(mongodb_version_array, test.metadata.requires.mongodb);
 	}
 }
 

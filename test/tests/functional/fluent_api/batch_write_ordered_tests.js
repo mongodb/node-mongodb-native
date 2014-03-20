@@ -299,7 +299,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             batch.execute(function(err, result) {
               // Test basic settings
               test.equal(0, result.nMatched);
-              test.ok(1 == result.nModified || result.nModified == null);
+              test.ok(0 == result.nModified || result.nModified == null);
               test.equal(true, result.hasWriteErrors());
               test.ok(1, result.getWriteErrorCount());
 

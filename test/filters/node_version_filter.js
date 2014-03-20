@@ -13,7 +13,7 @@ var NodeVersionFilter = function() {
   	if(test.metadata.requires == null) return false;
   	if(test.metadata.requires.node == null) return false;
   	// Return if this is a valid method
-    return validVersion(node_version_array, test.metadata.requires.node);
+    return !validVersion(node_version_array, test.metadata.requires.node);
 	}
 }
 
