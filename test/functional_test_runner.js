@@ -51,7 +51,8 @@ var runner = new Runner({
 });
 
 var testFiles =[
-  , '/test/tests/functional/connection_tests.js'
+    '/test/tests/functional/connection_tests.js'
+  , '/test/tests/functional/pool_tests.js'
 ]
 
 // Add all the tests to run
