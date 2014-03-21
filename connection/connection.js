@@ -6,13 +6,15 @@ var inherits = require('util').inherits
   , Response = require('./commands').Response
   , MongoError = require('../error');
 
+var _id = 0;
+
 var Connection = function(options) {  
   // Add event listener
   EventEmitter.call(this);
-  // Set null if no options passed
+  // Set empty if no options passed
   var options = options || {};
   // Identification information
-  var id = options.id || 0;
+  var id = _id++;
   var logger = options.logger 
     ? options.logger.create("Connection") : null;
   // No bson parser passed in
@@ -83,11 +85,16 @@ var Connection = function(options) {
           return self.emit("error", connection.authorizationError, self, {ssl:true});        
         }
 
+        // Set socket timeout instead of connection timeout
+        connection.setTimeout(socketTimeout);
         // We are done emit connect
         self.emit('connect', self);
       });
     } else {
       connection.on('connect', function() {
+        // Set socket timeout instead of connection timeout
+        connection.setTimeout(socketTimeout);
+        // Emit connect event
         self.emit('connect', self);        
       });
     }
@@ -163,7 +170,7 @@ var Connection = function(options) {
               sizeOfMessage:self.sizeOfMessage,
               bytesRead:self.bytesRead,
               stubBuffer:self.stubBuffer}};
-            if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
+            // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
             // We got a parse Error fire it off then keep going
             self.emit("parseError", errorObject, self);
           }
@@ -209,7 +216,7 @@ var Connection = function(options) {
                 sizeOfMessage: sizeOfMessage,
                 bytesRead: self.bytesRead,
                 stubBuffer: self.stubBuffer}};
-              if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
+              // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
               // We got a parse Error fire it off then keep going
               self.emit("parseError", errorObject, self);
               return;
@@ -246,7 +253,7 @@ var Connection = function(options) {
                   sizeOfMessage:self.sizeOfMessage,
                   bytesRead:self.bytesRead,
                   stubBuffer:self.stubBuffer}};
-                if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
+                // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
                 // We got a parse Error fire it off then keep going
                 self.emit("parseError", errorObject, self);
               }
@@ -256,7 +263,7 @@ var Connection = function(options) {
                 bytesRead:0,
                 buffer:null,
                 stubBuffer:null}};
-              if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
+              // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
               // We got a parse Error fire it off then keep going
               self.emit("parseError", errorObject, self);
 
@@ -285,7 +292,7 @@ var Connection = function(options) {
                   sizeOfMessage:sizeOfMessage,
                   bytesRead:self.bytesRead,
                   stubBuffer:self.stubBuffer}};
-                if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
+                // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
                 // We got a parse Error fire it off then keep going
                 self.emit("parseError", errorObject, self);
               }
