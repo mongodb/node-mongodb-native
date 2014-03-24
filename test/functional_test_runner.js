@@ -386,9 +386,9 @@ runner.on('exit', function(errors, results) {
 });
 
 // Run the tests
-runner.run(StandaloneConfiguration);
+// runner.run(StandaloneConfiguration);
 // runner.run(ReplicasetConfiguration);
-// runner.run(ShardingConfiguration);
+runner.run(ShardingConfiguration);
 
 
 
