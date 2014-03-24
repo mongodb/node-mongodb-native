@@ -27,6 +27,7 @@ var AWAIT_CAPABLE = 8;
 // Set property function
 var setProperty = function(obj, prop, flag, values) {
   Object.defineProperty(obj, prop.name, {
+      enumerable:true,
       set: function(value) {
         if(typeof value != 'boolean') throw new Error(f("%s required a boolean", prop.name));
         if(value) values.flags |= values.flag;
@@ -40,6 +41,7 @@ var setProperty = function(obj, prop, flag, values) {
 // Set property function
 var getProperty = function(obj, propName, fieldName, values, func) {
   Object.defineProperty(obj, propName, {
+    enumerable:true,
     get: function() { 
       // Not parsed yet, parse it
       if(!obj.isParsed()) {
@@ -52,6 +54,16 @@ var getProperty = function(obj, propName, fieldName, values, func) {
       return values[fieldName];
     }
   });
+}
+
+// Set simple property
+var getSingleProperty = function(obj, name, value) {
+  enumerable:true,
+  Object.defineProperty(obj, name, {
+    get: function() {
+      return value 
+    }
+  });  
 }
 
 //
@@ -102,6 +114,7 @@ var Query = function(bson, ns, query, options) {
   setProperty(this, awaitData, OPTS_AWAIT_DATA, values);
   setProperty(this, exhaust, OPTS_EXHAUST, values);
   setProperty(this, partial, OPTS_PARTIAL, values);
+  getSingleProperty(this, 'requestId', requestId);
 
   // To Binary
   this.toBin = function() {

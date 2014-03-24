@@ -23,6 +23,8 @@ var Pool = function(options) {
   var connections = [];
   var closedConnections = [];
   var state = DISCONNECTED;
+  // Round robin index
+  var index = 0;
 
   //
   // Handlers
@@ -66,6 +68,12 @@ var Pool = function(options) {
     state = DESTROYED;
     // Destroy all the connections
     connections.forEach(function(c) {
+      // Destroy all event emitters
+      ["close", "message", "error", "timeout", "parseError", "connect"].forEach(function(e) {
+        c.removeAllListeners(e);
+      });
+
+      // Destroy the connection
       c.destroy();
     });
   }
@@ -89,6 +97,20 @@ var Pool = function(options) {
       // Start connection
       connection.connect();
     }
+  }
+
+  //
+  // Get a connection
+  this.get = function() {
+    var connection = connections[index++];
+    index = index % connections.length;
+    return connection;
+  }
+
+  //
+  // Are we connected
+  this.isConnected = function() {
+    return state == CONNECTED;
   }
 }
 
