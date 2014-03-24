@@ -39,6 +39,7 @@ var StandaloneConfiguration = function(context) {
     require: mongo,
     port: 27017,
     host: 'localhost',
+    db: 'integration_tests',
     writeConcern: function() { return {w: 1} }
   }
 }
@@ -53,6 +54,7 @@ var runner = new Runner({
 var testFiles =[
     '/test/tests/functional/connection_tests.js'
   , '/test/tests/functional/pool_tests.js'
+  , '/test/tests/functional/server_tests.js'
 ]
 
 // Add all the tests to run
