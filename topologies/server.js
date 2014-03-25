@@ -5,6 +5,8 @@ var inherits = require('util').inherits
   , b = require('bson')
   , Query = require('../connection/commands').Query
   , MongoError = require('../error')
+  , ReadPreference = require('./read_preference')
+  , Cursor = require('../cursor')
   , BSON = require('bson').native().BSON;
 
 // All bson types
@@ -92,22 +94,12 @@ var Server = function(options) {
 
   //
   // Handlers
-  var messageHandler = function(response, connection) {    
-    var docs = response.documents;
-    console.dir("============================================")
-    console.dir(docs)
-    // Single document response
-    if(docs.length == 1) {
-      callbacks.emit(response.responseTo, null, docs[0]);
-    }
-
-    // Multiple document responses
-    callbacks.emit(response.responseTo, null, response.documents);
+  var messageHandler = function(response, connection) {
+    callbacks.emit(response.responseTo, null, response);
   }
 
   var errorHandler = function(err, connection) {
     self.destroy();
-    // console.dir(err)
     self.emit('error', err, self);
     if(reconnect) reconnectServer();
   }
@@ -196,9 +188,12 @@ var Server = function(options) {
     });
 
     // Set slave OK
-    query.slave = slaveOk(options.readPreference);    
+    query.slaveOk = slaveOk(options.readPreference);    
     // Register the callback
-    callbacks.once(query.requestId, callback);
+    callbacks.once(query.requestId, function(err, result) {
+      if(err) return callback(err);
+      callback(null, result.documents[0]);
+    });
     // Execute the query
     pool.get().write(query);
   }
@@ -218,16 +213,42 @@ var Server = function(options) {
     executeWrite(this, 'delete', 'deletes', ns, ops, options, callback);
   }
 
-  // Execute a cursor
-  this.find = function(ns, cmd, options, callback) {
-    // Support two types of commands (find and aggregate)
-    if(cmd.find) {
+  // // Command
+  // {
+  //     find: ns
+  //   , query: <object>
+  //   , limit: <n>
+  //   , fields: <object>
+  //   , skip: <n>
+  //   , hint: <string>
+  //   , explain: <boolean>
+  //   , snapshot: <boolean>
+  //   , noCursorTimeout: <boolean>
+  //   , tailable: <boolean>
+  //   , awaitdata: <boolean>
+  //   , oplogReply: <boolean>
+  //   , exhaust: <boolean>
+  //   , batchSize: <n>
+  //   , returnKey: <boolean>
+  //   , maxScan: <n>
+  //   , min: <n>
+  //   , max: <n>
+  //   , showDiskLoc: <boolean>
+  //   , comment: <string>
+  //   , partial: <boolean>
+  // }  
+  // // Options
+  // {
+  //     raw: <boolean>
+  //   , readPreference: <ReadPreference>
+  //   , maxTimeMS: <n>
+  //   , byMongos: <boolean>
+  // }
 
-    } else if(cmd.aggregate) {
-
-    } else {
-      throw new Error("command not supported");
-    }
+  // Create a cursor for the command
+  this.find = function(ns, cmd, options) {
+    options = options || {};
+    return new Cursor(bson, ns, cmd, options, pool.get(), callbacks, options);
   }
 
   var slaveOk = function(r) {

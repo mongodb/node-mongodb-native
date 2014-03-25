@@ -88,13 +88,13 @@ var Query = function(bson, ns, query, options) {
   var requestId = _requestId++;
 
   // Serialization option
-  var serializeFunctions = options.serializeFunctions || false;
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
   var maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
-  var checkKeys = options.checkKeys || true;
+  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
 
   // Properties
   var tailable = {name: 'tailable', value: 0};
-  var slave = {name: 'slave', value: 0};
+  var slave = {name: 'slaveOk', value: 0};
   var oplogReply = {name: 'oplogReply', value: 0};
   var noCursorTimeout = {name: 'noCursorTimeout', value: 0};
   var awaitData = {name: 'awaitData', value: 0};
@@ -180,17 +180,44 @@ var Query = function(bson, ns, query, options) {
     // Return buffer
     return buffer;
   }
-
-  var write32bit = function(index, buffer, value) {
-    buffer[index + 3] = (value >> 24) & 0xff;
-    buffer[index + 2] = (value >> 16) & 0xff;
-    buffer[index + 1] = (value >> 8) & 0xff;
-    buffer[index] = (value) & 0xff;
-    return index + 4;
-  }
 }
 
-var GetMore = function() {  
+var GetMore = function(bson, ns, cursorId, opts) {
+  opts = opts || {};
+  var numberToReturn = opts.numberToReturn || 0;
+  var requestId = _requestId++;
+
+  // Set up properties
+  getSingleProperty(this, 'requestId', requestId);
+
+  // To Binary
+  this.toBin = function() {
+    var length = 4 + Buffer.byteLength(ns) + 1 + 4 + 8 + (4 * 4);
+    // Create command buffer
+    var buffer = new Buffer(length);
+    var index = 0;
+    
+    // Write header information
+    index = write32bit(index, buffer, length);
+    index = write32bit(index, buffer, requestId);
+    index = write32bit(index, buffer, 0);
+    index = write32bit(index, buffer, OP_GETMORE);
+    index = write32bit(index, buffer, 0);
+
+    // Write collection name
+    index = index + buffer.write(ns, index, 'utf8') + 1;
+    buffer[index - 1] = 0;
+
+    // Write batch size
+    index = write32bit(index, buffer, numberToReturn);
+    // Write cursor id
+    index = write32bit(index, buffer, cursorId.getLowBits());
+    index = write32bit(index, buffer, cursorId.getHighBits());
+
+    // Return buffer
+    return buffer;
+  }
+
 }
 
 var Response = function(bson, data, opts) {
@@ -292,6 +319,14 @@ var Response = function(bson, data, opts) {
     // Set parsed
     parsed = true;
   }
+}
+
+var write32bit = function(index, buffer, value) {
+  buffer[index + 3] = (value >> 24) & 0xff;
+  buffer[index + 2] = (value >> 16) & 0xff;
+  buffer[index + 1] = (value >> 8) & 0xff;
+  buffer[index] = (value) & 0xff;
+  return index + 4;
 }
 
 module.exports = {
