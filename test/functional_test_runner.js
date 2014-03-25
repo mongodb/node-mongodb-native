@@ -1,9 +1,7 @@
 var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
-  // , NodeVersionFilter = require('./filters/node_version_filter')
-  // , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
-  // , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
+  , f = require('util').format
   , FileFilter = require('integra').FileFilter;
 
 /**
@@ -13,10 +11,24 @@ var f = require('util').format;
 
 var StandaloneConfiguration = function(context) {
   var mongo = require('../lib');
+  // var bson = require('bvson')
 
   return {    
     start: function(callback) {
-      callback();
+      var self = this;
+      var server = new mongo.Server({
+          host: this.host
+        , port: this.port 
+      });
+      // Set up connect
+      server.once('connect', function() {
+        // Drop the database
+        server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
+          callback();
+        });
+      });
+      // Connect
+      server.connect();
     },
 
     shutdown: function(callback) {
