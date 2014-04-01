@@ -3,7 +3,8 @@ var Response = require('./connection/commands').Response
   , Query = require('./connection/commands').Query
   , Long = require('bson').Long
   , ReadPreference = require('./topologies/read_preference')
-  , MongoError = require('./error');
+  , MongoError = require('./error')
+  , f = require('util').format;  
 
 var Cursor = function(bson, ns, cmd, options, connection, callbacks, options) {
   options = options || {};
@@ -15,8 +16,16 @@ var Cursor = function(bson, ns, cmd, options, connection, callbacks, options) {
   // All internal state
   var self = this;
   var cursorId = null;
-  var documents = [];
+  var documents = options.documents || [];
   var dead = false;
+
+  // 
+  // Did we pass in a cursor id
+  if(typeof cmd == 'number') {
+    cursorId = Long.fromNumber(cmd);
+  } else if(cmd instanceof Long) {
+    cursorId = cmd;
+  }
 
   //
   // Retrieve the next document from the cursor
@@ -29,9 +38,8 @@ var Cursor = function(bson, ns, cmd, options, connection, callbacks, options) {
         self.next(callback);
       });
     } else if(documents.length == 0 && !Long.ZERO.equals(cursorId)) {
-      execGetMore(function(err, r) {
-        if(err) return callback(err, null);
-        self.next(callback);
+      execGetMore(function(err, doc) {
+        callback(err, doc);
       });
     } else if(documents.length == 0 && Long.ZERO.equals(cursorId)) {
       dead = true;
@@ -65,6 +73,28 @@ var Cursor = function(bson, ns, cmd, options, connection, callbacks, options) {
     // Set up callback
     callbacks.once(query.requestId, function(err, result) {
       if(err) return callback(err);
+
+      // Check if we have a command cursor
+      if(Array.isArray(result.documents) && result.documents.length == 1) {
+        if(result.documents[0].cursor) {
+          var id = result.documents[0].cursor.id;
+          // Promote id to long if needed
+          cursorId = typeof id == 'number' 
+            ? Long.fromNumber(id) : id;
+          // If we have a firstBatch set it
+          if(Array.isArray(result.documents[0].cursor.firstBatch)) {
+            documents = result.documents[0].cursor.firstBatch;
+          }
+
+          // Return after processing command cursor
+          return callback(null, null);
+        }
+      }
+
+      // console.log("++++++++++++++++++++++++++++++++++++++++ QUERY 1")
+      // console.dir(err)
+      // console.log(JSON.stringify(result, null, 2))
+      // Otherwise fall back to regular find path
       cursorId = result.cursorId;
       documents = result.documents;
       callback(null, null);
@@ -114,20 +144,62 @@ var Cursor = function(bson, ns, cmd, options, connection, callbacks, options) {
 
     // Set query flags
     query.slaveOk = readPreference.slaveOk();
-    if(cmd.tailable) query.tailable = cmd.tailable;
-    if(cmd.oplogReply)query.oplogReply = cmd.oplogReply;
-    if(cmd.noCursorTimeout) query.noCursorTimeout = cmd.noCursorTimeout;
-    if(cmd.awaitdata) query.awaitdata = cmd.awaitdata;
-    if(cmd.exhaust) query.exhaust = cmd.exhaust;
-    if(cmd.partial) query.partial = cmd.partial;
+    // Set up the option bits for wire protocol
+    if(options.tailable) query.tailable = options.tailable;
+    if(options.oplogReply)query.oplogReply = options.oplogReply;
+    if(options.noCursorTimeout) query.noCursorTimeout = options.noCursorTimeout;
+    if(options.awaitdata) query.awaitdata = options.awaitdata;
+    if(options.exhaust) query.exhaust = options.exhaust;
+    if(options.partial) query.partial = options.partial;
     // Return the query
     return query;
   }  
 
+  //
+  // Set up a command cursor
+  var setupCommand = function(ns, cmd, options) {
+    var readPreference = options.readPreference || new ReadPreference('primary');
+    if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
+
+    // Set empty options object
+    options = options || {}
+
+    // Build command namespace
+    var parts = ns.split(/\./);
+    // Remove namespace db
+    parts.pop()
+    // Add command for initial execution
+    parts.push("$cmd");
+
+    // Build Query object
+    var query = new Query(bson, parts.join("."), cmd, {
+        numberToSkip: 0, numberToReturn: -1
+      , checkKeys: false
+    });
+
+    // Set query flags
+    query.slaveOk = readPreference.slaveOk();
+
+    // Options
+    if(options.tailable) query.tailable = options.tailable;
+    if(options.oplogReply)query.oplogReply = options.oplogReply;
+    if(options.noCursorTimeout) query.noCursorTimeout = options.noCursorTimeout;
+    if(options.awaitdata) query.awaitdata = options.awaitdata;
+    if(options.exhaust) query.exhaust = options.exhaust;
+    if(options.partial) query.partial = options.partial;
+    // Return the query
+    return query;
+  }
+
   // Establish type of command
   if(cmd.find) {
     query = setupClassicFind(ns, cmd, options)
-  }  
+  } else if(cmd.cursor) {
+    query = setupCommand(ns, cmd, options);
+  } else if(cursorId != null) {
+  } else {
+    throw new MongoError(f("command %s does not return a cursor", JSON.stringify(cmd)));
+  }
 }
 
 module.exports = Cursor;

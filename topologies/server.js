@@ -7,6 +7,7 @@ var inherits = require('util').inherits
   , MongoError = require('../error')
   , ReadPreference = require('./read_preference')
   , Cursor = require('../cursor')
+  , CommandResult = require('./command_result')
   , BSON = require('bson').native().BSON;
 
 // All bson types
@@ -14,23 +15,39 @@ var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Doub
 
 // Single store for all callbacks
 var Callbacks = function() {
-  EventEmitter.call(callbacks);  
+  EventEmitter.call(callbacks);
 }
+
 inherits(Callbacks, EventEmitter);
 
 var callbacks = new Callbacks;
+
+/**
+ * @ignore
+ */
+var bindToCurrentDomain = function(callback) {
+  var domain = process.domain;
+  if(domain == null || callback == null) {
+    return callback;
+  } else {
+    return domain.bind(callback);
+  }
+}
 
 /**
  * Server implementation
  */
 var Server = function(options) {
   var self = this;
+  
   // Add event listener
   EventEmitter.call(this);
+  
   // Reconnect option
-  var reconnect = options.reconnect || true;
+  var reconnect = typeof options.reconnect == 'boolean' ? options.reconnect :  true;
   var reconnectTries = options.reconnectTries || 30;
   var reconnectInterval = options.reconnectInterval || 1000;
+
   // Current state
   var currentReconnectRetry = reconnectTries;
 
@@ -48,7 +65,20 @@ var Server = function(options) {
   //
   // Reconnect server
   var reconnectServer = function() {
+    // Set the max retries
     currentReconnectRetry = reconnectTries;
+
+    // Error out any current callbacks
+    for(var id in callbacks._events) {
+      var executeError = function(_id, _callbacks) {
+        process.nextTick(function() {
+          _callbacks.emit(_id, new MongoError(f("server %s:%s closed the socket", options.host, options.port)), null);
+        });
+      }
+
+      executeError(id, callbacks);
+    }
+
     // Create a new Pool
     pool = new Pool(options);
     // error handler
@@ -80,6 +110,9 @@ var Server = function(options) {
       pool.on('close', closeHandler);
       pool.on('timeout', timeoutHandler);
       pool.on('message', messageHandler);
+
+      // Emit reconnect event
+      self.emit("reconnect", self);
     });
 
     //
@@ -101,19 +134,19 @@ var Server = function(options) {
   var errorHandler = function(err, connection) {
     self.destroy();
     self.emit('error', err, self);
-    if(reconnect) reconnectServer();
+    if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
   }
 
   var timeoutHandler = function(err, connection) {
     self.destroy();
     self.emit('timeout', err, self);
-    if(reconnect) reconnectServer();
+    if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
   }
 
   var closeHandler = function(err, connection) {
     self.destroy();
     self.emit('close', err, self);
-    if(reconnect) reconnectServer();
+    if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
   }
 
   var connectHandler = function(connection) {
@@ -184,18 +217,34 @@ var Server = function(options) {
     options = options || {};
     // Create a query instance
     var query = new Query(bson, ns, cmd, {
-      numberToSkip: 0, numberToReturn: -1
+      numberToSkip: 0, numberToReturn: -1, checkKeys: false
     });
 
     // Set slave OK
-    query.slaveOk = slaveOk(options.readPreference);    
+    query.slaveOk = slaveOk(options.readPreference);
+
+    // If we have no connection error
+    if(!pool.isConnected()) return callback(new MongoError("no connection available to server %s:%s", options.host, options.port));
+    
+    // Get a connection
+    var connection = pool.get()   
+
+    // Bind to current domain
+    bindToCurrentDomain(callback);
+
     // Register the callback
     callbacks.once(query.requestId, function(err, result) {
       if(err) return callback(err);
-      callback(null, result.documents[0]);
+      callback(null, new CommandResult(result.documents[0], connection));
     });
+
     // Execute the query
-    pool.get().write(query);
+    connection.write(query);
+  }
+
+  // Are we connected
+  this.isConnected = function() {
+    return pool.isConnected();
   }
 
   // Execute a write
@@ -223,11 +272,6 @@ var Server = function(options) {
   //   , hint: <string>
   //   , explain: <boolean>
   //   , snapshot: <boolean>
-  //   , noCursorTimeout: <boolean>
-  //   , tailable: <boolean>
-  //   , awaitdata: <boolean>
-  //   , oplogReply: <boolean>
-  //   , exhaust: <boolean>
   //   , batchSize: <n>
   //   , returnKey: <boolean>
   //   , maxScan: <n>
@@ -235,7 +279,6 @@ var Server = function(options) {
   //   , max: <n>
   //   , showDiskLoc: <boolean>
   //   , comment: <string>
-  //   , partial: <boolean>
   // }  
   // // Options
   // {
@@ -243,10 +286,16 @@ var Server = function(options) {
   //   , readPreference: <ReadPreference>
   //   , maxTimeMS: <n>
   //   , byMongos: <boolean>
+  //   , tailable: <boolean>
+  //   , oplogReply: <boolean>
+  //   , noCursorTimeout: <boolean>
+  //   , awaitdata: <boolean>
+  //   , exhaust: <boolean>
+  //   , partial: <boolean>
   // }
 
   // Create a cursor for the command
-  this.find = function(ns, cmd, options) {
+  this.cursor = function(ns, cmd, options) {
     options = options || {};
     return new Cursor(bson, ns, cmd, options, pool.get(), callbacks, options);
   }

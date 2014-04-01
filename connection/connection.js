@@ -111,7 +111,7 @@ var Connection = function(options) {
   }
 
   this.write = function(command) {
-    connection.write(command.toBin(), 'binary');
+    connection.write(command.toBin ? command.toBin() : command, 'binary');
   }
 
   //
