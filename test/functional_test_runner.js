@@ -9,53 +9,64 @@ var Runner = require('integra').Runner
  */
 var f = require('util').format;
 
-var StandaloneConfiguration = function(context) {
-  var mongo = require('../lib');
-  // var bson = require('bvson')
+var StandaloneConfiguration = function(options) {
+  options = options || {};
+  var host = options.host || 'localhost';
+  var port = options.port || 27017;
+  var db = options.db || 'integration_tests';
+  var mongo = null;
 
-  return {    
-    start: function(callback) {
-      var self = this;
-      var server = new mongo.Server({
-          host: this.host
-        , port: this.port 
-      });
-      
-      // Set up connect
-      server.once('connect', function() {
+  // Create a topology function
+  var topology = options.topology || function(self, _mongo) {
+    return new _mongo.Server({
+        host: self.host
+      , port: self.port 
+    });
+  }
+
+  return function(context) {
+    mongo = require('../lib');
+
+    return {    
+      start: function(callback) {
+        var self = this;
+        var server = topology(this, mongo);
         
-        // Drop the database
-        server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
-          callback();
+        // Set up connect
+        server.once('connect', function() {
+          // Drop the database
+          server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
+            callback();
+          });
         });
-      });
-      
-      // Connect
-      server.connect();
-    },
+        
+        // Connect
+        server.connect();
+      },
 
-    shutdown: function(callback) {
-      callback();
-    },
+      shutdown: function(callback) {
+        callback();
+      },
 
-    restart: function(callback) {
-      callback();
-    },
+      restart: function(callback) {
+        callback();
+      },
 
-    setup: function(callback) {
-      callback();
-    },
+      setup: function(callback) {
+        callback();
+      },
 
-    teardown: function(callback) {
-      callback();
-    },
+      teardown: function(callback) {
+        callback();
+      },
 
-    // Additional parameters needed
-    require: mongo,
-    port: 27017,
-    host: 'localhost',
-    db: 'integration_tests',
-    writeConcern: function() { return {w: 1} }
+      // Additional parameters needed
+      require: mongo,
+      port: port,
+      host: host,
+      db: db,
+      writeConcern: function() { return {w: 1} }
+    }
   }
 }
 
@@ -112,7 +123,16 @@ runner.on('exit', function(errors, results) {
 });
 
 // Run the tests
-runner.run(StandaloneConfiguration);
+runner.run(StandaloneConfiguration({
+    host: 'localhost'
+  , port: 31000
+  , topology: function(self, _mongo) {
+    return new _mongo.ReplSet([{
+        host: self.host
+      , port: self.port 
+    }]);
+  }
+}));
 
 
 
