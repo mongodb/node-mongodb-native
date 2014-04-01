@@ -101,9 +101,9 @@ var Server = function(options) {
     // Attempt to connect
     pool.once('connect', function() {
       // Remove any non used handlers
-      pool.removeAllListeners('error');
-      pool.removeAllListeners('close');
-      pool.removeAllListeners('timeout');
+      ['error', 'close', 'timeout'].forEach(function(e) {
+        pool.removeAllListeners(e);
+      })
 
       // Add proper handlers
       pool.on('error', errorHandler);
