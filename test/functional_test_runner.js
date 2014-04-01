@@ -20,13 +20,16 @@ var StandaloneConfiguration = function(context) {
           host: this.host
         , port: this.port 
       });
+      
       // Set up connect
       server.once('connect', function() {
+        
         // Drop the database
         server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
           callback();
         });
       });
+      
       // Connect
       server.connect();
     },
@@ -110,9 +113,6 @@ runner.on('exit', function(errors, results) {
 
 // Run the tests
 runner.run(StandaloneConfiguration);
-// runner.run(ReplicasetConfiguration);
-// runner.run(ShardingConfiguration);
-
 
 
 
