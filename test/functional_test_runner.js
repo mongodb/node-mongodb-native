@@ -36,6 +36,7 @@ var StandaloneConfiguration = function(options) {
         server.once('connect', function() {
           // Drop the database
           server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
+            server.destroy();
             callback();
           });
         });
