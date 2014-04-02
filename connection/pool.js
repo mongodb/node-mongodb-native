@@ -25,6 +25,7 @@ var Pool = function(options) {
   var state = DISCONNECTED;
   // Round robin index
   var index = 0;
+  var dead = false;
 
   //
   // Handlers
@@ -33,23 +34,41 @@ var Pool = function(options) {
   }
 
   var errorHandler = function(err, connection) {
-    self.destroy();
-    self.emit('error', err, self);
+    if(!dead) {
+      // console.log("################# pool error ")
+      // console.dir(err)
+      self.emit('error', err, self);
+      dead = true;
+      self.destroy();
+    }
   }
 
   var timeoutHandler = function(err, connection) {
-    self.destroy();
-    self.emit('timeout', err, self);
+    if(!dead) {
+      // console.log("################# pool timeout " + err)
+      dead = true;
+      self.destroy();
+      self.emit('timeout', err, self);
+    }
   }
 
   var closeHandler = function(err, connection) {
-    self.destroy();
-    self.emit('close', err, self);
+    if(!dead) {
+      // console.log("################# pool close " + err)
+      self.emit('close', err, self);
+      dead = true;
+      self.destroy();
+    }
   }
 
   var parseErrorHandler = function(err, connection) {
-    this.destroy();
-    self.emit('error', err, self);
+    if(!dead) {
+      // console.log("################# pool error ")
+      // console.dir(err)
+      self.emit('error', err, self);
+      dead = true;
+      self.destroy();
+    }
   }
 
   var connectHandler = function(connection) {
@@ -57,6 +76,7 @@ var Pool = function(options) {
     // We have connected to all servers
     if(connections.length == size) {
       state = CONNECTED;
+      // console.log("################# pool connected")
       // Done connecting
       self.emit("connect", self);
     }
@@ -81,6 +101,8 @@ var Pool = function(options) {
   //
   // Connect pool
   this.connect = function() {
+    // console.log("################# pool connect")
+    // console.dir(options)
     // Set to connecting
     state = CONNECTING
     // Connect all sockets
