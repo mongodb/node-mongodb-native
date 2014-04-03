@@ -115,7 +115,7 @@ ReplicaSetManager.prototype.startSet = function(killall, callback) {
   this.config = {"_id": this.name, "version": 1, "members": []};
 
   // Kill all existing mongod instances
-  // exec(killall ? 'killall -9 mongod' : '', function(err, stdout, stderr) {
+  // exec(killall ? 'killall -15 mongod' : '', function(err, stdout, stderr) {
   this.killAll({skip: !killall}, function() {    
     var n = 0;
     var tagsIndex = 0;
@@ -276,11 +276,11 @@ ReplicaSetManager.prototype.killAll = function(options, callback) {
       pids.push(this.mongods[name].pid)
     }
 
-    exec('kill -9 ' + pids.join(" "), function(err, stdout, stderr) {
+    exec('kill -15 ' + pids.join(" "), function(err, stdout, stderr) {
       if(typeof callback == 'function') return callback();
     });
   } else {
-    exec('killall -9 mongod', function(err, stdout, stderr) {
+    exec('killall -15 mongod', function(err, stdout, stderr) {
       if(typeof callback == 'function') return callback();
     });
   }
