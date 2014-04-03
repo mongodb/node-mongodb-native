@@ -82,7 +82,8 @@ var testFiles =[
   //   '/test/tests/functional/connection_tests.js'
   // , '/test/tests/functional/pool_tests.js'
   // , '/test/tests/functional/server_tests.js'
-  , '/test/tests/functional/replset_tests.js'
+  // , '/test/tests/functional/replset_tests.js'
+  , '/test/tests/functional/basic_auth_tests.js'
 ]
 
 // Add all the tests to run
@@ -127,13 +128,14 @@ runner.on('exit', function(errors, results) {
 // Run the tests
 runner.run(StandaloneConfiguration({
     host: 'localhost'
-  , port: 31000
-  , topology: function(self, _mongo) {
-    return new _mongo.ReplSet([{
-        host: self.host
-      , port: self.port 
-    }]);
-  }
+  // , port: 31000
+  , port: 27017
+  // , topology: function(self, _mongo) {
+  //   return new _mongo.ReplSet([{
+  //       host: self.host
+  //     , port: self.port 
+  //   }]);
+  // }
 }));
 
 
