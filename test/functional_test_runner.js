@@ -128,14 +128,14 @@ runner.on('exit', function(errors, results) {
 // Run the tests
 runner.run(StandaloneConfiguration({
     host: 'localhost'
-  // , port: 31000
-  , port: 27017
-  // , topology: function(self, _mongo) {
-  //   return new _mongo.ReplSet([{
-  //       host: self.host
-  //     , port: self.port 
-  //   }]);
-  // }
+  // , port: 27017
+  , port: 31000
+  , topology: function(self, _mongo) {
+    return new _mongo.ReplSet([{
+        host: self.host
+      , port: self.port 
+    }]);
+  }
 }));
 
 
