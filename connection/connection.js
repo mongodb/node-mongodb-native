@@ -170,7 +170,6 @@ var Connection = function(options) {
               sizeOfMessage:self.sizeOfMessage,
               bytesRead:self.bytesRead,
               stubBuffer:self.stubBuffer}};
-            // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
             // We got a parse Error fire it off then keep going
             self.emit("parseError", errorObject, self);
           }
@@ -216,7 +215,6 @@ var Connection = function(options) {
                 sizeOfMessage: sizeOfMessage,
                 bytesRead: self.bytesRead,
                 stubBuffer: self.stubBuffer}};
-              // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
               // We got a parse Error fire it off then keep going
               self.emit("parseError", errorObject, self);
               return;
@@ -253,7 +251,6 @@ var Connection = function(options) {
                   sizeOfMessage:self.sizeOfMessage,
                   bytesRead:self.bytesRead,
                   stubBuffer:self.stubBuffer}};
-                // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
                 // We got a parse Error fire it off then keep going
                 self.emit("parseError", errorObject, self);
               }
@@ -263,7 +260,6 @@ var Connection = function(options) {
                 bytesRead:0,
                 buffer:null,
                 stubBuffer:null}};
-              // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
               // We got a parse Error fire it off then keep going
               self.emit("parseError", errorObject, self);
 
@@ -292,11 +288,9 @@ var Connection = function(options) {
                   sizeOfMessage:sizeOfMessage,
                   bytesRead:self.bytesRead,
                   stubBuffer:self.stubBuffer}};
-                // if(self.logger != null && self.logger.doError) self.logger.error("parseError", errorObject);
                 // We got a parse Error fire it off then keep going
                 self.emit("parseError", errorObject, self);
               }
-
             }
           } else {
             // Create a buffer that contains the space for the non-complete message

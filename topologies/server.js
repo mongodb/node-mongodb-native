@@ -55,7 +55,7 @@ var Server = function(options) {
   // Contains any alternate strategies for picking
   var readPreferenceStrategies = null;
   // Auth providers
-  var authProviders = null;
+  var authProviders = options.authProviders || {};
 
   // Let's get the bson parser if none is passed in
   if(options.bson == null) {
@@ -177,7 +177,11 @@ var Server = function(options) {
     // Execute an ismaster
     self.command('system.$cmd', {ismaster:true}, function(err, r) {
       if(!err) ismaster = r.result;
-      self.emit('connect', self);
+
+      // Apply any authentications
+      applyAuthentications(function() {
+        self.emit('connect', self);
+      })
     });
   }
 
@@ -329,6 +333,26 @@ var Server = function(options) {
     authProviders[mechanism].auth.apply(authProviders[mechanism], finalArguments);
   }
 
+  // Apply all stored authentications
+  var applyAuthentications = function(callback) {
+    // We need to ensure we have re-authenticated
+    var keys = Object.keys(authProviders);
+    if(keys.length == 0) return callback(null, null);
+
+    // Execute all providers
+    var count = keys.length;
+    // Iterate over keys
+    for(var i = 0; i < keys.length; i++) {
+      authProviders[keys[i]].reauthenticate(self, pool, function(err, r) {
+        count = count - 1;
+        // We are done, emit reconnect event
+        if(count == 0) {
+          return callback(null, null);
+        }
+      });
+    }
+  }
+
   //
   // Plugin methods
   //
@@ -340,7 +364,6 @@ var Server = function(options) {
   }
 
   this.addAuthProvider = function(name, provider) {
-    if(authProviders == null) authProviders = {};
     authProviders[name] = provider;
   }
 

@@ -5,6 +5,12 @@ var AuthSession = function(db, username, password) {
   this.db = db;
   this.username = username;
   this.password = password;
+
+  this.equal = function(session) {
+    return session.db == this.db 
+      && session.username == this.username
+      && session.password == this.password;
+  }
 }
 
 var MongoCR = function() {
@@ -17,6 +23,7 @@ var MongoCR = function() {
     var connections = pool.getAll();
     // Total connections
     var count = connections.length;
+    if(count == 0) return callback(null, null);
 
     // For each connection we need to authenticate
     while(connections.length > 0) {    
@@ -50,7 +57,7 @@ var MongoCR = function() {
                 // We have authenticated all connections
                 if(count == 0) {
                   // Store the auth details
-                  authStore.push(new AuthSession(db, username, password));
+                  addAuthSession(new AuthSession(db, username, password));
                   // Return correct authentication
                   callback(null, true);
                 }
@@ -63,10 +70,25 @@ var MongoCR = function() {
     }
   }
 
+  // Add to store only if it does not exist
+  var addAuthSession = function(session) {
+    var found = false;
+
+    for(var i = 0; i < authStore.length; i++) {
+      if(authStore[i].equal(session)) {
+        found = true;
+        break;
+      }
+    }
+
+    if(!found) authStore.push(session);
+  }
+
   //
   // Re authenticate server
   this.reauthenticate = function(server, pool, callback) {
     var count = authStore.length;
+    if(count == 0) return callback(null, null);
     // Iterate over all the auth details stored
     for(var i = 0; i < authStore.length; i++) {
       this.auth(server, pool, authStore[i].db, authStore[i].username, authStore[i].password, function(err, r) {
