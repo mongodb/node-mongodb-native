@@ -54,6 +54,8 @@ var Server = function(options) {
   var ismaster = null;
   // Contains any alternate strategies for picking
   var readPreferenceStrategies = null;
+  // Auth providers
+  var authProviders = null;
 
   // Let's get the bson parser if none is passed in
   if(options.bson == null) {
@@ -115,8 +117,22 @@ var Server = function(options) {
       pool.on('timeout', timeoutHandler);
       pool.on('message', messageHandler);
 
-      // Emit reconnect event
-      self.emit("reconnect", self);
+      // We need to ensure we have re-authenticated
+      var keys = Object.keys(authProviders);
+      if(keys.length == 0) return self.emit("reconnect", self);
+
+      // Execute all providers
+      var count = keys.length;
+      // Iterate over keys
+      for(var i = 0; i < keys.length; i++) {
+        authProviders[keys[i]].reauthenticate(self, pool, function(err, r) {
+          count = count - 1;
+          // We are done, emit reconnect event
+          if(count == 0) {
+            return self.emit("reconnect", self);
+          }
+        });
+      }
     });
 
     //
@@ -251,6 +267,13 @@ var Server = function(options) {
     
     // Ensure we have no options
     options = options || {};
+
+    // If we have no connection error
+    if(!pool.isConnected()) return callback(new MongoError("no connection available to server %s:%s", options.host, options.port));
+    
+    // Get a connection (either passed or from the pool)
+    var connection = options.connection || pool.get();
+
     // Create a query instance
     var query = new Query(bson, ns, cmd, {
       numberToSkip: 0, numberToReturn: -1, checkKeys: false
@@ -258,12 +281,6 @@ var Server = function(options) {
 
     // Set slave OK
     query.slaveOk = slaveOk(options.readPreference);
-
-    // If we have no connection error
-    if(!pool.isConnected()) return callback(new MongoError("no connection available to server %s:%s", options.host, options.port));
-    
-    // Get a connection
-    var connection = pool.get()   
 
     // Bind to current domain
     bindToCurrentDomain(callback);
@@ -300,10 +317,31 @@ var Server = function(options) {
     executeWrite(this, 'delete', 'deletes', ns, ops, options, callback);
   }
 
+  // Authentication method
+  this.auth = function(mechanism, db) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    var callback = args.pop();
+    // If we don't have the mechanism fail
+    if(authProviders[mechanism] == null) throw new MongoError(f("auth provider %s does not exist", mechanism));
+    // Actual arguments
+    var finalArguments = [self, pool, db].concat(args.slice(0)).concat([callback]);
+    // Let's invoke the auth mechanism
+    authProviders[mechanism].auth.apply(authProviders[mechanism], finalArguments);
+  }
+
+  //
+  // Plugin methods
+  //
+
   // Add additional picking strategy
-  this.addReadPreferenceStrategy = function(name, func) {
+  this.addReadPreferenceStrategy = function(name, strategy) {
     if(readPreferenceStrategies == null) readPreferenceStrategies = {};
-    readPreferenceStrategies[name] = func;
+    readPreferenceStrategies[name] = strategy;
+  }
+
+  this.addAuthProvider = function(name, provider) {
+    if(authProviders == null) authProviders = {};
+    authProviders[name] = provider;
   }
 
   // Match

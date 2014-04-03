@@ -7,4 +7,5 @@ module.exports = {
   , Response: require('./connection/commands').Response
   , Server: require('./topologies/server')
   , ReplSet: require('./topologies/replset')
+  , MongoCR: require('./auth/mongocr')
 }
