@@ -144,8 +144,8 @@ ShardedManager.prototype.start = function(callback) {
 
 // Kill everything
 ShardedManager.prototype.killAll = function(callback) {
-  exec('killall -9 mongod', function(err, stdout, stderr) {
-    exec('killall -9 mongos', function(err, stdout, stderr) {
+  exec('killall -15 mongod', function(err, stdout, stderr) {
+    exec('killall -15 mongos', function(err, stdout, stderr) {
       callback(null, null);
     });
   });
