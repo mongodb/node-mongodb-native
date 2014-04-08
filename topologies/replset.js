@@ -46,13 +46,16 @@ var State = function() {
   this.remove = function(server) {
     if(this.primary && this.primary.equal(server)) {
       this.primary = null;
-      return;
+      return 'primary';
     }
 
     // Filter out the server from the secondaries
     this.secondaries = this.secondaries.filter(function(s) {
       return !s.equal(server);
     });
+
+    // Return that it's a secondary
+    return 'secondary';
   }
 
   this.getAll = function() {
@@ -68,6 +71,10 @@ var State = function() {
         return s.lastIsMaster().me
       })
     }
+  }
+
+  this.changePrimary = function(server) {
+    this.primary = server;
   }
 }
 
@@ -135,20 +142,20 @@ var ReplSet = function(seedlist, options) {
   var errorHandler = function(err, server) {
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', server.lastIsMaster() ? server.lastIsMaster().me : 'N/A', JSON.stringify(err)));
     addToListIfNotExist(disconnectedServers, server);
-    replState.remove(server);
+    self.emit('left', replState.remove(server), server);
     self.emit('error', err, server);
   }
 
   var timeoutHandler = function(err, server) {
     if(logger.isInfo()) logger.info(f('server %s timed out', server.lastIsMaster() ? server.lastIsMaster().me : 'N/A'));
     addToListIfNotExist(disconnectedServers, server);
-    replState.remove(server);
+    self.emit('left', replState.remove(server), server);
   }
 
   var closeHandler = function(err, server) {
     if(logger.isInfo()) logger.info(f('server %s closed', server.lastIsMaster() ? server.lastIsMaster().me : 'N/A'));
     addToListIfNotExist(disconnectedServers, server);
-    replState.remove(server);
+    self.emit('left', replState.remove(server), server);
   }
 
   //
@@ -188,6 +195,15 @@ var ReplSet = function(seedlist, options) {
 
           // Let's keep monitoring
           return setTimeout(replicasetInquirer, reconnectInterval);
+        }
+
+        // Did the primary change
+        if(replState.primary 
+          && r.result.primary
+          && !replState.primary.equal(r.result.primary)) {
+          replState.changePrimary(server);
+          // Emit new primary event
+          self.emit('joined', 'primary', server);
         }
 
         // Go over all the read preferences
@@ -288,7 +304,7 @@ var ReplSet = function(seedlist, options) {
       // If not found we need to create a new connection
       if(!found) {
         if(connectingServers[hosts[i]] == null) {
-          if(logger.isInfo()) logger.info(f('schedule server %s for connection', hosts[i]));
+          if(logger.isInfo()) logger.info(f('scheduled server %s for connection', hosts[i]));
           // Make sure we know what is trying to connect            
           connectingServers[hosts[i]] = hosts[i];            
           // Connect the server
@@ -322,6 +338,9 @@ var ReplSet = function(seedlist, options) {
         if(ismaster.ismaster) {
           replState.primary = server;
           
+          // Emit primary
+          self.emit('joined', 'primary', replState.primary);
+
           // We are connected
           if(state == DISCONNECTED) {
             state = CONNECTED;
@@ -329,6 +348,9 @@ var ReplSet = function(seedlist, options) {
           }
         } else if(!ismaster.ismaster && ismaster.secondary) {
           addedToList = addToList(ismaster, replState.secondaries, server);
+
+          // Emit primary
+          if(addedToList) self.emit('joined', 'secondary', server);
           
           // We can connect with only a secondary
           if(secondaryOnlyConnectionAllowed && state == DISCONNECTED) {
