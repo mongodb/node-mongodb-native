@@ -1,5 +1,9 @@
 exports['Should correctly connect to single server'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Connection = configuration.require.Connection
@@ -25,7 +29,11 @@ exports['Should correctly connect to single server'] = {
 }
 
 exports['Should fail connect to single server'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Connection = configuration.require.Connection
@@ -52,7 +60,11 @@ exports['Should fail connect to single server'] = {
 }
 
 exports['Should correctly execute ismaster on single server'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Connection = configuration.require.Connection

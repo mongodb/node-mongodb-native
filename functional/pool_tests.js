@@ -1,5 +1,9 @@
 exports['Should correctly connect pool to single server'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Pool = configuration.require.Pool

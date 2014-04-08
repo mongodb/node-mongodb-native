@@ -2,7 +2,11 @@ var f = require('util').format
   , Long = require('bson').Long;
 
 exports['Should correctly connect using server object'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server;
@@ -25,7 +29,11 @@ exports['Should correctly connect using server object'] = {
 }
 
 exports['Should correctly execute command'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server;
@@ -55,7 +63,11 @@ exports['Should correctly execute command'] = {
 }
 
 exports['Should correctly execute write'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server;
@@ -87,7 +99,11 @@ exports['Should correctly execute write'] = {
 }
 
 exports['Should correctly execute find'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server;
@@ -136,7 +152,11 @@ exports['Should correctly execute find'] = {
 }
 
 exports['Should correctly reconnect to server with automatic reconnect enabled'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server;
@@ -188,7 +208,11 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
 }
 
 exports['Should correctly reconnect to server with automatic reconnect disabled'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server;
@@ -239,7 +263,11 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
 }
 
 exports['Should correctly execute aggregation command'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server;
@@ -296,7 +324,11 @@ exports['Should correctly execute aggregation command'] = {
 }
 
 exports['Should correctly execute query against cursorId'] = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server;
@@ -354,5 +386,28 @@ exports['Should correctly execute query against cursorId'] = {
 
     // Start connection
     server.connect();
+  }
+}
+
+exports['Should correctly correctly handle domain'] = {
+  metadata: {},
+
+  test: function(configuration, test) {
+    var domain = require('domain');
+    var d = domain.create();
+    d.once('error', function(err) {
+      d.exit();
+      d.dispose();
+      test.done()
+    })
+
+    configuration.newConnection(function(err, connection) {
+      d.run(function() {
+        connection.command('system.$cmd', {ismaster:true}, function() {
+          testdfdma();
+          test.ok(false);
+        });
+      });
+    })
   }
 }
