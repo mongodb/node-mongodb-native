@@ -22,16 +22,36 @@ exports['Should correctly use a ping strategy to pick a node'] = {
       pings: {},
 
       pickServer: function(set, options) {
-        console.log("======================= pickServer")
+        // console.log("======================= pickServer")
         return null;
       },
 
       startOperation: function(server, query, date) {
+        // console.log("======================= startOperation")
       },
 
-      // endOperation: funtion()
+      endOperation: function(server, err, result, date) {
+        // console.log("======================= endOperation")
+      },
+
+      close: function(server) {
+        // console.log("======================= close")
+      },
+
+      error: function(server) {
+        // console.log("======================= error")
+      },
+
+      timeout: function(server) {
+        // console.log("======================= timeout")
+      },
+
+      connect: function(server) {
+        // console.log("======================= connect")
+      },
 
       execute: function(set, callback) {
+        // console.log("======================= execute")
         var self = this;
         var servers = set.getAll();
         var count = servers.length;
@@ -63,8 +83,12 @@ exports['Should correctly use a ping strategy to pick a node'] = {
 
     // Add event listeners
     server.on('connect', function(_server) {
-      _server.destroy();
-      test.done();
+      setTimeout(function() {
+        _server.command('system.$cmd', {ismaster:true}, function(err, r) {
+          // _server.destroy();
+          // test.done();
+        });
+      }, 1000);
     });
   
     // Start connection
