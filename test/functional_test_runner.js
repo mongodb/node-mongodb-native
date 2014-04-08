@@ -149,7 +149,8 @@ runner.on('exit', function(errors, results) {
 // Set Logger level for driver
 Logger.setLevel('debug');
 // Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
-Logger.filter('class', ['Connection']);
+// Logger.filter('class', ['Connection']);
+Logger.filter('class', ['ReplSet']);
 
 // Run the tests
 runner.run(StandaloneConfiguration({
