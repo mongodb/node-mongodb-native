@@ -2,12 +2,16 @@ var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
   , f = require('util').format
+  , NodeVersionFilter = require('./filters/node_version_filter')
+  // , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
+  , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
   , FileFilter = require('integra').FileFilter;
 
 /**
  * Standalone MongoDB Configuration
  */
 var f = require('util').format;
+var Logger = require('../lib/connection/logger');
 
 var StandaloneConfiguration = function(options) {
   options = options || {};
@@ -61,6 +65,22 @@ var StandaloneConfiguration = function(options) {
         callback();
       },
 
+      newConnection: function(options, callback) {
+        if(typeof options == 'function') {
+          callback = options;
+          options = {};
+        }
+
+        var server = topology(this, mongo);
+        // Set up connect
+        server.once('connect', function() {
+          callback(null, server);
+        });
+
+        // Connect
+        server.connect();
+      },
+
       // Additional parameters needed
       require: mongo,
       port: port,
@@ -79,11 +99,12 @@ var runner = new Runner({
 });
 
 var testFiles =[
-  //   '/test/tests/functional/connection_tests.js'
-  // , '/test/tests/functional/pool_tests.js'
-  // , '/test/tests/functional/server_tests.js'
-  // , '/test/tests/functional/replset_tests.js'
-  , '/test/tests/functional/basic_auth_tests.js'
+    '/test/tests/functional/connection_tests.js'
+  , '/test/tests/functional/pool_tests.js'
+  , '/test/tests/functional/server_tests.js'
+  , '/test/tests/functional/replset_tests.js'
+  // , '/test/tests/functional/basic_auth_tests.js'
+  , '/test/tests/functional/extend_pick_strategy_tests.js'
 ]
 
 // Add all the tests to run
@@ -113,17 +134,22 @@ testFiles.forEach(function(t) {
 //  ]
 // }));
 
-// // Add a Node version plugin
-// runner.plugin(new NodeVersionFilter());
+// Add a Node version plugin
+runner.plugin(new NodeVersionFilter());
 // // Add a MongoDB version plugin
 // runner.plugin(new MongoDBVersionFilter());
-// // Add a Topology filter plugin
-// runner.plugin(new MongoDBTopologyFilter());
+// Add a Topology filter plugin
+runner.plugin(new MongoDBTopologyFilter());
 
 // Exit when done
 runner.on('exit', function(errors, results) {
   process.exit(0)
 });
+
+// Set Logger level for driver
+Logger.setLevel('debug');
+// Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
+Logger.filter('class', ['Connection']);
 
 // Run the tests
 runner.run(StandaloneConfiguration({
