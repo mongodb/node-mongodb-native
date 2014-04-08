@@ -214,6 +214,7 @@ var Response = function(bson, data, opts) {
   getProperty(this, 'startingFrom', 'startingFrom', values);
   getProperty(this, 'numberReturned', 'numberReturned', values);
   getProperty(this, 'documents', 'documents', values);
+  getSingleProperty(this, 'raw', data);
 
   this.isParsed = function() {
     return parsed;

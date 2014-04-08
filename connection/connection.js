@@ -4,7 +4,8 @@ var inherits = require('util').inherits
   , tls = require('tls')
   , f = require('util').format
   , Response = require('./commands').Response
-  , MongoError = require('../error');
+  , MongoError = require('../error')
+  , Logger = require('./logger');  
 
 var _id = 0;
 
@@ -15,8 +16,8 @@ var Connection = function(options) {
   var options = options || {};
   // Identification information
   var id = _id++;
-  var logger = options.logger 
-    ? options.logger.create("Connection") : null;
+  // Logger instance
+  var logger = Logger('Connection', options);
   // No bson parser passed in
   if(!options.bson) throw new Error("must pass in valid bson parser");
   // Get bson parser
@@ -111,6 +112,9 @@ var Connection = function(options) {
   }
 
   this.write = function(command) {
+    // Debug log
+    if(logger.isDebug()) logger.debug(f('writing buffer [%s] to %s:%s', command.toBin().toString('hex'), host, port));
+    // Write out the command    
     connection.write(command.toBin ? command.toBin() : command, 'binary');
   }
 
@@ -270,7 +274,6 @@ var Connection = function(options) {
               self.stubBuffer = null;
               // Exit parsing loop
               data = new Buffer(0);
-
             } else {
               try {
                 var emitBuffer = data.slice(0, sizeOfMessage);
@@ -283,7 +286,7 @@ var Connection = function(options) {
                 data = data.slice(sizeOfMessage);
                 // Emit the message
                 self.emit("message", new Response(bson, emitBuffer, responseOptions), self);
-              } catch (err) {
+              } catch (err) {                
                 var errorObject = {err:"socketHandler", trace:err, bin:self.buffer, parseState:{
                   sizeOfMessage:sizeOfMessage,
                   bytesRead:self.bytesRead,

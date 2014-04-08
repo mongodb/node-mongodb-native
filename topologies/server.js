@@ -8,7 +8,10 @@ var inherits = require('util').inherits
   , ReadPreference = require('./read_preference')
   , Cursor = require('../cursor')
   , CommandResult = require('./command_result')
-  , BSON = require('bson').native().BSON;
+  , getSingleProperty = require('../connection/utils').getSingleProperty
+  , getProperty = require('../connection/utils').getProperty
+  , BSON = require('bson').native().BSON
+  , Logger = require('../connection/logger');
 
 // All bson types
 var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey];
@@ -42,6 +45,9 @@ var Server = function(options) {
   
   // Add event listener
   EventEmitter.call(this);
+
+  // Logger
+  var logger = Logger('Server', options);
   
   // Reconnect option
   var reconnect = typeof options.reconnect == 'boolean' ? options.reconnect :  true;
@@ -67,6 +73,16 @@ var Server = function(options) {
 
   // Internal connection pool
   var pool = null;
+
+  // Name of the server
+  var serverDetails = {
+      host: options.host
+    , port: options.port
+    , name: null
+  }
+
+  // Set error properties
+  getProperty(this, 'name', 'name', serverDetails);
 
   //
   // Reconnect server
@@ -148,11 +164,14 @@ var Server = function(options) {
   //
   // Handlers
   var messageHandler = function(response, connection) {
-    callbacks.emit(response.responseTo, null, response);
+    if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), ismaster ? ismaster.me : f("%s:%s", options.host, options.port)));
+    // Execute callback
+    callbacks.emit(response.responseTo, null, response);      
   }
 
   var errorHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
+    if(logger.isInfo()) logger.info(f('server %s errored out with %s', ismaster ? ismaster.me : f("%s:%s", options.host, options.port), JSON.stringify(err)));
     self.destroy();
     self.emit('error', err, self);
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
@@ -160,6 +179,7 @@ var Server = function(options) {
 
   var timeoutHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('timeout', [self]);
+    if(logger.isInfo()) logger.info(f('server %s timed out', ismaster ? ismaster.me : f("%s:%s", options.host, options.port)));
     self.destroy();
     self.emit('timeout', err, self);
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
@@ -167,6 +187,7 @@ var Server = function(options) {
 
   var closeHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('close', [self]);
+    if(logger.isInfo()) logger.info(f('server %s closed', ismaster ? ismaster.me : f("%s:%s", options.host, options.port)));
     self.destroy();
     self.emit('close', err, self);
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
@@ -177,8 +198,12 @@ var Server = function(options) {
     // Execute an ismaster
     self.command('system.$cmd', {ismaster:true}, function(err, r) {
       if(!err) ismaster = r.result;
+      if(logger.isInfo()) logger.info(f('server %s connected with ismaster [%s]', ismaster ? ismaster.me : f("%s:%s", options.host, options.port), JSON.stringify(r.result)));
 
-      // Apply any authentications
+      // Set the details
+      serverDetails.name = ismaster.me;
+
+      // Apply any applyAuthentications
       applyAuthentications(function() {
         self.emit('connect', self);
       })
@@ -211,6 +236,7 @@ var Server = function(options) {
 
   // destroy the server instance
   this.destroy = function() {
+    if(logger.isDebug()) logger.debug(f('destroy called on server %s', self.lastIsMaster() ? self.lastIsMaster().me : 'N/A'));
     // Destroy all event emitters
     ["close", "message", "error", "timeout", "connect"].forEach(function(e) {
       pool.removeAllListeners(e);
@@ -246,6 +272,7 @@ var Server = function(options) {
     writeCommand[opsField] = ops;
     writeCommand.ordered = ordered;
     writeCommand.writeConcern = writeConcern;
+    
     // Execute command
     self.command(f("%s.$cmd", p[0]), writeCommand, {}, callback);    
   }
@@ -272,6 +299,11 @@ var Server = function(options) {
     // Ensure we have no options
     options = options || {};
 
+    // Debug log
+    if(logger.isDebug()) logger.debug(f('executing command [%s] against %s', JSON.stringify({
+      ns: ns, cmd: cmd, options: options
+    }), ismaster ? ismaster.me : f("%s:%s", options.host, options.port)));
+
     // If we have no connection error
     if(!pool.isConnected()) return callback(new MongoError("no connection available to server %s:%s", options.host, options.port));
     
@@ -287,7 +319,7 @@ var Server = function(options) {
     query.slaveOk = slaveOk(options.readPreference);
 
     // Bind to current domain
-    bindToCurrentDomain(callback);
+    callback = bindToCurrentDomain(callback);
 
     // Notify query start to any read Preference strategies
     if(readPreferenceStrategies != null)

@@ -136,6 +136,7 @@ var ReplSet = function(seedlist, options) {
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', server.lastIsMaster() ? server.lastIsMaster().me : 'N/A', JSON.stringify(err)));
     addToListIfNotExist(disconnectedServers, server);
     replState.remove(server);
+    self.emit('error', err, server);
   }
 
   var timeoutHandler = function(err, server) {
@@ -175,13 +176,36 @@ var ReplSet = function(seedlist, options) {
     var server = pickServer({readPreference: ReadPreference.secondaryPreferred});
     if(server) {
       server.command('system.$cmd', {ismaster:true}, function(err, r) {
-        // Add any new servers
-        if(err == null && Array.isArray(r.result.hosts)) {
-          processHosts(r.result.hosts);
+        // Let all the read Preferences do things to the servers
+        var rPreferencesCount = Object.keys(readPreferenceStrategies).length;
+
+        // No read Preferences strategies
+        if(rPreferencesCount == 0) {
+          // Add any new servers
+          if(err == null && Array.isArray(r.result.hosts)) {
+            processHosts(r.result.hosts);
+          }
+
+          // Let's keep monitoring
+          return setTimeout(replicasetInquirer, reconnectInterval);
         }
 
-        // Let's keep monitoring
-        return setTimeout(replicasetInquirer, reconnectInterval);
+        // Go over all the read preferences
+        for(var name in readPreferenceStrategies) {
+          readPreferenceStrategies[name].execute(replState, function() {
+            rPreferencesCount = rPreferencesCount - 1;
+
+            if(rPreferencesCount == 0) {
+              // Add any new servers
+              if(err == null && Array.isArray(r.result.hosts)) {
+                processHosts(r.result.hosts);
+              }
+
+              // Let's keep monitoring
+              return setTimeout(replicasetInquirer, reconnectInterval);
+            }
+          });
+        }
       });
     } else {
       return setTimeout(replicasetInquirer, reconnectInterval);
@@ -506,7 +530,7 @@ var ReplSet = function(seedlist, options) {
 
     // Do we have a custom readPreference strategy, use it
     if(readPreferenceStrategies != null && readPreferenceStrategies[readPreference] != null) {
-      return readPreferenceStrategies[readPreference].pickServer(options);
+      return readPreferenceStrategies[readPreference].pickServer(replState, options);
     }
 
     // Check if we can satisfy and of the basic read Preferences

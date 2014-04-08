@@ -18,7 +18,7 @@ var getProperty = function(obj, propName, fieldName, values, func) {
     enumerable:true,
     get: function() { 
       // Not parsed yet, parse it
-      if(!obj.isParsed()) {
+      if(obj.isParsed && !obj.isParsed()) {
         obj.parse();
       }
 
