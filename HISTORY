@@ -1,3 +1,8 @@
+1.4.1 2014-04-09
+----------------
+- Correctly emit joined event when primary change
+- Add _id to documents correctly when using bulk operations
+
 1.4.0 2014-04-03
 ----------------
 - All node exceptions will no longer be caught if on('error') is defined
