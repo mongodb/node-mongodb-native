@@ -447,6 +447,7 @@ var Server = function(options) {
 
   // Match
   this.equal = function(server) {    
+    if(typeof server == 'string') return server == this.name;
     return server.name == this.name;
   }
 

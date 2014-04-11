@@ -76,6 +76,36 @@ var State = function() {
   this.changePrimary = function(server) {
     this.primary = server;
   }
+
+  this.addSecondary = function(server) {
+    var found = false;
+    // Check if the server is a secondary at the moment
+    for(var i = 0; i < this.secondaries.length; i++) {
+      if(this.secondaries[i].equal(server)) {
+        found = true;
+      }
+    }
+
+    if(!found) this.secondaries.push(server);
+  }
+
+  this.promotePrimary = function(address) {
+    var server = null;
+    // Check if the server is a secondary at the moment
+    for(var i = 0; i < secondaries.length; i++) {
+      if(secondaries[i].equals(address)) {
+        server = secondaries[i];        
+      }
+    }
+
+    // We found a server, make it primary and remove it from the secondaries
+    if(server) {
+      this.primary = servver;
+      this.secondaries = this.secondaries.filter(function(s) {
+        return !s.equal(server);
+      });
+    }
+  }
 }
 
 var ReplSet = function(seedlist, options) {
@@ -204,6 +234,19 @@ var ReplSet = function(seedlist, options) {
         // Let all the read Preferences do things to the servers
         var rPreferencesCount = Object.keys(readPreferenceStrategies).length;
 
+        // Handle the primary
+        var ismaster = r.result;
+        // Let's check what kind of server this is
+        if(ismaster.ismaster) {
+          if(logger.isInfo()) logger.info(f('promoting %s to primary', server.name));
+          replState.changePrimary(server);
+        } else if(ismaster.secondary) {
+          if(logger.isInfo()) logger.info(f('promoting %s to secondary', server.name));
+          replState.addSecondary(server);
+        } else if(replState.primary == null && ismaster.primary) {
+          replState.promotePrimary(ismaster.primary);
+        }
+
         // No read Preferences strategies
         if(rPreferencesCount == 0) {
           // Add any new servers
@@ -213,15 +256,6 @@ var ReplSet = function(seedlist, options) {
 
           // Let's keep monitoring
           return setTimeout(replicasetInquirer, reconnectInterval);
-        }
-
-        // Did the primary change
-        if(replState.primary 
-          && r.result.primary
-          && !replState.primary.equal(r.result.primary)) {
-          replState.changePrimary(server);
-          // Emit new primary event
-          self.emit('joined', 'primary', server);
         }
 
         // Go over all the read preferences
@@ -362,6 +396,7 @@ var ReplSet = function(seedlist, options) {
       if(ismaster.ismaster) {
         replState.primary = server;
         
+        if(logger.isInfo()) logger.info(f('promoting %s to primary', server.name));
         // Emit primary
         self.emit('joined', 'primary', replState.primary);
 
@@ -374,7 +409,10 @@ var ReplSet = function(seedlist, options) {
         addedToList = addToList(ismaster, replState.secondaries, server);
 
         // Emit primary
-        if(addedToList) self.emit('joined', 'secondary', server);
+        if(addedToList) {
+          if(logger.isInfo()) logger.info(f('promoting %s to secondary', server.name));
+          self.emit('joined', 'secondary', server);
+        }
         
         // We can connect with only a secondary
         if(secondaryOnlyConnectionAllowed && state == DISCONNECTED) {
