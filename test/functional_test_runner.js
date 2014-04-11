@@ -102,10 +102,10 @@ var testFiles =[
   //   '/test/tests/functional/connection_tests.js'
   // , '/test/tests/functional/pool_tests.js'
   // , '/test/tests/functional/server_tests.js'
-  // , '/test/tests/functional/replset_tests.js'
+  , '/test/tests/functional/replset_tests.js'
   // , '/test/tests/functional/basic_auth_tests.js'
   // , '/test/tests/functional/extend_pick_strategy_tests.js'
-  , '/test/tests/functional/mongos_tests.js'
+  // , '/test/tests/functional/mongos_tests.js'
 ]
 
 // Add all the tests to run
@@ -151,8 +151,8 @@ runner.on('exit', function(errors, results) {
 Logger.setLevel('error');
 // Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
 // Logger.filter('class', ['Connection']);
-// Logger.filter('class', ['ReplSet']);
-Logger.filter('class', ['Mongos', 'Server']);
+Logger.filter('class', ['ReplSet', 'Server']);
+//Logger.filter('class', ['Mongos', 'Server']);
 
 //
 // Single server topology
@@ -196,6 +196,7 @@ var mongosServerConfig = {
 
 // Set the config
 var config = mongosServerConfig;
+var config = replicasetServerConfig;
 
 // Run the tests
 runner.run(StandaloneConfiguration(config));
