@@ -85,8 +85,8 @@ exports['Should correctly use a ping strategy to pick a node'] = {
     server.on('connect', function(_server) {
       setTimeout(function() {
         _server.command('system.$cmd', {ismaster:true}, function(err, r) {
-          // _server.destroy();
-          // test.done();
+          _server.destroy();
+          test.done();
         });
       }, 1000);
     });

@@ -104,7 +104,8 @@ var testFiles =[
   // , '/test/tests/functional/server_tests.js'
   // , '/test/tests/functional/replset_tests.js'
   // , '/test/tests/functional/basic_auth_tests.js'
-  , '/test/tests/functional/extend_pick_strategy_tests.js'
+  // , '/test/tests/functional/extend_pick_strategy_tests.js'
+  , '/test/tests/functional/mongos_tests.js'
 ]
 
 // Add all the tests to run
@@ -147,23 +148,57 @@ runner.on('exit', function(errors, results) {
 });
 
 // Set Logger level for driver
-Logger.setLevel('debug');
+Logger.setLevel('error');
 // Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
 // Logger.filter('class', ['Connection']);
-Logger.filter('class', ['ReplSet']);
+// Logger.filter('class', ['ReplSet']);
+Logger.filter('class', ['Mongos', 'Server']);
 
-// Run the tests
-runner.run(StandaloneConfiguration({
+//
+// Single server topology
+var singleServerConfig = {
     host: 'localhost'
-  // , port: 27017
+  , port: 27017  
+}
+
+//
+// Replicaset server topology
+var replicasetServerConfig = {
+    host: 'localhost'
   , port: 31000
   , topology: function(self, _mongo) {
     return new _mongo.ReplSet([{
         host: self.host
       , port: self.port 
     }]);
-  }
-}));
+  }  
+}
+
+//
+// Mongos server topology
+var mongosServerConfig = {
+    host: 'localhost'
+  , port: 30998
+  , topology: function(self, _mongo) {
+    // return new _mongo.Mongos([{
+    //     host: self.host
+    //   , port: self.port 
+    // }, {
+    //     host: self.host
+    //   , port: self.port + 1
+    // }]);
+    return new _mongo.Mongos([{
+        host: self.host
+      , port: self.port 
+    }]);
+  }  
+}
+
+// Set the config
+var config = mongosServerConfig;
+
+// Run the tests
+runner.run(StandaloneConfiguration(config));
 
 
 
