@@ -411,3 +411,115 @@ exports['Should correctly correctly handle domain'] = {
     })
   }
 }
+
+exports['Should correctly kill command cursor'] = {
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
+
+  test: function(configuration, test) {
+    var Server = configuration.require.Server;
+
+    // Attempt to connect
+    var server = new Server({
+        host: configuration.host
+      , port: configuration.port
+    })
+
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // Execute the write
+      _server.insert(f("%s.inserts20", configuration.db), [{a:1}, {a:2}, {a:3}], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        test.equal(null, err);
+        test.equal(3, results.result.n);
+
+        // Execute find
+        var cursor = _server.cursor(f("%s.inserts20", configuration.db), {
+            aggregate: "inserts20"
+          , pipeline: [{$match: {}}]
+          , cursor: {batchSize: 1}
+        });
+
+        // Execute next
+        cursor.next(function(err, d) {
+          test.equal(null, err);
+          test.equal(1, d.a);
+
+          // Kill the cursor
+          cursor.kill(function() {
+            cursor.next(function(err, d) {
+              test.ok(err != null);
+              // Destroy the server connection        
+              _server.destroy();
+              // Finish the test
+              test.done();
+            });
+          });
+        });
+      });
+    })
+
+    // Start connection
+    server.connect();
+  }
+}
+
+exports['Should correctly kill find command cursor'] = {
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
+
+  test: function(configuration, test) {
+    var Server = configuration.require.Server;
+
+    // Attempt to connect
+    var server = new Server({
+        host: configuration.host
+      , port: configuration.port
+    })
+
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // Execute the write
+      _server.insert(f("%s.inserts21", configuration.db), [{a:1}, {a:2}, {a:3}], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        test.equal(null, err);
+        test.equal(3, results.result.n);
+
+        // Execute find
+        var cursor = _server.cursor(f("%s.inserts21", configuration.db), {
+            find: f("%s.inserts1", configuration.db)
+          , query: {}
+          , batchSize: 1
+        });
+
+        // Execute next
+        cursor.next(function(err, d) {
+          test.equal(null, err);
+          test.equal(1, d.a);
+
+          // Kill the cursor
+          cursor.kill(function() {
+            cursor.next(function(err, d) {
+              test.ok(err != null);
+              // Destroy the server connection        
+              _server.destroy();
+              // Finish the test
+              test.done();
+            });
+          });
+        });
+      });
+    })
+
+    // Start connection
+    server.connect();
+  }
+}
