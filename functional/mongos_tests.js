@@ -105,72 +105,72 @@ var f = require('util').format
 //   }
 // }
 
-exports['Should correctly recover from shit of servers'] = {
-  metadata: {
-    requires: {
-      topology: "mongos"
-    }
-  },
+// exports['Should correctly recover from shit of servers'] = {
+//   metadata: {
+//     requires: {
+//       topology: "mongos"
+//     }
+//   },
 
-  test: function(configuration, test) {
-    var Mongos = configuration.require.Mongos;
-    var Logger = configuration.require.Logger;
+//   test: function(configuration, test) {
+//     var Mongos = configuration.require.Mongos;
+//     var Logger = configuration.require.Logger;
 
-    // Set info level
-    Logger.setLevel('info');
+//     // Set info level
+//     Logger.setLevel('info');
 
-    // Attempt to connect
-    var server = new Mongos([{
-        host: configuration.host
-      , port: configuration.port
-    }, {
-        host: configuration.host
-      , port: configuration.port + 1
-    }])
+//     // Attempt to connect
+//     var server = new Mongos([{
+//         host: configuration.host
+//       , port: configuration.port
+//     }, {
+//         host: configuration.host
+//       , port: configuration.port + 1
+//     }])
 
-    // // Attempt to connect
-    // var server = new Mongos([{
-    //     host: configuration.host
-    //   , port: configuration.port
-    // }]);
+//     // // Attempt to connect
+//     // var server = new Mongos([{
+//     //     host: configuration.host
+//     //   , port: configuration.port
+//     // }]);
 
-    console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-    console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-    console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+//     console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+//     console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+//     console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 
-    // Add event listeners
-    server.on('connect', function(_server) {
-      // Execute the write
-      _server.insert(f("%s.inserts_mongos2", configuration.db), [{a:1}], {
-        writeConcern: {w:1}, ordered:true
-      }, function(err, results) {
-        setInterval(function() {
-    console.log("================== 0")
-          try {
-            // Execute find
-            var cursor = _server.cursor(f("%s.inserts_mongos2", configuration.db), {
-                find: f("%s.inserts_repl2", configuration.db)
-              , query: {}
-            });
+//     // Add event listeners
+//     server.on('connect', function(_server) {
+//       // Execute the write
+//       _server.insert(f("%s.inserts_mongos2", configuration.db), [{a:1}], {
+//         writeConcern: {w:1}, ordered:true
+//       }, function(err, results) {
+//         setInterval(function() {
+//     console.log("================== 0")
+//           try {
+//             // Execute find
+//             var cursor = _server.cursor(f("%s.inserts_mongos2", configuration.db), {
+//                 find: f("%s.inserts_repl2", configuration.db)
+//               , query: {}
+//             });
 
-            // Execute next
-            cursor.next(function(err, d) {            
-              console.log("========================= tick")
-              console.dir(err)
-              console.dir(d)
-            });            
-          } catch(err) {}
-        }, 1000);
-        // test.equal(null, err);
-        // test.equal(1, results.result.n);
-        // // Destroy the connection
-        // _server.destroy();
-        // // Finish the test
-        // test.done();
-      });
-    })
+//             // Execute next
+//             cursor.next(function(err, d) {            
+//               console.log("========================= tick")
+//               console.dir(err)
+//               console.dir(d)
+//             });            
+//           } catch(err) {}
+//         }, 1000);
+//         // test.equal(null, err);
+//         // test.equal(1, results.result.n);
+//         // // Destroy the connection
+//         // _server.destroy();
+//         // // Finish the test
+//         // test.done();
+//       });
+//     })
 
-    // Start connection
-    server.connect();
-  }
-}
+//     // Start connection
+//     server.connect();
+//   }
+// }
