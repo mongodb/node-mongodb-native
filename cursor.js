@@ -1,6 +1,7 @@
 var Response = require('./connection/commands').Response
   , GetMore = require('./connection/commands').GetMore
   , Query = require('./connection/commands').Query
+  , KillCursor = require('./connection/commands').KillCursor
   , Long = require('bson').Long
   , ReadPreference = require('./topologies/read_preference')
   , MongoError = require('./error')
@@ -50,6 +51,24 @@ var Cursor = function(bson, ns, cmd, options, connection, callbacks, options) {
   }
 
   //
+  // Kill the cursor
+  this.kill = function(callback) {
+    // Set cursor to dead
+    dead = true;
+    // If no cursor id just return
+    if(cursorId.isZero()) return callback(null, null);
+    // Create a kill cursor command
+    var killCursor = new KillCursor(bson, [cursorId]);
+    // Execute the kill cursor command
+    connection.write(killCursor);
+    // Set cursor to 0
+    cursorId = Long.ZERO;
+    // Return to caller
+    callback(null, null);
+  }
+
+
+  //
   // Execute getMore command
   var execGetMore = function(callback) {
     // Create getMore command
@@ -91,9 +110,6 @@ var Cursor = function(bson, ns, cmd, options, connection, callbacks, options) {
         }
       }
 
-      // console.log("++++++++++++++++++++++++++++++++++++++++ QUERY 1")
-      // console.dir(err)
-      // console.log(JSON.stringify(result, null, 2))
       // Otherwise fall back to regular find path
       cursorId = result.cursorId;
       documents = result.documents;

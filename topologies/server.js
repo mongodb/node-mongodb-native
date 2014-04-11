@@ -18,12 +18,25 @@ var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Doub
 
 // Single store for all callbacks
 var Callbacks = function() {
-  EventEmitter.call(callbacks);
+  EventEmitter.call(this);
+
+  //
+  // Flush all callbacks
+  this.flush = function(err) {
+    // Error out any current callbacks
+    for(var id in this._events) {
+      var executeError = function(_id, _callbacks) {
+        process.nextTick(function() {
+          _callbacks.emit(_id, err, null);
+        });
+      }
+
+      executeError(id, callbacks);
+    }
+  }
 }
 
 inherits(Callbacks, EventEmitter);
-
-var callbacks = new Callbacks;
 
 /**
  * @ignore
@@ -42,6 +55,8 @@ var bindToCurrentDomain = function(callback) {
  */
 var Server = function(options) {
   var self = this;
+  // Server callbacks
+  var callbacks = new Callbacks;
   
   // Add event listener
   EventEmitter.call(this);
@@ -53,6 +68,9 @@ var Server = function(options) {
   var reconnect = typeof options.reconnect == 'boolean' ? options.reconnect :  true;
   var reconnectTries = options.reconnectTries || 30;
   var reconnectInterval = options.reconnectInterval || 1000;
+
+  // Swallow or emit errors
+  var emitError = typeof options.emitError == 'boolean' ? options.emitError : false;
 
   // Current state
   var currentReconnectRetry = reconnectTries;
@@ -89,18 +107,6 @@ var Server = function(options) {
   var reconnectServer = function() {
     // Set the max retries
     currentReconnectRetry = reconnectTries;
-
-    // Error out any current callbacks
-    for(var id in callbacks._events) {
-      var executeError = function(_id, _callbacks) {
-        process.nextTick(function() {
-          _callbacks.emit(_id, new MongoError(f("server %s:%s closed the socket", options.host, options.port)), null);
-        });
-      }
-
-      executeError(id, callbacks);
-    }
-
     // Create a new Pool
     pool = new Pool(options);
     // error handler
@@ -123,7 +129,7 @@ var Server = function(options) {
     // Attempt to connect
     pool.once('connect', function() {
       // Remove any non used handlers
-      ['error', 'close', 'timeout'].forEach(function(e) {
+      ['error', 'close', 'timeout', 'parseError'].forEach(function(e) {
         pool.removeAllListeners(e);
       })
 
@@ -132,6 +138,7 @@ var Server = function(options) {
       pool.on('close', closeHandler);
       pool.on('timeout', timeoutHandler);
       pool.on('message', messageHandler);
+      pool.on('parseError', fatalErrorHandler);
 
       // We need to ensure we have re-authenticated
       var keys = Object.keys(authProviders);
@@ -156,6 +163,7 @@ var Server = function(options) {
     pool.once('error', errorHandler);
     pool.once('close', errorHandler);
     pool.once('timeout', errorHandler);
+    pool.once('parseError', errorHandler);
 
     // Connect pool
     pool.connect();
@@ -164,32 +172,60 @@ var Server = function(options) {
   //
   // Handlers
   var messageHandler = function(response, connection) {
-    if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), ismaster ? ismaster.me : f("%s:%s", options.host, options.port)));
+    if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
     // Execute callback
     callbacks.emit(response.responseTo, null, response);      
   }
 
   var errorHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
-    if(logger.isInfo()) logger.info(f('server %s errored out with %s', ismaster ? ismaster.me : f("%s:%s", options.host, options.port), JSON.stringify(err)));
+    if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
+    // Destroy all connections
     self.destroy();
-    self.emit('error', err, self);
+    // Flush out all the callbacks
+    callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    // Emit error event
+    if(emitError) self.emit('error', err, self);
+    // If we specified the driver to reconnect perform it
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
   }
 
+  var fatalErrorHandler = function(err, connection) {
+    if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
+    if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));    
+    // Destroy all connections
+    self.destroy();
+    // Flush out all the callbacks
+    callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    // Emit error event
+    self.emit('error', err, self);
+    // If we specified the driver to reconnect perform it
+    if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
+  }  
+
   var timeoutHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('timeout', [self]);
-    if(logger.isInfo()) logger.info(f('server %s timed out', ismaster ? ismaster.me : f("%s:%s", options.host, options.port)));
+    if(logger.isInfo()) logger.info(f('server %s timed out', self.name));
+    // Destroy all connections
     self.destroy();
+    // Flush out all the callbacks
+    callbacks.flush(new MongoError(f("server %s timed out", self.name)));
+    // Emit error event
     self.emit('timeout', err, self);
+    // If we specified the driver to reconnect perform it
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
   }
 
   var closeHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('close', [self]);
-    if(logger.isInfo()) logger.info(f('server %s closed', ismaster ? ismaster.me : f("%s:%s", options.host, options.port)));
+    if(logger.isInfo()) logger.info(f('server %s closed', self.name));
+    // Destroy all connections
     self.destroy();
+    // Flush out all the callbacks
+    callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
+    // Emit error event
     self.emit('close', err, self);
+    // If we specified the driver to reconnect perform it
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
   }
 
@@ -197,11 +233,21 @@ var Server = function(options) {
     if(readPreferenceStrategies != null) notifyStrategies('connect', [self]);
     // Execute an ismaster
     self.command('system.$cmd', {ismaster:true}, function(err, r) {
-      if(!err) ismaster = r.result;
-      if(logger.isInfo()) logger.info(f('server %s connected with ismaster [%s]', ismaster ? ismaster.me : f("%s:%s", options.host, options.port), JSON.stringify(r.result)));
+      if(err) return self.emit('close', err, self);
+
+      if(!err) {
+        ismaster = r.result;
+      }
+
+      if(logger.isInfo()) logger.info(f('server %s connected with ismaster [%s]', self.name, JSON.stringify(r.result)));
+
+      // Validate if we it's a server we can connect to
+      if(typeof ismaster.minWireVersion != 'number') {
+        return self.emit('error', new MongoError("non supported server version"), self);
+      }
 
       // Set the details
-      serverDetails.name = ismaster.me;
+      if(ismaster && ismaster.me) serverDetails.name = ismaster.me;
 
       // Apply any applyAuthentications
       applyAuthentications(function() {
@@ -230,15 +276,16 @@ var Server = function(options) {
     pool.on('error', errorHandler);
     pool.on('message', messageHandler);
     pool.on('connect', connectHandler);
+    pool.on('parseError', fatalErrorHandler);
     // Connect the pool
     pool.connect(); 
   }
 
   // destroy the server instance
   this.destroy = function() {
-    if(logger.isDebug()) logger.debug(f('destroy called on server %s', self.lastIsMaster() ? self.lastIsMaster().me : 'N/A'));
+    if(logger.isDebug()) logger.debug(f('destroy called on server %s', self.name));
     // Destroy all event emitters
-    ["close", "message", "error", "timeout", "connect"].forEach(function(e) {
+    ["close", "message", "error", "timeout", "connect", "parseError"].forEach(function(e) {
       pool.removeAllListeners(e);
     });
 
@@ -302,10 +349,10 @@ var Server = function(options) {
     // Debug log
     if(logger.isDebug()) logger.debug(f('executing command [%s] against %s', JSON.stringify({
       ns: ns, cmd: cmd, options: options
-    }), ismaster ? ismaster.me : f("%s:%s", options.host, options.port)));
+    }), self.name));
 
     // If we have no connection error
-    if(!pool.isConnected()) return callback(new MongoError("no connection available to server %s:%s", options.host, options.port));
+    if(!pool.isConnected()) return callback(new MongoError(f("no connection available to server %s", self.name)));
     
     // Get a connection (either passed or from the pool)
     var connection = options.connection || pool.get();
@@ -329,7 +376,6 @@ var Server = function(options) {
     callbacks.once(query.requestId, function(err, result) {
       // Notify end of command
       notifyStrategies('endOperation', [self, err, result, new Date()]);
-
       if(err) return callback(err);
       callback(null, new CommandResult(result.documents[0], connection));
     });
@@ -401,16 +447,7 @@ var Server = function(options) {
 
   // Match
   this.equal = function(server) {    
-    if(ismaster == null) return false;
-    if(server instanceof Server) {
-      return server.name == this.name;
-    }
-
-    if(typeof server == 'string') {
-      return server == ismaster.me; 
-    }
-
-    return false;
+    return server.name == this.name;
   }
 
   // // Command
@@ -447,8 +484,7 @@ var Server = function(options) {
 
   // Create a cursor for the command
   this.cursor = function(ns, cmd, options) {
-    options = options || {};
-    return new Cursor(bson, ns, cmd, options, pool.get(), callbacks, options);
+    return new Cursor(bson, ns, cmd, options, pool.get(), callbacks, options || {});
   }
 
   var slaveOk = function(r) {

@@ -59,7 +59,7 @@ var Pool = function(options) {
 
   var parseErrorHandler = function(err, connection) {
     if(!dead) {
-      self.emit('error', err, self);
+      self.emit('parseError', err, self);
       dead = true;
       self.destroy();
     }
