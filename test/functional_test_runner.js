@@ -2,10 +2,12 @@ var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
   , f = require('util').format
+  , path = require('path')
   , NodeVersionFilter = require('./filters/node_version_filter')
   // , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
-  , FileFilter = require('integra').FileFilter;
+  , FileFilter = require('integra').FileFilter
+  , ServerManager = require('./tools/server_manager');
 
 /**
  * Standalone MongoDB Configuration
@@ -19,6 +21,7 @@ var StandaloneConfiguration = function(options) {
   var port = options.port || 27017;
   var db = options.db || 'integration_tests';
   var mongo = null;
+  var manager = options.manager;
 
   // Create a topology function
   var topology = options.topology || function(self, _mongo) {
@@ -34,23 +37,29 @@ var StandaloneConfiguration = function(options) {
     return {    
       start: function(callback) {
         var self = this;
-        var server = topology(this, mongo);
-        
-        // Set up connect
-        server.once('connect', function() {
-          // Drop the database
-          server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
-            server.destroy();
-            callback();
+
+        // Start the db
+        manager.start({purge:true, signal: -15}, function() {
+          var server = topology(this, mongo);
+          
+          // Set up connect
+          server.once('connect', function() {
+            // Drop the database
+            server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
+              server.destroy();
+              callback();
+            });
           });
+          
+          // Connect
+          server.connect();
         });
-        
-        // Connect
-        server.connect();
       },
 
-      shutdown: function(callback) {
-        callback();
+      stop: function(callback) {
+        manager.stop({signal: -15}, function() {
+          callback();
+        });        
       },
 
       restart: function(callback) {
@@ -101,8 +110,8 @@ var runner = new Runner({
 var testFiles =[
   //   '/test/tests/functional/connection_tests.js'
   // , '/test/tests/functional/pool_tests.js'
-  // , '/test/tests/functional/server_tests.js'
-  , '/test/tests/functional/replset_tests.js'
+  , '/test/tests/functional/server_tests.js'
+  // , '/test/tests/functional/replset_tests.js'
   // , '/test/tests/functional/basic_auth_tests.js'
   // , '/test/tests/functional/extend_pick_strategy_tests.js'
   // , '/test/tests/functional/mongos_tests.js'
@@ -158,7 +167,10 @@ Logger.filter('class', ['ReplSet', 'Server']);
 // Single server topology
 var singleServerConfig = {
     host: 'localhost'
-  , port: 27017  
+  , port: 27017
+  , manager: new ServerManager({
+    dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
+  })
 }
 
 //
@@ -191,12 +203,13 @@ var mongosServerConfig = {
         host: self.host
       , port: self.port 
     }]);
-  }  
+  }
 }
 
 // Set the config
 var config = mongosServerConfig;
 var config = replicasetServerConfig;
+var config = singleServerConfig;
 
 // Run the tests
 runner.run(StandaloneConfiguration(config));

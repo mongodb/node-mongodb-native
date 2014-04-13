@@ -18,7 +18,9 @@
     "bson": "latest"
   },
   "devDependencies": {
-    "integra": "0.1.1"
+    "integra": "0.1.1",
+    "mkdirp": "latest",
+    "rimraf": "2.2.6"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
