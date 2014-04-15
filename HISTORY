@@ -1,3 +1,10 @@
+1.4.1 2014-04-15
+----------------
+- Fix for inheritance of readPreferences from MongoClient NODE-168/NODE-169
+- Merged in fix for ping strategy to avoid hitting non-pinged servers (Issue #1161, https://github.com/vaseker)
+- Merged in fix for correct debug output for connection messages (Issue #1158, https://github.com/vaseker)
+- Fixed global variable leak (Issue #1160, https://github.com/vaseker)
+
 1.4.1 2014-04-09
 ----------------
 - Correctly emit joined event when primary change
