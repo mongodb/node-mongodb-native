@@ -36,7 +36,8 @@ exports['Should correctly execute command'] = {
   },
 
   test: function(configuration, test) {
-    var Server = configuration.require.Server;
+    var Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference;
 
     // Attempt to connect
     var server = new Server({
@@ -47,7 +48,7 @@ exports['Should correctly execute command'] = {
     // Add event listeners
     server.on('connect', function(_server) {
       // Execute the command
-      _server.command("system.$cmd", {ismaster: true}, {readPreference: 'primary'}, function(err, result) {
+      _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
         test.equal(null, err);
         test.equal(true, result.result.ismaster);
         // Destroy the connection
@@ -159,7 +160,8 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
   },
 
   test: function(configuration, test) {
-    var Server = configuration.require.Server;
+    var Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference;
 
     // Attempt to connect
     var server = new Server({
@@ -175,7 +177,7 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
     // Add event listeners
     server.on('connect', function(_server) {
       // Execute the command
-      _server.command("system.$cmd", {ismaster: true}, {readPreference: 'primary'}, function(err, result) {
+      _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
         test.equal(null, err)
         // Write garbage, force socket closure
         try {
@@ -185,7 +187,7 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
         } catch(err) {}
 
         // Attempt a proper command
-        _server.command("system.$cmd", {ismaster: true}, {readPreference: 'primary'}, function(err, result) {
+        _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
           test.ok(err != null);
         });
       });
@@ -215,7 +217,8 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
   },
 
   test: function(configuration, test) {
-    var Server = configuration.require.Server;
+    var Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference;
 
     // Attempt to connect
     var server = new Server({
@@ -230,7 +233,7 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
     // Add event listeners
     server.on('connect', function(_server) {
       // Execute the command
-      _server.command("system.$cmd", {ismaster: true}, {readPreference: 'primary'}, function(err, result) {
+      _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
         test.equal(null, err)
         // Write garbage, force socket closure
         try {
@@ -240,7 +243,7 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
         } catch(err) {}
 
         // Attempt a proper command
-        _server.command("system.$cmd", {ismaster: true}, {readPreference: 'primary'}, function(err, result) {
+        _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
           test.ok(err != null);
         });
       });
