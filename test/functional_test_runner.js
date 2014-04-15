@@ -7,7 +7,8 @@ var Runner = require('integra').Runner
   // , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
   , FileFilter = require('integra').FileFilter
-  , ServerManager = require('./tools/server_manager');
+  , ServerManager = require('./tools/server_manager')
+  , ReplSetManager = require('./tools/replset_manager');
 
 /**
  * Standalone MongoDB Configuration
@@ -39,7 +40,7 @@ var StandaloneConfiguration = function(options) {
         var self = this;
 
         // Start the db
-        manager.start({purge:true, signal: -15}, function() {
+        manager.start({purge:true, signal: -9}, function() {
           var server = topology(this, mongo);
           
           // Set up connect
@@ -57,13 +58,16 @@ var StandaloneConfiguration = function(options) {
       },
 
       stop: function(callback) {
+        process.exit(0)
         manager.stop({signal: -15}, function() {
           callback();
         });        
       },
 
       restart: function(callback) {
-        callback();
+        manager.restart(function() {
+          callback();
+        });
       },
 
       setup: function(callback) {
@@ -95,6 +99,7 @@ var StandaloneConfiguration = function(options) {
       port: port,
       host: host,
       db: db,
+      manager: manager,
       writeConcern: function() { return {w: 1} }
     }
   }
@@ -110,8 +115,9 @@ var runner = new Runner({
 var testFiles =[
   //   '/test/tests/functional/connection_tests.js'
   // , '/test/tests/functional/pool_tests.js'
-  , '/test/tests/functional/server_tests.js'
+  // , '/test/tests/functional/server_tests.js'
   // , '/test/tests/functional/replset_tests.js'
+  , '/test/tests/functional/replset_failover_tests.js'
   // , '/test/tests/functional/basic_auth_tests.js'
   // , '/test/tests/functional/extend_pick_strategy_tests.js'
   // , '/test/tests/functional/mongos_tests.js'
@@ -157,21 +163,21 @@ runner.on('exit', function(errors, results) {
 });
 
 // Set Logger level for driver
-Logger.setLevel('error');
+Logger.setLevel('info');
 // Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
 // Logger.filter('class', ['Connection']);
 Logger.filter('class', ['ReplSet', 'Server']);
 //Logger.filter('class', ['Mongos', 'Server']);
 
-//
-// Single server topology
-var singleServerConfig = {
-    host: 'localhost'
-  , port: 27017
-  , manager: new ServerManager({
-    dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
-  })
-}
+// //
+// // Single server topology
+// var singleServerConfig = {
+//     host: 'localhost'
+//   , port: 27017
+//   , manager: new ServerManager({
+//     dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
+//   })
+// }
 
 //
 // Replicaset server topology
@@ -180,36 +186,40 @@ var replicasetServerConfig = {
   , port: 31000
   , topology: function(self, _mongo) {
     return new _mongo.ReplSet([{
-        host: self.host
-      , port: self.port 
+        host: 'localhost'
+      , port: 31000
     }]);
   }  
+  , manager: new ReplSetManager({
+      dbpath: path.join(path.resolve('db'))
+    , logpath: path.join(path.resolve('db'))
+  })
 }
 
-//
-// Mongos server topology
-var mongosServerConfig = {
-    host: 'localhost'
-  , port: 30998
-  , topology: function(self, _mongo) {
-    // return new _mongo.Mongos([{
-    //     host: self.host
-    //   , port: self.port 
-    // }, {
-    //     host: self.host
-    //   , port: self.port + 1
-    // }]);
-    return new _mongo.Mongos([{
-        host: self.host
-      , port: self.port 
-    }]);
-  }
-}
+// //
+// // Mongos server topology
+// var mongosServerConfig = {
+//     host: 'localhost'
+//   , port: 30998
+//   , topology: function(self, _mongo) {
+//     // return new _mongo.Mongos([{
+//     //     host: self.host
+//     //   , port: self.port 
+//     // }, {
+//     //     host: self.host
+//     //   , port: self.port + 1
+//     // }]);
+//     return new _mongo.Mongos([{
+//         host: self.host
+//       , port: self.port 
+//     }]);
+//   }
+// }
 
-// Set the config
-var config = mongosServerConfig;
+// // Set the config
+// var config = mongosServerConfig;
 var config = replicasetServerConfig;
-var config = singleServerConfig;
+// var config = singleServerConfig;
 
 // Run the tests
 runner.run(StandaloneConfiguration(config));

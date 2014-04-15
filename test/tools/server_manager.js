@@ -22,12 +22,11 @@ var cloneOptions = function(options) {
 var filterInternalOptionsOut = function(options, internalOptions) {
   var opts = {};
 
-  internalOptions.forEach(function(n) {
-    if(options[n]) {
-      opts[n] = options[n];
-      delete options[n];
+  for(var name in options) {
+    if(internalOptions.indexOf(name) == -1) {
+      opts[name] = options[name];
     }
-  });
+  }
 
   return opts;
 }
@@ -39,6 +38,7 @@ var ServerManager = function(serverOptions) {
   var bin = serverOptions.bin || 'mongod';
   // Set default db path if none set
   var dbpath = serverOptions.dbpath = serverOptions.dbpath || path.join(path.resolve('data'), f("data-%d", port));
+  var logpath = serverOptions.logpath = serverOptions.logpath || path.join(path.resolve('data'), f("data-%d.log", port));
 
   // Current process id
   var pid = 0;
@@ -49,6 +49,16 @@ var ServerManager = function(serverOptions) {
   // filtered out internal keys
   var internalOptions = {};
   internalOptions = filterInternalOptionsOut(serverOptions, ["bin", "host"]);
+  internalOptions.fork = null;
+
+  // Return
+  this.port = port;
+  this.host = host;
+  this.name = f("%s:%s", host, port);
+
+  // Actual server instance
+  var server = null;
+  var ismaster = null;
 
   // Return the startup command
   var buildStartupCommand = function(options) {
@@ -73,15 +83,16 @@ var ServerManager = function(serverOptions) {
     }
 
     var pingServer = function() {
-      if(callback == null) return;
       // Else we need to start checking if the server is up
-      var server = new Server({host: host
+      server = new Server({host: host
         , port: port
         , connectionTimeout: 2000
       });
       
       // On connect let's go
       server.on('connect', function() {
+        ismaster = server.lastIsMaster();
+
         try {
           // Read the pidfile        
           pid = fs.readFileSync(path.join(dbpath, "mongod.lock"), 'ascii').trim();          
@@ -90,7 +101,11 @@ var ServerManager = function(serverOptions) {
         }
         
         // Finish up
-        callback(null, server);          
+        if(callback) {
+          var _callback = callback;
+          callback = null;
+          _callback(null, server);
+        }
       });
       
       // Error or close handling
@@ -127,9 +142,10 @@ var ServerManager = function(serverOptions) {
 
     // Build startup command
     var cmd = buildStartupCommand(serverOptions);
-
     // If we have decided to kill all the processes
-    if(typeof options.signal == 'number') {
+    if(typeof options.signal == 'number' || options.purge) {
+      options.signal = typeof options.signal == 'number' ? options.signal : -9;
+
       exec(f("killall %d mongod", options.signal), function(err, stdout, stderr) {
         bootServer(cmd, callback);
       });
@@ -138,16 +154,15 @@ var ServerManager = function(serverOptions) {
     }
   }
 
-  this.destroy = function() {
-  }
-
   this.stop = function(options, callback) {    
     if(typeof options == 'function') {
       callback = options;
       options = {};
     }
 
-    var signal = options.signal || 15;
+    var signal = options.signal || -15;
+    // Stop server connection
+    server.destroy();
     // Kill the process with the desired signal
     exec(f("kill %d %s", signal, pid), function(error) {
       if(error) return callback(error, null);
@@ -155,7 +170,42 @@ var ServerManager = function(serverOptions) {
     });
   }
 
-  this.restart = function() {
+  this.restart = function(options, callback) {
+    if(typeof options == 'function') {
+      callback = options;
+      options = {};
+    }
+
+    var self = this;
+    self.stop(options, function(err, result) {
+      if(err) return callback(err, null);
+
+      self.start(options, function() {
+        if(err) return callback(err, null);
+        callback(null, null);
+      });
+    });
+  }
+
+  this.ismaster = function(callback) {
+    if(server == null || !server.isConnected()) return callback(new Error("no server available"));
+    server.command('system.$cmd', {ismaster:true}, function(err, r) {
+      if(err) return callback(err);
+      ismaster = r.result;
+      callback(null, ismaster);
+    });
+  }
+
+  this.lastIsMaster = function(callback) {
+    return ismaster;
+  }
+
+  this.isConnected = function() {
+    return server != null && server.isConnected();
+  }
+
+  this.server = function() {
+    return server;
   }
 }
 
