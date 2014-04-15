@@ -2126,3 +2126,55 @@ exports['Should correctly append content to file and have correct chunk numbers'
     });
   });
 }
+
+// /**
+//  * @ignore
+//  */
+// exports['Concurrent writes should not corrupt files'] = function(configuration, test) {
+//   var GridStore = configuration.getMongoPackage().GridStore
+//     , ObjectID = configuration.getMongoPackage().ObjectID;
+
+//   var db = configuration.newDbInstance({w:1}, {poolSize:1});
+//   db.open(function(err, db) {
+//     test.equal(null, err);
+//     // Set smaller chunk size
+//     var chunkSize = 32*1024;  // Standard 256KB chunks
+//     // Our file ID
+//     var fileId1 = new ObjectID();
+//     var fileId2 = new ObjectID();
+//     // Open a new file
+//     // var gridStore1 = new GridStore(db, fileId1, 'w', { chunkSize: chunkSize, root: "chunkCheck" });
+//     // var gridStore2 = new GridStore(db, fileId2, 'w', { chunkSize: chunkSize, root: "chunkCheck" });
+//     var gridStore1 = new GridStore(db, fileId1, 'w', { chunkSize: chunkSize});
+//     var gridStore2 = new GridStore(db, fileId2, 'w', { chunkSize: chunkSize});
+
+//     // Create buffer larger than the chunk
+//     var buffer1 = new Buffer(chunkSize * 4);
+//     var buffer2 = new Buffer(chunkSize * 4); 
+
+//     // Write concurrently
+//     gridStore1.open(function(err, gs) {
+//       test.equal(null, err);
+
+//       gs.write(buffer1, function(err, gs) {
+//         test.equal(null, err);
+//         gs.close(function(err) {
+//           test.equal(null, err);
+//           console.log("================= written")
+//         });
+//       });
+//     });
+
+//     gridStore2.open(function(err, gs) {
+//       test.equal(null, err);
+
+//       gs.write(buffer2, function(err, gs) {
+//         test.equal(null, err);
+//         gs.close(function(err) {
+//           test.equal(null, err);
+//           console.log("================= written 2")        
+//         });
+//       });
+//     });
+//   });
+// }
