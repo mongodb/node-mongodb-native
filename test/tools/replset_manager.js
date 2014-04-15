@@ -4,6 +4,7 @@ var f = require('util').format
   , mkdirp = require('mkdirp')
   , rimraf = require('rimraf')
   , ServerManager = require('./server_manager')
+  , ReadPreference = require('../../lib/topologies/read_preference')
   , Server = require('../../lib').Server
   , ReplSet = require('../../lib').ReplSet;
 
@@ -41,6 +42,7 @@ var ReplSetManager = function(replsetOptions) {
   var replSet = replsetOptions.replSet = replsetOptions.replSet || 'rs';
   var version = 1;
   var configSet = null;
+  var tags = replsetOptions.tags;
 
   // Clone the options
   replsetOptions = cloneOptions(replsetOptions);
@@ -50,7 +52,7 @@ var ReplSetManager = function(replsetOptions) {
 
   // filtered out internal keys
   var internalOptions = filterInternalOptionsOut(replsetOptions
-    , ["bin", "host", "secondaries", "arbiters", "startPort"]);
+    , ["bin", "host", "secondaries", "arbiters", "startPort", "tags"]);
 
   //
   // ensure replicaset is up and running
@@ -111,6 +113,15 @@ var ReplSetManager = function(replsetOptions) {
         , host: serverManagers[_id].name
       }      
     }
+
+    // Do we have tags to add to our config
+    if(Array.isArray(tags)) {
+      for(var i = 0; i < tags.length; i++) {
+        if(configSet.members[i] != null) {
+          configSet.members[i].tags = tags[i];
+        }
+      }
+    }
     
     // Let's pick one of the servers and run the command against it
     var server = new Server({
@@ -128,7 +139,7 @@ var ReplSetManager = function(replsetOptions) {
       // Execute configure replicaset
       server.command('admin.$cmd'
         , {replSetInitiate: configSet}
-        , {readPreference: 'secondary'}, function(err, result) {
+        , {readPreference: new ReadPreference('secondary')}, function(err, result) {
           if(err) return callback(err, null);
           console.log("Waiting for replicaset ");
           ensureUp(server, callback);

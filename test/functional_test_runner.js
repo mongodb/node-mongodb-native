@@ -23,6 +23,8 @@ var StandaloneConfiguration = function(options) {
   var db = options.db || 'integration_tests';
   var mongo = null;
   var manager = options.manager;
+  var skipStart = typeof options.skipStart == 'boolean' ? options.skipStart : false;
+  var skipTermination = typeof options.skipTermination == 'boolean' ? options.skipTermination : false;
 
   // Create a topology function
   var topology = options.topology || function(self, _mongo) {
@@ -38,9 +40,9 @@ var StandaloneConfiguration = function(options) {
     return {    
       start: function(callback) {
         var self = this;
-
+        if(skipStart) return callback();
         // Start the db
-        manager.start({purge:true, signal: -9}, function() {
+        manager.start({purge:true, signal: -9}, function(err) {
           var server = topology(this, mongo);
           
           // Set up connect
@@ -58,7 +60,7 @@ var StandaloneConfiguration = function(options) {
       },
 
       stop: function(callback) {
-        process.exit(0)
+        if(skipTermination) return callback();
         manager.stop({signal: -15}, function() {
           callback();
         });        
@@ -116,8 +118,8 @@ var testFiles =[
   //   '/test/tests/functional/connection_tests.js'
   // , '/test/tests/functional/pool_tests.js'
   // , '/test/tests/functional/server_tests.js'
-  // , '/test/tests/functional/replset_tests.js'
-  , '/test/tests/functional/replset_failover_tests.js'
+  , '/test/tests/functional/replset_tests.js'
+  // , '/test/tests/functional/replset_failover_tests.js'
   // , '/test/tests/functional/basic_auth_tests.js'
   // , '/test/tests/functional/extend_pick_strategy_tests.js'
   // , '/test/tests/functional/mongos_tests.js'
@@ -169,21 +171,24 @@ Logger.setLevel('info');
 Logger.filter('class', ['ReplSet', 'Server']);
 //Logger.filter('class', ['Mongos', 'Server']);
 
-// //
-// // Single server topology
-// var singleServerConfig = {
-//     host: 'localhost'
-//   , port: 27017
-//   , manager: new ServerManager({
-//     dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
-//   })
-// }
+//
+// Single server topology
+var config = {
+    host: 'localhost'
+  , port: 27017
+  , manager: new ServerManager({
+      dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
+    , logpath: path.join(path.resolve('db'), f("data-%d.log", 27017))
+  })
+}
 
 //
 // Replicaset server topology
-var replicasetServerConfig = {
+var config = {
     host: 'localhost'
   , port: 31000
+  // , skipStart: true
+  , skipTermination: true
   , topology: function(self, _mongo) {
     return new _mongo.ReplSet([{
         host: 'localhost'
@@ -193,12 +198,13 @@ var replicasetServerConfig = {
   , manager: new ReplSetManager({
       dbpath: path.join(path.resolve('db'))
     , logpath: path.join(path.resolve('db'))
+    , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
   })
 }
 
 // //
 // // Mongos server topology
-// var mongosServerConfig = {
+// var config = {
 //     host: 'localhost'
 //   , port: 30998
 //   , topology: function(self, _mongo) {
@@ -215,11 +221,6 @@ var replicasetServerConfig = {
 //     }]);
 //   }
 // }
-
-// // Set the config
-// var config = mongosServerConfig;
-var config = replicasetServerConfig;
-// var config = singleServerConfig;
 
 // Run the tests
 runner.run(StandaloneConfiguration(config));
