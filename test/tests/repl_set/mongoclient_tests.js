@@ -88,3 +88,32 @@ exports['Should give an error for non-existing servers'] = function(configuratio
     test.done();
   });
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly connect to a replicaset with writeConcern specified and GridStore should inherit correctly'] = function(configuration, test) {
+  var mongo = configuration.getMongoPackage()
+    , MongoClient = mongo.MongoClient
+    , GridStore = mongo.GridStore
+    , ObjectID = mongo.ObjectID;
+
+  var replMan = configuration.getReplicasetManager();
+
+  // Create url
+  var url = format("mongodb://%s,%s/%s?replicaSet=%s&w=%s&wtimeoutMS=5000"
+    , format("%s:%s", replMan.host, replMan.ports[0])
+    , format("%s:%s", replMan.host, replMan.ports[1])
+    , "integration_test_"
+    , configuration.getReplicasetManager().name
+    , "majority");
+
+  MongoClient.connect(url, function(err, db) {
+    var gs = new GridStore(db, new ObjectID());
+    test.equal('majority', gs.writeConcern.w);
+    test.equal(5000, gs.writeConcern.wtimeout);
+    db.close();
+    test.done();
+  });
+}
+
