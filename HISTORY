@@ -1,4 +1,4 @@
-1.4.1 2014-04-15
+1.4.2 2014-04-15
 ----------------
 - Fix for inheritance of readPreferences from MongoClient NODE-168/NODE-169
 - Merged in fix for ping strategy to avoid hitting non-pinged servers (Issue #1161, https://github.com/vaseker)
