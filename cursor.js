@@ -124,6 +124,7 @@ var Cursor = function(bson, ns, cmd, options, connection, callbacks, options) {
   // Execute a find command
   var setupClassicFind = function(ns, cmd, options) {
     var readPreference = options.readPreference || new ReadPreference('primary');
+    if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
     if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
 
     // Ensure we have at least some options
@@ -175,6 +176,7 @@ var Cursor = function(bson, ns, cmd, options, connection, callbacks, options) {
   // Set up a command cursor
   var setupCommand = function(ns, cmd, options) {
     var readPreference = options.readPreference || new ReadPreference('primary');
+    if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
     if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
 
     // Set empty options object

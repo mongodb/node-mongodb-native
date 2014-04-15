@@ -4,8 +4,8 @@ var setProperty = function(obj, prop, flag, values) {
       enumerable:true,
       set: function(value) {
         if(typeof value != 'boolean') throw new Error(f("%s required a boolean", prop.name));
-        if(value) values.flags |= values.flag;
-        if(!value) values.flags ^= values.flag;
+        if(value) values.flags |= flag;
+        if(!value) values.flags ^= flag;
         prop.value = value;
       }
     , get: function() { return prop.value; }
