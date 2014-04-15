@@ -348,6 +348,10 @@ var Server = function(options) {
     
     // Ensure we have no options
     options = options || {};
+    // Do we have a read Preference it need to be of type ReadPreference
+    if(options.readPreference && !(options.readPreference instanceof ReadPreference)) {
+      throw new Error("readPreference must be an instance of ReadPreference");
+    }
 
     // Debug log
     if(logger.isDebug()) logger.debug(f('executing command [%s] against %s', JSON.stringify({
@@ -492,7 +496,7 @@ var Server = function(options) {
   }
 
   var slaveOk = function(r) {
-    if(r == 'secondary' || r =='secondaryPreferred') return true;
+    if(r) return r.slaveOk()
     return false;
   }
 }

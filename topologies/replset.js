@@ -224,7 +224,7 @@ var ReplSet = function(seedlist, options) {
 
     // Check if can find a new server
     try {
-      server = pickServer({readPreference: ReadPreference.secondaryPreferred});      
+      server = pickServer(ReadPreference.secondaryPreferred);
     } catch(err) {}
     
     // Did we get a server
@@ -497,10 +497,8 @@ var ReplSet = function(seedlist, options) {
 
     // Ensure we have no options
     options = options || {};
-    // Write command, direct to primary always
-    if(options.writeConcern) options.readPreference = ReadPreference.primary;
     // Pick the right server based on readPreference
-    var server = pickServer(options);
+    var server = pickServer(options.writeConcern ? ReadPreference.primary : options.readPreference);
     // No server returned we had an error
     if(server == null) return;
 
@@ -519,7 +517,7 @@ var ReplSet = function(seedlist, options) {
     // Ensure we have no options
     options = options || {};
     // Get a primary    
-    var server = pickServer({readPreference: ReadPreference.primary});
+    var server = pickServer(ReadPreference.primary);
     // No server returned we had an error
     if(server == null) return;
     // Execute the command
@@ -551,7 +549,7 @@ var ReplSet = function(seedlist, options) {
     // Ensure we have no options
     options = options || {};
     // Pick the right server based on readPreference
-    var server = pickServer(options);
+    var server = pickServer(options.readPreference);
     // No server returned we had an error
     if(server == null) return;
     // Execute the command
@@ -610,37 +608,38 @@ var ReplSet = function(seedlist, options) {
 
   //
   // Pick a server based on readPreference
-  var pickServer = function(options) {
+  var pickServer = function(readPreference) {
     options = options || {};
-    var readPreference = options.readPreference || ReadPreference.primary;
+    // If no read Preference set to primary by default
+    readPreference = readPreference || ReadPreference.primary;
 
     // Do we have a custom readPreference strategy, use it
     if(readPreferenceStrategies != null && readPreferenceStrategies[readPreference] != null) {
-      return readPreferenceStrategies[readPreference].pickServer(replState, options);
+      return readPreferenceStrategies[readPreference].pickServer(replState, readPreference);
     }
 
     // Check if we can satisfy and of the basic read Preferences
-    if(readPreference == ReadPreference.secondary 
+    if(readPreference.equals(ReadPreference.secondary) 
       && replState.secondaries.length == 0)
         throw new MongoError("no secondary server available");
     
-    if(readPreference == ReadPreference.secondaryPreferred 
+    if(readPreference.equals(ReadPreference.secondaryPreferred)
         && replState.secondaries.length == 0
         && replState.primary == null)
       throw new MongoError("no secondary or primary server available");
 
-    if(readPreference == ReadPreference.primary 
+    if(readPreference.equals(ReadPreference.primary)
       && replState.primary == null)
         throw new MongoError("no primary server available");
 
     // Secondary
-    if(readPreference == ReadPreference.secondary) {
+    if(readPreference.equals(ReadPreference.secondary)) {
       index = index + 1;
       return replState.secondaries[index % replState.secondaries.length];
     }
 
     // Secondary preferred
-    if(readPreference == ReadPreference.secondaryPreferred) {
+    if(readPreference.equals(ReadPreference.secondaryPreferred)) {
       if(replState.secondaries.length > 0) {
         index = index + 1;
         return replState.secondaries[index % replState.secondaries.length];        
@@ -650,7 +649,7 @@ var ReplSet = function(seedlist, options) {
     }
 
     // Primary preferred
-    if(readPreference == ReadPreference.primaryPreferred) {
+    if(readPreference.equals(ReadPreference.primaryPreferred)) {
       if(replState.primary) return replState.primary;
 
       if(replState.secondaries.length > 0) {

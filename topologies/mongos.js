@@ -100,13 +100,13 @@ var State = function(readPreferenceStrategies) {
 
   //
   // Pick a server
-  this.pickServer = function(options) {
+  this.pickServer = function(readPreference) {
     options = options || {};
-    var readPreference = options.readPreference || ReadPreference.primary;
+    readPreference = readPreference || ReadPreference.primary;
 
     // Do we have a custom readPreference strategy, use it
     if(readPreferenceStrategies != null && readPreferenceStrategies[readPreference] != null) {
-      return readPreferenceStrategies[readPreference].pickServer(connectedServers, options);
+      return readPreferenceStrategies[readPreference].pickServer(connectedServers, readPreference);
     }
 
     // No valid connections
@@ -390,10 +390,8 @@ var Mongos = function(seedlist, options) {
 
     // Ensure we have no options
     options = options || {};
-    // Write command, direct to primary always
-    if(options.writeConcern) options.readPreference = ReadPreference.primary;
     // Pick the right server based on readPreference
-    var server = mongosState.pickServer(options);
+    var server = mongosState.pickServer(options.writeConcern ? ReadPreference.primary : options.readPreference);
     // We got an error
     if(server instanceof Error) return callback(server, null);
     // Execute the command
@@ -410,7 +408,7 @@ var Mongos = function(seedlist, options) {
     // Ensure we have no options
     options = options || {};
     // Pick the right server based on readPreference
-    var server = mongosState.pickServer(options);
+    var server = mongosState.pickServer(options.readPreference);
     // We got an error
     if(server instanceof Error) throw server;
     // Execute the command
