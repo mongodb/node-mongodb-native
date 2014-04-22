@@ -10,6 +10,10 @@ var Runner = require('integra').Runner
  * Standalone MongoDB Configuration
  */
 var f = require('util').format;
+var smokePlugin = require('./smoke_plugin.js');
+var argv = require('optimist')
+    .usage('Usage: $0 -r [smoke report file]')
+    .argv;
 
 var StandaloneConfiguration = function(context) {
 	var mongo = require('../lib/mongodb');
@@ -301,6 +305,11 @@ var runner = new Runner({
 	, runners: 1
 	, failFast: true
 });
+
+if (argv.r) {
+  console.log("Writing smoke output to " + argv.r);
+  smokePlugin.attachToRunner(runner, argv.r);
+}
 
 var testFiles =[
 		'/test/tests/functional/mongo_reply_parser_tests.js'
