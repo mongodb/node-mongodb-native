@@ -11,87 +11,108 @@ var Runner = require('integra').Runner
  */
 var f = require('util').format;
 
-var StandaloneConfiguration = function(context) {
-	var mongo = require('../lib/mongodb');
-	var Db = mongo.Db;
-	var Server = mongo.Server;
-	var ServerManager = require('../test/tools/server_manager').ServerManager;
-  var database = "integration_tests";
-  var url = "mongodb://%slocalhost:27017/" + database;
-  var manager = new ServerManager({
-  	journal:false
-  });  
+var createConfiguration = function(options) {  
+  options = options || {};
 
-	return {		
-		start: function(callback) {
-      manager.start(true, function(err) {
-        if(err) throw err;
-        callback();
-      });
-		},
+  // Create the configuration
+  var Configuration = function(context) {
+  	var mongo = require('../lib/mongodb');
+  	var Db = mongo.Db;
+  	var Server = mongo.Server;
+  	var ServerManager = require('../test/tools/server_manager').ServerManager;
+    var database = "integration_tests";
+    var url = "mongodb://%slocalhost:27017/" + database;
+    // Override manager or use default
+    var manager = options.manager ? options.manager() : new ServerManager({
+    	journal:false
+    });  
 
-		stop: function(callback) {
-      manager.killAll(function(err) {
-        callback();
-      });        
-		},
+  	return {		
+  		start: function(callback) {
+        manager.start(true, function(err) {
+          if(err) throw err;
+          callback();
+        });
+  		},
 
-		restart: function(callback) {
-			manager.stop(3, function() {
-				manager.start(false, callback);
-			})
-		},
+  		stop: function(callback) {
+        manager.killAll(function(err) {
+          callback();
+        });        
+  		},
 
-		setup: function(callback) {
-			callback();
-		},
+  		restart: function(callback) {
+  			manager.stop(3, function() {
+  				manager.start(false, callback);
+  			})
+  		},
 
-		teardown: function(callback) {
-			callback();
-		},
+  		setup: function(callback) {
+  			callback();
+  		},
 
-		newDbInstance: function(dbOptions, serverOptions) {
-			var port = serverOptions && serverOptions.port || 27017;
-			var host = serverOptions && serverOptions.host || "localhost";
-			if(dbOptions.w == null
-					&& dbOptions.fsync == null
-					&& dbOptions.wtimeout == null
-					&& dbOptions.j == null) dbOptions.w = 1;
-			// Return a new db instance
-			return new Db(database, new Server(host, port, serverOptions), dbOptions);
-		},
+  		teardown: function(callback) {
+  			callback();
+  		},
 
-		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
-			var host = serverOptions && serverOptions.host || "/tmp/mongodb-27017.sock";
+  		newDbInstance: function(dbOptions, serverOptions) {
+        // Override implementation
+        if(options.newDbInstance) return options.newDbInstance(dbOptions, serverOptions);
 
-			// If we explicitly testing undefined port behavior
-			if(serverOptions && serverOptions.port == 'undefined') {
-				return new Db('integration_tests', new Server(host, undefined, serverOptions), dbOptions);
-			}
+        // Fall back
+  			var port = serverOptions && serverOptions.port || 27017;
+  			var host = serverOptions && serverOptions.host || "localhost";
+  			if(dbOptions.w == null
+  					&& dbOptions.fsync == null
+  					&& dbOptions.wtimeout == null
+  					&& dbOptions.j == null) dbOptions.w = 1;
 
-			// Normal socket connection
-      return new Db('integration_tests', new Server(host, serverOptions), dbOptions);
-		},
+  			// Return a new db instance
+  			return new Db(database, new Server(host, port, serverOptions), dbOptions);
+  		},
 
-		url: function(username, password) {
-			var auth = "";
+  		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
+        // Override implementation
+        if(options.newDbInstanceWithDomainSocket) return options.newDbInstanceWithDomainSocket(dbOptions, serverOptions);
 
-			if(username && password) {
-				auth = f("%s:%s@", username, password);
-			}
+        // Fall back
+  			var host = serverOptions && serverOptions.host || "/tmp/mongodb-27017.sock";
 
-			return f(url, auth);
-		},
+  			// If we explicitly testing undefined port behavior
+  			if(serverOptions && serverOptions.port == 'undefined') {
+  				return new Db('integration_tests', new Server(host, undefined, serverOptions), dbOptions);
+  			}
 
-		// Additional parameters needed
-		require: mongo,
-		database: database,
-		nativeParser: true,
-		port: 27017,
-		host: 'localhost',
-		writeConcern: function() { return {w: 1} },
-    writeConcernMax: function() { return {w: 1} }
-	}
+  			// Normal socket connection
+        return new Db('integration_tests', new Server(host, serverOptions), dbOptions);
+  		},
+
+  		url: function(username, password) {
+        // Override implementation
+        if(options.url) return options.url(username, password);
+
+        // Fall back
+  			var auth = "";
+
+  			if(username && password) {
+  				auth = f("%s:%s@", username, password);
+  			}
+
+  			return f(url, auth);
+  		},
+
+  		// Additional parameters needed
+  		require: mongo,
+  		database: database || options.database,
+  		nativeParser: true,
+  		port: 27017 || options.port,
+  		host: 'localhost' || options.host,
+  		writeConcern: function() { return options.writeConcern || {w: 1} },
+      writeConcernMax: function() { return options.writeConcernMax || {w: 1} }
+  	}
+  }
+
+  return Configuration;
 }
 
 var ReplicasetConfiguration = function(context) {
@@ -387,7 +408,7 @@ runner.on('exit', function(errors, results) {
 });
 
 // Run the tests
-runner.run(StandaloneConfiguration);
+runner.run(createConfiguration());
 // runner.run(ReplicasetConfiguration);
 // runner.run(ShardingConfiguration);
 
