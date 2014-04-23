@@ -196,7 +196,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
               });
 
               // When the stream is done
-              stream.on("close", function() {
+              stream.on("end", function() {
                 db.close();
                 test.done();          
               });        

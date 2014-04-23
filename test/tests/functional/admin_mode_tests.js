@@ -66,14 +66,11 @@ exports.shouldCorrectlyAuthenticate = {
     db.open(function(err, db) {
       // Grab a collection object
       var collection = db.collection('test1');
-
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
       collection.insert({'a':1}, configuration.writeConcernMax(), function(err, doc) {
-
         // Use the admin database for the operation
         var adminDb = db.admin();
-
         // Add the new user to the admin database
         adminDb.addUser('admin2', 'admin2', configuration.writeConcernMax(), function(err, result) {
           // Authenticate using the newly added user

@@ -104,7 +104,7 @@ ReplicaSetManager.prototype.allHostPairsWithState = function(state, callback) {
   })
 }
 
-ReplicaSetManager.prototype.startSet = function(killall, callback) {
+var start = ReplicaSetManager.prototype.start = function(killall, callback) {
   var self = this;
   // Unpack callback and variables
   var args = Array.prototype.slice.call(arguments, 0);
@@ -234,7 +234,7 @@ ReplicaSetManager.prototype.initNode = function(n, fields, callback) {
         self.mongods[n]["start"] = self.startCmd(n);
 
         // Start the node
-        self.start(n, function() {
+        self.startNode(n, function() {
           // Add instance to list of members
           var member = {"_id": n, "host": self.host + ":" + self.mongods[n]["port"]};
           // Set it to arbiter if it's been passed
@@ -313,7 +313,12 @@ ReplicaSetManager.prototype.kill = function(node, signal, options, callback) {
   });
 }
 
-ReplicaSetManager.prototype.killSetServers = function(callback) {
+ReplicaSetManager.prototype.stop = function(options, callback) {
+  if(typeof options == 'function') {
+    callback = options;
+    options = {};
+  }
+  
   var keys = Object.keys(this.mongods);
   var totalKeys = keys.length;
   var self = this;
@@ -457,7 +462,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
           if(connection != null) connection.close();
 
           // Attempt to restart the whole set
-          return self.startSet(true, function(err, result) {
+          return self.start(true, function(err, result) {
             if(err) {
               console.log("[ensureUp] - " + self.startPort + " :: failed to restart set")
               // Set that we are done
@@ -878,14 +883,14 @@ var reStart = ReplicaSetManager.prototype.reStart = function(node, options, call
         // Clear out instances
         this.mongods = {};
         // Start set again
-        self.start(node, callback);
+        self.startNode(node, callback);
       });
     });
   });
 }
 
 // Fire up the mongodb instance
-var start = ReplicaSetManager.prototype.start = function(node, options, callback) {
+var startNode = ReplicaSetManager.prototype.startNode = function(node, options, callback) {
   var self = this;
   if(typeof options == 'function') {
     callback = options;

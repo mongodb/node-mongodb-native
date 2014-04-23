@@ -214,17 +214,22 @@ exports.testConnectGoodAuth = {
     // First add a user.
     connect(configuration.url(), function(err, db) {
       test.equal(err, null);
+      console.dir(configuration.writeConcernMax())
+      console.log(configuration.url())
+      console.log(configuration.url(user, password))
       
       db.addUser(user, password, configuration.writeConcernMax(), function(err, result) {
         test.equal(err, null);
         db.close();
-        restOfTest();
+        setTimeout(function() {
+
+          restOfTest();
+        }, 5000);
       });
     });
 
     function restOfTest() {
       connect(configuration.url(user, password), connectionTester(test, 'testConnectGoodAuth', configuration, function(db) {            
-        test.equal(false, db.safe);
         test.done();
       }));
     }

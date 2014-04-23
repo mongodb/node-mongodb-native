@@ -159,6 +159,7 @@ exports['Should handle MongoClient throw error in db operation correctly'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
+    
     MongoClient.connect(configuration.url(), function(err, db) {
       process.once("uncaughtException", function(err) {
         db.close();

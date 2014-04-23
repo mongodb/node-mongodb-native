@@ -2267,14 +2267,13 @@ exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = {
   	  var originalData = fs.readFileSync(__dirname + "/iya_logo_final_bw.jpg");
   	  // Upload using the mongofiles
   	  exec(exec_function, function(error, stdout, stderr) {
+        console.dir(exec_function)
   	    test.ok(stdout.match(/added file/) != -1);
 
   	    GridStore.list(db, function(err, items) {
   	      // Load the file using MongoDB
   	      var gridStore = new GridStore(db, __dirname + "/iya_logo_final_bw.jpg", "r", {});
   	      gridStore.open(function(err, gridStore) {
-  	        test.equal(null, err);
-
   	        gridStore.read(function(err, data) {
   	          test.equal(null, err);
   	          test.deepEqual(originalData, data);
