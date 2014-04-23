@@ -183,8 +183,6 @@ var ReplicasetConfiguration = function(context) {
 		nativeParser: true,
 		port: startPort,
 		host: 'localhost',
-		// writeConcern: function() { return {w: 'majority', wtimeout: 10000} }
-		// writeConcern: function() { return {w: 'majority', wtimeout: 10000} }
 		writeConcern: function() { return {w: 1} },
     writeConcernMax: function() { return {w: 'majority', wtimeout: 5000} }
 	}
@@ -389,9 +387,9 @@ runner.on('exit', function(errors, results) {
 });
 
 // Run the tests
-// runner.run(StandaloneConfiguration);
+runner.run(StandaloneConfiguration);
 // runner.run(ReplicasetConfiguration);
-runner.run(ShardingConfiguration);
+// runner.run(ShardingConfiguration);
 
 
 

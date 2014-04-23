@@ -8,7 +8,6 @@ var MongoDBTopologyFilter = function() {
       , Mongos = require('../../lib/mongodb').Mongos;
     // Get the first configuration
     var configuration = object.configurations[0];
-    
     // Get the MongoDB topology
     configuration.newDbInstance({w:1}).open(function(err, db) {
       if(err) throw err;

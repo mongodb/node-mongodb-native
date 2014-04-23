@@ -169,16 +169,6 @@ var replica_set_config_auth = function(options) {
     // Set up replicaset manager
     var replicasetManager = null;
 
-    // // Test suite start
-    // this.start = function(callback) {
-    //   callback();
-    // }
-
-    // Test suite stop
-    this.stop = function(callback) {
-      callback();
-    };
-
     var mapFunction = function(replicasetManager, name) {
       return function() {
         var args = Array.prototype.slice.call(arguments, 0);
@@ -191,14 +181,14 @@ var replica_set_config_auth = function(options) {
       this.setup(callback);
     }
 
-    // // Test suite stop
-    // this.stop = function(callback) {
-    //   if(self._db) self._db.close();
+    // Test suite stop
+    this.stop = function(callback) {
+      if(self._db) self._db.close();
 
-    //   replicasetManager.killSetServers(function(err) {
-    //     callback();
-    //   });
-    // };
+      replicasetManager.killSetServers(function(err) {
+        callback();
+      });
+    };
 
 
     // Set up replicaset manager

@@ -266,6 +266,8 @@ exports.shouldCorrectlyRetriveCollectionNames = {
   test: function(configuration, test) {
     configuration.newDbInstance(configuration.writeConcern(), {poolSize:1}).open(function(err, db) {
       db.createCollection('test_collection_names', function(err, r) {
+        test.equal(null, err);
+
         db.collectionNames(function(err, documents) {
           var found = false;
           var found2 = false;
