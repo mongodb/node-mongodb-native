@@ -278,26 +278,21 @@ exports['Should correctly parse mongodb://localhost/?safe=true'] = {
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000'] = {
-  metadata: {},
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    // console.dir(parse)
-    var object = parse("mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000");
-    test.equal(3, object.servers.length);
-    test.equal("host1", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal("host2", object.servers[1].host);
-    test.equal('27017', object.servers[1].port);
-    test.equal("host3", object.servers[2].host);
-    test.equal('27017', object.servers[2].port);
-    test.equal('admin', object.dbName);
-    test.equal(true, object.db_options.safe);
-    test.equal(2, object.db_options.w);
-    test.equal(2000, object.db_options.wtimeoutMS);
-    test.done();
-  }
+exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000'] = function(configure, test) {
+  // console.dir(parse)
+  var object = parse("mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000");
+  test.equal(3, object.servers.length);
+  test.equal("host1", object.servers[0].host);
+  test.equal('27017', object.servers[0].port);
+  test.equal("host2", object.servers[1].host);
+  test.equal('27017', object.servers[1].port);
+  test.equal("host3", object.servers[2].host);
+  test.equal('27017', object.servers[2].port);
+  test.equal('admin', object.dbName);
+  test.equal(true, object.db_options.safe);
+  test.equal(2, object.db_options.w);
+  test.equal(2000, object.db_options.wtimeout);
+  test.done();
 }
 
 /**

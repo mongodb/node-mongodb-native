@@ -2358,4 +2358,3 @@ exports['Should correctly append content to file and have correct chunk numbers'
     });
   }
 }
-

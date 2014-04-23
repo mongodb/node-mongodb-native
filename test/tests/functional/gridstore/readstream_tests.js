@@ -25,8 +25,11 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
       file.open(function(err, file) {    
         test.equal(null, err);  
         // Write some content and flush to disk
-        file.write('Hello world', function(err, file) {        
+        file.write('Hello world', function(err, file) {
+          test.equal(null, err);
+
           file.close(function(err, result) {
+            test.equal(null, err);
             
             // Let's create a read file
             file = new GridStore(db, fileId, "r");
@@ -125,22 +128,26 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
 
               // For each data item
               stream.on("end", function(item) {
-              });
-
-              // When the stream is done
-              stream.on("close", function() {
                 // Have we received the same file back?
                 test.equal(fileBuffer, fileBody);
                 db.close();
                 test.done();          
+              });
+
+              // When the stream is done
+              stream.on("close", function() {
+                // // Have we received the same file back?
+                // test.equal(fileBuffer, fileBody);
+                // db.close();
+                // test.done();          
               });     
 
               // Resume the stream
               stream.resume();
             });
-          });        
-        });      
-      });
+          });
+        });        
+      });      
     });
     // DOC_END
   }

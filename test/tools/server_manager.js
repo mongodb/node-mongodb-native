@@ -99,7 +99,7 @@ ServerManager.prototype.start = function(killall, options, callback) {
   var startCmd = generateStartCmd(this, {configserver:self.configServer, log_path: self.log_path,
     db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl});
 
-  exec(killall ? 'killall -9 mongod' : '', function(err, stdout, stderr) {
+  exec(killall ? 'killall -15 mongod' : '', function(err, stdout, stderr) {
     if(purgedirectories) {
       // Remove directory
       exec("rm -rf " + self.db_path, function(err, stdout, stderr) {
@@ -180,7 +180,7 @@ ServerManager.prototype.stop = function(signal, callback) {
 
 ServerManager.prototype.killAll = function(callback) {
   // console.log("=============================================== SERVERMANAGER KILLALL")
-  exec('killall -9 mongod', function(err, stdout, stderr) {
+  exec('killall -15 mongod', function(err, stdout, stderr) {
     if(typeof callback == 'function') callback(null, null);
   });
 }

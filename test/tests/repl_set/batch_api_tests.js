@@ -47,7 +47,7 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = functi
           test.equal(0, result.nMatched);
           test.equal(0, result.nUpserted);
           test.equal(0, result.nRemoved);
-          test.equal(0, result.nModified);
+          test.ok(result.nModified == null || result.nModified == 0);
           
           var writeConcernError = result.getWriteConcernError();
           test.ok(writeConcernError != null);
@@ -115,7 +115,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
           test.equal(0, result.nMatched);
           test.equal(1, result.nUpserted);
           test.equal(0, result.nRemoved);
-          test.equal(0, result.nModified);
+          test.ok(result.nModified == null || result.nModified == 0);
           
           var writeConcernError = result.getWriteConcernError();
           test.ok(writeConcernError != null);
@@ -195,7 +195,7 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = func
           test.equal(0, result.nMatched);
           test.equal(1, result.nUpserted);
           test.equal(0, result.nRemoved);
-          test.equal(0, result.nModified);
+          test.ok(result.nModified == null || result.nModified == 0);
           
           var writeConcernError = result.getWriteConcernError();
           test.ok(writeConcernError != null);
@@ -263,7 +263,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
           test.equal(0, result.nMatched);
           test.equal(1, result.nUpserted);
           test.equal(0, result.nRemoved);
-          test.equal(0, result.nModified);
+          test.ok(result.nModified == null || result.nModified == 0);
           
           var writeConcernError = result.getWriteConcernError();
           test.ok(writeConcernError != null);

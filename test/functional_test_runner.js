@@ -89,7 +89,8 @@ var StandaloneConfiguration = function(context) {
 		nativeParser: true,
 		port: 27017,
 		host: 'localhost',
-		writeConcern: function() { return {w: 1} }
+		writeConcern: function() { return {w: 1} },
+    writeConcernMax: function() { return {w: 1} }
 	}
 }
 
@@ -184,7 +185,8 @@ var ReplicasetConfiguration = function(context) {
 		host: 'localhost',
 		// writeConcern: function() { return {w: 'majority', wtimeout: 10000} }
 		// writeConcern: function() { return {w: 'majority', wtimeout: 10000} }
-		writeConcern: function() { return {w: 'majority'} }
+		writeConcern: function() { return {w: 1} },
+    writeConcernMax: function() { return {w: 'majority', wtimeout: 5000} }
 	}
 }
 
@@ -224,7 +226,7 @@ var ShardingConfiguration = function(context) {
 		},
 
 		stop: function(callback) {
-      manager.killSetServers(function(err) {
+      manager.killAll(function(err) {
         callback();
       });
 		},
@@ -232,7 +234,7 @@ var ShardingConfiguration = function(context) {
 		restart: function(callback) {
 			var self = this;
 
-      manager.killSetServers(function(err) {
+      manager.killAll(function(err) {
         self.start(callback);
       });
 		},
@@ -264,7 +266,7 @@ var ShardingConfiguration = function(context) {
 			// Return the db
       return new Db(database
       	, new Mongos([new Server(host, port, serverOptions)]
-      	, {}), dbOptions);      
+      	, {poolSize:1}), dbOptions);      
 		},
 
 		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
@@ -291,7 +293,8 @@ var ShardingConfiguration = function(context) {
 		host: 'localhost',
 		// writeConcern: function() { return {w: 'majority', wtimeout: 3000} }
 		// writeConcern: function() { return {w: 2, wtimeout: 10000} }
-		writeConcern: function() { return {w: 1} }
+		writeConcern: function() { return {w: 1} },
+    writeConcernMax: function() { return {w: 1} }    
 	}
 }
 

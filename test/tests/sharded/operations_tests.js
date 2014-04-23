@@ -25,7 +25,7 @@ exports.shouldCorrectlyPerformAllOperationsAgainstShardedSystem = function(confi
     test.ok(db != null);
 
     var collection = db.collection("shard_all_operations_test");
-    collection.insert(docs, {safe:{w:1, wtimeout:1000}}, function(err, result) {
+    collection.insert(docs, {w:1, wtimeout:1000}, function(err, result) {
       test.equal(null, err);
 
       // Perform an update

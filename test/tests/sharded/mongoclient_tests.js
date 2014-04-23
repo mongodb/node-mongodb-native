@@ -29,7 +29,7 @@ exports['Should connect to mongos proxies using connectiong string'] = function(
 exports['Should connect to mongos proxies using connectiong string and options'] = function(configuration, test) {
   var MongoClient = configuration.getMongoPackage().MongoClient;
 
-  MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1', {
+  MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1&readPreferenceTags=', {
     mongos: {
       haInterval: 500
     }
@@ -42,8 +42,13 @@ exports['Should connect to mongos proxies using connectiong string and options']
       test.equal(null, err);
       test.equal(1, result);
 
-      db.close();
-      test.done();
+      // Perform fetch of document
+      db.collection("replicaset_mongo_client_collection").findOne(function(err, d) {
+        test.equal(null, err);
+
+        db.close();
+        test.done();
+      });
     });    
   });
 }

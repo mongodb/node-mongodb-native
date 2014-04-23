@@ -70,7 +70,7 @@ exports.shouldCorrectlyPeformSimpleChainedFind = {
             collection.find().toArray(function(err, documents) {
               test.equal(2, documents.length);
 
-              collection.count(function(err, count) {
+              collection.count({}, {readPreference:'primary'}, function(err, count) {
                 test.equal(2, count);
 
                 // Fetch values by selection

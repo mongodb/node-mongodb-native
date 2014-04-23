@@ -7,19 +7,19 @@
 exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
   metadata: {
     requires: {
-      topology: ['single', 'replicaset']
+      topology: ['single']
     }
   },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode');
-      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, doc) {
         var adminDb = db.admin();
         
-        adminDb.addUser('admin', 'admin', function(err, result) {
+        adminDb.addUser('admin', 'admin', configuration.writeConcernMax(), function(err, result) {
           adminDb.authenticate('admin', 'admin', function(err, replies) {
             adminDb.validateCollection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode', function(err, doc) {
               // Pre 1.9.1 servers
@@ -52,11 +52,15 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
  * @ignore
  */
 exports.shouldCorrectlyAuthenticate = {
-  metadata: {},
+  metadata: {
+    requires: {
+      topology: ["single", "replicaset"]
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({}, {poolSize:1});
+    var db = configuration.newDbInstance({}, {poolSize:1, readPreference: 'primary'});
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
     db.open(function(err, db) {
@@ -65,13 +69,13 @@ exports.shouldCorrectlyAuthenticate = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin2', 'admin2', function(err, result) {
+        adminDb.addUser('admin2', 'admin2', configuration.writeConcernMax(), function(err, result) {
           // Authenticate using the newly added user
           adminDb.authenticate('admin2', 'admin2', function(err, result) {
             test.ok(result);
@@ -102,7 +106,7 @@ exports.accessAdminLevelOperations = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
     db.open(function(err, db) {
@@ -134,7 +138,7 @@ exports.shouldCorrectlyRetrieveBuildInfo = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -145,7 +149,7 @@ exports.shouldCorrectlyRetrieveBuildInfo = {
       var adminDb = db.admin();
 
       // Add the new user to the admin database
-      adminDb.addUser('admin3', 'admin3', function(err, result) {
+      adminDb.addUser('admin3', 'admin3', configuration.writeConcernMax(), function(err, result) {
 
         // Authenticate using the newly added user
         adminDb.authenticate('admin3', 'admin3', function(err, result) {
@@ -185,7 +189,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -196,7 +200,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
       var adminDb = db.admin();
 
       // Add the new user to the admin database
-      adminDb.addUser('admin4', 'admin4', function(err, result) {
+      adminDb.addUser('admin4', 'admin4', configuration.writeConcernMax(), function(err, result) {
 
         // Authenticate using the newly added user
         adminDb.authenticate('admin4', 'admin4', function(err, result) {
@@ -236,7 +240,7 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -248,13 +252,13 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin5', 'admin5', function(err, result) {
+        adminDb.addUser('admin5', 'admin5', configuration.writeConcernMax(), function(err, result) {
 
           // Authenticate using the newly added user
           adminDb.authenticate('admin5', 'admin5', function(err, replies) {
@@ -293,7 +297,7 @@ exports.shouldCorrectlyChangeProfilingLevel = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -305,13 +309,13 @@ exports.shouldCorrectlyChangeProfilingLevel = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin6', 'admin6', function(err, result) {
+        adminDb.addUser('admin6', 'admin6', configuration.writeConcernMax(), function(err, result) {
 
           // Authenticate using the newly added user
           adminDb.authenticate('admin6', 'admin6', function(err, replies) {                                
@@ -379,7 +383,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -391,13 +395,13 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, configuration.writeConcern(), function(doc) {
+      collection.insert({'a':1}, configuration.writeConcernMax(), function(doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin7', 'admin7', function(err, result) {
+        adminDb.addUser('admin7', 'admin7', configuration.writeConcernMax(), function(err, result) {
 
           // Authenticate using the newly added user
           adminDb.authenticate('admin7', 'admin7', function(err, replies) {
@@ -452,7 +456,7 @@ exports.shouldCorrectlyCallValidateCollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -464,13 +468,13 @@ exports.shouldCorrectlyCallValidateCollection = {
         
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, doc) {
         
         // Use the admin database for the operation
         var adminDb = db.admin();
           
         // Add the new user to the admin database
-        adminDb.addUser('admin8', 'admin8', function(err, result) {
+        adminDb.addUser('admin8', 'admin8', configuration.writeConcernMax(), function(err, result) {
           
           // Authenticate using the newly added user
           adminDb.authenticate('admin8', 'admin8', function(err, replies) {
@@ -515,7 +519,7 @@ exports.shouldCorrectlyPingTheMongoDbInstance = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -526,7 +530,7 @@ exports.shouldCorrectlyPingTheMongoDbInstance = {
       var adminDb = db.admin();
         
       // Add the new user to the admin database
-      adminDb.addUser('admin9', 'admin9', function(err, result) {
+      adminDb.addUser('admin9', 'admin9', configuration.writeConcernMax(), function(err, result) {
         
         // Authenticate using the newly added user
         adminDb.authenticate('admin9', 'admin9', function(err, result) {
@@ -565,7 +569,7 @@ exports.shouldCorrectlyUseLogoutFunction = {
   
   // The actual test we wish to run
   test: function(configuration, test) {  
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:5});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:5});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -576,7 +580,7 @@ exports.shouldCorrectlyUseLogoutFunction = {
       var adminDb = db.admin();
         
       // Add the new user to the admin database
-      adminDb.addUser('admin10', 'admin10', function(err, result) {
+      adminDb.addUser('admin10', 'admin10', configuration.writeConcernMax(), function(err, result) {
         
         // Authenticate using the newly added user
         adminDb.authenticate('admin10', 'admin10', function(err, result) {
@@ -615,7 +619,7 @@ exports.shouldCorrectlyAddAUserToAdminDb = {
   
   // The actual test we wish to run
   test: function(configuration, test) {  
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -626,7 +630,7 @@ exports.shouldCorrectlyAddAUserToAdminDb = {
       var adminDb = db.admin();
         
       // Add the new user to the admin database
-      adminDb.addUser('admin11', 'admin11', function(err, result) {
+      adminDb.addUser('admin11', 'admin11', configuration.writeConcernMax(), function(err, result) {
         
         // Authenticate using the newly added user
         adminDb.authenticate('admin11', 'admin11', function(err, result) {
@@ -659,7 +663,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
   
   // The actual test we wish to run
   test: function(configuration, test) {  
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -670,7 +674,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
       var adminDb = db.admin();
         
       // Add the new user to the admin database
-      adminDb.addUser('admin12', 'admin12', function(err, result) {
+      adminDb.addUser('admin12', 'admin12', configuration.writeConcernMax(), function(err, result) {
         
         // Authenticate using the newly added user
         adminDb.authenticate('admin12', 'admin12', function(err, result) {
@@ -712,7 +716,7 @@ exports.shouldCorrectlyListAllAvailableDatabases = {
   
   // The actual test we wish to run
   test: function(configuration, test) {  
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -751,7 +755,7 @@ exports.shouldCorrectlyRetrieveServerInfo = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -763,13 +767,13 @@ exports.shouldCorrectlyRetrieveServerInfo = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin13', 'admin13', function(err, result) {
+        adminDb.addUser('admin13', 'admin13', configuration.writeConcernMax(), function(err, result) {
 
           // Authenticate using the newly added user
           adminDb.authenticate('admin13', 'admin13', function(err, result) {
@@ -810,7 +814,7 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -822,13 +826,13 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, configuration.writeConcern(), function(err, doc) {
+      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin14', 'admin14', function(err, result) {
+        adminDb.addUser('admin14', 'admin14', configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
           test.ok(result != null);
 
