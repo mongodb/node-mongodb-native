@@ -1114,7 +1114,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsDb = function(configuration, test) {
  * @_class db
  * @_function ensureIndex
  */
-exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
+exports.shouldCreateComplexEnsureIndexDb = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
   // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
@@ -1123,7 +1123,7 @@ exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
   db.open(function(err, db) {
 
     // Create a collection we want to drop later
-    db.createCollection('more_complex_ensure_index_test', function(err, collection) {
+    db.createCollection('more_complex_ensure_index_db_test', function(err, collection) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the index
@@ -1132,7 +1132,7 @@ exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
         test.equal(null, err);
 
         // Create an index on the a field
-        db.ensureIndex('more_complex_ensure_index_test', {a:1, b:1}
+        db.ensureIndex('more_complex_ensure_index_db_test', {a:1, b:1}
           , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
 
           // Show that duplicate records got dropped

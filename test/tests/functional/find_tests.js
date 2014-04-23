@@ -656,8 +656,9 @@ exports.shouldCorrectlyFindAndModifyDocument = function(configuration, test) {
 
               // Test remove object on change
               collection.insert({'a':3, 'b':2}, {w:1}, function(err, doc) {
+                
                 // Let's modify the document in place
-                collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {'new': true, remove: true}, function(err, updated_doc) {
+                collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {remove: true}, function(err, updated_doc) {
                   test.equal(3, updated_doc.a);
                   test.equal(2, updated_doc.b);
 
