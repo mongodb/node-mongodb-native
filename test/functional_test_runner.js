@@ -30,7 +30,7 @@ var StandaloneConfiguration = function(context) {
       });
 		},
 
-		shutdown: function(callback) {
+		stop: function(callback) {
       manager.killAll(function(err) {
         callback();
       });        
@@ -123,7 +123,7 @@ var ReplicasetConfiguration = function(context) {
       });
 		},
 
-		shutdown: function(callback) {
+		stop: function(callback) {
       manager.killSetServers(function(err) {
         callback();
       });
@@ -184,7 +184,7 @@ var ReplicasetConfiguration = function(context) {
 		host: 'localhost',
 		// writeConcern: function() { return {w: 'majority', wtimeout: 10000} }
 		// writeConcern: function() { return {w: 'majority', wtimeout: 10000} }
-		writeConcern: function() { return {w: 1} }
+		writeConcern: function() { return {w: 'majority'} }
 	}
 }
 
@@ -223,7 +223,7 @@ var ShardingConfiguration = function(context) {
       });
 		},
 
-		shutdown: function(callback) {
+		stop: function(callback) {
       manager.killSetServers(function(err) {
         callback();
       });

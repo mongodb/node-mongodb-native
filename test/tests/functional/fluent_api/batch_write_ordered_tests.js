@@ -512,7 +512,7 @@ exports['Should correctly execute ordered batch using w:0'] = {
         test.equal(0, result.nUpserted);
         test.equal(0, result.nInserted);
         test.equal(0, result.nMatched);
-        test.equal(0, result.nModified);
+        test.ok(0 == result.nModified || result.nModified == null);
         test.equal(0, result.nRemoved);
         test.equal(false, result.hasWriteErrors());
 
