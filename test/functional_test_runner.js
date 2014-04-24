@@ -4,13 +4,12 @@ var Runner = require('integra').Runner
 	, NodeVersionFilter = require('./filters/node_version_filter')
 	, MongoDBVersionFilter = require('./filters/mongodb_version_filter')
 	, MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
-	, FileFilter = require('integra').FileFilter;
+	, FileFilter = require('integra').FileFilter
+  , f = require('util').format;
 
 /**
  * Standalone MongoDB Configuration
  */
-var f = require('util').format;
-
 var createConfiguration = function(options) {  
   options = options || {};
 
@@ -70,17 +69,23 @@ var createConfiguration = function(options) {
   		newDbInstance: function(dbOptions, serverOptions) {
         // Override implementation
         if(options.newDbInstance) return options.newDbInstance(dbOptions, serverOptions);
+        // Default topology
+        var topology = Server;
+        // If we have a specific topology
+        if(newDbInstance.topology) {
+          topology = newDbInstance.topology();
+        }
 
         // Fall back
-  			var port = serverOptions && serverOptions.port || 27017;
-  			var host = serverOptions && serverOptions.host || "localhost";
+  			var port = serverOptions && serverOptions.port || options.port;
+  			var host = serverOptions && serverOptions.host || options.host;
   			if(dbOptions.w == null
   					&& dbOptions.fsync == null
   					&& dbOptions.wtimeout == null
   					&& dbOptions.j == null) dbOptions.w = 1;
 
   			// Return a new db instance
-  			return new Db(database, new Server(host, port, serverOptions), dbOptions);
+  			return new Db(database, new topology(host, port, serverOptions), dbOptions);
   		},
 
   		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
@@ -260,6 +265,9 @@ runner.run(createConfiguration({
   port: 50000,
   url: "mongodb://%slocalhost:50000/integration_tests",
   writeConcernMax: {w: 'majority', wtimeout: 5000},
+  topology: function() {
+    return require('../lib/mongodb').Mongos
+  }, 
   manager: function() {
     var ShardedManager = require('../test/tools/sharded_manager').ShardedManager;
     // Replicaset settings
@@ -276,28 +284,28 @@ runner.run(createConfiguration({
     return new ShardedManager(options);
   }, 
 
-  newDbInstance: function(dbOptions, serverOptions) {
-    if(dbOptions.w == null
-        && dbOptions.fsync == null
-        && dbOptions.wtimeout == null
-        && dbOptions.j == null) {
-      dbOptions.w = 1;
-    }
+  // newDbInstance: function(dbOptions, serverOptions) {
+  //   if(dbOptions.w == null
+  //       && dbOptions.fsync == null
+  //       && dbOptions.wtimeout == null
+  //       && dbOptions.j == null) {
+  //     dbOptions.w = 1;
+  //   }
 
-    serverOptions = serverOptions || {};
-    var port = serverOptions.port || 50000;
-    var host = serverOptions.host || "localhost";
+  //   serverOptions = serverOptions || {};
+  //   var port = serverOptions.port || 50000;
+  //   var host = serverOptions.host || "localhost";
 
-    // Hardcode poolsize 1
-    serverOptions.poolSize = 1;
+  //   // Hardcode poolsize 1
+  //   serverOptions.poolSize = 1;
 
-    // Get the mongo lib
-    var mongo = require('../lib/mongodb');
-    // Return the db
-    return new mongo.Db('integration_tests'
-      , new mongo.Mongos([new mongo.Server(host, port, serverOptions)]
-      , {poolSize:1}), dbOptions);          
-  },
+  //   // Get the mongo lib
+  //   var mongo = require('../lib/mongodb');
+  //   // Return the db
+  //   return new mongo.Db('integration_tests'
+  //     , new mongo.Mongos([new mongo.Server(host, port, serverOptions)]
+  //     , {poolSize:1}), dbOptions);          
+  // },
 
   newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
     var mongo = require('../lib/mongodb');
