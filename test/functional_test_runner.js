@@ -1,15 +1,19 @@
 var Runner = require('integra').Runner
 	, Cover = require('integra').Cover
 	, RCover = require('integra').RCover
+  , FileFilter = require('integra').FileFilter
 	, NodeVersionFilter = require('./filters/node_version_filter')
 	, MongoDBVersionFilter = require('./filters/mongodb_version_filter')
 	, MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
 	, FileFilter = require('integra').FileFilter
+  , TestNameFilter = require('integra').TestNameFilter
   , f = require('util').format;
 
 var smokePlugin = require('./smoke_plugin.js');
+// console.log(argv._);
 var argv = require('optimist')
-    .usage('Usage: $0 -r [smoke report file]')
+    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
+    .demand(['t'])
     .argv;
 
 /**
@@ -147,11 +151,6 @@ var runner = new Runner({
 	, failFast: true
 });
 
-if (argv.r) {
-  console.log("Writing smoke output to " + argv.r);
-  smokePlugin.attachToRunner(runner, argv.r);
-}
-
 var testFiles =[
 		'/test/tests/functional/mongo_reply_parser_tests.js'
   , '/test/tests/functional/connection_pool_tests.js'
@@ -235,58 +234,81 @@ runner.on('exit', function(errors, results) {
 	process.exit(0)
 });
 
-// Run the tests
-runner.run(createConfiguration());
-// runner.run(createConfiguration({
-//   port: 30000,
-//   url: "mongodb://%slocalhost:30000/integration_tests",
-//   writeConcernMax: {w: 'majority', wtimeout: 5000},
-//   topology: function(host, port, serverOptions) {
-//     var m = require('../lib/mongodb');
-//     host = host || 'locahost'; port = port || 30000;
-//     return new m.ReplSet([new m.Server(host, port, serverOptions)], {poolSize: 1});
-//   }, 
-//   manager: function() {
-//     var ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
-//     // Replicaset settings
-//     var replicasetOptions = { 
-//         retries:120, secondary_count:2
-//       , passive_count:0, arbiter_count:1
-//       , start_port: 30000
-//       , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
-//     }
-    
-//     // Return manager
-//     return new ReplicaSetManager(replicasetOptions);
-//   },
-// }));
-// runner.run(createConfiguration({
-//   port: 50000,
-//   url: "mongodb://%slocalhost:50000/integration_tests",
-//   writeConcernMax: {w: 'majority', wtimeout: 5000},
-//   topology: function(host, port, serverOptions) {
-//     var m = require('../lib/mongodb');
-//     host = host || 'locahost'; port = port || 50000;
-//     return new m.Mongos([new m.Server(host, port, serverOptions)]);
-//   }, 
+// We want to export a smoke.py style json file
+if(argv.r) {
+  console.log("Writing smoke output to " + argv.r);
+  smokePlugin.attachToRunner(runner, argv.r);
+}
 
-//   manager: function() {
-//     var ShardedManager = require('../test/tools/sharded_manager').ShardedManager;
-//     // Replicaset settings
-//     var options = { 
-//         numberOfReplicaSets: 1
-//       , numberOfMongosServers: 1
-//       , replPortRangeSet: 30000
-//       , mongosRangeSet: 50000
-//       , db: "integration_tests"
-//       , collection: 'test_distinct_queries'
-//     }
-    
-//     // Return manager
-//     return new ShardedManager(options);
-//   }
-// }));
+// Are we running a functional test
+if(argv.t == 'functional') {
+  var config = createConfiguration();
 
+  if(argv.e == 'replicaset') {
+    config = createConfiguration({
+        port: 30000,
+        url: "mongodb://%slocalhost:30000/integration_tests",
+        writeConcernMax: {w: 'majority', wtimeout: 5000},
+        topology: function(host, port, serverOptions) {
+          var m = require('../lib/mongodb');
+          host = host || 'locahost'; port = port || 30000;
+          return new m.ReplSet([new m.Server(host, port, serverOptions)], {poolSize: 1});
+        }, 
+        manager: function() {
+          var ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
+          // Replicaset settings
+          var replicasetOptions = { 
+              retries:120, secondary_count:2
+            , passive_count:0, arbiter_count:1
+            , start_port: 30000
+            , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
+          }
+          
+          // Return manager
+          return new ReplicaSetManager(replicasetOptions);
+        },
+    });
+  } else if(argv.e == 'sharded') {
+    config = createConfiguration({
+        port: 50000,
+        url: "mongodb://%slocalhost:50000/integration_tests",
+        writeConcernMax: {w: 'majority', wtimeout: 5000},
+        topology: function(host, port, serverOptions) {
+          var m = require('../lib/mongodb');
+          host = host || 'locahost'; port = port || 50000;
+          return new m.Mongos([new m.Server(host, port, serverOptions)]);
+        }, 
+
+        manager: function() {
+          var ShardedManager = require('../test/tools/sharded_manager').ShardedManager;
+          // Replicaset settings
+          var options = { 
+              numberOfReplicaSets: 1
+            , numberOfMongosServers: 1
+            , replPortRangeSet: 30000
+            , mongosRangeSet: 50000
+            , db: "integration_tests"
+            , collection: 'test_distinct_queries'
+          }
+          
+          // Return manager
+          return new ShardedManager(options);
+        }
+    })
+  }
+
+  // If we have a test we are filtering by
+  if(argv.f) {
+    runner.plugin(new FileFilter(argv.f));
+  }
+
+  if(argv.n) {
+    runner.plugin(new TestNameFilter(argv.n));
+  }
+
+  // Run the configuration
+  runner.run(config);
+}
 
 
 
