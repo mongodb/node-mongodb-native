@@ -846,6 +846,7 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
 
       // Open the file
       gridStore.open(function(err, gridStore) {
+        test.equal(null, err);
         var file = fs.createReadStream('./test_gs_working_field_read.tmp');
         var dataSize = 0;
 
@@ -866,6 +867,7 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
             test.equal(null, err);
             // Read in the whole file and check that it's the same content
             GridStore.read(client, result._id, function(err, fileData) {
+              test.equal(null, err);
               var data = fs.readFileSync('./test_gs_working_field_read.tmp');
               test.deepEqual(data, fileData);
               client.close();
