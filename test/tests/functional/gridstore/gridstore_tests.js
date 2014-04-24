@@ -860,7 +860,7 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
           });
         });
 
-        file.on('end', function () {
+        file.on('close', function () {
           // Flush the remaining data to GridFS
           gridStore.close(function(err, result) {
             test.equal(null, err);
