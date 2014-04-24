@@ -819,7 +819,11 @@ exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = {
  * @ignore
  */
 exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
-  metadata: {},
+  metadata: {
+    ignore: {
+      travis: true
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {

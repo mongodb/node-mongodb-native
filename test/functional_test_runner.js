@@ -5,6 +5,7 @@ var Runner = require('integra').Runner
 	, NodeVersionFilter = require('./filters/node_version_filter')
 	, MongoDBVersionFilter = require('./filters/mongodb_version_filter')
 	, MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
+  , TravisFilter = require('./filters/travis_filter')
 	, FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
   , f = require('util').format;
@@ -305,6 +306,9 @@ if(argv.t == 'functional') {
   if(argv.n) {
     runner.plugin(new TestNameFilter(argv.n));
   }
+
+  // Add travis filter
+  runner.plugin(new TravisFilter());
 
   // Run the configuration
   runner.run(config);
