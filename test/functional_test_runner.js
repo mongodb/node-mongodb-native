@@ -69,20 +69,21 @@ var createConfiguration = function(options) {
   		newDbInstance: function(dbOptions, serverOptions) {
         // Override implementation
         if(options.newDbInstance) return options.newDbInstance(dbOptions, serverOptions);
-        // Default topology
-        var topology = Server;
-        // If we have a specific topology
-        if(newDbInstance.topology) {
-          topology = newDbInstance.topology();
-        }
 
         // Fall back
-  			var port = serverOptions && serverOptions.port || options.port;
-  			var host = serverOptions && serverOptions.host || options.host;
+  			var port = serverOptions && serverOptions.port || options.port || 27017;
+  			var host = serverOptions && serverOptions.host || 'localhost';
   			if(dbOptions.w == null
   					&& dbOptions.fsync == null
   					&& dbOptions.wtimeout == null
   					&& dbOptions.j == null) dbOptions.w = 1;
+
+        // Default topology
+        var topology = Server;
+        // If we have a specific topology
+        if(options.topology) {
+          topology = options.topology;
+        }
 
   			// Return a new db instance
   			return new Db(database, new topology(host, port, serverOptions), dbOptions);
@@ -91,6 +92,11 @@ var createConfiguration = function(options) {
   		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
         // Override implementation
         if(options.newDbInstanceWithDomainSocket) return options.newDbInstanceWithDomainSocket(dbOptions, serverOptions);
+
+        // If we have a topology
+        if(options.topology) {
+          return topology(null, null, serverOptions);
+        }
 
         // Fall back
   			var host = serverOptions && serverOptions.host || "/tmp/mongodb-27017.sock";
@@ -220,11 +226,16 @@ runner.on('exit', function(errors, results) {
 });
 
 // Run the tests
-// runner.run(createConfiguration());
+runner.run(createConfiguration());
 // runner.run(createConfiguration({
 //   port: 30000,
 //   url: "mongodb://%slocalhost:30000/integration_tests",
 //   writeConcernMax: {w: 'majority', wtimeout: 5000},
+//   topology: function(host, port, serverOptions) {
+//     var m = require('../lib/mongodb');
+//     host = host || 'locahost'; port = port || 30000;
+//     return new m.ReplSet([new m.Server(host, port, serverOptions)], {poolSize: 1});
+//   }, 
 //   manager: function() {
 //     var ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
 //     // Replicaset settings
@@ -237,83 +248,34 @@ runner.on('exit', function(errors, results) {
     
 //     // Return manager
 //     return new ReplicaSetManager(replicasetOptions);
+//   },
+// }));
+// runner.run(createConfiguration({
+//   port: 50000,
+//   url: "mongodb://%slocalhost:50000/integration_tests",
+//   writeConcernMax: {w: 'majority', wtimeout: 5000},
+//   topology: function(host, port, serverOptions) {
+//     var m = require('../lib/mongodb');
+//     host = host || 'locahost'; port = port || 50000;
+//     return new m.Mongos([new m.Server(host, port, serverOptions)]);
 //   }, 
 
-//   newDbInstance: function(dbOptions, serverOptions) {
-//     if(dbOptions.w == null
-//         && dbOptions.fsync == null
-//         && dbOptions.wtimeout == null
-//         && dbOptions.j == null) dbOptions.w = 1;
-//     serverOptions = serverOptions || {};
-//     // Get the mongo lib
-//     var mongo = require('../lib/mongodb');
-//     // Return the db
-//     return new mongo.Db('integration_tests'
-//       , new mongo.ReplSet([new mongo.Server(serverOptions.host || "localhost", serverOptions.port || 30000, serverOptions)]
-//       , {poolSize:1}), dbOptions);      
-//   },
-
-//   newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
-//     var mongo = require('../lib/mongodb');
-//     var mongo = require('../lib/mongodb');
-//     return new mongo.Db('integration_tests',
-//       , new mongo.ReplSet([new mongo.Server("localhost", serverOptions)]
-//       , {poolSize:1}), dbOptions);      
-//   }  
-// }));
-runner.run(createConfiguration({
-  port: 50000,
-  url: "mongodb://%slocalhost:50000/integration_tests",
-  writeConcernMax: {w: 'majority', wtimeout: 5000},
-  topology: function() {
-    return require('../lib/mongodb').Mongos
-  }, 
-  manager: function() {
-    var ShardedManager = require('../test/tools/sharded_manager').ShardedManager;
-    // Replicaset settings
-    var options = { 
-        numberOfReplicaSets: 1
-      , numberOfMongosServers: 1
-      , replPortRangeSet: 30000
-      , mongosRangeSet: 50000
-      , db: "integration_tests"
-      , collection: 'test_distinct_queries'
-    }
+//   manager: function() {
+//     var ShardedManager = require('../test/tools/sharded_manager').ShardedManager;
+//     // Replicaset settings
+//     var options = { 
+//         numberOfReplicaSets: 1
+//       , numberOfMongosServers: 1
+//       , replPortRangeSet: 30000
+//       , mongosRangeSet: 50000
+//       , db: "integration_tests"
+//       , collection: 'test_distinct_queries'
+//     }
     
-    // Return manager
-    return new ShardedManager(options);
-  }, 
-
-  // newDbInstance: function(dbOptions, serverOptions) {
-  //   if(dbOptions.w == null
-  //       && dbOptions.fsync == null
-  //       && dbOptions.wtimeout == null
-  //       && dbOptions.j == null) {
-  //     dbOptions.w = 1;
-  //   }
-
-  //   serverOptions = serverOptions || {};
-  //   var port = serverOptions.port || 50000;
-  //   var host = serverOptions.host || "localhost";
-
-  //   // Hardcode poolsize 1
-  //   serverOptions.poolSize = 1;
-
-  //   // Get the mongo lib
-  //   var mongo = require('../lib/mongodb');
-  //   // Return the db
-  //   return new mongo.Db('integration_tests'
-  //     , new mongo.Mongos([new mongo.Server(host, port, serverOptions)]
-  //     , {poolSize:1}), dbOptions);          
-  // },
-
-  newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
-    var mongo = require('../lib/mongodb');
-    return new mongo.Db('integration_tests'
-      , new mongo.Mongos([new mongo.Server("localhost", serverOptions)]
-      , {poolSize:1}), dbOptions);      
-  }  
-}));
+//     // Return manager
+//     return new ShardedManager(options);
+//   }
+// }));
 
 
 

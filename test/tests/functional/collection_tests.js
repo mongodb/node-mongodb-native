@@ -29,8 +29,6 @@ exports.shouldCorrectlySaveASimpleDocument = {
 
         // Find the saved document
         collection.findOne({hello:'world'}, function(err, item) {
-          console.dir(err)
-          console.dir(item)
           test.equal(null, err);
           test.equal('world', item.hello);
           db.close();
