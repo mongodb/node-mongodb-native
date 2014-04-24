@@ -211,16 +211,16 @@ testFiles.forEach(function(t) {
 // 	]
 // }));
 
-// // Add the RCoverage plugin
-// runner.plugin(new RCover({
-// 		logLevel: "info"
-// 	, filters: [
-// 			/_tests.js/
-// 		,	"js-bson"
-// 		, "/tests/"
-// 		, "/tools/"
-// 	]
-// }));
+// Add the RCoverage plugin
+runner.plugin(new RCover({
+		logLevel: "info"
+	, filters: [
+			/_tests.js/
+		,	"js-bson"
+		, "/tests/"
+		, "/tools/"
+	]
+}));
 
 // Add a Node version plugin
 runner.plugin(new NodeVersionFilter());

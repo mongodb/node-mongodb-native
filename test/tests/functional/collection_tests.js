@@ -40,58 +40,58 @@ exports.shouldCorrectlySaveASimpleDocument = {
   }
 }
 
-/**
- * Example of a simple document save and then resave with safe set to true
- *
- * @_class collection
- * @_function save
- * @ignore
- */
-exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
-  metadata: {},
+// /**
+//  * Example of a simple document save and then resave with safe set to true
+//  *
+//  * @_class collection
+//  * @_function save
+//  * @ignore
+//  */
+// exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
-    // DOC_START
-    // Establish connection to db
-    db.open(function(err, db) {
+//     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+//     // DOC_START
+//     // Establish connection to db
+//     db.open(function(err, db) {
 
-      // Fetch the collection
-      var collection = db.collection("save_a_simple_document_modify_it_and_resave_it");
+//       // Fetch the collection
+//       var collection = db.collection("save_a_simple_document_modify_it_and_resave_it");
 
-      // Save a document with no safe option
-      collection.save({hello:'world'}, configuration.writeConcern(), function(err, result) {
+//       // Save a document with no safe option
+//       collection.save({hello:'world'}, configuration.writeConcern(), function(err, result) {
 
-        // Find the saved document
-        collection.findOne({hello:'world'}, function(err, item) {
-          test.equal(null, err);
-          test.equal('world', item.hello);
+//         // Find the saved document
+//         collection.findOne({hello:'world'}, function(err, item) {
+//           test.equal(null, err);
+//           test.equal('world', item.hello);
 
-          // Update the document
-          item['hello2'] = 'world2';
+//           // Update the document
+//           item['hello2'] = 'world2';
 
-          // Save the item with the additional field
-          collection.save(item, configuration.writeConcern(), function(err, result) {
+//           // Save the item with the additional field
+//           collection.save(item, configuration.writeConcern(), function(err, result) {
 
-            // Find the changed document
-            collection.findOne({hello:'world'}, function(err, item) {
-              test.equal(null, err);
-              test.equal('world', item.hello);
-              test.equal('world2', item.hello2);
+//             // Find the changed document
+//             collection.findOne({hello:'world'}, function(err, item) {
+//               test.equal(null, err);
+//               test.equal('world', item.hello);
+//               test.equal('world2', item.hello2);
 
-              db.close();
-              test.done();
-            });
-          });
-        });
-      });
-    });
-    // DOC_END
-  }
-}
+//               db.close();
+//               test.done();
+//             });
+//           });
+//         });
+//       });
+//     });
+//     // DOC_END
+//   }
+// }
 
 /**
  * @ignore
@@ -254,85 +254,85 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
   }
 }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyRetriveCollectionNames = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyRetriveCollectionNames = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    configuration.newDbInstance(configuration.writeConcern(), {poolSize:1}).open(function(err, db) {
-      db.createCollection('test_collection_names', function(err, r) {
-        test.equal(null, err);
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     configuration.newDbInstance(configuration.writeConcern(), {poolSize:1}).open(function(err, db) {
+//       db.createCollection('test_collection_names', function(err, r) {
+//         test.equal(null, err);
 
-        db.collectionNames(function(err, documents) {
-          var found = false;
-          var found2 = false;
+//         db.collectionNames(function(err, documents) {
+//           var found = false;
+//           var found2 = false;
     
-          documents.forEach(function(document) {
-            if(document.name == configuration.database + '.test_collection_names') found = true;
-          });
+//           documents.forEach(function(document) {
+//             if(document.name == configuration.database + '.test_collection_names') found = true;
+//           });
     
-          test.ok(found);
-          // Insert a document in an non-existing collection should create the collection
-          db.collection('test_collection_names2', function(err, collection) {
-            collection.insert({a:1}, configuration.writeConcern(), function(err, r) {
-              db.collectionNames(function(err, documents) {
-                documents.forEach(function(document) {
-                  if(document.name == configuration.database + '.test_collection_names2') found = true;
-                  if(document.name == configuration.database + '.test_collection_names') found2 = true;
-                });
+//           test.ok(found);
+//           // Insert a document in an non-existing collection should create the collection
+//           db.collection('test_collection_names2', function(err, collection) {
+//             collection.insert({a:1}, configuration.writeConcern(), function(err, r) {
+//               db.collectionNames(function(err, documents) {
+//                 documents.forEach(function(document) {
+//                   if(document.name == configuration.database + '.test_collection_names2') found = true;
+//                   if(document.name == configuration.database + '.test_collection_names') found2 = true;
+//                 });
 
-                test.ok(found);
-                test.ok(found2);
+//                 test.ok(found);
+//                 test.ok(found2);
                 
-                // Let's close the db
-                db.close();
-                test.done();
-              });
-            })
-          });
-        });
-      });
-    });
-  }
-}
+//                 // Let's close the db
+//                 db.close();
+//                 test.done();
+//               });
+//             })
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyRetrieveCollectionInfo = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyRetrieveCollectionInfo = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var Cursor = configuration.require.Cursor;
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var Cursor = configuration.require.Cursor;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_collections_info', function(err, r) {
-        db.collectionsInfo(function(err, cursor) {
-          test.ok((cursor instanceof Cursor));
-          // Fetch all the collection info
-          cursor.toArray(function(err, documents) {
-            test.ok(documents.length > 1);
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_collections_info', function(err, r) {
+//         db.collectionsInfo(function(err, cursor) {
+//           test.ok((cursor instanceof Cursor));
+//           // Fetch all the collection info
+//           cursor.toArray(function(err, documents) {
+//             test.ok(documents.length > 1);
 
-            var found = false;
-            documents.forEach(function(document) {
-              if(document.name == configuration.database + '.test_collections_info') found = true;
-            });
+//             var found = false;
+//             documents.forEach(function(document) {
+//               if(document.name == configuration.database + '.test_collections_info') found = true;
+//             });
             
-            test.ok(found);
-            // Let's close the db
-            db.close();
-            test.done();
-          });
-        });
-      });
-    });
-  }
-}
+//             test.ok(found);
+//             // Let's close the db
+//             db.close();
+//             test.done();
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
 /**
  * An example returning the options for a collection.
@@ -620,244 +620,244 @@ exports.shouldFailDueToIllegalCollectionNames = {
   }
 }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyCountOnNonExistingCollection = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyCountOnNonExistingCollection = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.collection('test_multiple_insert_2', function(err, collection) {
-        collection.count(function(err, count) {
-          test.equal(0, count);
-          // Let's close the db
-          db.close();
-          test.done();
-        });
-      });
-    });
-  }
-}
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.collection('test_multiple_insert_2', function(err, collection) {
+//         collection.count(function(err, count) {
+//           test.equal(0, count);
+//           // Let's close the db
+//           db.close();
+//           test.done();
+//         });
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyExecuteSave = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyExecuteSave = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var ObjectID = configuration.require.ObjectID;
     
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_save', function(err, collection) {
-        var doc = {'hello':'world'};
-        collection.save(doc, configuration.writeConcern(), function(err, docs) {
-          test.ok(docs._id != null);
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_save', function(err, collection) {
+//         var doc = {'hello':'world'};
+//         collection.save(doc, configuration.writeConcern(), function(err, docs) {
+//           test.ok(docs._id != null);
 
-          collection.count(function(err, count) {
-            test.equal(1, count);
-            doc = docs;
+//           collection.count(function(err, count) {
+//             test.equal(1, count);
+//             doc = docs;
 
-            collection.save(doc, configuration.writeConcern(), function(err, doc2) {
+//             collection.save(doc, configuration.writeConcern(), function(err, doc2) {
 
-              collection.count(function(err, count) {
-                test.equal(1, count);
+//               collection.count(function(err, count) {
+//                 test.equal(1, count);
 
-                collection.findOne(function(err, doc3) {
-                  test.equal('world', doc3.hello);
+//                 collection.findOne(function(err, doc3) {
+//                   test.equal('world', doc3.hello);
 
-                  doc3.hello = 'mike';
+//                   doc3.hello = 'mike';
 
-                  collection.save(doc3, configuration.writeConcern(), function(err, doc4) {
-                    collection.count(function(err, count) {
-                      test.equal(1, count);
+//                   collection.save(doc3, configuration.writeConcern(), function(err, doc4) {
+//                     collection.count(function(err, count) {
+//                       test.equal(1, count);
 
-                      collection.findOne(function(err, doc5) {
-                        test.equal('mike', doc5.hello);
+//                       collection.findOne(function(err, doc5) {
+//                         test.equal('mike', doc5.hello);
 
-                        // Save another document
-                        collection.save({hello:'world'}, configuration.writeConcern(), function(err, doc) {
-                          collection.count(function(err, count) {
-                            test.equal(2, count);
-                            // Let's close the db
-                            db.close();
-                            test.done();
-                          });
-                        });
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  }
-}
+//                         // Save another document
+//                         collection.save({hello:'world'}, configuration.writeConcern(), function(err, doc) {
+//                           collection.count(function(err, count) {
+//                             test.equal(2, count);
+//                             // Let's close the db
+//                             db.close();
+//                             test.done();
+//                           });
+//                         });
+//                       });
+//                     });
+//                   });
+//                 });
+//               });
+//             });
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlySaveDocumentWithLongValue = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlySaveDocumentWithLongValue = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var Long = configuration.require.Long;
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_save_long', function(err, collection) {
-        collection.insert({'x':Long.fromNumber(9223372036854775807)}, configuration.writeConcern(), function(err, r) {
-          collection.findOne(function(err, doc) {
-            test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
-            // Let's close the db
-            db.close();
-            test.done();
-          });
-        });
-      });
-    });
-  }
-}
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_save_long', function(err, collection) {
+//         collection.insert({'x':Long.fromNumber(9223372036854775807)}, configuration.writeConcern(), function(err, r) {
+//           collection.findOne(function(err, doc) {
+//             test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
+//             // Let's close the db
+//             db.close();
+//             test.done();
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- */
-exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection', function(err, collection) {
-        var a = {'_id':'1', 'hello':'world'};
-        collection.save(a, configuration.writeConcern(), function(err, docs) {
-          collection.count(function(err, count) {
-            test.equal(1, count);
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection', function(err, collection) {
+//         var a = {'_id':'1', 'hello':'world'};
+//         collection.save(a, configuration.writeConcern(), function(err, docs) {
+//           collection.count(function(err, count) {
+//             test.equal(1, count);
 
-            collection.findOne(function(err, doc) {
-              test.equal('world', doc.hello);
+//             collection.findOne(function(err, doc) {
+//               test.equal('world', doc.hello);
 
-              doc.hello = 'mike';
-              collection.save(doc, configuration.writeConcern(), function(err, doc) {
-                collection.count(function(err, count) {
-                  test.equal(1, count);
-                });
+//               doc.hello = 'mike';
+//               collection.save(doc, configuration.writeConcern(), function(err, doc) {
+//                 collection.count(function(err, count) {
+//                   test.equal(1, count);
+//                 });
 
-                collection.findOne(function(err, doc) {
-                  test.equal('mike', doc.hello);
-                  // Let's close the db
-                  db.close();
-                  test.done();
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  }
-}
+//                 collection.findOne(function(err, doc) {
+//                   test.equal('mike', doc.hello);
+//                   // Let's close the db
+//                   db.close();
+//                   test.done();
+//                 });
+//               });
+//             });
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyPerformUpsert = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyPerformUpsert = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_should_correctly_do_upsert', function(err, collection) {
-        var id = new ObjectID(null)
-        var doc = {_id:id, a:1};
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_should_correctly_do_upsert', function(err, collection) {
+//         var id = new ObjectID(null)
+//         var doc = {_id:id, a:1};
 
-        Step(
-          function test1() {
-            var self = this;
+//         Step(
+//           function test1() {
+//             var self = this;
 
-            collection.update({"_id":id}, doc, {upsert:true, w: 1}, function(err, result) {
-              test.equal(null, err);
-              test.equal(1, result);
+//             collection.update({"_id":id}, doc, {upsert:true, w: 1}, function(err, result) {
+//               test.equal(null, err);
+//               test.equal(1, result);
 
-              collection.findOne({"_id":id}, self);
-            });
-          },
+//               collection.findOne({"_id":id}, self);
+//             });
+//           },
 
-          function test2(err, doc) {
-            var self = this;
-            test.equal(1, doc.a);
+//           function test2(err, doc) {
+//             var self = this;
+//             test.equal(1, doc.a);
 
-            id = new ObjectID(null)
-            doc = {_id:id, a:2};
+//             id = new ObjectID(null)
+//             doc = {_id:id, a:2};
 
-            collection.update({"_id":id}, doc, {w: 1, upsert:true}, function(err, result) {
-              test.equal(null, err);
-              test.equal(1, result);
+//             collection.update({"_id":id}, doc, {w: 1, upsert:true}, function(err, result) {
+//               test.equal(null, err);
+//               test.equal(1, result);
 
-              collection.findOne({"_id":id}, self);
-            });
-          },
+//               collection.findOne({"_id":id}, self);
+//             });
+//           },
 
-          function test3(err, doc2) {
-            var self = this;
-            test.equal(2, doc2.a);
+//           function test3(err, doc2) {
+//             var self = this;
+//             test.equal(2, doc2.a);
 
-            collection.update({"_id":id}, doc2, {w: 1, upsert:true}, function(err, result) {
-              test.equal(null, err);
-              test.equal(1, result);
+//             collection.update({"_id":id}, doc2, {w: 1, upsert:true}, function(err, result) {
+//               test.equal(null, err);
+//               test.equal(1, result);
 
-              collection.findOne({"_id":id}, function(err, doc) {
-                test.equal(2, doc.a);
-                db.close();
-                test.done();
-              });
-            });
-          }
-        );
-      });
-    });
-  }
-}
+//               collection.findOne({"_id":id}, function(err, doc) {
+//                 test.equal(2, doc.a);
+//                 db.close();
+//                 test.done();
+//               });
+//             });
+//           }
+//         );
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyUpdateWithNoDocs = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyUpdateWithNoDocs = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var ObjectID = configuration.require.ObjectID;
     
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
-        var id = new ObjectID(null)
-        var doc = {_id:id, a:1};
-        collection.update({"_id":id}, doc, configuration.writeConcern(), function(err, numberofupdateddocs) {
-          test.equal(null, err);
-          test.equal(0, numberofupdateddocs);
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
+//         var id = new ObjectID(null)
+//         var doc = {_id:id, a:1};
+//         collection.update({"_id":id}, doc, configuration.writeConcern(), function(err, numberofupdateddocs) {
+//           test.equal(null, err);
+//           test.equal(0, numberofupdateddocs);
 
-          db.close();
-          test.done();
-        });
-      });
-    });
-  }
-}
+//           db.close();
+//           test.done();
+//         });
+//       });
+//     });
+//   }
+// }
 
 /**
  * Example of a simple document update with safe set to false on an existing document
@@ -1127,41 +1127,41 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
   }
 }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
-        test.equal('test_should_execute_insert_update_delete_safe_mode', collection.collectionName);
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
+//         test.equal('test_should_execute_insert_update_delete_safe_mode', collection.collectionName);
 
-        collection.insert({i:1}, configuration.writeConcern(), function(err, ids) {
-          test.equal(1, ids.length);
-          test.ok(ids[0]._id.toHexString().length == 24);
+//         collection.insert({i:1}, configuration.writeConcern(), function(err, ids) {
+//           test.equal(1, ids.length);
+//           test.ok(ids[0]._id.toHexString().length == 24);
 
-          // Update the record
-          collection.update({i:1}, {"$set":{i:2}}, configuration.writeConcern(), function(err, result) {
-            test.equal(null, err);
-            test.equal(1, result);
+//           // Update the record
+//           collection.update({i:1}, {"$set":{i:2}}, configuration.writeConcern(), function(err, result) {
+//             test.equal(null, err);
+//             test.equal(1, result);
 
-            // Remove safely
-            collection.remove({}, configuration.writeConcern(), function(err, result) {
-              test.equal(null, err);
+//             // Remove safely
+//             collection.remove({}, configuration.writeConcern(), function(err, result) {
+//               test.equal(null, err);
 
-              db.close();
-              test.done();
-            });
-          });
-        });
-      });
-    });
-  }
-}
+//               db.close();
+//               test.done();
+//             });
+//           });
+//         });
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore
@@ -1493,74 +1493,74 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = {
   }
 }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = {
-  metadata: {
-    requires: {
-      mongodb: ">2.1.0"
-    }
-  },
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = {
+//   metadata: {
+//     requires: {
+//       mongodb: ">2.1.0"
+//     }
+//   },
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex', {}, function(err, collection) {
-        collection.createIndex({createdAt:1}, {expireAfterSeconds:1, w: 1}, function(err, result) {
-          test.equal(null, err);
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex', {}, function(err, collection) {
+//         collection.createIndex({createdAt:1}, {expireAfterSeconds:1, w: 1}, function(err, result) {
+//           test.equal(null, err);
 
-          // Insert a document with a date
-          collection.insert({a:1, createdAt:new Date()}, configuration.writeConcern(), function(err, result) {
-            test.equal(null, err);
+//           // Insert a document with a date
+//           collection.insert({a:1, createdAt:new Date()}, configuration.writeConcern(), function(err, result) {
+//             test.equal(null, err);
 
-            collection.indexInformation({full:true}, function(err, indexes) {
-              test.equal(null, err);
+//             collection.indexInformation({full:true}, function(err, indexes) {
+//               test.equal(null, err);
 
-              for(var i = 0; i < indexes.length; i++) {
-                if(indexes[i].name == "createdAt_1") {
-                  test.equal(1, indexes[i].expireAfterSeconds);
-                  break;
-                }
-              }
+//               for(var i = 0; i < indexes.length; i++) {
+//                 if(indexes[i].name == "createdAt_1") {
+//                   test.equal(1, indexes[i].expireAfterSeconds);
+//                   break;
+//                 }
+//               }
 
-              db.close();
-              test.done();
-            });
-          });
-        })
-      });
-    });
-  }
-}
+//               db.close();
+//               test.done();
+//             });
+//           });
+//         })
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- */
-exports.shouldCorrectlyReadBackDocumentWithNull = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports.shouldCorrectlyReadBackDocumentWithNull = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, function(err, collection) {
-        // Insert a document with a date
-        collection.insert({test:null}, configuration.writeConcern(), function(err, result) {
-            test.equal(null, err);
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, function(err, collection) {
+//         // Insert a document with a date
+//         collection.insert({test:null}, configuration.writeConcern(), function(err, result) {
+//             test.equal(null, err);
 
-            collection.findOne(function(err, item) {
-              test.equal(null, err);
+//             collection.findOne(function(err, item) {
+//               test.equal(null, err);
 
-              db.close();
-              test.done();
-            });
-        });
-      });
-    });
-  }
-}
+//               db.close();
+//               test.done();
+//             });
+//         });
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore
@@ -1615,49 +1615,49 @@ exports.shouldCorrectlyHandle0asIdForSave = {
   }
 }
 
-/**
- * @ignore
- */
-exports['Should correctly execute update with . field in selector'] = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports['Should correctly execute update with . field in selector'] = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.collection('executeUpdateWithElemMatch').update({'item.i': 1}, {$set: {a:1}}, function(err, result, full) {
-        test.equal(null, err);
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.collection('executeUpdateWithElemMatch').update({'item.i': 1}, {$set: {a:1}}, function(err, result, full) {
+//         test.equal(null, err);
 
-        db.close();
-        test.done();
-      });
-    });
-  }
-}
+//         db.close();
+//         test.done();
+//       });
+//     });
+//   }
+// }
 
-/**
- * @ignore
- */
-exports['Should correctly execute update with $elemMatch field in selector'] = {
-  metadata: {},
+// /**
+//  * @ignore
+//  */
+// exports['Should correctly execute update with $elemMatch field in selector'] = {
+//   metadata: {},
   
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    db.open(function(err, db) {
-      db.collection('executeUpdateWithElemMatch').update({item: {$elemMatch: {name: 'my_name'}}}, {$set: {a:1}}, function(err, result, full) {
-        test.equal(null, err);
+//     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.collection('executeUpdateWithElemMatch').update({item: {$elemMatch: {name: 'my_name'}}}, {$set: {a:1}}, function(err, result, full) {
+//         test.equal(null, err);
 
-        db.close();
-        test.done();
-      });
-    });
-  }
-}
+//         db.close();
+//         test.done();
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore
