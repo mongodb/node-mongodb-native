@@ -2,7 +2,7 @@
  * of these can exist at any given time. This plugin and anything else that
  * uses process.on('uncaughtException') will conflict. */
 exports.attachToRunner = function(runner, outputFile) {
-  var smokeResults = [];
+  var smokeOutput = { results : [] };
   var runningTests = {};
 
   var integraPlugin = {
@@ -12,19 +12,19 @@ exports.attachToRunner = function(runner, outputFile) {
       callback();
     },
     afterTest: function(test, callback) {
-      smokeResults.push({
+      smokeOutput.results.push({
         status: test.status,
         start: test.startTime,
         end: Date.now(),
         test_file: test.name,
         exit_code: 0,
-        url: null
+        url: ""
       });
       delete runningTests[test.name];
       callback();
     },
     beforeExit: function(obj, callback) {
-      fs.writeFile(outputFile, JSON.stringify(smokeResults), function() {
+      fs.writeFile(outputFile, JSON.stringify(smokeOutput, null, 2), function() {
         callback();
       });
     }
@@ -34,18 +34,18 @@ exports.attachToRunner = function(runner, outputFile) {
   process.on('uncaughtException', function(err) {
     // Mark all currently running tests as failed
     for (var testName in runningTests) {
-      smokeResults.push({
+      smokeOutput.results.push({
         status: "fail",
         start: runningTests[testName].startTime,
         end: Date.now(),
         test_file: testName,
         exit_code: 0,
-        url: null
+        url: ""
       });
     }
 
     // write file
-    fs.writeFileSync(outputFile, JSON.stringify(smokeResults));
+    fs.writeFileSync(outputFile, JSON.stringify(smokeOutput, null, 2));
 
     // Standard NodeJS uncaught exception handler
     console.error(err.stack);
