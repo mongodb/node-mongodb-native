@@ -656,3 +656,42 @@ exports.shouldCorrectlyReturnNestedKeys = function(configuration, test) {
     });
   });
 }
+
+/**
+* Mapreduce tests
+* @ignore
+*/
+exports.shouldPerformMapReduceWithScopeContainingFunction = function(configuration, test) {
+  var util = {
+    times_one_hundred: function(x) {return x * 100;}
+  }
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    db.createCollection('test_map_reduce', function(err, collection) {
+      collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        // String functions
+        var map = "function() { emit(this.user_id, util.times_one_hundred(this.user_id)); }";
+        var reduce = "function(k,vals) { return vals[0]; }";
+
+        // Before MapReduce
+        test.equal(200, util.times_one_hundred(2));
+
+        collection.mapReduce(map, reduce, {scope: {util: util}, out: {replace : 'tempCollection'}}, function(err, collection) {
+
+          // After MapReduce
+          test.equal(200, util.times_one_hundred(2));
+
+          collection.findOne({'_id':2}, function(err, result) {
+
+            // During MapReduce
+            test.equal(200, result.value);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+}
+
