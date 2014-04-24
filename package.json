@@ -75,7 +75,7 @@
 	  , "gleak": "0.2.3"
 	  , "step": "0.0.5"
 	  , "async": "0.1.22"
-    , "integra": "0.1.4"
+    , "integra": "0.1.5"
     , "optimist": "latest"
   }
 , "optionalDependencies": {

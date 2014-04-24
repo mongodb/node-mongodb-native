@@ -75,7 +75,8 @@ exports['should handle error throw in user callback'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    process.once("uncaughtException", function(err) {
+    // Catch an uncaughtException
+    test.uncaughtException(function(err) {
       db.close();
       test.done();
     })
@@ -95,7 +96,7 @@ exports['Should handle uncaught error correctly'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
-    process.once("uncaughtException", function(err) {
+    test.uncaughtException(function(err) {
       db.close();
       test.done();
     })
@@ -114,7 +115,7 @@ exports['Should handle throw error in db operation correctly'] = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
     db.open(function(err, db) {
-      process.once("uncaughtException", function(err) {
+      test.uncaughtException(function(err) {
         db.close();
         test.done();
       })
@@ -161,7 +162,7 @@ exports['Should handle MongoClient throw error in db operation correctly'] = {
     var MongoClient = configuration.require.MongoClient;
     
     MongoClient.connect(configuration.url(), function(err, db) {
-      process.once("uncaughtException", function(err) {
+      test.uncaughtException(function(err) {
         db.close();
         test.done();
       })
@@ -184,7 +185,7 @@ exports['Should handle Error thrown during operation'] = {
   test: function(configuration, test) {
     var db = null;
 
-    process.once("uncaughtException", function(err) {
+    test.uncaughtException(function(err) {
       db.close();
       test.done();
     });

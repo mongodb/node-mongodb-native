@@ -69,7 +69,7 @@ exports.shouldCorrectlyHandleExceptionsInCursorNext = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
-    process.once('uncaughtException', function(err) {
+    test.uncaughtException(function(err) {
       test.ok(err != null);
       db.close();
       test.done();
@@ -96,7 +96,7 @@ exports.shouldCorrectlyHandleExceptionsInCursorEach = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
 
-    process.once('uncaughtException', function(err) {
+    test.uncaughtException(function(err) {
       test.ok(err != null);
       db.close();
       test.done();
