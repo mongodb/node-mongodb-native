@@ -24,7 +24,7 @@ exports.attachToRunner = function(runner, outputFile) {
       callback();
     },
     beforeExit: function(obj, callback) {
-      fs.writeFile(outputFile, JSON.stringify(smokeOutput, null, 2), function() {
+      fs.writeFile(outputFile, JSON.stringify(smokeOutput), function() {
         callback();
       });
     }
@@ -45,7 +45,7 @@ exports.attachToRunner = function(runner, outputFile) {
     }
 
     // write file
-    fs.writeFileSync(outputFile, JSON.stringify(smokeOutput, null, 2));
+    fs.writeFileSync(outputFile, JSON.stringify(smokeOutput));
 
     // Standard NodeJS uncaught exception handler
     console.error(err.stack);
