@@ -696,7 +696,7 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = function(c
           test.equal(null, err);
 
           // Insert document
-          db.collection('authcollectiontest').insert({a:1}, function(err, result) {
+          db.collection('authcollectiontest').insert({a:1}, {w:'majority'}, function(err, result) {
             test.equal(null, err);
 
             // Find the document
@@ -748,7 +748,7 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = function(configurat
           test.equal(null, err);
 
           // Insert document
-          db.collection('authcollectiontest').insert({a:1}, function(err, result) {
+          db.collection('authcollectiontest').insert({a:1}, {w:'majority'}, function(err, result) {
             test.equal(null, err);
 
             // Find the document
