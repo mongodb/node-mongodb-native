@@ -124,208 +124,6 @@ var createConfiguration = function(options) {
   return Configuration;
 }
 
-var ReplicasetConfiguration = function(context) {
-	var mongo = require('../lib/mongodb');
-	var Db = mongo.Db;
-	var Server = mongo.Server;
-	var ReplSet = mongo.ReplSet;
-	var ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
-  var database = "integration_tests";
-  var url = "mongodb://%slocalhost:30000/" + database;
-  var startPort = 30000;
-
-  // Replicaset settings
-  var replicasetOptions = { 
-      retries:120, secondary_count:2
-    , passive_count:0, arbiter_count:1
-    , start_port: startPort
-    , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
-  }
-
-  // Set up replicaset manager
-  var manager = new ReplicaSetManager(replicasetOptions);
-  var replSet = null;
-
-	return {		
-		start: function(callback) {
-      manager.startSet(true, function(err) {
-        if(err) throw err;
-        callback();
-      });
-		},
-
-		stop: function(callback) {
-      manager.killSetServers(function(err) {
-        callback();
-      });
-		},
-
-		restart: function(callback) {
-			var self = this;
-
-      manager.killSetServers(function(err) {
-        self.start(callback);
-      });
-		},
-
-		setup: function(callback) {
-			callback();
-		},
-
-		teardown: function(callback) {
-			callback();
-		},
-
-		newDbInstance: function(dbOptions, serverOptions) {
-			if(dbOptions.w == null
-					&& dbOptions.fsync == null
-					&& dbOptions.wtimeout == null
-					&& dbOptions.j == null) dbOptions.w = 1;
-			serverOptions = serverOptions || {};
-			var port = serverOptions.port || startPort;
-			var host = serverOptions.host || "localhost";
-
-			// Return the db
-      return new Db('integration_tests'
-      	, new ReplSet([new Server(host, port, serverOptions)]
-      	, {poolSize:1}), dbOptions);      
-		},
-
-		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
-			return new Db('integration_tests'
-				, new ReplSet([new Server(host, serverOptions)]
-				, {poolSize:1}), dbOptions);      
-		},
-
-		url: function(username, password) {
-			var auth = "";
-
-			if(username && password) {
-				auth = f("%s:%s@", username, password);
-			}
-
-			return f(url, auth);
-		},
-
-		// Additional parameters needed
-		require: mongo,
-		database: database,
-		nativeParser: true,
-		port: startPort,
-		host: 'localhost',
-		writeConcern: function() { return {w: 1} },
-    writeConcernMax: function() { return {w: 'majority', wtimeout: 5000} }
-	}
-}
-
-var ShardingConfiguration = function(context) {
-	var mongo = require('../lib/mongodb');
-	var Db = mongo.Db;
-	var Server = mongo.Server;
-	var Mongos = mongo.Mongos;
-	var ShardedManager = require('../test/tools/sharded_manager').ShardedManager;
-  var database = "integration_tests";
-  var replStartPort = 30000;
-  var mongosStartPort = 50000;
-  var url = "mongodb://%slocalhost:" + mongosStartPort + "/" + database;
-
-  // Replicaset settings
-  var options = { 
-  		numberOfReplicaSets: 1
-  	,	numberOfMongosServers: 1
-  	, replPortRangeSet: replStartPort
-  	, mongosRangeSet: mongosStartPort
-  	, db: database
-  	, collection: 'test_distinct_queries'
-  }
-
-  // Set up replicaset manager
-  var manager = new ShardedManager(options);
-  var replSet = null;
-
-	return {		
-		start: function(callback) {
-			var self = this;
-
-      manager.start(function(err) {
-        if(err) throw err;
-        callback();
-      });
-		},
-
-		stop: function(callback) {
-      manager.killAll(function(err) {
-        callback();
-      });
-		},
-
-		restart: function(callback) {
-			var self = this;
-
-      manager.killAll(function(err) {
-        self.start(callback);
-      });
-		},
-
-		setup: function(callback) {
-			callback();
-		},
-
-		teardown: function(callback) {
-			callback();
-		},
-
-		newDbInstance: function(dbOptions, serverOptions) {
-			if(dbOptions.w == null
-					&& dbOptions.fsync == null
-					&& dbOptions.wtimeout == null
-					&& dbOptions.j == null) {
-				dbOptions.w = 1;
-				// dbOptions.wtimeout = 10000;
-			}
-
-			serverOptions = serverOptions || {};
-			var port = serverOptions.port || mongosStartPort;
-			var host = serverOptions.host || "localhost";
-
-			// Hardcode poolsize 1
-			serverOptions.poolSize = 1;
-
-			// Return the db
-      return new Db(database
-      	, new Mongos([new Server(host, port, serverOptions)]
-      	, {poolSize:1}), dbOptions);      
-		},
-
-		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
-			return new Db(database
-				, new Mongos([new Server(host, serverOptions)]
-				, {poolSize:1}), dbOptions);      
-		},
-
-		url: function(username, password) {
-			var auth = "";
-
-			if(username && password) {
-				auth = f("%s:%s@", username, password);
-			}
-
-			return f(url, auth);
-		},
-
-		// Additional parameters needed
-		require: mongo,
-		database: database,
-		nativeParser: true,
-		port: mongosStartPort,
-		host: 'localhost',
-		// writeConcern: function() { return {w: 'majority', wtimeout: 3000} }
-		// writeConcern: function() { return {w: 2, wtimeout: 10000} }
-		writeConcern: function() { return {w: 1} },
-    writeConcernMax: function() { return {w: 1} }    
-	}
-}
-
 // Set up the runner
 var runner = new Runner({
 		logLevel:'info'
@@ -418,48 +216,96 @@ runner.on('exit', function(errors, results) {
 
 // Run the tests
 // runner.run(createConfiguration());
+// runner.run(createConfiguration({
+//   port: 30000,
+//   url: "mongodb://%slocalhost:30000/integration_tests",
+//   writeConcernMax: {w: 'majority', wtimeout: 5000},
+//   manager: function() {
+//     var ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
+//     // Replicaset settings
+//     var replicasetOptions = { 
+//         retries:120, secondary_count:2
+//       , passive_count:0, arbiter_count:1
+//       , start_port: 30000
+//       , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
+//     }
+    
+//     // Return manager
+//     return new ReplicaSetManager(replicasetOptions);
+//   }, 
+
+//   newDbInstance: function(dbOptions, serverOptions) {
+//     if(dbOptions.w == null
+//         && dbOptions.fsync == null
+//         && dbOptions.wtimeout == null
+//         && dbOptions.j == null) dbOptions.w = 1;
+//     serverOptions = serverOptions || {};
+//     // Get the mongo lib
+//     var mongo = require('../lib/mongodb');
+//     // Return the db
+//     return new mongo.Db('integration_tests'
+//       , new mongo.ReplSet([new mongo.Server(serverOptions.host || "localhost", serverOptions.port || 30000, serverOptions)]
+//       , {poolSize:1}), dbOptions);      
+//   },
+
+//   newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
+//     var mongo = require('../lib/mongodb');
+//     var mongo = require('../lib/mongodb');
+//     return new mongo.Db('integration_tests',
+//       , new mongo.ReplSet([new mongo.Server("localhost", serverOptions)]
+//       , {poolSize:1}), dbOptions);      
+//   }  
+// }));
 runner.run(createConfiguration({
-  port: 30000,
-  url: "mongodb://%slocalhost:30000/integration_tests",
+  port: 50000,
+  url: "mongodb://%slocalhost:50000/integration_tests",
   writeConcernMax: {w: 'majority', wtimeout: 5000},
   manager: function() {
-    var ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
+    var ShardedManager = require('../test/tools/sharded_manager').ShardedManager;
     // Replicaset settings
-    var replicasetOptions = { 
-        retries:120, secondary_count:2
-      , passive_count:0, arbiter_count:1
-      , start_port: 30000
-      , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
+    var options = { 
+        numberOfReplicaSets: 1
+      , numberOfMongosServers: 1
+      , replPortRangeSet: 30000
+      , mongosRangeSet: 50000
+      , db: "integration_tests"
+      , collection: 'test_distinct_queries'
     }
     
     // Return manager
-    return new ReplicaSetManager(replicasetOptions);
+    return new ShardedManager(options);
   }, 
 
   newDbInstance: function(dbOptions, serverOptions) {
     if(dbOptions.w == null
         && dbOptions.fsync == null
         && dbOptions.wtimeout == null
-        && dbOptions.j == null) dbOptions.w = 1;
+        && dbOptions.j == null) {
+      dbOptions.w = 1;
+    }
+
     serverOptions = serverOptions || {};
+    var port = serverOptions.port || 50000;
+    var host = serverOptions.host || "localhost";
+
+    // Hardcode poolsize 1
+    serverOptions.poolSize = 1;
+
     // Get the mongo lib
     var mongo = require('../lib/mongodb');
     // Return the db
     return new mongo.Db('integration_tests'
-      , new mongo.ReplSet([new mongo.Server(serverOptions.host || "localhost", serverOptions.port || 30000, serverOptions)]
-      , {poolSize:1}), dbOptions);      
+      , new mongo.Mongos([new mongo.Server(host, port, serverOptions)]
+      , {poolSize:1}), dbOptions);          
   },
 
   newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
     var mongo = require('../lib/mongodb');
     return new mongo.Db('integration_tests'
-      , new mongo.ReplSet([new mongo.Server(host, serverOptions)]
+      , new mongo.Mongos([new mongo.Server("localhost", serverOptions)]
       , {poolSize:1}), dbOptions);      
   }  
 }));
-
-// runner.run(ReplicasetConfiguration);
-// runner.run(ShardingConfiguration);
 
 
 

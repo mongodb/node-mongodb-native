@@ -110,7 +110,11 @@ var ShardedManager = function ShardedManager(options) {
 }
 
 // Boots up the sharded system and configures it
-ShardedManager.prototype.start = function(callback) {
+ShardedManager.prototype.start = function(options, callback) {
+  if(typeof options == 'function') {
+    callback = options;
+    options = {};
+  }
   var self = this;
   // Start replicaset servers
   startReplicasetServers(self, function(err, result) {
@@ -133,12 +137,10 @@ ShardedManager.prototype.start = function(callback) {
           console.dir(err);
         }
 
-        // setTimeout(function() {
-          // Setup shard
-          setupShards(self, function(err, result) {
-            callback();
-          });
-        // }, 10000);
+        // Setup shard
+        setupShards(self, function(err, result) {
+          callback();
+        });
       });
     });
   });
@@ -156,7 +158,7 @@ ShardedManager.prototype.killAll = function(callback) {
 // Kill a random shard
 ShardedManager.prototype.killShard = function(callback) {
   var replicasetServer = this.replicasetManagers.pop();
-  replicasetServer.killSetServers(callback);
+  replicasetServer.stop(callback);
 }
 
 // Kill a shard primary
@@ -338,7 +340,7 @@ var startReplicasetServers = function(self, callback) {
   // Boot up replicaset servers
   for(var i = 0; i < self.replicasetManagers.length; i++) {
     // Start a replicaset
-    self.replicasetManagers[i].startSet(true, function(err, result) {
+    self.replicasetManagers[i].start(true, function(err, result) {
       replicasetsToStart = replicasetsToStart - 1;
 
       // Replicasets are up and running
