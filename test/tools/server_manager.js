@@ -90,8 +90,10 @@ var ServerManager = function(serverOptions) {
       });
       
       // On connect let's go
-      server.on('connect', function() {
+      server.on('connect', function(_server) {
         ismaster = server.lastIsMaster();
+        // Destroy the connection
+        _server.destroy();
 
         try {
           // Read the pidfile        
@@ -117,7 +119,7 @@ var ServerManager = function(serverOptions) {
     }    
 
     exec(cmd, function(error, stdout, stderr) {      
-      if(error != null) {
+      if(error != null && callback) {
         var _internal = callback;
         callback = null;
         return _internal(error);

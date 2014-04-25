@@ -44,7 +44,6 @@ var StandaloneConfiguration = function(options) {
         // Start the db
         manager.start({purge:true, signal: -9}, function(err) {
           var server = topology(this, mongo);
-          
           // Set up connect
           server.once('connect', function() {
             // Drop the database
@@ -118,10 +117,10 @@ var testFiles =[
   //   '/test/tests/functional/connection_tests.js'
   // , '/test/tests/functional/pool_tests.js'
   // , '/test/tests/functional/server_tests.js'
-  , '/test/tests/functional/replset_tests.js'
+  // , '/test/tests/functional/replset_tests.js'
   // , '/test/tests/functional/replset_failover_tests.js'
   // , '/test/tests/functional/basic_auth_tests.js'
-  // , '/test/tests/functional/extend_pick_strategy_tests.js'
+  , '/test/tests/functional/extend_pick_strategy_tests.js'
   // , '/test/tests/functional/mongos_tests.js'
 ]
 

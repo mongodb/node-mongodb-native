@@ -142,7 +142,10 @@ var ReplSetManager = function(replsetOptions) {
         , {readPreference: new ReadPreference('secondary')}, function(err, result) {
           if(err) return callback(err, null);
           console.log("Waiting for replicaset ");
-          ensureUp(server, callback);
+          ensureUp(server, function(err, r) {
+            server.destroy();
+            callback(err, r);
+          });
       });
     });
 

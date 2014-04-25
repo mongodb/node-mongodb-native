@@ -6,7 +6,8 @@ exports['Should correctly use a ping strategy to pick a node'] = {
   },
 
   test: function(configuration, test) {
-    var ReplSet = configuration.require.ReplSet;
+    var ReplSet = configuration.require.ReplSet
+        , ReadPreference = configuration.require.ReadPreference;
 
     // Get the basic auth provider
     var MongoCR = configuration.require.MongoCR;
@@ -15,80 +16,91 @@ exports['Should correctly use a ping strategy to pick a node'] = {
     var server = new ReplSet([{
         host: configuration.host
       , port: configuration.port
-    }], {reconnectInterval: 500});
+    }], {reconnectInterval: 2000});
 
-    // Register basic auth provider
-    server.addReadPreferenceStrategy('ping', {
-      pings: {},
+    // // Register basic auth provider
+    // server.addReadPreferenceStrategy('ping', {
+    //   pings: {},
 
-      pickServer: function(set, options) {
-        // console.log("======================= pickServer")
-        return null;
-      },
+    //   pickServer: function(set, options) {
+    //     // console.log("======================= pickServer")
+    //     return null;
+    //   },
 
-      startOperation: function(server, query, date) {
-        // console.log("======================= startOperation")
-      },
+    //   startOperation: function(server, query, date) {
+    //     // console.log("======================= startOperation")
+    //   },
 
-      endOperation: function(server, err, result, date) {
-        // console.log("======================= endOperation")
-      },
+    //   endOperation: function(server, err, result, date) {
+    //     // console.log("======================= endOperation")
+    //   },
 
-      close: function(server) {
-        // console.log("======================= close")
-      },
+    //   close: function(server) {
+    //     // console.log("======================= close")
+    //   },
 
-      error: function(server) {
-        // console.log("======================= error")
-      },
+    //   error: function(server) {
+    //     // console.log("======================= error")
+    //   },
 
-      timeout: function(server) {
-        // console.log("======================= timeout")
-      },
+    //   timeout: function(server) {
+    //     // console.log("======================= timeout")
+    //   },
 
-      connect: function(server) {
-        // console.log("======================= connect")
-      },
+    //   connect: function(server) {
+    //     // console.log("======================= connect")
+    //   },
 
-      execute: function(set, callback) {
-        // console.log("======================= execute")
-        var self = this;
-        var servers = set.getAll();
-        var count = servers.length;
-        // No servers return
-        if(servers.length == 0) return callback(null, null);
+    //   execute: function(set, callback) {
+    //     // console.log("======================= execute")
+    //     var self = this;
+    //     var servers = set.getAll();
+    //     var count = servers.length;
+    //     // No servers return
+    //     if(servers.length == 0) return callback(null, null);
 
-        // Execute operation
-        var operation = function(_server) {
-          var start = new Date();
+    //     // Execute operation
+    //     var operation = function(_server) {
+    //       var start = new Date();
           
-          // Execute ping against server
-          _server.command('system.$cmd', {ping:1}, function(err, r) {
-            count = count - 1;
-            var time = new Date().getTime() - start.getTime();
-            self.pings[_server.name] = time;
+    //       // Execute ping against server
+    //       _server.command('system.$cmd', {ping:1}, function(err, r) {
+    //         count = count - 1;
+    //         var time = new Date().getTime() - start.getTime();
+    //         self.pings[_server.name] = time;
 
-            if(count == 0) {
-              callback(null, null);
-            }
-          });
-        }
+    //         if(count == 0) {
+    //           callback(null, null);
+    //         }
+    //       });
+    //     }
 
-        // Let's ping all servers
-        while(servers.length > 0) {
-          operation(servers.shift());
-        }
-      }
-    });
+    //     // Let's ping all servers
+    //     while(servers.length > 0) {
+    //       operation(servers.shift());
+    //     }
+    //   }
+    // });
 
     // Add event listeners
     server.on('connect', function(_server) {
-      setTimeout(function() {
-        _server.command('system.$cmd', {ismaster:true}, function(err, r) {
-          _server.destroy();
-          test.done();
+      setInterval(function() {
+        _server.command('system.$cmd'
+            , {ismaster:true}
+            , {readPreference: new ReadPreference('nearest', [{rack: 'sf'}])}, function(err, r) {
+                console.log("=============== ismaster")
+            // console.log(JSON.stringify(r), null, 2)
+          // _server.destroy();
+          // test.done();
         });
       }, 1000);
+
+      // setTimeout(function() {
+      //   _server.command('system.$cmd', {ismaster:true}, function(err, r) {
+      //     _server.destroy();
+      //     test.done();
+      //   });
+      // }, 1000);
     });
   
     // Start connection
