@@ -277,7 +277,7 @@ var Connection = function(options) {
               // Exit parsing loop
               data = new Buffer(0);
             } else {
-              try {
+              // try {
                 var emitBuffer = data.slice(0, sizeOfMessage);
                 // Reset state of buffer
                 self.buffer = null;
@@ -288,9 +288,9 @@ var Connection = function(options) {
                 data = data.slice(sizeOfMessage);
                 // Emit the message
                 self.emit("message", new Response(bson, emitBuffer, responseOptions), self);
-              } catch (err) {
-                self.emit('parseError', err, self);  
-              }
+              // } catch (err) {
+              //   self.emit('parseError', err, self);  
+              // }
             }
           } else {
             // Create a buffer that contains the space for the non-complete message

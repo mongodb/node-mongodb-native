@@ -233,7 +233,6 @@ var Server = function(options) {
   }
 
   var connectHandler = function(connection) {
-    if(readPreferenceStrategies != null) notifyStrategies('connect', [self]);
     // Execute an ismaster
     self.command('system.$cmd', {ismaster:true}, function(err, r) {
       if(err) return self.emit('close', err, self);
@@ -254,8 +253,15 @@ var Server = function(options) {
 
       // Apply any applyAuthentications
       applyAuthentications(function() {
-        self.emit('connect', self);
-      })
+        if(readPreferenceStrategies == null) {
+          return self.emit('connect', self);
+        }
+
+        // Signal connect to all readPreferences
+        notifyStrategies('connect', [self], function(err, result) {
+          return self.emit('connect', self);
+        });
+      });
     });
   }
 
@@ -329,14 +335,37 @@ var Server = function(options) {
 
   //
   // Execute readPreference Strategies
-  var notifyStrategies = function(op, params) {
-    // Notify query start to any read Preference strategies
+  var notifyStrategies = function(op, params, callback) {
+    if(typeof callback != 'function') {
+      // Notify query start to any read Preference strategies
+      for(var name in readPreferenceStrategies) {
+        if(readPreferenceStrategies[name][op]) {
+          var strat = readPreferenceStrategies[name];
+          strat[op].apply(strat, params);
+        }
+      }
+      // Finish up
+      return;
+    }
+
+    // Execute the async callbacks
+    var nPreferences = Object.keys(readPreferenceStrategies).length;
+    if(nPreferences == 0) return callback(null, null);
     for(var name in readPreferenceStrategies) {
       if(readPreferenceStrategies[name][op]) {
         var strat = readPreferenceStrategies[name];
-        strat[op].apply(strat, params);
+        // Add a callback to params
+        var cParams = params.slice(0);
+        cParams.push(function(err, r) {
+          nPreferences = nPreferences - 1;
+          if(nPreferences == 0) {
+            callback(null, null);
+          }
+        })
+        // Execute the readPreference
+        strat[op].apply(strat, cParams);
       }
-    }
+    }    
   }
 
   // Execute a command
@@ -453,7 +482,7 @@ var Server = function(options) {
   }
 
   // Match
-  this.equal = function(server) {    
+  this.equals = function(server) {    
     if(typeof server == 'string') return server == this.name;
     return server.name == this.name;
   }
@@ -481,7 +510,6 @@ var Server = function(options) {
   //     raw: <boolean>
   //   , readPreference: <ReadPreference>
   //   , maxTimeMS: <n>
-  //   , byMongos: <boolean>
   //   , tailable: <boolean>
   //   , oplogReply: <boolean>
   //   , noCursorTimeout: <boolean>
