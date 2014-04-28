@@ -1,7 +1,7 @@
 { "name" :            "mongodb"
 , "description" :     "A node.js driver for MongoDB"
 , "keywords" :        ["mongodb", "mongo", "driver", "db"]
-, "version" :         "1.4.0-rc9"
+, "version" :         "1.4.2"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  [ "Aaron Heckmann",
                       "Christoph Pojer",
@@ -75,7 +75,7 @@
 	  , "gleak": "0.2.3"
 	  , "step": "0.0.5"
 	  , "async": "0.1.22"
-    , "integra": "latest"
+    , "integra": "0.0.3"
     , "optimist": "latest"
   }
 , "optionalDependencies": {

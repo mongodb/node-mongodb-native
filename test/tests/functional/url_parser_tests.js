@@ -221,7 +221,7 @@ exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtime
   test.equal('admin', object.dbName);
   test.equal(true, object.db_options.safe);
   test.equal(2, object.db_options.w);
-  test.equal(2000, object.db_options.wtimeoutMS);
+  test.equal(2000, object.db_options.wtimeout);
   test.done();
 }
 

@@ -164,7 +164,7 @@ exports.shouldCorrectlyReadFileUsingStream = function(configuration, test) {
             var stream = gs.stream(true);
             
             // Register events
-            stream.on("data", function(chunk) {              
+            stream.on("data", function(chunk) {
               // Record the length of the file
               readLen += chunk.length;
             });

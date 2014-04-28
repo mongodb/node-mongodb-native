@@ -561,7 +561,7 @@ exports['Should correctly write the results out to a new collection'] = {
 exports['Should correctly use allowDiskUse when performing an aggregation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">2.6.0"},
+  requires: {mongodb: ">2.5.5"},
   
   // The actual test we wish to run
   test: function(configure, test) {

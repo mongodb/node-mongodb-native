@@ -11,9 +11,6 @@ exports['Should Correctly group using replicaset'] = function(configuration, tes
   collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], {safe:{w:3, wtimeout:10000}}, function(err, result) {
     // Kill the primary
     configuration.killPrimary(function(node) {
-      console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 1")
-      console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 1")
-      console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 1")
       // Do a collection find
       collection.group(['key'], {}, {sum:0}, function reduce(record, memo){
         memo.sum += record.x;
