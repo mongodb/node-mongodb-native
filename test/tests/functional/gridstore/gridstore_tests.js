@@ -1859,6 +1859,128 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = functi
 /**
  * @ignore
  */
+exports.shouldCorrectlySaveFileWithoutFilenameAndThenOpenAddFilenameAndSaveAgain = function(configuration, test) {
+  var GridStore = configuration.getMongoPackage().GridStore
+    , ObjectID = configuration.getMongoPackage().ObjectID;
+
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var id = new ObjectID();
+    var gridStore = new GridStore(db, id, "w", {content_type: "image/jpeg"});
+    gridStore.open(function(err, gridStore) {
+      gridStore.write("hello world!", function(err, gridStore) {
+        gridStore.close(function(err, result) {
+          // Open the gridstore
+          new GridStore(db, id, "test_gs_filename", "w").open(function(err, gridStore) {
+            gridStore.contentType = "html/text";
+            gridStore.write("<h1>hello world!</h1>", function(err, gridStore) {
+              gridStore.close(function(err, result) {
+
+                new GridStore(db, id, "r").open(function(err, gridStore) {
+                  test.equal(null, err);
+                  console.log("2", gridStore.filename);
+                  test.equal("test_gs_filename", gridStore.filename);
+
+                  gridStore.read(function(err, data) {
+                    test.equal(null, err);
+                    test.equal("<h1>hello world!</h1>", data.toString('utf8'));
+                    db.close();
+                    test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlySaveFileAndThenOpenChangeFilenameAndSaveAgain = function(configuration, test) {
+  var GridStore = configuration.getMongoPackage().GridStore
+    , ObjectID = configuration.getMongoPackage().ObjectID;
+
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var id = new ObjectID();
+    var gridStore = new GridStore(db, id, "test_gs_filename3", "w", {content_type: "image/jpeg"});
+    gridStore.open(function(err, gridStore) {
+      gridStore.write("hello world!", function(err, gridStore) {
+        gridStore.close(function(err, result) {
+          // Open the gridstore
+          new GridStore(db, id, "test_gs_filename4", "w").open(function(err, gridStore) {
+            gridStore.contentType = "html/text";
+            gridStore.write("<h1>hello world!</h1>", function(err, gridStore) {
+              gridStore.close(function(err, result) {
+
+                new GridStore(db, id, "r").open(function(err, gridStore) {
+                  test.equal(null, err);
+                  console.log("2", gridStore.filename);
+                  test.equal("test_gs_filename4", gridStore.filename);
+
+                  gridStore.read(function(err, data) {
+                    test.equal(null, err);
+                    test.equal("<h1>hello world!</h1>", data.toString('utf8'));
+                    db.close();
+                    test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlySaveFileAndThenAppendChangeFilenameAndSaveAgain = function(configuration, test) {
+  var GridStore = configuration.getMongoPackage().GridStore
+    , ObjectID = configuration.getMongoPackage().ObjectID;
+
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var id = new ObjectID();
+    var gridStore = new GridStore(db, id, "test_gs_filename1", "w", {content_type: "image/jpeg"});
+    gridStore.open(function(err, gridStore) {
+      gridStore.write("hello world!", function(err, gridStore) {
+        gridStore.close(function(err, result) {
+          // Open the gridstore
+          new GridStore(db, id, "test_gs_filename2", "w+").open(function(err, gridStore) {
+            gridStore.contentType = "html/text";
+            gridStore.close(function(err, result) {
+
+              new GridStore(db, id, "r").open(function(err, gridStore) {
+                test.equal(null, err);
+                console.log("3", gridStore.filename);
+                test.equal("test_gs_filename2", gridStore.filename);
+
+                gridStore.read(function(err, data) {
+                  test.equal(null, err);
+                  test.equal("hello world!", data.toString('utf8'));
+                  db.close();
+                  test.done();
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyHandleSeekWithStream = function(configuration, test) {
   var GridStore = configuration.getMongoPackage().GridStore
     , ObjectID = configuration.getMongoPackage().ObjectID;
@@ -2126,6 +2248,10 @@ exports['Should correctly append content to file and have correct chunk numbers'
     });
   });
 }
+
+
+
+
 
 // /**
 //  * @ignore
