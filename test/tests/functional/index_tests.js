@@ -111,8 +111,13 @@ exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
         test.equal(null, err);
 
         // Create an index on the a field
+        var options = {unique:true, background:true, dropDups:true, w:1};
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+          , options, function(err, indexName) {
+
+          // Make sure that we haven't modified the user's options
+          test.ok(!options.readPreference);
+
           // Show that duplicate records got dropped
           collection.find({}).toArray(function(err, items) {
             test.equal(null, err);
