@@ -1,3 +1,12 @@
+1.4.3 2014-05-01
+----------------
+- Clone options for commands to avoid polluting original options passed from Mongoose (Issue #1171, https://github.com/vkarpov15)
+- Made geoNear and geoHaystackSearch only clean out allowed options from command generation (Issue #1167)
+- Fixed typo for allowDiskUse (Issue #1168, https://github.com/joaofranca)
+- A 'mapReduce' function changed 'function' to instance '\<Object\>' of 'Code' class (Issue #1165, https://github.com/exabugs)
+- Made findAndModify set sort only when explicitly set (Issue #1163, https://github.com/sars)
+- Rewriting a gridStore file by id should use a new filename if provided (Issue #1169, https://github.com/vsivsi)
+
 1.4.2 2014-04-15
 ----------------
 - Fix for inheritance of readPreferences from MongoClient NODE-168/NODE-169
