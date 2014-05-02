@@ -9,7 +9,7 @@
 
 ### Blogs of Engineers involved in the driver
 - Christian Kvalheim @christkv <http://christiankvalheim.com>
-- Valeri Karpov @code_barbarian <http://http://thecodebarbarian.wordpress.com/>
+- Valeri Karpov @code_barbarian <http://thecodebarbarian.wordpress.com/>
 
 ### Bugs / Feature Requests
 
