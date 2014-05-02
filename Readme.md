@@ -8,8 +8,8 @@
 | mongodb       | http://www.mongodb.org/                        |
 
 ### Blogs of Engineers involved in the driver
-Christian Kvalheim @christkv <http://christiankvalheim.com>
-Valeri Karpov @code_barbarian <http://http://thecodebarbarian.wordpress.com/>
+- Christian Kvalheim @christkv <http://christiankvalheim.com>
+- Valeri Karpov @code_barbarian <http://http://thecodebarbarian.wordpress.com/>
 
 ### Bugs / Feature Requests
 
