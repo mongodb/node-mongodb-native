@@ -2377,3 +2377,44 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, tes
   });
   // DOC_END
 }
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyUseFindAndCursorCount = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+
+  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_START
+  // Establish connection to db
+  db.open(function(err, db) {
+
+    // Create a lot of documents to insert
+    var docs = []
+    for(var i = 0; i < 100; i++) {
+      docs.push({'a':i})
+    }
+
+    // Create a collection
+    db.createCollection('test_close_function_on_cursor_2', function(err, collection) {
+      test.equal(null, err);
+
+      // Insert documents into collection
+      collection.insert(docs, {w:1}, function(err, ids) {
+
+        collection.find({}, function(err, cursor) {
+          test.equal(null, err);
+
+          cursor.count(function(err, count) {
+            test.equal(null, err);
+            test.equal(100, count);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  });
+  // DOC_END
+}
