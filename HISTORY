@@ -1,3 +1,10 @@
+1.4.4 2014-05-13
+----------------
+- Bumped BSON version to use the NaN 1.0 package, fixed strict comparison issue for ObjectID
+- Removed leaking global variable (Issue #1174, https://github.com/dainis)
+- MongoClient respects connectTimeoutMS for initial discovery process (NODE-185)
+- Fix bug with return messages larger than 16MB but smaller than max BSON Message Size (NODE-184)
+
 1.4.3 2014-05-01
 ----------------
 - Clone options for commands to avoid polluting original options passed from Mongoose (Issue #1171, https://github.com/vkarpov15)
