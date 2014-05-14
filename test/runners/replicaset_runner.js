@@ -53,6 +53,7 @@ module.exports = function(configurations) {
         , '/test/tests/repl_set/recovering_server_tests.js'
         , '/test/tests/repl_set/batch_api_tests.js'
         , '/test/tests/repl_set/individual_sets_connections_tests.js'
+        , '/test/tests/repl_set/full_result_tests.js'
       ]
     );
 

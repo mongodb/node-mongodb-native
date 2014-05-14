@@ -119,7 +119,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
       batch.insert({a:2});
 
       // Execute the operations
-      batch.execute({w:2, wtimeout:1000}, function(err, result) {
+      batch.execute({w:2, wtimeout:1000}, function(err, result) {        
         test.ok(err != null);
         test.ok(err.code != null);
         test.ok(err.errmsg != null);

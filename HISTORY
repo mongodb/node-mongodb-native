@@ -1,3 +1,7 @@
+
+----------------
+- Added fullResult flag to insert/update/remove which will pass raw result document back. Document contents will vary depending on the server version the driver is talking to. No attempt is made to coerce a joint response.
+
 1.4.4 2014-05-13
 ----------------
 - Bumped BSON version to use the NaN 1.0 package, fixed strict comparison issue for ObjectID

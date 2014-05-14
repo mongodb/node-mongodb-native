@@ -50,6 +50,7 @@ var ServerManager = exports.ServerManager = function(options) {
   this.log_path = getPath(this, "log-" + this.port);
   this.journal = options["journal"] != null ? options["journal"] : true;
   this.auth = options['auth'] != null ? options['auth'] : false;
+  this.master = options['master'] != null ? options['master'] : false;
   
   // SSL Settings
   this.ssl = options['ssl'] != null ? options['ssl'] : false;
@@ -97,7 +98,7 @@ ServerManager.prototype.start = function(killall, options, callback) {
 
   // Create start command
   var startCmd = generateStartCmd(this, {configserver:self.configServer, log_path: self.log_path,
-    db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl});
+    db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl, master:self.master});
 
   exec(killall ? 'killall -15 mongod' : '', function(err, stdout, stderr) {
     if(purgedirectories) {
@@ -199,6 +200,8 @@ var generateStartCmd = function(self, options) {
   startCmd = options['auth'] ? startCmd + " --auth" : startCmd;
   startCmd = options['configserver'] ? startCmd + " --configsvr" : startCmd;
   startCmd = startCmd + " --setParameter enableTestCommands=1";
+  startCmd = options['master'] ? startCmd + " --master" : startCmd;
+
   // If we have ssl defined set up with test certificate
   if(options['ssl']) {
     var path = getPath(self, self.ssl_server_pem);
