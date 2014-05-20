@@ -1,6 +1,9 @@
 
+1.4.5 2014-05-21
 ----------------
 - Added fullResult flag to insert/update/remove which will pass raw result document back. Document contents will vary depending on the server version the driver is talking to. No attempt is made to coerce a joint response.
+- Fix to avoid MongoClient.connect hanging during auth when secondaries building indexes pre 2.6.
+- return the destination stream in GridStore.pipe (Issue #1176, https://github.com/iamdoron)
 
 1.4.4 2014-05-13
 ----------------
