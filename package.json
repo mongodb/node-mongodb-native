@@ -79,7 +79,8 @@
     , "optimist": "latest"
   }
 , "optionalDependencies": {
-    "kerberos": "0.0.3"
+      "kerberos": "0.0.3"
+    , "readable-stream": "latest"
   }
 , "config":         { "native" : false }
 , "main":             "./lib/mongodb/index"
