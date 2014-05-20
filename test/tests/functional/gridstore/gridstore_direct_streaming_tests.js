@@ -51,7 +51,8 @@ exports.shouldCorrectlyStreamReadFromGridStoreObject = function(configuration, t
         test.done();			
       })
       // Pipe out the data
-      gridStore.pipe(fileStream);
+      var pipeResult = gridStore.pipe(fileStream);
+      test.equal(fileStream, pipeResult);
     });
   });
 }
