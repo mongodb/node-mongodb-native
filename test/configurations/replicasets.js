@@ -20,7 +20,7 @@ var replica_set_config = function(options) {
     this.startPort = startPort;
     // Setting up replicaset options
     var repl_options = { 
-        retries:120, secondary_count:2
+        retries:30, secondary_count:2
       , passive_count:0, arbiter_count:1
       , start_port: this.startPort
       , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
@@ -155,7 +155,7 @@ var replica_set_config_auth = function(options) {
     this.startPort = 30000;
     // Setting up replicaset options
     var repl_options = { 
-        retries:120, secondary_count:2
+        retries:30, secondary_count:2
       , passive_count:0, arbiter_count:1
       , start_port: this.startPort
       , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]

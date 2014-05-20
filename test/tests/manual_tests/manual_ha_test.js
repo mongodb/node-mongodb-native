@@ -30,10 +30,10 @@ var replSet = new ReplSetServers([
     }
 );
 
-// RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:0, arbiter_count:0, auth:true});
-// RS.startSet(true, function(err, result) {
-//   process.exit(0)
-//   if(err != null) throw err;
+RS = new ReplicaSetManager({name:"testappset", retries:120, secondary_count:2, passive_count:0, arbiter_count:0, auth:true});
+RS.startSet(true, function(err, result) {
+  process.exit(0)
+  if(err != null) throw err;
 
   // setInterval(function() {
   //   console.log("================================= heap snapshot");
@@ -108,5 +108,5 @@ var replSet = new ReplSetServers([
           console.log('Server running at port 8000');
       });
   });
-// });
+});
 

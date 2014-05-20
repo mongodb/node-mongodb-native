@@ -17,7 +17,7 @@ var ReplicaSetManager = exports.ReplicaSetManager = function(options) {
   this.ports = [];
   this.name = options["name"] != null ? options["name"] : "replica-set-foo";
   this.host = options["host"] != null ? options["host"] : "localhost";
-  this.retries = options["retries"] != null ? options["retries"] : 120;
+  this.retries = options["retries"] != null ? options["retries"] : 30;
   this.config = {"_id": this.name, "version": 1, "members": []};
   this.journal = options["journal"] != null ? options["journal"] : false;
   this.auth = options['auth'] != null ? options['auth'] : false;
@@ -104,19 +104,23 @@ ReplicaSetManager.prototype.allHostPairsWithState = function(state, callback) {
   })
 }
 
-ReplicaSetManager.prototype.startSet = function(killall, callback) {
+ReplicaSetManager.prototype.startSet = function(killall, options, callback) {
   var self = this;
   // Unpack callback and variables
-  var args = Array.prototype.slice.call(arguments, 0);
+  var args = Array.prototype.slice.call(arguments, 1);
   callback = args.pop();
   killall = args.length ? args.shift() : true;
+  options = args.length ? args.shift() || {} : {};
   debug("** Starting a replica set with " + this.count + " nodes");
+
   // Reset configuration for replicaset
   this.config = {"_id": this.name, "version": 1, "members": []};
+  var killOptions = {skip: !killall};
+  if(options.signal) killall.signal = options.signal;
 
   // Kill all existing mongod instances
   // exec(killall ? 'killall -15 mongod' : '', function(err, stdout, stderr) {
-  this.killAll({skip: !killall}, function() {    
+  this.killAll(killOptions, function() {    
     var n = 0;
     var tagsIndex = 0;
 
@@ -269,6 +273,7 @@ ReplicaSetManager.prototype.killAll = function(options, callback) {
 
   options = options == null ? {} : options;
   if(options.skip) return callback();
+  var signal = options.signal || -15;
 
   if(Object.keys(this.mongods).length > 0) {
     var pids = [];
@@ -276,11 +281,11 @@ ReplicaSetManager.prototype.killAll = function(options, callback) {
       pids.push(this.mongods[name].pid)
     }
 
-    exec('kill -15 ' + pids.join(" "), function(err, stdout, stderr) {
+    exec('kill ' + signal + ' ' + pids.join(" "), function(err, stdout, stderr) {
       if(typeof callback == 'function') return callback();
     });
   } else {
-    exec('killall -15 mongod', function(err, stdout, stderr) {
+    exec('killall ' + signal + ' mongod', function(err, stdout, stderr) {
       if(typeof callback == 'function') return callback();
     });
   }
@@ -457,7 +462,7 @@ ReplicaSetManager.prototype.ensureUp = function(callback) {
           if(connection != null) connection.close();
 
           // Attempt to restart the whole set
-          return self.startSet(true, function(err, result) {
+          return self.startSet(true, {signal: -9}, function(err, result) {
             if(err) {
               console.log("[ensureUp] - " + self.startPort + " :: failed to restart set")
               // Set that we are done
@@ -916,7 +921,7 @@ ReplicaSetManager.prototype.restart = start;
 
 ReplicaSetManager.prototype.startCmd = function(n) {
   // Create boot command
-  this.mongods[n]["start"] = "mongod --oplogSize 1 --rest --noprealloc --smallfiles --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
+  this.mongods[n]["start"] = "mongod --oplogSize 1 --noprealloc --smallfiles --replSet " + this.name + " --logpath '" + this.mongods[n]['log_path'] + "' " +
       " --dbpath " + this.mongods[n]['db_path'] + " --port " + this.mongods[n]['port'] + " --fork";
   this.mongods[n]["start"] = this.journal ? this.mongods[n]["start"] + " --journal" : this.mongods[n]["start"] + " --nojournal";
 
