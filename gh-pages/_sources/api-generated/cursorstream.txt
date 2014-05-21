@@ -1,0 +1,32 @@
+==============
+CursorStream()
+==============
+
+------------------
+Constructor
+------------------
+
+
+CursorStream
+
+
+  .. js:class:: CursorStream()
+
+   :param cursor cursor: a cursor object that the stream wraps.
+   :returns: stream 
+
+
+Returns a stream interface for the **cursor**.
+
+
+
+Options
+ - **transform** {Function} function of type function(object) { return transformed }, allows for transformation of data before emitting.
+
+
+
+Events
+ - **data** {function(item) {}} the data event triggers when a document is ready.
+ - **error** {function(err) {}} the error event triggers if an error happens.
+ - **close** {function() {}} the end event triggers when there is no more documents available.
+

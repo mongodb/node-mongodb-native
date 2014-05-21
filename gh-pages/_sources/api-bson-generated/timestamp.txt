@@ -1,0 +1,487 @@
+===========
+Timestamp()
+===========
+
+------------------
+Constructor
+------------------
+
+
+Defines a Timestamp class for representing a 64-bit two's-complement
+integer value, which faithfully simulates the behavior of a Java "Timestamp". This
+implementation is derived from TimestampLib in GWT.
+
+
+  .. js:class:: Timestamp()
+
+   :param number low: the low (signed) 32 bits of the Timestamp.
+   :param number high: the high (signed) 32 bits of the Timestamp.
+
+
+Constructs a 64-bit two's-complement integer, given its low and high 32-bit
+values as *signed* integers.  See the from* functions below for more
+convenient ways of constructing Timestamps.
+
+
+
+The internal representation of a Timestamp is the two given signed, 32-bit values.
+We use 32-bit pieces because these are the size of integers on which
+Javascript performs bit-operations.  For operations like addition and
+multiplication, we split each number into 16-bit pieces, which can easily be
+multiplied within Javascript's floating-point representation without overflow
+or change in sign.
+
+
+
+In the algorithms below, we frequently reduce the negative case to the
+positive case by negating the input(s) and then post-processing the result.
+Note that we must ALWAYS check specially whether those values are MIN_VALUE
+(-2^63) because -MIN_VALUE == MIN_VALUE (since 2^63 cannot be represented as
+a positive number, it overflows back into a negative).  Not handling this
+case would often result in infinite recursion.
+
+
+-----
+toInt
+-----
+
+
+Return the int value.
+
+.. js:function:: toInt()
+
+   :returns: number the value, assuming it is a 32-bit integer.
+
+
+--------
+toNumber
+--------
+
+
+Return the Number value.
+
+.. js:function:: toNumber()
+
+   :returns: number the closest floating-point representation to this value.
+
+
+------
+toJSON
+------
+
+
+Return the JSON value.
+
+.. js:function:: toJSON()
+
+   :returns: string the JSON representation.
+
+
+--------
+toString
+--------
+
+
+Return the String value.
+
+.. js:function:: toString([opt_radix])
+
+   :param number [opt_radix]: the radix in which the text should be written.
+   :returns: string the textual representation of this value.
+
+
+-----------
+getHighBits
+-----------
+
+
+Return the high 32-bits value.
+
+.. js:function:: getHighBits()
+
+   :returns: number the high 32-bits as a signed value.
+
+
+----------
+getLowBits
+----------
+
+
+Return the low 32-bits value.
+
+.. js:function:: getLowBits()
+
+   :returns: number the low 32-bits as a signed value.
+
+
+------------------
+getLowBitsUnsigned
+------------------
+
+
+Return the low unsigned 32-bits value.
+
+.. js:function:: getLowBitsUnsigned()
+
+   :returns: number the low 32-bits as an unsigned value.
+
+
+-------------
+getNumBitsAbs
+-------------
+
+
+Returns the number of bits needed to represent the absolute value of this Timestamp.
+
+.. js:function:: getNumBitsAbs()
+
+   :returns: number Returns the number of bits needed to represent the absolute value of this Timestamp.
+
+
+------
+isZero
+------
+
+
+Return whether this value is zero.
+
+.. js:function:: isZero()
+
+   :returns: boolean whether this value is zero.
+
+
+----------
+isNegative
+----------
+
+
+Return whether this value is negative.
+
+.. js:function:: isNegative()
+
+   :returns: boolean whether this value is negative.
+
+
+-----
+isOdd
+-----
+
+
+Return whether this value is odd.
+
+.. js:function:: isOdd()
+
+   :returns: boolean whether this value is odd.
+
+
+------
+equals
+------
+
+
+Return whether this Timestamp equals the other
+
+.. js:function:: equals(other)
+
+   :param timestamp other: Timestamp to compare against.
+   :returns: boolean whether this Timestamp equals the other
+
+
+---------
+notEquals
+---------
+
+
+Return whether this Timestamp does not equal the other.
+
+.. js:function:: notEquals(other)
+
+   :param timestamp other: Timestamp to compare against.
+   :returns: boolean whether this Timestamp does not equal the other.
+
+
+--------
+lessThan
+--------
+
+
+Return whether this Timestamp is less than the other.
+
+.. js:function:: lessThan(other)
+
+   :param timestamp other: Timestamp to compare against.
+   :returns: boolean whether this Timestamp is less than the other.
+
+
+---------------
+lessThanOrEqual
+---------------
+
+
+Return whether this Timestamp is less than or equal to the other.
+
+.. js:function:: lessThanOrEqual(other)
+
+   :param timestamp other: Timestamp to compare against.
+   :returns: boolean whether this Timestamp is less than or equal to the other.
+
+
+-----------
+greaterThan
+-----------
+
+
+Return whether this Timestamp is greater than the other.
+
+.. js:function:: greaterThan(other)
+
+   :param timestamp other: Timestamp to compare against.
+   :returns: boolean whether this Timestamp is greater than the other.
+
+
+------------------
+greaterThanOrEqual
+------------------
+
+
+Return whether this Timestamp is greater than or equal to the other.
+
+.. js:function:: greaterThanOrEqual(other)
+
+   :param timestamp other: Timestamp to compare against.
+   :returns: boolean whether this Timestamp is greater than or equal to the other.
+
+
+-------
+compare
+-------
+
+
+Compares this Timestamp with the given one.
+
+.. js:function:: compare(other)
+
+   :param timestamp other: Timestamp to compare against.
+   :returns: boolean 0 if they are the same, 1 if the this is greater, and -1 if the given one is greater.
+
+
+------
+negate
+------
+
+
+The negation of this value.
+
+.. js:function:: negate()
+
+   :returns: timestamp the negation of this value.
+
+
+---
+add
+---
+
+
+Returns the sum of this and the given Timestamp.
+
+.. js:function:: add(other)
+
+   :param timestamp other: Timestamp to add to this one.
+   :returns: timestamp the sum of this and the given Timestamp.
+
+
+--------
+subtract
+--------
+
+
+Returns the difference of this and the given Timestamp.
+
+.. js:function:: subtract(other)
+
+   :param timestamp other: Timestamp to subtract from this.
+   :returns: timestamp the difference of this and the given Timestamp.
+
+
+--------
+multiply
+--------
+
+
+Returns the product of this and the given Timestamp.
+
+.. js:function:: multiply(other)
+
+   :param timestamp other: Timestamp to multiply with this.
+   :returns: timestamp the product of this and the other.
+
+
+---
+div
+---
+
+
+Returns this Timestamp divided by the given one.
+
+.. js:function:: div(other)
+
+   :param timestamp other: Timestamp by which to divide.
+   :returns: timestamp this Timestamp divided by the given one.
+
+
+------
+modulo
+------
+
+
+Returns this Timestamp modulo the given one.
+
+.. js:function:: modulo(other)
+
+   :param timestamp other: Timestamp by which to mod.
+   :returns: timestamp this Timestamp modulo the given one.
+
+
+---
+not
+---
+
+
+The bitwise-NOT of this value.
+
+.. js:function:: not()
+
+   :returns: timestamp the bitwise-NOT of this value.
+
+
+---
+and
+---
+
+
+Returns the bitwise-AND of this Timestamp and the given one.
+
+.. js:function:: and(other)
+
+   :param timestamp other: the Timestamp with which to AND.
+   :returns: timestamp the bitwise-AND of this and the other.
+
+
+--
+or
+--
+
+
+Returns the bitwise-OR of this Timestamp and the given one.
+
+.. js:function:: or(other)
+
+   :param timestamp other: the Timestamp with which to OR.
+   :returns: timestamp the bitwise-OR of this and the other.
+
+
+---
+xor
+---
+
+
+Returns the bitwise-XOR of this Timestamp and the given one.
+
+.. js:function:: xor(other)
+
+   :param timestamp other: the Timestamp with which to XOR.
+   :returns: timestamp the bitwise-XOR of this and the other.
+
+
+---------
+shiftLeft
+---------
+
+
+Returns this Timestamp with bits shifted to the left by the given amount.
+
+.. js:function:: shiftLeft(numBits)
+
+   :param number numBits: the number of bits by which to shift.
+   :returns: timestamp this shifted to the left by the given amount.
+
+
+----------
+shiftRight
+----------
+
+
+Returns this Timestamp with bits shifted to the right by the given amount.
+
+.. js:function:: shiftRight(numBits)
+
+   :param number numBits: the number of bits by which to shift.
+   :returns: timestamp this shifted to the right by the given amount.
+
+
+------------------
+shiftRightUnsigned
+------------------
+
+
+Returns this Timestamp with bits shifted to the right by the given amount, with the new top bits matching the current sign bit.
+
+.. js:function:: shiftRightUnsigned(numBits)
+
+   :param number numBits: the number of bits by which to shift.
+   :returns: timestamp this shifted to the right by the given amount, with zeros placed into the new leading bits.
+
+
+-----------------
+Timestamp.fromInt
+-----------------
+
+
+Returns a Timestamp representing the given (32-bit) integer value.
+
+.. js:function:: Timestamp.fromInt(value)
+
+   :param number value: the 32-bit integer in question.
+   :returns: timestamp the corresponding Timestamp value.
+
+
+--------------------
+Timestamp.fromNumber
+--------------------
+
+
+Returns a Timestamp representing the given value, provided that it is a finite number. Otherwise, zero is returned.
+
+.. js:function:: Timestamp.fromNumber(value)
+
+   :param number value: the number in question.
+   :returns: timestamp the corresponding Timestamp value.
+
+
+------------------
+Timestamp.fromBits
+------------------
+
+
+Returns a Timestamp representing the 64-bit integer that comes by concatenating the given high and low bits. Each is assumed to use 32 bits.
+
+.. js:function:: Timestamp.fromBits(lowBits, highBits)
+
+   :param number lowBits: the low 32-bits.
+   :param number highBits: the high 32-bits.
+   :returns: timestamp the corresponding Timestamp value.
+
+
+--------------------
+Timestamp.fromString
+--------------------
+
+
+Returns a Timestamp representation of the given string, written using the given radix.
+
+.. js:function:: Timestamp.fromString(str, opt_radix)
+
+   :param string str: the textual representation of the Timestamp.
+   :param number opt_radix: the radix in which the text is written.
+   :returns: timestamp the corresponding Timestamp value.
+

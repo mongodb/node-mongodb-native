@@ -1,0 +1,10 @@
+==================
+Updates
+==================
+
+.. toctree::
+  :maxdepth: 2
+  
+  anintroductionto1_4_and_2_6
+  mongoclient
+  anintroductionto1_1and2_2

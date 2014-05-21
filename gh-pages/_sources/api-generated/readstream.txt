@@ -1,0 +1,29 @@
+============
+ReadStream()
+============
+
+------------------
+Constructor
+------------------
+
+
+ReadStream
+
+
+  .. js:class:: ReadStream()
+
+   :param boolean autoclose: automatically close file when the stream reaches the end.
+   :param gridstore cursor: a cursor object that the stream wraps.
+   :returns: readstream 
+
+
+Returns a stream interface for the **file**.
+
+
+
+Events
+ - **data** {function(item) {}} the data event triggers when a document is ready.
+ - **end** {function() {}} the end event triggers when there is no more documents available.
+ - **close** {function() {}} the close event triggers when the stream is closed.
+ - **error** {function(err) {}} the error event triggers if an error happens.
+

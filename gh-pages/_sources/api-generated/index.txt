@@ -1,0 +1,23 @@
+==================
+Driver API
+==================
+
+.. toctree::
+  :maxdepth: 2
+  
+  admin
+  collection
+  mongoclient
+  db
+  cursor
+  cursorstream
+  gridstore
+  readstream
+  grid
+  server
+  mongos
+  replset
+  readpreference
+  ordered
+  unordered
+  batchwriteresult
