@@ -2,6 +2,41 @@
 Changelog
 =========
 
+
+1.4.5 2014-05-21
+----------------
+- Added fullResult flag to insert/update/remove which will pass raw result document back. Document contents will vary depending on the server version the driver is talking to. No attempt is made to coerce a joint response.
+- Fix to avoid MongoClient.connect hanging during auth when secondaries building indexes pre 2.6.
+- return the destination stream in GridStore.pipe (Issue #1176, https://github.com/iamdoron)
+
+1.4.4 2014-05-13
+----------------
+- Bumped BSON version to use the NaN 1.0 package, fixed strict comparison issue for ObjectID
+- Removed leaking global variable (Issue #1174, https://github.com/dainis)
+- MongoClient respects connectTimeoutMS for initial discovery process (NODE-185)
+- Fix bug with return messages larger than 16MB but smaller than max BSON Message Size (NODE-184)
+
+1.4.3 2014-05-01
+----------------
+- Clone options for commands to avoid polluting original options passed from Mongoose (Issue #1171, https://github.com/vkarpov15)
+- Made geoNear and geoHaystackSearch only clean out allowed options from command generation (Issue #1167)
+- Fixed typo for allowDiskUse (Issue #1168, https://github.com/joaofranca)
+- A 'mapReduce' function changed 'function' to instance '\&lt;Object\&gt;' of 'Code' class (Issue #1165, https://github.com/exabugs)
+- Made findAndModify set sort only when explicitly set (Issue #1163, https://github.com/sars)
+- Rewriting a gridStore file by id should use a new filename if provided (Issue #1169, https://github.com/vsivsi)
+
+1.4.2 2014-04-15
+----------------
+- Fix for inheritance of readPreferences from MongoClient NODE-168/NODE-169
+- Merged in fix for ping strategy to avoid hitting non-pinged servers (Issue #1161, https://github.com/vaseker)
+- Merged in fix for correct debug output for connection messages (Issue #1158, https://github.com/vaseker)
+- Fixed global variable leak (Issue #1160, https://github.com/vaseker)
+
+1.4.1 2014-04-09
+----------------
+- Correctly emit joined event when primary change
+- Add _id to documents correctly when using bulk operations
+
 1.4.0 2014-04-03
 ----------------
 - All node exceptions will no longer be caught if on('error') is defined

@@ -23,7 +23,7 @@ A class representation of a file stored in GridFS.
 Modes
  - **"r"** - read only. This is the default mode.
  - **"w"** - write in truncate mode. Existing data will be overwriten.
- - **w+"** - write in edit mode.
+ - **w+"** - write in edit mode (append is not guaranteed for concurrent operations)
 
 
 

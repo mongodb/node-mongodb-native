@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Collection() &mdash; MongoDB Node.JS Driver 1.4.0 documentation</title>
+    <title>Collection() &mdash; MongoDB Node.JS Driver 1.4.5 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.4.0',
+        VERSION:     '1.4.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.4.0 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.5 documentation" href="../index.html" />
     <link rel="next" title="Admin()" href="admin.html" />
     <link rel="prev" title="Db()" href="db.html" /> 
   </head>
@@ -37,7 +37,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.5 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -101,6 +101,7 @@
 <li><strong>serializeFunctions</strong> {Boolean, default:false}, serialize functions on the document.</li>
 <li><strong>forceServerObjectId</strong> {Boolean, default:false}, let server assign ObjectId instead of the driver</li>
 <li><strong>checkKeys</strong> {Boolean, default:true}, allows for disabling of document key checking (WARNING OPENS YOU UP TO INJECTION ATTACKS)</li>
+<li><strong>fullResult</strong> {Boolean, default:false}, returns the full result document (document returned will differ by server version)</li>
 </ul>
 </dd>
 </dl>
@@ -118,7 +119,7 @@
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">collection</p>
 </td>
 </tr>
 </tbody>
@@ -279,6 +280,7 @@
 <li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal</li>
 <li><strong>j</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
 <li><strong>single</strong> {Boolean, default:false}, removes the first document found.</li>
+<li><strong>fullResult</strong> {Boolean, default:false}, returns the full result document (document returned will differ by server version)</li>
 </ul>
 </dd>
 </dl>
@@ -645,6 +647,7 @@ operators and update instead for more efficient operations.</p>
 <li><strong>multi</strong> {Boolean, default:false}, update all documents matching the selector.</li>
 <li><strong>serializeFunctions</strong> {Boolean, default:false}, serialize functions on the document.</li>
 <li><strong>checkKeys</strong> {Boolean, default:true}, allows for disabling of document key checking (WARNING OPENS YOU UP TO INJECTION ATTACKS)</li>
+<li><strong>fullResult</strong> {Boolean, default:false}, returns the full result document (document returned will differ by server version)</li>
 </ul>
 </dd>
 </dl>
@@ -1657,10 +1660,12 @@ The second findAndModify command upserts a document and returns the new document
       <span class="p">,</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span><span class="mi">3</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">4</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span><span class="mi">4</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
+      <span class="kd">var</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span><span class="nx">unique</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">background</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">dropDups</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">};</span>
       <span class="c1">// Create an index on the a field</span>
       <span class="nx">collection</span><span class="p">.</span><span class="nx">createIndex</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span> <span class="nx">b</span><span class="o">:</span><span class="mi">1</span><span class="p">}</span>
-        <span class="p">,</span> <span class="p">{</span><span class="nx">unique</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">background</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">dropDups</span><span class="o">:</span><span class="kc">true</span><span class="p">,</span> <span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">indexName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="p">,</span> <span class="nx">options</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">indexName</span><span class="p">)</span> <span class="p">{</span>
 
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="o">!</span><span class="nx">options</span><span class="p">.</span><span class="nx">readPreference</span><span class="p">);</span>
         <span class="c1">// Show that duplicate records got dropped</span>
         <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({}).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
           <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
@@ -2674,6 +2679,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <dt>Options</dt>
 <dd><ul class="first last simple">
 <li><strong>num</strong> {Number}, max number of results to return.</li>
+<li><strong>minDistance</strong> {Number}, include results starting at minDistance from a point (2.6 or higher)</li>
 <li><strong>maxDistance</strong> {Number}, include results up to maxDistance from the point.</li>
 <li><strong>distanceMultiplier</strong> {Number}, include a value to multiply the distances with allowing for range conversions.</li>
 <li><strong>query</strong> {Object}, filter the results by a query.</li>
@@ -3795,7 +3801,7 @@ no ordering guarantees for returned results.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.5 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

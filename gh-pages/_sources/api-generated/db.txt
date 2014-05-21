@@ -1573,7 +1573,7 @@ Options
      db.open(function(err, db) {
      
        // Create a collection we want to drop later
-       db.createCollection('more_complex_ensure_index_test', function(err, collection) {
+       db.createCollection('more_complex_ensure_index_db_test', function(err, collection) {
          assert.equal(null, err);
      
          // Insert a bunch of documents for the index
@@ -1582,7 +1582,7 @@ Options
            assert.equal(null, err);
      
            // Create an index on the a field
-           db.ensureIndex('more_complex_ensure_index_test', {a:1, b:1}
+           db.ensureIndex('more_complex_ensure_index_db_test', {a:1, b:1}
              , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
      
              // Show that duplicate records got dropped

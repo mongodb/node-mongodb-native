@@ -117,6 +117,18 @@ Retrieve all write errors
    :returns: array 
 
 
+---------
+getLastOp
+---------
+
+
+Retrieve lastOp if available
+
+.. js:function:: getLastOp()
+
+   :returns: array 
+
+
 --------------------
 getWriteConcernError
 --------------------

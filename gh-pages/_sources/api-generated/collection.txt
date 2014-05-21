@@ -45,13 +45,14 @@ Options
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
  - **forceServerObjectId** {Boolean, default:false}, let server assign ObjectId instead of the driver
  - **checkKeys** {Boolean, default:true}, allows for disabling of document key checking (WARNING OPENS YOU UP TO INJECTION ATTACKS)
+ - **fullResult** {Boolean, default:false}, returns the full result document (document returned will differ by server version)
 
 .. js:function:: insert(docs[, options], [callback])
 
    :param array docs: 
    :param object [options]: optional options for insert command
    :param function [callback]: optional callback for the function, must be provided when using a writeconcern
-   :returns: null 
+   :returns: collection 
 
 
 **Examples**
@@ -227,6 +228,7 @@ Options
  - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
  - **j**, (Boolean, default:false) write waits for journal sync before returning
  - **single** {Boolean, default:false}, removes the first document found.
+ - **fullResult** {Boolean, default:false}, returns the full result document (document returned will differ by server version)
 
 .. js:function:: remove([selector][, options], [callback])
 
@@ -577,6 +579,7 @@ Options
  - **multi** {Boolean, default:false}, update all documents matching the selector.
  - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
  - **checkKeys** {Boolean, default:true}, allows for disabling of document key checking (WARNING OPENS YOU UP TO INJECTION ATTACKS)
+ - **fullResult** {Boolean, default:false}, returns the full result document (document returned will differ by server version)
 
 .. js:function:: update(selector, document[, options], [callback])
 
@@ -1535,10 +1538,12 @@ Options
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
      
+           var options = {unique:true, background:true, dropDups:true, w:1};
            // Create an index on the a field
            collection.createIndex({a:1, b:1}
-             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+             , options, function(err, indexName) {
      
+             assert.ok(!options.readPreference);
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
                assert.equal(null, err);
@@ -2494,6 +2499,7 @@ Execute the geoNear command to search for items in the collection
 
 Options
  - **num** {Number}, max number of results to return.
+ - **minDistance** {Number}, include results starting at minDistance from a point (2.6 or higher)
  - **maxDistance** {Number}, include results up to maxDistance from the point.
  - **distanceMultiplier** {Number}, include a value to multiply the distances with allowing for range conversions.
  - **query** {Object}, filter the results by a query.
