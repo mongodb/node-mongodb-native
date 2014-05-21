@@ -1,0 +1,487 @@
+======
+Long()
+======
+
+------------------
+Constructor
+------------------
+
+
+Defines a Long class for representing a 64-bit two's-complement
+integer value, which faithfully simulates the behavior of a Java "Long". This
+implementation is derived from LongLib in GWT.
+
+
+  .. js:class:: Long()
+
+   :param number low: the low (signed) 32 bits of the Long.
+   :param number high: the high (signed) 32 bits of the Long.
+
+
+Constructs a 64-bit two's-complement integer, given its low and high 32-bit
+values as *signed* integers.  See the from* functions below for more
+convenient ways of constructing Longs.
+
+
+
+The internal representation of a Long is the two given signed, 32-bit values.
+We use 32-bit pieces because these are the size of integers on which
+Javascript performs bit-operations.  For operations like addition and
+multiplication, we split each number into 16-bit pieces, which can easily be
+multiplied within Javascript's floating-point representation without overflow
+or change in sign.
+
+
+
+In the algorithms below, we frequently reduce the negative case to the
+positive case by negating the input(s) and then post-processing the result.
+Note that we must ALWAYS check specially whether those values are MIN_VALUE
+(-2^63) because -MIN_VALUE == MIN_VALUE (since 2^63 cannot be represented as
+a positive number, it overflows back into a negative).  Not handling this
+case would often result in infinite recursion.
+
+
+-----
+toInt
+-----
+
+
+Return the int value.
+
+.. js:function:: toInt()
+
+   :returns: number the value, assuming it is a 32-bit integer.
+
+
+--------
+toNumber
+--------
+
+
+Return the Number value.
+
+.. js:function:: toNumber()
+
+   :returns: number the closest floating-point representation to this value.
+
+
+------
+toJSON
+------
+
+
+Return the JSON value.
+
+.. js:function:: toJSON()
+
+   :returns: string the JSON representation.
+
+
+--------
+toString
+--------
+
+
+Return the String value.
+
+.. js:function:: toString([opt_radix])
+
+   :param number [opt_radix]: the radix in which the text should be written.
+   :returns: string the textual representation of this value.
+
+
+-----------
+getHighBits
+-----------
+
+
+Return the high 32-bits value.
+
+.. js:function:: getHighBits()
+
+   :returns: number the high 32-bits as a signed value.
+
+
+----------
+getLowBits
+----------
+
+
+Return the low 32-bits value.
+
+.. js:function:: getLowBits()
+
+   :returns: number the low 32-bits as a signed value.
+
+
+------------------
+getLowBitsUnsigned
+------------------
+
+
+Return the low unsigned 32-bits value.
+
+.. js:function:: getLowBitsUnsigned()
+
+   :returns: number the low 32-bits as an unsigned value.
+
+
+-------------
+getNumBitsAbs
+-------------
+
+
+Returns the number of bits needed to represent the absolute value of this Long.
+
+.. js:function:: getNumBitsAbs()
+
+   :returns: number Returns the number of bits needed to represent the absolute value of this Long.
+
+
+------
+isZero
+------
+
+
+Return whether this value is zero.
+
+.. js:function:: isZero()
+
+   :returns: boolean whether this value is zero.
+
+
+----------
+isNegative
+----------
+
+
+Return whether this value is negative.
+
+.. js:function:: isNegative()
+
+   :returns: boolean whether this value is negative.
+
+
+-----
+isOdd
+-----
+
+
+Return whether this value is odd.
+
+.. js:function:: isOdd()
+
+   :returns: boolean whether this value is odd.
+
+
+------
+equals
+------
+
+
+Return whether this Long equals the other
+
+.. js:function:: equals(other)
+
+   :param long other: Long to compare against.
+   :returns: boolean whether this Long equals the other
+
+
+---------
+notEquals
+---------
+
+
+Return whether this Long does not equal the other.
+
+.. js:function:: notEquals(other)
+
+   :param long other: Long to compare against.
+   :returns: boolean whether this Long does not equal the other.
+
+
+--------
+lessThan
+--------
+
+
+Return whether this Long is less than the other.
+
+.. js:function:: lessThan(other)
+
+   :param long other: Long to compare against.
+   :returns: boolean whether this Long is less than the other.
+
+
+---------------
+lessThanOrEqual
+---------------
+
+
+Return whether this Long is less than or equal to the other.
+
+.. js:function:: lessThanOrEqual(other)
+
+   :param long other: Long to compare against.
+   :returns: boolean whether this Long is less than or equal to the other.
+
+
+-----------
+greaterThan
+-----------
+
+
+Return whether this Long is greater than the other.
+
+.. js:function:: greaterThan(other)
+
+   :param long other: Long to compare against.
+   :returns: boolean whether this Long is greater than the other.
+
+
+------------------
+greaterThanOrEqual
+------------------
+
+
+Return whether this Long is greater than or equal to the other.
+
+.. js:function:: greaterThanOrEqual(other)
+
+   :param long other: Long to compare against.
+   :returns: boolean whether this Long is greater than or equal to the other.
+
+
+-------
+compare
+-------
+
+
+Compares this Long with the given one.
+
+.. js:function:: compare(other)
+
+   :param long other: Long to compare against.
+   :returns: boolean 0 if they are the same, 1 if the this is greater, and -1 if the given one is greater.
+
+
+------
+negate
+------
+
+
+The negation of this value.
+
+.. js:function:: negate()
+
+   :returns: long the negation of this value.
+
+
+---
+add
+---
+
+
+Returns the sum of this and the given Long.
+
+.. js:function:: add(other)
+
+   :param long other: Long to add to this one.
+   :returns: long the sum of this and the given Long.
+
+
+--------
+subtract
+--------
+
+
+Returns the difference of this and the given Long.
+
+.. js:function:: subtract(other)
+
+   :param long other: Long to subtract from this.
+   :returns: long the difference of this and the given Long.
+
+
+--------
+multiply
+--------
+
+
+Returns the product of this and the given Long.
+
+.. js:function:: multiply(other)
+
+   :param long other: Long to multiply with this.
+   :returns: long the product of this and the other.
+
+
+---
+div
+---
+
+
+Returns this Long divided by the given one.
+
+.. js:function:: div(other)
+
+   :param long other: Long by which to divide.
+   :returns: long this Long divided by the given one.
+
+
+------
+modulo
+------
+
+
+Returns this Long modulo the given one.
+
+.. js:function:: modulo(other)
+
+   :param long other: Long by which to mod.
+   :returns: long this Long modulo the given one.
+
+
+---
+not
+---
+
+
+The bitwise-NOT of this value.
+
+.. js:function:: not()
+
+   :returns: long the bitwise-NOT of this value.
+
+
+---
+and
+---
+
+
+Returns the bitwise-AND of this Long and the given one.
+
+.. js:function:: and(other)
+
+   :param long other: the Long with which to AND.
+   :returns: long the bitwise-AND of this and the other.
+
+
+--
+or
+--
+
+
+Returns the bitwise-OR of this Long and the given one.
+
+.. js:function:: or(other)
+
+   :param long other: the Long with which to OR.
+   :returns: long the bitwise-OR of this and the other.
+
+
+---
+xor
+---
+
+
+Returns the bitwise-XOR of this Long and the given one.
+
+.. js:function:: xor(other)
+
+   :param long other: the Long with which to XOR.
+   :returns: long the bitwise-XOR of this and the other.
+
+
+---------
+shiftLeft
+---------
+
+
+Returns this Long with bits shifted to the left by the given amount.
+
+.. js:function:: shiftLeft(numBits)
+
+   :param number numBits: the number of bits by which to shift.
+   :returns: long this shifted to the left by the given amount.
+
+
+----------
+shiftRight
+----------
+
+
+Returns this Long with bits shifted to the right by the given amount.
+
+.. js:function:: shiftRight(numBits)
+
+   :param number numBits: the number of bits by which to shift.
+   :returns: long this shifted to the right by the given amount.
+
+
+------------------
+shiftRightUnsigned
+------------------
+
+
+Returns this Long with bits shifted to the right by the given amount, with the new top bits matching the current sign bit.
+
+.. js:function:: shiftRightUnsigned(numBits)
+
+   :param number numBits: the number of bits by which to shift.
+   :returns: long this shifted to the right by the given amount, with zeros placed into the new leading bits.
+
+
+------------
+Long.fromInt
+------------
+
+
+Returns a Long representing the given (32-bit) integer value.
+
+.. js:function:: Long.fromInt(value)
+
+   :param number value: the 32-bit integer in question.
+   :returns: long the corresponding Long value.
+
+
+---------------
+Long.fromNumber
+---------------
+
+
+Returns a Long representing the given value, provided that it is a finite number. Otherwise, zero is returned.
+
+.. js:function:: Long.fromNumber(value)
+
+   :param number value: the number in question.
+   :returns: long the corresponding Long value.
+
+
+-------------
+Long.fromBits
+-------------
+
+
+Returns a Long representing the 64-bit integer that comes by concatenating the given high and low bits. Each is assumed to use 32 bits.
+
+.. js:function:: Long.fromBits(lowBits, highBits)
+
+   :param number lowBits: the low 32-bits.
+   :param number highBits: the high 32-bits.
+   :returns: long the corresponding Long value.
+
+
+---------------
+Long.fromString
+---------------
+
+
+Returns a Long representation of the given string, written using the given radix.
+
+.. js:function:: Long.fromString(str, opt_radix)
+
+   :param string str: the textual representation of the Long.
+   :param number opt_radix: the radix in which the text is written.
+   :returns: long the corresponding Long value.
+
