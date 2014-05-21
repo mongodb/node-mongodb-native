@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 /* Note: because this plugin uses process.on('uncaughtException'), only one
  * of these can exist at any given time. This plugin and anything else that
  * uses process.on('uncaughtException') will conflict. */
