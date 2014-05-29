@@ -1,3 +1,5 @@
+TODO
+====
 - Create Mongos Set Manager
 - Add Replicaset Tests
   - Adding a new set members
@@ -5,8 +7,14 @@
   - Killing a secondary and recovering
 - Add Mongos Tests
   - Killing a mongos
-- Integrate Pinging of servers in replicaset
-  - Add nearest read preference
+- Single buffer BSON serialization option 
+- Add support for tags to be used for selection if available
+- Add fallback ability for legacy server support
+  - insert/update/remove
+
+DONE
+====
 - Add Custom cursor constructor 
   - Allow setting of Custom cursor class creator
-- Single buffer BSON serialization option 
+- Integrate Pinging of servers in replicaset
+  - Add nearest read preference
