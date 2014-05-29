@@ -19,7 +19,7 @@ var LegacySupport = function() {
       var result = results[i];
 
       // We have a command error
-      if(result.ok == 0 || result.err || result.errmsg) {
+      if(result != null && result.ok == 0 || result.err || result.errmsg) {
         if(result.ok == 0) final.ok = 0;
         final.code = result.code;
         final.errmsg = result.errmsg || result.err || result.errMsg;
@@ -47,7 +47,7 @@ var LegacySupport = function() {
       }
       
       // Result as expected
-      if(result.lastOp) final.lastOp = result.lastOp;
+      if(result != null && result.lastOp) final.lastOp = result.lastOp;
     }
 
     // Return final aggregated results
@@ -142,24 +142,28 @@ var LegacySupport = function() {
         connection.write(op);
         // Write the lastError message
         connection.write(getLastErrorOp);
-        
-        // Register the callback
-        callbacks.once(getLastErrorOp.requestId, function(err, result) {
-          // Update the number of operations executed
-          totalOps = totalOps - 1;
-          // Save the getLastError document
-          getLastErrors.push(result.documents[0]);
-          // Check if we are done
-          if(totalOps == 0) {
-            callback(null, aggregateInsertResults(getLastErrors, connection));
+  
+        // Give the result from getLastError the right index      
+        var callbackOp = function(_index) {
+          return function(err, result) {
+            // Update the number of operations executed
+            totalOps = totalOps - 1;
+            // Save the getLastError document
+            getLastErrors[_index] = result.documents[0];
+            // Check if we are done
+            if(totalOps == 0) {
+              callback(null, aggregateInsertResults(getLastErrors, connection));
+            }
           }
-        });
+        }
+        // Register the callback
+        callbacks.once(getLastErrorOp.requestId, callbackOp(i));
       } catch(err) {
         // Update the number of operations executed
         totalOps = totalOps - 1;
         // We have a serialization error, rewrite as a write error to have same behavior as modern
         // write commands
-        getLastErrors.push({ ok: 1, errmsg: err, code: 14 });
+        getLastErrors[i] = { ok: 1, errmsg: err, code: 14 };
         // Check if we are done
         if(totalOps == 0) {
           callback(null, aggregateInsertResults(getLastErrors, connection));
