@@ -68,6 +68,14 @@ var Query = function(bson, ns, query, options) {
     flags: 0
   }
   
+  // Allow the manipulation of the batch size of the cursor
+  // after creation has happened
+  Object.defineProperty(this, 'batchSize', {
+      enumerable:true,
+      set: function(value) { numberToReturn = value; }
+    , get: function() { return numberToReturn; }
+  });
+
   // Setup properties
   setProperty(this, tailable, OPTS_TAILABLE_CURSOR, values);
   setProperty(this, slave, OPTS_SLAVE, values);
@@ -142,6 +150,10 @@ var Query = function(bson, ns, query, options) {
     // Return buffer
     return buffer;
   }
+}
+
+Query.getRequestId = function() {
+  return ++_requestId;
 }
 
 var GetMore = function(bson, ns, cursorId, opts) {
@@ -302,7 +314,6 @@ var Response = function(bson, data, opts) {
     //
     for(var i = 0; i < values.numberReturned; i++) {
       var bsonSize = data.readUInt32LE(index);
-
       // If we have raw results specified slice the return document
       if(raw) {
         values.documents.push(data.slice(index, index + bsonSize));

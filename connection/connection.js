@@ -120,6 +120,10 @@ var Connection = function(options) {
     connection.write(buffer, 'binary');
   }
 
+  this.toString = function() {
+    return "" + id;
+  }
+
   //
   // Connection handlers
   var errorHandler = function(err) {    
@@ -137,7 +141,7 @@ var Connection = function(options) {
       self.emit("close"
         , MongoError.create(f("connection %s to %s:%s closed", id, host, port))
         , self);        
-  }
+  }  
 
   var dataHandler = function(data) {
     // Parse until we are done with the data
