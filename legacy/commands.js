@@ -203,6 +203,16 @@ var write32bit = function(index, buffer, value) {
   return index + 4;
 }
 
+//
+// Redefine write32bit to use buffer method if available
+if(new Buffer(0).writeInt32LE) {
+  write32bit = function(index, buffer, value) {
+    buffer.writeInt32LE(value, index);
+    return index + 4;
+  }
+}
+
+
 module.exports = {
     Insert: Insert
   , Update: Update

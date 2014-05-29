@@ -138,7 +138,7 @@ var Query = function(bson, ns, query, options) {
     // Write total document length
     write32bit(0, _buffer, index);
     // Return the buffer slice
-    return _buffer.slice(0, index + 1);
+    return _buffer.slice(0, index);
   }
 
   // To Binary
@@ -237,7 +237,7 @@ var GetMore = function(bson, ns, cursorId, opts) {
 
     // Write collection name
     index = index + _buffer.write(ns, index, 'utf8') + 1;
-    buffer[index - 1] = 0;
+    _buffer[index - 1] = 0;
 
     // Write batch size
     index = write32bit(index, _buffer, numberToReturn);
@@ -452,6 +452,15 @@ var write32bit = function(index, buffer, value) {
   buffer[index + 1] = (value >> 8) & 0xff;
   buffer[index] = (value) & 0xff;
   return index + 4;
+}
+
+//
+// Redefine write32bit to use buffer method if available
+if(new Buffer(0).writeInt32LE) {
+  write32bit = function(index, buffer, value) {
+    buffer.writeInt32LE(value, index);
+    return index + 4;
+  }
 }
 
 module.exports = {
