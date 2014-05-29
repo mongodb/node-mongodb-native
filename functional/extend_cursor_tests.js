@@ -69,7 +69,7 @@ exports['Should correctly extend the cursor with custom implementation'] = {
         });
 
         // Force a single 
-        Logger.setLevel('debug');
+        // Logger.setLevel('debug');
         // Set the batch size
         cursor.batchSize = 2;
         // Execute next
