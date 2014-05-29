@@ -28,6 +28,9 @@ var QUERY_FAILURE = 2;
 var SHARD_CONFIG_STALE = 4;
 var AWAIT_CAPABLE = 8;
 
+// Globally shared buffer
+var _buffer = null;
+
 //
 // Query message
 var Query = function(bson, ns, query, options) {
@@ -85,6 +88,58 @@ var Query = function(bson, ns, query, options) {
   setProperty(this, exhaust, OPTS_EXHAUST, values);
   setProperty(this, partial, OPTS_PARTIAL, values);
   getSingleProperty(this, 'requestId', requestId);
+
+  //
+  // Uses a single allocated buffer for the process, avoiding multiple memory allocations
+  this.toBinUnified = function() {
+    // No global buffer yet
+    if(_buffer == null) _buffer = new Buffer(maxBsonSize + (16 * 1024));
+
+    // Initial index
+    var index = 4;
+    
+    // Write header information
+    index = write32bit(index, _buffer, requestId);
+    index = write32bit(index, _buffer, 0);
+    index = write32bit(index, _buffer, OP_QUERY);
+    index = write32bit(index, _buffer, values.flags);
+
+    // Write collection name
+    index = index + _buffer.write(ns, index, 'utf8') + 1;
+    _buffer[index - 1] = 0;
+
+    // Write rest of fields
+    index = write32bit(index, _buffer, numberToSkip);
+    index = write32bit(index, _buffer, numberToReturn);
+
+    // Serialize query
+    var queryLength = bson.serializeWithBufferAndIndex(query
+      , checkKeys
+      , _buffer, index
+      , serializeFunctions) - index + 1;
+
+    // Write document into buffer
+    index = write32bit(index, _buffer, queryLength);
+    index = index - 4 + queryLength;
+    _buffer[index + 1] = 0x00;
+    
+    // If we have field selectors
+    if(returnFieldSelector && Object.keys(returnFieldSelector).length > 0) {
+      var fieldSelectorLength = bson.serializeWithBufferAndIndex(returnFieldSelector
+        , checkKeys
+        , _buffer
+        , index
+        , serializeFunctions) - index + 1;
+      index = write32bit(index, _buffer, fieldSelectorLength);
+      index = index - 4 + fieldSelectorLength;
+      _buffer[index + 1] = 0x00;
+    }
+
+    // Write total document length
+    write32bit(0, _buffer, index);
+    // Return the buffer slice
+    return _buffer.slice(0, index + 1);
+  }
 
   // To Binary
   this.toBin = function() {
@@ -164,6 +219,36 @@ var GetMore = function(bson, ns, cursorId, opts) {
   // Set up properties
   getSingleProperty(this, 'requestId', requestId);
 
+  //
+  // Uses a single allocated buffer for the process, avoiding multiple memory allocations
+  this.toBinUnified = function() {
+    var length = 4 + Buffer.byteLength(ns) + 1 + 4 + 8 + (4 * 4);
+    // No global buffer yet
+    if(_buffer == null) _buffer = new Buffer(maxBsonSize + (16 * 1024));
+    // Create command buffer
+    var index = 0;
+    
+    // Write header information
+    index = write32bit(index, _buffer, length);
+    index = write32bit(index, _buffer, requestId);
+    index = write32bit(index, _buffer, 0);
+    index = write32bit(index, _buffer, OP_GETMORE);
+    index = write32bit(index, _buffer, 0);
+
+    // Write collection name
+    index = index + _buffer.write(ns, index, 'utf8') + 1;
+    buffer[index - 1] = 0;
+
+    // Write batch size
+    index = write32bit(index, _buffer, numberToReturn);
+    // Write cursor id
+    index = write32bit(index, _buffer, cursorId.getLowBits());
+    index = write32bit(index, _buffer, cursorId.getHighBits());
+
+    // Return buffer
+    return _buffer.slice(0, index);
+  }
+
   // To Binary
   this.toBin = function() {
     var length = 4 + Buffer.byteLength(ns) + 1 + 4 + 8 + (4 * 4);
@@ -198,6 +283,37 @@ var KillCursor = function(bson, cursorIds) {
 
   // Set up properties
   getSingleProperty(this, 'requestId', requestId);
+
+  //
+  // Uses a single allocated buffer for the process, avoiding multiple memory allocations
+  this.toBinUnified = function() {
+    var length = 4 + 4 + (4 * 4) + (cursorIds.length * 8);
+
+    // No global buffer yet
+    if(_buffer == null) _buffer = new Buffer(maxBsonSize + (16 * 1024));
+    // Create command buffer
+    var index = 0;
+
+    // Write header information
+    index = write32bit(index, _buffer, length);
+    index = write32bit(index, _buffer, requestId);
+    index = write32bit(index, _buffer, 0);
+    index = write32bit(index, _buffer, OP_KILL_CURSORS);
+    index = write32bit(index, _buffer, 0);
+
+    // Write batch size
+    index = write32bit(index, _buffer, cursorIds.length);
+
+    // Write all the cursor ids into the array
+    for(var i = 0; i < cursorIds.length; i++) {
+      // Write cursor id
+      index = write32bit(index, _buffer, cursorIds[i].getLowBits());
+      index = write32bit(index, _buffer, cursorIds[i].getHighBits());
+    }
+
+    // Return buffer
+    return _buffer.slice(0, index);
+  }
 
   // Generate binary message
   this.toBin = function() {
