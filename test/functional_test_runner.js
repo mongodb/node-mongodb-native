@@ -116,15 +116,15 @@ var runner = new Runner({
 });
 
 var testFiles =[
-  //   '/test/tests/functional/connection_tests.js'
-  // , '/test/tests/functional/pool_tests.js'
-  // , '/test/tests/functional/server_tests.js'
-  // , '/test/tests/functional/replset_tests.js'
-  // , '/test/tests/functional/replset_failover_tests.js'
-  // , '/test/tests/functional/basic_auth_tests.js'
-  // , '/test/tests/functional/extend_pick_strategy_tests.js'
-  // , '/test/tests/functional/mongos_tests.js'
-  // , '/test/tests/functional/extend_cursor_tests.js'
+    '/test/tests/functional/connection_tests.js'
+  , '/test/tests/functional/pool_tests.js'
+  , '/test/tests/functional/server_tests.js'
+  , '/test/tests/functional/replset_tests.js'
+  , '/test/tests/functional/replset_failover_tests.js'
+  , '/test/tests/functional/basic_auth_tests.js'
+  , '/test/tests/functional/extend_pick_strategy_tests.js'
+  , '/test/tests/functional/mongos_tests.js'
+  , '/test/tests/functional/extend_cursor_tests.js'
   , '/test/tests/functional/legacy_support_tests.js'
 ]
 
@@ -179,8 +179,8 @@ Logger.filter('class', ['ReplSet', 'Server', 'Cursor']);
 var config = {
     host: 'localhost'
   , port: 27017
-  , skipStart: true
-  , skipTermination: true
+  , skipStart: false
+  , skipTermination: false
   , manager: new ServerManager({
       dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
     , logpath: path.join(path.resolve('db'), f("data-%d.log", 27017))
