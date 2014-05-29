@@ -4,7 +4,8 @@ var f = require('util').format
 exports['Simple authentication test for single server'] = {
   metadata: {
     requires: {
-      topology: "single"
+        topology: "single"
+      , mongodb: ">=2.6.0"
     }
   },
 
@@ -83,7 +84,8 @@ exports['Simple authentication test for single server'] = {
 exports['Simple authentication test for replicaset'] = {
   metadata: {
     requires: {
-      topology: "replicaset"
+        topology: "replicaset"
+      , mongodb: ">=2.6.0"
     }
   },
 

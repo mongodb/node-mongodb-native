@@ -4,7 +4,7 @@ var Runner = require('integra').Runner
   , f = require('util').format
   , path = require('path')
   , NodeVersionFilter = require('./filters/node_version_filter')
-  // , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
+  , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
   , FileFilter = require('integra').FileFilter
   , ServerManager = require('./tools/server_manager')
@@ -69,7 +69,10 @@ var StandaloneConfiguration = function(options) {
 
       restart: function(callback) {
         manager.restart(function() {
-          callback();
+          console.log("================= 0")
+          setTimeout(function() {
+            callback();
+          }, 1000);          
         });
       },
 
@@ -116,9 +119,7 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    '/test/tests/functional/connection_tests.js'
-  , '/test/tests/functional/pool_tests.js'
-  , '/test/tests/functional/server_tests.js'
+    '/test/tests/functional/server_tests.js'
   , '/test/tests/functional/replset_tests.js'
   , '/test/tests/functional/replset_failover_tests.js'
   , '/test/tests/functional/basic_auth_tests.js'
@@ -126,6 +127,8 @@ var testFiles =[
   , '/test/tests/functional/mongos_tests.js'
   , '/test/tests/functional/extend_cursor_tests.js'
   , '/test/tests/functional/legacy_support_tests.js'
+  , '/test/tests/functional/pool_tests.js'
+  , '/test/tests/functional/connection_tests.js'
 ]
 
 // Add all the tests to run
@@ -157,8 +160,8 @@ testFiles.forEach(function(t) {
 
 // Add a Node version plugin
 runner.plugin(new NodeVersionFilter());
-// // Add a MongoDB version plugin
-// runner.plugin(new MongoDBVersionFilter());
+// Add a MongoDB version plugin
+runner.plugin(new MongoDBVersionFilter());
 // Add a Topology filter plugin
 runner.plugin(new MongoDBTopologyFilter());
 

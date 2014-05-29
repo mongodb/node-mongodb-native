@@ -96,11 +96,13 @@ exports['Should correctly execute ismaster on single server'] = {
     });
 
     connection.on('close', function(err) {
-      test.fail(0);
+      console.dir(err)
+      test.ok(0);
     });
 
-    connection.on('close', function(err) {
-      test.fail(0);
+    connection.on('error', function(err) {
+      console.dir(err)
+      test.ok(0);
     });
 
     // Start connection

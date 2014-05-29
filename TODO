@@ -7,10 +7,7 @@ TODO
   - Killing a secondary and recovering
 - Add Mongos Tests
   - Killing a mongos
-- Single buffer BSON serialization option 
 - Add support for tags to be used for selection if available
-- Add fallback ability for legacy server support
-  - insert/update/remove
 
 DONE
 ====
@@ -18,3 +15,6 @@ DONE
   - Allow setting of Custom cursor class creator
 - Integrate Pinging of servers in replicaset
   - Add nearest read preference
+- Add fallback ability for legacy server support
+  - insert/update/remove
+- Single buffer BSON serialization option 

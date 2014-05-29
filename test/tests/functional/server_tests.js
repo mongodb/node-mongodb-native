@@ -268,7 +268,8 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
 exports['Should correctly execute aggregation command'] = {
   metadata: {
     requires: {
-      topology: "single"
+        topology: "single"
+      , mongodb: ">=2.6.0"
     }
   },
 
@@ -329,7 +330,8 @@ exports['Should correctly execute aggregation command'] = {
 exports['Should correctly execute query against cursorId'] = {
   metadata: {
     requires: {
-      topology: "single"
+        topology: "single"
+      , mongodb: ">=2.6.0"
     }
   },
 
@@ -418,7 +420,8 @@ exports['Should correctly correctly handle domain'] = {
 exports['Should correctly kill command cursor'] = {
   metadata: {
     requires: {
-      topology: "single"
+        topology: "single"
+      , mongodb: ">=2.6.0"
     }
   },
 
