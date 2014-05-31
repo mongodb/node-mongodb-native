@@ -69,7 +69,6 @@ var StandaloneConfiguration = function(options) {
 
       restart: function(callback) {
         manager.restart(function() {
-          console.log("================= 0")
           setTimeout(function() {
             callback();
           }, 1000);          
@@ -113,22 +112,22 @@ var StandaloneConfiguration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-    logLevel:'error'
+    logLevel:'debug'
   , runners: 1
   , failFast: true
 });
 
 var testFiles =[
-    '/test/tests/functional/server_tests.js'
+    // '/test/tests/functional/server_tests.js'
   , '/test/tests/functional/replset_tests.js'
-  , '/test/tests/functional/replset_failover_tests.js'
-  , '/test/tests/functional/basic_auth_tests.js'
-  , '/test/tests/functional/extend_pick_strategy_tests.js'
-  , '/test/tests/functional/mongos_tests.js'
-  , '/test/tests/functional/extend_cursor_tests.js'
-  , '/test/tests/functional/legacy_support_tests.js'
-  , '/test/tests/functional/pool_tests.js'
-  , '/test/tests/functional/connection_tests.js'
+  // , '/test/tests/functional/replset_failover_tests.js'
+  // , '/test/tests/functional/basic_auth_tests.js'
+  // , '/test/tests/functional/extend_pick_strategy_tests.js'
+  // , '/test/tests/functional/mongos_tests.js'
+  // , '/test/tests/functional/extend_cursor_tests.js'
+  // , '/test/tests/functional/legacy_support_tests.js'
+  // , '/test/tests/functional/pool_tests.js'
+  // , '/test/tests/functional/connection_tests.js'
 ]
 
 // Add all the tests to run
@@ -171,44 +170,44 @@ runner.on('exit', function(errors, results) {
 });
 
 // Set Logger level for driver
-// Logger.setLevel('info');
+Logger.setLevel('info');
 // Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
 // Logger.filter('class', ['Connection']);
 Logger.filter('class', ['ReplSet', 'Server', 'Cursor']);
 //Logger.filter('class', ['Mongos', 'Server']);
 
-//
-// Single server topology
-var config = {
-    host: 'localhost'
-  , port: 27017
-  , skipStart: false
-  , skipTermination: false
-  , manager: new ServerManager({
-      dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
-    , logpath: path.join(path.resolve('db'), f("data-%d.log", 27017))
-  })
-}
-
 // //
-// // Replicaset server topology
+// // Single server topology
 // var config = {
 //     host: 'localhost'
-//   , port: 31000
-//   // , skipStart: true
-//   , skipTermination: true
-//   , topology: function(self, _mongo) {
-//     return new _mongo.ReplSet([{
-//         host: 'localhost'
-//       , port: 31000
-//     }]);
-//   }  
-//   , manager: new ReplSetManager({
-//       dbpath: path.join(path.resolve('db'))
-//     , logpath: path.join(path.resolve('db'))
-//     , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
+//   , port: 27017
+//   , skipStart: false
+//   , skipTermination: false
+//   , manager: new ServerManager({
+//       dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
+//     , logpath: path.join(path.resolve('db'), f("data-%d.log", 27017))
 //   })
 // }
+
+//
+// Replicaset server topology
+var config = {
+    host: 'localhost'
+  , port: 31000
+  , skipStart: true
+  , skipTermination: true
+  , topology: function(self, _mongo) {
+    return new _mongo.ReplSet([{
+        host: 'localhost'
+      , port: 31000
+    }], { setName: 'rs' });
+  }  
+  , manager: new ReplSetManager({
+      dbpath: path.join(path.resolve('db'))
+    , logpath: path.join(path.resolve('db'))
+    , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
+  })
+}
 
 // //
 // // Mongos server topology
