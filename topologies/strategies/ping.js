@@ -73,7 +73,7 @@ var Ping = function(options) {
       var start = new Date();
       
       // Execute ping against server
-      _server.command('system.$cmd', {ping:1}, function(err, r) {
+      _server.command('system.$cmd', {ismaster:1}, function(err, r) {
         count = count - 1;
         var time = new Date().getTime() - start.getTime();
         pings[_server.name] = time;

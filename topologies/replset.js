@@ -112,15 +112,21 @@ var State = function() {
     this.primary = server;
   }
 
-  this.addSecondary = function(server) {
+  var add = function(list, server) {
     // Check if the server is a secondary at the moment
-    for(var i = 0; i < this.secondaries.length; i++) {
-      if(this.secondaries[i].equals(server)) {
-        return;
-      }
+    for(var i = 0; i < list.length; i++) {
+      if(list[i].equals(server)) return;
     }
 
-    this.secondaries.push(server);
+    list.push(server);    
+  }
+
+  this.addSecondary = function(server) {
+    add(this.secondaries, server);
+  }
+
+  this.addArbiter = function(server) {
+    add(this.arbiters, server);
   }
 }
 
@@ -137,15 +143,18 @@ var ReplSet = function(seedlist, options) {
   var state = DISCONNECTED;
   // Index
   var index = 0;
+
   // Special replicaset options
   var secondaryOnlyConnectionAllowed = typeof options.secondaryOnlyConnectionAllowed == 'boolean'
     ? options.secondaryOnlyConnectionAllowed : false;
   var reconnectTries = options.reconnectTries || 30;
-  var reconnectInterval = options.reconnectInterval || 2000;
+  var reconnectInterval = options.reconnectInterval || 5000;
   // Set up the connection timeout for the options
   options.connectionTimeout = options.connectionTimeout || 10000;
-  // Ping interval
-  options.pingInteval = options.pingInterval || 5000;
+
+  // The replicaset name
+  var setName = options.setName;
+  if(setName == null) throw new MongoError("setName option must be provided");
 
   // Swallow or emit errors
   var emitError = typeof options.emitError == 'boolean' ? options.emitError : false;
@@ -237,65 +246,85 @@ var ReplSet = function(seedlist, options) {
       server.connect();
     }
 
-    // Server
-    var server = null;
+    // We need to query all servers
+    var servers = replState.getAll();
+    var serversLeft = servers.length;
 
-    // Check if can find a new server
-    try {
-      server = pickServer(ReadPreference.secondaryPreferred);
-    } catch(err) {}
-    
-    // Did we get a server
-    if(server && server.isConnected()) {
-      server.command('system.$cmd', {ismaster:true}, function(err, r) {
-        if(err) return setTimeout(replicasetInquirer, reconnectInterval);
-        // Let all the read Preferences do things to the servers
-        var rPreferencesCount = Object.keys(readPreferenceStrategies).length;
+    // Call ismaster on all servers
+    for(var i = 0; i < servers.length; i++) {
+      var server = servers[i];
 
-        // Handle the primary
-        var ismaster = r.result;
-        if(logger.isDebug()) logger.debug(f('monitoring process ismaster %s', JSON.stringify(ismaster)));    
-        // Let's check what kind of server this is
-        if(ismaster.ismaster && !replState.isPrimary(ismaster.me)) {
-          if(logger.isInfo()) logger.info(f('promoting %s to primary', server.name));
-          replState.promotePrimary(server);
-        } else if(ismaster.secondary && !replState.isSecondary(ismaster.me)) {
-          if(logger.isInfo()) logger.info(f('promoting %s to secondary', server.name));
-          replState.addSecondary(server);
-        } else if(replState.primary == null && ismaster.primary) {
-          replState.promotePrimary(ismaster.primary);
-        }
+      // Did we get a server
+      if(server && server.isConnected()) {
+        // Execute ismaster
+        server.command('system.$cmd', {ismaster:true}, function(err, r) {
+          // Count down the number of servers left
+          serversLeft = serversLeft - 1;          
+          // If we have an error but still outstanding server request return
+          if(err && serversLeft > 0) return;
+          // We had an error and have no more servers to inspect, schedule a new check
+          if(err && serversLeft == 0) {
+            return setTimeout(replicasetInquirer, reconnectInterval);
+          }
+          // Let all the read Preferences do things to the servers
+          var rPreferencesCount = Object.keys(readPreferenceStrategies).length;
 
-        // No read Preferences strategies
-        if(rPreferencesCount == 0) {
-          // Add any new servers
-          if(err == null && Array.isArray(r.result.hosts)) {
-            processHosts(r.result.hosts);
+          // Handle the primary
+          var ismaster = r.result;
+          if(logger.isDebug()) logger.debug(f('monitoring process ismaster %s', JSON.stringify(ismaster)));    
+          // Let's check what kind of server this is
+          if(ismaster.ismaster && setName == ismaster.setName
+            && !replState.isPrimary(ismaster.me)) {
+              if(logger.isInfo()) logger.info(f('promoting %s to primary', server.name));
+              replState.promotePrimary(server);
+          } else if(ismaster.secondary && setName == ismaster.setName
+            && !replState.isSecondary(ismaster.me)) {
+              if(logger.isInfo()) logger.info(f('promoting %s to secondary', server.name));
+              replState.addSecondary(server);
+          } else if(ismaster.arbiterOnly && setName == ismaster.setName) {
+            if(logger.isInfo()) logger.info(f('promoting %s to ariter', server.name));
+            replState.addArbiter(server);
+          } else if(replState.primary == null 
+            && setName == ismaster.setName && ismaster.primary) {
+              replState.promotePrimary(ismaster.primary);
           }
 
-          // Let's keep monitoring
-          return setTimeout(replicasetInquirer, reconnectInterval);
-        }
-
-        // Go over all the read preferences
-        for(var name in readPreferenceStrategies) {
-          readPreferenceStrategies[name].ha(replState, function() {
-            rPreferencesCount = rPreferencesCount - 1;
-
-            if(rPreferencesCount == 0) {
-              // Add any new servers
-              if(err == null && Array.isArray(r.result.hosts)) {
-                processHosts(r.result.hosts);
-              }
-
-              // Let's keep monitoring
-              return setTimeout(replicasetInquirer, reconnectInterval);
+          // No read Preferences strategies
+          if(rPreferencesCount == 0) {
+            // Add any new servers
+            if(err == null && Array.isArray(ismaster.hosts)) {
+              processHosts(ismaster.hosts);
             }
-          });
-        }
-      });
-    } else {
-      return setTimeout(replicasetInquirer, reconnectInterval);
+
+            // Don't schedule a new inquiry
+            if(serversLeft > 0) return;
+            // Let's keep monitoring
+            return setTimeout(replicasetInquirer, reconnectInterval);
+          }
+
+          // No servers left to query
+          if(serversLeft == 0) {
+            // Go over all the read preferences
+            for(var name in readPreferenceStrategies) {
+              readPreferenceStrategies[name].ha(replState, function() {
+                rPreferencesCount = rPreferencesCount - 1;
+
+                if(rPreferencesCount == 0) {
+                  // Add any new servers in primary ismaster
+                  if(err == null 
+                    && ismaster.ismaster 
+                    && Array.isArray(ismaster.hosts)) {
+                      processHosts(ismaster.hosts);
+                  }
+
+                  // Let's keep monitoring
+                  return setTimeout(replicasetInquirer, reconnectInterval);
+                }
+              });
+            }            
+          }
+        });
+      }
     }
   }
 
@@ -412,10 +441,11 @@ var ReplSet = function(seedlist, options) {
         server.removeAllListeners(e);
       })
 
+      // Log information
       if(logger.isInfo()) logger.info(f('connectHandler %s', JSON.stringify(replState)));    
 
       // It's a master set it
-      if(ismaster.ismaster) {
+      if(ismaster.ismaster && setName == ismaster.setName) {
         replState.primary = server;
         
         if(logger.isInfo()) logger.info(f('promoting %s to primary', server.name));
@@ -427,20 +457,30 @@ var ReplSet = function(seedlist, options) {
           state = CONNECTED;
           self.emit('connect', self);
         }
-      } else if(!ismaster.ismaster && ismaster.secondary) {
-        addedToList = addToList(ismaster, replState.secondaries, server);
+      } else if(!ismaster.ismaster && setName == ismaster.setName
+        && ismaster.arbiterOnly) {
+          addedToList = addToList(ismaster, replState.arbiters, server);
 
-        // Emit primary
-        if(addedToList) {
-          if(logger.isInfo()) logger.info(f('promoting %s to secondary', server.name));
-          self.emit('joined', 'secondary', server);
-        }
-        
-        // We can connect with only a secondary
-        if(secondaryOnlyConnectionAllowed && state == DISCONNECTED) {
-          state = CONNECTED;
-          self.emit('connect', self);            
-        }
+          // Emit primary
+          if(addedToList) {
+            if(logger.isInfo()) logger.info(f('promoting %s to arbiter', server.name));
+            self.emit('joined', 'arbiter', server);
+          }
+      } else if(!ismaster.ismaster && setName == ismaster.setName
+        && ismaster.secondary) {
+          addedToList = addToList(ismaster, replState.secondaries, server);
+
+          // Emit primary
+          if(addedToList) {
+            if(logger.isInfo()) logger.info(f('promoting %s to secondary', server.name));
+            self.emit('joined', 'secondary', server);
+          }
+          
+          // We can connect with only a secondary
+          if(secondaryOnlyConnectionAllowed && state == DISCONNECTED) {
+            state = CONNECTED;
+            self.emit('connect', self);            
+          }
       }
 
       // Add the server handling code
@@ -541,7 +581,9 @@ var ReplSet = function(seedlist, options) {
     if(server == null) return;
 
     // Execute the command
-    server.command(ns, cmd, options, callback);
+    server.command(ns, cmd, options, function(err, r) {
+      callback(err, r);
+    });
   }
 
   //
@@ -559,7 +601,9 @@ var ReplSet = function(seedlist, options) {
     // No server returned we had an error
     if(server == null) return;
     // Execute the command
-    server[op](ns, ops, options, callback);    
+    server[op](ns, ops, options, function(err, r) {
+      callback(err, r);
+    });
   }
 
   // Execute a write
