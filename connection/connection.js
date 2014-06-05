@@ -134,6 +134,10 @@ var Connection = function(options) {
     return {id: id, host: host, port: port};
   }
 
+  this.isConnected = function() {
+    return !connection.destroyed && connection.writable && connection.readable;
+  }
+
   //
   // Connection handlers
   var errorHandler = function(err) {    
