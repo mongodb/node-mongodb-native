@@ -73,7 +73,6 @@ var ReplSetManager = function(replsetOptions) {
       });
 
       if(ready) {
-        console.log("replicaset is up");
         server.destroy();
         return callback(null, null);
       }
@@ -141,7 +140,6 @@ var ReplSetManager = function(replsetOptions) {
         , {replSetInitiate: configSet}
         , {readPreference: new ReadPreference('secondary')}, function(err, result) {
           if(err) return callback(err, null);
-          console.log("Waiting for replicaset ");
           ensureUp(server, function(err, r) {
             server.destroy();
             callback(err, r);
@@ -248,20 +246,13 @@ var ReplSetManager = function(replsetOptions) {
   //
   // Get the current ismaster
   var getIsMaster = function(callback) {
-    var manager = null;
-    
-    // Locate a connected server
-    for(var i = 0; i < serverManagers.length; i++) {
-      if(serverManagers[i].isConnected()) manager = serverManagers[i];
-    }
-
-    if(manager == null) return callback(new Error("no servers"));
+    if(serverManagers.length == 0) return callback(new Error("no servers"));
     serverManagers[0].ismaster(callback);
   } 
 
   //
   // Get a current serve
-  var getServer = function(address, callback) {
+  var getServerManager = function(address, callback) {
     if(serverManagers.length == 0) return callback(new Error("no servers"));
 
     var manager = null;
@@ -271,16 +262,14 @@ var ReplSetManager = function(replsetOptions) {
       }
     }
 
+    if(manager == null)  return callback(new Error("no servers"));    
     // We have an active server connection return it
-    if(manager != null && manager.isConnected()) 
-      return callback(null, manager.server()) ;
-    if(manager == null) 
-      return callback(new Error("no servers"));    
+    return callback(null, manager) ;
   }
 
   //
   // Get server by type
-  var getServerByType = function(type, callback) {
+  var getServerManagerByType = function(type, callback) {
     if(serverManagers.length == 0) return callback(new Error("no servers"));    
     // Filter out all connected servers
     var servers = serverManagers.filter(function(s) {
@@ -322,7 +311,7 @@ var ReplSetManager = function(replsetOptions) {
 
     options.signal = options.signal || -15;
     // Get server by type
-    getServerByType(type, function(err, manager) {
+    getServerManagerByType(type, function(err, manager) {
       if(err) return callback(err);
       // Shut down the server
       manager.stop(options, callback);
@@ -355,6 +344,7 @@ var ReplSetManager = function(replsetOptions) {
       options = {};
     }
 
+    // Unpack all the options
     options.avoidElectionFor = options.avoidElectionFor || 90;
     options.force = typeof options.force == 'boolean' ? options.force : false;
 
@@ -363,17 +353,22 @@ var ReplSetManager = function(replsetOptions) {
       if(err) return callback(err);
       
       // Get a live connection to the primary
-      getServer(ismaster.primary, function(err, server) {
+      getServerManager(ismaster.primary, function(err, manager) {
         if(err) return callback(err);
-
-        // Execute step down
-        server.command('admin.$cmd', {
-            replSetStepDown: options.avoidElectionFor
-          , force: options.force}, function(err, result) {
-            if(err) return callback(err);
-            callback(result);
+        
+        // Get a new connection
+        manager.connect(function(err, server) {
+          if(err) return callback(err);
+          
+          // Execute step down
+          server.command('admin.$cmd', {
+              replSetStepDown: options.avoidElectionFor
+            , force: options.force}, function(err, result) {
+              // Destroy the server
+              server.destroy();              
+          });
         });
-      })
+      });
     });
   }   
 }

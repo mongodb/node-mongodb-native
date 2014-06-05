@@ -42,6 +42,7 @@ var ServerManager = function(serverOptions) {
 
   // Current process id
   var pid = 0;
+  var self = this;
 
   // Clone the options
   serverOptions = cloneOptions(serverOptions);
@@ -190,11 +191,15 @@ var ServerManager = function(serverOptions) {
   }
 
   this.ismaster = function(callback) {
-    if(server == null || !server.isConnected()) return callback(new Error("no server available"));
-    server.command('system.$cmd', {ismaster:true}, function(err, r) {
+    self.connect(function(err, _server) {
       if(err) return callback(err);
-      ismaster = r.result;
-      callback(null, ismaster);
+
+      _server.command('system.$cmd', {ismaster:true}, function(err, r) {
+        _server.destroy();
+        if(err) return callback(err);
+        ismaster = r.result;
+        callback(null, ismaster);
+      });
     });
   }
 
@@ -204,6 +209,31 @@ var ServerManager = function(serverOptions) {
 
   this.isConnected = function() {
     return server != null && server.isConnected();
+  }
+
+  this.connect = function(callback) {
+    // Else we need to start checking if the server is up
+    var s = new Server({host: host
+      , port: port
+      , connectionTimeout: 2000
+    });
+    
+    // On connect let's go
+    s.on('connect', function(_server) {
+      callback(null, _server);
+    });
+    
+    // Error
+    var e = function(err) {
+      callback(err, null);
+    }
+
+    // Error or close handling
+    // s.on('error', e);
+    s.on('close', e);
+
+    // Attempt connect
+    s.connect();    
   }
 
   this.server = function() {

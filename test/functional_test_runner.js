@@ -26,6 +26,7 @@ var StandaloneConfiguration = function(options) {
   var manager = options.manager;
   var skipStart = typeof options.skipStart == 'boolean' ? options.skipStart : false;
   var skipTermination = typeof options.skipTermination == 'boolean' ? options.skipTermination : false;
+  var setName = options.setName || 'rs';
 
   // Create a topology function
   var topology = options.topology || function(self, _mongo) {
@@ -103,6 +104,7 @@ var StandaloneConfiguration = function(options) {
       require: mongo,
       port: port,
       host: host,
+      setName: setName,
       db: db,
       manager: manager,
       writeConcern: function() { return {w: 1} }
@@ -119,8 +121,8 @@ var runner = new Runner({
 
 var testFiles =[
     // '/test/tests/functional/server_tests.js'
-  , '/test/tests/functional/replset_tests.js'
-  // , '/test/tests/functional/replset_failover_tests.js'
+  // , '/test/tests/functional/replset_tests.js'
+  , '/test/tests/functional/replset_failover_tests.js'
   // , '/test/tests/functional/basic_auth_tests.js'
   // , '/test/tests/functional/extend_pick_strategy_tests.js'
   // , '/test/tests/functional/mongos_tests.js'
@@ -173,8 +175,10 @@ runner.on('exit', function(errors, results) {
 Logger.setLevel('info');
 // Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
 // Logger.filter('class', ['Connection']);
-Logger.filter('class', ['ReplSet', 'Server', 'Cursor']);
+// Logger.filter('class', ['ReplSet', 'Server', 'Cursor']);
 //Logger.filter('class', ['Mongos', 'Server']);
+//Logger.filter('class', ['Mongos', 'Server']);
+Logger.filter('class', ['ReplSet', 'Server']);
 
 // //
 // // Single server topology
@@ -194,7 +198,8 @@ Logger.filter('class', ['ReplSet', 'Server', 'Cursor']);
 var config = {
     host: 'localhost'
   , port: 31000
-  , skipStart: true
+  , setName: 'rs'
+  // , skipStart: true
   , skipTermination: true
   , topology: function(self, _mongo) {
     return new _mongo.ReplSet([{
