@@ -23,6 +23,9 @@ var Connection = function(options) {
   // Get bson parser
   var bson = options.bson;
 
+  // Debug information
+  if(logger.isDebug()) logger.debug(f('creating connection %s with options [%s]', id, JSON.stringify(options)));
+
   // Default options
   var port = options.port || 27017;
   var host = options.host || 'localhost';
@@ -141,16 +144,25 @@ var Connection = function(options) {
   //
   // Connection handlers
   var errorHandler = function(err) {    
+    // Debug information
+    if(logger.isDebug()) logger.debug(f('connection %s for [%s:%s] errored out with [%s]', id,host, port, JSON.stringify(err)));
+    // Emit the error
     self.emit("error", MongoError.create(err), self);
   }
 
   var timeoutHandler = function() {
+    // Debug information
+    if(logger.isDebug()) logger.debug(f('connection %s for [%s:%s] timeout out', id,host, port));
+    // Emit timeout error
     self.emit("timeout"
       , MongoError.create(f("connection %s to %s:%s timed out", id, host, port))
       , self);
   }
 
   var closeHandler = function(hadError) {
+    // Debug information
+    if(logger.isDebug()) logger.debug(f('connection %s with for [%s:%s] closed', id,host, port));
+    // Emit close event
     if(!hadError)
       self.emit("close"
         , MongoError.create(f("connection %s to %s:%s closed", id, host, port))

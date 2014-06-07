@@ -42,6 +42,7 @@ var State = function() {
   }
 
   this.isPrimary = function(address) {
+    if(this.primary == null) return false;
     return this.primary && this.primary.equals(address);
   }
 
@@ -54,6 +55,31 @@ var State = function() {
     }
 
     return false;
+  }
+
+  this.contains = function(address) {
+    if(this.primary && this.primary.equals(address)) return true;
+    for(var i = 0; i < this.secondaries.length; i++) {
+      if(this.secondaries[i].equals(address)) return true;
+    }
+
+    return false;
+  }
+
+  this.clean = function() {
+    if(this.primary != null && !this.primary.isConnected()) {
+      this.primary = null;
+    }
+
+    // Filter out disconnected servers
+    this.secondaries = this.secondaries.filter(function(s) {
+      return s.isConnected();
+    });
+
+    // Filter out disconnected servers
+    this.arbiters = this.arbiters.filter(function(s) {
+      return s.isConnected();
+    });
   }
 
   this.destroy = function() {
@@ -78,14 +104,14 @@ var State = function() {
     return 'secondary';
   }
 
-  this.get = function(address) {
+  this.get = function(server) {
     var found = false;
     // All servers to search
     var servers = this.primary ? [this.primary] : [];
     servers = servers.concat(this.secondaries);
     // Locate the server
     for(var i = 0; i < servers.length; i++) {
-      if(servers[i].equals(address)) {
+      if(servers[i].equals(server)) {
         return servers[i];
       }
     }
@@ -106,9 +132,14 @@ var State = function() {
     }
   }
 
-  this.promotePrimary = function(address) {
-    var server = this.get(address);
-    if(server == null) return;
+  this.promotePrimary = function(server) {
+    var server = this.get(server);
+    // Server does not exist in the state, add it as new primary
+    if(server == null) {
+      this.primary = server;
+      return;
+    }
+
     // We found a server, make it primary and remove it from the secondaries
     // Remove the server first
     this.remove(server);
@@ -234,9 +265,15 @@ var ReplSet = function(seedlist, options) {
   //
   // Inquires about state changes
   //
-  var replicasetInquirer = function() {    
+  var replicasetInquirer = function(norepeat) {    
     if(state == DESTROYED) return
     if(logger.isInfo()) logger.info(f('[%s] monitoring process running %s', id, JSON.stringify(replState)));    
+
+    // Clean out any failed connection attempts
+    connectingServers = {};
+
+    // Controls if we are doing a single inquiry or repeating
+    norepeat = typeof norepeat == 'boolean' ? norepeat : false;
 
     // Let's process all the disconnected servers
     while(disconnectedServers.length > 0) {
@@ -252,14 +289,22 @@ var ReplSet = function(seedlist, options) {
       server.connect();
     }
 
+    // Cleanup state (removed disconnected servers)
+    replState.clean();
+
     // We need to query all servers
     var servers = replState.getAll();
     var serversLeft = servers.length;
 
-    // Call ismaster on all servers
-    for(var i = 0; i < servers.length; i++) {
-      var server = servers[i];
+    // If no servers and we are not destroyed keep pinging
+    if(servers.length == 0 && state == CONNECTED) {
+      if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
+      return;
+    }
 
+    //
+    // Inspect a specific servers ismaster
+    var inspectServer = function(server) {
       // Did we get a server
       if(server && server.isConnected()) {
         // Execute ismaster
@@ -270,7 +315,8 @@ var ReplSet = function(seedlist, options) {
           if(err && serversLeft > 0) return;
           // We had an error and have no more servers to inspect, schedule a new check
           if(err && serversLeft == 0) {
-            return setTimeout(replicasetInquirer, reconnectInterval);
+            if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
+            return;
           }
           // Let all the read Preferences do things to the servers
           var rPreferencesCount = Object.keys(readPreferenceStrategies).length;
@@ -284,7 +330,7 @@ var ReplSet = function(seedlist, options) {
             && !replState.isPrimary(ismaster.me)) {
               if(logger.isInfo()) logger.info(f('[%s] promoting %s to primary', id, ismaster.me));
               replState.promotePrimary(server);
-              self.emit('joined', 'primary', replState.primary);
+              self.emit('joined', 'primary', server);
           } else if(ismaster.secondary && setName == ismaster.setName
             && !replState.isSecondary(ismaster.me)) {
               if(logger.isInfo()) logger.info(f('[%s] promoting %s to secondary', id, ismaster.me));
@@ -294,11 +340,6 @@ var ReplSet = function(seedlist, options) {
             if(logger.isInfo()) logger.info(f('[%s] promoting %s to ariter', id, ismaster.me));
             replState.addArbiter(server);
             self.emit('joined', 'arbiter', server);
-          } else if(replState.primary == null 
-            && setName == ismaster.setName && ismaster.primary) {
-              if(logger.isInfo()) logger.info(f('[%s] promoting %s to primary', id, ismaster.me));
-              replState.promotePrimary(ismaster.primary);
-              self.emit('joined', 'primary', replState.primary);
           }
 
           // No read Preferences strategies
@@ -311,7 +352,8 @@ var ReplSet = function(seedlist, options) {
             // Don't schedule a new inquiry
             if(serversLeft > 0) return;
             // Let's keep monitoring
-            return setTimeout(replicasetInquirer, reconnectInterval);
+            if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
+            return;
           }
 
           // No servers left to query
@@ -330,13 +372,28 @@ var ReplSet = function(seedlist, options) {
                   }
 
                   // Let's keep monitoring
-                  return setTimeout(replicasetInquirer, reconnectInterval);
+                  if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
+                  return;
                 }
               });
             }            
           }
         });
       }
+    }
+
+    // // Schedule ismasters 10 ms apart
+    // var timeoutMs = 10;
+
+    // Call ismaster on all servers
+    for(var i = 0; i < servers.length; i++) {
+      // setTimeout(function() {
+        inspectServer(servers[i]);
+      // }, timeoutMs);
+
+      // timeoutMs = timeoutMs + 10;
+      // var _server = servers[i];
+
     }
   }
 
@@ -387,6 +444,9 @@ var ReplSet = function(seedlist, options) {
 
   // Add to server list if not there
   var addToList = function(ismaster, list, server) {
+    // Clean up
+    delete connectingServers[server.name];
+
     // Iterate over all the list items
     for(var i = 0; i < list.length; i++) {
       if(list[i].equals(server)) {
@@ -395,8 +455,6 @@ var ReplSet = function(seedlist, options) {
       }
     }
 
-    // Clean up
-    delete connectingServers[ismaster.me];
     // Add to list
     list.push(server);
     return true;
@@ -406,26 +464,10 @@ var ReplSet = function(seedlist, options) {
   // Detect if we need to add new servers
   var processHosts = function(hosts) {
     if(Array.isArray(hosts)) {
-      var numberOfFounds = 0;
       // Check any hosts exposed by ismaster
       for(var i = 0; i < hosts.length; i++) {
-        // Did we find it
-        var found = false;
-
-        // Do we already have this
-        if(replState.primary && replState.primary.equals(hosts[i])) {
-          found = true; numberOfFounds++;
-        }
-
-        // Check if we have a secondary
-        for(var j = 0; j < replState.secondaries.length; j++) {
-          if(replState.secondaries[j].equals(hosts[i])) {
-            found = true; numberOfFounds++;
-          }
-        }
-
         // If not found we need to create a new connection
-        if(!found) {
+        if(!replState.contains(hosts[i])) {
           if(connectingServers[hosts[i]] == null) {
             if(logger.isInfo()) logger.info(f('[%s] scheduled server %s for connection', id, hosts[i]));
             // Make sure we know what is trying to connect            
@@ -440,7 +482,7 @@ var ReplSet = function(seedlist, options) {
 
   // Connect handler
   var connectHandler = function(server) {
-    if(logger.isInfo()) logger.info(f('[%s] connected to %s', id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
+    if(logger.isInfo()) logger.info(f('[%s] connected to %s', id, server.name));
 
     // Process the new server
     var processNewServer = function() {
@@ -610,9 +652,10 @@ var ReplSet = function(seedlist, options) {
     // Ensure we have no options
     options = options || {};
     // Get a primary    
-    var server = pickServer(ReadPreference.primary);
+    var server = pickServer(ReadPreference.primary);    
     // No server returned we had an error
     if(server == null) return;
+
     // Execute the command
     server[op](ns, ops, options, function(err, r) {
       callback(err, r);

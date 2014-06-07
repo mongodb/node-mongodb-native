@@ -1,7 +1,9 @@
 var inherits = require('util').inherits
   , EventEmitter = require('events').EventEmitter
   , Connection = require('./connection')
-  , Query = require('./commands').Query;
+  , Query = require('./commands').Query
+  , Logger = require('./logger')
+  , f = require('util').format;
 
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
@@ -26,6 +28,8 @@ var Pool = function(options) {
   // Round robin index
   var index = 0;
   var dead = false;
+  // Logger instance
+  var logger = Logger('Pool', options);
 
   //
   // Handlers
@@ -34,6 +38,7 @@ var Pool = function(options) {
   }
 
   var errorHandler = function(err, connection) {
+    if(logger.isDebug()) logger.debug(f('pool [%s] errored out [%s] with connection [%s]', dead, JSON.stringify(err), JSON.stringify(connection)));
     if(!dead) {
       self.emit('error', err, self);
       dead = true;
@@ -42,6 +47,7 @@ var Pool = function(options) {
   }
 
   var timeoutHandler = function(err, connection) {
+    if(logger.isDebug()) logger.debug(f('pool [%s] timedout out [%s] with connection [%s]', dead, JSON.stringify(err), JSON.stringify(connection)));
     if(!dead) {
       dead = true;
       self.destroy();
@@ -50,6 +56,7 @@ var Pool = function(options) {
   }
 
   var closeHandler = function(err, connection) {
+    if(logger.isDebug()) logger.debug(f('pool [%s] closed [%s] with connection [%s]', dead, JSON.stringify(err), JSON.stringify(connection)));
     if(!dead) {
       self.emit('close', err, self);
       dead = true;
@@ -58,6 +65,7 @@ var Pool = function(options) {
   }
 
   var parseErrorHandler = function(err, connection) {
+    if(logger.isDebug()) logger.debug(f('pool [%s] errored out [%s] with connection [%s]', dead, JSON.stringify(err), JSON.stringify(connection)));
     if(!dead) {
       self.emit('parseError', err, self);
       dead = true;

@@ -199,53 +199,53 @@ var Server = function(options) {
   var errorHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
-    // Destroy all connections
-    self.destroy();
     // Flush out all the callbacks
     callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
     // Emit error event
     if(emitError) self.emit('error', err, self);
     // If we specified the driver to reconnect perform it
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
+    // Destroy all connections
+    self.destroy();    
   }
 
   var fatalErrorHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));    
-    // Destroy all connections
-    self.destroy();
     // Flush out all the callbacks
     callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
     // Emit error event
     self.emit('error', err, self);
     // If we specified the driver to reconnect perform it
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
+    // Destroy all connections
+    self.destroy();
   }  
 
   var timeoutHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('timeout', [self]);
     if(logger.isInfo()) logger.info(f('server %s timed out', self.name));
-    // Destroy all connections
-    self.destroy();
     // Flush out all the callbacks
     callbacks.flush(new MongoError(f("server %s timed out", self.name)));
     // Emit error event
     self.emit('timeout', err, self);
     // If we specified the driver to reconnect perform it
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
+    // Destroy all connections
+    self.destroy();
   }
 
   var closeHandler = function(err, connection) {
     if(readPreferenceStrategies != null) notifyStrategies('close', [self]);
     if(logger.isInfo()) logger.info(f('server %s closed', self.name));
-    // Destroy all connections
-    self.destroy();
     // Flush out all the callbacks
     callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
     // Emit error event
     self.emit('close', err, self);
     // If we specified the driver to reconnect perform it
     if(reconnect) setTimeout(function() { reconnectServer() }, reconnectInterval);
+    // Destroy all connections
+    self.destroy();
   }
 
   var connectHandler = function(connection) {
@@ -430,6 +430,11 @@ var Server = function(options) {
     // Notify query start to any read Preference strategies
     if(readPreferenceStrategies != null)
       notifyStrategies('startOperation', [self, query, new Date()]);
+
+    // Double check if we have a valid connection
+    if(!connection.isConnected()) {
+      return callback(new MongoError(f("no connection available to server %s", self.name)));
+    }
 
     // Register the callback
     callbacks.once(query.requestId, function(err, result) {
