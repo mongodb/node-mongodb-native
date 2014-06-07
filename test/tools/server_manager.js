@@ -88,13 +88,15 @@ var ServerManager = function(serverOptions) {
       server = new Server({host: host
         , port: port
         , connectionTimeout: 2000
+        , size: 1
+        , reconnect: false
       });
       
       // On connect let's go
       server.on('connect', function(_server) {
         ismaster = server.lastIsMaster();
-        // Destroy the connection
-        _server.destroy();
+        // // Destroy the connection
+        // _server.destroy();
 
         try {
           // Read the pidfile        
@@ -114,6 +116,7 @@ var ServerManager = function(serverOptions) {
       // Error or close handling
       server.on('error', errHandler);
       server.on('close', errHandler);
+      server.on('timeout', errHandler);
 
       // Attempt connect
       server.connect();
@@ -212,14 +215,21 @@ var ServerManager = function(serverOptions) {
   }
 
   this.connect = function(callback) {
+    if(server.isConnected()) return callback(null, server);
+
     // Else we need to start checking if the server is up
     var s = new Server({host: host
       , port: port
       , connectionTimeout: 2000
+      , socketTimeout: 2000
+      , size: 1
+      , reconnect: false
+      , emitError: true
     });
     
     // On connect let's go
     s.on('connect', function(_server) {
+      server = _server;
       callback(null, _server);
     });
     
@@ -229,8 +239,9 @@ var ServerManager = function(serverOptions) {
     }
 
     // Error or close handling
-    // s.on('error', e);
+    s.on('error', e);
     s.on('close', e);
+    s.on('timeout', e);
 
     // Attempt connect
     s.connect();    

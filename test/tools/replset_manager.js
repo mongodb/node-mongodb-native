@@ -8,6 +8,8 @@ var f = require('util').format
   , Server = require('../../lib').Server
   , ReplSet = require('../../lib').ReplSet;
 
+var Logger = require('../../lib/connection/logger');
+
 //
 // Clone the options
 var cloneOptions = function(options) {
@@ -127,6 +129,9 @@ var ReplSetManager = function(replsetOptions) {
         host: serverManagers[0].host
       , port: serverManagers[0].port
       , connectionTimeout: 2000
+      , size: 1
+      , reconnect: false
+      , emitError: true
     });
 
     var onError = function(err) {
@@ -270,34 +275,38 @@ var ReplSetManager = function(replsetOptions) {
   //
   // Get server by type
   var getServerManagerByType = function(type, callback) {
-    if(serverManagers.length == 0) return callback(new Error("no servers"));    
-    // Filter out all connected servers
-    var servers = serverManagers.filter(function(s) {
-      return s.isConnected();
-    });
+    if(serverManagers.length == 0) return callback(new Error("no servers"));
 
-    // var servers = serverManagers;
-    if(servers.length == 0) return callback(new Error("no servers"));
-    // Refresh all ismasters
-    var count = servers.length;
-    for(var i = 0; i < servers.length; i++) {
-      servers[i].ismaster(function(err, ismaster) {
-        count = count - 1;
+    // Left to validate
+    var left = serverManagers.length;
+    var manager = null;
 
-        if(count == 0) {
-          var manager = null;
-          for(var i = 0; i < servers.length; i++) {
-            if(servers[i].lastIsMaster().secondary && servers[i].isConnected()) {
-              manager = servers[i];
-              break;
-            }
-          }  
+    // Server function
+    var s = function(_manager, callback) {
+      _manager.ismaster(function(err, ismaster) {
+        if(err) return callback(err, null);
 
-          // We have an active server connection return it
-          if(manager != null) 
-            return callback(null, manager);
-          if(manager == null) 
-            return callback(new Error("no servers"));                   
+        if(type == 'secondary' && manager == null && ismaster.secondary) {
+          manager = _manager;
+        } else if(type == 'primary' && manager == null && ismaster.ismaster) {
+          manager = _manager;
+        } else if(type == 'arbiter' && manager == null && ismaster.arbiterOnly) {
+          manager = _manager;
+        }
+
+        callback(null, null);
+      });      
+    }
+
+    // Locate a server of the right type
+    for(var i = 0; i < serverManagers.length; i++) {
+      s(serverManagers[i], function() {
+        left = left - 1;
+
+        // Done talking to all the servers
+        if(left == 0) {
+          if(manager == null) return callback(new Error("no servers"));
+          callback(null, manager);
         }
       });
     }

@@ -173,12 +173,14 @@ runner.on('exit', function(errors, results) {
 
 // Set Logger level for driver
 Logger.setLevel('info');
+// Logger.setLevel('error');
+// Logger.setLevel('debug');
 // Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
-// Logger.filter('class', ['Connection']);
+// Logger.filter('class', ['ReplSet', 'Server', 'Pool', 'Connection']);
 // Logger.filter('class', ['ReplSet', 'Server', 'Cursor']);
 //Logger.filter('class', ['Mongos', 'Server']);
 //Logger.filter('class', ['Mongos', 'Server']);
-Logger.filter('class', ['ReplSet', 'Server']);
+Logger.filter('class', ['ReplSet']);
 
 // //
 // // Single server topology
