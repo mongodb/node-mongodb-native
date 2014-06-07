@@ -32,8 +32,10 @@ exports['Should correctly recover from primary stepdown'] = {
         if(t == 'primary') state++;
       });
 
+      // Wait fo rthe test to be done
       var interval = setInterval(function() {
         if(state == 2) {
+          clearInterval(interval);
           _server.destroy();
           test.done();
         }
@@ -52,86 +54,95 @@ exports['Should correctly recover from primary stepdown'] = {
   }
 }
 
-// exports['Should correctly recover from secondary shutdowns'] = {
-//   metadata: {
-//     requires: {
-//       topology: "replicaset"
-//     }
-//   },
+exports['Should correctly recover from secondary shutdowns'] = {
+  metadata: {
+    requires: {
+      topology: "replicaset"
+    }
+  },
 
-//   test: function(configuration, test) {
-//     var ReplSet = configuration.require.ReplSet;
-//     // Attempt to connect
-//     var server = new ReplSet([{
-//         host: configuration.host
-//       , port: configuration.port
-//     }], { 
-//       setName: configuration.setName 
-//     });
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet
+      , ReadPreference = configuration.require.ReadPreference;;
+    // Attempt to connect
+    var server = new ReplSet([{
+        host: configuration.host
+      , port: configuration.port
+    }], { 
+      setName: configuration.setName 
+    });
 
-//     // The state
-//     var state = 0;
+    // The state
+    var primary = false;
 
-//     // Add event listeners
-//     server.on('connect', function(_server) {
-//       _server.insert(f("%s.repl_insert1",configuration.db), [{a:1}], function(err, r) {
-//         var interval = setInterval(function() {
-//           try {
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // The state
+      var left = {};
+      var joined = 0;
 
-//             // Create a cursor
-//             var cursor = _server.cursor(f("%s.repl_insert1",configuration.db), {
-//                 find: f("%s.repl_insert1", configuration.db)
-//               , query: {}              
-//             }, {readPreference: 'secondary'});
+      // Wait for left events
+      _server.on('left', function(t, s) {
+        left[s.name] = ({type: t, server: s});
 
-//             // Execute next
-//             cursor.next(function(err, d) {
-//               if(err && state == 0) state = 1;
-//               if(err && state == 2) state = 3;
-//               if(err == null && state == 1) {
-//                 state = 2;
-//                 // Let's restart a secondary
-//                 configuration.manager.restartServer('secondary', function(err, result) {
-//                   if(err) console.dir(err);
-//                 });
-//               }
-              
-//               if(err == null && state == 2) {
-//                 try {
-//                   // Attempt to perform a write, waiting for a primary to be elected
-//                   _server.insert(f("%s.repl_insert1",configuration.db), [{a:1}], function(err, r) {
-//                     if(err == null) {                      
-//                       clearInterval(interval);
-//                       _server.destroy();
-//                       // Restart
-//                       configuration.manager.restart(function() {
-//                         test.done();
-//                       });
-//                     }
-//                   });                  
-//                 } catch(err) {}
-//               }
-//             });          
-//           } catch(err) {
-//             if(state == 0) state = 1;
-//           }
-//         }, 500);
+        // Restart the servers
+        if(Object.keys(left).length == 3) {
+          // Wait for close event due to primary stepdown
+          _server.on('joined', function(t, s) {
+            if('primary' == t && left[s.name]) {
+              joined++;
+              primary = true;
+            } else if('secondary' == t && left[s.name]) {
+              joined++;
+            }
 
-//         // Wait for a second and shutdown secondaries
-//         setTimeout(function() {
-//           // Shutdown the first secondary
-//           configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
-//             if(err) console.dir(err);
-//             // Shutdown the second secondary
-//             configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
-//               if(err) console.dir(err);
-//             });
-//           });
-//         }, 1000);
-//       });
-//     });
+            if(joined >= Object.keys(left).length && primary) {
+              // Execute the write
+              _server.insert(f("%s.replset_insert0", configuration.db), [{a:1}], {
+                writeConcern: {w:1}, ordered:true
+              }, function(err, results) {
+                test.equal(null, err);
+                test.equal(1, results.result.n);
 
-//     // Start connection
-//     server.connect();
-//   }
-// }
+                // Attempt a write and a read
+                _server.command("system.$cmd", {ismaster: true}
+                  , {readPreference: new ReadPreference('secondary')}, function(err, result) {
+                    test.equal(null, err);
+                    // Destroy the connection
+                    _server.destroy();
+                    // Finish the test
+                    test.done();
+                });
+              });
+            }
+          });
+
+          // Let's restart a secondary
+          configuration.manager.restartServer('secondary', function(err, result) {
+            if(err) console.dir(err);
+
+            // Let's restart a secondary
+            configuration.manager.restartServer('secondary', function(err, result) {
+              if(err) console.dir(err);
+            });
+          });
+        }
+      });
+
+      // Wait for a second and shutdown secondaries
+      setTimeout(function() {
+        // Shutdown the first secondary
+        configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
+          if(err) console.dir(err);
+          // Shutdown the second secondary
+          configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
+            if(err) console.dir(err);
+          });
+        });
+      }, 1000);
+    });
+
+    // Start connection
+    server.connect();
+  }
+}
