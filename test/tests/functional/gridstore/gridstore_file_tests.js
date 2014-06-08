@@ -179,7 +179,7 @@ exports.shouldCorrectlySeekWithBuffer = function(configuration, test) {
   var GridStore = configuration.getMongoPackage().GridStore;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -471,7 +471,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = function(configuration, test) 
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -566,7 +566,7 @@ exports.shouldCorrectlyDetectEOF = function(configuration, test) {
   var GridStore = configuration.getMongoPackage().GridStore;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -967,7 +967,7 @@ exports.shouldCorrectlyExecuteGridstoreTell = function(configuration, test) {
   var GridStore = configuration.getMongoPackage().GridStore;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1015,7 +1015,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(configuration
   var GridStore = configuration.getMongoPackage().GridStore;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1090,7 +1090,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = function(configuration
     , ObjectID = configuration.getMongoPackage().ObjectID;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {

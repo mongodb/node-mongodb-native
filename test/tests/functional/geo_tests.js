@@ -42,7 +42,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = function(configuration, tes
 exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {

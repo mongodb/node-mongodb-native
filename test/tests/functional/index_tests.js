@@ -7,7 +7,7 @@
 exports.shouldCreateASimpleIndexOnASingleField = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -47,7 +47,7 @@ exports.shouldCreateASimpleIndexOnASingleField = function(configuration, test) {
 exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -96,7 +96,7 @@ exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
 exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -145,7 +145,7 @@ exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
 exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -193,7 +193,7 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = function(configur
 exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -240,7 +240,7 @@ exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
 exports.shouldCorrectlyCreateAndDropAllIndex = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -293,7 +293,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(configuration, test) {
 exports.shouldCorrectlyIndexAndForceReindexOnCollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
