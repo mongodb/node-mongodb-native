@@ -23,6 +23,11 @@ exports['Should correctly recover from primary stepdown'] = {
 
     // Add event listeners
     server.on('connect', function(_server) {
+      _server.on('ha', function(e, options) {
+        console.log("========================= ha - " + e)
+        console.dir(options)
+      });
+
       // Wait for close event due to primary stepdown
       _server.on('joined', function(t, s) {
         if(t == 'primary') state++;
@@ -81,6 +86,11 @@ exports['Should correctly recover from secondary shutdowns'] = {
       var left = {};
       var joined = 0;
 
+      _server.on('ha', function(e, options) {
+        console.log("========================= ha - " + e)
+        console.dir(options)
+      });
+
       // Wait for left events
       _server.on('left', function(t, s) {
         left[s.name] = ({type: t, server: s});
@@ -138,6 +148,64 @@ exports['Should correctly recover from secondary shutdowns'] = {
           configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
             if(err) console.dir(err);
           });
+        });
+      }, 1000);
+    });
+
+    // Start connection
+    server.connect();
+  }
+}
+
+exports['Should correctly fire single no-repeat ha state update due to not master error'] = {
+  metadata: {
+    requires: {
+      topology: "replicaset"
+    }
+  },
+
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet;
+    // Attempt to connect
+    var server = new ReplSet([{
+        host: configuration.host
+      , port: configuration.port
+    }], { 
+      setName: configuration.setName 
+    });
+
+    // The state
+    var state = 0;
+
+    // Add event listeners
+    server.on('connect', function(_server) {
+      _server.on('ha', function(e, options) {
+        console.log("========================= ha - " + e)
+        console.dir(options)
+      });
+
+      // Wait for close event due to primary stepdown
+      _server.on('joined', function(t, s) {
+        if(t == 'primary') state++;
+      });
+
+      _server.on('left', function(t, s) {
+        if(t == 'primary') state++;
+      });
+
+      // Wait fo rthe test to be done
+      var interval = setInterval(function() {
+        if(state == 2) {
+          clearInterval(interval);
+          _server.destroy();
+          test.done();
+        }
+      }, 500);
+
+      // Wait for a second and then step down primary
+      setTimeout(function() {
+        configuration.manager.stepDown({force: true}, function(err, result) {
+          test.ok(err != null);
         });
       }, 1000);
     });
