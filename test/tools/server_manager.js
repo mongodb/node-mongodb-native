@@ -52,6 +52,10 @@ var ServerManager = function(serverOptions) {
   internalOptions = filterInternalOptionsOut(serverOptions, ["bin", "host"]);
   internalOptions.fork = null;
 
+  // Add rest options
+  serverOptions.rest = null;
+  serverOptions.httpinterface = null;
+
   // Return
   this.port = port;
   this.host = host;

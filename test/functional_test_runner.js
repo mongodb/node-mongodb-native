@@ -6,10 +6,17 @@ var Runner = require('integra').Runner
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
+  , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
   , ServerManager = require('./tools/server_manager')
   , ReplSetManager = require('./tools/replset_manager')
   , LegacySupport = require('../lib/legacy/legacy_support');
+
+var smokePlugin = require('./tools/smoke_plugin.js');
+var argv = require('optimist')
+    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
+    .demand(['t'])
+    .argv;
 
 /**
  * Standalone MongoDB Configuration
@@ -17,7 +24,7 @@ var Runner = require('integra').Runner
 var f = require('util').format;
 var Logger = require('../lib/connection/logger');
 
-var StandaloneConfiguration = function(options) {
+var Configuration = function(options) {
   options = options || {};
   var host = options.host || 'localhost';
   var port = options.port || 27017;
@@ -195,26 +202,26 @@ Logger.filter('class', ['ReplSet']);
 //   })
 // }
 
-//
-// Replicaset server topology
-var config = {
-    host: 'localhost'
-  , port: 31000
-  , setName: 'rs'
-  // , skipStart: true
-  , skipTermination: true
-  , topology: function(self, _mongo) {
-    return new _mongo.ReplSet([{
-        host: 'localhost'
-      , port: 31000
-    }], { setName: 'rs' });
-  }  
-  , manager: new ReplSetManager({
-      dbpath: path.join(path.resolve('db'))
-    , logpath: path.join(path.resolve('db'))
-    , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
-  })
-}
+// //
+// // Replicaset server topology
+// var config = {
+//     host: 'localhost'
+//   , port: 31000
+//   , setName: 'rs'
+//   // , skipStart: true
+//   , skipTermination: true
+//   , topology: function(self, _mongo) {
+//     return new _mongo.ReplSet([{
+//         host: 'localhost'
+//       , port: 31000
+//     }], { setName: 'rs' });
+//   }  
+//   , manager: new ReplSetManager({
+//       dbpath: path.join(path.resolve('db'))
+//     , logpath: path.join(path.resolve('db'))
+//     , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
+//   })
+// }
 
 // //
 // // Mongos server topology
@@ -236,8 +243,89 @@ var config = {
 //   }
 // }
 
-// Run the tests
-runner.run(StandaloneConfiguration(config));
+// We want to export a smoke.py style json file
+if(argv.r) {
+  console.log("Writing smoke output to " + argv.r);
+  smokePlugin.attachToRunner(runner, argv.r);
+}
+
+// Are we running a functional test
+if(argv.t == 'functional') {
+  // 
+  // Single server
+  var config = {
+      host: 'localhost'
+    , port: 27017
+    , skipStart: false
+    , skipTermination: false
+    , manager: new ServerManager({
+        dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
+      , logpath: path.join(path.resolve('db'), f("data-%d.log", 27017))
+    })
+  }
+
+  if(argv.e == 'replicaset') {
+    // 
+    // Replicaset
+    config = {
+        host: 'localhost'
+      , port: 31000
+      , setName: 'rs'
+      // , skipStart: true
+      , skipTermination: true
+      , topology: function(self, _mongo) {
+        return new _mongo.ReplSet([{
+            host: 'localhost'
+          , port: 31000
+        }], { setName: 'rs' });
+      }  
+      , manager: new ReplSetManager({
+          dbpath: path.join(path.resolve('db'))
+        , logpath: path.join(path.resolve('db'))
+        , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
+      })
+    }
+  } else if(argv.e == 'sharded') {
+    // 
+    // Sharded
+    config = {
+        host: 'localhost'
+      , port: 30998
+      , topology: function(self, _mongo) {
+        // return new _mongo.Mongos([{
+        //     host: self.host
+        //   , port: self.port 
+        // }, {
+        //     host: self.host
+        //   , port: self.port + 1
+        // }]);
+        return new _mongo.Mongos([{
+            host: self.host
+          , port: self.port 
+        }]);
+      }
+    }
+  }
+
+  // If we have a test we are filtering by
+  if(argv.f) {
+    runner.plugin(new FileFilter(argv.f));
+  }
+
+  if(argv.n) {
+    runner.plugin(new TestNameFilter(argv.n));
+  }
+
+  // Add travis filter
+  runner.plugin(new TravisFilter());
+
+  // Run the configuration
+  runner.run(Configuration(config));
+}
+
+
+// // Run the tests
+// runner.run(Configuration(config));
 
 
 
