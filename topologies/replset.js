@@ -180,6 +180,8 @@ var ReplSet = function(seedlist, options) {
   var state = DISCONNECTED;
   // Index
   var index = 0;
+  // Ha Index
+  var haId = 0;
 
   // Special replicaset options
   var secondaryOnlyConnectionAllowed = typeof options.secondaryOnlyConnectionAllowed == 'boolean'
@@ -269,11 +271,17 @@ var ReplSet = function(seedlist, options) {
     if(state == DESTROYED) return
     if(logger.isInfo()) logger.info(f('[%s] monitoring process running %s', id, JSON.stringify(replState)));    
 
+    // Unique HA id to identify the current look running
+    var localHaId = haId++;
+
     // Clean out any failed connection attempts
     connectingServers = {};
 
     // Controls if we are doing a single inquiry or repeating
     norepeat = typeof norepeat == 'boolean' ? norepeat : false;
+
+    // Emit replicasetInquirer
+    self.emit('ha', 'start', {norepeat: norepeat, id: localHaId});
 
     // Let's process all the disconnected servers
     while(disconnectedServers.length > 0) {
@@ -298,6 +306,9 @@ var ReplSet = function(seedlist, options) {
 
     // If no servers and we are not destroyed keep pinging
     if(servers.length == 0 && state == CONNECTED) {
+      // Emit ha process end
+      self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
+      // Restart ha process
       if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
       return;
     }
@@ -315,6 +326,7 @@ var ReplSet = function(seedlist, options) {
           if(err && serversLeft > 0) return;
           // We had an error and have no more servers to inspect, schedule a new check
           if(err && serversLeft == 0) {
+            self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
             if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
             return;
           }
@@ -351,6 +363,8 @@ var ReplSet = function(seedlist, options) {
 
             // Don't schedule a new inquiry
             if(serversLeft > 0) return;
+            // Emit ha process end
+            self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
             // Let's keep monitoring
             if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
             return;
@@ -371,6 +385,8 @@ var ReplSet = function(seedlist, options) {
                       processHosts(ismaster.hosts);
                   }
 
+                  // Emit ha process end
+                  self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
                   // Let's keep monitoring
                   if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
                   return;
@@ -382,18 +398,9 @@ var ReplSet = function(seedlist, options) {
       }
     }
 
-    // // Schedule ismasters 10 ms apart
-    // var timeoutMs = 10;
-
     // Call ismaster on all servers
     for(var i = 0; i < servers.length; i++) {
-      // setTimeout(function() {
-        inspectServer(servers[i]);
-      // }, timeoutMs);
-
-      // timeoutMs = timeoutMs + 10;
-      // var _server = servers[i];
-
+      inspectServer(servers[i]);
     }
   }
 
@@ -621,6 +628,19 @@ var ReplSet = function(seedlist, options) {
     return replState.isPrimaryConnected();
   }
 
+  //
+  // Validate if a non-master or recovering error
+  var notMasterError = function(err, r) {
+    // Explore if we have a not master error
+    if(err && (err.err == 'not master'
+      || err.errmsg == 'not master' || err['$err'].indexOf('not master or secondary') != -1
+      || err['$err'].indexOf("not master and slaveOk=false") != -1
+      || err.errmsg == 'node is recovering')) {
+      return true;
+    }
+    return false;
+  }
+
   // Execute a command
   this.command = function(ns, cmd, options, callback) {
     if(typeof options == 'function') {
@@ -637,6 +657,9 @@ var ReplSet = function(seedlist, options) {
 
     // Execute the command
     server.command(ns, cmd, options, function(err, r) {
+      // We have a no master error, immediately refresh the view of the replicaset
+      if(notMasterError(err, r)) replicasetInquirer(true);
+      // Return the error
       callback(err, r);
     });
   }
@@ -658,6 +681,9 @@ var ReplSet = function(seedlist, options) {
 
     // Execute the command
     server[op](ns, ops, options, function(err, r) {
+      // We have a no master error, immediately refresh the view of the replicaset
+      if(notMasterError(err, r)) replicasetInquirer(true);
+      // Return the result
       callback(err, r);
     });
   }
