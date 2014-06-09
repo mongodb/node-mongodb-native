@@ -891,3 +891,29 @@ exports['should correctly apply hint to find'] = function(configuration, test) {
     });
   });
 }
+
+exports['should correctly set language_override option'] = function(configuration, test) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    var collection = db.collection("should_correctly_set_language_override");
+    collection.insert([{text:'Lorem ipsum dolor sit amet.', langua:'italian'}], function(err, result) {
+      test.equal(null, err);
+
+      collection.ensureIndex({text:'text'}, {language_override:'langua', name:'language_override_index'}, function(err, result) {
+        test.equal(null, err);
+
+        collection.indexInformation({full:true}, function(err, indexInformation) {
+          test.equal(null, err);
+          for (var i = 0; i < indexInformation.length; i++) {
+            if (indexInformation[i].name === 'language_override_index')
+              test.equal(indexInformation[i].language_override, 'langua')
+          }
+
+          db.close();
+          test.done();
+
+        });
+      });
+    });
+  });
+}
