@@ -108,11 +108,11 @@ var Pool = function(options) {
     for(var i = 0; i < size; i++) {
       var connection = new Connection(options);
       // Add all handlers
-      connection.on('close', closeHandler);
+      connection.once('close', closeHandler);
       connection.on('message', messageHandler);
-      connection.on('error', errorHandler);
-      connection.on('timeout', timeoutHandler);
-      connection.on('parseError', parseErrorHandler);
+      connection.once('error', errorHandler);
+      connection.once('timeout', timeoutHandler);
+      connection.once('parseError', parseErrorHandler);
       connection.on('connect', connectHandler);
 
       // Start connection
