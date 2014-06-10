@@ -225,36 +225,83 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
 
     // The state
     var state = 0;
+    var leftServer = null;
 
     // Add event listeners
     server.on('connect', function(_server) {
-      _server.on('ha', function(e, options) {
-        console.log("============================================== ha :: " + e);
-        console.dir(options)
-      });
-
       _server.on('joined', function(t, s) {
-        console.log("============================================== joined :: " + t + " :: " + s.name);
+        if(t == 'secondary' && leftServer && s.name == leftServer.host) {
+          _server.destroy();
+          test.done();
+        }
       });
 
       _server.on('left', function(t, s) {
-        console.log("============================================== left :: " + t + " :: " + s.name);
+        if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
       });
 
       // Shutdown the first secondary
       configuration.manager.remove('secondary', function(err, serverDetails) {
         if(err) console.dir(err);
-        console.log("==================================================== REMOVING SECONDARY")
-        console.dir(err)
-        console.dir(serverDetails)
+        leftServer = serverDetails;
 
         setTimeout(function() {
           // Shutdown the second secondary
-          configuration.manager.add(serverDetails, function(err, result) {
-            console.log("==================================================== ADDING SECONDARY")
-            console.dir(err)
-            console.dir(result)
-          });          
+          configuration.manager.add(serverDetails, function(err, result) {});          
+        }, 10000)
+      });      
+    });
+
+    // Start connection
+    server.connect();
+  }
+}
+
+exports['Should correctly remove and re-add secondary with new priority and detect removal and re-addition of the server as new new primary'] = {
+  metadata: {
+    requires: {
+        topology: "replicaset"
+      , mongodb: ">=2.6.0"
+    }
+  },
+
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet
+      , ReadPreference = configuration.require.ReadPreference;
+    // Attempt to connect
+    var server = new ReplSet([{
+        host: configuration.host
+      , port: configuration.port
+    }], { 
+      setName: configuration.setName 
+    });
+
+    // The state
+    var state = 0;
+    var leftServer = null;
+
+    // Add event listeners
+    server.on('connect', function(_server) {
+      _server.on('joined', function(t, s) {
+        if(t == 'primary' && leftServer && s.name == leftServer.host) {
+          _server.destroy();
+          test.done();
+        }
+      });
+
+      _server.on('left', function(t, s) {
+        if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
+      });
+
+      // Shutdown the first secondary
+      configuration.manager.remove('secondary', function(err, serverDetails) {
+        if(err) console.dir(err);
+        serverDetails.priority = 10;
+        leftServer = serverDetails;
+
+        setTimeout(function() {
+          // Shutdown the second secondary
+          configuration.manager.add(serverDetails, function(err, result) {});          
         }, 10000)
       });      
     });
