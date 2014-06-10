@@ -23,11 +23,7 @@ exports['Should correctly recover from primary stepdown'] = {
 
     // Add event listeners
     server.on('connect', function(_server) {
-      _server.on('ha', function(e, options) {
-        console.log("========================= ha - " + e)
-        console.dir(options)
-      });
-
+      _server.on('ha', function(e, options) {});
       // Wait for close event due to primary stepdown
       _server.on('joined', function(t, s) {
         if(t == 'primary') state++;
@@ -85,11 +81,6 @@ exports['Should correctly recover from secondary shutdowns'] = {
       // The state
       var left = {};
       var joined = 0;
-
-      _server.on('ha', function(e, options) {
-        console.log("========================= ha - " + e)
-        console.dir(options)
-      });
 
       // Wait for left events
       _server.on('left', function(t, s) {
@@ -160,12 +151,70 @@ exports['Should correctly recover from secondary shutdowns'] = {
 exports['Should correctly fire single no-repeat ha state update due to not master error'] = {
   metadata: {
     requires: {
-      topology: "replicaset"
+        topology: "replicaset"
+      , mongodb: ">=2.6.0"
     }
   },
 
   test: function(configuration, test) {
-    var ReplSet = configuration.require.ReplSet;
+    var ReplSet = configuration.require.ReplSet
+      , ReadPreference = configuration.require.ReadPreference;
+    // Attempt to connect
+    var server = new ReplSet([{
+        host: configuration.host
+      , port: configuration.port
+    }], { 
+      setName: configuration.setName 
+    });
+
+    // Add event listeners
+    server.on('connect', function(_server) {
+      _server.on('ha', function(e, options) {
+        // Manual status request issues correctly
+        if(options.norepeat) {
+          process.nextTick(function() {
+            // Destroy the connection
+            _server.destroy();
+            // Finish the test
+            test.done();          
+          });
+        }
+      });
+
+      // Wait for close event due to primary stepdown
+      _server.on('joined', function(t, s) {
+        if(t == 'secondary') {
+          // Execute write command
+          _server.command(f("%s.$cmd", configuration.db)
+            , {
+                insert: 'replset_insert1'
+              , documents: [{a:1}]
+              , ordered: false
+              , writeConcern: {w:1}
+            }
+            , {readPreference: new ReadPreference('secondary')}, function(err, result) {
+              test.equal('not master', result.result.errmsg);
+          });          
+        }
+      });
+    });
+
+    // Start connection
+    server.connect();
+  }
+}
+
+exports['Should correctly remove and re-add secondary and detect removal and re-addition of the server'] = {
+  metadata: {
+    requires: {
+        topology: "replicaset"
+      , mongodb: ">=2.6.0"
+    }
+  },
+
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet
+      , ReadPreference = configuration.require.ReadPreference;
     // Attempt to connect
     var server = new ReplSet([{
         host: configuration.host
@@ -180,34 +229,34 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
     // Add event listeners
     server.on('connect', function(_server) {
       _server.on('ha', function(e, options) {
-        console.log("========================= ha - " + e)
+        console.log("============================================== ha :: " + e);
         console.dir(options)
       });
 
-      // Wait for close event due to primary stepdown
       _server.on('joined', function(t, s) {
-        if(t == 'primary') state++;
+        console.log("============================================== joined :: " + t + " :: " + s.name);
       });
 
       _server.on('left', function(t, s) {
-        if(t == 'primary') state++;
+        console.log("============================================== left :: " + t + " :: " + s.name);
       });
 
-      // Wait fo rthe test to be done
-      var interval = setInterval(function() {
-        if(state == 2) {
-          clearInterval(interval);
-          _server.destroy();
-          test.done();
-        }
-      }, 500);
+      // Shutdown the first secondary
+      configuration.manager.remove('secondary', function(err, serverDetails) {
+        if(err) console.dir(err);
+        console.log("==================================================== REMOVING SECONDARY")
+        console.dir(err)
+        console.dir(serverDetails)
 
-      // Wait for a second and then step down primary
-      setTimeout(function() {
-        configuration.manager.stepDown({force: true}, function(err, result) {
-          test.ok(err != null);
-        });
-      }, 1000);
+        setTimeout(function() {
+          // Shutdown the second secondary
+          configuration.manager.add(serverDetails, function(err, result) {
+            console.log("==================================================== ADDING SECONDARY")
+            console.dir(err)
+            console.dir(result)
+          });          
+        }, 10000)
+      });      
     });
 
     // Start connection

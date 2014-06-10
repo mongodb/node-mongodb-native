@@ -347,6 +347,113 @@ var ReplSetManager = function(replsetOptions) {
     manager.start(options, callback);
   }
 
+  this.remove = function(t, callback) {  
+    // Get primary manager 
+    getServerManagerByType('primary', function(err, manager) {
+      if(err) return callback(err, null);
+
+      // Get a connection to the master
+      manager.connect(function(err, server) {
+        if(err) return callback(err, null);
+
+        // Avoid double calls
+        var done = false;
+
+        // Execute find
+        var cursor = server.cursor('local.system.replset', {
+            find: 'local.system.replset'
+          , query: {}
+        }).next(function(err, d) {
+          if(err) return callback(err, null);
+          if(d == null) return;
+          if(done) return;
+          done = true;
+          // Destroy the connection
+          server.destroy();
+
+          // Locate a secondary and remove it
+          getServerManagerByType('secondary', function(err, m) {
+            if(err) return callback(err);
+
+            // Remove from the list of the result
+            var members = [];
+            // Find all all servers not matching the one we want removed
+            for(var i = 0; i < d.members.length; i++) {
+              if(d.members[i].host != m.lastIsMaster().me) {
+                members.push(d.members[i]);
+              } else {
+                removedServer = d.members[i];
+              }
+            }
+
+            // Update the config
+            d.members = members;
+            d.version = d.version + 1;
+
+            // Get a connection to the master
+            manager.connect(function(err, server) {
+              if(err) return callback(err, null);
+
+              // Reconfigure the replicaset
+              server.command('admin.$cmd', {
+                replSetReconfig: d
+              }, function(err, result) {});
+
+              // Call back as the command above will fail
+              callback(null, removedServer);
+            });
+          });
+        });
+      });
+    });
+  }
+
+  this.add = function(serverDetails, options, callback) {
+    if(typeof options == 'function') {
+      callback = options;
+      options = {};
+    }
+
+    // Get primary manager 
+    getServerManagerByType('primary', function(err, manager) {
+      if(err) return callback(err, null);
+
+      // Get a connection to the master
+      manager.connect(function(err, server) {
+        if(err) return callback(err, null);
+
+        // Avoid double calls
+        var done = false;
+        // Execute find
+        var cursor = server.cursor('local.system.replset', {
+            find: 'local.system.replset'
+          , query: {}
+        }).next(function(err, d) {
+          if(err) return callback(err, null);
+          if(done) return;
+          done = true;
+
+          // Create a new members entry
+          d.members.push(serverDetails)
+          d.version = d.version + 1;
+
+          // Get a connection to the master
+          manager.connect(function(err, server) {
+            if(err) return callback(err, null);
+
+            // Reconfigure the replicaset
+            server.command('admin.$cmd', {
+              replSetReconfig: d
+            }, function(err, result) {
+              if(err) return callback(err);
+              callback(null, result.result);
+            });
+          });
+        });
+      });
+    });
+  }
+
   this.stepDown = function(options, callback) {
     if(typeof options == 'function') {
       callback = options;

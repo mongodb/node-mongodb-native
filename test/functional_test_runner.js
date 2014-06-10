@@ -8,6 +8,7 @@ var Runner = require('integra').Runner
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
   , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
+  , TestNameFilter = require('integra').TestNameFilter
   , ServerManager = require('./tools/server_manager')
   , ReplSetManager = require('./tools/replset_manager')
   , LegacySupport = require('../lib/legacy/legacy_support');

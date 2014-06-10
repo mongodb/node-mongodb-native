@@ -234,6 +234,11 @@ var ServerManager = function(serverOptions) {
     // On connect let's go
     s.on('connect', function(_server) {
       server = _server;
+
+      ['error', 'close', 'timeout', 'parseError'].forEach(function(e) {
+        server.removeAllListeners(e);
+      })
+
       callback(null, _server);
     });
     
@@ -243,9 +248,9 @@ var ServerManager = function(serverOptions) {
     }
 
     // Error or close handling
-    s.on('error', e);
-    s.on('close', e);
-    s.on('timeout', e);
+    s.once('error', e);
+    s.once('close', e);
+    s.once('timeout', e);
 
     // Attempt connect
     s.connect();    
