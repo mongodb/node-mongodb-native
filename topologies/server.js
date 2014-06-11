@@ -31,13 +31,13 @@ var Callbacks = function() {
       // Error out any current callbacks
       for(var id in this._events) {
         var executeError = function(_id, _callbacks) {
-            _callbacks.emit(_id, err, null);
+          _callbacks.emit(_id, err, null);
         }
 
         executeError(id, self);
       }
-        });
-    }
+    });
+  }
 }
 
 inherits(Callbacks, EventEmitter);

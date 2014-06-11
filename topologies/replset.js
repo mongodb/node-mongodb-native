@@ -656,21 +656,26 @@ var ReplSet = function(seedlist, options) {
       options = {};
     }
 
+    var server = null;
     // Ensure we have no options
     options = options || {};
+    
     // Pick the right server based on readPreference
-    pickServer(options.writeConcern ? ReadPreference.primary : options.readPreference, function(err, server) {
-      if(err) return callback(err);
-      // No server returned we had an error
-      if(server == null) return;
-      // Execute the command
-      server.command(ns, cmd, options, function(err, r) {
-        // We have a no master error, immediately refresh the view of the replicaset
-        if(r && notMasterError(r)) replicasetInquirer(true);
-        // Return the error
-        callback(err, r);
-      });      
-    });
+    try {
+      server = pickServer(options.writeConcern ? ReadPreference.primary : options.readPreference);
+    } catch(err) {
+      return callback(err);
+    }
+
+    // No server returned we had an error
+    if(server == null) return callback(new MongoError("no server found"));
+    // Execute the command
+    server.command(ns, cmd, options, function(err, r) {
+      // We have a no master error, immediately refresh the view of the replicaset
+      if(r && notMasterError(r)) replicasetInquirer(true);
+      // Return the error
+      callback(err, r);
+    });      
   }
 
   //
@@ -681,21 +686,26 @@ var ReplSet = function(seedlist, options) {
       options = {};
     }
 
+    var server = null;
     // Ensure we have no options
     options = options || {};
     // Get a primary    
-    pickServer(ReadPreference.primary, function(err, server) {
-      if(err) return callback(err);
-      // No server returned we had an error
-      if(server == null) return;
-      // Execute the command
-      server[op](ns, ops, options, function(err, r) {
-        // We have a no master error, immediately refresh the view of the replicaset
-        if(r && notMasterError(r)) replicasetInquirer(true);
-        // Return the result
-        callback(err, r);
-      });
-    }); 
+    try {
+      server = pickServer(ReadPreference.primary);
+    } catch(err) {
+      return callback(err);
+    }
+
+    // No server returned we had an error
+    if(server == null) return callback(new MongoError("no server found"));
+    
+    // Execute the command
+    server[op](ns, ops, options, function(err, r) {
+      // We have a no master error, immediately refresh the view of the replicaset
+      if(r && notMasterError(r)) replicasetInquirer(true);
+      // Return the result
+      callback(err, r);
+    });
   }
 
   // Execute a write
@@ -714,22 +724,26 @@ var ReplSet = function(seedlist, options) {
   }    
 
   // Create a cursor for the command
-  this.cursor = function(ns, cmd, options) {
+  this.cursor = function(ns, cmd, options, callback) {
     if(typeof options == 'function') {
       callback = options;
       options = {};
     }
 
+    var server = null;
     // Ensure we have no options
     options = options || {};
-    // Pick the right server based on readPreference
-    pickServer(options.readPreference, function(err, server) {
-      if(err) return callback(err);    
-      // No server returned we had an error
-      if(server == null) return;
-      // Execute the command
-      return server.cursor(ns, cmd, options);
-    });
+    try {
+      // Pick the right server based on readPreference
+      server = pickServer(options.readPreference);
+    } catch(err) {
+      return callback(err);
+    }
+
+    // No server returned we had an error
+    if(server == null) return callback(new MongoError("no server found"));
+    // Execute the command
+    return server.cursor(ns, cmd, options);
   }
 
   // Authentication method
@@ -784,60 +798,60 @@ var ReplSet = function(seedlist, options) {
 
   //
   // Pick a server based on readPreference
-  var pickServer = function(readPreference, callback) {
+  var pickServer = function(readPreference) {
     options = options || {};
     if(!(readPreference instanceof ReadPreference) 
-      && readPreference != null) return callback(new MongoError(f("readPreference %s must be an instance of ReadPreference", readPreference)));
+      && readPreference != null) throw new MongoError(f("readPreference %s must be an instance of ReadPreference", readPreference));
     // If no read Preference set to primary by default
     readPreference = readPreference || ReadPreference.primary;
 
     // Do we have a custom readPreference strategy, use it
     if(readPreferenceStrategies != null && readPreferenceStrategies[readPreference.preference] != null) {
-      return readPreferenceStrategies[readPreference.preference].pickServer(replState, readPreference, callback);
+      return readPreferenceStrategies[readPreference.preference].pickServer(replState, readPreference);
     }
 
     // Check if we can satisfy and of the basic read Preferences
     if(readPreference.equals(ReadPreference.secondary) 
       && replState.secondaries.length == 0)
-        return callback(new MongoError("no secondary server available"));
+        throw new MongoError("no secondary server available");
     
     if(readPreference.equals(ReadPreference.secondaryPreferred)
         && replState.secondaries.length == 0
         && replState.primary == null)
-      return callback(new MongoError("no secondary or primary server available"));
+      throw new MongoError("no secondary or primary server available");
 
     if(readPreference.equals(ReadPreference.primary)
       && replState.primary == null)
-        return callback(new MongoError("no primary server available"));
+        throw new MongoError("no primary server available");
 
     // Secondary
     if(readPreference.equals(ReadPreference.secondary)) {
       index = index + 1;
-      return callback(null, replState.secondaries[index % replState.secondaries.length]);
+      return replState.secondaries[index % replState.secondaries.length];
     }
 
     // Secondary preferred
     if(readPreference.equals(ReadPreference.secondaryPreferred)) {
       if(replState.secondaries.length > 0) {
         index = index + 1;
-        return callback(null, replState.secondaries[index % replState.secondaries.length]);
+        return replState.secondaries[index % replState.secondaries.length];
       }
 
-      return callback(null, replState.primary);
+      return replState.primary;
     }
 
     // Primary preferred
     if(readPreference.equals(ReadPreference.primaryPreferred)) {
-      if(replState.primary) return callback(null, replState.primary);
+      if(replState.primary) return replState.primary;
 
       if(replState.secondaries.length > 0) {
         index = index + 1;
-        return callback(null, replState.secondaries[index % replState.secondaries.length]);
+        return replState.secondaries[index % replState.secondaries.length];
       }
     }
 
     // Return the primary
-    return callback(null, replState.primary);
+    return replState.primary;
   }
 
   // Add the ping strategy for nearest

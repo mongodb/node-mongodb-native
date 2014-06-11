@@ -108,9 +108,9 @@ var Connection = function(options) {
     }
 
     // Add handlers for events
-    connection.on('error', errorHandler);
-    connection.on('timeout', timeoutHandler);
-    connection.on('close', closeHandler);
+    connection.once('error', errorHandler);
+    connection.once('timeout', timeoutHandler);
+    connection.once('close', closeHandler);
     connection.on('data', dataHandler);
   }
 
