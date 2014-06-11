@@ -1,111 +1,112 @@
 var f = require('util').format
   , Long = require('bson').Long;
 
-// exports['Should correctly connect using mongos object'] = {
-//   metadata: {
-//     requires: {
-//       topology: "mongos"
-//     }
-//   },
+exports['Should correctly connect using mongos object'] = {
+  metadata: {
+    requires: {
+      topology: "mongos"
+    }
+  },
 
-//   test: function(configuration, test) {
-//     var Mongos = configuration.require.Mongos;
+  test: function(configuration, test) {
+    var Mongos = configuration.require.Mongos;
 
-//     // Attempt to connect
-//     var server = new Mongos([{
-//         host: configuration.host
-//       , port: configuration.port
-//     }, {
-//         host: configuration.host
-//       , port: configuration.port + 1
-//     }])
+    // Attempt to connect
+    var server = new Mongos([{
+        host: configuration.host
+      , port: configuration.port
+    }, {
+        host: configuration.host
+      , port: configuration.port + 1
+    }])
 
-//     // Add event listeners
-//     server.on('connect', function(_server) {
-//       setTimeout(function() {
-//         test.equal(true, _server.isConnected());
-//         _server.destroy();
-//         test.equal(false, _server.isConnected());
-//         test.done();        
-//       }, 100);
-//     })
+    // Add event listeners
+    server.on('connect', function(_server) {
+      setTimeout(function() {
+        test.equal(true, _server.isConnected());
+        _server.destroy();
+        test.equal(false, _server.isConnected());
+        test.done();        
+      }, 100);
+    })
 
-//     // Start connection
-//     server.connect();
-//   }
-// }
+    // Start connection
+    server.connect();
+  }
+}
 
-// exports['Should correctly execute command using mongos'] = {
-//   metadata: {
-//     requires: {
-//       topology: "mongos"
-//     }
-//   },
+exports['Should correctly execute command using mongos'] = {
+  metadata: {
+    requires: {
+      topology: "mongos"
+    }
+  },
 
-//   test: function(configuration, test) {
-//     var Mongos = configuration.require.Mongos;
+  test: function(configuration, test) {
+    var Mongos = configuration.require.Mongos
+      ReadPreference = configuration.require.ReadPreference;
 
-//     // Attempt to connect
-//     var server = new Mongos([{
-//         host: configuration.host
-//       , port: configuration.port
-//     }]);
+    // Attempt to connect
+    var server = new Mongos([{
+        host: configuration.host
+      , port: configuration.port
+    }]);
 
-//     // Add event listeners
-//     server.on('connect', function(_server) {
-//       // Execute the command
-//       _server.command("system.$cmd", {ismaster: true}, {readPreference: 'primary'}, function(err, result) {
-//         test.equal(null, err);
-//         test.equal(true, result.result.ismaster);
-//         // Destroy the connection
-//         _server.destroy();
-//         // Finish the test
-//         test.done();
-//       });      
-//     });
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // Execute the command
+      _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
+        test.equal(null, err);
+        test.equal(true, result.result.ismaster);
+        // Destroy the connection
+        _server.destroy();
+        // Finish the test
+        test.done();
+      });      
+    });
 
-//     // Start connection
-//     server.connect();
-//   }
-// }
+    // Start connection
+    server.connect();
+  }
+}
 
-// exports['Should correctly execute write using replset'] = {
-//   metadata: {
-//     requires: {
-//       topology: "mongos"
-//     }
-//   },
+exports['Should correctly execute write using mongos'] = {
+  metadata: {
+    requires: {
+      topology: "mongos"
+    }
+  },
 
-//   test: function(configuration, test) {
-//     var Mongos = configuration.require.Mongos;
+  test: function(configuration, test) {
+    var Mongos = configuration.require.Mongos;
 
-//     // Attempt to connect
-//     var server = new Mongos([{
-//         host: configuration.host
-//       , port: configuration.port
-//     }]);
+    // Attempt to connect
+    var server = new Mongos([{
+        host: configuration.host
+      , port: configuration.port
+    }]);
 
-//     // Add event listeners
-//     server.on('connect', function(_server) {
-//       // Execute the write
-//       _server.insert(f("%s.inserts_mongos1", configuration.db), [{a:1}], {
-//         writeConcern: {w:1}, ordered:true
-//       }, function(err, results) {
-//         test.equal(null, err);
-//         test.equal(1, results.result.n);
-//         // Destroy the connection
-//         _server.destroy();
-//         // Finish the test
-//         test.done();
-//       });
-//     })
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // Execute the write
+      _server.insert(f("%s.inserts_mongos1", configuration.db), [{a:1}], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        test.equal(null, err);
+        test.equal(1, results.result.n);
+        // Destroy the connection
+        _server.destroy();
+        // Finish the test
+        test.done();
+      });
+    })
 
-//     // Start connection
-//     server.connect();
-//   }
-// }
+    // Start connection
+    server.connect();
+  }
+}
 
-// exports['Should correctly recover from shit of servers'] = {
+// exports['Should correctly recover from mongos going down'] = {
 //   metadata: {
 //     requires: {
 //       topology: "mongos"
@@ -152,6 +153,7 @@ var f = require('util').format
 //                 find: f("%s.inserts_repl2", configuration.db)
 //               , query: {}
 //             });
+//             console.dir(_server)
 
 //             // Execute next
 //             cursor.next(function(err, d) {            
@@ -159,7 +161,10 @@ var f = require('util').format
 //               console.dir(err)
 //               console.dir(d)
 //             });            
-//           } catch(err) {}
+//           } catch(err) {
+//     console.log("================== 1")
+//     console.dir(err)
+//           }
 //         }, 1000);
 //         // test.equal(null, err);
 //         // test.equal(1, results.result.n);

@@ -171,6 +171,8 @@ var ReplSetManager = function(replsetOptions) {
     var totalServers = secondaries + arbiters + 1;
     var serversLeft = totalServers;
     var purge = typeof options.purge == 'boolean' ? options.purge : true;
+    var kill = typeof options.kill == 'boolean' ? options.kill : true;
+    var self = this;
 
     // Start all the servers
     for(var i = 0; i < totalServers; i++) {
@@ -186,7 +188,7 @@ var ReplSetManager = function(replsetOptions) {
 
     // Start all the servers
     for(var i = 0; i < serverManagers.length; i++) {
-      var startOpts = {purge: purge};
+      var startOpts = {purge: purge, kill: kill};
 
       // Start the server
       serverManagers[i].start(startOpts, function(err) {
@@ -195,10 +197,9 @@ var ReplSetManager = function(replsetOptions) {
 
         // All servers are down
         if(serversLeft == 0) {
-
           // Configure the replicaset
           configureAndEnsure(function() {
-            callback(null, null);
+            callback(null, self);
           });
         }
       });
@@ -312,6 +313,10 @@ var ReplSetManager = function(replsetOptions) {
     }
   }
 
+  this.getIsMaster = function(callback) {
+    return getIsMaster(callback);
+  }
+
   this.shutdown = function(type, options, callback) {
     if(typeof options == 'function') {
       callback = options;
@@ -342,6 +347,10 @@ var ReplSetManager = function(replsetOptions) {
       }
     }
 
+    // Purge and delete
+    options.purge = true;
+    // options.kill = true;
+    // No manager
     if(manager == null) return callback(new Error("no downed secondary server found"));
     // Restart the server
     manager.start(options, callback);

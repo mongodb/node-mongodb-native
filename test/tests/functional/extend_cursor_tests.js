@@ -54,7 +54,6 @@ exports['Should correctly extend the cursor with custom implementation'] = {
 
     // Add event listeners
     server.on('connect', function(_server) {
-
       // Execute the write
       _server.insert(f("%s.inserts_extend_cursors", configuration.db), [{a:1}, {a:2}, {a:3}], {
         writeConcern: {w:1}, ordered:true

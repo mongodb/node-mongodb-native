@@ -31,36 +31,39 @@ var filterInternalOptionsOut = function(options, internalOptions) {
   return opts;
 }
 
-var ServerManager = function(serverOptions) {
-  serverOptions = serverOptions || {};
-  var host = serverOptions.host || 'localhost';
-  var port = serverOptions.port = serverOptions.port || 27017;
-  var bin = serverOptions.bin || 'mongod';
+var MongosManager = function(mongosOptions) {
+  mongosOptions = mongosOptions || {};
+  mongosOptions = cloneOptions(mongosOptions);
+  var host = mongosOptions.host || 'localhost';
+  var port = mongosOptions.port = mongosOptions.port || 50000;
+  var bin = mongosOptions.bin || 'mongos';
   // Set default db path if none set
-  var dbpath = serverOptions.dbpath = serverOptions.dbpath || path.join(path.resolve('data'), f("data-%d", port));
-  var logpath = serverOptions.logpath = serverOptions.logpath || path.join(path.resolve('data'), f("data-%d.log", port));
+  var pidfilepath = mongosOptions.pidfilepath = mongosOptions.pidfilepath || path.join(path.resolve('data'), f("data-%d", port));
+  var logpath = mongosOptions.logpath = mongosOptions.logpath || path.join(path.resolve('data'), f("data-%d.log", port));
+  var configdb = mongosOptions.configdb = mongosOptions.configdb ? mongosOptions.configdb.join(',') : ['localhost:50000'].join(',');
 
   // Current process id
   var pid = 0;
   var self = this;
 
   // Clone the options
-  serverOptions = cloneOptions(serverOptions);
+  mongosOptions = cloneOptions(mongosOptions);
 
   // filtered out internal keys
   var internalOptions = {};
-  internalOptions = filterInternalOptionsOut(serverOptions, ["bin", "host"]);
-  // internalOptions.fork = null;
-
-  // Add rest options
-  serverOptions.rest = null;
-  // serverOptions.fork = null;
-  // serverOptions.httpinterface = null;
+  internalOptions = filterInternalOptionsOut(mongosOptions, ["bin", "host"]);
+  internalOptions.fork = null;
 
   // Return
   this.port = port;
   this.host = host;
   this.name = f("%s:%s", host, port);
+
+  // Add the file path
+  pidfilepath = mongosOptions.pidfilepath = f("%s/mongos-%s.pid", pidfilepath, port);
+
+  // Fork
+  mongosOptions.fork = null;
 
   // Actual server instance
   var server = null;
@@ -80,6 +83,7 @@ var ServerManager = function(serverOptions) {
       }
     }
 
+    console.dir(command.join(" "))
     return command.join(" ");
   }
 
@@ -101,8 +105,9 @@ var ServerManager = function(serverOptions) {
 
         try {
           // Read the pidfile        
-          pid = fs.readFileSync(path.join(dbpath, "mongod.lock"), 'ascii').trim();
+          pid = fs.readFileSync(pidfilepath, 'ascii').trim();          
         } catch(err) {
+          console.dir(err)
           return setTimeout(pingServer, 1000);
         }
         
@@ -119,27 +124,25 @@ var ServerManager = function(serverOptions) {
       }
       
       // Error or close handling
-      server.on('error', errHandler);
-      server.on('close', errHandler);
-      server.on('timeout', errHandler);
+      server.once('error', errHandler);
+      server.once('close', errHandler);
+      server.once('timeout', errHandler);
       server.once('parseError', errHandler);
 
       // Attempt connect
       server.connect();
     }    
 
-    setTimeout(function() {
-      exec(cmd, function(error, stdout, stderr) {
-        if(error != null && callback) {
-          var _internal = callback;
-          callback = null;
-          return _internal(error);
-        }
-      });
+    exec(cmd, function(error, stdout, stderr) {      
+      if(error != null && callback) {
+        var _internal = callback;
+        callback = null;
+        return _internal(error);
+      }
+    });
 
-      // Attempt to ping the server
-      setTimeout(pingServer, 5000);      
-    }, 2000);
+    // Attempt to ping the server
+    setTimeout(pingServer, 5000);
   }
 
   this.start = function(options, callback) {
@@ -148,19 +151,13 @@ var ServerManager = function(serverOptions) {
       options = {};
     }
 
-    // If we have decided to remove the directory
-    if(options.purge) {
-      rimraf.sync(serverOptions.dbpath);
-      mkdirp.sync(serverOptions.dbpath);
-    }
-
     // Build startup command
-    var cmd = buildStartupCommand(serverOptions);
+    var cmd = buildStartupCommand(mongosOptions);
     // If we have decided to kill all the processes
     if(typeof options.signal == 'number' || options.kill) {
-      options.signal = typeof options.signal == 'number' ? options.signal : -15;
+      options.signal = typeof options.signal == 'number' ? options.signal : -9;
 
-      exec(f("killall %d mongod", options.signal), function(err, stdout, stderr) {
+      exec(f("killall %d mongos", options.signal), function(err, stdout, stderr) {
         bootServer(cmd, callback);
       });
     } else {
@@ -175,16 +172,10 @@ var ServerManager = function(serverOptions) {
     }
 
     var signal = options.signal || -15;
-
     // Stop server connection
     server.destroy();
     // Kill the process with the desired signal
     exec(f("kill %d %s", signal, pid), function(error) {
-      try {
-        // Destroy pid file
-        fs.unlinkSync(path.join(dbpath, "mongod.lock"))
-      } catch(err) {}
-      // Return
       if(error) return callback(error, null);
       callback(null, null);
     });
@@ -271,4 +262,4 @@ var ServerManager = function(serverOptions) {
   }
 }
 
-module.exports = ServerManager;
+module.exports = MongosManager;
