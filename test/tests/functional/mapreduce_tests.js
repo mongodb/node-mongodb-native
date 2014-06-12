@@ -8,7 +8,7 @@ exports.shouldCorrectlyExecuteGroupFunction = function(configuration, test) {
   var Code = configuration.getMongoPackage().Code;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -156,7 +156,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = function(confi
 exports.shouldPerformSimpleMapReduceFunctions = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -207,7 +207,7 @@ exports.shouldPerformMapReduceFunctionInline = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -251,7 +251,7 @@ exports.shouldPerformMapReduceInContext = function(configuration, test) {
   var Code = configuration.getMongoPackage().Code;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -326,7 +326,7 @@ exports.shouldPerformMapReduceInContextObjects = function(configuration, test) {
   var Code = configuration.getMongoPackage().Code;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
