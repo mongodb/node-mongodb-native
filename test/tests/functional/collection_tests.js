@@ -10,7 +10,7 @@ var Step = require('step');
 exports.shouldCorrectlySaveASimpleDocument = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -45,7 +45,7 @@ exports.shouldCorrectlySaveASimpleDocument = function(configuration, test) {
 exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -191,7 +191,7 @@ exports.shouldAccessToCollections = function(configuration, test) {
 exports.shouldCorrectlyDropCollectionWithDropFunction = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -308,7 +308,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = function(configuration, test) 
   var Collection = configuration.getMongoPackage().Collection;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -341,7 +341,7 @@ exports.shouldCorrectlyExecuteIsCapped = function(configuration, test) {
   var Collection = configuration.getMongoPackage().Collection;
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -372,7 +372,7 @@ exports.shouldCorrectlyExecuteIsCapped = function(configuration, test) {
 exports.shouldCorrectlyExecuteIndexExists = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -767,7 +767,7 @@ exports.shouldCorrectlyUpdateWithNoDocs = function(configuration, test) {
 exports.shouldCorrectlyUpdateASimpleDocument = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -809,7 +809,7 @@ exports.shouldCorrectlyUpdateASimpleDocument = function(configuration, test) {
 exports.shouldCorrectlyUpsertASimpleDocument = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -846,7 +846,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = function(configuration, test) {
 exports.shouldCorrectlyUpdateMultipleDocuments = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -890,7 +890,7 @@ exports.shouldCorrectlyUpdateMultipleDocuments = function(configuration, test) {
 exports.shouldCorrectlyHandleDistinctIndexes = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -930,7 +930,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = function(configuration, test) {
 exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -965,7 +965,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = function(config
 exports.shouldCorrectlyDoSimpleCountExamples = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1147,7 +1147,7 @@ exports.shouldPeformCollectionRemoveWithNoCallback = function(configuration, tes
 exports.shouldCorrectlyRetriveACollectionsIndexes = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1187,7 +1187,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = function(configuration, test
 exports.shouldCorrectlyReturnACollectionsStats = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {

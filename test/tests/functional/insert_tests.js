@@ -48,7 +48,7 @@ var ISODate = function (string) {
  */
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Fetch a collection to insert document into
   db.open(function(err, db) {
@@ -80,7 +80,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = func
  */
 exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   db.open(function(err, db) {
     // Fetch a collection to insert document into
@@ -111,7 +111,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = function(configuration,
  */
 exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   db.open(function(err, db) {
     // Fetch a collection to insert document into
@@ -149,7 +149,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Only run the rest of the code if we have a mongodb server with version >= 1.9.1
     db.open(function(err, db) {

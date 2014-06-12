@@ -120,7 +120,7 @@ exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = function(conf
 exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -157,7 +157,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = function(configuration, test) {
   var Code = configuration.getMongoPackage().Code;
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -247,7 +247,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = function(co
   var Code = configuration.getMongoPackage().Code;
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -338,7 +338,7 @@ exports.shouldCorrectlyDereferenceDbRef = function(configuration, test) {
 exports.shouldCorrectlyRenameCollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -432,7 +432,7 @@ exports.shouldCorrectlyRenameCollection = function(configuration, test) {
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -454,7 +454,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = function(configurat
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -480,7 +480,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
 exports.shouldCorrectlyRetrieveCollectionInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -521,7 +521,7 @@ exports.shouldCorrectlyRetrieveCollectionInformation = function(configuration, t
 exports.shouldCorrectlyRetrieveCollectionNames = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -558,7 +558,7 @@ exports.shouldCorrectlyRetrieveCollectionNames = function(configuration, test) {
 exports.shouldCorrectlyAccessACollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -602,7 +602,7 @@ exports.shouldCorrectlyAccessACollection = function(configuration, test) {
 exports.shouldCorrectlyRetrieveAllCollections = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -687,7 +687,7 @@ exports.shouldCorrectlyDereferenceDbRefExamples = function(configuration, test) 
   var DBRef = configuration.getMongoPackage().DBRef;
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -742,7 +742,7 @@ exports.shouldCorrectlyLogoutFromTheDatabase = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -791,7 +791,7 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -830,7 +830,7 @@ exports.shouldCorrectlyAddUserToDb = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -864,7 +864,7 @@ exports.shouldCorrectlyAddAndRemoveUser = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -911,7 +911,7 @@ exports.shouldCorrectlyAddAndRemoveUser = {
 exports.shouldCorrectlyCreateACollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -943,7 +943,7 @@ exports.shouldCorrectlyCreateACollection = function(configuration, test) {
 exports.shouldCorrectlyExecuteACommandAgainstTheServer = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -990,7 +990,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = function(configuration,
 exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1017,7 +1017,7 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = function(config
 exports.shouldCorrectlyRenameACollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1068,7 +1068,7 @@ exports.shouldCorrectlyRenameACollection = function(configuration, test) {
 exports.shouldCreateComplexIndexOnTwoFieldsDb = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1117,7 +1117,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsDb = function(configuration, test) {
 exports.shouldCreateComplexEnsureIndexDb = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1166,7 +1166,7 @@ exports.shouldCreateComplexEnsureIndexDb = function(configuration, test) {
 exports.shouldCorrectlyReturnCursorInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1213,7 +1213,7 @@ exports.shouldCorrectlyReturnCursorInformation = function(configuration, test) {
 exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1260,7 +1260,7 @@ exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
 exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1308,7 +1308,7 @@ exports.shouldCorrectlyForceReindexOnCollection = function(configuration, test) 
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configuration, test) {
   var db = configuration.newDbInstance({w:0, native_parser:false}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1356,7 +1356,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = function(configurati
 exports.shouldCorrectlyDropTheDatabase = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1473,7 +1473,7 @@ exports.shouldCorrectlyReconnectWhenError = function(configuration, test) {
 exports.shouldCorrectlyRetrieveDbStats = function(configuration, test) {
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {

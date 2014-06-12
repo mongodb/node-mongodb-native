@@ -13,7 +13,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {

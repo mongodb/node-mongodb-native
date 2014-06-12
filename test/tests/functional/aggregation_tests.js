@@ -14,7 +14,7 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -74,7 +74,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -134,7 +134,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -314,7 +314,7 @@ exports['Should correctly return and iterate over all the cursor results'] = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -381,7 +381,7 @@ exports['Should correctly return a cursor and call explain'] = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -445,7 +445,7 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -508,7 +508,7 @@ exports['Should correctly write the results out to a new collection'] = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -567,7 +567,7 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -627,7 +627,7 @@ exports['Should correctly use allowDiskUse when performing an aggregation with a
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
@@ -689,7 +689,7 @@ exports['Should correctly use aggregation as a cursor'] = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {

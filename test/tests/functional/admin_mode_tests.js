@@ -44,7 +44,7 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = function(c
  */
 exports.shouldCorrectlyAuthenticate = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   db.open(function(err, db) {
     // Grab a collection object
@@ -86,7 +86,7 @@ exports.shouldCorrectlyAuthenticate = function(configure, test) {
  */
 exports.accessAdminLevelOperations = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   db.open(function(err, db) {
 
@@ -110,7 +110,7 @@ exports.accessAdminLevelOperations = function(configure, test) {
 exports.shouldCorrectlyRetrieveBuildInfo = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
@@ -152,7 +152,7 @@ exports.shouldCorrectlyRetrieveBuildInfo = function(configure, test) {
 exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
@@ -194,7 +194,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = function(configure, test)
 exports.shouldCorrectlySetDefaultProfilingLevel = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
@@ -242,7 +242,7 @@ exports.shouldCorrectlySetDefaultProfilingLevel = function(configure, test) {
 exports.shouldCorrectlyChangeProfilingLevel = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
@@ -319,7 +319,7 @@ exports.shouldCorrectlyChangeProfilingLevel = function(configure, test) {
 exports.shouldCorrectlySetAndExtractProfilingInfo = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
@@ -383,7 +383,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = function(configure, test) {
 exports.shouldCorrectlyCallValidateCollection = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
   
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
@@ -437,7 +437,7 @@ exports.shouldCorrectlyCallValidateCollection = function(configure, test) {
 exports.shouldCorrectlyPingTheMongoDbInstance = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -478,7 +478,7 @@ exports.shouldCorrectlyPingTheMongoDbInstance = function(configure, test) {
 exports.shouldCorrectlyUseLogoutFunction = function(configure, test) {  
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -520,7 +520,7 @@ exports.shouldCorrectlyUseLogoutFunction = function(configure, test) {
 exports.shouldCorrectlyAddAUserToAdminDb = function(configure, test) {  
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -555,7 +555,7 @@ exports.shouldCorrectlyAddAUserToAdminDb = function(configure, test) {
 exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = function(configure, test) {  
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -599,7 +599,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = function(configure, test
 exports.shouldCorrectlyListAllAvailableDatabases = function(configure, test) {  
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -629,7 +629,7 @@ exports.shouldCorrectlyListAllAvailableDatabases = function(configure, test) {
 exports.shouldCorrectlyRetrieveServerInfo = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {
@@ -679,7 +679,7 @@ exports.shouldCorrectlyRetrieveServerInfo = function(configure, test) {
 exports.shouldCorrectlyRetrieveReplSetGetStatus = function(configure, test) {
   var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db  
   db.open(function(err, db) {

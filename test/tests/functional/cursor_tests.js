@@ -10,7 +10,7 @@ var Step = require('step')
 exports.shouldCorrectlyExecuteToArray = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -75,7 +75,7 @@ exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = function(con
 exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1235,7 +1235,7 @@ exports.shouldCorrectlyInsert5000RecordsWithDateAndSortCorrectlyWithIndex = func
 exports['Should correctly rewind and restart cursor'] = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1624,7 +1624,7 @@ exports['cursor stream pipe']= function(configuration, test) {
 exports.shouldCorrectlyUseCursorCountFunction = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1661,7 +1661,7 @@ exports.shouldCorrectlyUseCursorCountFunction = function(configuration, test) {
 exports.shouldCorrectlyPeformSimpleSorts = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1704,7 +1704,7 @@ exports.shouldCorrectlyPeformSimpleSorts = function(configuration, test) {
 exports.shouldCorrectlyPeformLimitOnCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1741,7 +1741,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = function(configuration, test) {
 exports.shouldCorrectlyPeformSkipOnCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1779,7 +1779,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = function(configuration, test) {
 exports.shouldCorrectlyPeformBatchSizeOnCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1816,7 +1816,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = function(configuration, test) {
 exports.shouldCorrectlyPeformNextObjectOnCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1853,7 +1853,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = function(configuration, test) 
 exports.shouldCorrectlyPeformSimpleExplainCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1889,7 +1889,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = function(configuration, test)
 exports.shouldStreamDocumentsUsingTheStreamFunction = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -1934,7 +1934,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = function(configuration, te
 exports.shouldStreamDocumentsUsingTheIsCloseFunction = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -2340,7 +2340,7 @@ exports.shouldFailToTailANormalCollection = function(configuration, test) {
 exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
@@ -2384,7 +2384,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = function(configuration, tes
 exports.shouldCorrectlyUseFindAndCursorCount = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
 
-  // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
+  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
   // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
