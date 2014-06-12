@@ -395,3 +395,46 @@ exports['Read preferences tag parsing'] = function(configure, test) {
   test.deepEqual([{dc:"ny", rack:"1"}, {dc:"sf", rack:"2"}, {}], object.db_options.read_preference_tags);
   test.done();
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly parse mongodb://[::1]:1234'] = function(configure, test) {
+  // console.dir(parse)
+  var object = parse("mongodb://[::1]:1234");
+  test.equal(1, object.servers.length);
+  test.equal('::1', object.servers[0].host);
+  test.equal('1234', object.servers[0].port);
+  test.equal('admin', object.dbName);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly parse mongodb://[::1]'] = function(configure, test) {
+  // console.dir(parse)
+  var object = parse("mongodb://[::1]");
+  test.equal(1, object.servers.length);
+  test.equal('::1', object.servers[0].host);
+  test.equal('27017', object.servers[0].port);
+  test.equal('admin', object.dbName);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly parse mongodb://localhost,[::1]:27018,[2607:f0d0:1002:51::41]'] = function(configure, test) {
+  // console.dir(parse)
+  var object = parse("mongodb://localhost,[::1]:27018,[2607:f0d0:1002:51::41]");
+  test.equal(3, object.servers.length);
+  test.equal("localhost", object.servers[0].host);
+  test.equal('27017', object.servers[0].port);
+  test.equal("::1", object.servers[1].host);
+  test.equal('27018', object.servers[1].port);
+  test.equal("2607:f0d0:1002:51::41", object.servers[2].host);
+  test.equal('27017', object.servers[2].port);
+  test.equal('admin', object.dbName);
+  test.done();
+}
