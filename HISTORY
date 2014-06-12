@@ -1,3 +1,8 @@
+1.4.6 2014-06-12
+----------------
+- Added better support for MongoClient IP6 parsing (Issue #1181, https://github.com/micovery)
+- Remove options check on index creation (Issue #1179, Issue #1183, https://github.com/jdesboeufs, https://github.com/rubenvereecken)
+- Added missing type check before calling optional callback function (Issue #1180)
 
 1.4.5 2014-05-21
 ----------------
