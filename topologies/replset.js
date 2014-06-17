@@ -5,6 +5,7 @@ var inherits = require('util').inherits
   , ReadPreference = require('./read_preference')
   , MongoError = require('../error')
   , Ping = require('./strategies/ping')
+  , Session = require('./session')
   , Logger = require('../connection/logger');
 
 var DISCONNECTED = 'disconnected';
@@ -219,6 +220,9 @@ var ReplSet = function(seedlist, options) {
       throw new MongoError("seedlist entry must contain a host and port");
   });
 
+  // High availability process running
+  var highAvailabilityProcessRunning = false;
+
   //
   // Add server to the list if it does not exist
   var addToListIfNotExist = function(list, server) {
@@ -269,6 +273,10 @@ var ReplSet = function(seedlist, options) {
   //
   var replicasetInquirer = function(norepeat) {    
     if(state == DESTROYED) return
+    // Process already running don't rerun
+    if(highAvailabilityProcessRunning) return;
+    // Started processes
+    highAvailabilityProcessRunning = true;
     if(logger.isInfo()) logger.info(f('[%s] monitoring process running %s', id, JSON.stringify(replState)));    
 
     // Unique HA id to identify the current look running
@@ -308,6 +316,8 @@ var ReplSet = function(seedlist, options) {
     if(servers.length == 0 && state == CONNECTED) {
       // Emit ha process end
       self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
+      // Ended highAvailabilityProcessRunning
+      highAvailabilityProcessRunning = false;
       // Restart ha process
       if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
       return;
@@ -331,6 +341,9 @@ var ReplSet = function(seedlist, options) {
           // We had an error and have no more servers to inspect, schedule a new check
           if(err && serversLeft == 0) {
             self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
+            // Ended highAvailabilityProcessRunning
+            highAvailabilityProcessRunning = false;
+            // Return the replicasetInquirer
             if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
             return;
           }
@@ -369,6 +382,8 @@ var ReplSet = function(seedlist, options) {
             if(serversLeft > 0) return;
             // Emit ha process end
             self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
+            // Ended highAvailabilityProcessRunning
+            highAvailabilityProcessRunning = false;
             // Let's keep monitoring
             if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
             return;
@@ -391,6 +406,8 @@ var ReplSet = function(seedlist, options) {
                 if(serversLeft == 0) {
                   // Emit ha process end
                   self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
+                  // Ended highAvailabilityProcessRunning
+                  highAvailabilityProcessRunning = false;
                   // Let's keep monitoring
                   if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
                   return;
@@ -416,12 +433,6 @@ var ReplSet = function(seedlist, options) {
   var errorHandlerTemp = function(err, server) {
     // Log the information
     if(logger.isInfo()) logger.info(f('[%s] server %s disconnected', id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
-
-    // Incompatible server version emit error
-    if(err && server.lastIsMaster() && typeof server.lastIsMaster().minWireVersion != 'number') {
-      if(logger.isError()) logger.error(f('[%s] server %s version is unsupported', id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
-      return self.emit('error', err, server);
-    }
     
     // Remove any non used handlers
     ['error', 'close', 'timeout', 'connect'].forEach(function(e) {
@@ -773,7 +784,7 @@ var ReplSet = function(seedlist, options) {
         // We are done
         if(count == 0) {
           if(authErr) return callback(authErr, false);
-          callback(null, authenticated);
+          callback(null, new Session({}, self));
         }
       }]);
       

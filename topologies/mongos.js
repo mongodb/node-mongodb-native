@@ -4,6 +4,7 @@ var inherits = require('util').inherits
   , Server = require('./server')
   , Logger = require('../connection/logger')
   , ReadPreference = require('./read_preference')
+  , Session = require('./session')
   , MongoError = require('../error');
 
 var DISCONNECTED = 'disconnected';
@@ -232,12 +233,7 @@ var Mongos = function(seedlist, options) {
     return function(err, server) {
       // Log the information
       if(logger.isInfo()) logger.info(f('server %s disconnected with error %s',  server.name, JSON.stringify(err)));
-      // Incompatible server version emit error
-      if(err && server.lastIsMaster() && typeof server.lastIsMaster().minWireVersion != 'number') {
-        if(logger.isError()) logger.error(f('server %s version is unsupported',  server.name));
-        return self.emit('error', err, server);
-      }
-      
+
       // Remove any non used handlers
       ['error', 'close', 'timeout', 'connect'].forEach(function(e) {
         server.removeAllListeners(e);
@@ -259,20 +255,20 @@ var Mongos = function(seedlist, options) {
   var errorHandler = function(err, server) {
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', server.name, JSON.stringify(err)));
     mongosState.disconnected(server);
-    self.emit('left', server);    
+    self.emit('left', 'mongos', server);    
     if(emitError) self.emit('error', err, server);
   }
 
   var timeoutHandler = function(err, server) {
     if(logger.isInfo()) logger.info(f('server %s timed out', server.name));
     mongosState.disconnected(server);
-    self.emit('left', server);
+    self.emit('left', 'mongos', server);
   }
 
   var closeHandler = function(err, server) {
     if(logger.isInfo()) logger.info(f('server %s closed', server.name));
     mongosState.disconnected(server);
-    self.emit('left', server);
+    self.emit('left', 'mongos', server);
   }
 
   // Connect handler
@@ -292,6 +288,9 @@ var Mongos = function(seedlist, options) {
       server.once('parseError', timeoutHandler);
       server.on('message', messageHandler);        
     }
+
+    // Emit joined event
+    self.emit('joined', 'mongos', server);
 
     // Add to list connected servers
     mongosState.connected(server);
@@ -489,7 +488,7 @@ var Mongos = function(seedlist, options) {
         // We are done
         if(count == 0) {
           if(authErr) return callback(authErr, false);
-          callback(null, authenticated);
+          callback(null, new Session({}, self));
         }
       }]);
       
