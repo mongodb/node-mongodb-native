@@ -21,7 +21,8 @@
     "integra": "0.1.1",
     "mkdirp": "latest",
     "rimraf": "2.2.6",
-    "optimist": "latest"
+    "optimist": "latest",
+    "jsdoc": "3.3.0-alpha8"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",

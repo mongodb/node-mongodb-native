@@ -128,6 +128,59 @@ exports['Should correctly execute find'] = {
   }
 }
 
+exports['Should correctly execute find with limit and skip'] = {
+  metadata: {
+    requires: {}
+  },
+
+  test: function(configuration, test) {
+    configuration.newTopology(function(err, server) {
+      var ReadPreference = configuration.require.ReadPreference;
+
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Execute the write
+        _server.insert(f("%s.inserts12", configuration.db), [{a:1}, {a:2}, {a:3}], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, results) {
+          test.equal(null, err);
+
+          // Work around 2.4.x issue with mongos reporting write done but it has
+          // not actually been written to the primary in the shard yet
+          setTimeout(function() {
+            // Execute find
+            var cursor = _server.cursor(f("%s.inserts12", configuration.db), {
+                find: f("%s.inserts12", configuration.db)
+              , query: {}
+              , limit: 1
+              , skip: 1
+            }, {readPreference: ReadPreference.primary});
+
+            // Execute next
+            cursor.next(function(err, d) {
+              test.equal(null, err)
+              test.equal(2, d.a);
+
+              // Execute next
+              cursor.next(function(err, d) {
+                test.equal(null, err)
+                test.equal(null, d);
+                // Destroy the server connection        
+                _server.destroy();
+                // Finish the test
+                test.done();
+              });
+            });
+          }, 1000)
+        });
+      })
+
+      // Start connection
+      server.connect();
+    });
+  }
+}
+
 exports['Should correctly execute aggregation command'] = {
   metadata: {
     requires: {

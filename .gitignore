@@ -13,6 +13,7 @@ logs
 results
 db
 data
+out
 
 npm-debug.log
 node_modules
