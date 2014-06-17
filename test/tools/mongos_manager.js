@@ -83,7 +83,6 @@ var MongosManager = function(mongosOptions) {
       }
     }
 
-    console.dir(command.join(" "))
     return command.join(" ");
   }
 

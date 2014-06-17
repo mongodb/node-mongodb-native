@@ -208,16 +208,11 @@ var ShardingManager = function(mongosOptions) {
     // Start up sharded system
     var start = function() {
       setTimeout(function() {
-        console.log("====================== replicasets START")
         startReplicasets(function() {
-          console.log("====================== replicasets READY")
           startConfigs(function() {
-            console.log("====================== configs READY")
             startMongoses(function() {
-              console.log("====================== mongooses READY")
               // Set up the sharded system
               setupShards(function() {
-                console.log("====================== shard setup READY")
                 callback();
               });
             })
@@ -265,7 +260,6 @@ var ShardingManager = function(mongosOptions) {
     // Stop all managers
     for(var i = 0; i < managers.length; i++) {
       managers[i].stop(options, function(err) {
-        if(err) throw err;
         totalLeft = totalLeft - 1;
 
         if(totalLeft == 0) {
@@ -296,6 +290,33 @@ var ShardingManager = function(mongosOptions) {
         }
       });
     }
+  }
+
+  this.remove = function(t, options, callback) {
+    if(typeof options == 'function') {
+      callback = options;
+      options = {};
+    }
+
+    var index = options.index || 0;
+    // If we are killing a mongoose
+    if(t == 'mongos') {
+      mongoses[index].stop(function(err) {
+        callback(err, mongoses[index]);
+      });
+    }
+  }
+
+  this.add = function(server, options, callback) {
+    if(typeof options == 'function') {
+      callback = options;
+      options = {};
+    }
+
+    // Start the server instance
+    server.start(function(err) {
+      callback(err);
+    });
   }
 }
 

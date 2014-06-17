@@ -93,6 +93,15 @@ var Configuration = function(options) {
         callback();
       },
 
+      newTopology: function(options, callback) {
+        if(typeof options == 'function') {
+          callback = options;
+          options = {};
+        }
+
+        callback(null, topology(this, mongo));
+      },
+
       newConnection: function(options, callback) {
         if(typeof options == 'function') {
           callback = options;
@@ -129,16 +138,16 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    // '/test/tests/functional/server_tests.js'
-  // , '/test/tests/functional/replset_tests.js'
+    '/test/tests/functional/server_tests.js'
+  , '/test/tests/functional/operations_tests.js'
   , '/test/tests/functional/replset_failover_tests.js'
-  // , '/test/tests/functional/basic_auth_tests.js'
-  // , '/test/tests/functional/extend_pick_strategy_tests.js'
+  , '/test/tests/functional/basic_auth_tests.js'
+  , '/test/tests/functional/extend_pick_strategy_tests.js'
   , '/test/tests/functional/mongos_tests.js'
-  // , '/test/tests/functional/extend_cursor_tests.js'
-  // , '/test/tests/functional/legacy_support_tests.js'
-  // , '/test/tests/functional/pool_tests.js'
-  // , '/test/tests/functional/connection_tests.js'
+  , '/test/tests/functional/extend_cursor_tests.js'
+  , '/test/tests/functional/legacy_support_tests.js'
+  , '/test/tests/functional/pool_tests.js'
+  , '/test/tests/functional/connection_tests.js'
 ]
 
 // Add all the tests to run
@@ -181,8 +190,8 @@ runner.on('exit', function(errors, results) {
 });
 
 // Set Logger level for driver
-Logger.setLevel('info');
-// Logger.setLevel('error');
+// Logger.setLevel('info');
+Logger.setLevel('error');
 // Logger.setLevel('debug');
 // Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
 // Logger.filter('class', ['ReplSet', 'Server', 'Pool', 'Connection']);

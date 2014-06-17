@@ -150,8 +150,10 @@ var ServerManager = function(serverOptions) {
 
     // If we have decided to remove the directory
     if(options.purge) {
-      rimraf.sync(serverOptions.dbpath);
-      mkdirp.sync(serverOptions.dbpath);
+      try {
+        rimraf.sync(serverOptions.dbpath);
+        mkdirp.sync(serverOptions.dbpath);        
+      } catch(err) {}
     }
 
     // Build startup command
