@@ -106,76 +106,80 @@ exports['Should correctly execute write using mongos'] = {
   }
 }
 
-// exports['Should correctly recover from mongos going down'] = {
-//   metadata: {
-//     requires: {
-//       topology: "mongos"
-//     }
-//   },
+exports['Should correctly remove mongos and re-add it'] = {
+  metadata: {
+    requires: {
+      topology: "mongos"
+    }
+  },
 
-//   test: function(configuration, test) {
-//     var Mongos = configuration.require.Mongos;
-//     var Logger = configuration.require.Logger;
+  test: function(configuration, test) {
+    var Mongos = configuration.require.Mongos
+      , ReadPreference = configuration.require.ReadPreference;
+    // Attempt to connect
+    // Attempt to connect
+    var server = new Mongos([{
+        host: configuration.host
+      , port: configuration.port
+    }, {
+        host: configuration.host
+      , port: configuration.port + 1
+    }])
 
-//     // Set info level
-//     Logger.setLevel('info');
+    // The state
+    var joined = 0;
+    var left = 0;
 
-//     // Attempt to connect
-//     var server = new Mongos([{
-//         host: configuration.host
-//       , port: configuration.port
-//     }, {
-//         host: configuration.host
-//       , port: configuration.port + 1
-//     }])
+    // Add event listeners
+    server.on('connect', function(_server) {
+      _server.on('joined', function(t, s) {
+        joined = joined + 1;
+      });
 
-//     // // Attempt to connect
-//     // var server = new Mongos([{
-//     //     host: configuration.host
-//     //   , port: configuration.port
-//     // }]);
+      _server.on('left', function(t, s) {
+        left = left + 1;
+      });
 
-//     console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-//     console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-//     console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+      var interval = setInterval(function() {
+        // We are done
+        if(joined == 2 && left == 2) {
+          clearInterval(interval);
+          server.destroy();
+          return test.done();
+        }
 
-//     // Add event listeners
-//     server.on('connect', function(_server) {
-//       // Execute the write
-//       _server.insert(f("%s.inserts_mongos2", configuration.db), [{a:1}], {
-//         writeConcern: {w:1}, ordered:true
-//       }, function(err, results) {
-//         setInterval(function() {
-//     console.log("================== 0")
-//           try {
-//             // Execute find
-//             var cursor = _server.cursor(f("%s.inserts_mongos2", configuration.db), {
-//                 find: f("%s.inserts_repl2", configuration.db)
-//               , query: {}
-//             });
-//             console.dir(_server)
+        // Execute the write
+        _server.insert(f("%s.inserts_mongos2", configuration.db), [{a:1}], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, results) {
+          test.equal(null, err);
+        });
+      }, 1000)
 
-//             // Execute next
-//             cursor.next(function(err, d) {            
-//               console.log("========================= tick")
-//               console.dir(err)
-//               console.dir(d)
-//             });            
-//           } catch(err) {
-//     console.log("================== 1")
-//     console.dir(err)
-//           }
-//         }, 1000);
-//         // test.equal(null, err);
-//         // test.equal(1, results.result.n);
-//         // // Destroy the connection
-//         // _server.destroy();
-//         // // Finish the test
-//         // test.done();
-//       });
-//     })
+      setTimeout(function() {
+        // Shutdown the first secondary
+        configuration.manager.remove('mongos', {index: 0}, function(err, serverDetails) {
+          if(err) console.dir(err);
 
-//     // Start connection
-//     server.connect();
-//   }
-// }
+          setTimeout(function() {
+            // Shutdown the second secondary
+            configuration.manager.add(serverDetails, function(err, result) {
+              // Shutdown the first secondary
+              configuration.manager.remove('mongos', {index: 1}, function(err, serverDetails) {
+                if(err) console.dir(err);
+
+                setTimeout(function() {
+                  // Shutdown the second secondary
+                  configuration.manager.add(serverDetails, function(err, result) {});          
+                }, 2000)
+              });
+            });
+          }, 2000)
+        });
+      }, 2000);
+    });
+
+    // Start connection
+    server.connect();
+  }
+}

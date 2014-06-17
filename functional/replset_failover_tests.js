@@ -64,7 +64,7 @@ exports['Should correctly recover from secondary shutdowns'] = {
 
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
-      , ReadPreference = configuration.require.ReadPreference;;
+      , ReadPreference = configuration.require.ReadPreference;
     // Attempt to connect
     var server = new ReplSet([{
         host: configuration.host
