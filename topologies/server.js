@@ -56,7 +56,36 @@ var bindToCurrentDomain = function(callback) {
 }
 
 /**
- * Server implementation
+ * Creates a new Server instance
+ * @class
+ * @param {boolean} [options.reconnect=true] Server will attempt to reconnect on loss of connection
+ * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
+ * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
+ * @param {boolean} [options.emitError=false] Server will emit errors events
+ * @param {Cursor} [options.cursorFactory=Cursor] The cursor factory class used for all query cursors
+ * @param {string} options.host The server host
+ * @param {number} options.port The server port
+ * @param {number} [options.size=5] Server connection pool size
+ * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
+ * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
+ * @param {boolean} [options.noDelay=true] TCP Connection no delay
+ * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
+ * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
+ * @param {boolean} [options.ssl=false] Use SSL for connection
+ * @param {Buffer} [options.ca] SSL Certificate store binary buffer
+ * @param {Buffer} [options.cert] SSL Certificate binary buffer
+ * @param {Buffer} [options.key] SSL Key file binary buffer
+ * @param {string} [options.passPhrase] SSL Certificate pass phrase
+ * @param {boolean} [options.rejectUnauthorized=false] Reject unauthorized server certificates
+ * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @return {Server} A cursor instance
+ * @fires Server#connect
+ * @fires Server#close
+ * @fires Server#error
+ * @fires Server#timeout
+ * @fires Server#parseError
+ * @fires Server#reconnect
  */
 var Server = function(options) {
   var self = this;
@@ -111,7 +140,7 @@ var Server = function(options) {
   var serverDetails = {
       host: options.host
     , port: options.port
-    , name: f("%s:%s", options.host, options.port)
+    , name: options.port ? f("%s:%s", options.host, options.port) : options.host
   }
 
   // Set error properties
@@ -162,7 +191,7 @@ var Server = function(options) {
 
       // We need to ensure we have re-authenticated
       var keys = Object.keys(authProviders);
-      if(keys.length == 0) return self.emit("reconnect", self);
+      if(keys.length == 0) return self.emit('reconnect', self);
 
       // Execute all providers
       var count = keys.length;
@@ -172,7 +201,7 @@ var Server = function(options) {
           count = count - 1;
           // We are done, emit reconnect event
           if(count == 0) {
-            return self.emit("reconnect", self);
+            return self.emit('reconnect', self);
           }
         });
       }
@@ -284,12 +313,19 @@ var Server = function(options) {
     });
   }
 
-  // Return last IsMaster document
+  /**
+   * Returns the last known ismaster document for this server
+   * @method
+   * @return {object}
+   */
   this.lastIsMaster = function() {
     return ismaster;
   }
 
-  // connect
+  /**
+   * Initiate server connect
+   * @method
+   */
   this.connect = function() {
     // Destroy existing pool
     if(pool) {
@@ -558,7 +594,7 @@ var Server = function(options) {
 
   // Create a cursor for the command
   this.cursor = function(ns, cmd, options) {
-    return new Cursor(bson, ns, cmd, options, pool.get(), callbacks, options || {});
+    return new Cursor(bson, ns, cmd, pool.get(), callbacks, options || {});
   }
 
   var slaveOk = function(r) {
@@ -568,5 +604,55 @@ var Server = function(options) {
 }
 
 inherits(Server, EventEmitter);
+
+/**
+ * This is a cursor results callback
+ *
+ * @callback resultCallback
+ * @param {error} error An error object. Set to null if no error present
+ * @param {object} document
+ */
+
+/**
+ * A server connect event, used to verify that the connection is up and running
+ *
+ * @event Server#connect
+ * @type {Server}
+ */
+
+/**
+ * The server connection closed, all pool connections closed
+ *
+ * @event Server#close
+ * @type {Server}
+ */
+
+/**
+ * The server connection caused an error, all pool connections closed
+ *
+ * @event Server#error
+ * @type {Server}
+ */
+
+/**
+ * The server connection timed out, all pool connections closed
+ *
+ * @event Server#timeout
+ * @type {Server}
+ */
+
+/**
+ * The driver experienced an invalid message, all pool connections closed
+ *
+ * @event Server#parseError
+ * @type {Server}
+ */
+
+/**
+ * The server reestablished the connection
+ *
+ * @event Server#reconnect
+ * @type {Server}
+ */
 
 module.exports = Server;
