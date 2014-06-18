@@ -155,12 +155,12 @@ exports['Should handle Error thrown during operation'] = {
       db.collection('throwerrorduringoperation').insert([{a:1}, {a:1}], function(err, result) {
         test.equal(null, err);
 
-        process.nextTick(function() {
+        // process.nextTick(function() {
           db.collection('throwerrorduringoperation').find().toArray(function(err, result) {
             // Throws error
             err = a;
           });
-        });
+        // });
       });
     });
   }
