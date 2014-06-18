@@ -116,6 +116,35 @@ var State = function(readPreferenceStrategies) {
   }
 }
 
+/**
+ * Creates a new Mongos instance
+ * @class
+ * @param {array} seedlist A list of seeds for the replicaset
+ * @param {number} [options.reconnectTries=30] Reconnect retries for HA if no servers available
+ * @param {number} [options.haInterval=10000] The High availability period for replicaset inquiry
+ * @param {boolean} [options.emitError=false] Server will emit errors events
+ * @param {Cursor} [options.cursorFactory=Cursor] The cursor factory class used for all query cursors
+ * @param {string} options.host The server host
+ * @param {number} options.port The server port
+ * @param {number} [options.size=5] Server connection pool size
+ * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
+ * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
+ * @param {boolean} [options.noDelay=true] TCP Connection no delay
+ * @param {number} [options.connectionTimeout=1000] TCP Connection timeout setting
+ * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
+ * @param {boolean} [options.ssl=false] Use SSL for connection
+ * @param {Buffer} [options.ca] SSL Certificate store binary buffer
+ * @param {Buffer} [options.cert] SSL Certificate binary buffer
+ * @param {Buffer} [options.key] SSL Key file binary buffer
+ * @param {string} [options.passPhrase] SSL Certificate pass phrase
+ * @param {boolean} [options.rejectUnauthorized=false] Reject unauthorized server certificates
+ * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @return {Mongos} A cursor instance
+ * @fires Mongos#connect
+ * @fires Mongos#joined
+ * @fires Mongos#left
+ */
 var Mongos = function(seedlist, options) {  
   var self = this;
   options = options || {};
@@ -128,7 +157,7 @@ var Mongos = function(seedlist, options) {
 
   // Options
   var reconnectTries = options.reconnectTries || 30;
-  var reconnectInterval = options.reconnectInterval || 2000;
+  var haInterval = options.haInterval || 2000;
   // Set up the connection timeout for the options
   options.connectionTimeout = options.connectionTimeout || 1000;
 
@@ -178,7 +207,7 @@ var Mongos = function(seedlist, options) {
     
     // Let's query any disconnected proxies
     var disconnectedServers = mongosState.disconnectedServers();
-    if(disconnectedServers.length == 0) return setTimeout(replicasetInquirer, reconnectInterval);
+    if(disconnectedServers.length == 0) return setTimeout(replicasetInquirer, haInterval);
     
     // Count of connections waiting to be connected
     var connectionCount = disconnectedServers.length;
@@ -204,7 +233,7 @@ var Mongos = function(seedlist, options) {
     }
 
     // Let's keep monitoring but wait for possible timeout to happen
-    return setTimeout(replicasetInquirer, options.connectionTimeout + reconnectInterval);
+    return setTimeout(replicasetInquirer, options.connectionTimeout + haInterval);
   }
 
   //
@@ -255,6 +284,7 @@ var Mongos = function(seedlist, options) {
   var errorHandler = function(err, server) {
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', server.name, JSON.stringify(err)));
     mongosState.disconnected(server);
+    if(mongosState.connectedServers().length == 0) state = DISCONNECTED;
     self.emit('left', 'mongos', server);    
     if(emitError) self.emit('error', err, server);
   }
@@ -262,12 +292,14 @@ var Mongos = function(seedlist, options) {
   var timeoutHandler = function(err, server) {
     if(logger.isInfo()) logger.info(f('server %s timed out', server.name));
     mongosState.disconnected(server);
+    if(mongosState.connectedServers().length == 0) state = DISCONNECTED;
     self.emit('left', 'mongos', server);
   }
 
   var closeHandler = function(err, server) {
     if(logger.isInfo()) logger.info(f('server %s closed', server.name));
     mongosState.disconnected(server);
+    if(mongosState.connectedServers().length == 0) state = DISCONNECTED;
     self.emit('left', 'mongos', server);
   }
 
@@ -302,12 +334,13 @@ var Mongos = function(seedlist, options) {
     }
   }
 
-  //
-  // Connection method
-  //
+  /**
+   * Initiate server connect
+   * @method
+   */
   this.connect = function() {
     // Start replicaset inquiry process
-    setTimeout(replicasetInquirer, reconnectInterval);
+    setTimeout(replicasetInquirer, haInterval);
     // For all entries in the seedlist build a server instance
     seedlist.forEach(function(e) {
       // Clone options
@@ -351,14 +384,21 @@ var Mongos = function(seedlist, options) {
     }
   }
 
-  // destroy the server instance
+  /**
+   * Destroy the server connection
+   * @method
+   */
   this.destroy = function() {
     state = DESTROYED;
     // Destroy the state
     mongosState.destroy();
   }
 
-  // is the server connected
+  /**
+   * Figure out if the server is connected
+   * @method
+   * @return {boolean}
+   */
   this.isConnected = function() {
     return mongosState.isConnected();
   }
@@ -391,17 +431,41 @@ var Mongos = function(seedlist, options) {
     server[op](ns, ops, options, callback);          
   }
 
-  // Execute a write
+  /**
+   * Insert one or more documents
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of documents to insert
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
   this.insert = function(ns, ops, options, callback) {
     executeWriteOperation('insert', ns, ops, options, callback);
   }
 
-  // Execute a write
+  /**
+   * Perform one or more update operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of updates
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
   this.update = function(ns, ops, options, callback) {
     executeWriteOperation('update', ns, ops, options, callback);
   }
 
-  // Execute a write
+  /**
+   * Perform one or more remove operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of removes
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
   this.remove = function(ns, ops, options, callback) {
     executeWriteOperation('remove', ns, ops, options, callback);
   }    
@@ -412,7 +476,15 @@ var Mongos = function(seedlist, options) {
     if(options.readPreference == null) return cmd;
   }
 
-  // Execute a command
+  /**
+   * Execute a command
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {object} cmd The command hash
+   * @param {object} [options.readPreference] Specify read preference if command supports it
+   * @param {object} [options.connection] Specify connection object to execute command against
+   * @param {opResultCallback} callback A callback function
+   */
   this.command = function(ns, cmd, options, callback) {
     if(typeof options == 'function') {
       callback = options;
@@ -435,7 +507,20 @@ var Mongos = function(seedlist, options) {
     server.command(ns, cmd, options, callback);      
   }
 
-  // Create a cursor for the command
+  /**
+   * Perform one or more remove operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
+   * @param {object} [options.batchSize=0] Batchsize for the operation
+   * @param {array} [options.documents=[]] Initial documents list for cursor
+   * @param {boolean} [options.tailable=false] Tailable flag set
+   * @param {boolean} [options.oplogReply=false] oplogReply flag set
+   * @param {boolean} [options.awaitdata=false] awaitdata flag set
+   * @param {boolean} [options.exhaust=false] exhaust flag set
+   * @param {boolean} [options.partial=false] partial flag set
+   * @param {opResultCallback} callback A callback function
+   */
   this.cursor = function(ns, cmd, options) {
     if(typeof options == 'function') {
       callback = options;
@@ -459,9 +544,14 @@ var Mongos = function(seedlist, options) {
     return server.cursor(ns, cmd, options);
   }
 
-  //
-  // Authentication
-  //
+  /**
+   * Authenticate using a specified mechanism
+   * @method
+   * @param {string} mechanism The Auth mechanism we are invoking
+   * @param {string} db The db we are invoking the mechanism against
+   * @param {...object} param Parameters for the specific mechanism
+   * @param {authResultCallback} callback A callback function
+   */
   this.auth = function(mechanism, db) {
     var args = Array.prototype.slice.call(arguments, 2);
     var callback = args.pop();
@@ -501,22 +591,53 @@ var Mongos = function(seedlist, options) {
   // Plugin methods
   //
 
-  // Add additional picking strategy
+  /**
+   * Add custom read preference strategy
+   * @method
+   * @param {string} name Name of the read preference strategy
+   * @param {object} strategy Strategy object instance
+   */
   this.addReadPreferenceStrategy = function(name, strategy) {
     if(readPreferenceStrategies == null) readPreferenceStrategies = {};
     readPreferenceStrategies[name] = strategy;
   }
 
+  /**
+   * Add custom authentication mechanism
+   * @method
+   * @param {string} name Name of the authentication mechanism
+   * @param {object} provider Authentication object instance
+   */
   this.addAuthProvider = function(name, provider) {
     authProviders[name] = provider;
-  }
-
-  // Match
-  this.equals = function(server) {    
-    return false;
   }
 }
 
 inherits(Mongos, EventEmitter);
+
+/**
+ * A mongos connect event, used to verify that the connection is up and running
+ *
+ * @event Mongos#connect
+ * @type {Mongos}
+ */
+
+/**
+ * A server member left the mongos list
+ *
+ * @event Mongos#left
+ * @type {Mongos}
+ * @param {string} type The type of member that left (mongos)
+ * @param {Server} server The server object that left
+ */
+
+/**
+ * A server member joined the mongos list
+ *
+ * @event Mongos#joined
+ * @type {Mongos}
+ * @param {string} type The type of member that left (mongos)
+ * @param {Server} server The server object that joined
+ */
 
 module.exports = Mongos;

@@ -27,30 +27,77 @@ var cloneOptions = function(options) {
   return opts;
 }
 
-//
-// Contains the state
+/**
+ * Creates a new Replicaset State object
+ * @class
+ * @property {object} primary Primary property
+ * @property {array} secondaries List of secondaries
+ * @property {array} arbiters List of arbiters
+ * @return {State} A cursor instance
+ */
 var State = function() {
-  this.secondaries = [];
-  this.arbiters = [];
-  this.primary = null;
+  var secondaries = [];
+  var arbiters = [];
+  var primary = null;
 
+  Object.defineProperty(this, 'primary', {
+      enumerable:true
+    , get: function() { return primary; }
+  });
+
+  Object.defineProperty(this, 'secondaries', {
+      enumerable:true
+    , get: function() { return secondaries.slice(0); }
+  });
+
+  Object.defineProperty(this, 'arbiters', {
+      enumerable:true
+    , get: function() { return arbiters.slice(0); }
+  });
+
+  /**
+   * Is there a secondary connected
+   * @method
+   * @return {boolean}
+   */
   this.isSecondaryConnected = function() {    
-    return this.secondaries.length > 0 && this.secondaries[0].isConnected();
+    for(var i = 0; i < secondaries.length; i++) {
+      if(secondaries[i].isConnected()) return true;
+    }
+
+    return false;
   }
 
+  /**
+   * Is there a primary connection
+   * @method
+   * @return {boolean}
+   */
   this.isPrimaryConnected = function() {
-    return this.primary != null && this.primary.isConnected();
+    return primary != null && primary.isConnected();
   }
 
+  /**
+   * Is the given address the primary
+   * @method
+   * @param {string} address Server address
+   * @return {boolean}
+   */
   this.isPrimary = function(address) {
-    if(this.primary == null) return false;
-    return this.primary && this.primary.equals(address);
+    if(primary == null) return false;
+    return primary && primary.equals(address);
   }
 
+  /**
+   * Is the given address a primary
+   * @method
+   * @param {string} address Server address
+   * @return {boolean}
+   */
   this.isSecondary = function(address) {
     // Check if the server is a secondary at the moment
-    for(var i = 0; i < this.secondaries.length; i++) {
-      if(this.secondaries[i].equals(address)) {
+    for(var i = 0; i < secondaries.length; i++) {
+      if(secondaries[i].equals(address)) {
         return true;
       }
     }
@@ -58,46 +105,67 @@ var State = function() {
     return false;
   }
 
+  /**
+   * Does the replicaset contain this server
+   * @method
+   * @param {string} address Server address
+   * @return {boolean}
+   */
   this.contains = function(address) {
-    if(this.primary && this.primary.equals(address)) return true;
-    for(var i = 0; i < this.secondaries.length; i++) {
-      if(this.secondaries[i].equals(address)) return true;
+    if(primary && primary.equals(address)) return true;
+    for(var i = 0; i < secondaries.length; i++) {
+      if(secondaries[i].equals(address)) return true;
     }
 
     return false;
   }
 
+  /**
+   * Clean out all dead connections
+   * @method
+   */
   this.clean = function() {
-    if(this.primary != null && !this.primary.isConnected()) {
-      this.primary = null;
+    if(primary != null && !primary.isConnected()) {
+      primary = null;
     }
 
     // Filter out disconnected servers
-    this.secondaries = this.secondaries.filter(function(s) {
+    secondaries = secondaries.filter(function(s) {
       return s.isConnected();
     });
 
     // Filter out disconnected servers
-    this.arbiters = this.arbiters.filter(function(s) {
+    arbiters = arbiters.filter(function(s) {
       return s.isConnected();
     });
   }
 
+  /**
+   * Destroy state
+   * @method
+   */
   this.destroy = function() {
-    if(this.primary) this.primary.destroy();
-    this.secondaries.forEach(function(s) {
+    state = DESTROYED;
+    if(primary) primary.destroy();
+    secondaries.forEach(function(s) {
       s.destroy();
     });
   }
 
+  /**
+   * Remove server from state
+   * @method
+   * @param {Server} Server to remove
+   * @return {string} Returns type of server removed (primary|secondary)
+   */
   this.remove = function(server) {
-    if(this.primary && this.primary.equals(server)) {
-      this.primary = null;
+    if(primary && primary.equals(server)) {
+      primary = null;
       return 'primary';
     }
 
     // Filter out the server from the secondaries
-    this.secondaries = this.secondaries.filter(function(s) {
+    secondaries = secondaries.filter(function(s) {
       return !s.equals(server);
     });
 
@@ -105,11 +173,17 @@ var State = function() {
     return 'secondary';
   }
 
+  /**
+   * Get the server by name
+   * @method
+   * @param {string} address Server address
+   * @return {Server}
+   */
   this.get = function(server) {
     var found = false;
     // All servers to search
-    var servers = this.primary ? [this.primary] : [];
-    servers = servers.concat(this.secondaries);
+    var servers = primary ? [primary] : [];
+    servers = servers.concat(secondaries);
     // Locate the server
     for(var i = 0; i < servers.length; i++) {
       if(servers[i].equals(server)) {
@@ -118,26 +192,41 @@ var State = function() {
     }
   }
 
+  /**
+   * Get all the servers in the set
+   * @method
+   * @return {array}
+   */
   this.getAll = function() {
     var servers = [];
-    if(this.primary) servers.push(this.primary);
-    return servers.concat(this.secondaries);
+    if(primary) servers.push(primary);
+    return servers.concat(secondaries);
   }
 
+  /**
+   * Return JSON object
+   * @method
+   * @return {object}
+   */
   this.toJSON = function() {
     return {
-        primary: this.primary ? this.primary.lastIsMaster().me : null
-      , secondaries: this.secondaries.map(function(s) {
+        primary: primary ? primary.lastIsMaster().me : null
+      , secondaries: secondaries.map(function(s) {
         return s.lastIsMaster().me
       })
     }
   }
 
+  /**
+   * Promote server to primary
+   * @method
+   * @param {Server} server Server we wish to promote
+   */
   this.promotePrimary = function(server) {
     var server = this.get(server);
     // Server does not exist in the state, add it as new primary
     if(server == null) {
-      this.primary = server;
+      primary = server;
       return;
     }
 
@@ -145,7 +234,7 @@ var State = function() {
     // Remove the server first
     this.remove(server);
     // Set as primary
-    this.primary = server;
+    primary = server;
   }
 
   var add = function(list, server) {
@@ -157,15 +246,56 @@ var State = function() {
     list.push(server);    
   }
 
+  /**
+   * Add server to list of secondaries
+   * @method
+   * @param {Server} server Server we wish to promote
+   */
   this.addSecondary = function(server) {
-    add(this.secondaries, server);
+    add(secondaries, server);
   }
 
+  /**
+   * Add server to list of arbiters
+   * @method
+   * @param {Server} server Server we wish to promote
+   */
   this.addArbiter = function(server) {
-    add(this.arbiters, server);
+    add(arbiters, server);
   }
 }
 
+/**
+ * Creates a new Replset instance
+ * @class
+ * @param {array} seedlist A list of seeds for the replicaset
+ * @param {boolean} options.setName The Replicaset set name
+ * @param {boolean} [options.secondaryOnlyConnectionAllowed=false] Allow connection to a secondary only replicaset
+ * @param {number} [options.haInterval=10000] The High availability period for replicaset inquiry
+ * @param {boolean} [options.emitError=false] Server will emit errors events
+ * @param {Cursor} [options.cursorFactory=Cursor] The cursor factory class used for all query cursors
+ * @param {string} options.host The server host
+ * @param {number} options.port The server port
+ * @param {number} [options.size=5] Server connection pool size
+ * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
+ * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
+ * @param {boolean} [options.noDelay=true] TCP Connection no delay
+ * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
+ * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
+ * @param {boolean} [options.ssl=false] Use SSL for connection
+ * @param {Buffer} [options.ca] SSL Certificate store binary buffer
+ * @param {Buffer} [options.cert] SSL Certificate binary buffer
+ * @param {Buffer} [options.key] SSL Key file binary buffer
+ * @param {string} [options.passPhrase] SSL Certificate pass phrase
+ * @param {boolean} [options.rejectUnauthorized=false] Reject unauthorized server certificates
+ * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @return {ReplSet} A cursor instance
+ * @fires ReplSet#connect
+ * @fires ReplSet#ha
+ * @fires ReplSet#joined
+ * @fires ReplSet#left
+ */
 var ReplSet = function(seedlist, options) {
   var self = this;
   options = options || {};
@@ -187,8 +317,7 @@ var ReplSet = function(seedlist, options) {
   // Special replicaset options
   var secondaryOnlyConnectionAllowed = typeof options.secondaryOnlyConnectionAllowed == 'boolean'
     ? options.secondaryOnlyConnectionAllowed : false;
-  var reconnectTries = options.reconnectTries || 30;
-  var reconnectInterval = options.reconnectInterval || 5000;
+  var haInterval = options.haInterval || 5000;
   // Set up the connection timeout for the options
   options.connectionTimeout = options.connectionTimeout || 10000;
 
@@ -289,7 +418,7 @@ var ReplSet = function(seedlist, options) {
     norepeat = typeof norepeat == 'boolean' ? norepeat : false;
 
     // Emit replicasetInquirer
-    self.emit('ha', 'start', {norepeat: norepeat, id: localHaId});
+    self.emit('ha', 'start', {norepeat: norepeat, id: localHaId, state: replState ? replState.toJSON() : {}});
 
     // Let's process all the disconnected servers
     while(disconnectedServers.length > 0) {
@@ -315,11 +444,11 @@ var ReplSet = function(seedlist, options) {
     // If no servers and we are not destroyed keep pinging
     if(servers.length == 0 && state == CONNECTED) {
       // Emit ha process end
-      self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
+      self.emit('ha', 'end', {norepeat: norepeat, id: localHaId, state: replState ? replState.toJSON() : {}});
       // Ended highAvailabilityProcessRunning
       highAvailabilityProcessRunning = false;
       // Restart ha process
-      if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
+      if(!norepeat) setTimeout(replicasetInquirer, haInterval);
       return;
     }
 
@@ -340,11 +469,11 @@ var ReplSet = function(seedlist, options) {
           if(err && serversLeft > 0) return;
           // We had an error and have no more servers to inspect, schedule a new check
           if(err && serversLeft == 0) {
-            self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
+            self.emit('ha', 'end', {norepeat: norepeat, id: localHaId, state: replState ? replState.toJSON() : {}});
             // Ended highAvailabilityProcessRunning
             highAvailabilityProcessRunning = false;
             // Return the replicasetInquirer
-            if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
+            if(!norepeat) setTimeout(replicasetInquirer, haInterval);
             return;
           }
           // Let all the read Preferences do things to the servers
@@ -381,11 +510,11 @@ var ReplSet = function(seedlist, options) {
             // Don't schedule a new inquiry
             if(serversLeft > 0) return;
             // Emit ha process end
-            self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
+            self.emit('ha', 'end', {norepeat: norepeat, id: localHaId, state: replState ? replState.toJSON() : {}});
             // Ended highAvailabilityProcessRunning
             highAvailabilityProcessRunning = false;
             // Let's keep monitoring
-            if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
+            if(!norepeat) setTimeout(replicasetInquirer, haInterval);
             return;
           }
 
@@ -405,11 +534,11 @@ var ReplSet = function(seedlist, options) {
                 // No servers left to query
                 if(serversLeft == 0) {
                   // Emit ha process end
-                  self.emit('ha', 'end', {norepeat: norepeat, id: localHaId});
+                  self.emit('ha', 'end', {norepeat: norepeat, id: localHaId, state: replState ? replState.toJSON() : {}});
                   // Ended highAvailabilityProcessRunning
                   highAvailabilityProcessRunning = false;
                   // Let's keep monitoring
-                  if(!norepeat) setTimeout(replicasetInquirer, reconnectInterval);
+                  if(!norepeat) setTimeout(replicasetInquirer, haInterval);
                   return;
                 }
               }
@@ -579,10 +708,13 @@ var ReplSet = function(seedlist, options) {
   // Actually exposed methods
   //
 
-  // connect
+  /**
+   * Initiate server connect
+   * @method
+   */
   this.connect = function() {
     // Start replicaset inquiry process
-    setTimeout(replicasetInquirer, reconnectInterval);
+    setTimeout(replicasetInquirer, haInterval);
     // For all entries in the seedlist build a server instance
     seedlist.forEach(function(e) {
       // Clone options
@@ -630,14 +762,21 @@ var ReplSet = function(seedlist, options) {
     }
   }
 
-  // destroy the server instance
+  /**
+   * Destroy the server connection
+   * @method
+   */
   this.destroy = function() {
     if(logger.isInfo()) logger.info(f('[%s] destroyed', id));
     state = DESTROYED;
     replState.destroy();
   }
 
-  // is the server connected
+  /**
+   * Figure out if the server is connected
+   * @method
+   * @return {boolean}
+   */
   this.isConnected = function() {
     if(secondaryOnlyConnectionAllowed) return replState.isSecondaryConnected();
     return replState.isPrimaryConnected();
@@ -660,7 +799,15 @@ var ReplSet = function(seedlist, options) {
     return false;
   }
 
-  // Execute a command
+  /**
+   * Execute a command
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {object} cmd The command hash
+   * @param {object} [options.readPreference] Specify read preference if command supports it
+   * @param {object} [options.connection] Specify connection object to execute command against
+   * @param {opResultCallback} callback A callback function
+   */
   this.command = function(ns, cmd, options, callback) {
     if(typeof options == 'function') {
       callback = options;
@@ -719,22 +866,59 @@ var ReplSet = function(seedlist, options) {
     });
   }
 
-  // Execute a write
+  /**
+   * Insert one or more documents
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of documents to insert
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
   this.insert = function(ns, ops, options, callback) {
     executeWriteOperation('insert', ns, ops, options, callback);
   }
 
-  // Execute a write
+  /**
+   * Perform one or more update operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of updates
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
   this.update = function(ns, ops, options, callback) {
     executeWriteOperation('update', ns, ops, options, callback);
   }
 
-  // Execute a write
+  /**
+   * Perform one or more remove operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of removes
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
   this.remove = function(ns, ops, options, callback) {
     executeWriteOperation('remove', ns, ops, options, callback);
   }    
 
-  // Create a cursor for the command
+  /**
+   * Perform one or more remove operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
+   * @param {object} [options.batchSize=0] Batchsize for the operation
+   * @param {array} [options.documents=[]] Initial documents list for cursor
+   * @param {boolean} [options.tailable=false] Tailable flag set
+   * @param {boolean} [options.oplogReply=false] oplogReply flag set
+   * @param {boolean} [options.awaitdata=false] awaitdata flag set
+   * @param {boolean} [options.exhaust=false] exhaust flag set
+   * @param {boolean} [options.partial=false] partial flag set
+   * @param {opResultCallback} callback A callback function
+   */
   this.cursor = function(ns, cmd, options, callback) {
     if(typeof options == 'function') {
       callback = options;
@@ -757,7 +941,14 @@ var ReplSet = function(seedlist, options) {
     return server.cursor(ns, cmd, options);
   }
 
-  // Authentication method
+  /**
+   * Authenticate using a specified mechanism
+   * @method
+   * @param {string} mechanism The Auth mechanism we are invoking
+   * @param {string} db The db we are invoking the mechanism against
+   * @param {...object} param Parameters for the specific mechanism
+   * @param {authResultCallback} callback A callback function
+   */
   this.auth = function(mechanism, db) {
     var args = Array.prototype.slice.call(arguments, 2);
     var callback = args.pop();
@@ -797,11 +988,22 @@ var ReplSet = function(seedlist, options) {
   // Plugin methods
   //  
 
-  // Add additional picking strategy
+  /**
+   * Add custom read preference strategy
+   * @method
+   * @param {string} name Name of the read preference strategy
+   * @param {object} strategy Strategy object instance
+   */
   this.addReadPreferenceStrategy = function(name, func) {
     readPreferenceStrategies[name] = func;
   }
 
+  /**
+   * Add custom authentication mechanism
+   * @method
+   * @param {string} name Name of the authentication mechanism
+   * @param {object} provider Authentication object instance
+   */
   this.addAuthProvider = function(name, provider) {
     if(authProviders == null) authProviders = {};
     authProviders[name] = provider;
@@ -870,5 +1072,41 @@ var ReplSet = function(seedlist, options) {
 }
 
 inherits(ReplSet, EventEmitter);
+
+/**
+ * A replset connect event, used to verify that the connection is up and running
+ *
+ * @event ReplSet#connect
+ * @type {ReplSet}
+ */
+
+/**
+ * The replset high availability event
+ *
+ * @event ReplSet#ha
+ * @type {ReplSet}
+ * @param {string} type The stage in the high availability event (start|end)
+ * @param {boolean} data.norepeat This is a repeating high availability process or a single execution only
+ * @param {number} data.id The id for this high availability request
+ * @param {object} data.state An object containing the information about the current replicaset
+ */
+
+/**
+ * A server member left the replicaset
+ *
+ * @event ReplSet#left
+ * @type {ReplSet}
+ * @param {string} type The type of member that left (primary|secondary|arbiter)
+ * @param {Server} server The server object that left
+ */
+
+/**
+ * A server member joined the replicaset
+ *
+ * @event ReplSet#joined
+ * @type {ReplSet}
+ * @param {string} type The type of member that joined (primary|secondary|arbiter)
+ * @param {Server} server The server object that joined
+ */
 
 module.exports = ReplSet;

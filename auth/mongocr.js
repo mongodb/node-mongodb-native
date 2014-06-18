@@ -14,11 +14,25 @@ var AuthSession = function(db, username, password) {
   }
 }
 
+/**
+ * Creates a new MongoCR authentication mechanism
+ * @class
+ * @return {MongoCR} A cursor instance
+ */
 var MongoCR = function() {
   var authStore = [];
 
-  //
-  // Authenticate mechanism
+  /**
+   * Authenticate
+   * @method
+   * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+   * @param {Pool} pool Connection pool for this topology
+   * @param {string} db Name of the database
+   * @param {string} username Username
+   * @param {string} password Password
+   * @param {authResultCallback} callback The callback to return the result from the authentication
+   * @return {object}
+   */
   this.auth = function(server, pool, db, username, password, callback) {
     // Get all the connections
     var connections = pool.getAll();
@@ -99,8 +113,14 @@ var MongoCR = function() {
     if(!found) authStore.push(session);
   }
 
-  //
-  // Re authenticate server
+  /**
+   * Re authenticate pool
+   * @method
+   * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+   * @param {Pool} pool Connection pool for this topology
+   * @param {authResultCallback} callback The callback to return the result from the authentication
+   * @return {object}
+   */
   this.reauthenticate = function(server, pool, callback) {
     var count = authStore.length;
     if(count == 0) return callback(null, null);
@@ -116,5 +136,13 @@ var MongoCR = function() {
     }
   }
 }
+
+/**
+ * This is a result from a authentication strategy
+ *
+ * @callback authResultCallback
+ * @param {error} error An error object. Set to null if no error present
+ * @param {boolean} result The result of the authentication process
+ */
 
 module.exports = MongoCR;

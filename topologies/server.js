@@ -345,7 +345,10 @@ var Server = function(options) {
     pool.connect(); 
   }
 
-  // destroy the server instance
+  /**
+   * Destroy the server connection
+   * @method
+   */
   this.destroy = function() {
     if(logger.isDebug()) logger.debug(f('destroy called on server %s', self.name));
     // Destroy all event emitters
@@ -357,7 +360,11 @@ var Server = function(options) {
     pool.destroy();
   }
 
-  // is the server connected
+  /**
+   * Figure out if the server is connected
+   * @method
+   * @return {boolean}
+   */
   this.isConnected = function() {
     if(pool) return pool.isConnected();
     return false;
@@ -422,7 +429,15 @@ var Server = function(options) {
     }    
   }
 
-  // Execute a command
+  /**
+   * Execute a command
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {object} cmd The command hash
+   * @param {object} [options.readPreference] Specify read preference if command supports it
+   * @param {object} [options.connection] Specify connection object to execute command against
+   * @param {opResultCallback} callback A callback function
+   */
   this.command = function(ns, cmd, options, callback) {
     if(typeof options == 'function') {
       callback = options;
@@ -485,25 +500,56 @@ var Server = function(options) {
     connection.write(query);
   }
 
-  // Execute a write
+  /**
+   * Insert one or more documents
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of documents to insert
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
   this.insert = function(ns, ops, options, callback) {
     if(fallback && ismaster.minWireVersion == null) return fallback.insert(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'insert', 'documents', ns, ops, options, callback);
   }
 
-  // Execute a write
+  /**
+   * Perform one or more update operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of updates
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
   this.update = function(ns, ops, options, callback) {
     if(fallback && ismaster.minWireVersion == null) return fallback.update(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'update', 'updates', ns, ops, options, callback);
   }
 
-  // Execute a write
+  /**
+   * Perform one or more remove operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of removes
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
   this.remove = function(ns, ops, options, callback) {
     if(fallback && ismaster.minWireVersion == null) return fallback.remove(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'delete', 'deletes', ns, ops, options, callback);
   }
 
-  // Authentication method
+  /**
+   * Authenticate using a specified mechanism
+   * @method
+   * @param {string} mechanism The Auth mechanism we are invoking
+   * @param {string} db The db we are invoking the mechanism against
+   * @param {...object} param Parameters for the specific mechanism
+   * @param {authResultCallback} callback A callback function
+   */
   this.auth = function(mechanism, db) {
     var args = Array.prototype.slice.call(arguments, 2);
     var callback = args.pop();
@@ -545,17 +591,33 @@ var Server = function(options) {
   // Plugin methods
   //
 
-  // Add additional picking strategy
+  /**
+   * Add custom read preference strategy
+   * @method
+   * @param {string} name Name of the read preference strategy
+   * @param {object} strategy Strategy object instance
+   */
   this.addReadPreferenceStrategy = function(name, strategy) {
     if(readPreferenceStrategies == null) readPreferenceStrategies = {};
     readPreferenceStrategies[name] = strategy;
   }
 
+  /**
+   * Add custom authentication mechanism
+   * @method
+   * @param {string} name Name of the authentication mechanism
+   * @param {object} provider Authentication object instance
+   */
   this.addAuthProvider = function(name, provider) {
     authProviders[name] = provider;
   }
 
-  // Match
+  /**
+   * Compare two server instances
+   * @method
+   * @param {Server} server Server to compare equality against
+   * @return {boolean}
+   */
   this.equals = function(server) {    
     if(typeof server == 'string') return server == this.name;
     return server.name == this.name;
@@ -592,9 +654,23 @@ var Server = function(options) {
   //   , partial: <boolean>
   // }
 
-  // Create a cursor for the command
+  /**
+   * Perform one or more remove operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
+   * @param {object} [options.batchSize=0] Batchsize for the operation
+   * @param {array} [options.documents=[]] Initial documents list for cursor
+   * @param {boolean} [options.tailable=false] Tailable flag set
+   * @param {boolean} [options.oplogReply=false] oplogReply flag set
+   * @param {boolean} [options.awaitdata=false] awaitdata flag set
+   * @param {boolean} [options.exhaust=false] exhaust flag set
+   * @param {boolean} [options.partial=false] partial flag set
+   * @param {opResultCallback} callback A callback function
+   */
   this.cursor = function(ns, cmd, options) {
-    return new Cursor(bson, ns, cmd, pool.get(), callbacks, options || {});
+    options = options || {};
+    return new Cursor(bson, ns, cmd, options.connection ? options.connection : pool.get(), callbacks, options || {});
   }
 
   var slaveOk = function(r) {
@@ -604,14 +680,6 @@ var Server = function(options) {
 }
 
 inherits(Server, EventEmitter);
-
-/**
- * This is a cursor results callback
- *
- * @callback resultCallback
- * @param {error} error An error object. Set to null if no error present
- * @param {object} document
- */
 
 /**
  * A server connect event, used to verify that the connection is up and running
@@ -653,6 +721,22 @@ inherits(Server, EventEmitter);
  *
  * @event Server#reconnect
  * @type {Server}
+ */
+
+/**
+ * This is an insert result callback
+ *
+ * @callback opResultCallback
+ * @param {error} error An error object. Set to null if no error present
+ * @param {CommandResult} command result
+ */
+
+/**
+ * This is an authentication result callback
+ *
+ * @callback authResultCallback
+ * @param {error} error An error object. Set to null if no error present
+ * @param {Session} an authenticated session
  */
 
 module.exports = Server;

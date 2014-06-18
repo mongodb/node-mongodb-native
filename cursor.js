@@ -24,7 +24,13 @@ var Response = require('./connection/commands').Response
  * @param {{object}|Long} cmd The selector (can be a command or a cursorId)
  * @param {object} connection The connection used for this cursor
  * @param {object} callbacks The callbacks storage object for the server instance
- * @param {object} [options] Specific command options
+ * @param {object} [options.batchSize=0] Batchsize for the operation
+ * @param {array} [options.documents=[]] Initial documents list for cursor
+ * @param {boolean} [options.tailable=false] Tailable flag set
+ * @param {boolean} [options.oplogReply=false] oplogReply flag set
+ * @param {boolean} [options.awaitdata=false] awaitdata flag set
+ * @param {boolean} [options.exhaust=false] exhaust flag set
+ * @param {boolean} [options.partial=false] partial flag set
  * @return {Cursor} A cursor instance
  * @property {number} batchSize The current batchsize for the cursor
  */
