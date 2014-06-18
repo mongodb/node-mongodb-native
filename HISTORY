@@ -1,3 +1,8 @@
+1.4.7 2014-06-18
+----------------
+- Make callbacks to be executed in right domain when server comes back up (Issue #1184, https://github.com/anton-kotenko)
+- Fix issue where currentOp query against mongos would fail due to mongos passing through $readPreference field to mongod (CS-X)
+
 1.4.6 2014-06-12
 ----------------
 - Added better support for MongoClient IP6 parsing (Issue #1181, https://github.com/micovery)
