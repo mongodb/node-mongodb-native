@@ -6,6 +6,7 @@ var Configuration = require('integra').Configuration
   , Db = mongodb.Db
   , Server = mongodb.Server
   , ReplSet = mongodb.ReplSet
+  , Mongos = mongodb.Mongos
   , ShardedManager = require('../../test/tools/sharded_manager').ShardedManager
   , ServerManager = require('../../test/tools/server_manager').ServerManager
   , ReplicaSetManager = require('../../test/tools/replica_set_manager').ReplicaSetManager;
@@ -73,6 +74,10 @@ var sharded_config = function(options) {
     this.killShard = mapFunction(this.shardManager, 'killShard');
     this.restartMongoS = mapFunction(this.shardManager, 'restartMongoS');
     this.restartAllMongos = mapFunction(this.shardManager, 'restartAllMongos');
+
+    this.newDbInstance = function(db_options, server_options) {
+      return new Db('integration_tests', new Mongos([new Server("127.0.0.1", 50000, {})], {poolSize:1}), {w:1});
+    }
 
     // Pr test functions
     this.setup = function(callback) { 

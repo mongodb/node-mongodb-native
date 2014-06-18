@@ -16,6 +16,7 @@ exports['Should connect to mongos proxies using connectiong string'] = function(
       test.equal(null, err);
       test.equal(1, result);
 
+      process.exit(0)
       db.close();
       test.done();
     });    
