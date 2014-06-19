@@ -47,7 +47,7 @@ var Configuration = function(options) {
   }
 
   return function(context) {
-    mongo = require('../lib');
+    mongo = require('..');
 
     return {    
       start: function(callback) {

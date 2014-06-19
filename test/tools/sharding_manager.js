@@ -7,10 +7,10 @@ var f = require('util').format
   , ServerManager = require('./server_manager')
   , ReplSetManager = require('./replset_manager')
   , MongosManager = require('./mongos_manager')
-  , ReadPreference = require('../../lib/topologies/read_preference')
-  , Server = require('../../lib').Server;
+  , ReadPreference = require('../..').ReadPreference
+  , Server = require('../..').Server;
 
-var Logger = require('../../lib/connection/logger');
+var Logger = require('../..').Logger;
 
 //
 // Clone the options

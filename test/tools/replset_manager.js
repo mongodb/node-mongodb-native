@@ -4,11 +4,11 @@ var f = require('util').format
   , mkdirp = require('mkdirp')
   , rimraf = require('rimraf')
   , ServerManager = require('./server_manager')
-  , ReadPreference = require('../../lib/topologies/read_preference')
-  , Server = require('../../lib').Server
-  , ReplSet = require('../../lib').ReplSet;
+  , ReadPreference = require('../..').ReadPreference
+  , Server = require('../..').Server
+  , ReplSet = require('../..').ReplSet;
 
-var Logger = require('../../lib/connection/logger');
+var Logger = require('../..').Logger;
 
 //
 // Clone the options
