@@ -6,7 +6,7 @@ exports['Should correctly connect pool to single server'] = {
   },
 
   test: function(configuration, test) {
-    var Pool = configuration.require.Pool
+    var Pool = require('../../../lib/connection/pool')
       , bson = require('bson').BSONPure.BSON;
 
     // Attempt to connect
