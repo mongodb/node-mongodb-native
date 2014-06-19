@@ -8,9 +8,6 @@ var MongoDBVersionFilter = function() {
     var configuration = object.configurations[0];
     // Get the MongoDB version
     configuration.newDbInstance({w:1}).open(function(err, db) {
-      console.log('-----------------------------------------')
-      console.dir(err)
-      console.dir(db)
       if(err) throw err;
 
       db.command({buildInfo:true}, function(err, result) {

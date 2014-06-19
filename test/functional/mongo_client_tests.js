@@ -8,15 +8,12 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-      console.log("========================================= -1")
     var MongoClient = configuration.require.MongoClient;
     MongoClient.connect(configuration.url() + "?maxPoolSize=1", {
       db: {bufferMaxEntries:0},
     }, function(err, db) {
-      console.log("========================================= 0 ++")
       // Listener for closing event
       var closeListener = function(has_error) {
-        console.log("========================================= 0 -- ")
         // Let's insert a document
         var collection = db.collection('test_object_id_generation.data2');
         // Insert another test document and collect using ObjectId
