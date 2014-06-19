@@ -5,7 +5,7 @@ var f = require('util').format
   , fs = require('fs')
   , mkdirp = require('mkdirp')
   , rimraf = require('rimraf')
-  , Server = require('../..').Server;
+  , Server = require('../../lib/topologies/server');
 
 //
 // Clone the options
@@ -85,6 +85,8 @@ var ServerManager = function(serverOptions) {
 
   var bootServer = function(cmd, callback) {
     var pingServer = function() {
+      console.log("===================================================")
+      console.dir(require('../../').Server)
       // Else we need to start checking if the server is up
       server = new Server({host: host
         , port: port
@@ -158,6 +160,7 @@ var ServerManager = function(serverOptions) {
 
     // Build startup command
     var cmd = buildStartupCommand(serverOptions);
+    console.log(cmd)
     // If we have decided to kill all the processes
     if(typeof options.signal == 'number' || options.kill) {
       options.signal = typeof options.signal == 'number' ? options.signal : -15;

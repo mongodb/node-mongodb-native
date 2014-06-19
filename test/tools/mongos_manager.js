@@ -5,7 +5,7 @@ var f = require('util').format
   , fs = require('fs')
   , mkdirp = require('mkdirp')
   , rimraf = require('rimraf')
-  , Server = require('../..').Server;
+  , Server = require('../../lib/topologies/server');
 
 //
 // Clone the options
