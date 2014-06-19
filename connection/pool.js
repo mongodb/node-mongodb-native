@@ -66,6 +66,7 @@ var Pool = function(options) {
   var errorHandler = function(err, connection) {
     if(logger.isDebug()) logger.debug(f('pool [%s] errored out [%s] with connection [%s]', dead, JSON.stringify(err), JSON.stringify(connection)));
     if(!dead) {
+      state = DISCONNECTED;
       self.emit('error', err, self);
       dead = true;
       self.destroy();
@@ -75,6 +76,7 @@ var Pool = function(options) {
   var timeoutHandler = function(err, connection) {
     if(logger.isDebug()) logger.debug(f('pool [%s] timedout out [%s] with connection [%s]', dead, JSON.stringify(err), JSON.stringify(connection)));
     if(!dead) {
+      state = DISCONNECTED;
       dead = true;
       self.destroy();
       self.emit('timeout', err, self);
@@ -84,6 +86,7 @@ var Pool = function(options) {
   var closeHandler = function(err, connection) {
     if(logger.isDebug()) logger.debug(f('pool [%s] closed [%s] with connection [%s]', dead, JSON.stringify(err), JSON.stringify(connection)));
     if(!dead) {
+      state = DISCONNECTED;
       self.emit('close', err, self);
       dead = true;
       self.destroy();
@@ -93,6 +96,7 @@ var Pool = function(options) {
   var parseErrorHandler = function(err, connection) {
     if(logger.isDebug()) logger.debug(f('pool [%s] errored out [%s] with connection [%s]', dead, JSON.stringify(err), JSON.stringify(connection)));
     if(!dead) {
+      state = DISCONNECTED;
       self.emit('parseError', err, self);
       dead = true;
       self.destroy();
@@ -103,6 +107,7 @@ var Pool = function(options) {
     connections.push(connection);
     // We have connected to all servers
     if(connections.length == size) {
+      state = DISCONNECTED;
       state = CONNECTED;
       // Done connecting
       self.emit("connect", self);

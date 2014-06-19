@@ -72,7 +72,17 @@ var State = function(readPreferenceStrategies) {
   // Get connectedServers
   this.connectedServers = function() {
     return connectedServers.slice(0)
-  }  
+  }
+
+  //
+  // Get all connections
+  this.getAllConnections = function() {
+    var connections = [];
+    connectedServers.forEach(function(e) {
+      connections = connections.concat(e.connections());
+    });
+    return connections;
+  }
 
   //
   // Destroy the state
@@ -611,6 +621,15 @@ var Mongos = function(seedlist, options) {
   this.addAuthProvider = function(name, provider) {
     authProviders[name] = provider;
   }
+
+  /**
+   * All raw connections
+   * @method
+   * @return {array}
+   */
+  this.connections = function() {
+    return mongosState.getAllConnections();
+  }  
 }
 
 inherits(Mongos, EventEmitter);
