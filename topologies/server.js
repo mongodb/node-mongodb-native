@@ -636,7 +636,6 @@ var Server = function(options) {
     return pool.getAll();
   }
 
-
   // // Command
   // {
   //     find: ns

@@ -32,7 +32,7 @@ var Response = require('./connection/commands').Response
  * @param {boolean} [options.exhaust=false] exhaust flag set
  * @param {boolean} [options.partial=false] partial flag set
  * @return {Cursor} A cursor instance
- * @property {number} batchSize The current batchsize for the cursor
+ * @property {number} cursorBatchSize The current cursorBatchSize for the cursor
  */
 var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
   options = options || {};
@@ -60,7 +60,7 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
 
   // Allow the manipulation of the batch size of the cursor
   // after creation has happened
-  Object.defineProperty(this, 'batchSize', {
+  Object.defineProperty(this, 'cursorBatchSize', {
       enumerable:true,
       set: function(value) { query.batchSize = value; }
     , get: function() { return query.batchSize; }

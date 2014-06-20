@@ -75,6 +75,12 @@ var State = function(readPreferenceStrategies) {
   }
 
   //
+  // Get all servers
+  this.getAll = function() {
+    return connectedServers.slice(0).concat(disconnectedServers);
+  }
+
+  //
   // Get all connections
   this.getAllConnections = function() {
     var connections = [];
@@ -629,7 +635,7 @@ var Mongos = function(seedlist, options) {
    */
   this.connections = function() {
     return mongosState.getAllConnections();
-  }  
+  }
 }
 
 inherits(Mongos, EventEmitter);
