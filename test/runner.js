@@ -157,9 +157,8 @@ var runner = new Runner({
 });
 
 var testFiles =[
-  '/test/functional/mongo_client_tests.js'
-  // , '/test/tests/functional/mongo_reply_parser_tests.js'
-  // , '/test/tests/functional/connection_pool_tests.js'
+    '/test/functional/mongo_client_tests.js'
+  , '/test/functional/collection_tests.js'
   // , '/test/tests/functional/gridstore/readstream_tests.js'
   // , '/test/tests/functional/gridstore/grid_tests.js'
   // , '/test/tests/functional/gridstore/gridstore_direct_streaming_tests.js'
@@ -190,7 +189,6 @@ var testFiles =[
   // , '/test/tests/functional/url_parser_tests.js'
   // , '/test/tests/functional/objectid_tests.js'
   // , '/test/tests/functional/connection_tests.js'
-  // , '/test/tests/functional/collection_tests.js'
   // , '/test/tests/functional/db_tests.js'
   // , '/test/tests/functional/read_preferences_tests.js'
   // // , '/test/tests/functional/fluent_api/aggregation_tests.js'

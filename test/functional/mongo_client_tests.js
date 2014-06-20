@@ -30,7 +30,6 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0'] = {
       db.once("close", closeListener);
       // Ensure death of server instance
       db.serverConfig.connections()[0].destroy();
-      // console.dir(db.serverConfig.connections());
     });
   }
 }
