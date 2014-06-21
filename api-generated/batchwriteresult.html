@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>BatchWriteResult() &mdash; MongoDB Node.JS Driver 1.4.0 documentation</title>
+    <title>BatchWriteResult() &mdash; MongoDB Node.JS Driver 1.4.7 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.4.0',
+        VERSION:     '1.4.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.4.0 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.7 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -35,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -82,15 +82,17 @@
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><strong>n</strong> {number} number of documents affected</td>
+<tr class="row-even"><td><strong>ok</strong> {boolean} did bulk operation correctly execute</td>
 </tr>
 <tr class="row-odd"><td><strong>nInserted</strong> {number} number of inserted documents</td>
 </tr>
-<tr class="row-even"><td><strong>nUpdated</strong> {number} number of updated documents</td>
+<tr class="row-even"><td><strong>nUpdated</strong> {number} number of documents updated logically</td>
 </tr>
 <tr class="row-odd"><td><strong>nUpserted</strong> {number} number of upserted documents</td>
 </tr>
-<tr class="row-even"><td><strong>nRemoved</strong> {number} number of removed documents</td>
+<tr class="row-even"><td><strong>nModified</strong> {number} number of documents updated physically on disk</td>
+</tr>
+<tr class="row-odd"><td><strong>nRemoved</strong> {number} number of removed documents</td>
 </tr>
 </tbody>
 </table>
@@ -152,29 +154,12 @@
 </dd></dl>
 
 </div>
-<div class="section" id="getsingleerror">
-<h2>getSingleError<a class="headerlink" href="#getsingleerror" title="Permalink to this headline">¶</a></h2>
-<p>Returns top level error object</p>
+<div class="section" id="haswriteerrors">
+<h2>hasWriteErrors<a class="headerlink" href="#haswriteerrors" title="Permalink to this headline">¶</a></h2>
+<p>Returns true if the bulk operation contains a write error</p>
 <dl class="function">
-<dt id="getSingleError">
-<tt class="descname">getSingleError</tt><big>(</big><big>)</big><a class="headerlink" href="#getSingleError" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">object</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</div>
-<div class="section" id="haserrors">
-<h2>hasErrors<a class="headerlink" href="#haserrors" title="Permalink to this headline">¶</a></h2>
-<p>Checks if results have errors</p>
-<dl class="function">
-<dt id="hasErrors">
-<tt class="descname">hasErrors</tt><big>(</big><big>)</big><a class="headerlink" href="#hasErrors" title="Permalink to this definition">¶</a></dt>
+<dt id="hasWriteErrors">
+<tt class="descname">hasWriteErrors</tt><big>(</big><big>)</big><a class="headerlink" href="#hasWriteErrors" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -186,12 +171,12 @@
 </dd></dl>
 
 </div>
-<div class="section" id="geterrorcount">
-<h2>getErrorCount<a class="headerlink" href="#geterrorcount" title="Permalink to this headline">¶</a></h2>
-<p>Returns the number of errors</p>
+<div class="section" id="getwriteerrorcount">
+<h2>getWriteErrorCount<a class="headerlink" href="#getwriteerrorcount" title="Permalink to this headline">¶</a></h2>
+<p>Returns the number of write errors off the bulk operation</p>
 <dl class="function">
-<dt id="getErrorCount">
-<tt class="descname">getErrorCount</tt><big>(</big><big>)</big><a class="headerlink" href="#getErrorCount" title="Permalink to this definition">¶</a></dt>
+<dt id="getWriteErrorCount">
+<tt class="descname">getWriteErrorCount</tt><big>(</big><big>)</big><a class="headerlink" href="#getWriteErrorCount" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -203,40 +188,68 @@
 </dd></dl>
 
 </div>
-<div class="section" id="geterrorat">
-<h2>getErrorAt<a class="headerlink" href="#geterrorat" title="Permalink to this headline">¶</a></h2>
-<p>Returns the WriteError at the passed in index, returns undefined if no error at the provided index</p>
+<div class="section" id="getwriteerrorat">
+<h2>getWriteErrorAt<a class="headerlink" href="#getwriteerrorat" title="Permalink to this headline">¶</a></h2>
+<p>Returns a specific write error object</p>
 <dl class="function">
-<dt id="getErrorAt">
-<tt class="descname">getErrorAt</tt><big>(</big><em>index</em><big>)</big><a class="headerlink" href="#getErrorAt" title="Permalink to this definition">¶</a></dt>
+<dt id="getWriteErrorAt">
+<tt class="descname">getWriteErrorAt</tt><big>(</big><big>)</big><a class="headerlink" href="#getWriteErrorAt" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><strong>index</strong> (<em>number</em>) &#8211; the number of the error to return, returns undefined if no result for passed in index</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">writeerror</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">writeerror</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 </div>
-<div class="section" id="getwcerrors">
-<h2>getWCErrors<a class="headerlink" href="#getwcerrors" title="Permalink to this headline">¶</a></h2>
-<p>Returns the number of write concern errors</p>
+<div class="section" id="getwriteerrors">
+<h2>getWriteErrors<a class="headerlink" href="#getwriteerrors" title="Permalink to this headline">¶</a></h2>
+<p>Retrieve all write errors</p>
 <dl class="function">
-<dt id="getWCErrors">
-<tt class="descname">getWCErrors</tt><big>(</big><big>)</big><a class="headerlink" href="#getWCErrors" title="Permalink to this definition">¶</a></dt>
+<dt id="getWriteErrors">
+<tt class="descname">getWriteErrors</tt><big>(</big><big>)</big><a class="headerlink" href="#getWriteErrors" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getlastop">
+<h2>getLastOp<a class="headerlink" href="#getlastop" title="Permalink to this headline">¶</a></h2>
+<p>Retrieve lastOp if available</p>
+<dl class="function">
+<dt id="getLastOp">
+<tt class="descname">getLastOp</tt><big>(</big><big>)</big><a class="headerlink" href="#getLastOp" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getwriteconcernerror">
+<h2>getWriteConcernError<a class="headerlink" href="#getwriteconcernerror" title="Permalink to this headline">¶</a></h2>
+<p>Retrieve the write concern error if any</p>
+<dl class="function">
+<dt id="getWriteConcernError">
+<tt class="descname">getWriteConcernError</tt><big>(</big><big>)</big><a class="headerlink" href="#getWriteConcernError" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">writeconcernerror</td>
 </tr>
 </tbody>
 </table>
@@ -259,11 +272,12 @@
 <li><a class="reference internal" href="#getupsertedids">getUpsertedIds</a></li>
 <li><a class="reference internal" href="#getupsertedidat">getUpsertedIdAt</a></li>
 <li><a class="reference internal" href="#getrawresponse">getRawResponse</a></li>
-<li><a class="reference internal" href="#getsingleerror">getSingleError</a></li>
-<li><a class="reference internal" href="#haserrors">hasErrors</a></li>
-<li><a class="reference internal" href="#geterrorcount">getErrorCount</a></li>
-<li><a class="reference internal" href="#geterrorat">getErrorAt</a></li>
-<li><a class="reference internal" href="#getwcerrors">getWCErrors</a></li>
+<li><a class="reference internal" href="#haswriteerrors">hasWriteErrors</a></li>
+<li><a class="reference internal" href="#getwriteerrorcount">getWriteErrorCount</a></li>
+<li><a class="reference internal" href="#getwriteerrorat">getWriteErrorAt</a></li>
+<li><a class="reference internal" href="#getwriteerrors">getWriteErrors</a></li>
+<li><a class="reference internal" href="#getlastop">getLastOp</a></li>
+<li><a class="reference internal" href="#getwriteconcernerror">getWriteConcernError</a></li>
 </ul>
 </li>
 </ul>
@@ -421,7 +435,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.0 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

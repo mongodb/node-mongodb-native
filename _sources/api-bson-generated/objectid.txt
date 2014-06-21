@@ -226,3 +226,15 @@ Creates an ObjectID from a hex string representation of an ObjectID.
      // Compare the two hex strings
      assert.equal(originalHex, newHex);
 
+
+----------------
+ObjectID.isValid
+----------------
+
+
+Checks if a value is a valid bson ObjectId
+
+.. js:function:: ObjectID.isValid()
+
+   :returns: boolean return true if the value is a valid bson ObjectId, return false otherwise.
+

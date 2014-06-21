@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Collections &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
+    <title>Collections &mdash; MongoDB Node.JS Driver 1.4.7 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.20',
+        VERSION:     '1.4.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.7 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -35,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -48,14 +48,14 @@
 <h1>Collections<a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h1>
 <p>See also:</p>
 <ul class="simple">
-<li><a class="reference external" href="database.md">Database</a></li>
-<li><a class="reference external" href="queries.md">Queries</a></li>
+<li><a class="reference external" href="database.html">Database</a></li>
+<li><a class="reference external" href="queries.html">Queries</a></li>
 </ul>
 <div class="section" id="collection-objects">
 <h2>Collection objects<a class="headerlink" href="#collection-objects" title="Permalink to this headline">¶</a></h2>
 <p>Collection object is a pointer to a specific collection in the
-<a class="reference external" href="database.md">database</a>. If you want to <a class="reference external" href="insert.md">insert</a> new
-records or <a class="reference external" href="queries.md">query</a> existing ones then you need to have a
+<a class="reference external" href="database.html">database</a>. If you want to <a class="reference external" href="insert.html">insert</a> new
+records or <a class="reference external" href="queries.html">query</a> existing ones then you need to have a
 valid collection object.</p>
 <p><strong>NB</strong> Collection names can&#8217;t start or end with a period nor contain a
 dollar sign! (<tt class="docutils literal"><span class="pre">.tes$t</span></tt> is not allowed)</p>
@@ -170,8 +170,7 @@ allow overwritting of existing collections</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">query</span></tt> is the query that records to be removed need to match. If
 not set all records will be removed</li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt> indicate advanced options. For example use
-<tt class="docutils literal"><span class="pre">{safe:</span> <span class="pre">true}</span></tt> when using callbacks</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> indicate advanced options.</li>
 <li><tt class="docutils literal"><span class="pre">callback</span></tt> callback function that gets two parameters - an error
 object (if an error occured) and the count of removed records</li>
 </ul>
@@ -183,7 +182,9 @@ object (if an error occured) and the count of removed records</li>
 </pre></div>
 </div>
 <p>or with <tt class="docutils literal"><span class="pre">dropCollection</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">javascript</span>&nbsp;&nbsp; <span class="pre">db.dropCollection(collection_name,</span> <span class="pre">callback)</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">db</span><span class="o">.</span><span class="n">dropCollection</span><span class="p">(</span><span class="n">collection_name</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -369,7 +370,7 @@ object (if an error occured) and the count of removed records</li>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

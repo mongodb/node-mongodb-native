@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Inserting and updating &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
+    <title>Inserting and updating &mdash; MongoDB Node.JS Driver 1.4.7 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.20',
+        VERSION:     '1.4.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.7 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -35,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -59,26 +59,20 @@
 <p>Where</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">docs</span></tt> is a single document object or an array of documents</li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt> is an object of parameters, if you use a callback, set
-<tt class="docutils literal"><span class="pre">safe</span></tt> to true - this way the callback is executed <em>after</em> the
-record is saved to the database, if <tt class="docutils literal"><span class="pre">safe</span></tt> is false (default)
-callback is fired immediately and thus doesn&#8217;t make much sense.</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt> - callback function to run after the record is inserted.
-Set <tt class="docutils literal"><span class="pre">safe</span></tt> to true in <tt class="docutils literal"><span class="pre">options</span></tt> when using callback. First
-parameter for callback is the error object (if an error occured) and
-the second is an array of records inserted.</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> is an options object.</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> - callback function to run after the record is inserted.</li>
 </ul>
 <p>For example</p>
 <div class="highlight-python"><pre>var document = {name:"David", title:"About MongoDB"};
-collection.insert(document, {safe: true}, function(err, records){
+collection.insert(document, {w: 1}, function(err, records){
   console.log("Record added as "+records[0]._id);
 });</pre>
 </div>
 <p>If trying to insert a record with an existing <tt class="docutils literal"><span class="pre">_id</span></tt> value, then the
 operation yields in error.</p>
-<div class="highlight-python"><pre>collection.insert({_id:1}, {safe:true}, function(err, doc){
+<div class="highlight-python"><pre>collection.insert({_id:1}, {w:1}, function(err, doc){
   // no error, inserted new document, with _id=1
-  collection.insert({_id:1}, {safe:true}, function(err, doc){
+  collection.insert({_id:1}, {w:1}, function(err, doc){
     // error occured since _id=1 already existed
   });
 });</pre>
@@ -89,7 +83,7 @@ operation yields in error.</p>
 <p>Shorthand for insert/update is <tt class="docutils literal"><span class="pre">save</span></tt> - if <tt class="docutils literal"><span class="pre">_id</span></tt> value set, the
 record is updated if it exists or inserted if it does not; if the
 <tt class="docutils literal"><span class="pre">_id</span></tt> value is not set, then the record is inserted as a new one.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">save</span><span class="p">({</span><span class="n">_id</span><span class="p">:</span><span class="s">&quot;abc&quot;</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span><span class="s">&quot;David&quot;</span><span class="p">},{</span><span class="n">safe</span><span class="p">:</span><span class="n">true</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">save</span><span class="p">({</span><span class="n">_id</span><span class="p">:</span><span class="s">&quot;abc&quot;</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span><span class="s">&quot;David&quot;</span><span class="p">},{</span><span class="n">w</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error occured)
@@ -114,8 +108,6 @@ the second is the count of records that were modified.</li>
 <h3>Update options<a class="headerlink" href="#update-options" title="Permalink to this headline">¶</a></h3>
 <p>There are several option values that can be used with an update</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">safe</span></tt> - run callback only after the update is done, defaults to
-false</li>
 <li><tt class="docutils literal"><span class="pre">multi</span></tt> - update all records that match the query object, default
 is false (only the first one found is updated)</li>
 <li><tt class="docutils literal"><span class="pre">upsert</span></tt> - if true and no records match the query, insert
@@ -378,7 +370,7 @@ db.collection('test').findAndModify(
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

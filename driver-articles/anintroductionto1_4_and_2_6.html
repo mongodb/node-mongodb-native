@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Node.JS Specific Presentations &mdash; MongoDB Node.JS Driver 1.4.7 documentation</title>
+    <title>Mongo Driver and Mongo DB 2.6 Features &mdash; MongoDB Node.JS Driver 1.4.7 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -44,127 +44,286 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="node-js-specific-presentations">
-<h1>Node.JS Specific Presentations<a class="headerlink" href="#node-js-specific-presentations" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="an-introduction-to-the-node-js-mongodb-driver">
-<h2>An Introduction to the node.js MongoDB Driver<a class="headerlink" href="#an-introduction-to-the-node-js-mongodb-driver" title="Permalink to this headline">¶</a></h2>
-<p>Christian Kvalheim gives an introduction to the node.js MongoDB driver.</p>
-<div class="presentation embed">
- <object id="myExperience620186085001" class="BrightcoveExperience">
- <param name="bgcolor" value="#FFFFFF" />
- <param name="width" value="460" />
- <param name="height" value="258" />
- <param name="playerID" value="596005226001" />
- <param name="playerKey" value="AQ%2E%2E,AAAAipOTmrk%2E,ppF_qxBkWm4G-M_tDdbW6qnuU4iUxLyo" />
- <param name="isVid" value="true" />
- <param name="isUI" value="true" />
- <param name="dynamicStreaming" value="true" />
- <param name="wmode" value="transparent">
- <param name="@videoPlayer" value="1222250797001" />
- </object>
-</div></div>
-<div class="section" id="node-js-and-mongodb-a-panel-discussion">
-<h2>Node.js and MongoDB, a Panel Discussion<a class="headerlink" href="#node-js-and-mongodb-a-panel-discussion" title="Permalink to this headline">¶</a></h2>
-<p>Working with Node’s JavaScript means that MongoDB documents get their most natural representation - as JSON - right in the application layer. This session introduces the open source tools available for using MongoDB with Node.js through a panel discussion with the main contributors to these projects. Tom Hughes-Croucher, Node.js Chief Evangelist at Joyent, moderates the discussion. Towards the end, Tom field questions from the attendees.</p>
-<div class="presentation embed">
-    <object id="myExperience620186085001" class="BrightcoveExperience"><param name="bgcolor" value="#FFFFFF" /><param name="width" value="460" /><param name="height" value="258" /><param name="playerID" value="596005226001" /><param name="playerKey" value="AQ%2E%2E,AAAAipOTmrk%2E,ppF_qxBkWm4G-M_tDdbW6qnuU4iUxLyo" /><param name="isVid" value="true" /><param name="isUI" value="true" /><param name="dynamicStreaming" value="true" /><param name="wmode" value="transparent"><param name="@videoPlayer" value="1064750448001" /></object>
-</div></div>
-<div class="section" id="schemas-for-real-time-analytics-with-node-js">
-<h2>Schemas for Real Time Analytics with Node.js<a class="headerlink" href="#schemas-for-real-time-analytics-with-node-js" title="Permalink to this headline">¶</a></h2>
-<p>SimpleReach powers the Slide, a recommendation powered content discovery technology for websites. Eric Lublow will discuss how SimpleReach builds schemas in MongoDB and Node.js for powerful, real-time data delivery. Topics will include:</p>
+  <div class="section" id="mongo-driver-and-mongo-db-2-6-features">
+<h1>Mongo Driver and Mongo DB 2.6 Features<a class="headerlink" href="#mongo-driver-and-mongo-db-2-6-features" title="Permalink to this headline">¶</a></h1>
+<p>MongoDB 2.6 introduces some new powerful features that are reflected in
+the 1.4 driver release. These include.</p>
 <ul class="simple">
-<li>Dynamic collection creation</li>
-<li>Updating (Increments over sets)</li>
-<li>Schema</li>
-<li>Next gen schemas for dynamic filters</li>
+<li>Aggregation cursors</li>
+<li>Per query timeouts <strong>maxTimeMS</strong></li>
+<li>Ordered and Unordered bulk operations</li>
+<li>A parallelCollectionScan command for fast reading of an entire
+collection</li>
+<li>Integrated text search in the query language</li>
 </ul>
- <div class="presentation embed">
-    <object id="myExperience620186085001" class="BrightcoveExperience">
-<param name="bgcolor" value="#FFFFFF" />
-<param name="width" value="460" />
-<param name="height" value="258" />
-<param name="playerID" value="596005226001" />
-<param name="playerKey" value="AQ%2E%2E,AAAAipOTmrk%2E,ppF_qxBkWm4G-M_tDdbW6qnuU4iUxLyo" />
-<param name="isVid" value="true" />
-<param name="isUI" value="true" />
-<param name="dynamicStreaming" value="true" />
-<param name="wmode" value="transparent">
-<param name="@videoPlayer" value="1405133882001" />
-</object>
-  </div></div>
-<div class="section" id="happy-mongo-ing-in-node-js">
-<h2>Happy Mongo-ing in Node.js<a class="headerlink" href="#happy-mongo-ing-in-node-js" title="Permalink to this headline">¶</a></h2>
-<p>Node.js is JavaScript. MongoDB speaks JSON. So why bother with an in-between &#8220;ORM&#8221; layer like Mongoose? Join us for a look at the object modeling... tool designed and maintained by the team at LearnBoost. Recent updates have made Mongoose even more compelling. We&#8217;ll share the pros and cons we&#8217;ve experienced in using it day-to-day on our current project.</p>
- <div class="presentation embed">
-    <object id="myExperience620186085001" class="BrightcoveExperience">
-<param name="bgcolor" value="#FFFFFF" />
-<param name="width" value="460" />
-<param name="height" value="258" />
-<param name="playerID" value="596005226001" />
-<param name="playerKey" value="AQ%2E%2E,AAAAipOTmrk%2E,ppF_qxBkWm4G-M_tDdbW6qnuU4iUxLyo" />
-<param name="isVid" value="true" />
-<param name="isUI" value="true" />
-<param name="dynamicStreaming" value="true" />
-<param name="wmode" value="transparent">
-<param name="@videoPlayer" value="1254850977001" />
-</object>
-  </div></div>
-<div class="section" id="nyc-mongodb-user-group-schemas-for-real-time-analytics-with-node-js">
-<h2>NYC MongoDB User Group - Schemas for Real Time Analytics with Node.js<a class="headerlink" href="#nyc-mongodb-user-group-schemas-for-real-time-analytics-with-node-js" title="Permalink to this headline">¶</a></h2>
-<p>Schemas for Real Time Analytics with Node.js - Eric Lubow and Russell Bradberry, SimpleReach</p>
-<p>SimpleReach powers the Slide, a recommendation powered content discovery technology for websites. Eric Lublow will discuss how SimpleReach builds schemas in MongoDB and Node.js for powerful, real-time data delivery. Topics will include:</p>
+<p>Moreover the driver includes a whole slew of minor and major bug fixes
+and features. Some of the more noteworthy features include.</p>
 <ul class="simple">
-<li>Dynamic collection creation</li>
-<li>Updating (Increments over sets)</li>
-<li>Schema</li>
-<li>Next gen schemas for dynamic filters</li>
+<li>Better support for domains in node.js</li>
+<li>Reconnect events for replicaset and mongos connections</li>
+<li>Replicaset emits &#8220;joined&#8221; and &#8220;left&#8221; events when new server join or
+leave the set</li>
+<li>Added <strong>bufferMaxEntries</strong> entry to allow tuning on how long driver
+keeps waiting for servers to come back up (default is until memory
+exhaustion)</li>
+<li>Upgraded BSON parser to rely on 0.2.6 returning to using <strong>nan</strong>
+package</li>
 </ul>
-<iframe width="853" height="480" src="http://www.youtube-nocookie.com/embed/EpCe4qKoH5E" frameborder="0" allowfullscreen></iframe></div>
-<div class="section" id="nyc-mongodb-user-group-what-s-in-the-trello">
-<h2>NYC MongoDB User Group - What&#8217;s in the Trello<a class="headerlink" href="#nyc-mongodb-user-group-what-s-in-the-trello" title="Permalink to this headline">¶</a></h2>
-<p>What&#8217;s in the Trello - Brett Kiefer, Fog Creek</p>
-<p>Trello is a collaboration tool that organizes your projects into boards. Brett Kiefer will discuss how Trello uses Node.js, Socket.io, MongoDB, Redis, and Backbone to create a responsive single-page app.</p>
-<iframe width="853" height="480" src="http://www.youtube-nocookie.com/embed/BUlQmXg0VDc" frameborder="0" allowfullscreen></iframe></div>
-<div class="section" id="nyc-node-js-meetup-august-2011-mongoose-other-mongodb-connectors">
-<h2>NYC Node JS Meetup - August 2011 - Mongoose &amp; other MongoDB Connectors<a class="headerlink" href="#nyc-node-js-meetup-august-2011-mongoose-other-mongodb-connectors" title="Permalink to this headline">¶</a></h2>
-<p>Mongoose Meetup August 2011</p>
-<div style="display:none"></div>
-<script language="JavaScript" type="text/javascript" src="http://admin.brightcove.com/js/BrightcoveExperiences.js"></script>
+<p>Let&#8217;s look at the main things in 2.6 features one by one.</p>
+<div class="section" id="aggregation-cursors">
+<h2>Aggregation cursors<a class="headerlink" href="#aggregation-cursors" title="Permalink to this headline">¶</a></h2>
+<p>The addition off aggregation cursors to MongoDB 2.6 now means that
+applications can disregard the previous max result limit of 16MB. Let&#8217;s
+look at a simple use of the aggregation cursor.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
 
-<object id="myExperience1123429378001" class="BrightcoveExperience">
-   <param name="bgcolor" value="#FFFFFF" />
-   <param name="width" value="480" />
-   <param name="height" value="270" />
-   <param name="playerID" value="596005226001" />
-   <param name="playerKey" value="AQ~~,AAAAipOTmrk~,ppF_qxBkWm4G-M_tDdbW6qnuU4iUxLyo" />
-   <param name="isVid" value="true" />
-   <param name="isUI" value="true" />
-   <param name="dynamicStreaming" value="true" />
-   <param name="@videoPlayer" value="1123429378001" />
-</object>
-<script type="text/javascript">brightcove.createExperiences();</script></div>
-<div class="section" id="a-beautiful-marriage-mongodb-and-node-js">
-<h2>A beautiful marriage: MongoDB and node.js<a class="headerlink" href="#a-beautiful-marriage-mongodb-and-node-js" title="Permalink to this headline">¶</a></h2>
-<p>What does it take to handle a million requests a day with sub 400ms response times? Not much when you marry the appropriate technologies. Learn how Proxlet.com leverages MongoDB &amp; NodeJS to serve over a million daily requests.... on a $10/month server. After briefly setting describing the product context, I will discuss why we chose NodeJS &amp; MongoDB to form the backbone of Proxlet, how the technologies play-nice &amp; poised for scale.</p>
-<div class="presentation embed">
-   <object id="myExperience620186085001" class="BrightcoveExperience"><param name="bgcolor" value="#FFFFFF" /><param name="width" value="460" /><param name="height" value="258" /><param name="playerID" value="596005226001" /><param name="playerKey" value="AQ%2E%2E,AAAAipOTmrk%2E,ppF_qxBkWm4G-M_tDdbW6qnuU4iUxLyo" /><param name="isVid" value="true" /><param name="isUI" value="true" /><param name="dynamicStreaming" value="true" /><param name="@videoPlayer" value="998473087001" /><param name="wmode" value="transparent"/></object>
- </div></div>
-<div class="section" id="rapid-realtime-app-development-with-node-js-mongodb">
-<h2>Rapid Realtime App Development with Node.JS &amp; MongoDB<a class="headerlink" href="#rapid-realtime-app-development-with-node-js-mongodb" title="Permalink to this headline">¶</a></h2>
-<p>Jump on board to learn about combining two of the most exciting technologies to quickly build realtime apps yourself. This talk will introduce the popular Node.js library, Mongoose, which is a MongoDB &#8220;ORM&#8221; for Node.js. First, the speaker will deliver a quick primer on Node.js. Then, he&#8217;ll walk you through Mongoose&#8217;s schema api, powerful query builder, middleware capabilities, and exciting plugin ecosystem. Finally, he&#8217;ll demonstrate some realtime capabilities using Node.js and Mongoose.</p>
-<div class="presentation embed">
-   <object id="myExperience620186085001" class="BrightcoveExperience">
-     <param name="bgcolor" value="#FFFFFF" />
-     <param name="width" value="460" />
-     <param name="height" value="258" />
-     <param name="playerID" value="596005226001" />
-     <param name="playerKey" value="AQ%2E%2E,AAAAipOTmrk%2E,ppF_qxBkWm4G-M_tDdbW6qnuU4iUxLyo" />
-     <param name="isVid" value="true" />
-     <param name="isUI" value="true" />
-     <param name="dynamicStreaming" value="true" />
-     <param name="@videoPlayer" value="968171642001" />
-   <param name="wmode" value="transparent"/></object>
- </div></div>
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+    // Get an aggregation cursor
+    var cursor = db.collection('data').aggregate([
+            {$match: {}}
+        ], {
+        allowDiskUsage: true
+      , cursor: {batchSize: 1000}
+        });
+
+    // Use cursor as stream
+    cursor.on('data', function(data) {
+        console.dir(data);
+    });
+
+    cursor.on('end', function() {
+        db.close();
+    });
+});</pre>
+</div>
+<p>As one can see the cursor implements the <strong>Readable</strong> stream interface
+for 0.10.X or higher. For 2.4 the driver will emulate the cursor
+behavior by wrapping the result document.</p>
+</div>
+<div class="section" id="maxtimems">
+<h2>maxTimeMS<a class="headerlink" href="#maxtimems" title="Permalink to this headline">¶</a></h2>
+<p>One feature that has requested often is the ability to timeout
+individual queries. In MongoDB 2.6 it&#8217;s finally arrived and is known as
+the <strong>maxTimeMS</strong> option. Let&#8217;s take a look at a simple usage of the
+property with a query.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+    // Get an aggregation cursor
+    var cursor = db.collection('data')
+        .find("$where": "sleep(1000) || true")
+        .maxTimeMS(50);
+
+    // Get alll the items
+    cursor.toArray(function(err, items) {
+        console.dir(err);
+        console.dir(items);
+        db.close();
+    });
+});</pre>
+</div>
+<p>This is a bit of a contrived example using sleep to force the query to
+wait a second. With the <strong>maxTimeMS</strong> set to 50 milliseconds the query
+will be aborted before the full second is up.</p>
+</div>
+<div class="section" id="ordered-unordered-bulk-operations">
+<h2>Ordered/Unordered bulk operations<a class="headerlink" href="#ordered-unordered-bulk-operations" title="Permalink to this headline">¶</a></h2>
+<p>Under the covers MongoDB is moving away from the combination of a write
+operation + get last error (GLE) and towards a write commands api. These
+new commands allow for the execution of bulk insert/update/remove
+operations. The bulk api&#8217;s are abstractions on top of this that server
+to make it easy to build bulk operations. Bulk operations come in two
+main flavors.</p>
+<ol class="arabic simple">
+<li>Ordered bulk operations. These operations execute all the operation
+in order and error out on the first write error.</li>
+<li>Unordered bulk operations. These operations execute all the
+operations in parallel and aggregates up all the errors. Unordered
+bulk operations do not guarantee order of execution.</li>
+</ol>
+<p>Let&#8217;s look at two simple examples using ordered and unordered
+operations.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+  // Get the collection
+  var col = db.collection('batch_write_ordered_ops');
+  // Initialize the Ordered Batch
+  var batch = col.initializeOrderedBulkOp();
+
+  // Add some operations to be executed in order
+  batch.insert({a:1});
+  batch.find({a:1}).updateOne({$set: {b:1}});
+  batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+  batch.insert({a:3});
+  batch.find({a:3}).remove({a:3});
+
+  // Execute the operations
+  batch.execute(function(err, result) {
+    console.dir(err);
+    console.dir(result);
+    db.close();
+  });
+});
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+  // Get the collection
+  var col = db.collection('batch_write_ordered_ops');
+  // Initialize the Ordered Batch
+  var batch = col.initializeUnorderedBulkOp();
+
+  // Add some operations to be executed in order
+  batch.insert({a:1});
+  batch.find({a:1}).updateOne({$set: {b:1}});
+  batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+  batch.insert({a:3});
+  batch.find({a:3}).remove({a:3});
+
+  // Execute the operations
+  batch.execute(function(err, result) {
+    console.dir(err);
+    console.dir(result);
+    db.close();
+  });
+});</pre>
+</div>
+<p>For older servers than 2.6 the API will downconvert the operations.
+However it&#8217;s not possible to downconvert 100% so there might be slight
+edge cases where it cannot correctly report the right numbers.</p>
+</div>
+<div class="section" id="parallelcollectionscan">
+<h2>parallelCollectionScan<a class="headerlink" href="#parallelcollectionscan" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>parallelCollectionScan</strong> command is a special command targeted at
+reading out an entire collection using <strong>numCursors</strong> parallel cursors.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+    // Get an aggregation cursor
+    db.collection('data').parallelCollectionScan({numCursors:3}, function(err, cursors) {
+    var results = [];
+
+    for(var i = 0; i &lt; cursors.length; i++) {
+      cursors[i].get(function(err, items) {
+        test.equal(err, null);
+
+        // Add docs to results array
+        results = results.concat(items);
+        numCursors = numCursors - 1;
+
+        // No more cursors let's ensure we got all results
+        if(numCursors == 0) {
+          test.equal(docs.length, results.length);
+
+          db.close();
+          test.done();
+        }
+      });
+    }
+    });
+});</pre>
+</div>
+<p>This optimizes the IO throughput from a collection.</p>
+</div>
+<div class="section" id="integrated-text-search-in-the-query-language">
+<h2>Integrated text search in the query language<a class="headerlink" href="#integrated-text-search-in-the-query-language" title="Permalink to this headline">¶</a></h2>
+<p>Text indexes are now integrated into the main query language and enabled
+by default. A simple example.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+  // Get the collection
+  var collection = db.collection('textSearchWithSort');
+  collection.ensureIndex({s: 'text'}, function(err, result) {
+    test.equal(null, err);
+
+    collection.insert([
+        {s: 'spam'}
+      , {s: 'spam eggs and spam'}
+      , {s: 'sausage and eggs'}], function(err, result) {
+        test.equal(null, err);
+
+        collection.find(
+            {$text: {$search: 'spam'}}
+          , {fields: {_id: false, s: true, score: {$meta: 'textScore'}}}
+        ).sort({score: {$meta: 'textScore'}}).toArray(function(err, items) {
+          test.equal(null, err);
+          test.equal("spam eggs and spam", items[0].s);
+          db.close();
+          test.done();
+        });
+      });
+  });
+});</pre>
+</div>
+</div>
+<div class="section" id="emitting-reconnect-and-joined-left-events">
+<h2>Emitting Reconnect and Joined/Left events<a class="headerlink" href="#emitting-reconnect-and-joined-left-events" title="Permalink to this headline">¶</a></h2>
+<p>The Replicaset and Mongos now emits events for servers joining and
+leaving the replicaset. This let&#8217;s applications more easily monitor the
+changes in the driver over time. <strong>Reconnect</strong> in the context of a
+Replicaset or Mongos means that the driver is starting to replay
+buffered operations.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017,localhost:27027/test", function(err, db) {
+    db.serverConfig.on('joined', function(err, server) {
+        console.log("server joined");
+        console.dir(server);
+    });
+
+    db.serverConfig.on('left', function(err, server) {
+        console.log("server left");
+        console.dir(server);
+    });
+
+    db.serverConfig.on('reconnect', function() {
+        console.log("server reconnected");
+    });
+});</pre>
+</div>
+</div>
+<div class="section" id="buffermaxentries">
+<h2>bufferMaxEntries<a class="headerlink" href="#buffermaxentries" title="Permalink to this headline">¶</a></h2>
+<p>Buffered Max Entries allow for more fine grained control on how many
+operations that will be buffered before the driver errors out and stops
+attempting to reconnect.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", {
+        db: {bufferMaxEntries:0},
+    }, function(err, db) {
+        db.close();
+});</pre>
+</div>
+<p>This example disables the command buffering completely and errors out
+the moment there is no connection available. The default value (for
+backward compatibility) is to buffer until memory runs out. Be aware
+that by setting a very low value you can cause some problems in failover
+scenarios in Replicasets as it might take a little but of time before
+f.ex a new Primary is elected and steps up to accept writes. Setting
+<strong>bufferMaxEntries</strong> to 0 in this case will cause the driver to error
+out instead of falling over correctly.</p>
+</div>
+<div class="section" id="fsync-and-journal-write-concerns-note">
+<h2>Fsync and journal Write Concerns note<a class="headerlink" href="#fsync-and-journal-write-concerns-note" title="Permalink to this headline">¶</a></h2>
+<p>MongoDB from version 2.6 and higher disallows the combination of
+<strong>journal</strong> and <strong>fsync</strong>. Combining them will cause an error while on
+2.4 <strong>fsync</strong> was ignored when provided with <strong>journal</strong>. The following
+semantics apply.</p>
+<ul class="simple">
+<li>j: If true block until write operations have been committed to the
+journal. Cannot be used in combination with <tt class="docutils literal"><span class="pre">fsync</span></tt>. Prior to
+MongoDB 2.6 this option was ignored if the server was running without
+journaling. Starting with MongoDB 2.6 write operations will fail with
+an exception if this option is used when the server is running
+without journaling.</li>
+<li>fsync: If true and the server is running without journaling, blocks
+until the server has synced all data files to disk. If the server is
+running with journaling, this acts the same as the <tt class="docutils literal"><span class="pre">j</span></tt> option,
+blocking until write operations have been committed to the journal.
+Cannot be used in combination with <tt class="docutils literal"><span class="pre">j</span></tt>.</li>
+</ul>
+</div>
 </div>
 
 
@@ -175,16 +334,15 @@
         <div class="sphinxsidebarwrapper">
 <h3>Contents</h3>
 <ul>
-<li><a class="reference internal" href="#">Node.JS Specific Presentations</a><ul>
-<li><a class="reference internal" href="#an-introduction-to-the-node-js-mongodb-driver">An Introduction to the node.js MongoDB Driver</a></li>
-<li><a class="reference internal" href="#node-js-and-mongodb-a-panel-discussion">Node.js and MongoDB, a Panel Discussion</a></li>
-<li><a class="reference internal" href="#schemas-for-real-time-analytics-with-node-js">Schemas for Real Time Analytics with Node.js</a></li>
-<li><a class="reference internal" href="#happy-mongo-ing-in-node-js">Happy Mongo-ing in Node.js</a></li>
-<li><a class="reference internal" href="#nyc-mongodb-user-group-schemas-for-real-time-analytics-with-node-js">NYC MongoDB User Group - Schemas for Real Time Analytics with Node.js</a></li>
-<li><a class="reference internal" href="#nyc-mongodb-user-group-what-s-in-the-trello">NYC MongoDB User Group - What&#8217;s in the Trello</a></li>
-<li><a class="reference internal" href="#nyc-node-js-meetup-august-2011-mongoose-other-mongodb-connectors">NYC Node JS Meetup - August 2011 - Mongoose &amp; other MongoDB Connectors</a></li>
-<li><a class="reference internal" href="#a-beautiful-marriage-mongodb-and-node-js">A beautiful marriage: MongoDB and node.js</a></li>
-<li><a class="reference internal" href="#rapid-realtime-app-development-with-node-js-mongodb">Rapid Realtime App Development with Node.JS &amp; MongoDB</a></li>
+<li><a class="reference internal" href="#">Mongo Driver and Mongo DB 2.6 Features</a><ul>
+<li><a class="reference internal" href="#aggregation-cursors">Aggregation cursors</a></li>
+<li><a class="reference internal" href="#maxtimems">maxTimeMS</a></li>
+<li><a class="reference internal" href="#ordered-unordered-bulk-operations">Ordered/Unordered bulk operations</a></li>
+<li><a class="reference internal" href="#parallelcollectionscan">parallelCollectionScan</a></li>
+<li><a class="reference internal" href="#integrated-text-search-in-the-query-language">Integrated text search in the query language</a></li>
+<li><a class="reference internal" href="#emitting-reconnect-and-joined-left-events">Emitting Reconnect and Joined/Left events</a></li>
+<li><a class="reference internal" href="#buffermaxentries">bufferMaxEntries</a></li>
+<li><a class="reference internal" href="#fsync-and-journal-write-concerns-note">Fsync and journal Write Concerns note</a></li>
 </ul>
 </li>
 </ul>

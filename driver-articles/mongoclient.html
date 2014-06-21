@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MongoClient or how to connect in a new and better way &mdash; MongoDB Node.JS Driver 1.3.20 documentation</title>
+    <title>MongoClient or how to connect in a new and better way &mdash; MongoDB Node.JS Driver 1.4.7 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.3.20',
+        VERSION:     '1.4.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.3.20 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.7 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -35,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -328,6 +328,46 @@ other. This is in contrast to having to use the <strong>ReplSet</strong> or
 <strong>Mongos</strong> instances when using the <strong>open</strong> command.</p>
 </div>
 </div>
+<div class="section" id="mongoclient-connection-pooling">
+<h2>MongoClient connection pooling<a class="headerlink" href="#mongoclient-connection-pooling" title="Permalink to this headline">¶</a></h2>
+<p>A Connection Pool is a cache of database connections maintained by the
+driver so that connections can be re-used when new connections to the
+database are required. To reduce the number of connection pools created
+by your application, we recommend calling <strong>MongoClient.connect once</strong>
+and reusing the database variable returned by the callback:</p>
+<div class="highlight-python"><pre>var express = require('express');
+var mongodb = require('mongodb');
+var app = express();
+
+var MongoClient = require('mongodb').MongoClient;
+var db;
+
+// Initialize connection once
+MongoClient.connect("mongodb://localhost:27017/integration_test", function(err, database) {
+  if(err) throw err;
+
+  db = database;
+
+  // Start the application after the database connection is ready
+  app.listen(3000);
+  console.log("Listening on port 3000");
+});
+
+// Reuse database object in request handlers
+app.get("/", function(req, res) {
+  db.collection("replicaset_mongo_client_collection").find({}, function(err, docs) {
+    docs.each(function(err, doc) {
+      if(doc) {
+        console.log(doc);
+      }
+      else {
+        res.end();
+      }
+    });
+  });
+});</pre>
+</div>
+</div>
 <div class="section" id="mongoclient-connect-options">
 <h2>MongoClient.connect options<a class="headerlink" href="#mongoclient-connect-options" title="Permalink to this headline">¶</a></h2>
 <p>The connect function also takes a hash of options divided into
@@ -485,6 +525,7 @@ status check.</li>
 <li><a class="reference internal" href="#a-sharded-connect-using-no-acknowledgment-by-default-and-readpreference-for-secondary">A sharded connect using no acknowledgment by default and readPreference for secondary</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#mongoclient-connection-pooling">MongoClient connection pooling</a></li>
 <li><a class="reference internal" href="#mongoclient-connect-options">MongoClient.connect options</a></li>
 <li><a class="reference internal" href="#db-a-hash-of-options-at-the-db-level-overriding-or-adjusting-functionality-not-supported-by-the-url">db: A hash of options at the db level overriding or adjusting functionality not supported by the url</a></li>
 <li><a class="reference internal" href="#server-a-hash-of-options-at-the-server-level-not-supported-by-the-url">server: A hash of options at the server level not supported by the url.</a></li>
@@ -647,7 +688,7 @@ status check.</li>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.3.20 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

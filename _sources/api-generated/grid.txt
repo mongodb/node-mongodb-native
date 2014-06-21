@@ -62,7 +62,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a new grid instance
@@ -98,7 +98,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a new grid instance
@@ -135,7 +135,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a new grid instance
@@ -191,7 +191,7 @@ Get binary data to the grid
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a new grid instance
@@ -249,7 +249,7 @@ Delete file from grid
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
        // Create a new grid instance

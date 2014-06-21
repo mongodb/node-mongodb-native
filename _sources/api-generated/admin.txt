@@ -51,7 +51,7 @@ instance of the db client
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
@@ -113,7 +113,7 @@ Retrieve this db's server status.
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
@@ -183,7 +183,7 @@ Retrieve the current profiling Level for MongoDB
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        
@@ -251,7 +251,7 @@ Ping the MongoDB server and retrieve results
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -315,7 +315,7 @@ Authenticate against MongoDB
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      db.open(function(err, db) {
        // Grab a collection object
        var collection = db.collection('test');
@@ -379,7 +379,7 @@ Logout current authenticated user
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -419,7 +419,10 @@ overwrite the current password
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
 
 .. js:function:: addUser(username, password[, options], callback)
 
@@ -450,7 +453,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -484,7 +487,10 @@ Remove a user from the MongoDB server
 
 
 Options
- - **safe** {true | {w:n, wtimeout:n} | {fsync:true}, default:false}, executes with a getLastError command returning the results of the command on MongoDB.
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
 
 .. js:function:: removeUser(username[, options], callback)
 
@@ -514,7 +520,7 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -581,7 +587,7 @@ Set the current profiling level of MongoDB
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
        
@@ -679,7 +685,7 @@ Retrive the current profiling information for MongoDB
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
@@ -765,7 +771,7 @@ Execute a db command against the Admin database
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
@@ -830,7 +836,7 @@ Validate an existing collection
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
@@ -906,7 +912,7 @@ List the available databases
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
      
@@ -956,7 +962,7 @@ Get ReplicaSet status
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     var db = new Db('test', new Server('locahost', 27017));
+     var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db  
      db.open(function(err, db) {
      
