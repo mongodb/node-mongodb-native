@@ -1031,24 +1031,29 @@ exports.shouldCorrectlyRenameACollection = function(configuration, test) {
       collection.insert({a:1}, {w:1}, function(err, result) {
         test.equal(null, err);
 
-        // Rename the collection
-        db.renameCollection("simple_rename_collection", "simple_rename_collection_2", function(err, collection2) {
-          test.equal(null, err);
+        // Retrieve the number of documents from the collection
+        collection.count(function(err, count) {
+          test.equal(1, count);
 
-          // Retrieve the number of documents from the collection
-          collection2.count(function(err, count) {
-            test.equal(1, count);
+          // Rename the collection
+          db.renameCollection("simple_rename_collection", "simple_rename_collection_2", function(err, collection2) {
+            test.equal(null, err);
 
-            // Verify that the collection is gone
-            db.collectionNames("simple_rename_collection", function(err, names) {
-              test.equal(0, names.length);
+            // Retrieve the number of documents from the collection
+            collection2.count(function(err, count) {
+              test.equal(1, count);
 
-              // Verify that the new collection exists
-              db.collectionNames("simple_rename_collection_2", function(err, names) {
-                test.equal(1, names.length);
+              // Verify that the collection is gone
+              db.collectionNames("simple_rename_collection", function(err, names) {
+                test.equal(0, names.length);
 
-                db.close();
-                test.done();
+                // Verify that the new collection exists
+                db.collectionNames("simple_rename_collection_2", function(err, names) {
+                  test.equal(1, names.length);
+
+                  db.close();
+                  test.done();
+                });
               });
             });
           });
