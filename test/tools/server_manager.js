@@ -85,8 +85,6 @@ var ServerManager = function(serverOptions) {
 
   var bootServer = function(cmd, callback) {
     var pingServer = function() {
-      console.log("===================================================")
-      console.dir(require('../../').Server)
       // Else we need to start checking if the server is up
       server = new Server({host: host
         , port: port
