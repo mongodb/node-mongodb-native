@@ -1206,7 +1206,7 @@ exports.shouldPeformCollectionRemoveWithNoCallback = {
         collection.save({a:1}, configuration.writeConcern(), function(){
           collection.save({b:1}, configuration.writeConcern(), function(){
             collection.save({c:1}, configuration.writeConcern(), function(){
-               collection.remove({a:1}, configuration.writeConcern(), function() {
+               collection.remove({a:1}, configuration.writeConcern(), function(err, r) {
                  // Let's perform a count
                  collection.count(function(err, count) {
                    test.equal(null, err);

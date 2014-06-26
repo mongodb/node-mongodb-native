@@ -157,8 +157,9 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    '/test/functional/mongo_client_tests.js'
-  , '/test/functional/collection_tests.js'
+  //   '/test/functional/mongo_client_tests.js'
+  // , '/test/functional/collection_tests.js'
+  , '/test/functional/db_tests.js'
   // , '/test/tests/functional/gridstore/readstream_tests.js'
   // , '/test/tests/functional/gridstore/grid_tests.js'
   // , '/test/tests/functional/gridstore/gridstore_direct_streaming_tests.js'

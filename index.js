@@ -1,5 +1,3 @@
-// console.dir(require('mongodb-core'))
-
 // Core module
 var core = require('mongodb-core');
 
