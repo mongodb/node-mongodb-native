@@ -195,7 +195,7 @@ var Connection = function(options) {
 
   //
   // Connection handlers
-  var errorHandler = function(err) {    
+  var errorHandler = function(err) {  
     // Debug information
     if(logger.isDebug()) logger.debug(f('connection %s for [%s:%s] errored out with [%s]', id,host, port, JSON.stringify(err)));
     // Emit the error
