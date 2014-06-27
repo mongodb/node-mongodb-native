@@ -8,6 +8,8 @@ module.exports = {
   , Cursor: require('./lib/cursor')
   , ReadPreference: require('./lib/topologies/read_preference')
   , BSON: require('bson')
+  // Raw operations
+  , Query: require('./lib/connection/commands').Query
   // Tools exported for testing
   , ServerManager: require('./test/tools/server_manager')
   , ReplSetManager: require('./test/tools/replset_manager')
