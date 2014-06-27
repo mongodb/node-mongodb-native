@@ -46,6 +46,8 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
   var cursorId = null;
   var documents = options.documents || [];
   var dead = false;
+  var killed = false;
+  var init = false;
 
   // Logger
   var logger = Logger('Cursor', options);
@@ -72,7 +74,22 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
    * @param {resultCallback} callback A callback function
    */
   this.next = function(callback) {
+    if(killed) return callback(null, null);
     if(dead) return callback(new MongoError("cursor is dead"));
+    // We have just started the cursor
+    if(!init) {
+      init = true;
+      // Establish type of command
+      if(cmd.find) {
+        query = setupClassicFind(ns, cmd, options)
+      } else if(cmd.cursor) {
+        query = setupCommand(ns, cmd, options);
+      } else if(cursorId != null) {
+      } else {
+        throw new MongoError(f("command %s does not return a cursor", JSON.stringify(cmd)));
+      }      
+    }
+
     // If we don't have a cursorId execute the first query
     if(cursorId == null) {
       execInitialQuery(query, function(err, r) {
@@ -109,8 +126,11 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
   this.kill = function(callback) {
     // Set cursor to dead
     dead = true;
+    killed = true;
+    // Remove documents
+    documents = [];
     // If no cursor id just return
-    if(cursorId.isZero()) return callback(null, null);
+    if(cursorId == null || cursorId.isZero()) return callback(null, null);
     // Create a kill cursor command
     var killCursor = new KillCursor(bson, [cursorId]);
     // Execute the kill cursor command
@@ -156,17 +176,18 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
       
       // Check if we have a command cursor
       if(Array.isArray(result.documents) && result.documents.length == 1) {
-        if(typeof result.documents[0].cursor != 'string') {
-          var id = result.documents[0].cursor.id;
-          // Promote id to long if needed
-          cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
-          // If we have a firstBatch set it
-          if(Array.isArray(result.documents[0].cursor.firstBatch)) {
-            documents = result.documents[0].cursor.firstBatch;
-          }
+        if(result.documents[0].cursor != null 
+          && typeof result.documents[0].cursor != 'string') {
+            var id = result.documents[0].cursor.id;
+            // Promote id to long if needed
+            cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
+            // If we have a firstBatch set it
+            if(Array.isArray(result.documents[0].cursor.firstBatch)) {
+              documents = result.documents[0].cursor.firstBatch;
+            }
 
-          // Return after processing command cursor
-          return callback(null, null);
+            // Return after processing command cursor
+            return callback(null, null);
         }
       }
 
@@ -220,6 +241,8 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     // If we have a special modifier
     if(usesSpecialModifier) {      
       findCmd['$query'] = cmd.query;
+    } else {
+      findCmd = cmd;
     }
 
     // Build Query object
@@ -276,16 +299,6 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     if(options.partial) query.partial = options.partial;
     // Return the query
     return query;
-  }
-
-  // Establish type of command
-  if(cmd.find) {
-    query = setupClassicFind(ns, cmd, options)
-  } else if(cmd.cursor) {
-    query = setupCommand(ns, cmd, options);
-  } else if(cursorId != null) {
-  } else {
-    throw new MongoError(f("command %s does not return a cursor", JSON.stringify(cmd)));
   }
 }
 

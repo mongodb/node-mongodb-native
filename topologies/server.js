@@ -353,10 +353,10 @@ var Server = function(options) {
    */
   this.destroy = function() {
     if(logger.isDebug()) logger.debug(f('destroy called on server %s', self.name));
-    // Destroy all event emitters
-    ["close", "message", "error", "timeout", "connect", "parseError"].forEach(function(e) {
-      pool.removeAllListeners(e);
-    });
+    // // Destroy all event emitters
+    // ["close", "message", "error", "timeout", "connect", "parseError"].forEach(function(e) {
+    //   pool.removeAllListeners(e);
+    // });
 
     // Close pool
     pool.destroy();
