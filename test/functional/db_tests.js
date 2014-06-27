@@ -302,7 +302,6 @@ exports.shouldCorrectlyDereferenceDbRef = function(configuration, test) {
 
                       collection.insert(obj, {w:1}, function(err, ids) {
                         db.dereference(new DBRef("test_deref", 4), function(err, document) {
-
                           test.equal(obj['_id'], document._id);
                           collection.remove({}, {w:1}, function(err, result) {
                             collection.insert({'x':'hello'}, {w:1}, function(err, ids) {
@@ -805,8 +804,13 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
         db.authenticate('user2', 'name', function(err, result) {
           test.equal(true, result);
 
-          db.close();
-          test.done();
+          // Remove the user from the db
+          db.removeUser('user2', function(err, result) {
+            test.equal(null, err);
+
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -840,8 +844,13 @@ exports.shouldCorrectlyAddUserToDb = {
       db.addUser('user', 'name', function(err, result) {
         test.equal(null, err);
 
-        db.close();
-        test.done();
+        // Remove the user from the db
+        db.removeUser('user', function(err, result) {
+          test.equal(null, err);
+
+          db.close();
+          test.done();
+        });
       });
     });
     // DOC_END
@@ -1367,7 +1376,7 @@ exports.shouldCorrectlyDropTheDatabase = function(configuration, test) {
   db.open(function(err, db) {
 
     // Create a collection
-    db.createCollection('more_index_information_test', function(err, collection) {
+    db.createCollection('more_index_information_test_1', function(err, collection) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the index
