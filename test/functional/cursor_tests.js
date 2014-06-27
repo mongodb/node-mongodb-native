@@ -531,46 +531,51 @@ exports.shouldCorrectlySkipRecordsOnCursor = function(configuration, test) {
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
     db.createCollection('test_skip', function(err, collection) {
-      Step(
-        function insert() {
-          var group = this.group();
+      function insert(callback) {
+        var total = 10;
 
-          for(var i = 0; i < 10; i++) {
-            collection.insert({'x':i}, {w:1}, group());
-          }
-        },
-
-        function finished() {
-          collection.find(function(err, cursor) {
-            cursor.count(function(err, count) {
-              test.equal(10, count);
-            });
-          });
-
-          collection.find(function(err, cursor) {
-            cursor.toArray(function(err, items) {
-              test.equal(10, items.length);
-
-              collection.find().skip(2).toArray(function(err, items2) {
-                test.equal(8, items2.length);
-
-                // Check that we have the same elements
-                var numberEqual = 0;
-                var sliced = items.slice(2, 10);
-
-                for(var i = 0; i < sliced.length; i++) {
-                  if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                }
-                test.equal(8, numberEqual);
-
-                // Let's close the db
-                db.close();
-                test.done();
-              });
-            });
+        for(var i = 0; i < 10; i++) {
+          collection.insert({'x':i}, {w:1}, function(e) {
+            total = total - 1;
+            if(total == 0) callback();
           });
         }
-      )
+      }
+
+      function finished() {
+        collection.find(function(err, cursor) {
+          cursor.count(function(err, count) {
+            test.equal(10, count);
+          });
+        });
+
+        collection.find(function(err, cursor) {
+          cursor.toArray(function(err, items) {
+            test.equal(10, items.length);
+
+            collection.find().skip(2).toArray(function(err, items2) {
+              test.equal(8, items2.length);
+
+              // Check that we have the same elements
+              var numberEqual = 0;
+              var sliced = items.slice(2, 10);
+
+              for(var i = 0; i < sliced.length; i++) {
+                if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+              }
+              test.equal(8, numberEqual);
+
+              // Let's close the db
+              db.close();
+              test.done();
+            });
+          });
+        });
+      }
+
+      insert(function() {
+        finished();
+      });      
     });
   });
 }
@@ -584,25 +589,31 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = function(configuration,
   db.open(function(err, db) {
     db.createCollection('test_skip_exceptions', function(err, collection) {
       collection.insert({'a':1}, {w:1}, function(err, docs) {});
-      collection.find().skip('not-an-integer', function(err, cursor) {
+      try {
+        collection.find().skip('not-an-integer');
+      } catch(err) {
         test.equal("skip requires an integer", err.message);
-      });
+      }
 
       var cursor = collection.find()
       cursor.nextObject(function(err, doc) {
-        cursor.skip(1, function(err, cursor) {
+        try {
+          cursor.skip(1);  
+        } catch(err) {
           test.equal("Cursor is closed", err.message);
-        });
+        }
       });
 
       var cursor = collection.find()
       cursor.close(function(err, cursor) {
-        cursor.skip(1, function(err, cursor) {
+        try {
+          cursor.skip(1);  
+        } catch(err) {
           test.equal("Cursor is closed", err.message);
+        }
 
-          db.close();
-          test.done();
-        });
+        db.close();
+        test.done();
       });
     });
   });
