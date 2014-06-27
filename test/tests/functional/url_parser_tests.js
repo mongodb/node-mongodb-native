@@ -89,6 +89,20 @@ exports['Should correctly parse mongodb://fred:foo%20bar@localhost/baz'] = funct
 /**
  * @ignore
  */
+ exports['Should correctly parse mongodb://fred:testP@ssword@localhost/baz'] = function (configure, test) {
+  var object = parse("mongodb://fred:testP@ssword@localhost/baz");
+  test.equal(1, object.servers.length);
+  test.equal('localhost', object.servers[0].host);
+  test.equal('27017', object.servers[0].port);
+  test.equal('baz', object.dbName);
+  test.equal('fred', object.auth.user);
+  test.equal('testP@ssword', object.auth.password);
+  test.done();
+ }
+
+/**
+ * @ignore
+ */
 exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = function(configure, test) {
   // console.dir(parse)
   var object = parse("mongodb:///tmp/mongodb-27017.sock", {uri_decode_auth:true});
