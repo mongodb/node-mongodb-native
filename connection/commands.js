@@ -77,7 +77,7 @@ var Query = function(bson, ns, query, options) {
       enumerable:true,
       set: function(value) { numberToReturn = value; }
     , get: function() { return numberToReturn; }
-  });
+  });  
 
   // Setup properties
   setProperty(this, tailable, OPTS_TAILABLE_CURSOR, values);
@@ -116,7 +116,7 @@ var Query = function(bson, ns, query, options) {
 
     // Write rest of fields
     index = write32bit(index, _buffer, numberToSkip);
-    index = write32bit(index, _buffer, numberToReturn > 0 ? -numberToReturn : numberToReturn);
+    index = write32bit(index, _buffer, numberToReturn);
 
     // Serialize query
     var queryLength = bson.serializeWithBufferAndIndex(query

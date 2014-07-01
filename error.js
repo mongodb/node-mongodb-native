@@ -26,7 +26,7 @@ MongoError.create = function(options) {
   } else if(typeof options == 'string') {
     err = new MongoError(options);
   } else {
-    err = new MongoError(options);
+    err = new MongoError(options.message || "n/a");
     // Other options
     for(var name in options) {
       err[name] = options[name];

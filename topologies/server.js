@@ -697,18 +697,18 @@ var Server = function(options) {
   //   , max: <n>
   //   , showDiskLoc: <boolean>
   //   , comment: <string>
-  // }  
-  // // Options
-  // {
-  //     raw: <boolean>
-  //   , readPreference: <ReadPreference>
-  //   , maxTimeMS: <n>
   //   , tailable: <boolean>
   //   , oplogReply: <boolean>
   //   , noCursorTimeout: <boolean>
   //   , awaitdata: <boolean>
   //   , exhaust: <boolean>
   //   , partial: <boolean>
+  // }  
+  // // Options
+  // {
+  //     raw: <boolean>
+  //   , readPreference: <ReadPreference>
+  //   , maxTimeMS: <n>
   // }
 
   /**

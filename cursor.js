@@ -38,8 +38,12 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
   options = options || {};
   // Initial query
   var query = null;
+
   // Unpack options
-  var batchSize = options.batchSize || 0;
+  var batchSize = options.batchSize || cmd.batchSize || 0;
+  var limit = options.limit || cmd.limit || 0;
+  var skip = options.skip || cmd.skip || 0;
+  var currentLimit = 0;
 
   // All internal state
   var self = this;
@@ -64,9 +68,27 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
   // after creation has happened
   Object.defineProperty(this, 'cursorBatchSize', {
       enumerable:true,
-      set: function(value) { query.batchSize = value; }
-    , get: function() { return query.batchSize; }
+      set: function(value) { batchSize = value; }
+    , get: function() { return batchSize; }
   });
+
+  // Allow the manipulation of the cursor limit
+  Object.defineProperty(this, 'cursorLimit', {
+      enumerable:true,
+      set: function(value) { limit = value; }
+    , get: function() { return limit; }
+  });
+
+  // Allow the manipulation of the cursor skip
+  Object.defineProperty(this, 'cursorSkip', {
+      enumerable:true,
+      set: function(value) { 
+        console.log("--------------------- set cursor skip")
+        skip = value; }
+    , get: function() { return skip; }
+  });
+
+  var counter = 0;
 
   /**
    * Retrieve the next document from the cursor
@@ -74,6 +96,7 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
    * @param {resultCallback} callback A callback function
    */
   this.next = function(callback) {
+    // console.log("))))))))))))))))))))))))))))))))))))))))) next " + documents.length + " = " + cursorId)    
     if(killed) return callback(null, null);
     if(dead) return callback(new MongoError("cursor is dead"));
     // We have just started the cursor
@@ -93,18 +116,73 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     // If we don't have a cursorId execute the first query
     if(cursorId == null) {
       execInitialQuery(query, function(err, r) {
+        console.log("----------------------------------- initial")
+        console.dir(documents.length);
         if(err) return callback(err, null);
+        // console.log("$$$$$$$$$$$$$$$$$$$$$$$$ execInitialQuery :: " + documents.length)
+        // console.dir(documents)
         if(documents.length == 0) return callback(null, null);
         self.next(callback);
       });
     } else if(documents.length == 0 && !Long.ZERO.equals(cursorId)) {
+      // console.log("+++++++++++++++++++++++++++++++++++++exec getmore")
       execGetMore(function(err, doc) {
-        callback(err, doc);
+        console.log("+++++++++++++++++++++++++++++++++++++exec getmore 1")
+        console.dir(err)
+        console.log(cursorId)
+        console.dir(documents.length);
+        // next(callback);
+        // console.dir(doc)
+        if(documents.length == 0 && Long.ZERO.equals(cursorId)) dead = true;
+        // Tailable cursor getMore result, notify owner about it
+        // No attempt is made here to retry, this is left to the user of the
+        // core module to handle to keep core simple
+        if(documents.length == 0 && options.tailable) {
+          return callback(MongoError.create({
+              message: "No more documents in tailed cursor"
+            , tailable: options.tailable
+            , awaitData: options.awaitData
+          }));
+        }
+
+        // // console.log("===================== execGetMore :: " + documents.length)
+        // // console.dir(documents)
+        // // console.dir(cursorId)
+        // // console.dir(options)
+        // currentLimit += 1;
+
+        if(limit > 0 && currentLimit >= limit) {
+          dead = true;
+          documents = [];
+          return callback(null, null);
+        }
+
+        console.log("===================== execGetMore :: " + documents.length)
+        self.next(callback);
+        // callback(err, doc);
       });
+    } else if(documents.length == 0 && options.tailable) { 
+      return callback(MongoError.create({
+          message: "No more documents in tailed cursor"
+        , tailable: options.tailable
+        , awaitData: options.awaitData
+      }));
     } else if(documents.length == 0 && Long.ZERO.equals(cursorId)) {
       dead = true;
+      console.log("####################### counter next :: " + counter)
       callback(null, null);
     } else {
+    // counter++;
+    // console.log(documents.length)
+      // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%2")
+      // console.log("limit " + limit)
+      // console.log("currentLimit " + currentLimit)
+      if(limit > 0 && currentLimit >= limit) {
+        dead = true;
+        return callback(null, null);
+      }
+
+      currentLimit += 1;
       callback(null, documents.shift());
     }
   }
@@ -119,6 +197,34 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
   }
 
   /**
+   * Returns current buffered documents
+   * @method
+   * @return {Array} An array of buffered documents
+   */
+  this.bufferedDocuments = function() {
+    return documents;
+  }
+
+  /**
+   * Resets the cursor
+   * @method
+   * @return {null}
+   */  
+  this.rewind = function() {
+    if(init) {
+      if(!dead) {
+        this.kill();
+      }
+
+      init = false;
+      dead = false;
+      killed = false;
+      documents = [];
+      cursorId = null;
+    }  
+  }
+
+  /**
    * Kill the cursor
    * @method
    * @param {resultCallback} callback A callback function
@@ -130,15 +236,19 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     // Remove documents
     documents = [];
     // If no cursor id just return
-    if(cursorId == null || cursorId.isZero()) return callback(null, null);
+    if(cursorId == null || cursorId.isZero()) {
+      if(callback) callback(null, null);
+      return;
+    }
+
     // Create a kill cursor command
     var killCursor = new KillCursor(bson, [cursorId]);
     // Execute the kill cursor command
-    connection.write(killCursor);
+    if(connection.isConnected()) connection.write(killCursor);
     // Set cursor to 0
     cursorId = Long.ZERO;
     // Return to caller
-    callback(null, null);
+    if(callback) callback(null, null);
   }
 
 
@@ -150,11 +260,13 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     var getMore = new GetMore(bson, ns, cursorId, {numberToReturn: batchSize});
     // Register a callback
     callbacks.once(getMore.requestId, function(err, r) {
-      if(err) return callback(err);      
+      console.dir("+++++++++++++++++++++++++++ EXECUTE")
+      console.log("---------------------- number returned :: " + r.numberReturned)
+      if(err) return callback(err);  
       documents = r.documents;
       cursorId = r.cursorId;
-      // Return the next document
-      callback(null, documents.shift());
+      // Return
+      callback(null);
     });
 
     // Write out the getMore command
@@ -173,6 +285,7 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     // Set up callback
     callbacks.once(query.requestId, function(err, result) {
       if(err) return callback(err);
+      console.log("---------------------- number returned :: " + result.numberReturned)
       
       // Check if we have a command cursor
       if(Array.isArray(result.documents) && result.documents.length == 1) {
@@ -210,11 +323,27 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
 
     // Ensure we have at least some options
     options = options || {};
-    // Unpack the limit and skip values
-    var numberToReturn = cmd.limit || batchSize;
-    var numberToSkip = cmd.skip || 0;
     // Set the optional batchSize
     batchSize = cmd.batchSize || batchSize;
+    console.log("--------------------------- limit :: " + limit)
+    console.log("--------------------------- batchSize :: " + batchSize)
+    var numberToReturn = 0;
+    
+    // Unpack the limit and batchSize values
+    if(limit == 0) {
+      numberToReturn = batchSize;
+    } else if(limit < 0 || limit < batchSize) {
+      numberToReturn = limit;
+    } else {
+      numberToReturn = batchSize;
+    }
+
+    // var numberToReturn = limit != 0 && limit < batchSize ? limit : batchSize;
+    console.log("--------------------------- numberToReturn :: " + numberToReturn)
+
+    var numberToSkip = skip || 0;
+    console.log("--------------------------- skip :: " + skip)
+    console.log("--------------------------- numberToSkip :: " + numberToSkip)
     // Build actual find command
     var findCmd = {};
     // Using special modifier
@@ -245,19 +374,23 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
       findCmd = cmd;
     }
 
+    console.log("--------------------------- numberToReturn :: " + numberToReturn)
+    console.dir(findCmd)
     // Build Query object
     var query = new Query(bson, ns, findCmd, {
         numberToSkip: numberToSkip, numberToReturn: numberToReturn
-      , checkKeys: false
+      , checkKeys: false, returnFieldSelector: cmd.fields
     });
+
+    console.dir(options)
 
     // Set query flags
     query.slaveOk = readPreference.slaveOk();
     // Set up the option bits for wire protocol
-    if(options.tailable) query.tailable = options.tailable;
+    if(options.tailable) { query.tailable = options.tailable; }
     if(options.oplogReply)query.oplogReply = options.oplogReply;
     if(options.noCursorTimeout) query.noCursorTimeout = options.noCursorTimeout;
-    if(options.awaitdata) query.awaitdata = options.awaitdata;
+    if(options.awaitData) query.awaitData = options.awaitData;
     if(options.exhaust) query.exhaust = options.exhaust;
     if(options.partial) query.partial = options.partial;
     // Return the query

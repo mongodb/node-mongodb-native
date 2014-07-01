@@ -188,6 +188,9 @@ var LegacySupport = function() {
     var legacy = typeof options.legacy == 'boolean' ? options.legacy : false;
     ops = Array.isArray(ops) ? ops :[ops];
 
+    // If we have more than a 1000 ops fails
+    if(ops.length > 1000) return callback(new MongoError("exceeded maximum write batch size of 1000"));
+
     // We are unordered
     if(!ordered) {
       return executeUnordered(Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
