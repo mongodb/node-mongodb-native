@@ -16,7 +16,8 @@
     "legacy"
   ],
   "dependencies": {
-    "mongodb-core": "latest"
+      "mongodb-core": "latest"
+    , "readable-stream": "latest"
   },
   "devDependencies": {
       "integra": "latest"

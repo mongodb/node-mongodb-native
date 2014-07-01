@@ -1,0 +1,3 @@
+- Insert method allows only up 1000 pr batch for legacy as well as 2.6 mode
+- Streaming behavior is 0.10.x or higher with backwards compatibility using readable-stream npm package
+- 
