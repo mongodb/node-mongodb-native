@@ -1278,18 +1278,12 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = {
 
       // Upsert a new doc
       collection.update({a:1}, {a:1}, {upsert:true, w:1, fullResult:true}, function(err, result) {
-        console.log("======================================================= 0")
-        console.dir(err)
-        console.dir(result)
         if(result.updatedExisting) test.equal(false, result.updatedExisting);
         test.equal(1, result.n);
         test.ok(result.upserted != null);
 
         // Upsert an existing doc
         collection.update({a:1}, {a:1}, {upsert:true, w:1, fullResult:true}, function(err, result) {
-        console.log("======================================================= 1")
-        console.dir(err)
-        console.dir(result)
           if(result.updatedExisting) test.equal(true, result.updatedExisting);          
           test.equal(1, result.n);
           db.close();
