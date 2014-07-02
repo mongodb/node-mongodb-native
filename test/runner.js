@@ -157,11 +157,12 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    '/test/functional/mongo_client_tests.js'
-  , '/test/functional/collection_tests.js'
-  , '/test/functional/db_tests.js'
-  , '/test/functional/cursor_tests.js'
-  , '/test/functional/insert_tests.js'
+  //   '/test/functional/mongo_client_tests.js'
+  // , '/test/functional/collection_tests.js'
+  // , '/test/functional/db_tests.js'
+  // , '/test/functional/cursor_tests.js'
+  // , '/test/functional/insert_tests.js'
+  , '/test/functional/aggregation_tests.js'
 ]
 
 // Add all the tests to run
