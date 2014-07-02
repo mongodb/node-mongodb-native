@@ -86,7 +86,7 @@ var Update = function(requestId, ismaster, bson, ns, update, options) {
 
   // Unpack options
   var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
-  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
+  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : false;
 
   // Unpack the update document
   var upsert = typeof update[0].upsert == 'boolean' ? update[0].upsert : false;
@@ -148,7 +148,7 @@ var Remove = function(requestId, ismaster, bson, ns, remove, options) {
 
   // Unpack options
   var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
-  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
+  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : false;
 
   // Unpack the update document
   var limit = typeof remove[0].limit == 'number' ? remove[0].limit : 1;
