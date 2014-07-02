@@ -105,9 +105,9 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
       // Establish type of command
       if(cmd.find) {
         query = setupClassicFind(ns, cmd, options)
-      } else if(cmd.cursor) {
-        query = setupCommand(ns, cmd, options);
       } else if(cursorId != null) {
+      } else if(cmd) {
+        query = setupCommand(ns, cmd, options);
       } else {
         throw new MongoError(f("command %s does not return a cursor", JSON.stringify(cmd)));
       }      
@@ -116,8 +116,6 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     // If we don't have a cursorId execute the first query
     if(cursorId == null) {
       execInitialQuery(query, function(err, r) {
-        // console.log("----------------------------------- initial")
-        // console.dir(documents.length);
         if(err) return callback(err, null);
         // console.log("$$$$$$$$$$$$$$$$$$$$$$$$ execInitialQuery :: " + documents.length)
         // console.dir(documents)
@@ -321,6 +319,12 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
             // Return after processing command cursor
             return callback(null, null);
         }
+
+        if(Array.isArray(result.documents[0].result)) {
+          documents = result.documents[0].result;
+          cursorId = Long.ZERO;
+          return callback(null, null);
+        }
       }
 
       // Otherwise fall back to regular find path
@@ -432,6 +436,9 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     parts.pop()
     // Add command for initial execution
     parts.push("$cmd");
+
+    // console.log("++++++++++++++++++++++++++++++++++++++++++++++++++ setupCommand")
+    // console.dir(cmd)
 
     // Build Query object
     var query = new Query(bson, parts.join("."), cmd, {
