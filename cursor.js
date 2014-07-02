@@ -83,7 +83,7 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
   Object.defineProperty(this, 'cursorSkip', {
       enumerable:true,
       set: function(value) { 
-        console.log("--------------------- set cursor skip")
+        // console.log("--------------------- set cursor skip")
         skip = value; }
     , get: function() { return skip; }
   });
@@ -116,8 +116,8 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     // If we don't have a cursorId execute the first query
     if(cursorId == null) {
       execInitialQuery(query, function(err, r) {
-        console.log("----------------------------------- initial")
-        console.dir(documents.length);
+        // console.log("----------------------------------- initial")
+        // console.dir(documents.length);
         if(err) return callback(err, null);
         // console.log("$$$$$$$$$$$$$$$$$$$$$$$$ execInitialQuery :: " + documents.length)
         // console.dir(documents)
@@ -127,10 +127,11 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     } else if(documents.length == 0 && !Long.ZERO.equals(cursorId)) {
       // console.log("+++++++++++++++++++++++++++++++++++++exec getmore")
       execGetMore(function(err, doc) {
-        console.log("+++++++++++++++++++++++++++++++++++++exec getmore 1")
-        console.dir(err)
-        console.log(cursorId)
-        console.dir(documents.length);
+        if(err) return callback(err);
+        // console.log("+++++++++++++++++++++++++++++++++++++exec getmore 1")
+        // console.dir(err)
+        // console.log(cursorId)
+        // console.dir(documents.length);
         // next(callback);
         // console.dir(doc)
         if(documents.length == 0 && Long.ZERO.equals(cursorId)) dead = true;
@@ -157,7 +158,7 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
           return callback(null, null);
         }
 
-        console.log("===================== execGetMore :: " + documents.length)
+        // console.log("===================== execGetMore :: " + documents.length)
         self.next(callback);
         // callback(err, doc);
       });
@@ -169,12 +170,12 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
       }));
     } else if(documents.length == 0 && Long.ZERO.equals(cursorId)) {
       dead = true;
-      console.log("####################### counter next :: " + counter)
+      // console.log("####################### counter next :: " + counter)
       callback(null, null);
     } else {
     // counter++;
     // console.log(documents.length)
-      // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%2")
+      // console.log("==================================================2")
       // console.log("limit " + limit)
       // console.log("currentLimit " + currentLimit)
       if(limit > 0 && currentLimit >= limit) {
@@ -197,12 +198,24 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
   }
 
   /**
+   * Returns current buffered documents length
+   * @method
+   * @return {number} The number of items in the buffered documents
+   */
+  this.bufferedCount = function() {
+    return documents.length;
+  }
+
+  /**
    * Returns current buffered documents
    * @method
    * @return {Array} An array of buffered documents
    */
-  this.bufferedDocuments = function() {
-    return documents;
+  this.readBufferedDocuments = function(number) {
+    var length = number < documents.length ? number : documents.length;
+    var elements = documents.splice(0, length);
+    currentLimit = currentLimit + length;
+    return elements;
   }
 
   /**
@@ -260,8 +273,10 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     var getMore = new GetMore(bson, ns, cursorId, {numberToReturn: batchSize});
     // Register a callback
     callbacks.once(getMore.requestId, function(err, r) {
-      console.dir("+++++++++++++++++++++++++++ EXECUTE")
-      console.log("---------------------- number returned :: " + r.numberReturned)
+      // console.dir("+++++++++++++++++++++++++++ EXECUTE")
+      // console.dir(err)
+      // console.log("---------------------- number returned :: " + r.numberReturned)
+      // console.dir(callback)
       if(err) return callback(err);  
       documents = r.documents;
       cursorId = r.cursorId;
@@ -269,6 +284,7 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
       callback(null);
     });
 
+    // console.log("connection write :: " + connection.isConnected())
     // Write out the getMore command
     connection.write(getMore);
   }
@@ -285,10 +301,13 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     // Set up callback
     callbacks.once(query.requestId, function(err, result) {
       if(err) return callback(err);
-      console.log("---------------------- number returned :: " + result.numberReturned)
       
       // Check if we have a command cursor
       if(Array.isArray(result.documents) && result.documents.length == 1) {
+        if(result.documents[0]['$err'] 
+          || result.documents[0]['errmsg'])
+          return callback(new MongoError(result.documents[0]), null);
+
         if(result.documents[0].cursor != null 
           && typeof result.documents[0].cursor != 'string') {
             var id = result.documents[0].cursor.id;
@@ -325,25 +344,25 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
     options = options || {};
     // Set the optional batchSize
     batchSize = cmd.batchSize || batchSize;
-    console.log("--------------------------- limit :: " + limit)
-    console.log("--------------------------- batchSize :: " + batchSize)
+    // console.log("--------------------------- limit :: " + limit)
+    // console.log("--------------------------- batchSize :: " + batchSize)
     var numberToReturn = 0;
     
     // Unpack the limit and batchSize values
     if(limit == 0) {
       numberToReturn = batchSize;
-    } else if(limit < 0 || limit < batchSize) {
+    } else if(limit < 0 || limit < batchSize || (limit > 0 && batchSize == 0)) {
       numberToReturn = limit;
     } else {
       numberToReturn = batchSize;
     }
 
     // var numberToReturn = limit != 0 && limit < batchSize ? limit : batchSize;
-    console.log("--------------------------- numberToReturn :: " + numberToReturn)
+    // console.log("--------------------------- numberToReturn :: " + numberToReturn)
 
     var numberToSkip = skip || 0;
-    console.log("--------------------------- skip :: " + skip)
-    console.log("--------------------------- numberToSkip :: " + numberToSkip)
+    // console.log("--------------------------- skip :: " + skip)
+    // console.log("--------------------------- numberToSkip :: " + numberToSkip)
     // Build actual find command
     var findCmd = {};
     // Using special modifier
@@ -374,15 +393,15 @@ var Cursor = function(bson, ns, cmd, connection, callbacks, options) {
       findCmd = cmd;
     }
 
-    console.log("--------------------------- numberToReturn :: " + numberToReturn)
-    console.dir(findCmd)
+    // console.log("--------------------------- numberToReturn :: " + numberToReturn)
+    // console.dir(findCmd)
     // Build Query object
     var query = new Query(bson, ns, findCmd, {
         numberToSkip: numberToSkip, numberToReturn: numberToReturn
       , checkKeys: false, returnFieldSelector: cmd.fields
     });
 
-    console.dir(options)
+    // console.dir(options)
 
     // Set query flags
     query.slaveOk = readPreference.slaveOk();

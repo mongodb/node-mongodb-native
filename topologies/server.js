@@ -30,7 +30,7 @@ var Callbacks = function() {
   //
   // Flush all callbacks
   this.flush = function(err) {
-    process.nextTick(function() {
+    // process.nextTick(function() {
       // Error out any current callbacks
       for(var id in this._events) {
         var executeError = function(_id, _callbacks) {
@@ -39,7 +39,7 @@ var Callbacks = function() {
 
         executeError(id, self);
       }
-    });
+    // });
   }
 }
 
@@ -353,13 +353,12 @@ var Server = function(options) {
    */
   this.destroy = function() {
     if(logger.isDebug()) logger.debug(f('destroy called on server %s', self.name));
-    // // Destroy all event emitters
-    // ["close", "message", "error", "timeout", "connect", "parseError"].forEach(function(e) {
-    //   pool.removeAllListeners(e);
-    // });
 
     // Close pool
     pool.destroy();
+
+    // Flush out all the callbacks
+    callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
   }
 
   /**
