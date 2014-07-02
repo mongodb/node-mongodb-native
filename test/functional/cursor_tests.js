@@ -429,10 +429,6 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
         }
 
         function finished() {
-          collection.find().count(function(err, count) {
-            test.equal(10, count);
-          });
-
           collection.find().limit(5).toArray(function(err, items) {
             test.equal(5, items.length);
             
@@ -699,18 +695,18 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
           } catch(err) {
             test.equal("Cursor is closed", err.message);
           }
-        });
 
-        var cursor = collection.find()
-        cursor.close(function(err, cursor) {
-          try {
-            cursor.skip(1);  
-          } catch(err) {
-            test.equal("Cursor is closed", err.message);
-          }
+          var cursor2 = collection.find()
+          cursor2.close(function(err, cursor) {
+            try {
+              cursor2.skip(1);  
+            } catch(err) {
+              test.equal("Cursor is closed", err.message);
+            }
 
-          db.close();
-          test.done();
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -741,7 +737,6 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
           test.equal("batchSize requires an integer", err.message);
         }
 
-
         var cursor = collection.find();
         cursor.nextObject(function(err, doc) {
           cursor.nextObject(function(err, doc) {
@@ -751,20 +746,20 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
             } catch (err) {
               test.equal("Cursor is closed", err.message);
             }
+
+            var cursor2 = collection.find()
+            cursor2.close(function(err, cursor) {
+              try {
+                cursor2.batchSize(1);
+                test.ok(false);
+              } catch (err) {
+                test.equal("Cursor is closed", err.message);
+              }
+
+              db.close();
+              test.done();
+            });
           });
-        });
-
-        var cursor = collection.find()
-        cursor.close(function(err, cursor) {
-          try {
-            cursor.batchSize(1);
-            test.ok(false);
-          } catch (err) {
-            test.equal("Cursor is closed", err.message);
-          }
-
-          db.close();
-          test.done();
         });
       });
     });
@@ -797,12 +792,12 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
             //1st
             cursor.nextObject(function(err, items) {
               //cursor.items should contain 1 since nextObject already popped one
-              test.equal(1, cursor.bufferedDocuments().length);
+              test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
               cursor.nextObject(function(err, items) {
-                test.equal(0, cursor.bufferedDocuments().length);
+                test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
                 //test batch size modification on the fly
@@ -811,22 +806,22 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
 
                 //3rd
                 cursor.nextObject(function(err, items) {
-                  test.equal(2, cursor.bufferedDocuments().length);
+                  test.equal(2, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
                   cursor.nextObject(function(err, items) {
-                    test.equal(1, cursor.bufferedDocuments().length);
+                    test.equal(1, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //5th
                     cursor.nextObject(function(err, items) {
-                      test.equal(0, cursor.bufferedDocuments().length);
+                      test.equal(0, cursor.bufferedCount());
                       test.ok(items != null);
 
                       //6th
                       cursor.nextObject(function(err, items) {
-                        test.equal(0, cursor.bufferedDocuments().length);
+                        test.equal(0, cursor.bufferedCount());
                         test.ok(items != null);
 
                         //No more
@@ -876,22 +871,22 @@ exports.shouldCorrectlyHandleBatchSize = {
           collection.find({}, {batchSize : batchSize}, function(err, cursor) {
             //1st
             cursor.nextObject(function(err, items) {
-              test.equal(1, cursor.bufferedDocuments().length);
+              test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
               cursor.nextObject(function(err, items) {
-                test.equal(0, cursor.bufferedDocuments().length);
+                test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
                 //3rd
                 cursor.nextObject(function(err, items) {
-                  test.equal(1, cursor.bufferedDocuments().length);
+                  test.equal(1, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
                   cursor.nextObject(function(err, items) {
-                    test.equal(0, cursor.bufferedDocuments().length);
+                    test.equal(0, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //No more
@@ -939,19 +934,19 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
           var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
           //1st
           cursor.nextObject(function(err, items) {
-            test.equal(2, cursor.bufferedDocuments().length);
+            test.equal(2, cursor.bufferedCount());
 
             //2nd
             cursor.nextObject(function(err, items) {
-              test.equal(1, cursor.bufferedDocuments().length);
+              test.equal(1, cursor.bufferedCount());
 
               //3rd
               cursor.nextObject(function(err, items) {
-                test.equal(0, cursor.bufferedDocuments().length);
+                test.equal(0, cursor.bufferedCount());
 
                 //4th
                 cursor.nextObject(function(err, items) {
-                  test.equal(0, cursor.bufferedDocuments().length);
+                  test.equal(2, cursor.bufferedCount());
 
                   //No more
                   cursor.nextObject(function(err, items) {
@@ -997,11 +992,11 @@ exports.shouldHandleLimitLessThanBatchSize = {
           var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
           //1st
           cursor.nextObject(function(err, items) {
-            test.equal(1, cursor.bufferedDocuments().length);
+            test.equal(1, cursor.bufferedCount());
 
             //2nd
             cursor.nextObject(function(err, items) {
-              test.equal(0, cursor.bufferedDocuments().length);
+              test.equal(0, cursor.bufferedCount());
 
               //No more
               cursor.nextObject(function(err, items) {
@@ -1654,18 +1649,20 @@ exports['immediately destroying a stream prevents the query from executing'] = {
           stream.on('data', function () {
             i++;
           })
-          stream.on('close', done);
-          stream.on('error', done);
+          stream.on('close', done('close'));
+          sstream.on('error', done('error'));
 
           stream.destroy();
 
-          function done (err) {
-            test.equal(++doneCalled, 1);
-            test.equal(undefined, err);
-            test.strictEqual(0, i);
-            test.strictEqual(true, stream.isClosed());
-            db.close();
-            test.done();
+          function done (e) {
+            return function(err) {              
+              test.equal(++doneCalled, 1);
+              test.equal(undefined, err);
+              test.strictEqual(0, i);
+              test.strictEqual(true, stream.isClosed());
+              db.close();
+              test.done();
+            }
           }
         });
       });
@@ -1708,7 +1705,6 @@ exports['destroying a stream stops it'] = {
 
           stream.on('data', function (doc) {
             if(++i === 5) {
-              console.log("destroy")
               stream.destroy();
             }
           });
@@ -1766,9 +1762,68 @@ exports['cursor stream errors'] = {
 
           var stream = collection.find({}, { batchSize: 5 }).stream();
 
-          stream.on('data', function (doc) {
+          stream.on('data', function (doc) {            
             if (++i === 5) {
               client.close();
+            }
+          });
+
+          stream.on('close', done('close'));
+
+          stream.on('error', done('error'));
+
+          function done (e) {
+            return function(err) {              
+              ++finished;
+              setTimeout(function () {
+                test.equal(5, i);
+                test.equal(1, finished);
+                test.equal(true, stream.isClosed());
+                client.close();
+                test.done();
+              }, 150)
+            }
+          }
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['cursor stream errors connection force closed'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    client.open(function(err, db_p) {
+      test.equal(null, err);
+
+      client.createCollection('cursor_stream_errors', function(err, collection) {
+        test.equal(null, err);
+
+        var docs = [];
+        for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii+1 });
+
+        // insert all docs
+        collection.insert(docs, {w:1}, function(err, result) {
+          test.equal(null, err);
+
+          var finished = 0
+            , closed = 0
+            , i = 0
+
+          var stream = collection.find({}, { batchSize: 5 }).stream();
+
+          stream.on('data', function (doc) {            
+            if (++i === 5) {
+              client.serverConfig.connections()[0].destroy();
             }
           });
 
@@ -2204,7 +2259,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
           var stream = collection.find().stream();
 
           // Execute find on all the documents
-          stream.on('close', function() {
+          stream.on('end', function() {
             db.close();
             test.done();
           });
@@ -2293,51 +2348,39 @@ exports.shouldCloseDeadTailableCursors = {
       var options = { capped: true, size: 8 };
       db.createCollection('test_if_dead_tailable_cursors_close', options, function(err, collection) {
         test.equal(null, err);
+        var closed = false;
 
-        var insertId = 0
-        function insert (cb) {
-          if (insert.ran) insert.ran++;
-          else insert.ran = 1;
+        // insert(function query () {
+          var stream = collection.find({}, { tailable: true }).stream();
 
-          var docs = []
-          for(var end = insertId+1; insertId < end+80; insertId++) {
-            docs.push({id:insertId})
+          // Just hammer the server
+          for(var i = 0; i < 1000; i++) {
+            collection.insert({id: i});
           }
-          collection.insert(docs, {w:1}, function(err, ids) {
-            test.equal(null, err);
-            cb && cb();
-          })
-        }
 
-        var lastId = 0
-          , closed = false;
-
-        insert(function query () {
-          var conditions = { id: { $gte: lastId }};
-          var stream = collection.find(conditions, { tailable: true }).stream();
-
-          stream.on('data', function (doc) {
-            lastId = doc.id;
-            // kill the cursor on the server by inserting enough more
-            // docs to overwrite the last one returned. this should
-            // force the stream to close.
-            if (insertId == lastId+1) insert();
-          });
+          stream.on('data', function (doc) {});
 
           stream.on('error', function (err) {
             // shouldn't happen
             test.equal(null, err);
           });
 
-          stream.on('end', function () {
+          stream.on('close', function () {
             // this is what we need
             closed = true;
           });
-        });
+
+          // Just hammer the server
+          for(var i = 0; i < 10000; i++) {
+            process.nextTick(function() {
+              collection.insert({id: i});
+            })
+          }
+
+        // });
 
         setTimeout(function () {
           db.close();
-          test.equal(2, insert.ran);
           test.equal(true, closed);
           db.close();
           test.done();
@@ -2502,55 +2545,6 @@ exports.shouldNotExplainWhenFalse = {
 /**
  * @ignore
  */
-exports.shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-
-    // Establish connection to db
-    db.open(function(err, db) {
-
-      // Create a lot of documents to insert
-      var dup_check = {};
-      var docs = [];
-      for(var i = 0; i < 100; i++) {
-        docs.push({'a':i})
-      }
-
-      // Create a collection
-      db.createCollection('shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates', function(err, collection) {
-        test.equal(null, err);
-
-        // Insert documents into collection
-        collection.insert(docs, {w:1}, function(err, ids) {
-          // Peform a find to get a cursor
-          var stream = collection.find().stream();
-          stream.pause();
-          stream.resume();
-          stream.on("data", function(item) {
-            // console.log(item)
-            // var key = item._id.toHexString();
-            // test.ok(dup_check[key] == null);
-            // dup_check[key] = true;
-          });
-
-          stream.on("end", function() {
-            db.close();
-            test.done();
-          });
-        });
-      });
-    });
-  }
-}
-
-/**
- * @ignore
- */
 exports.shouldFailToSetReadPreferenceOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -2602,7 +2596,7 @@ exports.shouldNotFailDueToStackOverflowEach = {
         // Get all batches we must insert
         left = allDocs.length;
         totalI = 0;
-        // console.dir(allDocs)
+
         // Execute inserts
         for(var i = 0; i < left; i++) {
           collection.insert(allDocs.shift(), {w:1}, function(err, d) {
@@ -2658,7 +2652,7 @@ exports.shouldNotFailDueToStackOverflowToArray = {
         left = allDocs.length;
         totalI = 0;
         timeout = 0;
-        // console.dir(allDocs)
+
         // Execute inserts
         for(var i = 0; i < left; i++) {
           setTimeout(function() {
