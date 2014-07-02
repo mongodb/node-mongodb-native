@@ -81,7 +81,7 @@ var Connection = function(options) {
 
   // Response options
   var responseOptions = {
-    promoteLongs: options.promoteLongs || true
+    promoteLongs: typeof options.promoteLongs == 'boolean' ?  options.promoteLongs : true
   }
 
   // Internal state
@@ -95,7 +95,12 @@ var Connection = function(options) {
    * Connect
    * @method
    */
-  this.connect = function() {
+  this.connect = function(_options) {
+    _options = _options || {};
+    // Check if we are overriding the promoteLongs
+    if(typeof _options.promoteLongs == 'boolean')
+      responseOptions.promoteLongs = _options.promoteLongs;
+
     // Create new connection instance
     connection = domainSocket 
       ? net.createConnection(host)

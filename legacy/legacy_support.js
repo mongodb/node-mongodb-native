@@ -18,8 +18,14 @@ var LegacySupport = function() {
     for(var i = 0; i < results.length; i++) {
       var result = results[i];
 
-      // console.dir(result)
-      // console.log(result.n)
+      if(result.upserted && final.upserted == null) {
+        final.upserted = [];
+      }
+
+      // Push the upserted document to the list of upserted values
+      if(result.upserted) {
+        final.upserted.push({index: i, _id: result.upserted});
+      }
 
       // We have a command error
       if(result != null && result.ok == 0 || result.err || result.errmsg) {

@@ -224,7 +224,6 @@ var Server = function(options) {
   // Handlers
   var messageHandler = function(response, connection) {
     if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
-    // Execute callback
     callbacks.emit(response.responseTo, null, response);      
   }
 
@@ -328,7 +327,12 @@ var Server = function(options) {
    * Initiate server connect
    * @method
    */
-  this.connect = function() {
+  this.connect = function(_options) {
+
+    // Set server specific settings
+    _options = _options || {}
+    if(typeof _options.promoteLongs == 'boolean') 
+      options.promoteLongs = _options.promoteLongs;
     // Destroy existing pool
     if(pool) {
       pool.destroy();
@@ -396,6 +400,8 @@ var Server = function(options) {
     // Options object
     var opts = {};
     if(type == 'insert') opts.checkKeys = true;
+    // Ensure we support serialization of functions
+    if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
 
     // Execute command
     self.command(f("%s.$cmd", d), writeCommand, opts, callback);    
@@ -468,10 +474,18 @@ var Server = function(options) {
     // Check keys
     var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys: false;
 
-    // Create a query instance
-    var query = new Query(bson, ns, cmd, {
+    // Serialize function
+    var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+
+    // Query options
+    var queryOptions = {
       numberToSkip: 0, numberToReturn: -1, checkKeys: checkKeys
-    });
+    };
+
+    if(serializeFunctions) queryOptions.serializeFunctions = serializeFunctions;
+
+    // Create a query instance
+    var query = new Query(bson, ns, cmd, queryOptions);
 
     // Set slave OK
     query.slaveOk = slaveOk(options.readPreference);

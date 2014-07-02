@@ -57,6 +57,9 @@ var Query = function(bson, ns, query, options) {
   var maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
   var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
 
+  console.log("--------------------------------------- QUERY")
+  console.dir(options)
+
   // Properties
   var tailable = {name: 'tailable', value: 0};
   var slave = {name: 'slaveOk', value: 0};
