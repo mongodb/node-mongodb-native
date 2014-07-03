@@ -162,7 +162,13 @@ var testFiles =[
   // , '/test/functional/db_tests.js'
   // , '/test/functional/cursor_tests.js'
   // , '/test/functional/insert_tests.js'
-  , '/test/functional/aggregation_tests.js'
+  // , '/test/functional/aggregation_tests.js'
+  // , '/test/functional/admin_tests.js'
+  // , '/test/functional/connection_tests.js'
+  // , '/test/functional/cursorstream_tests.js'
+  // , '/test/functional/custom_pk_tests.js'
+  // , '/test/functional/domain_tests.js'
+  , '/test/functional/error_tests.js'
 ]
 
 // Add all the tests to run
