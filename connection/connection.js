@@ -65,7 +65,7 @@ var Connection = function(options) {
   var socketTimeout = options.socketTimeout || 0;
 
   // Check if we have a domain socket
-  var domainSocket = host.indexOf("@") != -1;
+  var domainSocket = host.indexOf('\/') != -1;
 
   // Serialize commands using function
   var singleBufferSerializtion = typeof options.singleBufferSerializtion == 'boolean' ? options.singleBufferSerializtion : true;
@@ -83,6 +83,10 @@ var Connection = function(options) {
   var responseOptions = {
     promoteLongs: typeof options.promoteLongs == 'boolean' ?  options.promoteLongs : true
   }
+
+  // Flushing
+  var flushing = false;
+  var queue = [];
 
   // Internal state
   var connection = null;
@@ -109,6 +113,7 @@ var Connection = function(options) {
     // Set the options for the connection
     connection.setKeepAlive(keepAlive, keepAliveInitialDelay);
     connection.setTimeout(connectionTimeout);
+    connection.setNoDelay(noDelay);
 
     // If we have ssl enabled
     if(ssl) {
@@ -168,10 +173,18 @@ var Connection = function(options) {
     var buffer = Buffer.isBuffer(command) 
       ? command 
       : (command[serializationFunction] ? command[serializationFunction]() : command.toBin());
+    // // Get the raw buffer
+    // var buffer = Buffer.isBuffer(command) 
+    //   ? command 
+    //   : command.toBin();
     // Debug log
     if(logger.isDebug()) logger.debug(f('writing buffer [%s] to %s:%s', buffer.toString('hex'), host, port));
-    // Write out the command    
-    connection.write(buffer, 'binary');
+    // Write out the command
+    var writeResult = connection.write(buffer, 'binary');
+
+    // if(!writeResult)
+    // console.log(connection.write(buffer, 'binary'));
+    // console.log(connection.bufferSize)
   }
 
   /**

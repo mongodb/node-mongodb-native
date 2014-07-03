@@ -30,16 +30,18 @@ var Callbacks = function() {
   //
   // Flush all callbacks
   this.flush = function(err) {
-    // process.nextTick(function() {
-      // Error out any current callbacks
-      for(var id in this._events) {
-        var executeError = function(_id, _callbacks) {
-          _callbacks.emit(_id, err, null);
-        }
-
-        executeError(id, self);
+    // Error out any current callbacks
+    for(var id in this._events) {
+      var executeError = function(_id, _callbacks) {
+        _callbacks.emit(_id, err, null);
       }
-    // });
+
+      executeError(id, self);
+    }
+  }
+
+  this.register = function(id, callback) {
+    this.once(id, bindToCurrentDomain(callback));
   }
 }
 
@@ -50,11 +52,8 @@ inherits(Callbacks, EventEmitter);
  */
 var bindToCurrentDomain = function(callback) {
   var domain = process.domain;
-  if(domain == null || callback == null) {
-    return callback;
-  } else {
-    return domain.bind(callback);
-  }
+  if(domain == null || callback == null) return callback;
+  return domain.bind(callback);
 }
 
 /**
@@ -96,6 +95,11 @@ var Server = function(options) {
   
   // Add event listener
   EventEmitter.call(this);
+
+  // console.log("+++++++++++++++++++++++++++++++++++++++++++ SERVER CREATION")
+  // console.log("+++++++++++++++++++++++++++++++++++++++++++ SERVER CREATION")
+  // console.log("+++++++++++++++++++++++++++++++++++++++++++ SERVER CREATION")
+  // console.dir(options)
 
   // Logger
   var logger = Logger('Server', options);
@@ -328,7 +332,6 @@ var Server = function(options) {
    * @method
    */
   this.connect = function(_options) {
-
     // Set server specific settings
     _options = _options || {}
     if(typeof _options.promoteLongs == 'boolean') 
@@ -452,6 +455,7 @@ var Server = function(options) {
    * @param {opResultCallback} callback A callback function
    */
   this.command = function(ns, cmd, options, callback) {
+    // console.log("--------------------------------------------- command")
     if(typeof options == 'function') callback = options, options = {};
     // Ensure we have no options
     options = options || {};
@@ -490,9 +494,6 @@ var Server = function(options) {
     // Set slave OK
     query.slaveOk = slaveOk(options.readPreference);
 
-    // Bind to current domain
-    callback = bindToCurrentDomain(callback);
-
     // Notify query start to any read Preference strategies
     if(readPreferenceStrategies != null)
       notifyStrategies('startOperation', [self, query, new Date()]);
@@ -528,7 +529,7 @@ var Server = function(options) {
         }
 
         // Register the callback
-        callbacks.once(query.requestId, function(err, result) {
+        callbacks.register(query.requestId, function(err, result) {
           if(err) error = err;
           total = total - 1;
 
@@ -553,7 +554,7 @@ var Server = function(options) {
     }
 
     // Register the callback
-    callbacks.once(query.requestId, function(err, result) {
+    callbacks.register(query.requestId, function(err, result) {
       // Notify end of command
       notifyStrategies('endOperation', [self, err, result, new Date()]);
       if(err) return callback(err);
@@ -575,6 +576,7 @@ var Server = function(options) {
    * @param {opResultCallback} callback A callback function
    */
   this.insert = function(ns, ops, options, callback) {
+    // console.log("--------------------------------------------- insert")
     if(fallback && ismaster.minWireVersion == null) return fallback.insert(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'insert', 'documents', ns, ops, options, callback);
   }
@@ -589,6 +591,7 @@ var Server = function(options) {
    * @param {opResultCallback} callback A callback function
    */
   this.update = function(ns, ops, options, callback) {
+    // console.log("--------------------------------------------- update")
     if(fallback && ismaster.minWireVersion == null) return fallback.update(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'update', 'updates', ns, ops, options, callback);
   }
@@ -603,6 +606,7 @@ var Server = function(options) {
    * @param {opResultCallback} callback A callback function
    */
   this.remove = function(ns, ops, options, callback) {
+    // console.log("--------------------------------------------- remove")
     if(fallback && ismaster.minWireVersion == null) return fallback.remove(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'delete', 'deletes', ns, ops, options, callback);
   }
@@ -696,6 +700,18 @@ var Server = function(options) {
   this.connections = function() {
     return pool.getAll();
   }
+
+  /**
+   * Name of BSON parser currently used
+   * @method
+   * @return {string}
+   */
+  this.parserType = function() {
+    if(bsonInstance.serialize.toString().indexOf('[native code]') != -1)
+      return 'c++';
+    return 'js';
+  }
+
 
   // // Command
   // {

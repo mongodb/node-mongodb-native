@@ -43,6 +43,9 @@ var Query = function(bson, ns, query, options) {
     throw new Error("namespace cannot contain a null character");
   }
 
+  // console.log("=========================================== QUERY")
+  // console.log(ns)
+
   // Ensure empty options
   options = options || {};
 
@@ -143,8 +146,12 @@ var Query = function(bson, ns, query, options) {
 
     // Write total document length
     write32bit(0, _buffer, index);
-    // Return the buffer slice
-    return _buffer.slice(0, index);
+    // Allocate a new buffer
+    var finalBuffer = new Buffer(index);
+    _buffer.copy(finalBuffer, 0, 0, index);
+
+    // Return buffer
+    return finalBuffer;
   }
 
   // To Binary
@@ -251,8 +258,12 @@ var GetMore = function(bson, ns, cursorId, opts) {
     index = write32bit(index, _buffer, cursorId.getLowBits());
     index = write32bit(index, _buffer, cursorId.getHighBits());
 
+    // Allocate a new buffer
+    var finalBuffer = new Buffer(index);
+    _buffer.copy(finalBuffer, 0, 0, index);
+
     // Return buffer
-    return _buffer.slice(0, index);
+    return finalBuffer;
   }
 
   // To Binary
@@ -317,8 +328,12 @@ var KillCursor = function(bson, cursorIds) {
       index = write32bit(index, _buffer, cursorIds[i].getHighBits());
     }
 
+    // Allocate a new buffer
+    var finalBuffer = new Buffer(index);
+    _buffer.copy(finalBuffer, 0, 0, index);
+
     // Return buffer
-    return _buffer.slice(0, index);
+    return finalBuffer;
   }
 
   // Generate binary message
