@@ -168,7 +168,8 @@ var testFiles =[
   // , '/test/functional/cursorstream_tests.js'
   // , '/test/functional/custom_pk_tests.js'
   // , '/test/functional/domain_tests.js'
-  , '/test/functional/error_tests.js'
+  // , '/test/functional/error_tests.js'
+  , '/test/functional/find_tests.js'
 ]
 
 // Add all the tests to run
