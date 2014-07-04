@@ -3,6 +3,7 @@ var Insert = require('./commands').Insert
   , Remove = require('./commands').Remove
   , Query = require('../connection/commands').Query
   , copy = require('../connection/utils').copy
+  , f = require('util').format
   , CommandResult = require('../topologies/command_result')
   , MongoError = require('../error');
 
@@ -89,8 +90,11 @@ var LegacySupport = function() {
       var op = new command(Query.getRequestId(), ismaster, bson, ns, [doc], options);
       // Write concern
       var writeConcern = options.writeConcern || {w:1};
+      var db = ns.split('.').shift();
+      console.log("################################ db " + db)
       // Create a getLastError command
-      var getLastErrorOp = new Query(bson, "system.$cmd", copy(writeConcern, {getLastError: 1}), {numberToReturn: -1});
+      // var getLastErrorOp = new Query(bson, f("%s.$cmd", db), copy(writeConcern, {getLastError: 1}), {numberToReturn: -1});
+      var getLastErrorOp = new Query(bson, f("%s.$cmd", db), {getlasterror: 1}, {numberToReturn: -1});
 
       // Error out if no connection available
       if(connection == null) 
@@ -137,10 +141,13 @@ var LegacySupport = function() {
     for(var i = 0; i < ops.length; i++) {
       // Create an insert command
       var op = new command(Query.getRequestId(), ismaster, bson, ns, [ops[i]], options);
+      // Get db name
+      var db = ns.split('.').shift();
       // Write concern
       var writeConcern = options.writeConcern || {w:1};
       // Create a getLastError command
-      var getLastErrorOp = new Query(bson, "system.$cmd", copy(writeConcern, {getLastError: 1}), {numberToReturn: -1});
+      // var getLastErrorOp = new Query(bson, f("%s.$cmd", db), copy(writeConcern, {getlasterror: 1}), {numberToReturn: -1});
+      var getLastErrorOp = new Query(bson, f("%s.$cmd", db), {getlasterror: 1}, {numberToReturn: -1});
 
       // Get a pool connection
       var connection = pool.get();
