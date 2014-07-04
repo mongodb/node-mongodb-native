@@ -169,7 +169,9 @@ var testFiles =[
   // , '/test/functional/custom_pk_tests.js'
   // , '/test/functional/domain_tests.js'
   // , '/test/functional/error_tests.js'
-  , '/test/functional/find_tests.js'
+  // , '/test/functional/find_tests.js'
+  // , '/test/functional/geo_tests.js'
+  , '/test/functional/index_tests.js'
 ]
 
 // Add all the tests to run
