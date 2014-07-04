@@ -171,7 +171,8 @@ var testFiles =[
   // , '/test/functional/error_tests.js'
   // , '/test/functional/find_tests.js'
   // , '/test/functional/geo_tests.js'
-  , '/test/functional/index_tests.js'
+  // , '/test/functional/index_tests.js'
+  , '/test/functional/mapreduce_tests.js'
 ]
 
 // Add all the tests to run
