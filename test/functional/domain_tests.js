@@ -26,6 +26,7 @@ exports.shouldStayInCorrectDomainForReadCommand = {
         collection.count({}, function(err) {
           test.ok(!err);
           test.ok(domainInstance === process.domain);
+          domainInstance.dispose();
           test.done();
         });
       });
@@ -61,6 +62,7 @@ exports.shouldStayInCorrectDomainForWriteCommand = {
         collection.insert({field: 123}, function(err) {
           test.ok(!err);
           test.ok(domainInstance === process.domain);
+          domainInstance.dispose();
           test.done();
         });
       });
@@ -98,6 +100,7 @@ exports.shouldStayInCorrectDomainForQueuedReadCommand = {
         collection.count({}, function(err) {
           test.ok(err != null);
           test.ok(process.domain === domainInstance);
+          domainInstance.dispose();
           client.close();          
           test.done();
         });
@@ -137,6 +140,7 @@ exports.shouldStayInCorrectDomainForQueuedWriteCommand = {
         collection.insert({field: 123}, function(err) {
           test.ok(err != null);
           test.ok(process.domain === domainInstance);
+          domainInstance.dispose();
           test.done();
         });
       });

@@ -73,6 +73,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
           // Update the document
           item['hello2'] = 'world2';
 
+
           // Save the item with the additional field
           collection.save(item, configuration.writeConcern(), function(err, result) {
 
@@ -468,15 +469,15 @@ exports.shouldEnsureStrictAccessCollection = {
       db.collection('does-not-exist', {strict: true}, function(err, collection) {
         test.ok(err instanceof Error);
         test.equal("Collection does-not-exist does not exist. Currently in strict mode.", err.message);
-      });
 
-      db.createCollection('test_strict_access_collection', function(err, collection) {
-        db.collection('test_strict_access_collection', configuration.writeConcern(), function(err, collection) {
-          test.equal(null, err);
-          test.ok(collection.collectionName);
-          // Let's close the db
-          db.close();
-          test.done();
+        db.createCollection('test_strict_access_collection', function(err, collection) {
+          db.collection('test_strict_access_collection', configuration.writeConcern(), function(err, collection) {
+            test.equal(null, err);
+            test.ok(collection.collectionName);
+            // Let's close the db
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -747,15 +748,15 @@ exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = {
 
               doc.hello = 'mike';
               collection.save(doc, configuration.writeConcern(), function(err, doc) {
-                collection.count(function(err, count) {
-                  test.equal(1, count);
-                });
-
                 collection.findOne(function(err, doc) {
-                  test.equal('mike', doc.hello);
-                  // Let's close the db
-                  db.close();
-                  test.done();
+                  collection.count(function(err, count) {
+                    test.equal(1, count);
+
+                    test.equal('mike', doc.hello);
+                    // Let's close the db
+                    db.close();
+                    test.done();
+                  });
                 });
               });
             });

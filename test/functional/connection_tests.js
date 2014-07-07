@@ -119,24 +119,6 @@ exports.testConnectNoOptions = {
 /**
  * @ignore
  */
-exports.testConnectDbOptions = {
-  metadata: {},
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var connect = configuration.require;
-    connect(configuration.url(),
-            { db: {native_parser: true} },
-            connectionTester(test, 'testConnectDbOptions', function(db) {            
-      test.equal(true, db.native_parser);
-      test.done();
-    }));
-  }
-}
-
-/**
- * @ignore
- */
 exports.testConnectServerOptions = {
   metadata: {},
   
