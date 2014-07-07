@@ -43,9 +43,6 @@ var Query = function(bson, ns, query, options) {
     throw new Error("namespace cannot contain a null character");
   }
 
-  // console.log("=========================================== QUERY")
-  // console.log(ns)
-
   // Ensure empty options
   options = options || {};
 
@@ -112,8 +109,8 @@ var Query = function(bson, ns, query, options) {
     index = write32bit(index, _buffer, 0);
     index = write32bit(index, _buffer, OP_QUERY);
     index = write32bit(index, _buffer, values.flags);
-    console.log("================= index " + index)
-    console.log("================= flags " + values.flags)
+    // console.log("================= index " + index)
+    // console.log("================= flags " + values.flags)
 
     // Write collection name
     index = index + _buffer.write(ns, index, 'utf8') + 1;
@@ -131,6 +128,9 @@ var Query = function(bson, ns, query, options) {
     //   , checkKeys
     //   , b, 0
     //   , serializeFunctions))
+
+    // console.log("######################################### Query")
+    // console.dir(query)
 
     // Serialize query
     var queryLength = bson.serializeWithBufferAndIndex(query
@@ -160,13 +160,13 @@ var Query = function(bson, ns, query, options) {
 
     // Write total document length
     write32bit(0, _buffer, index);
-    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ QUERY COMMAND :: " + index)
-
+    // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ QUERY COMMAND :: " + index)
+    // console.dir(query)
     // Allocate a new buffer
     var finalBuffer = new Buffer(index);
     _buffer.copy(finalBuffer, 0, 0, index);
 
-    console.log(finalBuffer.toString('hex'))
+    // console.log(finalBuffer.toString('hex'))
     // Return buffer
     return finalBuffer;
   }
@@ -460,14 +460,15 @@ var Response = function(bson, data, opts) {
     values.numberReturned = data.readUInt32LE(index);
     index = index + 4; 
 
-    // Parse options
-    var _options = {promoteLongs: opts.promoteLongs};
-
     //
     // Parse Body
     //
     for(var i = 0; i < values.numberReturned; i++) {
       var bsonSize = data.readUInt32LE(index);
+      // console.log("================ bsonSize :: " + bsonSize)
+      // Parse options
+      var _options = {promoteLongs: opts.promoteLongs};
+
       // If we have raw results specified slice the return document
       if(raw) {
         values.documents.push(data.slice(index, index + bsonSize));
