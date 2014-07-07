@@ -73,7 +73,6 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
           // Update the document
           item['hello2'] = 'world2';
 
-
           // Save the item with the additional field
           collection.save(item, configuration.writeConcern(), function(err, result) {
 

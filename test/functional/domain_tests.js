@@ -6,16 +6,7 @@ exports.shouldStayInCorrectDomainForReadCommand = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Domain;
-
-    try {
-      Domain = require('domain');
-    } catch (e) {
-      //Old node versions. Nothing to test
-      test.done();
-      return;
-    }
-
+    var Domain = require('domain');
     var domainInstance = Domain.create();
     var client = configuration.newDbInstance({w: 0}, {poolSize: 1, auto_reconnect: true});
 
@@ -26,7 +17,9 @@ exports.shouldStayInCorrectDomainForReadCommand = {
         collection.count({}, function(err) {
           test.ok(!err);
           test.ok(domainInstance === process.domain);
+          domainInstance.exit();
           domainInstance.dispose();
+          client.close();
           test.done();
         });
       });
@@ -42,16 +35,7 @@ exports.shouldStayInCorrectDomainForWriteCommand = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Domain;
-
-    try {
-      Domain = require('domain');
-    } catch (e) {
-      //Old node versions. Nothing to test
-      test.done();
-      return;
-    }
-
+    var Domain = require('domain');
     var domainInstance = Domain.create();
     var client = configuration.newDbInstance({w: 1}, {poolSize: 1, auto_reconnect: true});
 
@@ -62,7 +46,9 @@ exports.shouldStayInCorrectDomainForWriteCommand = {
         collection.insert({field: 123}, function(err) {
           test.ok(!err);
           test.ok(domainInstance === process.domain);
+          domainInstance.exit();
           domainInstance.dispose();
+          client.close();
           test.done();
         });
       });
@@ -78,16 +64,7 @@ exports.shouldStayInCorrectDomainForQueuedReadCommand = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Domain;
-
-    try {
-      Domain = require('domain');
-    } catch (e) {
-      //Old node versions. Nothing to test
-      test.done();
-      return;
-    }
-
+    var Domain = require('domain');
     var domainInstance = Domain.create();
     var client = configuration.newDbInstance({w: 0}, {poolSize: 1, auto_reconnect: true});
 
@@ -100,6 +77,7 @@ exports.shouldStayInCorrectDomainForQueuedReadCommand = {
         collection.count({}, function(err) {
           test.ok(err != null);
           test.ok(process.domain === domainInstance);
+          domainInstance.exit();
           domainInstance.dispose();
           client.close();          
           test.done();
@@ -113,20 +91,15 @@ exports.shouldStayInCorrectDomainForQueuedReadCommand = {
  * @ignore
  */
 exports.shouldStayInCorrectDomainForQueuedWriteCommand = {
-  metadata: {},
+  metadata: {
+    require: {
+      node: ">=0.10.x"
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Domain;
-
-    try {
-      Domain = require('domain');
-    } catch (e) {
-      //Old node versions. Nothing to test
-      test.done();
-      return;
-    }
-
+    var Domain = require('domain');
     var domainInstance = Domain.create();
     var client = configuration.newDbInstance({w: 1}, {poolSize: 1, auto_reconnect: true});
 
@@ -140,7 +113,9 @@ exports.shouldStayInCorrectDomainForQueuedWriteCommand = {
         collection.insert({field: 123}, function(err) {
           test.ok(err != null);
           test.ok(process.domain === domainInstance);
+          domainInstance.exit();
           domainInstance.dispose();
+          client.close();
           test.done();
         });
       });
