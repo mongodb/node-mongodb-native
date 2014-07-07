@@ -131,6 +131,7 @@ var Query = function(bson, ns, query, options) {
 
     // console.log("######################################### Query")
     // console.dir(query)
+    // console.dir(options)
 
     // Serialize query
     var queryLength = bson.serializeWithBufferAndIndex(query
@@ -418,6 +419,37 @@ var Response = function(bson, data, opts) {
   getProperty(this, 'documents', 'documents', values);
   getSingleProperty(this, 'raw', data);
 
+  //
+  // Parse Header
+  //
+  var index = 0;
+  // Read the message length
+  values.length = data.readUInt32LE(index);
+  index = index + 4;
+  // Fetch the request id for this reply
+  values.requestId = data.readUInt32LE(index);
+  index = index + 4;
+  // Fetch the id of the request that triggered the response
+  values.responseTo = data.readUInt32LE(index);
+  // Skip op-code field
+  index = index + 4 + 4;
+  // Unpack flags
+  values.responseFlags = data.readUInt32LE(index);
+  index = index + 4; 
+  // Unpack the cursor
+  var lowBits = data.readUInt32LE(index);
+  index = index + 4; 
+  var highBits = data.readUInt32LE(index);
+  index = index + 4; 
+  // Create long object
+  values.cursorId = new Long(lowBits, highBits);
+  // Unpack the starting from
+  values.startingFrom = data.readUInt32LE(index);
+  index = index + 4; 
+  // Unpack the number of objects returned
+  values.numberReturned = data.readUInt32LE(index);
+  index = index + 4; 
+
   this.isParsed = function() {
     return parsed;
   }
@@ -428,37 +460,6 @@ var Response = function(bson, data, opts) {
     options = options || {};
     // Allow the return of raw documents instead of parsing
     var raw = options.raw || false;
-
-    //
-    // Parse Header
-    //
-    var index = 0;
-    // Read the message length
-    values.length = data.readUInt32LE(index);
-    index = index + 4;
-    // Fetch the request id for this reply
-    values.requestId = data.readUInt32LE(index);
-    index = index + 4;
-    // Fetch the id of the request that triggered the response
-    values.responseTo = data.readUInt32LE(index);
-    // Skip op-code field
-    index = index + 4 + 4;
-    // Unpack flags
-    values.responseFlags = data.readUInt32LE(index);
-    index = index + 4; 
-    // Unpack the cursor
-    var lowBits = data.readUInt32LE(index);
-    index = index + 4; 
-    var highBits = data.readUInt32LE(index);
-    index = index + 4; 
-    // Create long object
-    values.cursorId = new Long(lowBits, highBits);
-    // Unpack the starting from
-    values.startingFrom = data.readUInt32LE(index);
-    index = index + 4; 
-    // Unpack the number of objects returned
-    values.numberReturned = data.readUInt32LE(index);
-    index = index + 4; 
 
     //
     // Parse Body

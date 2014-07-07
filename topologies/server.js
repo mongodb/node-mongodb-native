@@ -40,18 +40,17 @@ var Callbacks = function() {
     }
   }
 
+  this.raw = function(id) {
+    if(this._events[id] == null) return false;
+    return this._events[id].listener.raw == true ? true : false;
+  }
+
   this.unregister = function(id) {
-    // console.log("========================= unregister :: " + id)
-    // console.dir(this.listeners(id))
     this.removeAllListeners(id);
   }
 
   this.register = function(id, callback) {
     this.once(id, bindToCurrentDomain(callback));
-  }
-
-  this.registerExhaust = function(id, callback) {
-    this.on(id, bindToCurrentDomain(callback));
   }
 }
 
@@ -162,7 +161,7 @@ var Server = function(options) {
   }
 
   // Set error properties
-  getProperty(this, 'name', 'name', serverDetails);
+  getProperty(this, 'name', 'name', serverDetails, {});
 
   // Supports server
   var supportsServer = function() {
@@ -238,7 +237,8 @@ var Server = function(options) {
   // Handlers
   var messageHandler = function(response, connection) {
     // console.log("+++++++++++++++++++++++++++++++++++++++ messageHandler :: " + response.responseTo + " :: " + response.requestId)
-    // console.dir(callbacks)
+    // Parse the message
+    response.parse({raw: callbacks.raw(response.responseTo)});
     // if(response.documents)console.dir(response.documents)
     if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
     callbacks.emit(response.responseTo, null, response);      
