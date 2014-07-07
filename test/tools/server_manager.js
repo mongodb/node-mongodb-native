@@ -71,6 +71,8 @@ var ServerManager = function(serverOptions) {
     var command = [];
     // Binary command
     command.push(f("%s", bin));
+    // Push test commands
+    commands.push("--setParameter enableTestCommands=1");
 
     for(var name in options) {
       if(options[name] === null) {
