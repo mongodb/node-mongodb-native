@@ -17,8 +17,6 @@ var argv = require('optimist')
     .demand(['t'])
     .argv;
 
-// console.dir(require('mongodb-core'))
-
 /**
  * Standalone MongoDB Configuration
  */
@@ -173,6 +171,15 @@ var testFiles =[
   , '/test/functional/geo_tests.js'
   , '/test/functional/index_tests.js'
   , '/test/functional/mapreduce_tests.js'
+  , '/test/functional/maxtimems_tests.js'
+  , '/test/functional/multiple_db_tests.js'
+  , '/test/functional/object_id_tests.js'
+  , '/test/functional/raw_tests.js'
+  , '/test/functional/readpreference_tests.js'
+  , '/test/functional/remove_tests.js'
+  , '/test/functional/unicode_tests.js'
+  , '/test/functional/uri_tests.js'
+  , '/test/functional/url_parser_tests.js'
 ]
 
 // Add all the tests to run

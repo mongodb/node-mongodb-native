@@ -26,5 +26,7 @@ connect.ObjectID = core.BSON.ObjectID;
 connect.Symbol = core.BSON.Symbol;
 connect.Timestamp = core.BSON.Timestamp;  
 
+// Add connect method
+connect.connect = connect;
 // Set our exports to be the connect function
 module.exports = connect;

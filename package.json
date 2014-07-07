@@ -22,6 +22,7 @@
   "devDependencies": {
       "integra": "latest"
     , "optimist": "latest"
+    , "bson": "latest"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
