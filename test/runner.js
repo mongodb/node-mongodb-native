@@ -83,7 +83,7 @@ if(argv.t == 'functional') {
   });
 } else if(argv.t == 'kerberos') {
   kerberos_runners.runner.run('none', run_options);
-  kerberos_runners.runner_auth.on('end', function() {
+  kerberos_runners.runner.on('end', function() {
     process.exit(0);
   });
 }
