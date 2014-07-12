@@ -14,16 +14,16 @@ So there is an important thing to keep in mind when working with Mongo DB, and t
 
 * **Float** is a 8 byte and is directly convertible to the Javascript type Number
 * **Double class** a special class representing a float value, this is especially useful when using capped collections where you need to ensure your values are always floats.
-* **Integers** is a bit trickier due to the fact that Javascript represents all Numbers as 64 bit floats meaning that the maximum integer value is at a 53 bit. Mongo has two types for integers, a 32 bit and a 64 bit. The driver will try to fit the value into 32 bits if it can and promote it to 64 bits if it has to. Similarly it will deserialize attempting to fit it into 53 bits if it can. If it cannot it will return an instance of **Long** to avoid loosing precession.
-* **Long class** a special class that let's you store 64 bit integers and also let's you operate on the 64 bits integers.
+* **Integers** is a bit trickier due to the fact that Javascript represents all Numbers as 64 bit floats meaning that the maximum integer value is at a 53 bit. Mongo has two types for integers, a 32 bit and a 64 bit. The driver will try to fit the value into 32 bits if it can and promote it to 64 bits if it has to. Similarly it will deserialize attempting to fit it into 53 bits if it can. If it cannot it will return an instance of **Long** to avoid losing precision.
+* **Long class** a special class that lets you store 64 bit integers and also lets you operate on the 64 bit integers.
 * **Date** maps directly to a Javascript Date
 * **RegExp** maps directly to a Javascript RegExp
 * **String** maps directly to a Javascript String (encoded in utf8)
-* **Binary class** a special class that let's you store data in Mongo DB
-* **Code class** a special class that let's you store javascript functions in Mongo DB, can also provide a scope to run the method in
+* **Binary class** a special class that lets you store data in Mongo DB
+* **Code class** a special class that lets you store javascript functions in Mongo DB, can also provide a scope to run the method in
 * **ObjectID class** a special class that holds a MongoDB document identifier (the equivalent to a Primary key)
-* **DbRef class** a special class that let's you include a reference in a document pointing to another object
-* **Symbol class** a special class that let's you specify a symbol, not really relevant for javascript but for languages that supports the concept of symbols.
+* **DbRef class** a special class that lets you include a reference in a document pointing to another object
+* **Symbol class** a special class that lets you specify a symbol, not really relevant for javascript but for languages that supports the concept of symbols.
 
 As we see the number type can be a little tricky due to the way integers are implemented in Javascript. The latest driver will do correct conversion up to 53 bit's of complexity. If you need to handle big integers the recommendation is to use the Long class to operate on the numbers.
 
