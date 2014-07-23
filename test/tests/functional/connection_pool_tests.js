@@ -30,12 +30,26 @@ exports['Should correctly fail due to no server'] = {
     var connectionPool = new ConnectionPool('localhost', 2000, 4, null, {timeout:100, noDelay:true});
 
     // // Add event handler that will fire once the pool is ready
-    connectionPool.on("poolReady", function(err, result) {});
+    connectionPool.on("poolReady", function(err, result) {
+    });
 
+    var done = false;
     // Add event handler that will fire when it fails
     connectionPool.on("error", function(err, connection) {
-      test.equal(0, connectionPool.openConnections.length)
-      test.done();
+      if (!done) {
+        test.equal(0, connectionPool.openConnections.length)
+        test.done();
+        done = true;
+      }
+    });
+
+    // On Windows, this times out instead of erroring
+    connectionPool.on("timeout", function(err, connection) {
+      if (!done) {
+        test.equal(0, connectionPool.openConnections.length)
+        test.done();
+        done = true;
+      }
     });
     
     // Start the pool

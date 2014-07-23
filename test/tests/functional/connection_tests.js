@@ -4,7 +4,10 @@
 exports['Should correctly connect to server using domain socket'] = {
   metadata: {
     requires: {
-      topology: "single"
+      topology: "single",
+      os: {
+        windows: false
+      }
     }
   },
   
@@ -35,7 +38,10 @@ exports['Should correctly connect to server using domain socket'] = {
 exports['Should connect to server using domain socket with undefined port'] = {
   metadata: {
     requires: {
-      topology: "single"
+      topology: "single",
+      os: {
+        windows: false
+      }
     }
   },
   
@@ -363,7 +369,7 @@ exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = {
 /**
  * @ignore
  */
-exports['Should Force reconnect event by force closing connection'] = {
+/*exports['Should Force reconnect event by force closing connection'] = {
   metadata: {
     requires: {
       topology: "single"
@@ -391,4 +397,4 @@ exports['Should Force reconnect event by force closing connection'] = {
       });
     });  
   }
-}
+}*/

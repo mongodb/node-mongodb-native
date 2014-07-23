@@ -1,12 +1,13 @@
 var Runner = require('integra').Runner
-	, Cover = require('integra').Cover
-	, RCover = require('integra').RCover
+  , Cover = require('integra').Cover
+  , RCover = require('integra').RCover
   , FileFilter = require('integra').FileFilter
-	, NodeVersionFilter = require('./filters/node_version_filter')
-	, MongoDBVersionFilter = require('./filters/mongodb_version_filter')
-	, MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
+  , NodeVersionFilter = require('./filters/node_version_filter')
+  , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
+  , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
+  , OSFilter = require('./filters/os_filter')
   , TravisFilter = require('./filters/travis_filter')
-	, FileFilter = require('integra').FileFilter
+  , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
   , f = require('util').format;
 
@@ -17,6 +18,8 @@ var argv = require('optimist')
     .demand(['t'])
     .argv;
 
+var osFilter = new OSFilter();
+
 /**
  * Standalone MongoDB Configuration
  */
@@ -25,10 +28,12 @@ var createConfiguration = function(options) {
 
   // Create the configuration
   var Configuration = function(context) {
-  	var mongo = require('../lib/mongodb');
-  	var Db = mongo.Db;
-  	var Server = mongo.Server;
-  	var ServerManager = require('../test/tools/server_manager').ServerManager;
+    var mongo = require('../lib/mongodb');
+    var Db = mongo.Db;
+    var Server = mongo.Server;
+    var ServerManager = osFilter.isWindows() ?
+      require('./tools/server_manager_cygwin.js').ServerManager :
+      require('../test/tools/server_manager').ServerManager;
     var database = "integration_tests";
     var url = options.url || "mongodb://%slocalhost:27017/" + database;
     var port = options.port || 27017;
@@ -38,7 +43,7 @@ var createConfiguration = function(options) {
     
     // Override manager or use default
     var manager = options.manager ? options.manager() : new ServerManager({
-    	journal:false
+      journal:false
     });  
 
     // clone
@@ -48,45 +53,45 @@ var createConfiguration = function(options) {
     }
 
     // return configuration
-  	return {		
-  		start: function(callback) {
+    return {
+      start: function(callback) {
         manager.start(true, function(err) {
           if(err) throw err;
           callback();
         });
-  		},
+      },
 
-  		stop: function(callback) {
+      stop: function(callback) {
         manager.killAll(function(err) {
           callback();
         });        
-  		},
+      },
 
-  		restart: function(callback) {
-  			manager.stop(3, function() {
-  				manager.start(false, callback);
-  			})
-  		},
+      restart: function(callback) {
+        manager.stop(3, function() {
+          manager.start(false, callback);
+        })
+      },
 
-  		setup: function(callback) {
-  			callback();
-  		},
+      setup: function(callback) {
+        callback();
+      },
 
-  		teardown: function(callback) {
-  			callback();
-  		},
+      teardown: function(callback) {
+        callback();
+      },
 
-  		newDbInstance: function(dbOptions, serverOptions) {
+      newDbInstance: function(dbOptions, serverOptions) {
         // Override implementation
         if(options.newDbInstance) return options.newDbInstance(dbOptions, serverOptions);
 
         // Fall back
-  			var port = serverOptions && serverOptions.port || options.port || 27017;
-  			var host = serverOptions && serverOptions.host || 'localhost';
-  			if(dbOptions.w == null
-  					&& dbOptions.fsync == null
-  					&& dbOptions.wtimeout == null
-  					&& dbOptions.j == null) dbOptions.w = 1;
+        var port = serverOptions && serverOptions.port || options.port || 27017;
+        var host = serverOptions && serverOptions.host || 'localhost';
+        if(dbOptions.w == null
+            && dbOptions.fsync == null
+            && dbOptions.wtimeout == null
+            && dbOptions.j == null) dbOptions.w = 1;
 
         // Default topology
         var topology = Server;
@@ -95,11 +100,11 @@ var createConfiguration = function(options) {
           topology = options.topology;
         }
 
-  			// Return a new db instance
-  			return new Db(database, new topology(host, port, serverOptions), dbOptions);
-  		},
+        // Return a new db instance
+        return new Db(database, new topology(host, port, serverOptions), dbOptions);
+      },
 
-  		newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
+      newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
         // Override implementation
         if(options.newDbInstanceWithDomainSocket) return options.newDbInstanceWithDomainSocket(dbOptions, serverOptions);
 
@@ -109,37 +114,37 @@ var createConfiguration = function(options) {
         }
 
         // Fall back
-  			var host = serverOptions && serverOptions.host || "/tmp/mongodb-27017.sock";
+        var host = serverOptions && serverOptions.host || "/tmp/mongodb-27017.sock";
 
-  			// If we explicitly testing undefined port behavior
-  			if(serverOptions && serverOptions.port == 'undefined') {
-  				return new Db('integration_tests', new Server(host, undefined, serverOptions), dbOptions);
-  			}
+        // If we explicitly testing undefined port behavior
+        if(serverOptions && serverOptions.port == 'undefined') {
+          return new Db('integration_tests', new Server(host, undefined, serverOptions), dbOptions);
+        }
 
-  			// Normal socket connection
+        // Normal socket connection
         return new Db('integration_tests', new Server(host, serverOptions), dbOptions);
-  		},
+      },
 
-  		url: function(username, password) {
+      url: function(username, password) {
         // Fall back
-  			var auth = "";
+        var auth = "";
 
-  			if(username && password) {
-  				auth = f("%s:%s@", username, password);
-  			}
+        if(username && password) {
+          auth = f("%s:%s@", username, password);
+        }
 
-  			return f(url, auth);
-  		},
+        return f(url, auth);
+      },
 
-  		// Additional parameters needed
-  		require: mongo,
-  		database: database || options.database,
-  		nativeParser: true,
-  		port: port,
-  		host: host,
-  		writeConcern: function() { return clone(writeConcern) },
+      // Additional parameters needed
+      require: mongo,
+      database: database || options.database,
+      nativeParser: true,
+      port: port,
+      host: host,
+      writeConcern: function() { return clone(writeConcern) },
       writeConcernMax: function() { return clone(writeConcernMax) }
-  	}
+    }
   }
 
   return Configuration;
@@ -147,13 +152,13 @@ var createConfiguration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-		logLevel:'info'
-	, runners: 1
-	, failFast: true
+    logLevel:'info'
+  , runners: 1
+  , failFast: true
 });
 
 var testFiles =[
-		'/test/tests/functional/mongo_reply_parser_tests.js'
+    '/test/tests/functional/mongo_reply_parser_tests.js'
   , '/test/tests/functional/connection_pool_tests.js'
   , '/test/tests/functional/gridstore/readstream_tests.js'
   , '/test/tests/functional/gridstore/grid_tests.js'
@@ -198,7 +203,7 @@ var testFiles =[
 
 // Add all the tests to run
 testFiles.forEach(function(t) {
-	if(t != "") runner.add(t);
+  if(t != "") runner.add(t);
 });
 
 // // Add the Coverage plugin
@@ -229,6 +234,8 @@ runner.plugin(new NodeVersionFilter());
 runner.plugin(new MongoDBVersionFilter());
 // Add a Topology filter plugin
 runner.plugin(new MongoDBTopologyFilter());
+// Add OS filter plugin to avoid domain sockets on windows
+runner.plugin(osFilter);
 
 // Exit when done
 runner.on('exit', function(errors, results) {
@@ -313,8 +320,3 @@ if(argv.t == 'functional') {
   // Run the configuration
   runner.run(config);
 }
-
-
-
-
-
