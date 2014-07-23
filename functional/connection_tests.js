@@ -91,17 +91,16 @@ exports['Should correctly execute ismaster on single server'] = {
     });
 
     connection.on('message', function(message) {
+      message.parse();
       test.equal(true, message.documents[0].ismaster);
-      test.done();
+      connection.destroy();
     });
 
     connection.on('close', function(err) {
-      console.dir(err)
-      test.ok(0);
+      test.done();
     });
 
     connection.on('error', function(err) {
-      console.dir(err)
       test.ok(0);
     });
 
