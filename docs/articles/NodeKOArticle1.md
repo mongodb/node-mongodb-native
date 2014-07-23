@@ -25,7 +25,7 @@ So there is an important thing to keep in mind when working with Mongo DB, and t
 * **DbRef class** a special class that let's you include a reference in a document pointing to another object
 * **Symbol class** a special class that let's you specify a symbol, not really relevant for javascript but for languages that supports the concept of symbols.
 
-As we see the number type can be a little tricky due to the way integers are implemented in Javascript. The latest driver will do correct conversion up to 53 bit's of complexity. If you need to handle big integers the recommendation is to use the Long class to operate on the numbers.
+As we see the number type can be a little tricky due to the way integers are implemented in Javascript. The latest driver will do correct conversion up to 53 bits of complexity. If you need to handle big integers the recommendation is to use the Long class to operate on the numbers.
 
 ## Getting that connection to the database
 Let's get around to setting up a connection with the Mongo DB database. Jumping straight into the code let's do direct connection and then look at the code.
@@ -45,7 +45,7 @@ method let's use use a uri to connect to the Mongo database, where
 **localhost:27017** is the server host and port and **exampleDb** the db
 we wish to connect to. After the url notice the hash containing the
 **auto_reconnect** key. Auto reconnect tells the driver to retry sending
-a command to the server if there is a failure during it's execution.
+a command to the server if there is a failure during its execution.
 
 Another useful option you can pass in is
 
