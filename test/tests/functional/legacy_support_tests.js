@@ -235,17 +235,15 @@ exports['Should fail due to illegal ordered insert operation'] = {
     server.connect();
     
     // Set up listener
-    server.on('connect', function(server) {      
-      server.insert(f("%s.legacy_illegal0", configuration.db), [{$set: {a: 1}}, {a:2}], {
-        writeConcern: {w:1}, ordered:true
-      }, function(err, result) {        
-        test.equal(null, err);
-        test.equal(1, result.result.ok);
-        test.equal(0, result.result.n);
-        test.equal(1, result.result.writeErrors.length);
-        test.equal(0, result.result.writeErrors[0].index);
+    server.on('connect', function(server) {
+      try {
+        server.insert(f("%s.legacy_illegal0", configuration.db), [{$set: {a: 1}}, {a:2}], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, result) {});
+        test.ok(false);
+      } catch(err) {
         test.done();
-      });
+      }
     });
   }
 }
@@ -270,16 +268,14 @@ exports['Should fail due to illegal unordered insert operation'] = {
     
     // Set up listener
     server.on('connect', function(server) {      
-      server.insert(f("%s.legacy_illegal0", configuration.db), [{$set: {a: 1}}, {a:2}], {
-        writeConcern: {w:1}, ordered:false
-      }, function(err, result) {        
-        test.equal(null, err);
-        test.equal(1, result.result.ok);
-        test.equal(1, result.result.n);
-        test.equal(1, result.result.writeErrors.length);
-        test.equal(0, result.result.writeErrors[0].index);
+      try {
+        server.insert(f("%s.legacy_illegal0", configuration.db), [{$set: {a: 1}}, {a:2}], {
+          writeConcern: {w:1}, ordered:false
+        }, function(err, result) {});
+        test.ok(false);
+      } catch(err) {
         test.done();
-      });
+      }
     });
   }
 }
@@ -304,19 +300,17 @@ exports['Should fail due to illegal ordered update operation'] = {
     
     // Set up listener
     server.on('connect', function(server) {      
-      server.update(f("%s.legacy_illegal0", configuration.db), [
-            { q: { $set: { a:1 } }, u: { $set: {b : 1} }, upsert:true }
-          , { q: { a:2 }, u: { $set: {b : 2} }, upsert:true }
-        ], {
-        writeConcern: {w:1}, ordered:true
-      }, function(err, result) {        
-        test.equal(null, err);
-        test.equal(1, result.result.ok);
-        test.equal(0, result.result.n);
-        test.equal(1, result.result.writeErrors.length);
-        test.equal(0, result.result.writeErrors[0].index);
+      try {
+        server.update(f("%s.legacy_illegal0", configuration.db), [
+              { q: { $set: { a:1 } }, u: { $set: {b : 1} }, upsert:true }
+            , { q: { a:2 }, u: { $set: {b : 2} }, upsert:true }
+          ], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, result) {});
+        test.ok(false);
+      } catch(err) {
         test.done();
-      });
+      }        
     });
   }
 }
@@ -341,19 +335,18 @@ exports['Should fail due to illegal unordered update operation'] = {
     
     // Set up listener
     server.on('connect', function(server) {      
-      server.update(f("%s.legacy_illegal0", configuration.db), [
-            { q: { $set: { a:1 } }, u: { $set: {b : 1} }, upsert:true }
-          , { q: { a:2 }, u: { $set: {b : 2} }, upsert:true }
-        ], {
-        writeConcern: {w:1}, ordered:false
-      }, function(err, result) {        
-        test.equal(null, err);
-        test.equal(1, result.result.ok);
-        test.equal(1, result.result.n);
-        test.equal(1, result.result.writeErrors.length);
-        test.equal(0, result.result.writeErrors[0].index);
+      try {
+        server.update(f("%s.legacy_illegal0", configuration.db), [
+              { q: { $set: { a:1 } }, u: { $set: {b : 1} }, upsert:true }
+            , { q: { a:2 }, u: { $set: {b : 2} }, upsert:true }
+          ], {
+          writeConcern: {w:1}, ordered:false
+        }, function(err, result) {});
+
+        test.ok(false);
+      } catch(err) {
         test.done();
-      });
+      }
     });
   }
 }
@@ -378,19 +371,18 @@ exports['Should fail due to illegal ordered remove operation'] = {
     
     // Set up listener
     server.on('connect', function(server) {      
-      server.remove(f("%s.legacy_illegal0", configuration.db), [
-            { q: { $set: { a:1 } }, limit: 1 }
-          , { q: { a:2 }, limit: 1 }
-        ], {
-        writeConcern: {w:1}, ordered:true
-      }, function(err, result) {        
-        test.equal(null, err);
-        test.equal(1, result.result.ok);
-        test.equal(0, result.result.n);
-        test.equal(1, result.result.writeErrors.length);
-        test.equal(0, result.result.writeErrors[0].index);
+      try {
+        server.remove(f("%s.legacy_illegal0", configuration.db), [
+              { q: { $set: { a:1 } }, limit: 1 }
+            , { q: { a:2 }, limit: 1 }
+          ], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, result) {});
+
+        test.ok(false);
+      } catch(err) {
         test.done();
-      });
+      }
     });
   }
 }
@@ -414,20 +406,19 @@ exports['Should fail due to illegal unordered remove operation'] = {
     server.connect();
     
     // Set up listener
-    server.on('connect', function(server) {      
-      server.remove(f("%s.legacy_illegal0", configuration.db), [
-            { q: { $set: { a:1 } }, limit: 1 }
-          , { q: { a:2 }, limit: 1 }
-        ], {
-        writeConcern: {w:1}, ordered:false
-      }, function(err, result) {        
-        test.equal(null, err);
-        test.equal(1, result.result.ok);
-        test.equal(1, result.result.n);
-        test.equal(1, result.result.writeErrors.length);
-        test.equal(0, result.result.writeErrors[0].index);
+    server.on('connect', function(server) {
+      try {
+        server.remove(f("%s.legacy_illegal0", configuration.db), [
+              { q: { $set: { a:1 } }, limit: 1 }
+            , { q: { a:2 }, limit: 1 }
+          ], {
+          writeConcern: {w:1}, ordered:false
+        }, function(err, result) {});
+
+        test.ok(false);
+      } catch(err) {
         test.done();
-      });
+      }
     });
   }
 }

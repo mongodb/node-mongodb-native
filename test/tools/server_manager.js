@@ -71,8 +71,10 @@ var ServerManager = function(serverOptions) {
     var command = [];
     // Binary command
     command.push(f("%s", bin));
+    command.push('--smallfiles');
+    command.push('--noprealloc')
     // Push test commands
-    commands.push("--setParameter enableTestCommands=1");
+    command.push("--setParameter enableTestCommands=1");
 
     for(var name in options) {
       if(options[name] === null) {

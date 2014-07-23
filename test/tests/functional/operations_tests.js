@@ -69,7 +69,7 @@ exports['Should correctly execute write'] = {
           // Finish the test
           test.done();
         });
-      })
+      });
 
       // Start connection
       server.connect();
@@ -356,7 +356,8 @@ exports['Should correctly kill command cursor'] = {
             // Kill the cursor
             cursor.kill(function() {
               cursor.next(function(err, d) {
-                test.ok(err != null);
+                test.equal(null, err);
+                test.equal(null, d);
                 // Destroy the server connection        
                 _server.destroy();
                 // Finish the test
@@ -406,7 +407,8 @@ exports['Should correctly kill find command cursor'] = {
             // Kill the cursor
             cursor.kill(function() {
               cursor.next(function(err, d) {
-                test.ok(err != null);
+                test.equal(null, err);
+                test.equal(null, d);
                 // Destroy the server connection        
                 _server.destroy();
                 // Finish the test
