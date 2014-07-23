@@ -12,12 +12,16 @@ var LegacySupport = function() {
   //
   // Aggregate up all the results
   //
-  var aggregateWriteOperationResults = function(results, connection) {
+  var aggregateWriteOperationResults = function(opType, results, connection) {
     var final = { ok: 1, n: 0 }
     
     // Map all the results coming back
     for(var i = 0; i < results.length; i++) {
       var result = results[i];
+
+      // console.log("------------------------------ result")
+      // console.dir(result)
+      // console.dir(opType)
 
       if(result.upserted && final.upserted == null) {
         final.upserted = [];
@@ -26,6 +30,11 @@ var LegacySupport = function() {
       // Push the upserted document to the list of upserted values
       if(result.upserted) {
         final.upserted.push({index: i, _id: result.upserted});
+      }
+
+      // We have an insert command
+      if(result.ok == 1 && opType == 'insert' && result.err == null) {
+        final.n = final.n + 1;
       }
 
       // We have a command error
@@ -69,7 +78,7 @@ var LegacySupport = function() {
   //
   // Execute all inserts in an ordered manner
   //
-  var executeOrdered = function(command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+  var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
     var _ops = ops.slice(0);
     // Bind to current domain
     callback = bindToCurrentDomain(callback);
@@ -81,7 +90,7 @@ var LegacySupport = function() {
       // Get a pool connection
       var connection = pool.get();
       // No more items in the list
-      if(list.length == 0) return _callback(null, aggregateWriteOperationResults(getLastErrors, connection));
+      if(list.length == 0) return _callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
       
       // Get the first operation
       var doc = list.shift();      
@@ -92,7 +101,6 @@ var LegacySupport = function() {
       var writeConcern = options.writeConcern || {w:1};
       var db = ns.split('.').shift();
       // Create a getLastError command
-      // var getLastErrorOp = new Query(bson, f("%s.$cmd", db), copy(writeConcern, {getLastError: 1}), {numberToReturn: -1});
       var getLastErrorOp = new Query(bson, f("%s.$cmd", db), {getlasterror: 1}, {numberToReturn: -1});
 
       // Error out if no connection available
@@ -102,6 +110,7 @@ var LegacySupport = function() {
       try {
         // Execute the insert
         connection.write(op);
+        
         // If write concern 0 don't fire getLastError
         if(writeConcern.w != 0) {
           // Write the lastError message
@@ -114,7 +123,7 @@ var LegacySupport = function() {
             // Save the getLastError document
             getLastErrors.push(doc);
             // If we have an error terminate
-            if(doc.ok == 0 || doc.err || doc.errmsg) return callback(null, aggregateWriteOperationResults(getLastErrors, connection));
+            if(doc.ok == 0 || doc.err || doc.errmsg) return callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
             // Execute the next op in the list
             executeOp(list, callback);
           });          
@@ -124,7 +133,7 @@ var LegacySupport = function() {
         // write commands
         getLastErrors.push({ ok: 1, errmsg: err.message, code: 14 });
         // Return due to an error
-        return callback(null, aggregateWriteOperationResults(getLastErrors, connection));
+        return callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
       }
     }
 
@@ -132,7 +141,7 @@ var LegacySupport = function() {
     executeOp(_ops, callback);
   }
 
-  var executeUnordered = function(command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+  var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
     // Bind to current domain
     callback = bindToCurrentDomain(callback);
     // Total operations to write
@@ -176,7 +185,7 @@ var LegacySupport = function() {
               getLastErrors[_index] = result.documents[0];
               // Check if we are done
               if(totalOps == 0) {
-                callback(null, aggregateWriteOperationResults(getLastErrors, connection));
+                callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
               }
             }
           }
@@ -191,7 +200,7 @@ var LegacySupport = function() {
         getLastErrors[i] = { ok: 1, errmsg: err.message, code: 14 };
         // Check if we are done
         if(totalOps == 0) {
-          callback(null, aggregateWriteOperationResults(getLastErrors, connection));
+          callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
         }
       }
     }
@@ -220,10 +229,10 @@ var LegacySupport = function() {
 
     // We are unordered
     if(!ordered || writeConcern.w == 0) {
-      return executeUnordered(Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+      return executeUnordered('insert', Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
     }
 
-    return executeOrdered(Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    return executeOrdered('insert', Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
   }
 
   this.update = function(ismaster, ns, bson, pool, callbacks, ops, options, callback) {    
@@ -237,10 +246,10 @@ var LegacySupport = function() {
 
     // We are unordered
     if(!ordered || writeConcern.w == 0) {
-      return executeUnordered(Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+      return executeUnordered('update', Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);
     }
 
-    return executeOrdered(Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);    
+    return executeOrdered('update', Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);    
   }
 
   this.remove = function(ismaster, ns, bson, pool, callbacks, ops, options, callback) {
@@ -254,10 +263,10 @@ var LegacySupport = function() {
 
     // We are unordered
     if(!ordered || writeConcern.w == 0) {
-      return executeUnordered(Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+      return executeUnordered('remove', Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);
     }
 
-    return executeOrdered(Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);    
+    return executeOrdered('remove', Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);    
   }
 }
 
