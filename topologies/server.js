@@ -162,6 +162,7 @@ var Server = function(options) {
 
   // Set error properties
   getProperty(this, 'name', 'name', serverDetails, {});
+  getSingleProperty(this, 'bson', bsonInstance);
 
   // Supports server
   var supportsServer = function() {
@@ -592,7 +593,7 @@ var Server = function(options) {
    */
   this.insert = function(ns, ops, options, callback) {
     // console.log("--------------------------------------------- insert")
-    if(fallback && ismaster.minWireVersion == null) return fallback.insert(ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    if(fallback && (ismaster.maxWireVersion == null || ismaster.maxWireVersion == 0)) return fallback.insert(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'insert', 'documents', ns, ops, options, callback);
   }
 
@@ -607,7 +608,7 @@ var Server = function(options) {
    */
   this.update = function(ns, ops, options, callback) {
     // console.log("--------------------------------------------- update")
-    if(fallback && ismaster.minWireVersion == null) return fallback.update(ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    if(fallback && (ismaster.maxWireVersion == null || ismaster.maxWireVersion == 0)) return fallback.update(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'update', 'updates', ns, ops, options, callback);
   }
 
@@ -622,7 +623,7 @@ var Server = function(options) {
    */
   this.remove = function(ns, ops, options, callback) {
     // console.log("--------------------------------------------- remove")
-    if(fallback && ismaster.minWireVersion == null) return fallback.remove(ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    if(fallback && (ismaster.maxWireVersion == null || ismaster.maxWireVersion == 0)) return fallback.remove(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'delete', 'deletes', ns, ops, options, callback);
   }
 

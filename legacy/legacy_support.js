@@ -12,24 +12,26 @@ var LegacySupport = function() {
   //
   // Aggregate up all the results
   //
-  var aggregateWriteOperationResults = function(opType, results, connection) {
+  var aggregateWriteOperationResults = function(opType, ops, results, connection) {
     var final = { ok: 1, n: 0 }
     
     // Map all the results coming back
     for(var i = 0; i < results.length; i++) {
       var result = results[i];
+      var op = ops[i];
 
-      // console.log("------------------------------ result")
-      // console.dir(result)
-      // console.dir(opType)
-
-      if(result.upserted && final.upserted == null) {
+      if((result.upserted || (result.updatedExisting == false)) && final.upserted == null) {
         final.upserted = [];
       }
 
       // Push the upserted document to the list of upserted values
       if(result.upserted) {
         final.upserted.push({index: i, _id: result.upserted});
+      }
+
+      // We have an upsert where we passed in a _id
+      if(result.updatedExisting == false && result.n == 1 && result.upserted == null) {
+        final.upserted.push({index: i, _id: op.q._id});
       }
 
       // We have an insert command
@@ -90,7 +92,7 @@ var LegacySupport = function() {
       // Get a pool connection
       var connection = pool.get();
       // No more items in the list
-      if(list.length == 0) return _callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
+      if(list.length == 0) return _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
       
       // Get the first operation
       var doc = list.shift();      
@@ -123,7 +125,7 @@ var LegacySupport = function() {
             // Save the getLastError document
             getLastErrors.push(doc);
             // If we have an error terminate
-            if(doc.ok == 0 || doc.err || doc.errmsg) return callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
+            if(doc.ok == 0 || doc.err || doc.errmsg) return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
             // Execute the next op in the list
             executeOp(list, callback);
           });          
@@ -133,7 +135,7 @@ var LegacySupport = function() {
         // write commands
         getLastErrors.push({ ok: 1, errmsg: err.message, code: 14 });
         // Return due to an error
-        return callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
+        return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
       }
     }
 
@@ -185,7 +187,7 @@ var LegacySupport = function() {
               getLastErrors[_index] = result.documents[0];
               // Check if we are done
               if(totalOps == 0) {
-                callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
+                callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
               }
             }
           }
@@ -200,7 +202,7 @@ var LegacySupport = function() {
         getLastErrors[i] = { ok: 1, errmsg: err.message, code: 14 };
         // Check if we are done
         if(totalOps == 0) {
-          callback(null, aggregateWriteOperationResults(opType, getLastErrors, connection));
+          callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
         }
       }
     }

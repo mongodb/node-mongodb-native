@@ -367,6 +367,14 @@ var ReplSet = function(seedlist, options) {
   // High availability process running
   var highAvailabilityProcessRunning = false;
 
+  // BSON property (find a server and pass it along)
+  Object.defineProperty(this, 'bson', {
+    enumerable: true, get: function() { 
+      var servers = replState.getAll();
+      return servers.length > 0 ? servers[0].bson : null; 
+    }
+  });
+
   //
   // Add server to the list if it does not exist
   var addToListIfNotExist = function(list, server) {
