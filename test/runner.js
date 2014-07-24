@@ -180,7 +180,8 @@ var testFiles =[
   // , '/test/functional/unicode_tests.js'
   // , '/test/functional/uri_tests.js'
   // , '/test/functional/url_parser_tests.js'
-  , '/test/functional/gridfs_tests.js'
+  // , '/test/functional/gridfs_tests.js'
+  , '/test/functional/bulk_tests.js'
 ]
 
 // Add all the tests to run
