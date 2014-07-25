@@ -1844,6 +1844,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = {
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
+    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     var db = configuration.newDbInstance({w:1, promoteLongs:false}, {native_parser:false})
     db.open(function(err, db) {
       db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insert({
@@ -1852,7 +1853,8 @@ exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = {
         }, function(err, doc) {
           test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {      test.equal(null, err);
+          db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {      
+            test.equal(null, err);
             test.equal(null, err);
             test.ok(doc.doc instanceof Long);
             test.ok(doc.array[0][0] instanceof Long);

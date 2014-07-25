@@ -3,8 +3,8 @@ exports['Should Correctly respect the maxtimeMs property on count'] = {
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
-        topology: 'single'
-      , mongodb: ">=2.6.0"
+        // topology: 'single'
+      mongodb: ">2.5.5"
     }
   },
   
@@ -39,8 +39,8 @@ exports['Should Correctly respect the maxtimeMs property on toArray'] = {
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
-        topology: 'single'
-      , mongodb: ">=2.6.0"
+        // topology: 'single'
+      mongodb: ">2.5.5"
     }
   },
   
@@ -75,8 +75,8 @@ exports['Should Correctly fail with maxTimeMS error'] = {
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
-        topology: 'single'
-      , mongodb: ">=2.6.0"
+        // topology: 'single'
+      mongodb: ">2.5.5"
     }
   },
   

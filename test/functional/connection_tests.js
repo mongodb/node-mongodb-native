@@ -2,7 +2,7 @@
  * @ignore
  */
 exports['Should correctly connect to server using domain socket'] = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -29,7 +29,7 @@ exports['Should correctly connect to server using domain socket'] = {
  * @ignore
  */
 exports['Should connect to server using domain socket with undefined port'] = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -56,7 +56,7 @@ exports['Should connect to server using domain socket with undefined port'] = {
  * @ignore
  */
 exports['Should fail to connect using non-domain socket with undefined port'] = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -104,7 +104,7 @@ function connectionTester(test, testName, callback) {
  * @ignore
  */
 exports.testConnectNoOptions = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -120,7 +120,7 @@ exports.testConnectNoOptions = {
  * @ignore
  */
 exports.testConnectServerOptions = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -140,7 +140,7 @@ exports.testConnectServerOptions = {
  * @ignore
  */
 exports.testConnectAllOptions = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -161,7 +161,7 @@ exports.testConnectAllOptions = {
  * @ignore
  */
 exports.testConnectGoodAuth = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -190,7 +190,7 @@ exports.testConnectGoodAuth = {
  * @ignore
  */
 exports.testConnectBadAuth = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -208,7 +208,7 @@ exports.testConnectBadAuth = {
  * @ignore
  */
 exports.testConnectThrowsNoCallbackProvided = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -225,7 +225,7 @@ exports.testConnectThrowsNoCallbackProvided = {
  * @ignore
  */
 exports.testConnectBadUrl = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -242,7 +242,7 @@ exports.testConnectBadUrl = {
  * @ignore
  */
 exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -279,7 +279,7 @@ exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = {
  * @ignore
  */
 exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -288,36 +288,3 @@ exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = {
     test.done();
   }
 }
-
-// /**
-//  * @ignore
-//  */
-// exports['Should Force reconnect event by force closing connection'] = {
-//   metadata: {
-//     requires: {
-//       topology: 'single'
-//     }
-//   },
-  
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
-//     db.open(function(err, db) {
-//       test.equal(null, err);
-
-//       var reconnectCalled = false;
-//       // Add listener to the serverConfig
-//       db.serverConfig.on('reconnect', function(err) {
-//         reconnectCalled = true;
-//       });
-
-//       configuration.restart(function() {
-//         db.collection('forceReconnectEvent').insert({a:1}, function(err, result) {
-//           test.ok(reconnectCalled);
-//           db.close();
-//           test.done();
-//         });
-//       });
-//     });  
-//   }
-// }

@@ -187,7 +187,9 @@ exports.shouldPerformSimpleMapReduceFunctions = {
           var reduce = function(k,vals) { return 1; };
 
           // Peform the map reduce
-          collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}, readPreference : 'secondary'}, function(err, collection) {
+          collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
+            test.equal(null, err);
+
             // Mapreduce returns the temporary collection with the results
             collection.findOne({'_id':1}, function(err, result) {
               test.equal(1, result.value);

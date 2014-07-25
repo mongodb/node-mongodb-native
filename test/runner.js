@@ -8,6 +8,7 @@ var Runner = require('integra').Runner
   , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
+  , path = require('path')
   , f = require('util').format;
 
 var smokePlugin = require('./smoke_plugin.js');
@@ -16,6 +17,12 @@ var argv = require('optimist')
     .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
     .demand(['t'])
     .argv;
+
+var shallowClone = function(obj) {
+  var copy = {};
+  for(var name in obj) copy[name] = obj[name];
+  return copy;
+}
 
 /**
  * Standalone MongoDB Configuration
@@ -51,6 +58,8 @@ var createConfiguration = function(options) {
     return {    
       start: function(callback) {
         // manager.start({purge:true, signal:-9}, function(err) {
+        //   console.log("+++++++++++++++++++++++++++++++++++++++++ STARTED")
+        //   console.dir(err)
         //   if(err) throw err;
           callback();
         // });
@@ -63,11 +72,11 @@ var createConfiguration = function(options) {
       },
 
       restart: function(callback) {
-        manager.restart({purge:true, kill:true}, function() {
-          setTimeout(function() {
+        // manager.restart({purge:true, kill:true}, function() {
+        //   setTimeout(function() {
             callback();
-          }, 1000);          
-        });
+        //   }, 1000);          
+        // });
       },
 
       setup: function(callback) {
@@ -155,32 +164,32 @@ var runner = new Runner({
 });
 
 var testFiles =[
-  //   '/test/functional/mongo_client_tests.js'
-  // , '/test/functional/collection_tests.js'
-  // , '/test/functional/db_tests.js'
-  // , '/test/functional/cursor_tests.js'
-  // , '/test/functional/insert_tests.js'
-  // , '/test/functional/aggregation_tests.js'
-  // , '/test/functional/admin_tests.js'
-  // , '/test/functional/connection_tests.js'
-  // , '/test/functional/cursorstream_tests.js'
-  // , '/test/functional/custom_pk_tests.js'
-  // , '/test/functional/domain_tests.js'
-  // , '/test/functional/error_tests.js'
-  // , '/test/functional/find_tests.js'
-  // , '/test/functional/geo_tests.js'
-  // , '/test/functional/index_tests.js'
-  // , '/test/functional/mapreduce_tests.js'
-  // , '/test/functional/maxtimems_tests.js'
-  // , '/test/functional/multiple_db_tests.js'
-  // , '/test/functional/object_id_tests.js'
-  // , '/test/functional/raw_tests.js'
-  // , '/test/functional/readpreference_tests.js'
-  // , '/test/functional/remove_tests.js'
-  // , '/test/functional/unicode_tests.js'
-  // , '/test/functional/uri_tests.js'
-  // , '/test/functional/url_parser_tests.js'
-  // , '/test/functional/gridfs_tests.js'
+    '/test/functional/mongo_client_tests.js'
+  , '/test/functional/collection_tests.js'
+  , '/test/functional/db_tests.js'
+  , '/test/functional/cursor_tests.js'
+  , '/test/functional/insert_tests.js'
+  , '/test/functional/aggregation_tests.js'
+  , '/test/functional/admin_tests.js'
+  , '/test/functional/connection_tests.js'
+  , '/test/functional/cursorstream_tests.js'
+  , '/test/functional/custom_pk_tests.js'
+  , '/test/functional/domain_tests.js'
+  , '/test/functional/error_tests.js'
+  , '/test/functional/find_tests.js'
+  , '/test/functional/geo_tests.js'
+  , '/test/functional/index_tests.js'
+  , '/test/functional/mapreduce_tests.js'
+  , '/test/functional/maxtimems_tests.js'
+  , '/test/functional/multiple_db_tests.js'
+  , '/test/functional/object_id_tests.js'
+  , '/test/functional/raw_tests.js'
+  , '/test/functional/readpreference_tests.js'
+  , '/test/functional/remove_tests.js'
+  , '/test/functional/unicode_tests.js'
+  , '/test/functional/uri_tests.js'
+  , '/test/functional/url_parser_tests.js'
+  , '/test/functional/gridfs_tests.js'
   , '/test/functional/bulk_tests.js'
 ]
 
@@ -235,26 +244,28 @@ if(argv.t == 'functional') {
 
   if(argv.e == 'replicaset') {
     config = createConfiguration({
-        port: 30000,
-        url: "mongodb://%slocalhost:30000/integration_tests",
+        port: 31000,
+        url: "mongodb://%slocalhost:31000/integration_tests?rs_name=rs",
         writeConcernMax: {w: 'majority', wtimeout: 5000},
+        
         topology: function(host, port, serverOptions) {
-          var m = require('../lib/mongodb');
-          host = host || 'locahost'; port = port || 30000;
-          return new m.ReplSet([new m.Server(host, port, serverOptions)], {poolSize: 1});
+          var m = require('../');
+          host = host || 'locahost'; port = port || 31000;
+          serverOptions = shallowClone(serverOptions);
+          serverOptions.rs_name = 'rs';
+          serverOptions.poolSize = 1;
+          return new m.ReplSet([new m.Server(host, port)], serverOptions);
         }, 
+        
         manager: function() {
-          var ReplicaSetManager = require('../test/tools/replica_set_manager').ReplicaSetManager;
-          // Replicaset settings
-          var replicasetOptions = { 
-              retries:120, secondary_count:2
-            , passive_count:0, arbiter_count:1
-            , start_port: 30000
-            , tags:[{"dc1":"ny"}, {"dc1":"ny"}, {"dc2":"sf"}]
-          }
-          
+          var ReplSetManager = require('mongodb-core').ReplSetManager;
           // Return manager
-          return new ReplicaSetManager(replicasetOptions);
+          return new ReplSetManager({
+              dbpath: path.join(path.resolve('db'))
+            , logpath: path.join(path.resolve('db'))
+            , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
+            , replSet: 'rs', startPort: 31000
+          });
         },
     });
   } else if(argv.e == 'sharded') {
@@ -262,6 +273,7 @@ if(argv.t == 'functional') {
         port: 50000,
         url: "mongodb://%slocalhost:50000/integration_tests",
         writeConcernMax: {w: 'majority', wtimeout: 5000},
+        
         topology: function(host, port, serverOptions) {
           var m = require('../lib/mongodb');
           host = host || 'locahost'; port = port || 50000;
@@ -269,19 +281,14 @@ if(argv.t == 'functional') {
         }, 
 
         manager: function() {
-          var ShardedManager = require('../test/tools/sharded_manager').ShardedManager;
-          // Replicaset settings
-          var options = { 
-              numberOfReplicaSets: 1
-            , numberOfMongosServers: 1
-            , replPortRangeSet: 30000
-            , mongosRangeSet: 50000
-            , db: "integration_tests"
-            , collection: 'test_distinct_queries'
-          }
-          
-          // Return manager
-          return new ShardedManager(options);
+          var ShardingManager = require('mongodb-core').ShardingManager;
+          return new ShardingManager({
+              dbpath: path.join(path.resolve('db'))
+            , logpath: path.join(path.resolve('db'))
+            , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
+            , mongosStartPort: 50000
+            , replsetStartPort: 31000
+          });
         }
     })
   }

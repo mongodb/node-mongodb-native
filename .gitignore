@@ -12,6 +12,9 @@ pids
 lib-cov
 data
 
+# Directory for dbs
+db
+
 # Coverage directory used by tools like istanbul
 coverage
 

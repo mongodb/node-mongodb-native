@@ -2405,7 +2405,7 @@ exports['Should correctly handle multiple seeks over several chunks'] = {
  * @ignore
  */
 exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

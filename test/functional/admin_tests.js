@@ -48,7 +48,7 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
  * @ignore
  */
 exports.shouldCorrectlyAuthenticate = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -123,7 +123,7 @@ exports.accessAdminLevelOperations = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveBuildInfo = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -170,7 +170,7 @@ exports.shouldCorrectlyRetrieveBuildInfo = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -217,7 +217,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
  * @ignore
  */
 exports.shouldCorrectlySetDefaultProfilingLevel = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -270,7 +270,7 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
  * @_function setProfilingLevel
  */ 
 exports.shouldCorrectlyChangeProfilingLevel = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -352,7 +352,7 @@ exports.shouldCorrectlyChangeProfilingLevel = {
  * @_function profilingInfo
  */ 
 exports.shouldCorrectlySetAndExtractProfilingInfo = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -421,7 +421,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
  * @_function validateCollection
  */
 exports.shouldCorrectlyCallValidateCollection = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -480,7 +480,7 @@ exports.shouldCorrectlyCallValidateCollection = {
  * @_function ping
  */
 exports.shouldCorrectlyPingTheMongoDbInstance = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -526,7 +526,7 @@ exports.shouldCorrectlyPingTheMongoDbInstance = {
  * @_function logout
  */
 exports.shouldCorrectlyUseLogoutFunction = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
@@ -572,7 +572,7 @@ exports.shouldCorrectlyUseLogoutFunction = {
  * @_function addUser
  */
 exports.shouldCorrectlyAddAUserToAdminDb = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
@@ -612,7 +612,7 @@ exports.shouldCorrectlyAddAUserToAdminDb = {
  * @_function removeUser
  */
 exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
@@ -696,7 +696,7 @@ exports.shouldCorrectlyListAllAvailableDatabases = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveServerInfo = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -751,7 +751,7 @@ exports.shouldCorrectlyRetrieveServerInfo = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveReplSetGetStatus = {
-  metadata: {},
+  metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
