@@ -182,6 +182,7 @@ var ReplSetManager = function(replsetOptions) {
       opts.port = startPort + i;
       opts.dbpath = opts.dbpath ? opts.dbpath + f("/data-%s", opts.port) : null;
       opts.logpath = opts.logpath ? opts.logpath + f("/data-%s.log", opts.port) : null;
+      opts.fork = null;
       // Create a server manager
       serverManagers.push(new ServerManager(opts));
     }
