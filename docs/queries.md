@@ -3,12 +3,12 @@ Queries
 
 See also:
 
-  * [Database](database.md)
-  * [Collections](collections.md)
+  * [Database](database.html)
+  * [Collections](collections.html)
 
 ## Making queries with find()
 
-[Collections](collections.md) can be queried with `find`. 
+[Collections](collections.html) can be queried with `find`. 
 
 ```javascript
   collection.find(query[[[, fields], options], callback]);
@@ -65,7 +65,7 @@ Example:
 
 ## _id values
 
-Default `_id` values are 12 byte binary hashes. You can alter the format with custom Primary Key factories (see *Custom Primarky Keys* in [Database](database.md)).
+Default `_id` values are 12 byte binary hashes. You can alter the format with custom Primary Key factories (see *Custom Primarky Keys* in [Database](database.html)).
 
 In order to treat these binary _id values as strings it would be wise to convert binary values to hex strings. This can be done with `toHexString` property.
 
