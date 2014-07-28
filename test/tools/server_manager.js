@@ -162,7 +162,7 @@ var ServerManager = function(serverOptions) {
 
     // Build startup command
     var cmd = buildStartupCommand(serverOptions);
-    console.log(cmd)
+    // console.log(cmd)
     // If we have decided to kill all the processes
     if(typeof options.signal == 'number' || options.kill) {
       options.signal = typeof options.signal == 'number' ? options.signal : -15;

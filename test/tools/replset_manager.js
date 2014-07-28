@@ -182,7 +182,7 @@ var ReplSetManager = function(replsetOptions) {
       opts.port = startPort + i;
       opts.dbpath = opts.dbpath ? opts.dbpath + f("/data-%s", opts.port) : null;
       opts.logpath = opts.logpath ? opts.logpath + f("/data-%s.log", opts.port) : null;
-      opts.fork = null;
+      // opts.fork = null;
       // Create a server manager
       serverManagers.push(new ServerManager(opts));
     }
@@ -469,7 +469,7 @@ var ReplSetManager = function(replsetOptions) {
       callback = options;
       options = {};
     }
-
+  
     // Unpack all the options
     options.avoidElectionFor = options.avoidElectionFor || 90;
     options.force = typeof options.force == 'boolean' ? options.force : false;
@@ -485,13 +485,14 @@ var ReplSetManager = function(replsetOptions) {
         // Get a new connection
         manager.connect(function(err, server) {
           if(err) return callback(err);
-          
+
           // Execute step down
           server.command('admin.$cmd', {
               replSetStepDown: options.avoidElectionFor
             , force: options.force}, function(err, result) {
               // Destroy the server
-              server.destroy();              
+              server.destroy();
+              callback(null, null);
           });
         });
       });
