@@ -73,6 +73,7 @@ var ServerManager = function(serverOptions) {
     command.push(f("%s", bin));
     command.push('--smallfiles');
     command.push('--noprealloc')
+    command.push('--nojournal');
     // Push test commands
     command.push("--setParameter enableTestCommands=1");
 
