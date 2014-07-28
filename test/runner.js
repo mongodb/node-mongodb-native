@@ -55,28 +55,30 @@ var createConfiguration = function(options) {
     }
 
     // return configuration
-    return {    
+    return {
+      manager: manager,
+
       start: function(callback) {
-        // manager.start({purge:true, signal:-9}, function(err) {
+        manager.start({purge:true, signal:-9}, function(err) {
         //   console.log("+++++++++++++++++++++++++++++++++++++++++ STARTED")
         //   console.dir(err)
-        //   if(err) throw err;
+          if(err) throw err;
           callback();
-        // });
+        });
       },
 
       stop: function(callback) {
-        // manager.stop({signal: -15}, function() {
+        manager.stop({signal: -15}, function() {
           callback();
-        // });        
+        });        
       },
 
       restart: function(callback) {
-        // manager.restart({purge:true, kill:true}, function() {
-        //   setTimeout(function() {
+        manager.restart({purge:true, kill:true}, function() {
+          setTimeout(function() {
             callback();
-        //   }, 1000);          
-        // });
+          }, 1000);          
+        });
       },
 
       setup: function(callback) {
@@ -191,6 +193,9 @@ var testFiles =[
   , '/test/functional/url_parser_tests.js'
   , '/test/functional/gridfs_tests.js'
   , '/test/functional/bulk_tests.js'
+
+  // Replicaset tests
+  , '/test/functional/replset_failover_tests.js'
 ]
 
 // Add all the tests to run

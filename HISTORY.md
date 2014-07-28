@@ -1,3 +1,6 @@
 - Insert method allows only up 1000 pr batch for legacy as well as 2.6 mode
 - Streaming behavior is 0.10.x or higher with backwards compatibility using readable-stream npm package
 - gridfs stream only available through .stream() method due to overlapping names on Gridstore object and streams in 0.10.x and higher of node
+- remove third result on update and remove and return the whole result document instead (getting rid of the weird 3 result parameters)
+    - Might break some application
+- MongoClient only has the connect method (no ability instantiate with Server, ReplSet or similar)
